@@ -40,3 +40,12 @@
 ### Not done / open
 - Jar **not** deployed to `.minecraft\mods`: that folder is shared by all TLauncher profiles and contains OptiFine builds for 1.21.11 and 26.1.2; dropping a 1.20.1 mod there would break the Forge 26.2 profile, and those OptiFine jars would crash a 1.20.1 profile. Needs a dedicated NeoForge 1.20.1 game directory — awaiting the human's OK.
 - Sync currently goes to the owner only; other players' visuals (aura/forms) need a public-subset packet (Phase 1/2).
+
+## 2026-10-04 — Session 1 (cont.): deployment
+- Project moved to `C:\Users\sunam\DragonBlockZenith` (git history copied over; tag `phase-0-scaffold` intact).
+- Installed **NeoForge 1.20.1-47.1.106** client via the official installer (`--installClient`, SHA-1 verified) into `.minecraft` → version `1.20.1-forge-47.1.106`.
+- TLauncher has a single global game dir (`minecraft.gamedir` in `.tlauncher/tlauncher-2.0.properties`), so all versions share `.minecraft\mods`. Chosen approach: reversible swap scripts in `C:\Users\sunam\AppData\Roaming\.minecraft-dbz\`:
+  - `Switch to Dragon Block Zenith.bat` parks every non-dbzenith jar in `.minecraft\mods-parked-by-dbzenith\` and copies `.minecraft-dbz\mods\dbzenith-*.jar` in.
+  - `Switch back to normal mods.bat` reverses it.
+  - Currently ACTIVE (OptiFine jars parked). To deploy a new build: copy the jar into `.minecraft-dbz\mods\` (remove the old one) and re-run the switch script.
+- An installer-created official-launcher profile was dropped when a launcher rewrote `launcher_profiles.json`; not needed for TLauncher.
