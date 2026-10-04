@@ -25,7 +25,9 @@ public final class FormMath {
     /** Everything that multiplies an attribute: current form and overdrive. */
     public static double attributeMultiplier(PlayerData data, Attribute attribute) {
         double m = formMultiplier(data, Forms.byId(data.getFormId()), attribute);
-        if (isCombatAttribute(attribute)) m *= overdriveMultiplier(data) * data.getGearMultiplier(attribute);
+        if (isCombatAttribute(attribute)) {
+            m *= overdriveMultiplier(data) * data.getGearMultiplier(attribute) * com.dbzenith.world.LifeSim.ageMultiplier(data, attribute);
+        }
         return m;
     }
 

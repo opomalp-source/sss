@@ -37,6 +37,14 @@ public class StatScreen extends Screen {
         top = (height - H) / 2;
         addRenderableWidget(Button.builder(Component.translatable("screen.dbzenith.forms_button"), b -> minecraft.setScreen(new FormScreen(this)))
                 .bounds(left + W - 70, top + H - 24, 62, 18).build());
+        addRenderableWidget(Button.builder(titleLabel(), b -> {
+            java.util.List<com.dbzenith.world.LifeSim.Title> earned = com.dbzenith.world.LifeSim.earnedTitles(ClientPlayerData.get());
+            String current = ClientPlayerData.get().getTitle();
+            int idx = -1;
+            for (int i = 0; i < earned.size(); i++) if (earned.get(i).id().equals(current)) idx = i;
+            String next = idx + 1 < earned.size() ? earned.get(idx + 1).id() : "";
+            ModNetwork.sendToServer(new com.dbzenith.network.SelectTitlePacket(next));
+        }).bounds(left + 8, top + H - 24, 140, 18).build());
         addRenderableWidget(Button.builder(Component.translatable("screen.dbzenith.techniques_button"), b -> minecraft.setScreen(new DeckScreen(this)))
                 .bounds(left + W - 156, top + H - 24, 82, 18).build());
         Attribute[] attrs = Attribute.values();
@@ -58,8 +66,9 @@ public class StatScreen extends Screen {
         DerivedStats s = d.getDerived();
 
         g.drawString(font, title, left + 8, top + 8, HEADER);
-        g.drawString(font, Component.translatable("screen.dbzenith.identity",
-                Component.translatable(d.getRace().translationKey()), Component.translatable(d.getPath().translationKey())), left + 8, top + 20, DIM);
+        g.drawString(font, Component.translatable("screen.dbzenith.identity_age",
+                Component.translatable(d.getRace().translationKey()), Component.translatable(d.getPath().translationKey()),
+                (int) d.getPhysicalAge()), left + 8, top + 20, DIM);
         g.drawString(font, Component.translatable("screen.dbzenith.tp", String.format("%,d", d.getTrainingPoints())), left + W - 110, top + 8, 0xFF7CFF7C);
 
         Attribute[] attrs = Attribute.values();
@@ -87,6 +96,17 @@ public class StatScreen extends Screen {
             ry += 12;
         }
         super.render(g, mouseX, mouseY, partialTick);
+    }
+
+    private static Component titleLabel() {
+        String t = ClientPlayerData.get().getTitle();
+        return Component.translatable("screen.dbzenith.title_button", t.isEmpty() ? Component.translatable("screen.dbzenith.title_none")
+                : Component.translatable("title.dbzenith." + t));
+    }
+
+    @Override
+    public void tick() {
+        rebuildWidgets(); // keep the title button label in sync with the server
     }
 
     private static String costText(PlayerData d, Attribute a) {

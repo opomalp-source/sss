@@ -166,6 +166,10 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue enemyPowerPerLevelSquared;
         public final ForgeConfigSpec.IntValue enemyMaxLevel;
 
+        // --- life sim ---
+        public final ForgeConfigSpec.BooleanValue agingEnabled;
+        public final ForgeConfigSpec.DoubleValue agingDaysPerYear;
+
         // --- character ---
         public final ForgeConfigSpec.DoubleValue startingAge;
 
@@ -398,6 +402,13 @@ public final class DBZConfig {
             enemyPowerPerLevelSquared = b.comment("Enemy level = 1 + sqrt(nearest player power level / this)")
                     .defineInRange("powerPerLevelSquared", 1500.0, 1.0, 1e12);
             enemyMaxLevel = b.defineInRange("maxLevel", 60, 1, 10_000);
+            b.pop();
+
+            b.comment("Optional life-sim layer").push("life_sim");
+            agingEnabled = b.comment("Characters age with in-game time; past 60, STR and DEX slowly decline")
+                    .define("agingEnabled", true);
+            agingDaysPerYear = b.comment("In-game days per year of age (Androids and Majins never age; Namekians and Frost Demons age 4x slower)")
+                    .defineInRange("agingDaysPerYear", 8.0, 0.1, 10_000.0);
             b.pop();
 
             b.push("character");

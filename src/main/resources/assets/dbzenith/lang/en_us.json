@@ -347,5 +347,16 @@
   "dimension.dbzenith.namek": "Namek",
   "dimension.dbzenith.northern_planet": "the Northern Planet",
   "message.dbzenith.pod_landed": "Your pod touches down on %s.",
-  "message.dbzenith.pod_recharging": "The pod is still refuelling."
+  "message.dbzenith.pod_recharging": "The pod is still refuelling.",
+  "wish.dbzenith.eternal_youth": "Make me young again",
+  "wish.dbzenith.eternal_youth.desc": "Return to the prime of your life (age 20).",
+  "title.dbzenith.transformed": "Ascended",
+  "title.dbzenith.survivor": "Survivor",
+  "title.dbzenith.dragon_summoner": "Dragon Summoner",
+  "title.dbzenith.patrol_commander": "Patrol Commander",
+  "title.dbzenith.legendary": "Legendary",
+  "title.dbzenith.divine": "Divine",
+  "screen.dbzenith.title_button": "Title: %s",
+  "screen.dbzenith.title_none": "none",
+  "screen.dbzenith.identity_age": "%s • %s • age %s"
 }

@@ -54,7 +54,8 @@ public final class ClientEvents {
             devScreenshot(shot, 0);
             if (mc.screen instanceof com.dbzenith.client.screen.StatScreen || mc.screen instanceof com.dbzenith.client.screen.FormScreen
                     || mc.screen instanceof com.dbzenith.client.screen.CharacterCreationScreen
-                    || mc.screen instanceof com.dbzenith.client.screen.DeckScreen) mc.setScreen(null);
+                    || mc.screen instanceof com.dbzenith.client.screen.DeckScreen || mc.screen instanceof com.dbzenith.client.screen.QuestScreen
+                    || mc.screen instanceof com.dbzenith.client.screen.PlanetScreen) mc.setScreen(null);
             if (shot.startsWith("third_") || shot.startsWith("front_")) mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON);
         }
         if (DEV_SCREENSHOT_TICKS.contains(ticksInWorld)) {
@@ -80,6 +81,14 @@ public final class ClientEvents {
         if (name.startsWith("noscreen_") && mc.screen != null) {
             mc.setScreen(null);
             delayTicks = Math.max(delayTicks, 3);
+        }
+        if (name.startsWith("quests_") && !(mc.screen instanceof com.dbzenith.client.screen.QuestScreen)) {
+            mc.setScreen(new com.dbzenith.client.screen.QuestScreen(name.contains("patrol") ? com.dbzenith.quest.Quest.Giver.PATROL : com.dbzenith.quest.Quest.Giver.MASTER));
+            delayTicks = Math.max(delayTicks, 5);
+        }
+        if (name.startsWith("planets_") && !(mc.screen instanceof com.dbzenith.client.screen.PlanetScreen)) {
+            mc.setScreen(new com.dbzenith.client.screen.PlanetScreen());
+            delayTicks = Math.max(delayTicks, 5);
         }
         if (name.startsWith("create_") && !(mc.screen instanceof com.dbzenith.client.screen.CharacterCreationScreen)) {
             mc.setScreen(new com.dbzenith.client.screen.CharacterCreationScreen());

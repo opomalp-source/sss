@@ -188,7 +188,9 @@ public class PlayerData {
     }
 
     public void setPhysicalAge(double physicalAge) {
-        this.physicalAge = Math.max(0, physicalAge);
+        double v = Math.max(0, physicalAge);
+        if ((int) v != (int) this.physicalAge) derivedStale = true; // the age multiplier changes per whole year
+        this.physicalAge = v;
         markDirty();
     }
 
@@ -360,6 +362,20 @@ public class PlayerData {
     public void setMeditating(boolean m) {
         if (m != meditating) {
             meditating = m;
+            markDirty();
+        }
+    }
+
+    private String title = "";
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String t) {
+        String v = t == null ? "" : t;
+        if (!v.equals(title)) {
+            title = v;
             markDirty();
         }
     }
@@ -885,6 +901,7 @@ public class PlayerData {
         completedQuests.forEach(cq::putInt);
         tag.put("completedQuests", cq);
         tag.putInt("patrolRep", patrolRep);
+        tag.putString("title", title);
         return tag;
     }
 
@@ -948,6 +965,7 @@ public class PlayerData {
         CompoundTag cq = tag.getCompound("completedQuests");
         for (String k : cq.getAllKeys()) completedQuests.put(k, cq.getInt(k));
         patrolRep = tag.getInt("patrolRep");
+        title = tag.getString("title");
         if (initialized && tag.getInt("DataVersion") < 2) { // v1 -> v2: keep every technique v1 allowed
             learned.addAll(V1_TECHNIQUES);
             deck.addAll(V1_TECHNIQUES.subList(0, 4));

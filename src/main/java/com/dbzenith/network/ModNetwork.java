@@ -13,7 +13,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
  * so mismatched client/server versions are refused at login instead of desyncing.
  */
 public final class ModNetwork {
-    private static final String PROTOCOL = "11";
+    private static final String PROTOCOL = "12";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(DBZenith.MOD_ID, "main"),
@@ -78,6 +78,8 @@ public final class ModNetwork {
                 .encoder(QuestPackets.Action::encode).decoder(QuestPackets.Action::decode).consumerMainThread(QuestPackets.Action::handle).add();
         CHANNEL.messageBuilder(TravelPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(TravelPacket::encode).decoder(TravelPacket::decode).consumerMainThread(TravelPacket::handle).add();
+        CHANNEL.messageBuilder(SelectTitlePacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(SelectTitlePacket::encode).decoder(SelectTitlePacket::decode).consumerMainThread(SelectTitlePacket::handle).add();
         CHANNEL.messageBuilder(InputPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(InputPacket::encode)
                 .decoder(InputPacket::decode)

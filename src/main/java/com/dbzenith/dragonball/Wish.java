@@ -19,6 +19,7 @@ public enum Wish {
     IMMORTALITY,
     HIDDEN_POTENTIAL,
     GODLY_KI,
+    ETERNAL_YOUTH,
     RICHES;
 
     public String id() {
@@ -45,6 +46,10 @@ public enum Wish {
             case IMMORTALITY -> d.setImmortalUntil(player.level().getGameTime() + c.wishImmortalityTicks.get());
             case HIDDEN_POTENTIAL -> d.setFlag("potential_unlocked", true);
             case GODLY_KI -> d.setFlag("god_ki", true);
+            case ETERNAL_YOUTH -> {
+                d.setPhysicalAge(20);
+                d.recomputeIfStale();
+            }
             case RICHES -> give(player, new ItemStack(Items.DIAMOND, c.wishDiamonds.get()));
         }
     }
