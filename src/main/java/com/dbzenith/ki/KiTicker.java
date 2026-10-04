@@ -4,6 +4,8 @@ import com.dbzenith.combat.BodyHealth;
 import com.dbzenith.config.DBZConfig;
 import com.dbzenith.data.PlayerData;
 import com.dbzenith.race.RacePassives;
+import com.dbzenith.world.TimeChamber;
+import com.dbzenith.world.TrainingTicker;
 import com.dbzenith.race.RaceTraits;
 import com.dbzenith.race.Races;
 import com.dbzenith.stats.DerivedStats;
@@ -64,7 +66,8 @@ public final class KiTicker {
             }
         } else if (!(data.isFlying() && player.getAbilities().flying) && !data.isTransformed()) {
             // No passive ki regen while transformed: forms are sustained by charging and mastery.
-            data.setKi(data.getKi() + perTick(s.maxKi(), c.kiRegenPercentPerSecond.get()) * race.kiRegenMultiplier());
+            data.setKi(data.getKi() + perTick(s.maxKi(), c.kiRegenPercentPerSecond.get()) * race.kiRegenMultiplier()
+                    * (data.isMeditating() ? c.meditationKiRegenMultiplier.get() : 1.0));
         }
 
         if (!data.isCharging() && !data.isGuarding()) {
@@ -74,6 +77,8 @@ public final class KiTicker {
             data.setBody(data.getBody() + perTick(s.maxBody(), c.bodyRegenPercentPerSecond.get()) * race.regenMultiplier());
         }
 
+        TrainingTicker.tick(player, data, now);
+        if (now % 20 == 0) TimeChamber.tick(player, data, now);
         RacePassives.tick(player, data, now);
         if (now % 20 == 0) GreatApe.tick(player, data);
         FormHandler.tick(player, data, now);

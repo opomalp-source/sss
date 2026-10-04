@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["QGQ", "QDQ", "QEQ"],
+  "key": {"Q": {"item": "minecraft:quartz_block"}, "G": {"item": "minecraft:gold_block"}, "D": {"item": "minecraft:diamond_block"}, "E": {"item": "minecraft:ender_eye"}},
+  "result": {"item": "dbzenith:time_chamber_door"}
+}

@@ -131,6 +131,24 @@ public final class DBZConfig {
         public final ForgeConfigSpec.IntValue deckLevelsPerExtraSlot;
         public final ForgeConfigSpec.IntValue deckMaxSlots;
 
+        // --- training ---
+        public final ForgeConfigSpec.IntValue gravityMax;
+        public final ForgeConfigSpec.IntValue gravityRadius;
+        public final ForgeConfigSpec.DoubleValue gravityTolerancePerPoint;
+        public final ForgeConfigSpec.DoubleValue gravityTrainingBonus;
+        public final ForgeConfigSpec.DoubleValue gravityMaxTrainingMultiplier;
+        public final ForgeConfigSpec.DoubleValue gravitySlowPerExcess;
+        public final ForgeConfigSpec.DoubleValue gravityBodyDamagePercentPerExcess;
+        public final ForgeConfigSpec.DoubleValue tpPerPunch;
+        public final ForgeConfigSpec.IntValue punchCooldownTicks;
+        public final ForgeConfigSpec.DoubleValue tpPerSecondMovingUnderGravity;
+        public final ForgeConfigSpec.IntValue meditationStartTicks;
+        public final ForgeConfigSpec.DoubleValue tpPerMeditationSecond;
+        public final ForgeConfigSpec.DoubleValue meditationKiRegenMultiplier;
+        public final ForgeConfigSpec.DoubleValue chamberTrainingMultiplier;
+        public final ForgeConfigSpec.DoubleValue chamberGravity;
+        public final ForgeConfigSpec.IntValue chamberMaxStayTicks;
+
         // --- character ---
         public final ForgeConfigSpec.DoubleValue startingAge;
 
@@ -312,6 +330,32 @@ public final class DBZConfig {
             deckLevelsPerExtraSlot = b.comment("One extra deck slot per this many character levels")
                     .defineInRange("deckLevelsPerExtraSlot", 250, 1, 1_000_000);
             deckMaxSlots = b.defineInRange("deckMaxSlots", 8, 1, 20);
+            b.pop();
+
+            b.comment("Training: gravity chamber, punching bag, meditation, Hyperbolic Time Chamber").push("training");
+            gravityMax = b.comment("Highest setting of the Gravity Chamber").defineInRange("gravityMax", 100, 1, 10_000);
+            gravityRadius = b.comment("Gravity Chamber reach in blocks").defineInRange("gravityRadius", 6, 1, 32);
+            gravityTolerancePerPoint = b.comment("Gravity tolerated per point of STR + CON (1 + points * this)")
+                    .defineInRange("gravityTolerancePerPoint", 0.02, 0.0, 10.0);
+            gravityTrainingBonus = b.comment("Training multiplier gained per g above 1")
+                    .defineInRange("gravityTrainingBonus", 0.1, 0.0, 10.0);
+            gravityMaxTrainingMultiplier = b.defineInRange("gravityMaxTrainingMultiplier", 10.0, 1.0, 1000.0);
+            gravitySlowPerExcess = b.comment("Movement slowdown per g above your tolerance (capped at 80%)")
+                    .defineInRange("gravitySlowPerExcess", 0.05, 0.0, 1.0);
+            gravityBodyDamagePercentPerExcess = b.comment("Body lost per second, % of max, per g above your tolerance (capped at 5%/s)")
+                    .defineInRange("gravityBodyDamagePercentPerExcess", 0.4, 0.0, 100.0);
+            tpPerPunch = b.comment("TP per Punching Bag hit before multipliers").defineInRange("tpPerPunch", 0.5, 0.0, 1e6);
+            punchCooldownTicks = b.defineInRange("punchCooldownTicks", 8, 0, 200);
+            tpPerSecondMovingUnderGravity = b.comment("TP per second spent moving under more than 1g, per g")
+                    .defineInRange("tpPerSecondMovingUnderGravity", 0.05, 0.0, 1e6);
+            meditationStartTicks = b.comment("Sneak and stand still this long to start meditating").defineInRange("meditationStartTicks", 60, 1, 72000);
+            tpPerMeditationSecond = b.defineInRange("tpPerMeditationSecond", 0.2, 0.0, 1e6);
+            meditationKiRegenMultiplier = b.defineInRange("meditationKiRegenMultiplier", 3.0, 0.0, 100.0);
+            chamberTrainingMultiplier = b.comment("Extra training multiplier inside the Hyperbolic Time Chamber")
+                    .defineInRange("chamberTrainingMultiplier", 4.0, 1.0, 1000.0);
+            chamberGravity = b.comment("Gravity inside the Hyperbolic Time Chamber").defineInRange("chamberGravity", 10.0, 1.0, 10_000.0);
+            chamberMaxStayTicks = b.comment("Longest stay in the chamber before being sent back (24000 = one day)")
+                    .defineInRange("chamberMaxStayTicks", 24000, 20, 10_000_000);
             b.pop();
 
             b.push("character");

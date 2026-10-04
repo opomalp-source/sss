@@ -3,6 +3,8 @@ package com.dbzenith;
 import com.dbzenith.config.DBZConfig;
 import com.dbzenith.data.ModCapabilities;
 import com.dbzenith.network.ModNetwork;
+import com.dbzenith.registry.ModBlockEntities;
+import com.dbzenith.registry.ModBlocks;
 import com.dbzenith.registry.ModCreativeTabs;
 import com.dbzenith.registry.ModEntities;
 import com.dbzenith.registry.ModItems;
@@ -29,6 +31,8 @@ public class DBZenith {
 
         ModItems.register(modBus);
         ModEntities.register(modBus);
+        ModBlocks.register(modBus);
+        ModBlockEntities.register(modBus);
         ModCreativeTabs.register(modBus);
         modBus.addListener(ModCapabilities::register);
         modBus.addListener(this::commonSetup);

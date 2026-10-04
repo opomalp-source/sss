@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["B B", "BWB", "BBB"],
+  "key": {"B": {"item": "minecraft:iron_block"}, "W": {"item": "dbzenith:training_weights"}},
+  "result": {"item": "dbzenith:heavy_training_weights"}
+}

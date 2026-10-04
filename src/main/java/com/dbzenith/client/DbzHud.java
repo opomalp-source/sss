@@ -86,6 +86,8 @@ public final class DbzHud implements IGuiOverlay {
         }
         if (d.isFlying()) cx = chip(g, font, cx, y, Component.translatable("hud.dbzenith.flying"), KI);
         if (d.isGuarding()) cx = chip(g, font, cx, y, Component.translatable("hud.dbzenith.guard"), STAMINA);
+        if (d.isMeditating()) cx = chip(g, font, cx, y, Component.translatable("hud.dbzenith.meditating"), 0xFFC8A0FF);
+        if (d.getGravity() > 1) cx = chip(g, font, cx, y, Component.translatable("hud.dbzenith.gravity", (int) d.getGravity()), 0xFFB070FF);
         if (d.isChargingHeavy()) cx = chip(g, font, cx, y, Component.translatable("hud.dbzenith.heavy_charging"), 0xFFFF6040);
         else if (d.getHeavyArmedMultiplier() > 0) {
             cx = chip(g, font, cx, y, Component.translatable("hud.dbzenith.heavy_ready", String.format("%.1f", d.getHeavyArmedMultiplier())), 0xFFFF6040);

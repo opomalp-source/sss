@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["L L", "III", "LIL"],
+  "key": {"L": {"item": "minecraft:leather"}, "I": {"item": "minecraft:iron_ingot"}},
+  "result": {"item": "dbzenith:training_weights"}
+}

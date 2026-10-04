@@ -307,6 +307,89 @@ public class PlayerData {
         }
     }
 
+    // ------------------------------------------------------------------ training environment (runtime; gravity + meditation synced)
+
+    private double envGravity = 1.0;
+    private long envGravityUntil;
+    private double trainingMultiplier = 1.0;
+    private int meditateTicks;
+    private boolean meditating;
+
+    /** Gravity applied by a chamber/dimension; must be refreshed before {@code untilGameTime} or it lapses to 1. */
+    public void applyGravity(double g, long untilGameTime) {
+        if (g >= envGravity || untilGameTime > envGravityUntil) {
+            if (g != envGravity) markDirty();
+            envGravity = Math.max(1.0, g);
+            envGravityUntil = untilGameTime;
+        }
+    }
+
+    public double getGravity(long gameTime) {
+        return gameTime <= envGravityUntil ? envGravity : 1.0;
+    }
+
+    /** Client view (synced value). */
+    public double getGravity() {
+        return envGravity;
+    }
+
+    public void expireGravity(long gameTime) {
+        if (gameTime > envGravityUntil && envGravity != 1.0) {
+            envGravity = 1.0;
+            markDirty();
+        }
+    }
+
+    public double getTrainingMultiplier() {
+        return trainingMultiplier;
+    }
+
+    public void setTrainingMultiplier(double m) {
+        trainingMultiplier = Math.max(0, m);
+    }
+
+    public int tickMeditation(boolean still) {
+        meditateTicks = still ? meditateTicks + 1 : 0;
+        return meditateTicks;
+    }
+
+    public boolean isMeditating() {
+        return meditating;
+    }
+
+    public void setMeditating(boolean m) {
+        if (m != meditating) {
+            meditating = m;
+            markDirty();
+        }
+    }
+
+    // ------------------------------------------------------------------ Hyperbolic Time Chamber (saved)
+
+    private String returnDimension = "";
+    private double returnX, returnY, returnZ;
+    private long chamberEnteredAt = -1;
+
+    public void setChamberReturn(String dimension, double x, double y, double z, long enteredAt) {
+        returnDimension = dimension;
+        returnX = x;
+        returnY = y;
+        returnZ = z;
+        chamberEnteredAt = enteredAt;
+        markDirty();
+    }
+
+    public String getReturnDimension() { return returnDimension; }
+    public double getReturnX() { return returnX; }
+    public double getReturnY() { return returnY; }
+    public double getReturnZ() { return returnZ; }
+    public long getChamberEnteredAt() { return chamberEnteredAt; }
+
+    public void clearChamber() {
+        chamberEnteredAt = -1;
+        markDirty();
+    }
+
     // ------------------------------------------------------------------ zenkai (saved)
 
     private boolean zenkaiArmed;
@@ -702,6 +785,11 @@ public class PlayerData {
         net.minecraft.nbt.ListTag dk = new net.minecraft.nbt.ListTag();
         for (String s : deck) dk.add(net.minecraft.nbt.StringTag.valueOf(s));
         tag.put("deck", dk);
+        tag.putString("returnDim", returnDimension);
+        tag.putDouble("returnX", returnX);
+        tag.putDouble("returnY", returnY);
+        tag.putDouble("returnZ", returnZ);
+        tag.putLong("chamberAt", chamberEnteredAt);
         return tag;
     }
 
@@ -752,6 +840,11 @@ public class PlayerData {
         deck.clear();
         net.minecraft.nbt.ListTag dk = tag.getList("deck", net.minecraft.nbt.Tag.TAG_STRING);
         for (int i = 0; i < dk.size(); i++) deck.add(dk.getString(i));
+        returnDimension = tag.getString("returnDim");
+        returnX = tag.getDouble("returnX");
+        returnY = tag.getDouble("returnY");
+        returnZ = tag.getDouble("returnZ");
+        chamberEnteredAt = tag.contains("chamberAt") ? tag.getLong("chamberAt") : -1;
         if (initialized && tag.getInt("DataVersion") < 2) { // v1 -> v2: keep every technique v1 allowed
             learned.addAll(V1_TECHNIQUES);
             deck.addAll(V1_TECHNIQUES.subList(0, 4));
@@ -773,6 +866,8 @@ public class PlayerData {
         tag.putBoolean("guarding", guarding);
         tag.putInt("combo", comboHits);
         tag.putInt("overdrive", overdriveLevel);
+        tag.putDouble("gravity", envGravity);
+        tag.putBoolean("meditating", meditating);
         tag.putBoolean("heavyCharging", heavyChargeTicks >= 0);
         tag.putDouble("heavyArmed", heavyArmedMultiplier);
         return tag;
@@ -787,6 +882,8 @@ public class PlayerData {
         guarding = tag.getBoolean("guarding");
         comboHits = tag.getInt("combo");
         overdriveLevel = tag.getInt("overdrive");
+        envGravity = tag.contains("gravity") ? tag.getDouble("gravity") : 1.0;
+        meditating = tag.getBoolean("meditating");
         heavyChargeTicks = tag.getBoolean("heavyCharging") ? 0 : -1;
         heavyArmedMultiplier = tag.getDouble("heavyArmed");
         dirty = false;

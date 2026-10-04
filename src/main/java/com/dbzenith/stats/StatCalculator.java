@@ -59,7 +59,8 @@ public final class StatCalculator {
     /** Applies the MIND bonus to a raw TP gain. */
     public static double scaleTpGain(PlayerData data, double rawGain) {
         double mult = (1.0 + data.getAttribute(Attribute.MIND) * DBZConfig.SERVER.tpGainPerMind.get())
-                * (1.0 + Races.of(data.getRace()).tpGainBonus());
+                * (1.0 + Races.of(data.getRace()).tpGainBonus())
+                * data.getTrainingMultiplier(); // gravity, weights, Time Chamber (set by TrainingTicker)
         return rawGain * mult;
     }
 

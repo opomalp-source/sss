@@ -1,0 +1,16 @@
+{
+  "type": "dbzenith:time_chamber",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "dbzenith:time_chamber",
+      "layers": [
+        {"block": "minecraft:bedrock", "height": 1},
+        {"block": "minecraft:white_concrete", "height": 3}
+      ],
+      "lakes": false,
+      "features": false,
+      "structure_overrides": []
+    }
+  }
+}

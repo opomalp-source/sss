@@ -204,5 +204,16 @@
   "screen.dbzenith.alignment": "Alignment",
   "screen.dbzenith.alignment.good": "Good (%s)",
   "screen.dbzenith.alignment.neutral": "Neutral (%s)",
-  "screen.dbzenith.alignment.evil": "Evil (%s)"
+  "screen.dbzenith.alignment.evil": "Evil (%s)",
+  "block.dbzenith.gravity_chamber": "Gravity Chamber",
+  "block.dbzenith.punching_bag": "Punching Bag",
+  "block.dbzenith.time_chamber_door": "Time Chamber Door",
+  "item.dbzenith.training_weights": "Training Weights",
+  "item.dbzenith.heavy_training_weights": "Heavy Training Weights",
+  "hud.dbzenith.meditating": "MEDITATING",
+  "hud.dbzenith.gravity": "%sG",
+  "message.dbzenith.gravity_set": "Gravity set to %sx (sneak + use to lower)",
+  "message.dbzenith.chamber_enter": "You step into the Hyperbolic Time Chamber. Time flows differently here: training counts many times over.",
+  "message.dbzenith.chamber_exit": "You step back into the world.",
+  "message.dbzenith.chamber_time_up": "Your time in the chamber is up."
 }

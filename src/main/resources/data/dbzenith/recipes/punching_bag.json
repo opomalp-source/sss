@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [" S ", "LWL", "LWL"],
+  "key": {"S": {"item": "minecraft:string"}, "L": {"item": "minecraft:leather"}, "W": {"tag": "minecraft:wool"}},
+  "result": {"item": "dbzenith:punching_bag"}
+}
