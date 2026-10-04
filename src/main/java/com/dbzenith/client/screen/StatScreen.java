@@ -37,6 +37,8 @@ public class StatScreen extends Screen {
         top = (height - H) / 2;
         addRenderableWidget(Button.builder(Component.translatable("screen.dbzenith.forms_button"), b -> minecraft.setScreen(new FormScreen(this)))
                 .bounds(left + W - 70, top + H - 24, 62, 18).build());
+        addRenderableWidget(Button.builder(Component.translatable("screen.dbzenith.techniques_button"), b -> minecraft.setScreen(new DeckScreen(this)))
+                .bounds(left + W - 156, top + H - 24, 82, 18).build());
         Attribute[] attrs = Attribute.values();
         for (int i = 0; i < attrs.length; i++) {
             Attribute a = attrs[i];

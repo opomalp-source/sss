@@ -20,14 +20,20 @@ public final class TechniqueHandler {
     private static final double HOMING_RANGE = 32.0;
     private static final double HOMING_CONE_COS = Math.cos(Math.toRadians(35));
 
-    public enum Result { FIRED, COOLDOWN, NOT_ENOUGH_KI, INVALID }
+    public enum Result { FIRED, COOLDOWN, NOT_ENOUGH_KI, NOT_EQUIPPED, INVALID }
 
     private TechniqueHandler() {}
 
     public static Result use(ServerPlayer player, Technique technique) {
+        return use(player, technique, false);
+    }
+
+    /** {@code bypassDeck}: admin/testing path (/dbz technique) that skips the learned + deck check. */
+    public static Result use(ServerPlayer player, Technique technique, boolean bypassDeck) {
         if (technique == null || !player.isAlive() || player.isSpectator()) return Result.INVALID;
         PlayerData data = ModCapabilities.get(player).orElse(null);
         if (data == null || !Forms.byId(data.getFormId()).allowsTechniques()) return Result.INVALID;
+        if (!bypassDeck && !(data.knows(technique.id()) && data.deckView().contains(technique.id()))) return Result.NOT_EQUIPPED;
         data.recomputeIfStale();
 
         ServerLevel level = player.serverLevel();
@@ -36,7 +42,11 @@ public final class TechniqueHandler {
         double cost = DamageCalculator.kiCost(data, technique.kiCost());
         if (!player.getAbilities().instabuild && data.getKi() < cost) return Result.NOT_ENOUGH_KI;
 
-        spawn(level, player, technique, DamageCalculator.kiOutgoing(data, technique.damageMult()));
+        if (technique.style() == Technique.Style.SELF) {
+            if (!TechniqueEffects.apply(player, data, technique)) return Result.INVALID;
+        } else {
+            spawn(level, player, technique, DamageCalculator.kiOutgoing(data, technique.damageMult()));
+        }
 
         if (!player.getAbilities().instabuild) data.setKi(data.getKi() - cost);
         data.setCooldown(technique.id(), now + technique.cooldownTicks());
@@ -51,6 +61,7 @@ public final class TechniqueHandler {
      * Players go through {@link #use}; NPCs (Phase 4) and {@code /dbz cast} call this directly.
      */
     public static void spawn(ServerLevel level, LivingEntity caster, Technique technique, double damage) {
+        if (technique.style() == Technique.Style.SELF) return; // self effects need a player caster (TechniqueEffects)
         Vec3 look = caster.getLookAngle();
         if (technique.style() == Technique.Style.BEAM) {
             level.addFreshEntity(KiBeamEntity.create(level, caster, technique, damage));

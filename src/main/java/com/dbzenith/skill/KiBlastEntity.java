@@ -43,6 +43,8 @@ public class KiBlastEntity extends Projectile {
     private int age;
     private float explosionPower;
     private int homingTargetId = -1;
+    private Technique.Effect effect = Technique.Effect.NONE;
+    private double effectPower;
     private final Set<Integer> hitIds = new HashSet<>();
 
     public KiBlastEntity(EntityType<? extends KiBlastEntity> type, Level level) {
@@ -57,6 +59,8 @@ public class KiBlastEntity extends Projectile {
         blast.pierceLeft = technique.pierce();
         blast.lifeTicks = technique.lifeTicks();
         blast.explosionPower = technique.explosionPower();
+        blast.effect = technique.effect();
+        blast.effectPower = technique.effectPower();
         blast.entityData.set(SIZE, technique.size());
         blast.entityData.set(COLOR, technique.color());
         blast.entityData.set(STYLE, technique.style().ordinal());
@@ -149,6 +153,10 @@ public class KiBlastEntity extends Projectile {
         if (level().isClientSide) return;
         Entity target = result.getEntity();
         hitIds.add(target.getId());
+        if (effect == Technique.Effect.CANDY && TechniqueEffects.candy(target, effectPower)) {
+            discard();
+            return;
+        }
         target.invulnerableTime = 0; // volleys must not be eaten by i-frames
         target.hurt(ModDamageTypes.kiBlast(level(), this, getOwner()), (float) damage);
         if (pierceLeft-- <= 0) impact();
@@ -180,6 +188,8 @@ public class KiBlastEntity extends Projectile {
         tag.putFloat("size", getSize());
         tag.putInt("color", getColor());
         tag.putInt("style", entityData.get(STYLE));
+        tag.putString("effect", effect.name());
+        tag.putDouble("effectPower", effectPower);
     }
 
     @Override
@@ -193,5 +203,11 @@ public class KiBlastEntity extends Projectile {
         entityData.set(SIZE, tag.getFloat("size"));
         entityData.set(COLOR, tag.getInt("color"));
         entityData.set(STYLE, tag.getInt("style"));
+        try {
+            effect = Technique.Effect.valueOf(tag.getString("effect"));
+        } catch (IllegalArgumentException e) {
+            effect = Technique.Effect.NONE;
+        }
+        effectPower = tag.getDouble("effectPower");
     }
 }

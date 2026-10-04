@@ -3,6 +3,7 @@ package com.dbzenith.registry;
 import com.dbzenith.DBZenith;
 import com.dbzenith.item.MoonOrbItem;
 import com.dbzenith.item.SenzuBeanItem;
+import com.dbzenith.item.TechniqueScrollItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -15,6 +16,9 @@ public final class ModItems {
 
     public static final RegistryObject<Item> SENZU_BEAN = ITEMS.register("senzu_bean",
             () -> new SenzuBeanItem(new Item.Properties().stacksTo(16).rarity(Rarity.UNCOMMON)));
+
+    public static final RegistryObject<Item> TECHNIQUE_SCROLL = ITEMS.register("technique_scroll",
+            () -> new TechniqueScrollItem(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
 
     public static final RegistryObject<Item> MOON_ORB = ITEMS.register("moon_orb",
             () -> new MoonOrbItem(new Item.Properties().stacksTo(4).rarity(Rarity.RARE)));

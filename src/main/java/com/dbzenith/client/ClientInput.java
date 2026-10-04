@@ -57,13 +57,15 @@ public final class ClientInput {
         while (ModKeys.LOWER_RELEASE.consumeClick()) ModNetwork.sendToServer(new InputPacket(InputPacket.Action.LOWER_RELEASE));
         while (ModKeys.NEXT_TECHNIQUE.consumeClick()) {
             Technique t = ClientCombatState.cycle();
-            mc.player.displayClientMessage(Component.translatable("message.dbzenith.selected_technique",
-                    Component.translatable(t.translationKey())), true);
+            if (t != null) {
+                mc.player.displayClientMessage(Component.translatable("message.dbzenith.selected_technique",
+                        Component.translatable(t.translationKey())), true);
+            }
         }
         while (ModKeys.KI_ATTACK.consumeClick()) {
             Technique t = ClientCombatState.selected();
             long now = mc.level.getGameTime();
-            if (!ClientCombatState.onCooldown(t, now)) {
+            if (t != null && !ClientCombatState.onCooldown(t, now)) {
                 ModNetwork.sendToServer(new UseTechniquePacket(t.id()));
                 ClientCombatState.startCooldown(t, now);
             }

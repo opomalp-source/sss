@@ -1,42 +1,148 @@
 package com.dbzenith.skill;
 
-/**
- * A ki technique definition. Pure data; firing logic lives in {@link TechniqueHandler}.
- *
- * @param id             stable id (lang key {@code technique.dbzenith.<id>})
- * @param kiCost         base ki cost before ki control / release scaling
- * @param damageMult     multiplier on {@code DamageCalculator.kiOutgoing}
- * @param speed          blocks per tick (beams: how fast the beam extends)
- * @param size           projectile diameter / beam width in blocks
- * @param cooldownTicks  ticks before it can be used again
- * @param count          projectiles per use (volleys)
- * @param spreadDegrees  random cone for multi-projectile techniques
- * @param pierce         extra entities a projectile passes through
- * @param homing         steers toward the target it was aimed at
- * @param explosionPower vanilla explosion power on impact (0 = none)
- * @param color          0xRRGGBB tint
- * @param lifeTicks      max flight time / beam duration
- * @param style          visual style
- */
-public record Technique(
-        String id,
-        double kiCost,
-        double damageMult,
-        float speed,
-        float size,
-        int cooldownTicks,
-        int count,
-        float spreadDegrees,
-        int pierce,
-        boolean homing,
-        float explosionPower,
-        int color,
-        int lifeTicks,
-        Style style) {
+import com.dbzenith.stats.Race;
 
-    public enum Style { BALL, DISK, BEAM }
+import java.util.EnumSet;
+import java.util.Set;
+
+/**
+ * A technique definition. Pure data; firing logic lives in {@link TechniqueHandler} (projectiles/beams)
+ * and {@link TechniqueEffects} (self/area effects). Built with {@link #builder}.
+ */
+public final class Technique {
+    public enum Style { BALL, DISK, BEAM, SELF }
+
+    /** Special behavior. NONE = plain damage. */
+    public enum Effect { NONE, HEAL_SELF, HEAL_ALLY, BLIND_AREA, EXPLOSIVE_WAVE, TELEPORT, KI_SENSE, ENERGY_ABSORB, CANDY }
+
+    private final String id;
+    private final double kiCost;
+    private final double damageMult;
+    private final float speed;
+    private final float size;
+    private final int cooldownTicks;
+    private final int count;
+    private final float spreadDegrees;
+    private final int pierce;
+    private final boolean homing;
+    private final float explosionPower;
+    private final int color;
+    private final int lifeTicks;
+    private final Style style;
+    private final Effect effect;
+    private final double effectPower;
+    private final long learnCost;
+    private final int unlockLevel;
+    private final Set<Race> races;
+
+    private Technique(Builder b) {
+        id = b.id;
+        kiCost = b.kiCost;
+        damageMult = b.damageMult;
+        speed = b.speed;
+        size = b.size;
+        cooldownTicks = b.cooldownTicks;
+        count = b.count;
+        spreadDegrees = b.spreadDegrees;
+        pierce = b.pierce;
+        homing = b.homing;
+        explosionPower = b.explosionPower;
+        color = b.color;
+        lifeTicks = b.lifeTicks;
+        style = b.style;
+        effect = b.effect;
+        effectPower = b.effectPower;
+        learnCost = b.learnCost;
+        unlockLevel = b.unlockLevel;
+        races = b.races;
+    }
+
+    public static Builder builder(String id) {
+        return new Builder(id);
+    }
+
+    public String id() { return id; }
+    /** Base ki cost before ki control, release and racial scaling. */
+    public double kiCost() { return kiCost; }
+    /** Multiplier on {@code DamageCalculator.kiOutgoing}. */
+    public double damageMult() { return damageMult; }
+    /** Blocks per tick (beams: how fast the beam extends). */
+    public float speed() { return speed; }
+    /** Projectile diameter / beam width in blocks. */
+    public float size() { return size; }
+    public int cooldownTicks() { return cooldownTicks; }
+    /** Projectiles per use (volleys). */
+    public int count() { return count; }
+    public float spreadDegrees() { return spreadDegrees; }
+    /** Extra entities a projectile passes through. */
+    public int pierce() { return pierce; }
+    public boolean homing() { return homing; }
+    public float explosionPower() { return explosionPower; }
+    /** 0xRRGGBB tint. */
+    public int color() { return color; }
+    /** Max flight time / beam duration. */
+    public int lifeTicks() { return lifeTicks; }
+    public Style style() { return style; }
+    public Effect effect() { return effect; }
+    /** Effect strength (heal fraction, radius, distance, duration ticks...; meaning depends on the effect). */
+    public double effectPower() { return effectPower; }
+    /** TP to learn from the Techniques screen (0 = starting / racial). */
+    public long learnCost() { return learnCost; }
+    public int unlockLevel() { return unlockLevel; }
+    /** Races that may learn it (all races unless restricted). */
+    public Set<Race> races() { return races; }
+
+    public boolean isRacial() {
+        return races.size() < Race.values().length;
+    }
 
     public String translationKey() {
         return "technique.dbzenith." + id;
+    }
+
+    public static final class Builder {
+        private final String id;
+        private double kiCost = 20;
+        private double damageMult = 1;
+        private float speed = 1.5f;
+        private float size = 0.5f;
+        private int cooldownTicks = 20;
+        private int count = 1;
+        private float spreadDegrees;
+        private int pierce;
+        private boolean homing;
+        private float explosionPower;
+        private int color = 0xFFFFFF;
+        private int lifeTicks = 60;
+        private Style style = Style.BALL;
+        private Effect effect = Effect.NONE;
+        private double effectPower;
+        private long learnCost;
+        private int unlockLevel;
+        private Set<Race> races = EnumSet.allOf(Race.class);
+
+        private Builder(String id) {
+            this.id = id;
+        }
+
+        public Builder cost(double ki) { kiCost = ki; return this; }
+        public Builder damage(double mult) { damageMult = mult; return this; }
+        public Builder speed(float s) { speed = s; return this; }
+        public Builder size(float s) { size = s; return this; }
+        public Builder cooldown(int ticks) { cooldownTicks = ticks; return this; }
+        public Builder volley(int n, float spread) { count = n; spreadDegrees = spread; return this; }
+        public Builder pierce(int n) { pierce = n; return this; }
+        public Builder homing() { homing = true; return this; }
+        public Builder explosion(float power) { explosionPower = power; return this; }
+        public Builder color(int rgb) { color = rgb; return this; }
+        public Builder life(int ticks) { lifeTicks = ticks; return this; }
+        public Builder style(Style s) { style = s; return this; }
+        public Builder effect(Effect e, double power) { effect = e; effectPower = power; return this; }
+        public Builder learn(long tp, int level) { learnCost = tp; unlockLevel = level; return this; }
+        public Builder race(Race first, Race... rest) { races = EnumSet.of(first, rest); return this; }
+
+        public Technique build() {
+            return new Technique(this);
+        }
     }
 }

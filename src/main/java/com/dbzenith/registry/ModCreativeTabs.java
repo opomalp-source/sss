@@ -1,6 +1,9 @@
 package com.dbzenith.registry;
 
 import com.dbzenith.DBZenith;
+import com.dbzenith.item.TechniqueScrollItem;
+import com.dbzenith.skill.Technique;
+import com.dbzenith.skill.Techniques;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -15,7 +18,14 @@ public final class ModCreativeTabs {
     public static final RegistryObject<CreativeModeTab> MAIN = TABS.register("main", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.dbzenith.main"))
             .icon(() -> new ItemStack(ModItems.SENZU_BEAN.get()))
-            .displayItems((params, output) -> ModItems.ITEMS.getEntries().forEach(item -> output.accept(item.get())))
+            .displayItems((params, output) -> {
+                ModItems.ITEMS.getEntries().forEach(item -> {
+                    if (item.get() != ModItems.TECHNIQUE_SCROLL.get()) output.accept(item.get());
+                });
+                for (Technique t : Techniques.all()) {
+                    if (!t.isRacial() && t.learnCost() > 0) output.accept(TechniqueScrollItem.of(ModItems.TECHNIQUE_SCROLL.get(), t));
+                }
+            })
             .build());
 
     private ModCreativeTabs() {}

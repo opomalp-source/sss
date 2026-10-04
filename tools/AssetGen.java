@@ -56,6 +56,25 @@ public class AssetGen {
                 "................",
                 "................");
 
+        pixelArt("assets/dbzenith/textures/item/technique_scroll.png", Map.of(
+                '#', 0xFF5A3A1C, 'p', 0xFFEAD9B0, 's', 0xFFC8B080, 'r', 0xFFB02020, 'k', 0xFF3A2A1A),
+                "................",
+                "..##########....",
+                ".#pppppppppp#...",
+                ".#psssssssp#....",
+                "..#pkkkkkkp#....",
+                "..#psssssp#.....",
+                "..#pkkkkkp#.....",
+                "..#psssssp#.....",
+                "..#pkkkp.p#.....",
+                "..#pppppp#......",
+                "..#pprrpp#......",
+                "..#pprrpp#......",
+                ".#pppppppp#.....",
+                ".##########.....",
+                "................",
+                "................");
+
         // --- ki glow: soft radial white, tinted per technique at render time ---
         radialGlow("assets/dbzenith/textures/entity/ki_glow.png", 32);
         beamGlow("assets/dbzenith/textures/entity/ki_beam.png", 32);

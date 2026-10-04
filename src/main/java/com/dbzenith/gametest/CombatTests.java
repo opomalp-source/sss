@@ -168,7 +168,7 @@ public final class CombatTests {
         helper.assertTrue(d.getKi() < ki, "ki should be spent");
         helper.assertTrue(TechniqueHandler.use(player, Techniques.KI_BLAST) == TechniqueHandler.Result.COOLDOWN, "second use should be on cooldown");
         d.setKi(0);
-        helper.assertTrue(TechniqueHandler.use(player, Techniques.WAVE_BEAM) == TechniqueHandler.Result.NOT_ENOUGH_KI, "no ki, no beam");
+        helper.assertTrue(TechniqueHandler.use(player, Techniques.WAVE_BEAM, true) == TechniqueHandler.Result.NOT_ENOUGH_KI, "no ki, no beam");
         int blasts = helper.getLevel().getEntitiesOfClass(KiBlastEntity.class, player.getBoundingBox().inflate(4)).size();
         helper.assertTrue(blasts == 1, "exactly one ki blast should spawn, found " + blasts);
         TestPlayers.remove(helper, player);
@@ -181,8 +181,8 @@ public final class CombatTests {
         float start = zombie.getHealth();
         Vec3 target = zombie.position().add(0, 1, 0);
         KiBlastEntity blast = KiBlastEntity.create(helper.getLevel(), null, Techniques.KI_BLAST, 50);
-        blast.moveTo(target.x - 4, target.y, target.z, 0, 0);
-        blast.setDeltaMovement(1.0, 0, 0);
+        blast.moveTo(target.x - 1.5, target.y, target.z, 0, 0); // stay inside this test's area
+        blast.setDeltaMovement(0.5, 0, 0);
         helper.getLevel().addFreshEntity(blast);
         helper.succeedWhen(() -> helper.assertTrue(zombie.getHealth() < start, "zombie should be hurt by the blast"));
     }

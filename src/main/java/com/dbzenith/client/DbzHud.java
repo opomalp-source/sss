@@ -107,10 +107,15 @@ public final class DbzHud implements IGuiOverlay {
         int ty = height - 23;
         int tw = 104;
         g.fill(tx - 2, ty - 2, tx + tw + 2, ty + 20, FRAME);
-        g.drawString(font, Component.translatable(t.translationKey()), tx + 2, ty + 1, 0xFF000000 | t.color());
-        g.drawString(font, Component.translatable("hud.dbzenith.technique_keys"), tx + 2, ty + 10, DIM);
-        float cd = ClientCombatState.cooldownFraction(t, time);
-        if (cd > 0) g.fill(tx, ty + 18, tx + (int) (tw * cd), ty + 20, 0xFFFFFFFF);
+        if (t == null) {
+            g.drawString(font, Component.translatable("hud.dbzenith.empty_deck"), tx + 2, ty + 5, DIM);
+        } else {
+            g.drawString(font, Component.translatable(t.translationKey()), tx + 2, ty + 1, 0xFF000000 | t.color());
+            g.drawString(font, Component.translatable("hud.dbzenith.technique_keys", ClientCombatState.selectedSlot() + 1, d.deckView().size()),
+                    tx + 2, ty + 10, DIM);
+            float cd = ClientCombatState.cooldownFraction(t, time);
+            if (cd > 0) g.fill(tx, ty + 18, tx + (int) (tw * cd), ty + 20, 0xFFFFFFFF);
+        }
     }
 
     private static int bar(GuiGraphics g, Font font, int x, int y, String label, double value, double max, int color) {

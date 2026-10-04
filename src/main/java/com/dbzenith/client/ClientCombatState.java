@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Client-only UI state: the selected technique and predicted cooldowns for the HUD.
+ * Client-only UI state: which deck slot is selected and predicted cooldowns for the HUD.
  * The server stays authoritative; a mispredicted cooldown only affects the HUD bar.
  */
 public final class ClientCombatState {
@@ -17,13 +17,26 @@ public final class ClientCombatState {
 
     private ClientCombatState() {}
 
+    private static List<String> deck() {
+        return ClientPlayerData.get().deckView();
+    }
+
+    /** The technique in the selected deck slot, or null if the deck is empty. */
     public static Technique selected() {
-        List<Technique> all = Techniques.all();
-        return all.get(Math.floorMod(selected, all.size()));
+        List<String> deck = deck();
+        if (deck.isEmpty()) return null;
+        return Techniques.byId(deck.get(Math.floorMod(selected, deck.size())));
+    }
+
+    public static int selectedSlot() {
+        List<String> deck = deck();
+        return deck.isEmpty() ? 0 : Math.floorMod(selected, deck.size());
     }
 
     public static Technique cycle() {
-        selected = Math.floorMod(selected + 1, Techniques.all().size());
+        List<String> deck = deck();
+        if (deck.isEmpty()) return null;
+        selected = Math.floorMod(selected + 1, deck.size());
         return selected();
     }
 
@@ -45,5 +58,6 @@ public final class ClientCombatState {
 
     public static void clear() {
         cooldowns.clear();
+        selected = 0;
     }
 }

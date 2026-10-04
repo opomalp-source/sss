@@ -136,7 +136,7 @@ public final class DBZCommand {
                                             if (t == null) throw UNKNOWN_TECHNIQUE.create(id);
                                             int fired = 0;
                                             for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
-                                                TechniqueHandler.Result r = TechniqueHandler.use(p, t);
+                                                TechniqueHandler.Result r = TechniqueHandler.use(p, t, true);
                                                 if (r == TechniqueHandler.Result.FIRED) fired++;
                                                 else ctx.getSource().sendFailure(Component.literal(p.getGameProfile().getName() + ": " + r));
                                             }
@@ -236,6 +236,16 @@ public final class DBZCommand {
                                     ctx.getSource().sendSuccess(() -> Component.literal("Raised overdrive for " + count + " player(s)"), true);
                                     return n;
                                 })))
+                .then(Commands.literal("learn")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("technique", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(Techniques.all().stream().map(Technique::id), b))
+                                        .executes(ctx -> {
+                                            String id = StringArgumentType.getString(ctx, "technique");
+                                            Technique t = Techniques.byId(id);
+                                            if (t == null) throw UNKNOWN_TECHNIQUE.create(id);
+                                            return apply(ctx, "Taught " + id + " to", d -> com.dbzenith.skill.TechniqueLibrary.learnFree(d, t));
+                                        }))))
                 .then(Commands.literal("tail")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("on", BoolArgumentType.bool())
