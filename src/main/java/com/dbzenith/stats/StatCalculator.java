@@ -46,9 +46,9 @@ public final class StatCalculator {
     }
 
     /** Applies the MIND bonus to a raw TP gain. */
-    public static long scaleTpGain(PlayerData data, long rawGain) {
+    public static double scaleTpGain(PlayerData data, double rawGain) {
         double mult = 1.0 + data.getAttribute(Attribute.MIND) * DBZConfig.SERVER.tpGainPerMind.get();
-        return Math.round(rawGain * mult);
+        return rawGain * mult;
     }
 
     /**

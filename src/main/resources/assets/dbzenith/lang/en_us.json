@@ -21,5 +21,41 @@
 
   "path.dbzenith.fighter": "Fighter",
   "path.dbzenith.spiritualist": "Spiritualist",
-  "path.dbzenith.hybrid": "Hybrid"
+  "path.dbzenith.hybrid": "Hybrid",
+
+  "entity.dbzenith.ki_blast": "Ki Blast",
+  "death.attack.dbzenith.ki_blast": "%1$s was blasted away",
+  "death.attack.dbzenith.ki_blast.player": "%1$s was blasted away by %2$s",
+
+  "technique.dbzenith.ki_blast": "Ki Blast",
+  "technique.dbzenith.wave_beam": "Wave Beam",
+  "technique.dbzenith.rapid_volley": "Rapid Volley",
+  "technique.dbzenith.cutter_disk": "Cutter Disk",
+  "technique.dbzenith.homing_orb": "Homing Orb",
+
+  "key.categories.dbzenith": "Dragon Block Zenith",
+  "key.dbzenith.charge": "Charge ki (hold)",
+  "key.dbzenith.lower_release": "Lower release %",
+  "key.dbzenith.fly": "Toggle flight",
+  "key.dbzenith.guard": "Guard (hold)",
+  "key.dbzenith.ki_attack": "Use technique",
+  "key.dbzenith.next_technique": "Next technique",
+  "key.dbzenith.stats": "Training / stats",
+
+  "hud.dbzenith.power_level": "Power Level %s",
+  "hud.dbzenith.release": "Release %s%%",
+  "hud.dbzenith.charging": "CHARGING",
+  "hud.dbzenith.flying": "FLYING",
+  "hud.dbzenith.guard": "GUARD",
+  "hud.dbzenith.technique_keys": "[R] fire  [Y] next",
+
+  "screen.dbzenith.stats": "Training",
+  "screen.dbzenith.identity": "%s • %s",
+  "screen.dbzenith.tp": "TP: %s",
+  "screen.dbzenith.cost": "Cost",
+  "screen.dbzenith.upgrade_tooltip": "Spend TP to raise by 1 (Shift: 10)",
+
+  "message.dbzenith.selected_technique": "Technique: %s",
+  "message.dbzenith.no_ki_to_fly": "Not enough ki to fly",
+  "message.dbzenith.out_of_ki": "Out of ki!"
 }

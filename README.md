@@ -16,8 +16,19 @@ Requires JDK 17 (`JAVA_HOME`). On this machine: `C:\Users\sunam\.jdks\jdk-17.0.2
 ## Play
 Install **NeoForge 1.20.1-47.1.106** into a dedicated game directory, then put `dbzenith-<version>.jar` in that profile's `mods` folder.
 
-## In-game (Phase 0)
+## Controls (rebind under Controls > Dragon Block Zenith)
+| Key | Action |
+|---|---|
+| G (hold) | Charge ki: fills ki, raises release %, drains stamina, aura |
+| Z | Lower release % by 10 |
+| V | Toggle flight (drains ki) |
+| Left Alt (hold) | Guard: blocks 60% of damage, costs stamina |
+| R | Use selected technique |
+| Y | Next technique (Ki Blast, Wave Beam, Rapid Volley, Cutter Disk, Homing Orb) |
+| K | Training screen: spend TP on attributes (Shift+click = +10) |
+
+## In-game
 - Creative tab **Dragon Block Zenith** → Senzu Bean (full heal + ki/stamina refill).
-- Top-left debug overlay shows your synced stats (toggle `hud.showDebugOverlay` in `config/dbzenith-client.toml`).
+- Top-left HUD: power level, body/ki/stamina, release %, status. Earn TP by fighting and charging; spend it with K.
 - `/dbz stats`, `/dbz set <player> <field> <value>` (fields: strength, dexterity, constitution, ki_power, willpower, mind, spirit, tp, body, ki, stamina, release, alignment, physical_age, mental_age), `/dbz tp add`, `/dbz race`, `/dbz path`, `/dbz refill`, `/dbz reset`.
 - Balance numbers: `<world>/serverconfig/dbzenith-server.toml`.

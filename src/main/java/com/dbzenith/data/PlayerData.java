@@ -125,6 +125,19 @@ public class PlayerData {
         setTrainingPoints(trainingPoints + amount);
     }
 
+    private double tpFraction;
+
+    /** Adds a fractional TP gain (already scaled); whole points are banked, the remainder carries over. */
+    public void addTrainingProgress(double amount) {
+        if (amount <= 0) return;
+        tpFraction += amount;
+        long whole = (long) tpFraction;
+        if (whole > 0) {
+            tpFraction -= whole;
+            addTrainingPoints(whole);
+        }
+    }
+
     // ------------------------------------------------------------------ identity
 
     public Race getRace() {
@@ -190,8 +203,11 @@ public class PlayerData {
 
     public void setBody(double body) {
         recomputeIfStale();
-        this.body = Mth.clamp(body, 0, derived.maxBody());
-        markDirty();
+        double v = Mth.clamp(body, 0, derived.maxBody());
+        if (v != this.body) {
+            this.body = v;
+            markDirty();
+        }
     }
 
     public double getKi() {
@@ -200,8 +216,11 @@ public class PlayerData {
 
     public void setKi(double ki) {
         recomputeIfStale();
-        this.ki = Mth.clamp(ki, 0, derived.maxKi());
-        markDirty();
+        double v = Mth.clamp(ki, 0, derived.maxKi());
+        if (v != this.ki) {
+            this.ki = v;
+            markDirty();
+        }
     }
 
     public double getStamina() {
@@ -210,8 +229,11 @@ public class PlayerData {
 
     public void setStamina(double stamina) {
         recomputeIfStale();
-        this.stamina = Mth.clamp(stamina, 0, derived.maxStamina());
-        markDirty();
+        double v = Mth.clamp(stamina, 0, derived.maxStamina());
+        if (v != this.stamina) {
+            this.stamina = v;
+            markDirty();
+        }
     }
 
     public int getReleasePercent() {
@@ -219,8 +241,104 @@ public class PlayerData {
     }
 
     public void setReleasePercent(int releasePercent) {
-        this.releasePercent = Mth.clamp(releasePercent, 0, 100);
+        int v = Mth.clamp(releasePercent, 0, 100);
+        if (v != this.releasePercent) {
+            this.releasePercent = v;
+            markDirty();
+        }
+    }
+
+    // ------------------------------------------------------------------ combat state (runtime only, synced but not saved)
+
+    private boolean charging;
+    private boolean guarding;
+    private boolean flying;
+    private int comboHits;
+    private long lastHitTick = Long.MIN_VALUE / 2;
+    private long lastDamagedTick = Long.MIN_VALUE / 2;
+    private int chargeTicks;
+    private float lastSetHealth = -1;
+    private final java.util.Map<String, Long> cooldownUntil = new java.util.HashMap<>();
+
+    public boolean isCharging() {
+        return charging;
+    }
+
+    public void setCharging(boolean charging) {
+        if (this.charging != charging) {
+            this.charging = charging;
+            chargeTicks = 0;
+            markDirty();
+        }
+    }
+
+    public int tickCharge() {
+        return ++chargeTicks;
+    }
+
+    public boolean isGuarding() {
+        return guarding;
+    }
+
+    public void setGuarding(boolean guarding) {
+        if (this.guarding != guarding) {
+            this.guarding = guarding;
+            markDirty();
+        }
+    }
+
+    public boolean isFlying() {
+        return flying;
+    }
+
+    public void setFlying(boolean flying) {
+        if (this.flying != flying) {
+            this.flying = flying;
+            markDirty();
+        }
+    }
+
+    public int getComboHits() {
+        return comboHits;
+    }
+
+    /** Registers a melee hit at {@code gameTime}; returns the combo length including this hit. */
+    public int registerHit(long gameTime, int windowTicks, int maxHits) {
+        comboHits = gameTime - lastHitTick <= windowTicks ? Math.min(maxHits, comboHits + 1) : 1;
+        lastHitTick = gameTime;
         markDirty();
+        return comboHits;
+    }
+
+    public void tickCombo(long gameTime, int windowTicks) {
+        if (comboHits > 0 && gameTime - lastHitTick > windowTicks) {
+            comboHits = 0;
+            markDirty();
+        }
+    }
+
+    public long getLastDamagedTick() {
+        return lastDamagedTick;
+    }
+
+    public void setLastDamagedTick(long tick) {
+        this.lastDamagedTick = tick;
+    }
+
+    public float getLastSetHealth() {
+        return lastSetHealth;
+    }
+
+    public void setLastSetHealth(float health) {
+        this.lastSetHealth = health;
+    }
+
+    public boolean isOnCooldown(String id, long gameTime) {
+        return cooldownUntil.getOrDefault(id, Long.MIN_VALUE) > gameTime;
+    }
+
+    public void setCooldown(String id, long untilGameTime) {
+        cooldownUntil.put(id, untilGameTime);
     }
 
     // ------------------------------------------------------------------ sync bookkeeping
@@ -264,6 +382,7 @@ public class PlayerData {
         tag.putInt("alignment", alignment);
         tag.putDouble("physicalAge", physicalAge);
         tag.putDouble("mentalAge", mentalAge);
+        tag.putBoolean("flying", flying);
         return tag;
     }
 
@@ -287,6 +406,7 @@ public class PlayerData {
         alignment = tag.getInt("alignment");
         physicalAge = tag.contains("physicalAge") ? tag.getDouble("physicalAge") : 16;
         mentalAge = tag.contains("mentalAge") ? tag.getDouble("mentalAge") : 16;
+        flying = tag.getBoolean("flying");
         derivedStale = true;
         markDirty();
     }
@@ -300,6 +420,9 @@ public class PlayerData {
         recomputeIfStale();
         CompoundTag tag = save();
         tag.put("derived", derived.save());
+        tag.putBoolean("charging", charging);
+        tag.putBoolean("guarding", guarding);
+        tag.putInt("combo", comboHits);
         return tag;
     }
 
@@ -308,6 +431,9 @@ public class PlayerData {
         load(tag);
         derived = DerivedStats.load(tag.getCompound("derived"));
         derivedStale = false;
+        charging = tag.getBoolean("charging");
+        guarding = tag.getBoolean("guarding");
+        comboHits = tag.getInt("combo");
         dirty = false;
     }
 }

@@ -4,13 +4,22 @@ import com.dbzenith.DBZenith;
 import com.dbzenith.data.ModCapabilities;
 import com.dbzenith.data.PlayerData;
 import com.dbzenith.data.StatField;
+import com.dbzenith.ki.FlightHandler;
+import com.dbzenith.network.DevScreenshotPacket;
+import com.dbzenith.network.ModNetwork;
+import com.dbzenith.skill.Technique;
+import com.dbzenith.skill.TechniqueHandler;
+import com.dbzenith.skill.Techniques;
 import com.dbzenith.stats.Attribute;
+import com.dbzenith.stats.AttributeTraining;
 import com.dbzenith.stats.DerivedStats;
 import com.dbzenith.stats.FightingPath;
 import com.dbzenith.stats.Race;
 import com.dbzenith.stats.StatCalculator;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -51,6 +60,8 @@ public final class DBZCommand {
             new DynamicCommandExceptionType(id -> Component.literal("Unknown race: " + id));
     private static final DynamicCommandExceptionType UNKNOWN_PATH =
             new DynamicCommandExceptionType(id -> Component.literal("Unknown path: " + id));
+    private static final DynamicCommandExceptionType UNKNOWN_TECHNIQUE =
+            new DynamicCommandExceptionType(id -> Component.literal("Unknown technique: " + id));
 
     private DBZCommand() {}
 
@@ -104,6 +115,70 @@ public final class DBZCommand {
                         .executes(ctx -> applyTo(ctx.getSource(), List.of(ctx.getSource().getPlayerOrException()), "Refilled", PlayerData::refill))
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .executes(ctx -> apply(ctx, "Refilled", PlayerData::refill))))
+                .then(Commands.literal("technique")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("technique", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(Techniques.all().stream().map(Technique::id), b))
+                                        .executes(ctx -> {
+                                            String id = StringArgumentType.getString(ctx, "technique");
+                                            Technique t = Techniques.byId(id);
+                                            if (t == null) throw UNKNOWN_TECHNIQUE.create(id);
+                                            int fired = 0;
+                                            for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
+                                                TechniqueHandler.Result r = TechniqueHandler.use(p, t);
+                                                if (r == TechniqueHandler.Result.FIRED) fired++;
+                                                else ctx.getSource().sendFailure(Component.literal(p.getGameProfile().getName() + ": " + r));
+                                            }
+                                            int n = fired;
+                                            ctx.getSource().sendSuccess(() -> Component.literal("Fired " + id + " for " + n + " player(s)"), true);
+                                            return n;
+                                        }))))
+                .then(Commands.literal("fly")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .executes(ctx -> {
+                                    int n = 0;
+                                    for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
+                                        boolean on = FlightHandler.toggle(p);
+                                        ctx.getSource().sendSuccess(() -> Component.literal(p.getGameProfile().getName() + " flight: " + on), true);
+                                        n++;
+                                    }
+                                    return n;
+                                })))
+                .then(Commands.literal("charge")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("on", BoolArgumentType.bool())
+                                        .executes(ctx -> {
+                                            boolean on = BoolArgumentType.getBool(ctx, "on");
+                                            return apply(ctx, "Set charging " + on + " for", d -> d.setCharging(on));
+                                        }))))
+                .then(Commands.literal("guard")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("on", BoolArgumentType.bool())
+                                        .executes(ctx -> {
+                                            boolean on = BoolArgumentType.getBool(ctx, "on");
+                                            return apply(ctx, "Set guarding " + on + " for", d -> d.setGuarding(on));
+                                        }))))
+                .then(Commands.literal("train")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("attribute", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(Arrays.stream(Attribute.values()).map(Attribute::id), b))
+                                        .then(Commands.argument("times", IntegerArgumentType.integer(1, AttributeTraining.MAX_STEPS_PER_REQUEST))
+                                                .executes(ctx -> {
+                                                    String id = StringArgumentType.getString(ctx, "attribute");
+                                                    Attribute a = Attribute.byId(id);
+                                                    if (a == null) throw UNKNOWN_FIELD.create(id);
+                                                    int times = IntegerArgumentType.getInteger(ctx, "times");
+                                                    return apply(ctx, "Spent TP on " + id + " (up to " + times + ") for", d -> AttributeTraining.upgrade(d, a, times));
+                                                })))))
+                .then(Commands.literal("devshot")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("name", StringArgumentType.word())
+                                        .executes(ctx -> {
+                                            String name = StringArgumentType.getString(ctx, "name");
+                                            var targets = EntityArgument.getPlayers(ctx, "targets");
+                                            targets.forEach(p -> ModNetwork.sendTo(p, new DevScreenshotPacket(name)));
+                                            return targets.size();
+                                        }))))
                 .then(Commands.literal("reset")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .executes(ctx -> apply(ctx, "Reset character of", PlayerData::reset)))));

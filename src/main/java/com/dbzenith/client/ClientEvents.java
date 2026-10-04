@@ -23,6 +23,7 @@ public final class ClientEvents {
      */
     private static final Set<Integer> DEV_SCREENSHOT_TICKS = parseTicks(System.getProperty("dbzenith.devScreenshots", ""));
     private static final int DEV_QUIT_AFTER = Integer.getInteger("dbzenith.devQuitAfter", -1);
+    private static final boolean DEV_AUTOMATION = Boolean.getBoolean("dbzenith.devAutomation");
     private static int ticksInWorld;
 
     private ClientEvents() {}
@@ -30,6 +31,7 @@ public final class ClientEvents {
     @SubscribeEvent
     public static void loggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientPlayerData.clear();
+        ClientCombatState.clear();
         ticksInWorld = 0;
     }
 
@@ -47,6 +49,15 @@ public final class ClientEvents {
             DBZenith.LOGGER.info("[dev] devQuitAfter reached, stopping client");
             mc.stop();
         }
+    }
+
+    /** Dev automation: save a named screenshot now (requested by /dbz devshot). */
+    public static void devScreenshot(String name) {
+        if (!DEV_AUTOMATION) return;
+        Minecraft mc = Minecraft.getInstance();
+        String safe = name.replaceAll("[^a-zA-Z0-9_-]", "_");
+        Screenshot.grab(mc.gameDirectory, "dbz_" + safe + ".png", mc.getMainRenderTarget(),
+                msg -> DBZenith.LOGGER.info("[dev] {}", msg.getString()));
     }
 
     private static Set<Integer> parseTicks(String csv) {

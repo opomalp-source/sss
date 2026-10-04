@@ -37,6 +37,9 @@ public class AssetGen {
                 "................",
                 "................");
 
+        // --- ki glow: soft radial white, tinted per technique at render time ---
+        radialGlow("assets/dbzenith/textures/entity/ki_glow.png", 32);
+
         // --- gametest structure: empty 3x3x3 template ---
         emptyStructure("data/dbzenith/structures/empty.nbt", 3);
         System.out.println("AssetGen done");
@@ -47,6 +50,24 @@ public class AssetGen {
         for (int y = 0; y < rows.length; y++) {
             for (int x = 0; x < rows[y].length(); x++) {
                 img.setRGB(x, y, palette.getOrDefault(rows[y].charAt(x), 0x00000000));
+            }
+        }
+        File out = new File(RES + path);
+        out.getParentFile().mkdirs();
+        ImageIO.write(img, "png", out);
+        System.out.println("wrote " + out);
+    }
+
+    static void radialGlow(String path, int size) throws IOException {
+        BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        double c = (size - 1) / 2.0;
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                double d = Math.hypot(x - c, y - c) / (size / 2.0);
+                double a = Math.max(0, 1 - d);
+                a = Math.pow(a, 1.6);
+                int alpha = (int) Math.round(255 * Math.min(1, a * 1.4));
+                img.setRGB(x, y, (alpha << 24) | 0xFFFFFF);
             }
         }
         File out = new File(RES + path);

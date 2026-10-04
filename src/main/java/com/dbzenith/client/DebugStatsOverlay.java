@@ -29,7 +29,7 @@ public final class DebugStatsOverlay implements IGuiOverlay {
         DerivedStats s = d.getDerived();
         Font font = mc.font;
         int x = 4;
-        int y = 4;
+        int y = 80;
         int line = font.lineHeight + 1;
 
         g.drawString(font, "Dragon Block Zenith [debug]", x, y, ACCENT);

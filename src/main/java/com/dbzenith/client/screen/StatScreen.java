@@ -1,0 +1,107 @@
+package com.dbzenith.client.screen;
+
+import com.dbzenith.client.ClientPlayerData;
+import com.dbzenith.data.PlayerData;
+import com.dbzenith.network.ModNetwork;
+import com.dbzenith.network.UpgradeAttributePacket;
+import com.dbzenith.stats.Attribute;
+import com.dbzenith.stats.DerivedStats;
+import com.dbzenith.stats.StatCalculator;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+
+/**
+ * Training screen: attributes, TP cost per point and "+" buttons (shift = +10), plus derived stats.
+ * Reads live from {@link ClientPlayerData}; upgrades are requested from and validated by the server.
+ */
+public class StatScreen extends Screen {
+    private static final int W = 320;
+    private static final int H = 196;
+    private static final int PANEL = 0xE0101018;
+    private static final int HEADER = 0xFFFFB330;
+    private static final int TEXT = 0xFFF0F0F0;
+    private static final int DIM = 0xFFA0A0B0;
+
+    private int left;
+    private int top;
+
+    public StatScreen() {
+        super(Component.translatable("screen.dbzenith.stats"));
+    }
+
+    @Override
+    protected void init() {
+        left = (width - W) / 2;
+        top = (height - H) / 2;
+        Attribute[] attrs = Attribute.values();
+        for (int i = 0; i < attrs.length; i++) {
+            Attribute a = attrs[i];
+            addRenderableWidget(Button.builder(Component.literal("+"),
+                            b -> ModNetwork.sendToServer(new UpgradeAttributePacket(a, hasShiftDown() ? 10 : 1)))
+                    .bounds(left + 140, top + 42 + i * 18, 18, 16)
+                    .tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("screen.dbzenith.upgrade_tooltip")))
+                    .build());
+        }
+    }
+
+    @Override
+    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        renderBackground(g);
+        g.fill(left, top, left + W, top + H, PANEL);
+        PlayerData d = ClientPlayerData.get();
+        DerivedStats s = d.getDerived();
+
+        g.drawString(font, title, left + 8, top + 8, HEADER);
+        g.drawString(font, Component.translatable("screen.dbzenith.identity",
+                Component.translatable(d.getRace().translationKey()), Component.translatable(d.getPath().translationKey())), left + 8, top + 20, DIM);
+        g.drawString(font, Component.translatable("screen.dbzenith.tp", String.format("%,d", d.getTrainingPoints())), left + W - 110, top + 8, 0xFF7CFF7C);
+
+        Attribute[] attrs = Attribute.values();
+        g.drawString(font, Component.translatable("screen.dbzenith.cost"), left + 104, top + 32, DIM);
+        for (int i = 0; i < attrs.length; i++) {
+            Attribute a = attrs[i];
+            int y = top + 46 + i * 18;
+            g.drawString(font, Component.translatable(a.translationKey()), left + 10, y, TEXT);
+            g.drawString(font, String.valueOf(d.getAttribute(a)), left + 76, y, 0xFFFFFFFF);
+            g.drawString(font, costText(d, a), left + 104, y, DIM);
+        }
+
+        int rx = left + 172;
+        int ry = top + 34;
+        String[] lines = {
+                line("Body", s.maxBody()), line("Ki", s.maxKi()), line("Stamina", s.maxStamina()),
+                line("Melee dmg", s.meleeDamage()), line("Ki dmg", s.kiDamage()), line("Defense", s.defense()),
+                pct("Evasion", s.evasion()), pct("Ki control", s.kiControl()),
+                String.format("Spirit  x%.2f", s.spiritModifier()), pct("Atk speed", s.attackSpeed()), pct("Move speed", s.moveSpeed()),
+                String.format("Power   %,d", StatCalculator.battlePower(d))
+        };
+        for (String l : lines) {
+            g.drawString(font, l, rx, ry, TEXT);
+            ry += 12;
+        }
+        super.render(g, mouseX, mouseY, partialTick);
+    }
+
+    private static String costText(PlayerData d, Attribute a) {
+        try {
+            return StatCalculator.tpCost(d, a) + " TP";
+        } catch (IllegalStateException e) { // server config not available on this client yet
+            return "? TP";
+        }
+    }
+
+    private static String line(String label, double v) {
+        return String.format("%-10s %,.0f", label, v);
+    }
+
+    private static String pct(String label, double v) {
+        return String.format("%-10s %.1f%%", label, v * 100);
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
+    }
+}

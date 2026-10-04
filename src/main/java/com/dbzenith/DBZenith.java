@@ -4,6 +4,7 @@ import com.dbzenith.config.DBZConfig;
 import com.dbzenith.data.ModCapabilities;
 import com.dbzenith.network.ModNetwork;
 import com.dbzenith.registry.ModCreativeTabs;
+import com.dbzenith.registry.ModEntities;
 import com.dbzenith.registry.ModItems;
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -27,6 +28,7 @@ public class DBZenith {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         ModItems.register(modBus);
+        ModEntities.register(modBus);
         ModCreativeTabs.register(modBus);
         modBus.addListener(ModCapabilities::register);
         modBus.addListener(this::commonSetup);

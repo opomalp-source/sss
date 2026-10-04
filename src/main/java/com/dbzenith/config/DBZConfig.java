@@ -61,8 +61,41 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue moveSpeedPerDexterity;
         public final ForgeConfigSpec.DoubleValue moveSpeedCap;
 
-        // --- ki / release ---
+        // --- ki / release / regen ---
         public final ForgeConfigSpec.IntValue defaultReleasePercent;
+        public final ForgeConfigSpec.DoubleValue kiRegenPercentPerSecond;
+        public final ForgeConfigSpec.DoubleValue staminaRegenPercentPerSecond;
+        public final ForgeConfigSpec.DoubleValue bodyRegenPercentPerSecond;
+        public final ForgeConfigSpec.IntValue bodyRegenDelayTicks;
+        public final ForgeConfigSpec.DoubleValue chargeKiPercentPerSecond;
+        public final ForgeConfigSpec.DoubleValue chargeStaminaPercentPerSecond;
+        public final ForgeConfigSpec.IntValue chargeReleaseStepTicks;
+        public final ForgeConfigSpec.IntValue releaseLowerStep;
+        public final ForgeConfigSpec.DoubleValue flightKiPercentPerSecond;
+        public final ForgeConfigSpec.DoubleValue flightBaseSpeed;
+        public final ForgeConfigSpec.DoubleValue flightSpeedPerMoveBonus;
+
+        // --- combat ---
+        public final ForgeConfigSpec.DoubleValue vanillaDamageToBody;
+        public final ForgeConfigSpec.DoubleValue minDamageFraction;
+        public final ForgeConfigSpec.DoubleValue dbzDamageVsMobsScale;
+        public final ForgeConfigSpec.DoubleValue meleeStaminaCost;
+        public final ForgeConfigSpec.DoubleValue exhaustedDamageMultiplier;
+        public final ForgeConfigSpec.IntValue comboWindowTicks;
+        public final ForgeConfigSpec.DoubleValue comboBonusPerHit;
+        public final ForgeConfigSpec.IntValue comboMaxHits;
+        public final ForgeConfigSpec.DoubleValue meleeKnockbackPerStrength;
+        public final ForgeConfigSpec.DoubleValue guardDamageReduction;
+        public final ForgeConfigSpec.DoubleValue guardStaminaPerDamage;
+        public final ForgeConfigSpec.DoubleValue kiCostReleaseScaling;
+        public final ForgeConfigSpec.DoubleValue kiBlastBaseDamage;
+        public final ForgeConfigSpec.BooleanValue kiBlastsBreakBlocks;
+
+        // --- TP gains ---
+        public final ForgeConfigSpec.DoubleValue tpPerDamageDealt;
+        public final ForgeConfigSpec.DoubleValue tpPerKillHealth;
+        public final ForgeConfigSpec.IntValue tpChargeTrainingInterval;
+        public final ForgeConfigSpec.IntValue tpPerChargeInterval;
 
         // --- character ---
         public final ForgeConfigSpec.DoubleValue startingAge;
@@ -123,6 +156,66 @@ public final class DBZConfig {
             b.push("ki");
             defaultReleasePercent = b.comment("Release % a new character starts at")
                     .defineInRange("defaultReleasePercent", 50, 0, 100);
+            kiRegenPercentPerSecond = b.comment("Passive ki regen, % of max per second (not while charging/flying)")
+                    .defineInRange("kiRegenPercentPerSecond", 2.0, 0.0, 100.0);
+            staminaRegenPercentPerSecond = b.defineInRange("staminaRegenPercentPerSecond", 5.0, 0.0, 100.0);
+            bodyRegenPercentPerSecond = b.comment("Out-of-combat body regen, % of max per second")
+                    .defineInRange("bodyRegenPercentPerSecond", 1.0, 0.0, 100.0);
+            bodyRegenDelayTicks = b.comment("Ticks after taking damage before body regen starts")
+                    .defineInRange("bodyRegenDelayTicks", 100, 0, 72000);
+            chargeKiPercentPerSecond = b.comment("Ki gained per second while charging, % of max")
+                    .defineInRange("chargeKiPercentPerSecond", 10.0, 0.0, 100.0);
+            chargeStaminaPercentPerSecond = b.comment("Stamina drained per second while charging, % of max")
+                    .defineInRange("chargeStaminaPercentPerSecond", 4.0, 0.0, 100.0);
+            chargeReleaseStepTicks = b.comment("While charging, release % rises by 1 every this many ticks")
+                    .defineInRange("chargeReleaseStepTicks", 2, 1, 200);
+            releaseLowerStep = b.comment("Release % removed per press of the lower-release key")
+                    .defineInRange("releaseLowerStep", 10, 1, 100);
+            flightKiPercentPerSecond = b.comment("Ki drained per second while flying, % of max")
+                    .defineInRange("flightKiPercentPerSecond", 1.5, 0.0, 100.0);
+            flightBaseSpeed = b.comment("Vanilla creative flight speed is 0.05")
+                    .defineInRange("flightBaseSpeed", 0.05, 0.0, 1.0);
+            flightSpeedPerMoveBonus = b.comment("Flight speed multiplier per unit of DEX move-speed bonus")
+                    .defineInRange("flightSpeedPerMoveBonus", 2.0, 0.0, 100.0);
+            b.pop();
+
+            b.comment("Damage math (see combat.DamageCalculator)").push("combat");
+            vanillaDamageToBody = b.comment("Body damage per point of vanilla damage from mobs/environment")
+                    .defineInRange("vanillaDamageToBody", 10.0, 0.0, 1e6);
+            minDamageFraction = b.comment("Defense can never reduce a hit below this fraction of its raw value")
+                    .defineInRange("minDamageFraction", 0.1, 0.0, 1.0);
+            dbzDamageVsMobsScale = b.comment("DBZ damage is multiplied by this when it hits a non-player (vanilla health scale)")
+                    .defineInRange("dbzDamageVsMobsScale", 0.1, 0.0, 1e6);
+            meleeStaminaCost = b.comment("Stamina spent per melee hit")
+                    .defineInRange("meleeStaminaCost", 3.0, 0.0, 1e6);
+            exhaustedDamageMultiplier = b.comment("Melee damage multiplier when out of stamina")
+                    .defineInRange("exhaustedDamageMultiplier", 0.5, 0.0, 1.0);
+            comboWindowTicks = b.comment("Max ticks between hits to keep a combo going")
+                    .defineInRange("comboWindowTicks", 30, 1, 200);
+            comboBonusPerHit = b.defineInRange("comboBonusPerHit", 0.05, 0.0, 10.0);
+            comboMaxHits = b.defineInRange("comboMaxHits", 10, 1, 1000);
+            meleeKnockbackPerStrength = b.comment("Extra melee knockback per STR point")
+                    .defineInRange("meleeKnockbackPerStrength", 0.002, 0.0, 10.0);
+            guardDamageReduction = b.comment("Fraction of damage blocked while guarding")
+                    .defineInRange("guardDamageReduction", 0.6, 0.0, 1.0);
+            guardStaminaPerDamage = b.comment("Stamina spent per point of body damage blocked")
+                    .defineInRange("guardStaminaPerDamage", 0.05, 0.0, 100.0);
+            kiCostReleaseScaling = b.comment("Technique ki cost multiplier at 100% release (linear from 1 at 0%)")
+                    .defineInRange("kiCostReleaseScaling", 1.5, 0.0, 100.0);
+            kiBlastBaseDamage = b.comment("Flat DBZ damage added to every ki technique before multipliers")
+                    .defineInRange("kiBlastBaseDamage", 40.0, 0.0, 1e9);
+            kiBlastsBreakBlocks = b.comment("Whether explosive techniques break blocks")
+                    .define("kiBlastsBreakBlocks", false);
+            b.pop();
+
+            b.comment("Training point gains").push("tp_gains");
+            tpPerDamageDealt = b.comment("TP per point of DBZ damage dealt")
+                    .defineInRange("tpPerDamageDealt", 0.05, 0.0, 1e6);
+            tpPerKillHealth = b.comment("TP per point of max health of a killed entity")
+                    .defineInRange("tpPerKillHealth", 1.0, 0.0, 1e6);
+            tpChargeTrainingInterval = b.comment("Charging ki grants TP every this many ticks (spiritual training)")
+                    .defineInRange("tpChargeTrainingInterval", 100, 1, 72000);
+            tpPerChargeInterval = b.defineInRange("tpPerChargeInterval", 2, 0, 1_000_000);
             b.pop();
 
             b.push("character");
@@ -142,8 +235,8 @@ public final class DBZConfig {
 
         Client(ForgeConfigSpec.Builder b) {
             b.push("hud");
-            showDebugOverlay = b.comment("Show the raw stat debug overlay in the top-left corner")
-                    .define("showDebugOverlay", true);
+            showDebugOverlay = b.comment("Show the raw stat debug overlay (developer aid, drawn under the HUD position)")
+                    .define("showDebugOverlay", false);
             b.pop();
         }
     }

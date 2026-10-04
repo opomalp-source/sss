@@ -37,8 +37,9 @@ legacyForge {
         clientTest {
             client()
             gameDirectory = project.file('run-clienttest')
-            programArguments.addAll '--username', 'Dev', '--quickPlayMultiplayer', 'localhost:25565'
-            systemProperty 'dbzenith.debugSync', 'true'
+            programArguments.addAll '--username', 'Dev', '--quickPlayMultiplayer', '127.0.0.1:25565'
+            systemProperty 'dbzenith.debugSync', 'false'
+            systemProperty 'dbzenith.devAutomation', 'true'
             systemProperty 'dbzenith.devScreenshots', project.findProperty('devScreenshots') ?: '400'
             systemProperty 'dbzenith.devQuitAfter', project.findProperty('devQuitAfter') ?: '500'
         }

@@ -10,10 +10,12 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Server→client sync | B | done | Verified end-to-end (RCON + client screenshot) |
 | 7 base attributes (STR/DEX/CON/KIP/WIL/MND/SPI) | C | done | Values, soft/hard caps, per-point config |
 | Derived: body, ki, stamina max | B | done | `StatCalculator` |
-| Derived: defense, evasion, ki control, spirit modifier, melee/ki damage, atk/move speed, ki transfer | B | stubbed | Computed + displayed; not yet applied to gameplay |
-| Release % | B | stubbed | Stored, clamped, shown; no gameplay effect yet |
+| Derived: defense, evasion, ki control, melee/ki damage | B | done | Applied in DamageCalculator; GameTests |
+| Derived: spirit modifier, ki transfer, attack/move speed | B | stubbed | Computed + shown; flight speed uses move bonus; rest Phase 2+ |
+| Release % | B | done | Scales ki damage + ki cost; charging raises, key lowers; GameTests |
 | Physical / mental age | V | stubbed | Stored only |
-| TP pool | C | stubbed | Stored, admin grant; no earning/spending yet |
+| TP pool: earning | C | done | Damage dealt, kills, charging; MIND bonus |
+| TP pool: spending | C | done | Server-validated upgrade packet + stat screen (screen not yet seen in-client) |
 | TP cost formula (path weights, soft cap) | C | done | GameTest `tpCostFollowsPath` |
 | Class/path choice | B | stubbed | Affects TP cost only; no UI |
 | Battle power / level | C | done | Shown in HUD + `/dbz stats` |
@@ -21,14 +23,18 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 ## 3.2 Ki & combat
 | Feature | Src | Status | Notes |
 |---|---|---|---|
-| Ki pool regen | B | todo | |
-| Ki control spend efficiency | B | todo | value computed |
-| Charging / power up | B | todo | |
-| Ki blast framework | B | todo | |
-| Techniques: finger beam, wave beam, volley, disk, grab-throw, ball-drop, explosive wave, teleport/afterimage, heal, guard, sense | B | todo | |
-| Melee combo, knockback, block, heavy hit | B | todo | |
-| Flight, dash, burst | B | todo | |
-| Central DamageCalculator | B | todo | |
+| Ki pool regen | B | done | KiTicker; GameTest |
+| Ki control spend efficiency | B | done | DamageCalculator.kiCost |
+| Charging / power up | B | in-progress | Logic GameTested; aura particles not yet seen in-client |
+| Ki blast framework | B | in-progress | Entity + damage GameTested (hits mob); renderer not yet seen in-client |
+| Techniques: ki blast, wave beam, volley, disk, homing orb | B | in-progress | 5 techniques; beam is a big projectile for now |
+| Techniques: finger beam, grab-throw, ball-drop, explosive wave, teleport/afterimage, heal, sense | B | todo | |
+| Melee combo, knockback, stamina, guard | B | done | GameTests (combo, stamina, guard reduction) |
+| Heavy (charged) hit, aerial combat feel | B | todo | |
+| Flight | B | done | Toggle, ki drain, auto-stop at 0 ki; GameTest |
+| Dash / burst movement | B | todo | |
+| Central DamageCalculator | B | done | combat.DamageCalculator; GameTests |
+| Body pool as real health (DBC-style) | C | done | BodyHealth mirror; GameTests (hit, mirror, lethal) |
 
 ## 3.3 Transformations
 | Feature | Src | Status | Notes |
@@ -90,10 +96,10 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Feature | Src | Status | Notes |
 |---|---|---|---|
 | Debug stat overlay | — | done | Config `hud.showDebugOverlay` |
-| DBZ HUD (bars, form, charge, aura) | B | todo | |
-| Stat screen | B | todo | |
+| DBZ HUD (bars, release, status, combo, technique) | B | in-progress | Built; awaiting in-client check. Form display Phase 2 |
+| Stat screen | B | in-progress | Built (K); awaiting in-client check |
 | Skill/deck screen | V | todo | |
 | Dragon Ball radar screen | B | todo | |
-| Keybinds | B | todo | |
+| Keybinds | B | in-progress | G charge, Z lower release, V fly, LAlt guard, R fire, Y next, K stats |
 | Config for every tunable | B | in-progress | All Phase 0 numbers in config |
 | Admin/debug command `/dbz` | — | done | GameTest `commandSetsStats` |

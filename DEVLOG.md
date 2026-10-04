@@ -49,3 +49,25 @@
   - `Switch back to normal mods.bat` reverses it.
   - Currently ACTIVE (OptiFine jars parked). To deploy a new build: copy the jar into `.minecraft-dbz\mods\` (remove the old one) and re-run the switch script.
 - An installer-created official-launcher profile was dropped when a launcher rewrote `launcher_profiles.json`; not needed for TLauncher.
+
+## 2026-10-04 — Session 1 (cont.): Phase 1 combat core (v0.2.0)
+
+### Built
+- **Body model (decision):** DBC-style body pool is the real health. `combat.BodyHealth` mirrors body→vanilla health each tick and adopts external health changes (food regen, potions, totems, /kill, other mods) back into body. Player damage is intercepted in `LivingHurtEvent` (LOW priority, pre-armor): body is reduced, health re-mirrored and the vanilla amount set to 0 — or to a lethal amount when body hits 0, so vanilla death/death messages/totems still work. `BYPASSES_INVULNERABILITY` sources (/kill, void) are left alone.
+- **Damage math** in `combat.DamageCalculator` (single place). Release % scales only the DBZ portion of melee so vanilla weapons never feel weaker; ki damage and ki cost scale with release. Vanilla armor still reduces mob/environment damage. Mob victims take DBZ damage × `dbzDamageVsMobsScale` (= 1/`vanillaDamageToBody`, so weapons map 1:1).
+- **Ki loop** (`ki.KiTicker`): regen (ki/stamina/body with delay), charging (ki up, stamina down, release +1 every 2 ticks, aura dust + end-rod particles, TP every 5 s), flight drain (`ki.FlightHandler`, vanilla abilities, only revokes flight we granted, flying flag persisted so relog can't leave free flight).
+- **Techniques** (`skill`): `KiBlastEntity` projectile (synced size/color/style; pierce, homing, explosion), 5 originals: Ki Blast, Wave Beam, Rapid Volley, Cutter Disk, Homing Orb. Server-validated in `TechniqueHandler` (cooldown, ki, liveness). Custom damage type `dbzenith:ki_blast` (+ `is_projectile` tag, death messages).
+- **Melee:** combo counter/bonus, STR knockback, stamina cost, exhausted penalty, guard (stamina per prevented damage, guard breaks at 0 stamina).
+- **TP economy:** damage dealt, kills (victim max health), charging; spending via `UpgradeAttributePacket` → `stats.AttributeTraining` (≤100 steps/request).
+- **Client:** keybinds (G charge, Z lower release, V fly, LAlt guard, R fire, Y next technique, K stats), `DbzHud` (bars, power level, release, status chips, combo, technique + cooldown), `StatScreen`, `KiBlastRenderer` (emissive glow billboard / spinning disk), `ki_glow.png` placeholder. Debug overlay now off by default.
+- Setters now mark data dirty only on real changes (regen would otherwise sync every 2 ticks forever).
+- Network protocol bumped to 3. Dev-only `/dbz devshot <player> <name>` + `DevScreenshotPacket` (client ignores it unless `-Ddbzenith.devAutomation=true`, set only in the `clientTest` run).
+
+### Problems hit
+- Fresh `ServerPlayer`s ignore damage for 60 ticks (spawn invulnerability) — two tests now wait it out.
+- The configuration cache copied with the project folder pointed at the old location, so `build` reused a stale graph and didn't rebuild the jar. Deleted `.gradle/configuration-cache`. **If a jar looks stale, delete that folder.**
+- `server-ip=127.0.0.1` binds IPv4 only; the test client resolved `localhost` to `::1` and got "connection refused". `clientTest` now joins `127.0.0.1:25565`.
+- The scripted client check was **postponed**: the human was playing in TLauncher at the time, and a dev client window would have popped over their game. Logic is GameTested (17/17); HUD/renderer/stat screen/aura still need the in-client look before tagging `phase-1-combat`.
+
+### Deployment
+- `dbzenith-0.2.0.jar` staged in `.minecraft-dbz\mods` (0.1.0 removed). Switch script now deletes older `dbzenith-*.jar` from `.minecraft\mods` before copying (two versions at once would refuse to load). `.minecraft\mods` still holds 0.1.0 until the human re-runs the switch script with the game closed.

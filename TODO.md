@@ -15,21 +15,25 @@ Resume from the first unchecked item. Each phase ends with a git tag.
 - [x] Scripted end-to-end check: dev server + RCON + auto-joining client + screenshot
 
 ## Phase 1 — Ki, stats & combat
-- [ ] **Body/health model decision** — DBC-style "body" pool absorbing damage vs scaling vanilla max health (record in DEVLOG); wire `LivingHurtEvent`/`LivingDamageEvent`
-- [ ] Ki & stamina regeneration ticks (config rates, scaled by WIL/CON), stamina drain on sprint/melee
-- [ ] TP economy: earn TP from combat (damage dealt/taken) and training; MIND bonus via `StatCalculator.scaleTpGain`
-- [ ] Spend TP: C2S packet `UpgradeAttributePacket` (server validates cost via `StatCalculator.tpCost`)
-- [ ] Stat screen (keybind) showing attributes, derived stats, TP, upgrade buttons
-- [ ] Release %: keybinds to raise/lower, scales output + drain; charging (hold key) builds ki, drains stamina, aura particle placeholder
-- [ ] `combat.DamageCalculator`: attack × technique multiplier × release% vs defense/evasion; apply to melee
-- [ ] Melee: STR-scaled damage, combo counter, knockback, guard/block keybind (stamina cost, damage reduction), charged heavy hit
-- [ ] Ki blast entity framework (damage, speed, size, cost, cooldown, homing; all config/data driven)
-- [ ] Techniques: basic ki blast, wave beam, rapid volley, disk/cutter (3–4 total)
-- [ ] Flight toggle (ki/stamina drain), dash/burst movement
-- [ ] DBZ HUD: body/ki/stamina bars, release %, charge indicator (replace debug overlay; keep it behind config)
+- [x] **Body/health model**: DBC-style body pool is the real health; vanilla health mirrors the ratio (`combat.BodyHealth`), damage routed in `combat.CombatEvents` (LivingHurtEvent, LOW priority)
+- [x] Ki / stamina / body regeneration (`ki.KiTicker`), body regen after a no-damage delay
+- [x] TP economy: TP from damage dealt, kills (by victim max health) and charging (spiritual training); MIND bonus
+- [x] Spend TP: `UpgradeAttributePacket`, server-validated in `stats.AttributeTraining` (capped per request)
+- [x] Training / stat screen (K): attributes, TP cost, + buttons (shift = +10), derived stats
+- [x] Release %: charging (G, hold) raises it + fills ki, drains stamina, aura particles; Z lowers it; scales ki damage + cost
+- [x] `combat.DamageCalculator`: melee, ki, defense floor, guard, evasion, ki cost
+- [x] Melee: STR-scaled damage, combo counter + bonus, extra knockback, stamina cost, exhausted penalty, guard (Left Alt)
+- [ ] Melee: charged heavy hit
+- [x] Ki blast entity framework (`skill.KiBlastEntity`: size, color, speed, pierce, homing, explosion, life)
+- [x] Techniques: Ki Blast, Wave Beam, Rapid Volley, Cutter Disk, Homing Orb (R fire, Y cycle)
+- [ ] True beam rendering (stretched beam instead of a large projectile)
+- [x] Flight toggle (V), ki drain, DEX-scaled speed, ends when ki runs out
+- [ ] Dash / burst movement
+- [x] DBZ HUD: body/ki/stamina bars, power level, release %, charging/flying/guard chips, combo counter, technique panel + cooldown (debug overlay now off by default)
 - [ ] Apply DEX attack-speed/move-speed bonuses via vanilla attribute modifiers
 - [ ] Sync a public subset (release %, charging, flying, form) to tracking players for visuals
-- [ ] GameTests for damage formula, TP spend validation, regen
+- [x] GameTests: 10 combat tests (17 total) green
+- [ ] **In-client visual check of HUD, blasts, aura, stat screen** (scripted run was postponed: the human was playing)
 - [ ] Tag `phase-1-combat`
 
 ## Phase 2 — Transformations

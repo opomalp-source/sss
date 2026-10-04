@@ -2,6 +2,7 @@ package com.dbzenith.data;
 
 import com.dbzenith.DBZenith;
 import com.dbzenith.config.DBZConfig;
+import com.dbzenith.ki.KiTicker;
 import com.dbzenith.network.ModNetwork;
 import com.dbzenith.network.SyncPlayerDataPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -40,7 +41,10 @@ public final class PlayerDataEvents {
         ModCapabilities.get(original).ifPresent(oldData ->
                 ModCapabilities.get(event.getEntity()).ifPresent(newData -> {
                     newData.copyFrom(oldData);
-                    if (event.isWasDeath()) newData.refill();
+                    if (event.isWasDeath()) {
+                        newData.refill();
+                        newData.setFlying(false); // vanilla resets abilities on death
+                    }
                 }));
         original.invalidateCaps();
     }
@@ -67,7 +71,7 @@ public final class PlayerDataEvents {
     public static void tick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
         ModCapabilities.get(player).ifPresent(data -> {
-            data.recomputeIfStale();
+            KiTicker.tick(player, data);
             if (data.tickSyncTimer(DBZConfig.SERVER.syncIntervalTicks.get())) {
                 ModNetwork.sendTo(player, new SyncPlayerDataPacket(data.writeSyncTag()));
             }
