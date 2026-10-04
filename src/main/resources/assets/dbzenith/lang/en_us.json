@@ -107,6 +107,8 @@
   "screen.dbzenith.life_partner": "Partner: %s",
   "screen.dbzenith.life_partner_near": "Partner: %s (training together, +TP)",
   "screen.dbzenith.scar": "Scar: %s",
+  "screen.dbzenith.race_look_on": "Race look: on",
+  "screen.dbzenith.race_look_off": "Race look: off (own skin)",
   "screen.dbzenith.tattoo": "Tattoo: %s",
   "cosmetic.dbzenith.scar.none": "none",
   "cosmetic.dbzenith.scar.eye": "over the eye",

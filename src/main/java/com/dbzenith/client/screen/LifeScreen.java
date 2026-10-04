@@ -27,6 +27,7 @@ public class LifeScreen extends Screen {
     private int top;
     private int scar;
     private int tattoo;
+    private boolean raceLook;
 
     public LifeScreen(Screen parent) {
         super(Component.translatable("screen.dbzenith.life"));
@@ -40,6 +41,14 @@ public class LifeScreen extends Screen {
         PlayerData d = ClientPlayerData.get();
         scar = Math.min(d.getScar(), Cosmetics.SCARS.size() - 1);
         tattoo = Math.min(d.getTattoo(), Cosmetics.TATTOOS.size() - 1);
+        raceLook = d.isRaceLook();
+        if (com.dbzenith.client.render.RaceSkinLayer.texture(d.getRace()) != null) {
+            addRenderableWidget(Button.builder(raceLookLabel(), b -> {
+                raceLook = !raceLook;
+                b.setMessage(raceLookLabel());
+                send();
+            }).bounds(left + 8, top + H - 70, 130, 18).build());
+        }
         addRenderableWidget(Button.builder(scarLabel(), b -> {
             scar = (scar + 1) % Cosmetics.SCARS.size();
             b.setMessage(scarLabel());
@@ -58,17 +67,22 @@ public class LifeScreen extends Screen {
         return Component.translatable("screen.dbzenith.scar", Component.translatable("cosmetic.dbzenith.scar." + Cosmetics.SCARS.get(scar)));
     }
 
+    private Component raceLookLabel() {
+        return Component.translatable(raceLook ? "screen.dbzenith.race_look_on" : "screen.dbzenith.race_look_off");
+    }
+
     private Component tattooLabel() {
         return Component.translatable("screen.dbzenith.tattoo", Component.translatable("cosmetic.dbzenith.tattoo." + Cosmetics.TATTOOS.get(tattoo)));
     }
 
     private void send() {
-        ModNetwork.sendToServer(new Cosmetics.Packet(scar, tattoo));
+        ModNetwork.sendToServer(new Cosmetics.Packet(scar, tattoo, raceLook));
         if (minecraft == null || minecraft.player == null) return;
         PublicStatePacket s = ClientPublicStates.get(minecraft.player.getId());
         if (s != null) { // preview at once; the server's public state confirms it
             ClientPublicStates.put(new PublicStatePacket(s.entityId(), s.flags(), s.release(), s.auraColor(), s.form(), s.overdrive(),
-                    s.race(), s.bodyType(), s.hairStyle(), s.hairColor(), s.eyeColor(), s.battlePower(), scar | tattoo << 4));
+                    s.race(), s.bodyType(), s.hairStyle(), s.hairColor(), s.eyeColor(), s.battlePower(),
+                    scar | tattoo << 4 | (raceLook ? PublicStatePacket.RACE_LOOK : 0)));
         }
     }
 

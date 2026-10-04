@@ -1,4 +1,3 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {"layer0": "dbzenith:block/dragon_ball_4"}
+  "parent": "dbzenith:block/dragon_ball_4"
 }

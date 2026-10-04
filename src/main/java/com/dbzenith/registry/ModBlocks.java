@@ -24,7 +24,7 @@ public final class ModBlocks {
                     .strength(5f, 6f).requiresCorrectToolForDrops().sound(SoundType.METAL).lightLevel(s -> 7)));
     public static final RegistryObject<Block> PUNCHING_BAG = register("punching_bag",
             () -> new TrainingBlocks.PunchingBag(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED)
-                    .strength(0.8f).sound(SoundType.WOOL)));
+                    .strength(0.8f).sound(SoundType.WOOL).noOcclusion()));
     public static final RegistryObject<Block> TIME_CHAMBER_DOOR = register("time_chamber_door",
             () -> new TrainingBlocks.TimeChamberDoor(BlockBehaviour.Properties.of().mapColor(MapColor.SNOW)
                     .strength(-1f, 3_600_000f).lightLevel(s -> 12).sound(SoundType.STONE)));

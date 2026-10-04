@@ -393,6 +393,7 @@ public class PlayerData {
     private String partnerName = "";
     private int scar;
     private int tattoo;
+    private boolean raceLook = true;
 
     public double getThirst() {
         return thirst;
@@ -448,6 +449,16 @@ public class PlayerData {
 
     public int getTattoo() {
         return tattoo;
+    }
+
+    /** Show the full race look (green Namekian, white-and-violet Frost Demon, pink Majin) over the player's own skin. */
+    public boolean isRaceLook() {
+        return raceLook;
+    }
+
+    public void setRaceLook(boolean on) {
+        raceLook = on;
+        markDirty();
     }
 
     public void setCosmetics(int scar, int tattoo) {
@@ -1079,6 +1090,7 @@ public class PlayerData {
         tag.putString("partnerName", partnerName);
         tag.putInt("scar", scar);
         tag.putInt("tattoo", tattoo);
+        tag.putBoolean("raceLook", raceLook);
         tag.putLong("tailCutAt", tailCutAt);
         tag.putInt("majinStacks", majinStacks);
         tag.putLong("majinUntil", majinUntil);
@@ -1157,6 +1169,7 @@ public class PlayerData {
         partnerName = tag.getString("partnerName");
         scar = tag.getInt("scar");
         tattoo = tag.getInt("tattoo");
+        raceLook = !tag.contains("raceLook") || tag.getBoolean("raceLook");
         tailCutAt = tag.contains("tailCutAt") ? tag.getLong("tailCutAt") : TAIL_NOT_CUT;
         majinStacks = tag.getInt("majinStacks");
         majinUntil = tag.contains("majinUntil") ? tag.getLong("majinUntil") : -1;

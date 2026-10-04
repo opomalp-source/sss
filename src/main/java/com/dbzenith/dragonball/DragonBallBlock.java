@@ -16,7 +16,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 /** One of the seven Dragon Balls as a small glowing block. Tracked by {@link DragonBalls}. */
 public class DragonBallBlock extends Block {
-    private static final VoxelShape SHAPE = Block.box(5, 0, 5, 11, 6, 11);
+    private static final VoxelShape SHAPE = Block.box(4, 0, 4, 12, 8, 12);
 
     private final int star;
 

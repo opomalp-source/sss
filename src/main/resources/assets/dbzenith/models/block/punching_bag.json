@@ -1,4 +1,41 @@
 {
-  "parent": "minecraft:block/cube_all",
-  "textures": {"all": "dbzenith:block/punching_bag"}
+  "parent": "minecraft:block/block",
+  "textures": {"bag": "dbzenith:block/punching_bag", "particle": "dbzenith:block/punching_bag"},
+  "elements": [
+    {
+      "__comment": "rope",
+      "from": [7, 14, 7], "to": [9, 16, 9],
+      "faces": {
+        "north": {"uv": [8, 8, 10, 10], "texture": "#bag"}, "south": {"uv": [8, 8, 10, 10], "texture": "#bag"},
+        "east": {"uv": [8, 8, 10, 10], "texture": "#bag"}, "west": {"uv": [8, 8, 10, 10], "texture": "#bag"},
+        "up": {"uv": [8, 8, 10, 10], "texture": "#bag", "cullface": "up"}
+      }
+    },
+    {
+      "__comment": "top cap",
+      "from": [3.5, 13, 3.5], "to": [12.5, 14, 12.5],
+      "faces": {
+        "north": {"uv": [8, 10, 16, 11], "texture": "#bag"}, "south": {"uv": [8, 10, 16, 11], "texture": "#bag"},
+        "east": {"uv": [8, 10, 16, 11], "texture": "#bag"}, "west": {"uv": [8, 10, 16, 11], "texture": "#bag"},
+        "up": {"uv": [8, 0, 16, 8], "texture": "#bag"}, "down": {"uv": [8, 0, 16, 8], "texture": "#bag"}
+      }
+    },
+    {
+      "__comment": "bag",
+      "from": [4, 1, 4], "to": [12, 13, 12],
+      "faces": {
+        "north": {"uv": [0, 0, 8, 12], "texture": "#bag"}, "south": {"uv": [0, 0, 8, 12], "texture": "#bag"},
+        "east": {"uv": [0, 0, 8, 12], "texture": "#bag"}, "west": {"uv": [0, 0, 8, 12], "texture": "#bag"}
+      }
+    },
+    {
+      "__comment": "bottom cap",
+      "from": [5, 0, 5], "to": [11, 1, 11],
+      "faces": {
+        "north": {"uv": [8, 11, 14, 12], "texture": "#bag"}, "south": {"uv": [8, 11, 14, 12], "texture": "#bag"},
+        "east": {"uv": [8, 11, 14, 12], "texture": "#bag"}, "west": {"uv": [8, 11, 14, 12], "texture": "#bag"},
+        "up": {"uv": [9, 1, 15, 7], "texture": "#bag"}, "down": {"uv": [9, 1, 15, 7], "texture": "#bag", "cullface": "down"}
+      }
+    }
+  ]
 }

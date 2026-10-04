@@ -16,6 +16,38 @@ import net.minecraftforge.fml.common.Mod;
 public final class FormScaleRenderer {
     private FormScaleRenderer() {}
 
+    private static GreatApeModel apeModel;
+
+    /** A Great Ape is drawn with its own model instead of a scaled-up player. */
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void greatApe(RenderPlayerEvent.Pre event) {
+        net.minecraft.world.entity.player.Player player = event.getEntity();
+        com.dbzenith.network.PublicStatePacket state = com.dbzenith.client.ClientPublicStates.get(player.getId());
+        if (state == null || !com.dbzenith.transform.Forms.GREAT_APE.id().equals(state.form()) || player.isInvisible()) return;
+        if (apeModel == null) {
+            apeModel = new GreatApeModel(net.minecraft.client.Minecraft.getInstance().getEntityModels().bakeLayer(GreatApeModel.LAYER));
+        }
+        event.setCanceled(true);
+        float pt = event.getPartialTick();
+        com.mojang.blaze3d.vertex.PoseStack pose = event.getPoseStack();
+        float bodyYaw = net.minecraft.util.Mth.rotLerp(pt, player.yBodyRotO, player.yBodyRot);
+        float headYaw = net.minecraft.util.Mth.wrapDegrees(net.minecraft.util.Mth.rotLerp(pt, player.yHeadRotO, player.yHeadRot) - bodyYaw);
+        float pitch = net.minecraft.util.Mth.lerp(pt, player.xRotO, player.getXRot());
+        float s = GreatApe.scaleOf(player);
+        pose.pushPose();
+        pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180f - bodyYaw));
+        pose.scale(s, s, s);
+        pose.scale(-1f, -1f, 1f);
+        pose.translate(0f, -1.501f, 0f);
+        apeModel.attackTime = player.getAttackAnim(pt);
+        apeModel.setupAnim(player, player.walkAnimation.position(pt), Math.min(1f, player.walkAnimation.speed(pt)),
+                player.tickCount + pt, headYaw, pitch);
+        int overlay = net.minecraft.client.renderer.entity.LivingEntityRenderer.getOverlayCoords(player, 0f);
+        apeModel.renderToBuffer(pose, event.getMultiBufferSource().getBuffer(apeModel.renderType(GreatApeModel.TEXTURE)),
+                event.getPackedLight(), overlay, 1f, 1f, 1f, 1f);
+        pose.popPose();
+    }
+
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void pre(RenderPlayerEvent.Pre event) {
         float s = GreatApe.scaleOf(event.getEntity());

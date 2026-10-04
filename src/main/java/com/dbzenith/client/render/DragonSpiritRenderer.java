@@ -14,20 +14,25 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 /**
- * Placeholder Eternal Dragon: a body of glowing green segments coiling up a helix into the sky, with a large
- * head and red eyes at the top. (A real model is listed in ASSETS_TODO.md.)
+ * The Eternal Dragon: a scaled serpent ({@link DragonModel}) coiling up a helix into the sky, thick at the neck and
+ * thin at the tail, dorsal spikes along its back, its head turned towards whoever is looking. It glows faintly.
  */
 public class DragonSpiritRenderer extends EntityRenderer<DragonSpiritEntity> {
     private static final ResourceLocation GLOW = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/ki_glow.png");
-    private static final RenderType TYPE = RenderType.entityTranslucentEmissive(GLOW);
-    private static final int SEGMENTS = 70;
+    private static final RenderType GLOW_TYPE = RenderType.entityTranslucentEmissive(GLOW);
+    private static final int SEGMENTS = 56;
+    private static final int GLOW_LIGHT = LightTexture.pack(15, 15);
+
+    private final DragonModel model;
 
     public DragonSpiritRenderer(EntityRendererProvider.Context context) {
         super(context);
+        model = new DragonModel(context.bakeLayer(DragonModel.LAYER));
     }
 
     @Override
@@ -35,30 +40,51 @@ public class DragonSpiritRenderer extends EntityRenderer<DragonSpiritEntity> {
         return true;
     }
 
+    /** Point {@code f} (0 = tail on the ground, 1 = neck in the sky) of the coil at time {@code t}. */
+    private static Vec3 coil(float f, float t) {
+        float angle = f * 5.5f * Mth.PI + t;
+        float radius = 7f * (1 - f * 0.55f);
+        return new Vec3(radius * Mth.cos(angle), f * 30f, radius * Mth.sin(angle));
+    }
+
     @Override
     public void render(DragonSpiritEntity dragon, float yaw, float partialTicks, PoseStack pose, MultiBufferSource buffers, int light) {
-        VertexConsumer vc = buffers.getBuffer(TYPE);
-        float t = (dragon.tickCount + partialTicks) * 0.02f;
-        float rise = Mth.clamp((dragon.tickCount + partialTicks) / 60f, 0f, 1f); // emerges over 3 s
-        float hx = 0, hy = 0, hz = 0;
-        for (int i = 0; i < SEGMENTS * rise; i++) {
+        float age = dragon.tickCount + partialTicks;
+        float t = age * 0.015f;
+        float rise = Mth.clamp(age / 60f, 0f, 1f);                                                  // emerges over 3 s
+        VertexConsumer body = buffers.getBuffer(RenderType.entityCutoutNoCull(DragonModel.TEXTURE));
+        int shown = (int) (SEGMENTS * rise);
+        for (int i = 0; i < shown; i++) {
             float f = i / (float) SEGMENTS;
-            float angle = f * 6.5f * Mth.PI + t;
-            float radius = 6f * (1 - f * 0.6f);
-            float x = radius * Mth.cos(angle);
-            float z = radius * Mth.sin(angle);
-            float y = f * 30f;
-            float size = (2.6f - f * 0.9f) * 1.6f;
-            ball(pose, vc, x, y, z, size * 1.6f, 0x30, 0xC0, 0x50, 170);
-            ball(pose, vc, x, y, z, size * 0.7f, 0xB0, 0xFF, 0xB0, 230);
-            hx = x;
-            hy = y;
-            hz = z;
+            Vec3 p = coil(f, t), next = coil((i + 1) / (float) SEGMENTS, t);
+            Vec3 d = next.subtract(p);
+            float thick = 0.9f + f * 2.1f;
+            pose.pushPose();
+            pose.translate(p.x, p.y, p.z);
+            pose.mulPose(Axis.YP.rotation((float) Math.atan2(d.x, d.z) + Mth.PI));
+            pose.mulPose(Axis.XP.rotation((float) Math.atan2(d.y, Math.sqrt(d.x * d.x + d.z * d.z))));
+            // the segment cube is 8x8x12 px = 0.5 x 0.5 x 0.75 blocks; overlap neighbours a little so the body is seamless
+            pose.scale(thick * 2f, -thick * 2f, (float) (d.length() * 1.45 / 0.75));                // -y: spikes point up
+            model.segment.render(pose, body, GLOW_LIGHT, OverlayTexture.NO_OVERLAY);
+            if (i % 3 == 0) model.spike.render(pose, body, GLOW_LIGHT, OverlayTexture.NO_OVERLAY);
+            pose.popPose();
         }
         if (rise >= 1f) {
-            ball(pose, vc, hx, hy + 1.5f, hz, 6f, 0x40, 0xD0, 0x60, 200); // head
-            ball(pose, vc, hx - 0.9f, hy + 2f, hz, 0.9f, 0xFF, 0x20, 0x20, 255); // eyes
-            ball(pose, vc, hx + 0.9f, hy + 2f, hz, 0.9f, 0xFF, 0x20, 0x20, 255);
+            Vec3 neck = coil(1f, t);
+            Vec3 cam = entityRenderDispatcher.camera.getPosition().subtract(dragon.getPosition(partialTicks)).subtract(neck);
+            float headYaw = (float) Math.atan2(cam.x, cam.z);
+            float headPitch = (float) Math.atan2(cam.y, Math.sqrt(cam.x * cam.x + cam.z * cam.z));
+            pose.pushPose();
+            pose.translate(neck.x, neck.y + 1.6, neck.z);
+            pose.mulPose(Axis.YP.rotation(headYaw + Mth.PI));
+            pose.mulPose(Axis.XP.rotation(Mth.clamp(headPitch, -0.8f, 0.8f)));
+            pose.scale(6f, -6f, 6f);                                                           // 8 px skull = 3 blocks; model space is y-down
+            model.head.render(pose, body, GLOW_LIGHT, OverlayTexture.NO_OVERLAY);
+            model.eyes.render(pose, body, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
+            pose.popPose();
+            VertexConsumer glow = buffers.getBuffer(GLOW_TYPE);                                // faint magic around the head
+            float pulse = 0.85f + 0.15f * Mth.sin(age * 0.1f);
+            ball(pose, glow, (float) neck.x, (float) neck.y + 1.6f, (float) neck.z, 9f * pulse, 0x40, 0xFF, 0x70, 60);
         }
         super.render(dragon, yaw, partialTicks, pose, buffers, light);
     }
@@ -86,6 +112,6 @@ public class DragonSpiritRenderer extends EntityRenderer<DragonSpiritEntity> {
 
     @Override
     public ResourceLocation getTextureLocation(DragonSpiritEntity dragon) {
-        return GLOW;
+        return DragonModel.TEXTURE;
     }
 }

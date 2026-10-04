@@ -22,6 +22,8 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
     public static final int GUARDING = 4;
     public static final int HEAVY = 8;
     public static final int TAIL = 16;
+    /** Bit in {@code looks}: show the full race skin. */
+    public static final int RACE_LOOK = 256;
 
     public static PublicStatePacket of(int entityId, PlayerData d) {
         int flags = (d.isCharging() ? CHARGING : 0) | (d.isFlying() ? FLYING : 0)
@@ -30,7 +32,7 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
         return new PublicStatePacket(entityId, flags, d.getReleasePercent(), Aura.color(d), d.getFormId(), d.getOverdriveLevel(),
                 d.getRace().ordinal(), d.getBodyType().ordinal(), d.getHairStyle(), d.getHairColor(), d.getEyeColor(),
                 d.hasFlag("god_ki") ? -1 : com.dbzenith.stats.StatCalculator.battlePower(d), // -1: god ki cannot be read
-                d.getScar() | d.getTattoo() << 4);
+                d.getScar() | d.getTattoo() << 4 | (d.isRaceLook() ? RACE_LOOK : 0));
     }
 
     public int stateHash() {
@@ -51,6 +53,10 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
         return (looks >> 4) & 0xF;
     }
 
+    public boolean raceLook() {
+        return (looks & RACE_LOOK) != 0;
+    }
+
     public Race raceEnum() {
         Race[] all = Race.values();
         return race >= 0 && race < all.length ? all[race] : Race.HUMAN;
@@ -69,13 +75,13 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
         buf.writeInt(msg.hairColor);
         buf.writeInt(msg.eyeColor);
         buf.writeVarLong(msg.battlePower);
-        buf.writeByte(msg.looks);
+        buf.writeShort(msg.looks);
     }
 
     public static PublicStatePacket decode(FriendlyByteBuf buf) {
         return new PublicStatePacket(buf.readVarInt(), buf.readByte(), buf.readByte(), buf.readInt(), buf.readUtf(64), buf.readByte(),
                 buf.readByte(), buf.readByte(), buf.readByte(), buf.readInt(), buf.readInt(), buf.readVarLong(),
-                buf.readUnsignedByte());
+                buf.readUnsignedShort());
     }
 
     public static void handle(PublicStatePacket msg, Supplier<NetworkEvent.Context> ctx) {

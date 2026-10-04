@@ -42,6 +42,8 @@ public final class ClientSetup {
     public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(FormHairModel.LAYER, FormHairModel::createLayer);
         event.registerLayerDefinition(RaceFeatureModel.LAYER, RaceFeatureModel::createLayer);
+        event.registerLayerDefinition(com.dbzenith.client.render.GreatApeModel.LAYER, com.dbzenith.client.render.GreatApeModel::createLayer);
+        event.registerLayerDefinition(com.dbzenith.client.render.DragonModel.LAYER, com.dbzenith.client.render.DragonModel::createLayer);
     }
 
     @SubscribeEvent
@@ -49,6 +51,7 @@ public final class ClientSetup {
         for (String skin : event.getSkins()) {
             PlayerRenderer renderer = event.getSkin(skin);
             if (renderer != null) {
+                renderer.addLayer(new com.dbzenith.client.render.RaceSkinLayer(renderer));
                 renderer.addLayer(new com.dbzenith.client.render.CosmeticsLayer(renderer));
                 renderer.addLayer(new FormHairLayer(renderer, event.getEntityModels()));
                 renderer.addLayer(new RaceFeatureLayer(renderer, event.getEntityModels()));

@@ -179,3 +179,17 @@
 - Vanilla `MAX_HEALTH` caps at 1024, so leveled bosses silently stopped scaling. Levels now add damage reduction instead.
 - The GameTest world kept its old server config, which hid the new defaults. That is exactly what players' worlds do, hence the migration.
 - `playerFusionNeedsConsent` was flaky: new players land anywhere within the spawn radius, so the pair could be more than 16 blocks apart.
+
+## 2026-10-04 — Session 1 (cont.): Art pass (v0.8.0)
+
+### Built
+- `tools/ArtGen.java`: a small pixel-art toolkit (hue-shifted ramps, lit spheres, selective outlines, cloth and fur noise, box-UV painting for skins and armor) and all the mod's art: 21 items, Dragon Balls (orb model, star faces + shell), punching bag model, gravity-chamber console, Time Chamber arch, gi and armor layers, 8 NPC skins, 3 race skins, Great Ape and Eternal Dragon textures. `tools/ContactSheet.java` for review sheets. `AssetGen` keeps effect textures and test data only.
+- Models: `GreatApeModel` (drawn instead of a scaled player when in the form), `DragonModel` + new `DragonSpiritRenderer` (scaled serpent coil, head facing the viewer), Dragon Ball and punching-bag block models with matching shapes.
+- NPCs render with the player model (outer layers). Optional race looks for Namekians, Frost Demons and Majins (`RaceSkinLayer`; the player's own outer layer is hidden while on; Life screen toggle). Protocol 15 (public state looks are 16-bit).
+- Every piece checked in the dev client (gallery wall, NPC lineup, gi on the player, race looks, Great Ape, the dragon from near and far).
+
+### Problems
+- The Dragon Ball faces each drew their own lit sphere and stars, so the balls read as spotted boxes; stars now sit only on the four frontmost faces and the shell is a smooth gradient.
+- The race skin showed the player's own sleeves and jacket on top; that outer layer is hidden while a race look is on.
+- The NPC renderer used the zombie model, which ignores outer layers and mirrors the left limbs.
+- Someone was playing in the test window during several checks (transforming, switching items), which spoiled shots; the dev shots gained a `first_` prefix to force first person.

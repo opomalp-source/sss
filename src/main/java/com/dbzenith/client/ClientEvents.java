@@ -73,7 +73,8 @@ public final class ClientEvents {
         if (!DEV_AUTOMATION) return;
         Minecraft mc = Minecraft.getInstance();
         net.minecraft.client.CameraType wanted = name.startsWith("third_") ? net.minecraft.client.CameraType.THIRD_PERSON_BACK
-                : name.startsWith("front_") ? net.minecraft.client.CameraType.THIRD_PERSON_FRONT : null;
+                : name.startsWith("front_") ? net.minecraft.client.CameraType.THIRD_PERSON_FRONT
+                : name.startsWith("first_") ? net.minecraft.client.CameraType.FIRST_PERSON : null;
         if (wanted != null && mc.options.getCameraType() != wanted) {
             mc.options.setCameraType(wanted);
             delayTicks = Math.max(delayTicks, 4);

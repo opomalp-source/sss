@@ -15,21 +15,25 @@ public final class Cosmetics {
 
     private Cosmetics() {}
 
-    /** Client to server: choose a scar and a tattoo (indices into {@link #SCARS} / {@link #TATTOOS}). */
-    public record Packet(int scar, int tattoo) {
+    /** Client to server: choose a scar, a tattoo (indices into {@link #SCARS} / {@link #TATTOOS}) and the race look. */
+    public record Packet(int scar, int tattoo, boolean raceLook) {
         public static void encode(Packet msg, FriendlyByteBuf buf) {
             buf.writeByte(msg.scar);
             buf.writeByte(msg.tattoo);
+            buf.writeBoolean(msg.raceLook);
         }
 
         public static Packet decode(FriendlyByteBuf buf) {
-            return new Packet(buf.readUnsignedByte(), buf.readUnsignedByte());
+            return new Packet(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readBoolean());
         }
 
         public static void handle(Packet msg, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayer player = ctx.get().getSender();
             if (player == null || msg.scar >= SCARS.size() || msg.tattoo >= TATTOOS.size()) return;
-            ModCapabilities.get(player).ifPresent(d -> d.setCosmetics(msg.scar, msg.tattoo));
+            ModCapabilities.get(player).ifPresent(d -> {
+                d.setCosmetics(msg.scar, msg.tattoo);
+                d.setRaceLook(msg.raceLook);
+            });
         }
     }
 }

@@ -64,6 +64,14 @@ public final class TrainingBlocks {
             super(properties);
         }
 
+        private static final net.minecraft.world.phys.shapes.VoxelShape SHAPE = Block.box(3.5, 0, 3.5, 12.5, 16, 12.5);
+
+        @Override
+        public net.minecraft.world.phys.shapes.VoxelShape getShape(BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos,
+                                                                    net.minecraft.world.phys.shapes.CollisionContext ctx) {
+            return SHAPE;
+        }
+
         @Override
         public void attack(BlockState state, Level level, BlockPos pos, Player player) {
             if (level.isClientSide || !(player instanceof ServerPlayer sp)) return;

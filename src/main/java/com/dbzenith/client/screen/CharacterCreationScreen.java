@@ -117,7 +117,7 @@ public class CharacterCreationScreen extends Screen {
         if (minecraft == null || minecraft.player == null) return;
         int flags = Races.of(race).tail() ? PublicStatePacket.TAIL : 0;
         ClientPublicStates.put(new PublicStatePacket(minecraft.player.getId(), flags, 50, Races.of(race).auraColor(),
-                PlayerData.BASE_FORM, 0, race.ordinal(), body.ordinal(), hairStyle, hairColor, eyeColor, 0L, 0));
+                PlayerData.BASE_FORM, 0, race.ordinal(), body.ordinal(), hairStyle, hairColor, eyeColor, 0L, PublicStatePacket.RACE_LOOK));
     }
 
     private void confirm() {
