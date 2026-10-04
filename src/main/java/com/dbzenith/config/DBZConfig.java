@@ -162,6 +162,10 @@ public final class DBZConfig {
         // --- gear ---
         public final ForgeConfigSpec.LongValue scouterLimit;
 
+        // --- enemies ---
+        public final ForgeConfigSpec.DoubleValue enemyPowerPerLevelSquared;
+        public final ForgeConfigSpec.IntValue enemyMaxLevel;
+
         // --- character ---
         public final ForgeConfigSpec.DoubleValue startingAge;
 
@@ -388,6 +392,12 @@ public final class DBZConfig {
             b.push("gear");
             scouterLimit = b.comment("A scouter shatters when it reads a power level above this")
                     .defineInRange("scouterLimit", 1_000_000L, 1L, Long.MAX_VALUE);
+            b.pop();
+
+            b.comment("Enemy fighters and bosses scale to the strongest nearby player").push("enemies");
+            enemyPowerPerLevelSquared = b.comment("Enemy level = 1 + sqrt(nearest player power level / this)")
+                    .defineInRange("powerPerLevelSquared", 1500.0, 1.0, 1e12);
+            enemyMaxLevel = b.defineInRange("maxLevel", 60, 1, 10_000);
             b.pop();
 
             b.push("character");

@@ -1,0 +1,6 @@
+{"type": "minecraft:entity", "pools": [
+  {"rolls": 1, "entries": [{"type": "minecraft:item", "name": "dbzenith:senzu_bean", "functions": [{"function": "minecraft:set_count", "count": {"min": 2, "max": 4}}]}]},
+  {"rolls": 1, "entries": [{"type": "minecraft:item", "name": "dbzenith:heavy_training_weights"}]},
+  {"rolls": 1, "entries": [{"type": "minecraft:item", "name": "dbzenith:technique_scroll", "functions": [{"function": "minecraft:set_nbt", "tag": "{technique:\"explosive_wave\"}"}]}]},
+  {"rolls": 1, "entries": [{"type": "minecraft:item", "name": "minecraft:gold_ingot", "functions": [{"function": "minecraft:set_count", "count": {"min": 4, "max": 10}}]}]}
+]}

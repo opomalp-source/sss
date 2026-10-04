@@ -261,5 +261,18 @@
   "hud.dbzenith.scouter_power": "Power Level: %s",
   "hud.dbzenith.scouter_distance": "%sm",
   "message.dbzenith.scouter_overload": "The scouter can't take that reading. It shatters!",
-  "message.dbzenith.capsule_nested": "A capsule can't hold another capsule."
+  "message.dbzenith.capsule_nested": "A capsule can't hold another capsule.",
+  "entity.dbzenith.sproutling": "Sproutling",
+  "entity.dbzenith.ki_soldier": "Ki Soldier",
+  "entity.dbzenith.android_unit": "Android Unit",
+  "entity.dbzenith.tyrant_lord": "Tyrant Lord",
+  "entity.dbzenith.rampage_brute": "Rampage Brute",
+  "entity.dbzenith.leveled": "%s (Lv %s)",
+  "item.dbzenith.sproutling_spawn_egg": "Sproutling Spawn Egg",
+  "item.dbzenith.ki_soldier_spawn_egg": "Ki Soldier Spawn Egg",
+  "item.dbzenith.android_unit_spawn_egg": "Android Unit Spawn Egg",
+  "item.dbzenith.tyrant_sigil": "Tyrant Sigil",
+  "item.dbzenith.rage_totem": "Rage Totem",
+  "message.dbzenith.boss_arrives": "%s has arrived to fight!",
+  "message.dbzenith.boss_enraged": "%s transforms! Its power surges!"
 }

@@ -202,6 +202,26 @@ public class AssetGen {
         });
         texture("assets/dbzenith/textures/models/armor/scouter_layer_2.png", 64, 32, (x, y) -> 0);
 
+        // --- enemy fighters: 64x64 humanoid skins (head, eyes, body, arms, hands, legs, feet, accent) ---
+        skin("sproutling", 0xFF4CA03A, 0xFFD02020, 0xFF3E8A30, 0xFF4CA03A, 0xFF3E8A30, 0xFF3E8A30, 0xFF2E6A24, 0xFF2A5A20);
+        skin("ki_soldier", 0xFFE8C8A8, 0xFF202020, 0xFFEEEEEE, 0xFF2A2A38, 0xFFE8C8A8, 0xFF2A2A38, 0xFFEEEEEE, 0xFFE0C040);
+        skin("android_unit", 0xFF9098A0, 0xFFFF2020, 0xFF4A4E58, 0xFF8890A0, 0xFF9098A0, 0xFF3A3E48, 0xFF2A2E38, 0xFFC02020);
+        skin("tyrant_lord", 0xFFF4F0F8, 0xFFD01030, 0xFFF4F0F8, 0xFFF4F0F8, 0xFFF4F0F8, 0xFFF4F0F8, 0xFF7030A0, 0xFF7030A0);
+        skin("rampage_brute", 0xFFB07040, 0xFFFF4020, 0xFF802020, 0xFFB07040, 0xFFB07040, 0xFF402820, 0xFF2A1A10, 0xFFFFC020);
+        texture("assets/dbzenith/textures/item/tyrant_sigil.png", 16, 16, (x, y) -> {
+            double d = Math.hypot(x - 7.5, y - 7.5);
+            if (d > 6.5) return 0;
+            if (d > 5.5) return 0xFFD4AF37;
+            if (Math.abs(x - 7.5) < 1.2 && y > 3 && y < 12) return 0xFFC890FF;
+            return 0xFF3A1A50;
+        });
+        texture("assets/dbzenith/textures/item/rage_totem.png", 16, 16, (x, y) -> {
+            if (x < 5 || x > 10 || y < 1 || y > 14) return 0;
+            if (y == 4 && (x == 6 || x == 9)) return 0xFFFF4020;                    // eyes
+            if (y == 7 && x >= 6 && x <= 9) return 0xFFFFFFFF;                       // teeth
+            return (y % 4 == 0) ? 0xFF5A2A10 : 0xFF8A4A20;
+        });
+
         // --- ki glow: soft radial white, tinted per technique at render time ---
         radialGlow("assets/dbzenith/textures/entity/ki_glow.png", 32);
         beamGlow("assets/dbzenith/textures/entity/ki_beam.png", 32);
@@ -223,6 +243,30 @@ public class AssetGen {
         out.getParentFile().mkdirs();
         ImageIO.write(img, "png", out);
         System.out.println("wrote " + out);
+    }
+
+    /** Paints a 64x64 humanoid skin (zombie/player layout; left limbs mirror the right ones). */
+    static void skin(String name, int head, int eyes, int body, int arms, int hands, int legs, int feet, int accent) throws IOException {
+        texture("assets/dbzenith/textures/entity/fighter/" + name + ".png", 64, 64, (x, y) -> {
+            if (y < 16 && x < 32) {                                                   // head
+                if (y >= 8 && x >= 8 && x < 16) {                                     // face
+                    if (y == 12 && (x == 9 || x == 10 || x == 13 || x == 14)) return (x == 10 || x == 13) ? eyes : 0xFFFFFFFF;
+                    if (y == 14 && x >= 10 && x <= 13) return 0xFF301818;            // mouth
+                }
+                if (y < 8 && name.equals("tyrant_lord")) return accent;               // dome on top
+                return head;
+            }
+            if (y >= 16 && y < 32) {
+                if (x >= 16 && x < 40) {                                              // body
+                    if (y >= 20 && y < 23 && x >= 20 && x < 28 && !name.equals("sproutling")) return accent; // collar/chest detail
+                    if (y == 30 || y == 31) return accent;                            // belt
+                    return body;
+                }
+                if (x >= 40 && x < 56) return y >= 29 ? hands : arms;                // arm + hand
+                if (x < 16) return y >= 29 ? feet : legs;                            // leg + foot
+            }
+            return 0;
+        });
     }
 
     /** A small vest icon: body color with strap color bands. */

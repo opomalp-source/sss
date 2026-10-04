@@ -1,0 +1,3 @@
+{"type": "minecraft:crafting_shaped", "pattern": ["BRB", "RGR", "BRB"],
+ "key": {"B": {"item": "minecraft:bone_block"}, "R": {"item": "minecraft:redstone_block"}, "G": {"item": "minecraft:gold_block"}},
+ "result": {"item": "dbzenith:rage_totem"}}

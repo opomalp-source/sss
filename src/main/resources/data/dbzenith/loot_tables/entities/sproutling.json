@@ -1,0 +1,4 @@
+{"type": "minecraft:entity", "pools": [
+  {"rolls": 1, "entries": [{"type": "minecraft:item", "name": "minecraft:slime_ball", "functions": [{"function": "minecraft:set_count", "count": {"min": 0, "max": 2}}]}]},
+  {"rolls": 1, "conditions": [{"condition": "minecraft:random_chance_with_looting", "chance": 0.05, "looting_multiplier": 0.02}], "entries": [{"type": "minecraft:item", "name": "dbzenith:senzu_bean"}]}
+]}

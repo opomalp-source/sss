@@ -3,6 +3,7 @@ package com.dbzenith.client;
 import com.dbzenith.DBZenith;
 import com.dbzenith.client.render.DragonSpiritRenderer;
 import com.dbzenith.client.render.FalseMoonRenderer;
+import com.dbzenith.client.render.FighterRenderer;
 import com.dbzenith.client.render.FormHairLayer;
 import com.dbzenith.client.render.FormHairModel;
 import com.dbzenith.client.render.KiBeamRenderer;
@@ -60,5 +61,10 @@ public final class ClientSetup {
         event.registerEntityRenderer(ModEntities.KI_BEAM.get(), KiBeamRenderer::new);
         event.registerEntityRenderer(ModEntities.FALSE_MOON.get(), FalseMoonRenderer::new);
         event.registerEntityRenderer(ModEntities.DRAGON_SPIRIT.get(), DragonSpiritRenderer::new);
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.SPROUTLING.get(), ctx -> new FighterRenderer<>(ctx, "sproutling", 0.7f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.KI_SOLDIER.get(), ctx -> new FighterRenderer<>(ctx, "ki_soldier", 1f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.ANDROID_UNIT.get(), ctx -> new FighterRenderer<>(ctx, "android_unit", 1f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.TYRANT_LORD.get(), ctx -> new FighterRenderer<>(ctx, "tyrant_lord", 1.1f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.RAMPAGE_BRUTE.get(), ctx -> new FighterRenderer<>(ctx, "rampage_brute", 1.6f));
     }
 }
