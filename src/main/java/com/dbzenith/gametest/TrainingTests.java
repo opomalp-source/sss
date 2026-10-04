@@ -49,7 +49,7 @@ public final class TrainingTests {
             long now = helper.getLevel().getGameTime();
             helper.assertTrue(d.getGravity(now) == 100, "player in range should feel 100g, felt " + d.getGravity(now));
             double body = d.getBody();
-            for (int i = 0; i < 20; i++) KiTicker.tick(p, d);
+            for (int i = 0; i < 40; i++) KiTicker.tick(p, d);
             helper.assertTrue(d.getBody() < body, "100g strains a weak body");
             helper.assertTrue(d.getTrainingMultiplier() > 5, "heavy gravity multiplies training: " + d.getTrainingMultiplier());
             helper.assertTrue(StatCalculator.scaleTpGain(d, 10) > 50, "TP gains use the training multiplier");

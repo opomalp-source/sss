@@ -246,6 +246,12 @@ public final class DBZCommand {
                                             if (t == null) throw UNKNOWN_TECHNIQUE.create(id);
                                             return apply(ctx, "Taught " + id + " to", d -> com.dbzenith.skill.TechniqueLibrary.learnFree(d, t));
                                         }))))
+                .then(Commands.literal("summon")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .then(Commands.argument("pos", net.minecraft.commands.arguments.coordinates.BlockPosArgument.blockPos())
+                                        .executes(ctx -> com.dbzenith.dragonball.DragonBalls.trySummon(ctx.getSource().getLevel(),
+                                                EntityArgument.getPlayer(ctx, "player"),
+                                                net.minecraft.commands.arguments.coordinates.BlockPosArgument.getLoadedBlockPos(ctx, "pos")) ? 1 : 0))))
                 .then(Commands.literal("tail")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("on", BoolArgumentType.bool())

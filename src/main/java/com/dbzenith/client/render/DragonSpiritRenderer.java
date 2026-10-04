@@ -48,7 +48,7 @@ public class DragonSpiritRenderer extends EntityRenderer<DragonSpiritEntity> {
             float x = radius * Mth.cos(angle);
             float z = radius * Mth.sin(angle);
             float y = f * 30f;
-            float size = 2.6f - f * 0.9f;
+            float size = (2.6f - f * 0.9f) * 1.6f;
             ball(pose, vc, x, y, z, size * 1.6f, 0x30, 0xC0, 0x50, 170);
             ball(pose, vc, x, y, z, size * 0.7f, 0xB0, 0xFF, 0xB0, 230);
             hx = x;

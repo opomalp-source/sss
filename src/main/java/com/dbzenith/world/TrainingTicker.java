@@ -43,9 +43,11 @@ public final class TrainingTicker {
         double excess = Math.max(0, g - tolerance(data));
 
         setSlow(player, Math.min(0.8, excess * c.gravitySlowPerExcess.get()));
-        if (excess > 0 && !player.getAbilities().invulnerable) {
+        if (excess > 0 && !player.getAbilities().invulnerable && !data.isOnCooldown("gravity_strain", now)) {
+            data.setCooldown("gravity_strain", now + 20);
+            // Once per second: each health drop flashes the player red on clients, so per-tick strain would flicker constantly.
             double perSecond = Math.min(5.0, excess * c.gravityBodyDamagePercentPerExcess.get());
-            double loss = data.getDerived().maxBody() * perSecond / 100.0 / 20.0;
+            double loss = data.getDerived().maxBody() * perSecond / 100.0;
             data.setBody(Math.max(1, data.getBody() - loss)); // gravity strains, it never kills
             data.setLastDamagedTick(now);
         }

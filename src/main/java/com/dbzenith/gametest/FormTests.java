@@ -153,6 +153,20 @@ public final class FormTests {
         helper.succeed();
     }
 
+    @GameTest(template = EMPTY)
+    public static void stormyDayIsNotAFullMoon(GameTestHelper helper) {
+        ServerPlayer p = saiyan(helper, 0);
+        long day = helper.getLevel().getDayTime();
+        helper.getLevel().setDayTime(6000); // noon on a full-moon day
+        helper.getLevel().setWeatherParameters(0, 200, true, true);
+        boolean sees = GreatApe.isFullMoonNight(helper.getLevel());
+        helper.getLevel().setWeatherParameters(6000, 0, false, false);
+        helper.getLevel().setDayTime(day);
+        helper.assertTrue(!sees, "a thunderstorm at noon is not a full moon");
+        TestPlayers.remove(helper, p);
+        helper.succeed();
+    }
+
     @GameTest(template = EMPTY, timeoutTicks = 120)
     public static void falseMoonTriggersGreatApe(GameTestHelper helper) {
         ServerPlayer saiyan = saiyan(helper, 0);

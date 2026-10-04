@@ -47,8 +47,14 @@ public final class GreatApe {
         Level level = player.level();
         boolean sky = level.canSeeSky(player.blockPosition().above((int) Math.ceil(player.getBbHeight())));
         if (!sky) return false;
-        boolean fullMoon = level.dimensionType().hasSkyLight() && level.isNight() && level.getMoonPhase() == 0;
-        return fullMoon || nearFalseMoon(player);
+        return isFullMoonNight(level) || nearFalseMoon(player);
+    }
+
+    /** Time of day, not Level.isNight(): a thunderstorm darkens the sky enough for isNight() to report true. */
+    public static boolean isFullMoonNight(Level level) {
+        long time = level.getDayTime() % 24000L;
+        boolean night = time >= 13000L && time <= 23000L;
+        return level.dimensionType().hasSkyLight() && !level.dimensionType().hasFixedTime() && night && level.getMoonPhase() == 0;
     }
 
     public static boolean nearFalseMoon(Player player) {

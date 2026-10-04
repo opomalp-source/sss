@@ -97,6 +97,7 @@ public final class DragonBalls {
         for (int attempt = 0; attempt < 16; attempt++) {
             int x = spawn.getX() + rnd.nextInt(radius * 2 + 1) - radius;
             int z = spawn.getZ() + rnd.nextInt(radius * 2 + 1) - radius;
+            level.getChunk(x >> 4, z >> 4); // load or generate first: getHeight reports the world bottom for unloaded chunks
             int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
             BlockPos pos = new BlockPos(x, y, z);
             BlockState below = level.getBlockState(pos.below());

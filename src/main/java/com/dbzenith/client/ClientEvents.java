@@ -77,6 +77,10 @@ public final class ClientEvents {
             mc.options.setCameraType(wanted);
             delayTicks = Math.max(delayTicks, 4);
         }
+        if (name.startsWith("noscreen_") && mc.screen != null) {
+            mc.setScreen(null);
+            delayTicks = Math.max(delayTicks, 3);
+        }
         if (name.startsWith("create_") && !(mc.screen instanceof com.dbzenith.client.screen.CharacterCreationScreen)) {
             mc.setScreen(new com.dbzenith.client.screen.CharacterCreationScreen());
             delayTicks = Math.max(delayTicks, 6);
