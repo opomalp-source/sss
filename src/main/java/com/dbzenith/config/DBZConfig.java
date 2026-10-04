@@ -236,7 +236,7 @@ public final class DBZConfig {
         Client(ForgeConfigSpec.Builder b) {
             b.push("hud");
             showDebugOverlay = b.comment("Show the raw stat debug overlay (developer aid, drawn under the HUD position)")
-                    .define("showDebugOverlay", false);
+                    .define("showDebugStats", false);
             b.pop();
         }
     }

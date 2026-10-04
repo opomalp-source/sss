@@ -33,7 +33,7 @@ Resume from the first unchecked item. Each phase ends with a git tag.
 - [ ] Apply DEX attack-speed/move-speed bonuses via vanilla attribute modifiers
 - [ ] Sync a public subset (release %, charging, flying, form) to tracking players for visuals
 - [x] GameTests: 10 combat tests (17 total) green
-- [ ] **In-client visual check of HUD, blasts, aura, stat screen** (scripted run was postponed: the human was playing)
+- [x] In-client visual check (scripted, screenshots): HUD, charging, all 5 techniques in flight, flight + guard chips, stat screen
 - [ ] Tag `phase-1-combat`
 
 ## Phase 2 — Transformations

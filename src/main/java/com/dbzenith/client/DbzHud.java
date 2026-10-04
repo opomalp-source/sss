@@ -49,10 +49,12 @@ public final class DbzHud implements IGuiOverlay {
         y = bar(g, font, x, y, "STA", d.getStamina(), s.maxStamina(), STAMINA);
 
         // release %
-        g.drawString(font, Component.translatable("hud.dbzenith.release", d.getReleasePercent()), x, y, RELEASE);
-        int rx = x + 64;
-        g.fill(rx, y + 2, rx + BAR_W - 64 + 22, y + 6, TRACK);
-        g.fill(rx, y + 2, rx + (int) ((BAR_W - 64 + 22) * d.getReleasePercent() / 100f), y + 6, RELEASE);
+        Component release = Component.translatable("hud.dbzenith.release", d.getReleasePercent());
+        g.drawString(font, release, x, y, RELEASE);
+        int rx = x + font.width(release) + 4;
+        int rEnd = x + 26 + BAR_W;
+        g.fill(rx, y + 2, rEnd, y + 6, TRACK);
+        g.fill(rx, y + 2, rx + (int) ((rEnd - rx) * d.getReleasePercent() / 100f), y + 6, RELEASE);
         y += 12;
 
         // status chips

@@ -15,7 +15,7 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Release % | B | done | Scales ki damage + ki cost; charging raises, key lowers; GameTests |
 | Physical / mental age | V | stubbed | Stored only |
 | TP pool: earning | C | done | Damage dealt, kills, charging; MIND bonus |
-| TP pool: spending | C | done | Server-validated upgrade packet + stat screen (screen not yet seen in-client) |
+| TP pool: spending | C | done | Server-validated upgrade packet + stat screen |
 | TP cost formula (path weights, soft cap) | C | done | GameTest `tpCostFollowsPath` |
 | Class/path choice | B | stubbed | Affects TP cost only; no UI |
 | Battle power / level | C | done | Shown in HUD + `/dbz stats` |
@@ -25,9 +25,9 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 |---|---|---|---|
 | Ki pool regen | B | done | KiTicker; GameTest |
 | Ki control spend efficiency | B | done | DamageCalculator.kiCost |
-| Charging / power up | B | in-progress | Logic GameTested; aura particles not yet seen in-client |
-| Ki blast framework | B | in-progress | Entity + damage GameTested (hits mob); renderer not yet seen in-client |
-| Techniques: ki blast, wave beam, volley, disk, homing orb | B | in-progress | 5 techniques; beam is a big projectile for now |
+| Charging / power up | B | done | GameTested + seen in-client (HUD chip, stamina drain). First-person aura is subtle by design |
+| Ki blast framework | B | done | GameTested + all styles seen rendering in-client |
+| Techniques: ki blast, wave beam, volley, disk, homing orb | B | done | Seen in-client; homing visibly curves. Wave Beam is a big orb until true beam rendering |
 | Techniques: finger beam, grab-throw, ball-drop, explosive wave, teleport/afterimage, heal, sense | B | todo | |
 | Melee combo, knockback, stamina, guard | B | done | GameTests (combo, stamina, guard reduction) |
 | Heavy (charged) hit, aerial combat feel | B | todo | |
@@ -96,10 +96,10 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Feature | Src | Status | Notes |
 |---|---|---|---|
 | Debug stat overlay | — | done | Config `hud.showDebugOverlay` |
-| DBZ HUD (bars, release, status, combo, technique) | B | in-progress | Built; awaiting in-client check. Form display Phase 2 |
-| Stat screen | B | in-progress | Built (K); awaiting in-client check |
+| DBZ HUD (bars, release, status, combo, technique) | B | done | Seen in-client. Form display Phase 2 |
+| Stat screen | B | done | Seen in-client (opened via dev hook) |
 | Skill/deck screen | V | todo | |
 | Dragon Ball radar screen | B | todo | |
-| Keybinds | B | in-progress | G charge, Z lower release, V fly, LAlt guard, R fire, Y next, K stats |
+| Keybinds | B | in-progress | Registered; actions verified via the same server paths, physical key presses not yet scripted. G charge, Z lower release, V fly, LAlt guard, R fire, Y next, K stats |
 | Config for every tunable | B | in-progress | All Phase 0 numbers in config |
 | Admin/debug command `/dbz` | — | done | GameTest `commandSetsStats` |

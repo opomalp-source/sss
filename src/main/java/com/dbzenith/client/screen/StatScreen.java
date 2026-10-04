@@ -70,15 +70,16 @@ public class StatScreen extends Screen {
 
         int rx = left + 172;
         int ry = top + 34;
-        String[] lines = {
-                line("Body", s.maxBody()), line("Ki", s.maxKi()), line("Stamina", s.maxStamina()),
-                line("Melee dmg", s.meleeDamage()), line("Ki dmg", s.kiDamage()), line("Defense", s.defense()),
-                pct("Evasion", s.evasion()), pct("Ki control", s.kiControl()),
-                String.format("Spirit  x%.2f", s.spiritModifier()), pct("Atk speed", s.attackSpeed()), pct("Move speed", s.moveSpeed()),
-                String.format("Power   %,d", StatCalculator.battlePower(d))
+        String[][] rows = {
+                {"Body", num(s.maxBody())}, {"Ki", num(s.maxKi())}, {"Stamina", num(s.maxStamina())},
+                {"Melee dmg", num(s.meleeDamage())}, {"Ki dmg", num(s.kiDamage())}, {"Defense", num(s.defense())},
+                {"Evasion", pct(s.evasion())}, {"Ki control", pct(s.kiControl())},
+                {"Spirit", String.format("x%.2f", s.spiritModifier())}, {"Atk speed", pct(s.attackSpeed())},
+                {"Move speed", pct(s.moveSpeed())}, {"Power", num(StatCalculator.battlePower(d))}
         };
-        for (String l : lines) {
-            g.drawString(font, l, rx, ry, TEXT);
+        for (String[] row : rows) {
+            g.drawString(font, row[0], rx, ry, DIM);
+            g.drawString(font, row[1], rx + 120 - font.width(row[1]), ry, TEXT);
             ry += 12;
         }
         super.render(g, mouseX, mouseY, partialTick);
@@ -92,12 +93,12 @@ public class StatScreen extends Screen {
         }
     }
 
-    private static String line(String label, double v) {
-        return String.format("%-10s %,.0f", label, v);
+    private static String num(double v) {
+        return String.format("%,.0f", v);
     }
 
-    private static String pct(String label, double v) {
-        return String.format("%-10s %.1f%%", label, v * 100);
+    private static String pct(double v) {
+        return String.format("%.1f%%", v * 100);
     }
 
     @Override

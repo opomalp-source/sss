@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class Rcon {
     public static void main(String[] args) throws Exception {
-        try (Socket s = new Socket("127.0.0.1", Integer.parseInt(args[0]))) {
+        try (Socket s = new Socket("localhost", Integer.parseInt(args[0]))) {
             OutputStream out = s.getOutputStream();
             DataInputStream in = new DataInputStream(s.getInputStream());
             send(out, 1, 3, args[1]);

@@ -25,6 +25,8 @@ public final class ClientEvents {
     private static final int DEV_QUIT_AFTER = Integer.getInteger("dbzenith.devQuitAfter", -1);
     private static final boolean DEV_AUTOMATION = Boolean.getBoolean("dbzenith.devAutomation");
     private static int ticksInWorld;
+    private static String pendingShot;
+    private static int pendingShotTicks;
 
     private ClientEvents() {}
 
@@ -41,6 +43,12 @@ public final class ClientEvents {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) return;
         ticksInWorld++;
+        if (pendingShot != null && --pendingShotTicks <= 0) {
+            String shot = pendingShot;
+            pendingShot = null;
+            devScreenshot(shot, 0);
+            if (mc.screen instanceof com.dbzenith.client.screen.StatScreen) mc.setScreen(null);
+        }
         if (DEV_SCREENSHOT_TICKS.contains(ticksInWorld)) {
             Screenshot.grab(mc.gameDirectory, "dbz_dev_" + ticksInWorld + ".png", mc.getMainRenderTarget(),
                     msg -> DBZenith.LOGGER.info("[dev] {}", msg.getString()));
@@ -52,9 +60,20 @@ public final class ClientEvents {
     }
 
     /** Dev automation: save a named screenshot now (requested by /dbz devshot). */
-    public static void devScreenshot(String name) {
+    public static void devScreenshot(String name, int delayTicks) {
         if (!DEV_AUTOMATION) return;
         Minecraft mc = Minecraft.getInstance();
+        if (delayTicks > 0) {
+            pendingShot = name;
+            pendingShotTicks = delayTicks;
+            return;
+        }
+        if (name.startsWith("stats_") && !(mc.screen instanceof com.dbzenith.client.screen.StatScreen)) {
+            mc.setScreen(new com.dbzenith.client.screen.StatScreen());
+            pendingShot = name;
+            pendingShotTicks = 5; // let the screen render first
+            return;
+        }
         String safe = name.replaceAll("[^a-zA-Z0-9_-]", "_");
         Screenshot.grab(mc.gameDirectory, "dbz_" + safe + ".png", mc.getMainRenderTarget(),
                 msg -> DBZenith.LOGGER.info("[dev] {}", msg.getString()));

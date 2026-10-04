@@ -71,3 +71,10 @@
 
 ### Deployment
 - `dbzenith-0.2.0.jar` staged in `.minecraft-dbz\mods` (0.1.0 removed). Switch script now deletes older `dbzenith-*.jar` from `.minecraft\mods` before copying (two versions at once would refuse to load). `.minecraft\mods` still holds 0.1.0 until the human re-runs the switch script with the game closed.
+
+## 2026-10-04 — Session 1 (cont.): Phase 1 in-client check
+- **Login timeouts were the test network setup, not the mod.** With `server-ip` set (127.0.0.1 or ::1), the dev client connected, the server sent all 23 FML handshake packets, but the client received nothing and timed out after 30 s (both netty threads idle; RCON on the same server worked). Restoring Phase 0's setup (server on all interfaces, client to `localhost`) fixed it. Root cause unknown (local loopback quirk). To keep RCON safe while it listens on all interfaces, the password is now random per setup, stored in git-ignored `run-server/rcon-password.txt`. **Recipe:** `PW=$(cat run-server/rcon-password.txt); java tools/Rcon.java 25575 "$PW" "<cmd>" ...`.
+- Each `tools/Rcon.java` call starts a JVM (about 1 s), so screenshots taken in a separate call missed fast projectiles. `/dbz devshot <player> <name> [delayTicks]` now takes a delay; fire and shoot in one call: `"dbz technique Dev wave_beam" "dbz devshot Dev wave_beam 3"`. Names starting with `stats_` open the Training screen first.
+- Verified in screenshots: HUD (power level, bars, release, chips), charging, Rapid Volley, Wave Beam, Cutter Disk (edge-on spinning disk), Homing Orb (curves to target), Ki Blast, flight + guard chips, Training screen. A husk took damage (20 → 9 HP).
+- Fixed: the old debug overlay still showed because existing `dbzenith-client.toml` files from 0.1.0 kept `showDebugOverlay=true`. Key renamed to `showDebugStats` (default false). Training screen derived-stat column now right-aligns values (space padding doesn't work in MC's proportional font). Release bar now starts after its label (the label overlapped at 100%; fix compiled, not re-screenshotted).
+- Deployed 0.2.0 to `.minecraft\mods` via the switch script (0.1.0 removed). OptiFine jars stay parked.

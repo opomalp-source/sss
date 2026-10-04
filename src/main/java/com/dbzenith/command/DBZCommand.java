@@ -173,15 +173,19 @@ public final class DBZCommand {
                 .then(Commands.literal("devshot")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("name", StringArgumentType.word())
-                                        .executes(ctx -> {
-                                            String name = StringArgumentType.getString(ctx, "name");
-                                            var targets = EntityArgument.getPlayers(ctx, "targets");
-                                            targets.forEach(p -> ModNetwork.sendTo(p, new DevScreenshotPacket(name)));
-                                            return targets.size();
-                                        }))))
+                                        .executes(ctx -> devshot(ctx, 0))
+                                        .then(Commands.argument("delayTicks", IntegerArgumentType.integer(0, 200))
+                                                .executes(ctx -> devshot(ctx, IntegerArgumentType.getInteger(ctx, "delayTicks")))))))
                 .then(Commands.literal("reset")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .executes(ctx -> apply(ctx, "Reset character of", PlayerData::reset)))));
+    }
+
+    private static int devshot(CommandContext<CommandSourceStack> ctx, int delay) throws CommandSyntaxException {
+        String name = StringArgumentType.getString(ctx, "name");
+        var targets = EntityArgument.getPlayers(ctx, "targets");
+        targets.forEach(p -> ModNetwork.sendTo(p, new DevScreenshotPacket(name, delay)));
+        return targets.size();
     }
 
     private static int set(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
