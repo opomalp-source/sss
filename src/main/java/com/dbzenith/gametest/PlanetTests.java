@@ -37,6 +37,7 @@ public final class PlanetTests {
         d.setCooldown("space_travel", 0);
         helper.assertTrue(Planet.travel(p, Planet.NAMEK), "then fly on to Namek");
         helper.assertTrue(Planet.of(p.level()) == Planet.NAMEK, "arrived on Namek");
+        helper.assertTrue(p.level().getFluidState(p.blockPosition().below()).isEmpty(), "landed on dry ground, not at sea: " + p.blockPosition());
         d.setCooldown("space_travel", 0);
         TimeChamber.enter(p);
         helper.assertTrue(!Planet.travel(p, Planet.EARTH), "no pod flights out of the Time Chamber");

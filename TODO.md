@@ -39,7 +39,8 @@ Resume from the first unchecked item. Each phase ends with a git tag.
 ## Phase 2 — Transformations
 - [x] Form framework (`transform.Form`/`Forms`: multipliers on STR/DEX/KI_POWER, ki+stamina drain, colors, hair style, unlock level + parent mastery + flags, scale, trigger)
 - [x] Saiyan line: Super Saiyan, Ascended, Ultra, SSJ2, SSJ3, God (needs `god_ki` flag), Blue; Great Ape via full moon or Moon Orb false moon (tail required, 3x size)
-- [ ] God ki ritual (Phase 4 quest) to grant `god_ki` properly; tail regrowth / tail cutting
+- [x] God ki ritual: the "Divine Ritual" quest (level 1000 + Time Chamber) grants `god_ki`
+- [ ] Tail regrowth / tail cutting
 - [x] Mastery per form (time in form x spirit / tier; up to -75% drain, +20% bonus)
 - [x] J transform / Shift+J revert; Forms screen (from K) with target selection; hair (4 styles), eye color, form aura, lightning sparks
 - [ ] Real art: hair model/textures, Great Ape model (GeckoLib) instead of a scaled player
@@ -57,16 +58,20 @@ Resume from the first unchecked item. Each phase ends with a git tag.
 - [x] Tag `phase-3-races`
 
 ## Phase 4 — Progression & world
-- [ ] Training blocks + gravity chamber
-- [ ] Hyperbolic Time Chamber dimension
-- [ ] Dragon Balls (7) + radar + dragon + wishes
-- [ ] Scouter, capsules, gi/armor sets, training weights
-- [ ] NPC enemies + boss slots + loot
-- [ ] Quest system + questline
-- [ ] Galactic Patrol faction
-- [ ] Space/planets/dimensions + travel
-- [ ] Life-sim layer (aging, needs, family, cosmetics) — config-toggleable
-- [ ] Tag `phase-4-world`
+- [x] Training: Gravity Chamber block (1-100g; tolerance from STR + CON; slowdown and strain above it; TP while moving), Punching Bag, meditation (sneak and stand still for 3 s), Training Weights
+- [x] Hyperbolic Time Chamber dimension (door block, 10g, x4 training, one-day stay limit, sends you back where you entered)
+- [x] Dragon Balls (7, scattered; turn to stone after a wish, then scatter again), Dragon Radar HUD, Eternal Dragon, 8 wishes (power, restoration, senzu, immortality, hidden potential, godly ki, eternal youth, riches)
+- [x] Scouter (power-level readout; shatters above the limit), Capsule (27 slots), gi sets with a set bonus, training weights
+- [x] NPC enemies (Sproutling, Ki Soldier, Android Unit) that scale to the nearest player; 2 bosses (Tyrant Lord, Rampage Brute) with summon items and loot
+- [x] Quest system: Martial Arts Master questline (7 quests, ends with the divine ritual), quest NPCs placed near spawn, quest screen
+- [x] Galactic Patrol: Patrol Officer, 4 repeatable bounties, 5 ranks from reputation
+- [x] Planets: Namek (1g) and Northern Planet (10g) dimensions, Space Pod travel screen, planet gravity
+- [x] Life sim (config-toggleable): aging by race, STR/DEX decline in old age, eternal youth wish, earned titles shown before the name
+- [ ] Life-sim extras: thirst, temperature, family, tattoos/scars
+- [ ] Namekian fusion, Majin absorption, Frost Demon space survival
+- [ ] Structures (master's house, Patrol outpost) for the quest NPCs instead of open ground
+- [ ] Real art for every Phase 4 block/item/mob (see ASSETS_TODO.md)
+- [x] Tag `phase-4-world`
 
 ## Phase 5+
 - [ ] Work every FEATURE_MATRIX row to `done`, then balance + polish

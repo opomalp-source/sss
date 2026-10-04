@@ -126,3 +126,23 @@
 - The test client paused itself whenever its window lost focus, so the pause menu covered screenshots. Set `pauseOnLostFocus:false` in `run-clienttest/options.txt`.
 - Racial auto-equip compared against the base slot count instead of the real deck size. Fixed. Changing race now drops the previous race's racial techniques.
 - `/dbz race` goes through `CharacterCreation.applyRace` (tail, racial techniques, invalid form dropped) but gives no start bonuses (those are creation-only).
+
+## 2026-10-04 — Session 1 (cont.): Phase 4 progression & world (v0.6.0)
+
+### Built (7 slices, each committed)
+1. **Training**: `TrainingTicker` (gravity from the Gravity Chamber block entity or the planet; tolerance 1 + (STR+CON) x 0.02; slowdown and body strain above it; training multiplier from gravity, weights, the Time Chamber and meditation), Punching Bag, meditation (sneak still 3 s: ki regen x3 + TP), Training Weights. **Hyperbolic Time Chamber**: flat white dimension, door block, 10g, x4 training, one-day stay limit, return position saved.
+2. **Dragon Balls**: `DragonBallData` (SavedData: positions, inert timer), 7 ball blocks scattered on dry ground near spawn, Dragon Radar (`RadarPacket` + HUD), `DragonSpiritEntity`, wish screen with 8 wishes, stone for 2 days then scatter again.
+3. **Gear**: Scouter (helmet slot; reads level, name, distance; shatters above the limit), gi sets with full-set multipliers in `FormMath`, Capsule (27-slot item storage, no nesting).
+4. **Enemies**: `KiFighter` (melee + ki blasts, level from the nearest player's power level, natural spawns via biome modifiers), `BossFighter` (boss bar, phases, loot), summon items.
+5. **Quests**: `Quest`/`Quests`/`QuestManager` (objectives: level, learn, kill, collect, form, flag, visit; rewards: TP, items, flags, reputation, alignment), quest NPCs placed near spawn, `QuestScreen`. Galactic Patrol bounties and ranks. The Divine Ritual quest grants `god_ki`.
+6. **Planets**: Namek and Northern Planet dimensions (`dbzenith:planet` type, fixed biomes), `Planet` enum with gravity, Space Pod + `PlanetScreen` + `TravelPacket`, 1-minute pod recharge, lands on dry ground.
+7. **Life sim**: `LifeSim` aging by race (config days per year), STR/DEX decline past 60 in `FormMath`, Eternal Youth wish, earned titles (`TitleEvents` adds them to chat and tab-list names; Title button on the stat screen).
+- 70 GameTests green (23 new). Visual check in the dev client: training blocks, Time Chamber, radar, dragon + wish screen, scouter, NPCs, quest screens, planet screen, Namek, Northern Planet.
+
+### Problems
+- A storm counted as night, so the Great Ape triggered in daytime storms. `isFullMoonNight` now uses the day time.
+- `getHeight` returns the world bottom for unloaded chunks, which put Dragon Balls and quest NPCs underground. Fixed by loading the chunk first.
+- Mob `registerGoals` runs in the `Mob` constructor, before subclass fields exist. The ki attack goal is now added in the subclass constructor.
+- `DefaultAttributes` complained about generic fighter types. Base stats are cached in the constructor and attributes are registered per type.
+- Gravity strain applied every tick, so the screen flashed red constantly. It now applies once per second through a cooldown.
+- Namek uses overworld noise, so the pod could land in the sea at (0, 0). Travel now searches rings out to 384 blocks for dry land (GameTest asserts it).

@@ -34,7 +34,15 @@ Install **NeoForge 1.20.1-47.1.106** into a dedicated game directory, then put `
 ## In-game
 - First join opens **Create your character**: race, path, body, hair, eyes, alignment ("Decide later" reopens it next time).
 - Races: Human, Saiyan, Half-Saiyan, Namekian, Frost Demon, Majin, Android, Cyborg. Each has its own form line, passives and racial technique.
-- Creative tab **Dragon Block Zenith**: Senzu Bean (full heal), Moon Orb (false moon), Technique Scrolls (teach a technique).
+- Creative tab **Dragon Block Zenith**: everything below plus Senzu Bean (full heal), Moon Orb (false moon), Technique Scrolls (teach a technique). Gear, training blocks, radar, pod and boss items are also craftable (see the recipe book).
 - Top-left HUD: power level, body/ki/stamina, release %, status. Earn TP by fighting and charging; spend it with K.
+- **Training**: Gravity Chamber block (right-click to raise the g, sneak + right-click to lower; too much g slows and hurts you), Punching Bag, meditation (sneak and stand still), Training Weights (chest slot). All of them multiply TP gains.
+- **Hyperbolic Time Chamber**: place and use the Time Chamber Door. 10g, x4 training, one day's stay, then it sends you back where you came in.
+- **Dragon Balls**: seven balls are scattered near world spawn. Hold the Dragon Radar to track them. Place all seven within 4 blocks of each other and right-click one to call the Eternal Dragon and pick a wish. Afterwards the balls turn to stone for two days.
+- **Gear**: Scouter (helmet; reads power levels and breaks on huge ones), Capsule (27 slots in your pocket), Turtle / Demon gi and Battle Armor (full-set bonus), Training Weights.
+- **Enemies**: Sproutlings, Ki Soldiers and Android Units spawn in the world and scale to the nearest player. Bosses: use a Tyrant Sigil or a Rage Totem on the ground.
+- **Quests**: the Martial Arts Master and the Patrol Officer stand near world spawn; right-click them. The master's questline ends with the Divine Ritual (god ki). The Galactic Patrol hands out repeatable bounties; reputation raises your rank.
+- **Space**: right-click the Space Pod to fly to Earth, Namek or the Northern Planet (10g). The pod needs a minute to recharge.
+- **Life sim**: characters age (Androids and Majins never do), and STR/DEX fade in old age. Earned titles are shown before your name (Title button on the stat screen). Toggle with `life_sim.agingEnabled`.
 - `/dbz stats`, `/dbz set <player> <field> <value>` (fields: strength, dexterity, constitution, ki_power, willpower, mind, spirit, tp, body, ki, stamina, release, alignment, physical_age, mental_age), `/dbz tp add`, `/dbz race`, `/dbz path`, `/dbz refill`, `/dbz reset`.
 - Balance numbers: `<world>/serverconfig/dbzenith-server.toml`.

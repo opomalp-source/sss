@@ -78,26 +78,26 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 ## 3.6 Progression & training
 | Feature | Src | Status | Notes |
 |---|---|---|---|
-| Physical / spiritual training | B | todo | |
-| Gravity chamber | B | todo | |
-| Hyperbolic Time Chamber | B | todo | |
-| Mastery (forms & techniques) | B | todo | |
-| Prestige / God Ki scaling | B | todo | |
+| Physical / spiritual training | B | done | Punching Bag, moving under gravity, meditation (sneak still 3 s), ki charging; training multiplier. GameTests |
+| Gravity chamber | B | done | Block 1-100g, radius 6; tolerance 1 + (STR+CON) x 0.02; slowdown + body strain above it; x(1 + 0.1/g) training. GameTests + seen in-client |
+| Hyperbolic Time Chamber | B | done | Door block, white void dimension, 10g, x4 training, 1-day stay, sends you back. GameTests + seen in-client |
+| Mastery (forms & techniques) | B | in-progress | Form mastery done (Phase 2); technique mastery todo |
+| Prestige / God Ki scaling | B | in-progress | `god_ki` from the Divine Ritual quest or the Godly Ki wish; prestige todo |
 
 ## 3.7 World, items & endgame
 | Feature | Src | Status | Notes |
 |---|---|---|---|
 | Senzu Bean | B | done | Full heal + body/ki/stamina refill; GameTest + seen in-game |
-| Dragon Balls, radar, dragon, wishes | B | todo | |
-| Scouter | B | todo | `StatCalculator.battlePower` ready |
-| Capsules | V | todo | |
-| Gi/armor sets + set bonuses | B | todo | |
-| Training weights | B | todo | |
-| NPC enemies + bosses | B | todo | |
-| Galactic Patrol faction | V | todo | |
-| Planets / dimensions / travel | V | todo | |
-| Aging, needs, family, cosmetics | V | todo | ages stored |
-| Quest system | B | todo | |
+| Dragon Balls, radar, dragon, wishes | B | done | 7 balls scattered near spawn (SavedData), radar HUD, Eternal Dragon, 8 wishes; stone for 2 days after a wish. GameTests + seen in-client |
+| Scouter | B | done | Helmet slot; reads power level/name/distance; shatters above 1,000,000. Seen in-client |
+| Capsules | V | done | 27-slot storage in an item, no nesting. GameTest |
+| Gi/armor sets + set bonuses | B | done | Turtle gi, Demon gi, Battle Armor: STR/DEX/KI multipliers when the full set (chest, legs, boots) is worn. GameTest |
+| Training weights | B | done | Slower movement, x training while worn. GameTest |
+| NPC enemies + bosses | B | done | Sproutling, Ki Soldier, Android Unit (scale to the nearest player, ki attacks); Tyrant Lord + Rampage Brute bosses with summon items and loot. GameTests |
+| Galactic Patrol faction | V | done | Patrol Officer, 4 repeatable bounties, 5 ranks from reputation (0/50/150/400/1000), good alignment required. GameTests + seen in-client |
+| Planets / dimensions / travel | V | done | Namek (1g), Northern Planet (10g), Earth; Space Pod screen, 1-min recharge, lands on dry ground. GameTests + seen in-client |
+| Aging, needs, family, cosmetics | V | in-progress | Aging by race + old-age STR/DEX decline + youth wish, earned titles done; needs/family/tattoos todo |
+| Quest system | B | done | 7-quest master line + bounties; objectives (level, learn, kill, collect, form, flag, visit), rewards, quest screen. GameTests + seen in-client |
 
 ## 3.8 UI/UX
 | Feature | Src | Status | Notes |
@@ -107,7 +107,8 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Aura visuals (seen by others) | B | done | Public state sync + aura glow renderer; seen in third person |
 | Stat screen | B | done | Seen in-client (opened via dev hook) |
 | Skill/deck screen | V | done | Techniques screen |
-| Dragon Ball radar screen | B | todo | |
+| Dragon Ball radar screen | B | done | HUD radar while holding the Dragon Radar; seen in-client |
+| Quest / planet / wish / title UI | B | done | Quest screen (NPC), planet screen (Space Pod), wish screen (dragon), Title button on the stat screen |
 | Keybinds | B | done | Real presses observed in the test client (Y, R, H, F5). G charge, Z lower release, V fly, LAlt guard, R fire, Y next, K stats |
 | Config for every tunable | B | in-progress | All Phase 0 numbers in config |
 | Admin/debug command `/dbz` | — | done | GameTest `commandSetsStats` |
