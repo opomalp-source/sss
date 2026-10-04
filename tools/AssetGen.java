@@ -300,17 +300,17 @@ public class AssetGen {
                 "................");
 
         // --- scars and tattoos: 64x64 skin-layout overlays, transparent except the mark ---
-        int scarColor = 0xFFB0505A, ink = 0xFF1C1C3A;
-        overlay("scar_eye", (x, y) -> x == 13 && y >= 10 && y <= 14 ? scarColor : 0);
-        overlay("scar_cheek", (x, y) -> (x == 12 && y == 14) || (x == 13 && y == 13) || (x == 14 && y == 12) ? scarColor : 0);
-        overlay("scar_chest", (x, y) -> x >= 21 && x <= 26 && y - 20 == x - 20 ? scarColor : 0);
-        overlay("tattoo_arm", (x, y) -> x >= 40 && x <= 55 && (y == 22 || y == 23) ? ink : 0);
+        int scarColor = 0xFFE07888, ink = 0xFF14143A;
+        overlay("scar_eye", (x, y) -> (x == 13 || x == 14) && y >= 9 && y <= 14 && !(y == 12 && x == 13) ? scarColor : 0);
+        overlay("scar_cheek", (x, y) -> x >= 9 && x <= 14 && y >= 13 && y <= 14 && (x + y == 26 || x + y == 27) ? scarColor : 0);
+        overlay("scar_chest", (x, y) -> x >= 20 && x <= 27 && y >= 20 && y <= 29 && (y - x == 0 || y - x == 1) ? scarColor : 0);
+        overlay("tattoo_arm", (x, y) -> x >= 40 && x <= 55 && (y == 22 || y == 23 || y == 25) ? ink : 0);
         overlay("tattoo_back", (x, y) -> {
             int dx = x - 35, dy = y - 24;                                   // a ring with a bar through it
             double r = Math.sqrt((dx + 0.5) * (dx + 0.5) + (dy + 0.5) * (dy + 0.5));
             return x >= 32 && x <= 39 && y >= 20 && y <= 28 && (Math.abs(r - 2.6) < 0.7 || (x == 35 || x == 36) && y >= 21 && y <= 27) ? ink : 0;
         });
-        overlay("tattoo_chest", (x, y) -> x >= 22 && x <= 25 && y >= 21 && y <= 24 && Math.abs(x - 23.5) + Math.abs(y - 22.5) <= 2 ? ink : 0);
+        overlay("tattoo_chest", (x, y) -> x >= 20 && x <= 27 && y >= 20 && y <= 27 && Math.abs(x - 23.5) + Math.abs(y - 23.5) <= 3.5 && Math.abs(x - 23.5) + Math.abs(y - 23.5) >= 2 ? ink : 0);
 
         emptyStructure("data/dbzenith/structures/empty.nbt", 3);
         System.out.println("AssetGen done");

@@ -146,3 +146,23 @@
 - `DefaultAttributes` complained about generic fighter types. Base stats are cached in the constructor and attributes are registered per type.
 - Gravity strain applied every tick, so the screen flashed red constantly. It now applies once per second through a cooldown.
 - Namek uses overworld noise, so the pod could land in the sea at (0, 0). Travel now searches rings out to 384 blocks for dry land (GameTest asserts it).
+
+## 2026-10-04 — Session 1 (cont.): Phase 5 feature completion (v0.7.0)
+
+### Built (6 slices, each committed)
+1. **Combat depth**: `registry.ModEffects` (Stunned: no moving, jumping, attacking, dashing or techniques; Ki Sealed: no techniques, flight, charging, transforming or ki regen), enforced where each action happens (`combat.StatusRules`, handlers, NPC ki goal). New techniques: Ki Transfer, Grab & Throw (`skill.GrabThrow`: hold, throw, impact damage via the new `throw` damage type; bosses immune), Paralysis Wave, Seal Orb, Gathering Sphere (ball-drop: hovers over the caster, then flies at the crosshair). `combat.AerialCombat`: air hits +15% and juggle, heavy from the ground launches, heavy from above looking down spikes. HUD chips. Tyrant Lord uses Seal Orb.
+2. **Namekian fusion and Majin absorption** (`race.Absorption`): Namekian Warriors (neutral NPC spawning on Namek) can be fused with once beaten; Namekian players fuse with consent (`/dbzfusion accept`, 25% of their attributes plus their techniques; they start over); max 3. Majins absorb beaten non-bosses (`absorbed` damage type that bypasses everything): +10% STR/DEX/KI per stack (max 3, 10 min), a technique stolen from players; respects PvP.
+3. **Technique mastery** (`skill.TechniqueMastery`, stored as `technique:<id>` in the mastery map), **prestige** (`stats.Prestige`, at level 2000; stat-screen button with confirm), **god ki edge** (+25%/-25% vs ordinary ki; invisible to scouters and Ki Sense). Techniques screen scrolls.
+4. **Alignment** (`race.Alignment`: deed shifts with fractional accumulation; good = faster ki, evil = harder hits), **path bonuses**, **mental age** (grows for all races, faster meditating, a Time Chamber day is a year) and **wisdom** (+TP), **tail cutting** by blades and regrowth (`race.TailRules`).
+5. **Life sim**: `world.Needs` (thirst, temperature), `world.Family` (Promise Ring, `/dbzfamily accept|leave`, +TP near your partner), `world.Cosmetics` + `client.render.CosmeticsLayer` (scar and tattoo skin overlays), `LifeScreen` with preview. Protocol 14.
+6. **Quest NPC buildings** (`npc.NpcStructures`: dojo and Patrol outpost built from code in new worlds; `/dbz build dojo|outpost <pos>` for existing worlds), **config audit** (pod recharge, dragon wait, false moon, scouter range, enemy scaling, boss enrage).
+- 94 GameTests green (24 new). Every FEATURE_MATRIX row is `done`.
+
+### Problems
+- No-AI test mobs ignore velocity, so knock-up and throw tests passed or failed for the wrong reasons; they now use mobs with AI.
+- Vanilla knockback after the hurt event squashed upward launches; launches are queued and applied at the end of the server tick.
+- The absorb test player survived because the GameTest server has PvP off; absorbing players now checks `canHarmPlayer` first.
+- `setPath` did not mark derived stats stale. The tail "not cut" marker (-1) clashed with negative timestamps early in a world; it is now `Long.MIN_VALUE`.
+- The Techniques screen overflowed with 17+ techniques; it scrolls now.
+- A visual-check run hung: the client compiled mid-edit and failed while the script waited forever for a join. Waits are now bounded and check for build failures.
+- `spreadplayers` in 1.20.1 never changes dimension, so a check run took screenshots underground on the Northern Planet; teleport into the overworld first.

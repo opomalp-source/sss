@@ -108,8 +108,8 @@ public class KiFighter extends Monster {
         var health = getAttribute(Attributes.MAX_HEALTH);
         var damage = getAttribute(Attributes.ATTACK_DAMAGE);
         double baseHealth = defaultHealth();
-        if (health != null) health.setBaseValue(baseHealth * (1 + 0.6 * (level - 1)));
-        if (damage != null) damage.setBaseValue(defaultDamage() * (1 + 0.35 * (level - 1)));
+        if (health != null) health.setBaseValue(baseHealth * (1 + DBZConfig.SERVER.enemyHealthPerLevel.get() * (level - 1)));
+        if (damage != null) damage.setBaseValue(defaultDamage() * (1 + DBZConfig.SERVER.enemyDamagePerLevel.get() * (level - 1)));
         setHealth(getMaxHealth());
         setCustomName(Component.translatable("entity.dbzenith.leveled", Component.translatable(profile.nameKey()), level));
         setCustomNameVisible(false);
@@ -125,7 +125,7 @@ public class KiFighter extends Monster {
 
     /** Raw DBZ ki damage of this fighter's techniques. */
     public double kiDamage() {
-        return profile.baseKiDamage() * (1 + 0.35 * (level - 1)) * damageMultiplier();
+        return profile.baseKiDamage() * (1 + DBZConfig.SERVER.enemyDamagePerLevel.get() * (level - 1)) * damageMultiplier();
     }
 
     /** Bosses override (enraged phase). */

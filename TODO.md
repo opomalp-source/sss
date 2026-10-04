@@ -49,10 +49,10 @@ Resume from the first unchecked item. Each phase ends with a git tag.
 
 ## Phase 3 — Races & character creation
 - [x] Race passives + growth weighting + signature mechanic for all 8 races (`race.RaceTraits`/`Races`/`RacePassives`): Zenkai, Namekian/Majin regen, Majin kill-heal, Android no hunger/fatigue + ki absorb, Cyborg, Frost Demon breathless, Human TP/ki-cost bonuses
-- [ ] Namekian fusion, Majin absorption of players, Frost Demon space survival (needs Phase 4 space)
+- [x] Namekian fusion and Majin absorption (Phase 5). Frost Demon space survival: travel is instant (no vacuum yet), so their breathlessness covers water only
 - [x] One transformation line per race (Human, Namekian incl. Giant, Frost Demon, Majin, Android upgrades, Cyborg; Half-Saiyan Ultimate gated by flag)
 - [x] Technique library (18 incl. 8 racial), TP learning with level gates, Technique Scrolls, deck (4 + 1 per 250 levels, max 8), Techniques screen; R/Y use the deck
-- [ ] Custom status effects (stun, ki-seal), grab-and-throw, ball-drop techniques
+- [x] Custom status effects (stun, ki-seal), grab-and-throw, ball-drop techniques (Phase 5)
 - [x] Character-creation screen on first join (race, path, body type, hair style + color, eye color, alignment) with live preview; racial features (antennae, horns, tentacle, tail)
 - [ ] Skin color / full racial skins (art)
 - [x] Tag `phase-3-races`
@@ -68,10 +68,21 @@ Resume from the first unchecked item. Each phase ends with a git tag.
 - [x] Planets: Namek (1g) and Northern Planet (10g) dimensions, Space Pod travel screen, planet gravity
 - [x] Life sim (config-toggleable): aging by race, STR/DEX decline in old age, eternal youth wish, earned titles shown before the name
 - [x] Life-sim extras: thirst, temperature, partners (Promise Ring), scars and tattoos (Life screen)
-- [ ] Namekian fusion, Majin absorption, Frost Demon space survival
-- [ ] Structures (master's house, Patrol outpost) for the quest NPCs instead of open ground
+- [x] Namekian fusion, Majin absorption (Phase 5)
+- [x] Dojo and Patrol outpost for the quest NPCs (new worlds; `/dbz build` for existing ones)
 - [ ] Real art for every Phase 4 block/item/mob (see ASSETS_TODO.md)
 - [x] Tag `phase-4-world`
 
-## Phase 5+
-- [ ] Work every FEATURE_MATRIX row to `done`, then balance + polish
+## Phase 5 — Feature completion (v0.7.0)
+- [x] Combat depth: Stunned / Ki Sealed effects, Ki Transfer, Grab & Throw, Paralysis Wave, Seal Orb, Gathering Sphere (ball-drop), air combos, knock-ups, spikes
+- [x] Namekian fusion (Namekian Warriors on Namek, consenting players), Majin absorption
+- [x] Technique mastery, prestige, god ki edge
+- [x] Alignment effects, path bonuses, mental age / wisdom, tail cutting and regrowth
+- [x] Life sim: thirst, temperature, partners (Promise Ring), scars / tattoos (Life screen)
+- [x] Quest NPC buildings, config audit; every FEATURE_MATRIX row is `done`
+- [x] Tag `phase-5-complete`
+
+## Next
+- [ ] Balance pass with real play (TP pacing, enemy scaling, form multipliers vs. bosses)
+- [ ] Real art (see ASSETS_TODO.md): hair, Great Ape, dragon, race skins, NPC models, item and block textures
+- [ ] More content: more bosses and questlines, more planets, a space dimension (Frost Demon vacuum survival), children for partners

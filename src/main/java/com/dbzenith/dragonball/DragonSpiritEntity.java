@@ -49,7 +49,7 @@ public class DragonSpiritEntity extends Entity {
     @Override
     public void tick() {
         super.tick();
-        if (!level().isClientSide && tickCount > LIFETIME) DragonBalls.dragonDeparts(this);
+        if (!level().isClientSide && tickCount > com.dbzenith.config.DBZConfig.SERVER.dragonWaitTicks.get()) DragonBalls.dragonDeparts(this);
     }
 
     @Override

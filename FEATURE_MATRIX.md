@@ -110,5 +110,5 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Dragon Ball radar screen | B | done | HUD radar while holding the Dragon Radar; seen in-client |
 | Quest / planet / wish / title UI | B | done | Quest screen (NPC), planet screen (Space Pod), wish screen (dragon), Title button on the stat screen |
 | Keybinds | B | done | Real presses observed in the test client (Y, R, H, F5). G charge, Z lower release, V fly, LAlt guard, R fire, Y next, K stats |
-| Config for every tunable | B | in-progress | All Phase 0 numbers in config |
+| Config for every tunable | B | done | `serverconfig/dbzenith-server.toml`: combat, techniques, forms, races, training, Dragon Balls, gear, enemies, life sim (Phase 5 audit moved the last constants: pod recharge, dragon wait, false moon, scouter range, enemy scaling, boss enrage) |
 | Admin/debug command `/dbz` | — | done | GameTest `commandSetsStats` |

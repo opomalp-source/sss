@@ -99,6 +99,21 @@ public final class NeedsTests {
     }
 
     @GameTest(template = EMPTY)
+    public static void questNpcsGetBuildings(GameTestHelper helper) {
+        net.minecraft.server.level.ServerLevel level = helper.getLevel();
+        net.minecraft.core.BlockPos far = new net.minecraft.core.BlockPos(30_000, 0, 30_000); // away from the other tests
+        com.dbzenith.npc.QuestNpcPlacement.buildWithNpc(level, com.dbzenith.npc.NpcStructures.Kind.DOJO, far);
+        var masters = level.getEntitiesOfClass(com.dbzenith.npc.QuestGiverEntity.class, new net.minecraft.world.phys.AABB(far).inflate(8, 400, 8));
+        helper.assertTrue(masters.size() == 1, "the master stands in the dojo");
+        var m = masters.get(0);
+        helper.assertTrue(level.getBlockState(m.blockPosition().below()).is(net.minecraft.world.level.block.Blocks.OAK_PLANKS), "on the dojo floor");
+        helper.assertTrue(level.getBlockState(m.blockPosition().offset(2, 0, 2)).is(com.dbzenith.registry.ModBlocks.PUNCHING_BAG.get()), "with a punching bag");
+        helper.assertTrue(!level.getBlockState(m.blockPosition().above(4)).isAir(), "under a roof");
+        m.discard();
+        helper.succeed();
+    }
+
+    @GameTest(template = EMPTY)
     public static void scarsAndTattoosAreVisible(GameTestHelper helper) {
         ServerPlayer p = TestPlayers.create(helper);
         PlayerData d = ModCapabilities.getOrThrow(p);

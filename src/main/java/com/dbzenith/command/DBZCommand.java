@@ -259,6 +259,19 @@ public final class DBZCommand {
                                             boolean on = BoolArgumentType.getBool(ctx, "on");
                                             return apply(ctx, "Set tail " + on + " for", d -> d.setTail(on));
                                         }))))
+                .then(Commands.literal("build")
+                        .then(Commands.argument("kind", StringArgumentType.word())
+                                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.List.of("dojo", "outpost"), b))
+                                .then(Commands.argument("pos", net.minecraft.commands.arguments.coordinates.BlockPosArgument.blockPos())
+                                        .executes(ctx -> {
+                                            String kind = StringArgumentType.getString(ctx, "kind");
+                                            if (!kind.equals("dojo") && !kind.equals("outpost")) return 0;
+                                            var pos = net.minecraft.commands.arguments.coordinates.BlockPosArgument.getLoadedBlockPos(ctx, "pos");
+                                            com.dbzenith.npc.QuestNpcPlacement.buildWithNpc(ctx.getSource().getLevel(),
+                                                    kind.equals("dojo") ? com.dbzenith.npc.NpcStructures.Kind.DOJO : com.dbzenith.npc.NpcStructures.Kind.OUTPOST, pos);
+                                            ctx.getSource().sendSuccess(() -> Component.literal("Built a " + kind + " at " + pos.toShortString()), true);
+                                            return 1;
+                                        }))))
                 .then(Commands.literal("moon")
                         .executes(ctx -> {
                             var pos = ctx.getSource().getPosition();

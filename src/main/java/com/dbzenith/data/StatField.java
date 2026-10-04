@@ -31,6 +31,9 @@ public record StatField(String id, ToDoubleFunction<PlayerData> getter, BiConsum
         register("physical_age", PlayerData::getPhysicalAge, PlayerData::setPhysicalAge);
         register("mental_age", PlayerData::getMentalAge, PlayerData::setMentalAge);
         register("prestige", d -> d.getPrestige(), (d, v) -> d.setPrestige((int) Math.round(v)));
+        register("thirst", PlayerData::getThirst, PlayerData::setThirst);
+        register("scar", d -> d.getScar(), (d, v) -> d.setCosmetics((int) Math.max(0, Math.min(com.dbzenith.world.Cosmetics.SCARS.size() - 1, Math.round(v))), d.getTattoo()));
+        register("tattoo", d -> d.getTattoo(), (d, v) -> d.setCosmetics(d.getScar(), (int) Math.max(0, Math.min(com.dbzenith.world.Cosmetics.TATTOOS.size() - 1, Math.round(v)))));
     }
 
     private static void register(String id, ToDoubleFunction<PlayerData> getter, BiConsumer<PlayerData, Double> setter) {

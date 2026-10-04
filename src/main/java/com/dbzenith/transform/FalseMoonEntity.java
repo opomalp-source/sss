@@ -34,7 +34,7 @@ public class FalseMoonEntity extends Entity {
     public void tick() {
         super.tick();
         if (level().isClientSide) return;
-        if (tickCount > LIFETIME) {
+        if (tickCount > com.dbzenith.config.DBZConfig.SERVER.falseMoonTicks.get()) {
             discard();
             return;
         }

@@ -185,6 +185,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue dragonBallsEnabled;
         public final ForgeConfigSpec.IntValue dragonBallScatterRadius;
         public final ForgeConfigSpec.IntValue dragonBallInertTicks;
+        public final ForgeConfigSpec.IntValue dragonWaitTicks;
         public final ForgeConfigSpec.IntValue radarRange;
         public final ForgeConfigSpec.LongValue wishPowerTp;
         public final ForgeConfigSpec.IntValue wishSenzuCount;
@@ -193,10 +194,16 @@ public final class DBZConfig {
 
         // --- gear ---
         public final ForgeConfigSpec.LongValue scouterLimit;
+        public final ForgeConfigSpec.IntValue scouterRange;
+        public final ForgeConfigSpec.IntValue spacePodRechargeTicks;
+        public final ForgeConfigSpec.IntValue falseMoonTicks;
 
         // --- enemies ---
         public final ForgeConfigSpec.DoubleValue enemyPowerPerLevelSquared;
         public final ForgeConfigSpec.IntValue enemyMaxLevel;
+        public final ForgeConfigSpec.DoubleValue enemyHealthPerLevel;
+        public final ForgeConfigSpec.DoubleValue enemyDamagePerLevel;
+        public final ForgeConfigSpec.DoubleValue bossEnrageHealth;
 
         // --- life sim ---
         public final ForgeConfigSpec.BooleanValue agingEnabled;
@@ -478,6 +485,8 @@ public final class DBZConfig {
                     .defineInRange("scatterRadius", 800, 16, 30_000);
             dragonBallInertTicks = b.comment("After a wish the balls are stone for this long, then scatter again (48000 = 2 days)")
                     .defineInRange("inertTicks", 48000, 0, 10_000_000);
+            dragonWaitTicks = b.comment("How long the Eternal Dragon waits for a wish (2400 = 2 minutes)")
+                    .defineInRange("dragonWaitTicks", 2400, 200, 1_000_000);
             radarRange = b.comment("Dragon Radar range in blocks").defineInRange("radarRange", 1000, 16, 30_000);
             wishPowerTp = b.comment("TP granted by the power wish").defineInRange("wishPowerTp", 5000L, 0L, Long.MAX_VALUE);
             wishSenzuCount = b.defineInRange("wishSenzuCount", 10, 1, 64);
@@ -489,12 +498,20 @@ public final class DBZConfig {
             b.push("gear");
             scouterLimit = b.comment("A scouter shatters when it reads a power level above this")
                     .defineInRange("scouterLimit", 1_000_000L, 1L, Long.MAX_VALUE);
+            scouterRange = b.comment("How far a scouter reads, in blocks").defineInRange("scouterRange", 64, 4, 512);
+            spacePodRechargeTicks = b.comment("Space Pod recharge time between flights (1200 = 1 minute)")
+                    .defineInRange("spacePodRechargeTicks", 1200, 0, 10_000_000);
+            falseMoonTicks = b.comment("How long a Moon Orb's false moon shines (1200 = 1 minute)")
+                    .defineInRange("falseMoonTicks", 1200, 20, 1_000_000);
             b.pop();
 
             b.comment("Enemy fighters and bosses scale to the strongest nearby player").push("enemies");
             enemyPowerPerLevelSquared = b.comment("Enemy level = 1 + sqrt(nearest player power level / this)")
                     .defineInRange("powerPerLevelSquared", 1500.0, 1.0, 1e12);
             enemyMaxLevel = b.defineInRange("maxLevel", 60, 1, 10_000);
+            enemyHealthPerLevel = b.comment("Health gained per enemy level (fraction of base)").defineInRange("healthPerLevel", 0.6, 0.0, 100.0);
+            enemyDamagePerLevel = b.comment("Damage gained per enemy level (fraction of base)").defineInRange("damagePerLevel", 0.35, 0.0, 100.0);
+            bossEnrageHealth = b.comment("Bosses enrage below this share of their health").defineInRange("bossEnrageHealth", 0.5, 0.0, 1.0);
             b.pop();
 
             b.comment("Optional life-sim layer").push("life_sim");

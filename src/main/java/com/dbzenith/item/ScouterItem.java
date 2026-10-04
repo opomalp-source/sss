@@ -63,11 +63,15 @@ public class ScouterItem extends ArmorItem {
         return Math.round(e.getMaxHealth() * 10 + e.getAttributeValue(Attributes.ARMOR) * 25);
     }
 
+    public static double range() {
+        return com.dbzenith.config.DBZConfig.SERVER_SPEC.isLoaded() ? com.dbzenith.config.DBZConfig.SERVER.scouterRange.get() : RANGE;
+    }
+
     /** The living entity under the crosshair within {@link #RANGE}, or null. */
     public static LivingEntity target(Player player) {
         Vec3 eye = player.getEyePosition();
-        Vec3 end = eye.add(player.getLookAngle().scale(RANGE));
-        AABB box = player.getBoundingBox().expandTowards(player.getLookAngle().scale(RANGE)).inflate(1);
+        Vec3 end = eye.add(player.getLookAngle().scale(range()));
+        AABB box = player.getBoundingBox().expandTowards(player.getLookAngle().scale(range())).inflate(1);
         EntityHitResult hit = ProjectileUtil.getEntityHitResult(player.level(), player, eye, end, box,
                 e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator());
         Entity e = hit == null ? null : hit.getEntity();

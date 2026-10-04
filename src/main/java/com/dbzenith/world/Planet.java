@@ -23,7 +23,6 @@ public enum Planet {
     NAMEK(key("namek"), 1),
     NORTHERN_PLANET(key("northern_planet"), 10);
 
-    public static final int TRAVEL_COOLDOWN_TICKS = 1200;
 
     private final ResourceKey<Level> dimension;
     private final double gravity;
@@ -69,7 +68,7 @@ public enum Planet {
         BlockPos base = landingSite(level, target == EARTH ? level.getSharedSpawnPos() : BlockPos.ZERO);
         player.teleportTo(level, base.getX() + 0.5, base.getY(), base.getZ() + 0.5, player.getYRot(), 0f);
         player.fallDistance = 0;
-        d.setCooldown("space_travel", now + TRAVEL_COOLDOWN_TICKS);
+        d.setCooldown("space_travel", now + com.dbzenith.config.DBZConfig.SERVER.spacePodRechargeTicks.get());
         level.playSound(null, player.blockPosition(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 1f, 0.6f);
         player.displayClientMessage(Component.translatable("message.dbzenith.pod_landed", Component.translatable(target.translationKey())), false);
         return true;

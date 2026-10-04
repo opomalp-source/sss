@@ -58,7 +58,7 @@ public class BossFighter extends KiFighter {
     protected void customServerAiStep() {
         super.customServerAiStep();
         bossBar.setProgress(getHealth() / getMaxHealth());
-        if (!enraged && getHealth() < getMaxHealth() / 2) enrage();
+        if (!enraged && getHealth() < getMaxHealth() * com.dbzenith.config.DBZConfig.SERVER.bossEnrageHealth.get()) enrage();
         if (teleportCooldown > 0) teleportCooldown--;
         LivingEntity t = getTarget();
         if (t != null && teleportCooldown == 0 && distanceToSqr(t) > 12 * 12) {
