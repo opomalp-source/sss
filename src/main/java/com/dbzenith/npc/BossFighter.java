@@ -43,6 +43,12 @@ public class BossFighter extends KiFighter {
         return bossBar;
     }
 
+    /** Bosses match the strongest form the summoner can take, so transforming after the summons is no shortcut. */
+    @Override
+    protected long scaleTo(com.dbzenith.data.PlayerData d) {
+        return com.dbzenith.stats.StatCalculator.peakPower(d);
+    }
+
     @Override
     protected double damageMultiplier() {
         return enraged ? 1.5 : 1.0;

@@ -92,11 +92,16 @@ public final class CombatEvents {
                 // Vanilla armor still matters against mobs and the environment.
                 float afterArmor = CombatRules.getDamageAfterAbsorb(event.getAmount(), player.getArmorValue(),
                         (float) player.getAttributeValue(Attributes.ARMOR_TOUGHNESS));
-                raw *= afterArmor / event.getAmount();
+                double kept = afterArmor / event.getAmount();
+                if (source.getEntity() instanceof com.dbzenith.npc.KiFighter) { // fighters hit through most of it
+                    kept = 1 - (1 - kept) * DBZConfig.SERVER.fighterArmorEffect.get();
+                }
+                raw *= kept;
             }
             boolean afterimage = source.getEntity() != null && victim.level().getGameTime() <= victimData.getDashEvadeUntil();
             if (isKi && !afterimage) raw *= RacePassives.absorbKiHit(victimData, raw, victim.level().getGameTime());
             dealt = afterimage ? 0 : DamageCalculator.againstPlayer(raw, victimData, source.getEntity() != null && !isThrow, victim.getRandom());
+            dealt *= 1 - victimData.getGearReduction();                          // a full gi or armour set
             if (victimData.isGuarding() && dealt > 0) {
                 victimData.setStamina(victimData.getStamina() - DamageCalculator.guardPrevented(dealt) * DBZConfig.SERVER.guardStaminaPerDamage.get());
                 if (victimData.getStamina() <= 0) victimData.setGuarding(false); // guard broken

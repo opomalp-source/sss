@@ -353,7 +353,7 @@
   "item.dbzenith.battle_armor_top": "Battle Armor",
   "item.dbzenith.battle_armor_pants": "Battle Suit Leggings",
   "item.dbzenith.battle_armor_boots": "Battle Armor Boots",
-  "item.dbzenith.gi.set_bonus": "Full set: STR %s, DEX %s, Ki Power %s",
+  "item.dbzenith.gi.set_bonus": "Full set: STR %s, DEX %s, Ki Power %s, -%s%% damage taken",
   "hud.dbzenith.scouter_power": "Power Level: %s",
   "hud.dbzenith.scouter_distance": "%sm",
   "message.dbzenith.scouter_overload": "The scouter can't take that reading. It shatters!",

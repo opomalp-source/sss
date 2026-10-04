@@ -29,7 +29,7 @@ public final class DBZConfig {
 
     public static final class Server {
         /** Bump when a balance pass changes defaults; older config files get the listed values reset once. */
-        public static final int BALANCE_VERSION = 2;
+        public static final int BALANCE_VERSION = 3;
         public final ForgeConfigSpec.IntValue balanceVersion;
         // --- attributes ---
         public final ForgeConfigSpec.IntValue startingAttribute;
@@ -207,6 +207,7 @@ public final class DBZConfig {
         // --- enemies ---
         public final ForgeConfigSpec.DoubleValue enemyPowerPerLevel;
         public final ForgeConfigSpec.IntValue enemyMaxLevel;
+        public final ForgeConfigSpec.DoubleValue fighterArmorEffect;
         public final ForgeConfigSpec.DoubleValue enemyHealthPerLevel;
         public final ForgeConfigSpec.DoubleValue enemyDamagePerLevel;
         public final ForgeConfigSpec.DoubleValue bossEnrageHealth;
@@ -416,7 +417,7 @@ public final class DBZConfig {
             overdriveBodyDrainPercent = b.comment("Body drained per second, % of max, per point of multiplier above 1")
                     .defineInRange("overdriveBodyDrainPercent", 0.4, 0.0, 100.0);
             overdriveStaminaDrainPercent = b.comment("Stamina drained per second, % of max, per point of multiplier above 1")
-                    .defineInRange("overdriveStaminaDrainPercent", 1.0, 0.0, 100.0);
+                    .defineInRange("overdriveStaminaDrainPercent", 2.0, 0.0, 100.0);
             overdriveBacklashPercent = b.comment("On ending Overdrive: body lost, % of max, per point of multiplier above 1")
                     .defineInRange("overdriveBacklashPercent", 0.5, 0.0, 100.0);
             overdriveMinBodyPercent = b.comment("Overdrive switches off below this body %")
@@ -523,6 +524,8 @@ public final class DBZConfig {
             enemyPowerPerLevel = b.comment("Enemy level = nearest player's full power level (at 100% release) / this, at least 1. Linear, so foes keep pace")
                     .defineInRange("powerPerLevel", 700.0, 1.0, 1e12);
             enemyMaxLevel = b.defineInRange("maxLevel", 200, 1, 10_000);
+            fighterArmorEffect = b.comment("How much vanilla armour counts against fighters' punches (they hit through it; 1 = fully)")
+                    .defineInRange("fighterArmorEffect", 0.25, 0.0, 1.0);
             enemyHealthPerLevel = b.comment("Health gained per enemy level (fraction of base)").defineInRange("healthPerLevel", 0.5, 0.0, 100.0);
             enemyDamagePerLevel = b.comment("Damage gained per enemy level (fraction of base)").defineInRange("damagePerLevel", 0.55, 0.0, 100.0);
             bossEnrageHealth = b.comment("Bosses enrage below this share of their health").defineInRange("bossEnrageHealth", 0.5, 0.0, 1.0);

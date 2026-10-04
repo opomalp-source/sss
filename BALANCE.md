@@ -50,6 +50,33 @@ Server config lives in each world (`serverconfig/dbzenith-server.toml`), so new 
 The file now has `balanceVersion`; on load, a file from an older revision gets the values this pass changed reset to
 the new defaults once (`config.BalanceMigration`), and the log says so. Everything else you set stays.
 
-## Not modelled yet
-Ki-technique damage per ki, Overdrive at high levels, PvP between races, and gear set bonuses are covered by unit
-tests but not by pacing targets. They are the next things to watch in real play.
+## Pass 2 (balance revision 3)
+The `BalanceReport2` GameTest models four more areas, writes `run-gametest/balance-report-2.md` and asserts these
+targets (`pass2TargetsHold`):
+
+| What | Target | Now |
+|---|---|---|
+| Damage per ki, every damaging technique (level 1000) | 0.6-1.6x the median | 5.2-8.2 (median 6.2) |
+| A technique spammed vs punching | at most 4x | at most x1.18 (Ki Blast) |
+| Overdrive: extra output of one full burst, any level | 30-75 multiplier-seconds | 50 (125 mastered) |
+| Best form of each race vs the median race, levels 100-2000 | 0.75-1.33x | 0.80-1.28x |
+| Netherite vs no armour, survival against fighters | at most 2x | x1.24 |
+| Battle Armor vs no armour, survival against fighters | at least 1.15x | x1.24 (plus +8% damage) |
+
+Changes:
+- **Techniques**: Homing Orb x1.2 (was 0.8), Cutter Disk x1.8 (1.5), Explosive Wave x2.2 (1.5), Gathering Sphere x12 (6),
+  Supernova Orb x5 (4); Arm Cannon costs 40 ki (30) with a 1 s cooldown (0.75 s). Volleys are modelled at 60% of shots landing;
+  Seal Orb and Candy Beam count as utility.
+- **Overdrive** drains stamina twice as fast (`overdriveStaminaDrainPercent` 2.0): a burst is now worth half a boss fight, not
+  a whole one. **Summoned bosses** match the strongest form you can take (`StatCalculator.peakPower`), so transforming after the
+  summons is no shortcut. Ordinary enemies still match your current power.
+- **Forms**: Buffed x2.8/1.8/2.4 (was 2.6/1.5/1.8); Third Form unlocks at 250 (200); Final Form x3.2 with 1%/s drain (x3.5, 0.5%/s);
+  Golden Form x5.0 (5.5); Super Saiyan Blue x6.0 (6.5); Super Namekian, Upgrade Mk III, Full Conversion and Super Majin unlock at 300
+  (350-400), so every race has a second tier by then.
+- **Gear**: fighters punch through vanilla armour (`enemies.fighterArmorEffect` 0.25: armour counts a quarter against them;
+  it still counts fully against vanilla mobs). Full gi sets take damage off everything: Turtle and Demon gi 5%, Battle Armor 15%
+  (shown in the tooltip).
+
+## Still for real play
+Feel, not numbers: how fights read with knockback, flight and dashes; whether racial passives (Namekian regeneration,
+Android ki absorption, Majin kill-heal) tip close duels; whether the pacing targets match how people actually play.

@@ -207,3 +207,10 @@
 - `GuiGraphics.blitNineSliced` assumes a 256x256 texture; the 256x64 HUD sheet came out as stripes. The sheet is 256x256 now.
 - `spreadplayers` from RCON again used the overworld's heights in another dimension; run it with `execute in <dimension>`.
 - Someone flew the test character to the Northern Planet with the new pod mid-check, so one dome house landed there in the dev world.
+
+## 2026-10-05 — Session 1 (cont.): Balance pass 2 (v0.8.2)
+
+### Built
+- `gametest.BalanceReport2`: techniques (damage per ki, spam DPS vs punching), Overdrive bursts (duration and extra output by level and mastery), a race-vs-race table of best-form multipliers from level 100 to 2000, and gear (soldier hits to beat you with vanilla armour and gi sets). Targets in BALANCE.md, asserted by `pass2TargetsHold`.
+- Findings and fixes: weak area/utility techniques buffed and the Arm Cannon trimmed; Overdrive's burst halved; summoned bosses now match the summoner's peak form (`StatCalculator.peakPower`); Human, Frost Demon and Saiyan form curves smoothed and second tiers moved to level 300; netherite gave 4.5x survival against fighters, so fighters now punch through vanilla armour (a quarter counts) and full gi sets reduce all damage (5% / 15%). Balance revision 3 migrates the Overdrive drain in existing worlds.
+- 100 GameTests green.

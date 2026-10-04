@@ -21,12 +21,18 @@ public final class BalanceMigration {
                 c.tpPerMeditationSecond, c.tpPerSecondMovingUnderGravity, c.tpCostPerPoint, c.wishPowerTp);
     }
 
+    /** Values whose defaults changed in balance revision 3 (pass 2). */
+    static List<ForgeConfigSpec.ConfigValue<?>> revision3(DBZConfig.Server c) {
+        return List.of(c.overdriveStaminaDrainPercent);
+    }
+
     public static void onLoad(ModConfigEvent event) {
         if (event.getConfig().getSpec() != DBZConfig.SERVER_SPEC) return;
         DBZConfig.Server c = DBZConfig.SERVER;
         int from = c.balanceVersion.get();
         if (from >= DBZConfig.Server.BALANCE_VERSION) return;
         if (from < 2) revision2(c).forEach(BalanceMigration::reset);
+        if (from < 3) revision3(c).forEach(BalanceMigration::reset);
         c.balanceVersion.set(DBZConfig.Server.BALANCE_VERSION);
         DBZConfig.SERVER_SPEC.save();
         DBZenith.LOGGER.info("Dragon Block Zenith: server config upgraded from balance revision {} to {}", from, DBZConfig.Server.BALANCE_VERSION);

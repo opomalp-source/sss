@@ -24,16 +24,18 @@ import java.util.Locale;
  */
 public class GiArmorItem extends ArmorItem {
     public enum Set {
-        TURTLE(1.10, 1.10, 1.00, 2, Items.LEATHER),
-        DEMON(1.00, 1.05, 1.15, 2, Items.LEATHER),
-        BATTLE_ARMOR(1.08, 1.00, 1.08, 5, Items.IRON_INGOT);
+        TURTLE(1.10, 1.10, 1.00, 0.05, 2, Items.LEATHER),
+        DEMON(1.00, 1.05, 1.15, 0.05, 2, Items.LEATHER),
+        BATTLE_ARMOR(1.08, 1.00, 1.08, 0.15, 5, Items.IRON_INGOT);
 
         private final double strMult;
         private final double dexMult;
         private final double kiMult;
+        private final double reduction;
         private final ArmorMaterial material;
 
-        Set(double str, double dex, double ki, int defense, net.minecraft.world.item.Item repair) {
+        Set(double str, double dex, double ki, double reduction, int defense, net.minecraft.world.item.Item repair) {
+            this.reduction = reduction;
             strMult = str;
             dexMult = dex;
             kiMult = ki;
@@ -53,6 +55,8 @@ public class GiArmorItem extends ArmorItem {
         public double strMult() { return strMult; }
         public double dexMult() { return dexMult; }
         public double kiMult() { return kiMult; }
+        /** Share of all incoming damage a full set takes off. */
+        public double reduction() { return reduction; }
         public ArmorMaterial material() { return material; }
 
         public String id() {
@@ -89,12 +93,13 @@ public class GiArmorItem extends ArmorItem {
         Set s = wornSet(player);
         if (s == null) data.setGearMultipliers(1, 1, 1);
         else data.setGearMultipliers(s.strMult(), s.dexMult(), s.kiMult());
+        data.setGearReduction(s == null ? 0 : s.reduction());
     }
 
     @Override
     public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("item.dbzenith.gi.set_bonus",
-                pct(set.strMult), pct(set.dexMult), pct(set.kiMult)).withStyle(net.minecraft.ChatFormatting.GOLD));
+                pct(set.strMult), pct(set.dexMult), pct(set.kiMult), Math.round(set.reduction * 100)).withStyle(net.minecraft.ChatFormatting.GOLD));
     }
 
     private static String pct(double m) {

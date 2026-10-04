@@ -91,9 +91,14 @@ public class KiFighter extends Monster {
                                         SpawnGroupData data, CompoundTag tag) {
         SpawnGroupData result = super.finalizeSpawn(world, difficulty, reason, data, tag);
         Player nearest = world.getNearestPlayer(this, 64);
-        long power = nearest == null ? 0 : ModCapabilities.get(nearest).map(StatCalculator::fullPower).orElse(0L);
+        long power = nearest == null ? 0 : ModCapabilities.get(nearest).map(this::scaleTo).orElse(0L);
         setFighterLevel(levelFor(power));
         return result;
+    }
+
+    /** The power this fighter matches itself to (bosses override: they expect your best form). */
+    protected long scaleTo(com.dbzenith.data.PlayerData d) {
+        return StatCalculator.fullPower(d);
     }
 
     /** Level from a full power level: power / enemies.powerPerLevel (linear, so foes keep pace), at least 1, capped. */

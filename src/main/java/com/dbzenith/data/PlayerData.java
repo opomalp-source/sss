@@ -547,6 +547,17 @@ public class PlayerData {
         };
     }
 
+    private double gearReduction;
+
+    /** Share of incoming damage a full gi/armour set takes off (set every tick from the worn set; not saved). */
+    public double getGearReduction() {
+        return gearReduction;
+    }
+
+    public void setGearReduction(double r) {
+        gearReduction = r;
+    }
+
     public void setGearMultipliers(double str, double dex, double ki) {
         if (str != gearStr || dex != gearDex || ki != gearKi) {
             gearStr = str;

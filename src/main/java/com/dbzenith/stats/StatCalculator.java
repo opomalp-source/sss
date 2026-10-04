@@ -91,6 +91,25 @@ public final class StatCalculator {
     }
 
     /**
+     * Full power in the strongest form this character can take right now (forms it qualifies for, current
+     * multipliers otherwise kept). Summoned bosses match this.
+     */
+    public static long peakPower(PlayerData data) {
+        double best = fullPower(data);
+        com.dbzenith.transform.Form current = Forms.byId(data.getFormId());
+        for (com.dbzenith.transform.Form f : Forms.all()) {
+            if (f.isBase() || com.dbzenith.transform.FormHandler.problem(data, f) != null) continue;
+            double sum = 0;
+            for (Attribute a : Attribute.values()) {
+                double others = FormMath.attributeMultiplier(data, a) / FormMath.formMultiplier(data, current, a);
+                sum += data.getAttribute(a) * others * FormMath.formMultiplier(data, f, a);
+            }
+            best = Math.max(best, sum * 10.0);
+        }
+        return Math.round(best);
+    }
+
+    /**
      * Battle power as shown by a scouter: grows with every attribute and scales with the current release %.
      */
     public static long battlePower(PlayerData data) {
