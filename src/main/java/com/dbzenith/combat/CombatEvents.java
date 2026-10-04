@@ -83,6 +83,7 @@ public final class CombatEvents {
         // 2) apply to victim
         PlayerData victimData = victim instanceof Player vp ? ModCapabilities.get(vp).orElse(null) : null;
         raw *= godKiFactor(attackerData, victimData);
+        if (attackerData != null && (isKi || isMelee || isThrow)) raw *= com.dbzenith.race.Alignment.damageMultiplier(attackerData);
         double dealt;
         if (victimData != null) {
             Player player = (Player) victim;
@@ -100,6 +101,7 @@ public final class CombatEvents {
                 victimData.setStamina(victimData.getStamina() - DamageCalculator.guardPrevented(dealt) * DBZConfig.SERVER.guardStaminaPerDamage.get());
                 if (victimData.getStamina() <= 0) victimData.setGuarding(false); // guard broken
             }
+            if (dealt > 0) com.dbzenith.race.TailRules.onHit(player, victimData, source); // blades can cut a tail
             BodyHealth.adoptExternalChanges(player, victimData);
             victimData.setBody(victimData.getBody() - dealt);
             victimData.setLastDamagedTick(victim.level().getGameTime());

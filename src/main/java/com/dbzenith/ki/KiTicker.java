@@ -68,7 +68,7 @@ public final class KiTicker {
                 && !com.dbzenith.registry.ModEffects.isKiSealed(player)) {
             // No passive ki regen while transformed: forms are sustained by charging and mastery.
             data.setKi(data.getKi() + perTick(s.maxKi(), c.kiRegenPercentPerSecond.get()) * race.kiRegenMultiplier()
-                    * (data.isMeditating() ? c.meditationKiRegenMultiplier.get() : 1.0));
+                    * (data.isMeditating() ? c.meditationKiRegenMultiplier.get() : 1.0) * com.dbzenith.race.Alignment.kiRegenMultiplier(data));
         }
 
         if (!data.isCharging() && !data.isGuarding()) {
@@ -86,6 +86,7 @@ public final class KiTicker {
         if (now % 20 == 0) com.dbzenith.world.LifeSim.tick(player, data);
         data.tickMajin(now);
         RacePassives.tick(player, data, now);
+        if (now % 20 == 0) com.dbzenith.race.TailRules.tick(player, data);
         if (now % 20 == 0) GreatApe.tick(player, data);
         FormHandler.tick(player, data, now);
         Overdrive.tick(player, data, now);

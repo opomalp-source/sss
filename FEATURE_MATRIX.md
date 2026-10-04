@@ -15,11 +15,11 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Derived: spirit modifier | B | done | Scales form + Overdrive mastery gain |
 | Derived: ki transfer | B | done | SPI sets the rate; Ki Transfer technique gives ki to the player you look at. GameTest |
 | Release % | B | done | Scales ki damage + ki cost; charging raises, key lowers; GameTests |
-| Physical / mental age | V | stubbed | Stored only |
+| Physical / mental age | V | done | Body ages by race (STR/DEX fade past 60); the mind ages for all, x3 meditating; a Time Chamber day is a year; wisdom: +1% TP per mental year past 20 (max +40%). GameTests |
 | TP pool: earning | C | done | Damage dealt, kills, charging; MIND bonus |
 | TP pool: spending | C | done | Server-validated upgrade packet + stat screen |
 | TP cost formula (path weights, soft cap) | C | done | GameTest `tpCostFollowsPath` |
-| Class/path choice | B | stubbed | Affects TP cost only; no UI |
+| Class/path choice | B | done | Chosen at creation (`/dbz path` to change): Fighter cheaper body stats, +5% melee, +10% stamina; Spiritualist cheaper ki stats, +5% ki damage, +10% ki; Hybrid +5% TP. GameTests |
 | Battle power / level | C | done | Shown in HUD + `/dbz stats` |
 
 ## 3.2 Ki & combat
@@ -64,7 +64,7 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Majin absorption of other fighters | B | done | Absorb a beaten non-boss: +10% STR/DEX/KI per stack (max 3, 10 min), steals a technique from players; respects PvP. GameTests |
 | Android / Cyborg (no hunger, energy absorb, no fatigue) | B | done | Passives + Energy Absorb / Arm Cannon; GameTests |
 | Character-creation screen | B | done | Seen in-client with live preview |
-| Alignment | V | stubbed | Stored, clamped −100..100 |
+| Alignment | V | done | Deeds shift it (monsters +, innocents/masters/good players -); Good 30+: +10% ki regen, Patrol work; Evil -30-: +10% damage; shown on the stat screen. GameTests |
 
 ## 3.5 Skills & deck
 | Feature | Src | Status | Notes |

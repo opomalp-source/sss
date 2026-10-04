@@ -40,7 +40,7 @@ Resume from the first unchecked item. Each phase ends with a git tag.
 - [x] Form framework (`transform.Form`/`Forms`: multipliers on STR/DEX/KI_POWER, ki+stamina drain, colors, hair style, unlock level + parent mastery + flags, scale, trigger)
 - [x] Saiyan line: Super Saiyan, Ascended, Ultra, SSJ2, SSJ3, God (needs `god_ki` flag), Blue; Great Ape via full moon or Moon Orb false moon (tail required, 3x size)
 - [x] God ki ritual: the "Divine Ritual" quest (level 1000 + Time Chamber) grants `god_ki`
-- [ ] Tail regrowth / tail cutting
+- [x] Tail cutting (blades, 10%; a Great Ape shrinks back) and regrowth after 3 days
 - [x] Mastery per form (time in form x spirit / tier; up to -75% drain, +20% bonus)
 - [x] J transform / Shift+J revert; Forms screen (from K) with target selection; hair (4 styles), eye color, form aura, lightning sparks
 - [ ] Real art: hair model/textures, Great Ape model (GeckoLib) instead of a scaled player

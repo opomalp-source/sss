@@ -151,6 +151,14 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue majinAbsorbBonusPerStack;
         public final ForgeConfigSpec.IntValue majinAbsorbMaxStacks;
         public final ForgeConfigSpec.IntValue majinAbsorbDurationTicks;
+        public final ForgeConfigSpec.DoubleValue alignmentBonus;
+        public final ForgeConfigSpec.DoubleValue pathDamageBonus;
+        public final ForgeConfigSpec.DoubleValue pathPoolBonus;
+        public final ForgeConfigSpec.DoubleValue hybridTpBonus;
+        public final ForgeConfigSpec.DoubleValue tailCutChance;
+        public final ForgeConfigSpec.IntValue tailRegrowTicks;
+        public final ForgeConfigSpec.DoubleValue wisdomTpPerYear;
+        public final ForgeConfigSpec.DoubleValue wisdomTpMax;
         public final ForgeConfigSpec.IntValue deckBaseSlots;
         public final ForgeConfigSpec.IntValue deckLevelsPerExtraSlot;
         public final ForgeConfigSpec.IntValue deckMaxSlots;
@@ -412,6 +420,20 @@ public final class DBZConfig {
             majinAbsorbMaxStacks = b.defineInRange("majinAbsorbMaxStacks", 3, 1, 100);
             majinAbsorbDurationTicks = b.comment("How long absorbed power lasts (12000 = 10 minutes)")
                     .defineInRange("majinAbsorbDurationTicks", 12000, 20, 10_000_000);
+            alignmentBonus = b.comment("Good (alignment 30+): ki regen bonus. Evil (-30 or less): damage bonus")
+                    .defineInRange("alignmentBonus", 0.10, 0.0, 10.0);
+            pathDamageBonus = b.comment("Fighter path: melee damage bonus. Spiritualist path: ki damage bonus")
+                    .defineInRange("pathDamageBonus", 0.05, 0.0, 10.0);
+            pathPoolBonus = b.comment("Fighter path: max stamina bonus. Spiritualist path: max ki bonus")
+                    .defineInRange("pathPoolBonus", 0.10, 0.0, 10.0);
+            hybridTpBonus = b.comment("Hybrid path: TP gain bonus").defineInRange("hybridTpBonus", 0.05, 0.0, 10.0);
+            tailCutChance = b.comment("Chance that a hit from a sword or axe cuts off a Saiyan tail")
+                    .defineInRange("tailCutChance", 0.10, 0.0, 1.0);
+            tailRegrowTicks = b.comment("A cut tail grows back after this long (72000 = 3 days)")
+                    .defineInRange("tailRegrowTicks", 72000, 20, 100_000_000);
+            wisdomTpPerYear = b.comment("TP gain bonus per year of mental age above 20 (wisdom)")
+                    .defineInRange("wisdomTpPerYear", 0.01, 0.0, 1.0);
+            wisdomTpMax = b.defineInRange("wisdomTpMax", 0.40, 0.0, 10.0);
             deckBaseSlots = b.comment("Technique deck slots every character has")
                     .defineInRange("deckBaseSlots", 4, 1, 20);
             deckLevelsPerExtraSlot = b.comment("One extra deck slot per this many character levels")

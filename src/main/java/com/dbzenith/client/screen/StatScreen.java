@@ -79,6 +79,9 @@ public class StatScreen extends Screen {
                 Component.translatable(d.getRace().translationKey()), Component.translatable(d.getPath().translationKey()),
                 (int) d.getPhysicalAge(), d.getPrestige()), left + 8, top + 20, DIM);
         g.drawString(font, Component.translatable("screen.dbzenith.tp", String.format("%,d", d.getTrainingPoints())), left + W - 110, top + 8, 0xFF7CFF7C);
+        com.dbzenith.race.Alignment.Standing standing = com.dbzenith.race.Alignment.of(d);
+        g.drawString(font, Component.translatable("screen.dbzenith.alignment", Component.translatable(standing.translationKey()), d.getAlignment())
+                .withStyle(standing.color), left + W - 110, top + 20, 0xFFFFFFFF);
 
         Attribute[] attrs = Attribute.values();
         g.drawString(font, Component.translatable("screen.dbzenith.cost"), left + 104, top + 32, DIM);

@@ -25,12 +25,16 @@ public final class StatCalculator {
         int mnd = data.getAttribute(Attribute.MIND);
         int spi = data.getAttribute(Attribute.SPIRIT);
 
+        FightingPath path = data.getPath();
+        boolean fighter = path == FightingPath.FIGHTER, spiritualist = path == FightingPath.SPIRITUALIST;
+        double pool = c.pathPoolBonus.get(), dmg = c.pathDamageBonus.get();
+
         return new DerivedStats(
                 c.baseBody.get() + con * c.bodyPerConstitution.get(),
-                c.baseStamina.get() + con * c.staminaPerConstitution.get(),
-                c.baseKi.get() + wil * c.kiPerWillpower.get(),
-                str * c.meleeDamagePerStrength.get(),
-                kip * c.kiDamagePerKiPower.get(),
+                (c.baseStamina.get() + con * c.staminaPerConstitution.get()) * (fighter ? 1 + pool : 1),
+                (c.baseKi.get() + wil * c.kiPerWillpower.get()) * (spiritualist ? 1 + pool : 1),
+                str * c.meleeDamagePerStrength.get() * (fighter ? 1 + dmg : 1),
+                kip * c.kiDamagePerKiPower.get() * (spiritualist ? 1 + dmg : 1),
                 dex * c.defensePerDexterity.get() + con * c.defensePerConstitution.get(),
                 Math.min(c.evasionCap.get(), dex * c.evasionPerDexterity.get()),
                 Math.min(c.kiControlCap.get(), mnd * c.kiControlPerMind.get()),
@@ -61,7 +65,9 @@ public final class StatCalculator {
         double mult = (1.0 + data.getAttribute(Attribute.MIND) * DBZConfig.SERVER.tpGainPerMind.get())
                 * (1.0 + Races.of(data.getRace()).tpGainBonus())
                 * data.getTrainingMultiplier() // gravity, weights, Time Chamber (set by TrainingTicker)
-                * (1.0 + DBZConfig.SERVER.prestigeTpBonus.get() * data.getPrestige());
+                * (1.0 + DBZConfig.SERVER.prestigeTpBonus.get() * data.getPrestige())
+                * (data.getPath() == FightingPath.HYBRID ? 1.0 + DBZConfig.SERVER.hybridTpBonus.get() : 1.0)
+                * com.dbzenith.world.LifeSim.wisdomMultiplier(data);
         return rawGain * mult;
     }
 

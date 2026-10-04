@@ -12,8 +12,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -135,13 +133,12 @@ public final class QuestManager {
 
     // ------------------------------------------------------------------ hooks
 
-    /** Kill objectives, and alignment loss for killing the innocent. */
+    /** Kill objectives (alignment shifts live in race.Alignment). */
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
         if (!(event.getSource().getEntity() instanceof ServerPlayer killer)) return;
         PlayerData d = ModCapabilities.get(killer).orElse(null);
         if (d == null) return;
-        if (event.getEntity() instanceof Villager || event.getEntity() instanceof IronGolem) d.setAlignment(d.getAlignment() - 5);
         ResourceLocation type = EntityType.getKey(event.getEntity().getType());
         for (String id : java.util.List.copyOf(d.activeQuestsView().keySet())) {
             Quest q = Quests.byId(id);

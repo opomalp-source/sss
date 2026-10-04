@@ -162,6 +162,7 @@ public class PlayerData {
 
     public void setPath(FightingPath path) {
         this.path = path;
+        derivedStale = true; // paths carry stat bonuses
         markDirty();
     }
 
@@ -181,6 +182,16 @@ public class PlayerData {
     public void setAlignment(int alignment) {
         this.alignment = Mth.clamp(alignment, -100, 100);
         markDirty();
+    }
+
+    private double alignmentFraction;
+
+    /** Adds a possibly fractional shift; whole points apply as they add up. */
+    public void addAlignment(double shift) {
+        alignmentFraction += shift;
+        int whole = (int) alignmentFraction;
+        alignmentFraction -= whole;
+        if (whole != 0) setAlignment(alignment + whole);
     }
 
     public double getPhysicalAge() {
@@ -694,6 +705,19 @@ public class PlayerData {
         }
     }
 
+    public static final long TAIL_NOT_CUT = Long.MIN_VALUE;
+    private long tailCutAt = TAIL_NOT_CUT;
+
+    /** When the tail was cut off in a fight ({@link #TAIL_NOT_CUT} if not; a tail removed any other way does not grow back). */
+    public long getTailCutAt() {
+        return tailCutAt;
+    }
+
+    public void setTailCutAt(long gameTime) {
+        tailCutAt = gameTime;
+        markDirty();
+    }
+
     public String getTargetForm() {
         return targetForm;
     }
@@ -920,6 +944,7 @@ public class PlayerData {
         tag.putDouble("stamina", stamina);
         tag.putInt("release", releasePercent);
         tag.putInt("alignment", alignment);
+        tag.putDouble("alignmentFrac", alignmentFraction);
         tag.putDouble("physicalAge", physicalAge);
         tag.putDouble("mentalAge", mentalAge);
         tag.putBoolean("flying", flying);
@@ -953,6 +978,7 @@ public class PlayerData {
         tag.putLong("immortalUntil", immortalUntil);
         tag.putInt("fusions", fusions);
         tag.putInt("prestige", prestige);
+        tag.putLong("tailCutAt", tailCutAt);
         tag.putInt("majinStacks", majinStacks);
         tag.putLong("majinUntil", majinUntil);
         CompoundTag aq = new CompoundTag();
@@ -984,6 +1010,7 @@ public class PlayerData {
         stamina = tag.getDouble("stamina");
         releasePercent = tag.contains("release") ? tag.getInt("release") : 50;
         alignment = tag.getInt("alignment");
+        alignmentFraction = tag.getDouble("alignmentFrac");
         physicalAge = tag.contains("physicalAge") ? tag.getDouble("physicalAge") : 16;
         mentalAge = tag.contains("mentalAge") ? tag.getDouble("mentalAge") : 16;
         flying = tag.getBoolean("flying");
@@ -1021,6 +1048,7 @@ public class PlayerData {
         immortalUntil = tag.contains("immortalUntil") ? tag.getLong("immortalUntil") : -1;
         fusions = tag.getInt("fusions");
         prestige = tag.getInt("prestige");
+        tailCutAt = tag.contains("tailCutAt") ? tag.getLong("tailCutAt") : TAIL_NOT_CUT;
         majinStacks = tag.getInt("majinStacks");
         majinUntil = tag.contains("majinUntil") ? tag.getLong("majinUntil") : -1;
         activeQuests.clear();
