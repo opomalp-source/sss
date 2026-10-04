@@ -140,6 +140,68 @@ public class AssetGen {
             return 0xFF104A20;
         });
 
+        // --- gear: scouter, capsule, gi sets (items + armor layers) ---
+        texture("assets/dbzenith/textures/item/scouter.png", 16, 16, (x, y) -> {
+            if (x >= 2 && x <= 13 && y >= 9 && y <= 10) return 0xFF505058;            // band
+            if (x >= 9 && x <= 14 && y >= 3 && y <= 8) return (x == 9 || x == 14 || y == 3 || y == 8) ? 0xFF202024 : 0xC040FF70; // lens
+            if (x >= 2 && x <= 4 && y >= 7 && y <= 12) return 0xFFE0E0E0;            // ear piece
+            return 0;
+        });
+        texture("assets/dbzenith/textures/item/capsule.png", 16, 16, (x, y) -> {
+            double d = Math.hypot((x - 7.5) / 3.2, (y - 7.5) / 6.0);
+            if (d > 1) return 0;
+            if (y == 7 || y == 8) return 0xFF303038;                                   // seam
+            if (y < 3 && x >= 6 && x <= 9) return 0xFFE02020;                          // button
+            return x < 7 ? 0xFFF8F8F8 : 0xFFD8D8E0;
+        });
+        int[][] giColors = {{0xFFF07820, 0xFF2040B0}, {0xFF7030A0, 0xFF402010}, {0xFFF4F4F4, 0xFF202028}};
+        String[] giSets = {"turtle", "demon", "battle_armor"};
+        for (int s = 0; s < 3; s++) {
+            int main = giColors[s][0];
+            int accent = giColors[s][1];
+            String set = giSets[s];
+            texture("assets/dbzenith/textures/item/" + set + "_top.png", 16, 16, (x, y) -> {
+                boolean body = x >= 4 && x <= 11 && y >= 3 && y <= 13;
+                boolean sleeves = y >= 3 && y <= 7 && (x == 2 || x == 3 || x == 12 || x == 13);
+                if (y == 10 && x >= 4 && x <= 11) return accent;                       // belt / sash
+                if (body) return (y < 5 && x >= 6 && x <= 9) ? accent : main;
+                return sleeves ? accent : 0;
+            });
+            texture("assets/dbzenith/textures/item/" + set + "_pants.png", 16, 16, (x, y) -> {
+                if (y >= 2 && y <= 4 && x >= 4 && x <= 11) return accent;              // waist
+                boolean legs = y >= 5 && y <= 14 && ((x >= 4 && x <= 7) || (x >= 8 && x <= 11));
+                return legs ? main : 0;
+            });
+            texture("assets/dbzenith/textures/item/" + set + "_boots.png", 16, 16, (x, y) -> {
+                boolean boot = y >= 7 && y <= 13 && ((x >= 2 && x <= 6) || (x >= 9 && x <= 13));
+                if (!boot) return 0;
+                return y == 7 ? main : accent;
+            });
+            texture("assets/dbzenith/textures/models/armor/" + set + "_layer_1.png", 64, 32, (x, y) -> {
+                boolean body = x >= 16 && x < 40 && y >= 16 && y < 32;
+                boolean arms = x >= 40 && x < 56 && y >= 16 && y < 32;
+                boolean feet = x >= 0 && x < 16 && y >= 26 && y < 32;
+                if (body) return (y >= 26 && y <= 27) ? accent : main;
+                if (arms) return y >= 26 ? accent : main;
+                if (feet) return accent;
+                return 0;
+            });
+            texture("assets/dbzenith/textures/models/armor/" + set + "_layer_2.png", 64, 32, (x, y) -> {
+                boolean legs = x >= 0 && x < 16 && y >= 16 && y < 30;
+                boolean waist = x >= 16 && x < 40 && y >= 26 && y < 32;
+                if (legs) return main;
+                if (waist) return accent;
+                return 0;
+            });
+        }
+        texture("assets/dbzenith/textures/models/armor/scouter_layer_1.png", 64, 32, (x, y) -> {
+            // head front face is x 8..16, y 8..16: a green lens over the left eye and a band
+            if (y >= 9 && y <= 12 && x >= 9 && x <= 12) return 0xB040FF70;
+            if (y == 11 && ((x >= 0 && x < 9) || (x >= 16 && x < 24))) return 0xFF505058;
+            return 0;
+        });
+        texture("assets/dbzenith/textures/models/armor/scouter_layer_2.png", 64, 32, (x, y) -> 0);
+
         // --- ki glow: soft radial white, tinted per technique at render time ---
         radialGlow("assets/dbzenith/textures/entity/ki_glow.png", 32);
         beamGlow("assets/dbzenith/textures/entity/ki_beam.png", 32);

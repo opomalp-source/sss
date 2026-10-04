@@ -77,6 +77,8 @@ public final class KiTicker {
             data.setBody(data.getBody() + perTick(s.maxBody(), c.bodyRegenPercentPerSecond.get()) * race.regenMultiplier());
         }
 
+        com.dbzenith.item.GiArmorItem.updateBonus(player, data);
+        if (now % 20 == 0) com.dbzenith.item.ScouterItem.checkOverload(player);
         TrainingTicker.tick(player, data, now);
         if (now % 20 == 0) TimeChamber.tick(player, data, now);
         RacePassives.tick(player, data, now);

@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["IGG", "IRG", "I  "],
+  "key": {"I": {"item": "minecraft:iron_ingot"}, "G": {"item": "minecraft:green_stained_glass_pane"}, "R": {"item": "minecraft:redstone"}},
+  "result": {"item": "dbzenith:scouter"}
+}

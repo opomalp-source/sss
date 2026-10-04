@@ -364,6 +364,31 @@ public class PlayerData {
         }
     }
 
+    // ------------------------------------------------------------------ gear set bonus (runtime, recomputed from armor each tick)
+
+    private double gearStr = 1.0;
+    private double gearDex = 1.0;
+    private double gearKi = 1.0;
+
+    public double getGearMultiplier(com.dbzenith.stats.Attribute a) {
+        return switch (a) {
+            case STRENGTH -> gearStr;
+            case DEXTERITY -> gearDex;
+            case KI_POWER -> gearKi;
+            default -> 1.0;
+        };
+    }
+
+    public void setGearMultipliers(double str, double dex, double ki) {
+        if (str != gearStr || dex != gearDex || ki != gearKi) {
+            gearStr = str;
+            gearDex = dex;
+            gearKi = ki;
+            derivedStale = true;
+            markDirty();
+        }
+    }
+
     // ------------------------------------------------------------------ Hyperbolic Time Chamber (saved)
 
     private String returnDimension = "";

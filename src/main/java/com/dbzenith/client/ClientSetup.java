@@ -28,6 +28,7 @@ public final class ClientSetup {
     public static void registerOverlays(RegisterGuiOverlaysEvent event) {
         event.registerAboveAll("hud", new DbzHud());
         event.registerAboveAll("dragon_radar", new RadarOverlay());
+        event.registerAboveAll("scouter", new ScouterOverlay());
         event.registerAboveAll("debug_stats", new DebugStatsOverlay());
     }
 

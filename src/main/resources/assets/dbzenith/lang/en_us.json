@@ -245,5 +245,21 @@
   "wish.dbzenith.godly_ki": "Grant me godly ki",
   "wish.dbzenith.godly_ki.desc": "Lets you sense and wield divine energy (unlocks God forms).",
   "wish.dbzenith.riches": "Make me rich",
-  "wish.dbzenith.riches.desc": "A handful of diamonds."
+  "wish.dbzenith.riches.desc": "A handful of diamonds.",
+  "item.dbzenith.scouter": "Scouter",
+  "item.dbzenith.capsule": "Capsule",
+  "item.dbzenith.turtle_top": "Turtle Gi Top",
+  "item.dbzenith.turtle_pants": "Turtle Gi Pants",
+  "item.dbzenith.turtle_boots": "Turtle Gi Boots",
+  "item.dbzenith.demon_top": "Demon Gi Top",
+  "item.dbzenith.demon_pants": "Demon Gi Pants",
+  "item.dbzenith.demon_boots": "Demon Gi Boots",
+  "item.dbzenith.battle_armor_top": "Battle Armor",
+  "item.dbzenith.battle_armor_pants": "Battle Suit Leggings",
+  "item.dbzenith.battle_armor_boots": "Battle Armor Boots",
+  "item.dbzenith.gi.set_bonus": "Full set: STR %s, DEX %s, Ki Power %s",
+  "hud.dbzenith.scouter_power": "Power Level: %s",
+  "hud.dbzenith.scouter_distance": "%sm",
+  "message.dbzenith.scouter_overload": "The scouter can't take that reading. It shatters!",
+  "message.dbzenith.capsule_nested": "A capsule can't hold another capsule."
 }

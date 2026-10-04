@@ -1,10 +1,14 @@
 package com.dbzenith.registry;
 
 import com.dbzenith.DBZenith;
+import com.dbzenith.item.CapsuleItem;
+import com.dbzenith.item.GiArmorItem;
 import com.dbzenith.item.MoonOrbItem;
+import com.dbzenith.item.ScouterItem;
 import com.dbzenith.item.SenzuBeanItem;
 import com.dbzenith.item.TechniqueScrollItem;
 import com.dbzenith.item.TrainingWeightsItem;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -28,6 +32,22 @@ public final class ModItems {
 
     public static final RegistryObject<Item> DRAGON_RADAR = ITEMS.register("dragon_radar",
             () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.RARE)));
+
+    public static final RegistryObject<Item> SCOUTER = ITEMS.register("scouter",
+            () -> new ScouterItem(new Item.Properties().rarity(Rarity.UNCOMMON)));
+    public static final RegistryObject<Item> CAPSULE = ITEMS.register("capsule",
+            () -> new CapsuleItem(new Item.Properties().stacksTo(1)));
+    public static final java.util.List<RegistryObject<Item>> GI = gi();
+
+    private static java.util.List<RegistryObject<Item>> gi() {
+        java.util.List<RegistryObject<Item>> out = new java.util.ArrayList<>();
+        for (GiArmorItem.Set set : GiArmorItem.Set.values()) {
+            out.add(ITEMS.register(set.id() + "_top", () -> new GiArmorItem(set, ArmorItem.Type.CHESTPLATE, new Item.Properties())));
+            out.add(ITEMS.register(set.id() + "_pants", () -> new GiArmorItem(set, ArmorItem.Type.LEGGINGS, new Item.Properties())));
+            out.add(ITEMS.register(set.id() + "_boots", () -> new GiArmorItem(set, ArmorItem.Type.BOOTS, new Item.Properties())));
+        }
+        return out;
+    }
 
     public static final RegistryObject<Item> MOON_ORB = ITEMS.register("moon_orb",
             () -> new MoonOrbItem(new Item.Properties().stacksTo(4).rarity(Rarity.RARE)));

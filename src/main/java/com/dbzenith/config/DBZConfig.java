@@ -159,6 +159,9 @@ public final class DBZConfig {
         public final ForgeConfigSpec.IntValue wishImmortalityTicks;
         public final ForgeConfigSpec.IntValue wishDiamonds;
 
+        // --- gear ---
+        public final ForgeConfigSpec.LongValue scouterLimit;
+
         // --- character ---
         public final ForgeConfigSpec.DoubleValue startingAge;
 
@@ -380,6 +383,11 @@ public final class DBZConfig {
             wishImmortalityTicks = b.comment("How long the immortality wish lasts (36000 = 30 minutes)")
                     .defineInRange("wishImmortalityTicks", 36000, 20, 10_000_000);
             wishDiamonds = b.defineInRange("wishDiamonds", 16, 1, 64);
+            b.pop();
+
+            b.push("gear");
+            scouterLimit = b.comment("A scouter shatters when it reads a power level above this")
+                    .defineInRange("scouterLimit", 1_000_000L, 1L, Long.MAX_VALUE);
             b.pop();
 
             b.push("character");

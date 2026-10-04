@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["IWI", "WCW", "IWI"],
+  "key": {"I": {"item": "minecraft:iron_ingot"}, "W": {"item": "minecraft:white_dye"}, "C": {"item": "minecraft:chest"}},
+  "result": {"item": "dbzenith:capsule"}
+}
