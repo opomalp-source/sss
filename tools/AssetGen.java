@@ -208,6 +208,8 @@ public class AssetGen {
         skin("android_unit", 0xFF9098A0, 0xFFFF2020, 0xFF4A4E58, 0xFF8890A0, 0xFF9098A0, 0xFF3A3E48, 0xFF2A2E38, 0xFFC02020);
         skin("tyrant_lord", 0xFFF4F0F8, 0xFFD01030, 0xFFF4F0F8, 0xFFF4F0F8, 0xFFF4F0F8, 0xFFF4F0F8, 0xFF7030A0, 0xFF7030A0);
         skin("rampage_brute", 0xFFB07040, 0xFFFF4020, 0xFF802020, 0xFFB07040, 0xFFB07040, 0xFF402820, 0xFF2A1A10, 0xFFFFC020);
+        skin("martial_arts_master", 0xFFE8C0A0, 0xFF202020, 0xFFF07820, 0xFFE8C0A0, 0xFFE8C0A0, 0xFFF07820, 0xFF6A4020, 0xFF2040B0);
+        skin("patrol_officer", 0xFFD8B090, 0xFF203060, 0xFF2A4AA0, 0xFF2A4AA0, 0xFFD8B090, 0xFF1A2A60, 0xFF101010, 0xFFE0E0E0);
         texture("assets/dbzenith/textures/item/tyrant_sigil.png", 16, 16, (x, y) -> {
             double d = Math.hypot(x - 7.5, y - 7.5);
             if (d > 6.5) return 0;
@@ -254,6 +256,8 @@ public class AssetGen {
                     if (y == 14 && x >= 10 && x <= 13) return 0xFF301818;            // mouth
                 }
                 if (y < 8 && name.equals("tyrant_lord")) return accent;               // dome on top
+                if (name.equals("martial_arts_master") && y >= 13 && y < 16 && x >= 8 && x < 16) return 0xFFF4F4F4; // white beard
+                if (name.equals("patrol_officer") && y < 8) return 0xFF1A2A60;        // cap
                 return head;
             }
             if (y >= 16 && y < 32) {

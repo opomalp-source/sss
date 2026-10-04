@@ -364,6 +364,57 @@ public class PlayerData {
         }
     }
 
+    // ------------------------------------------------------------------ quests + Galactic Patrol (saved)
+
+    private final java.util.Map<String, int[]> activeQuests = new java.util.LinkedHashMap<>();
+    private final java.util.Map<String, Integer> completedQuests = new java.util.HashMap<>();
+    private int patrolRep;
+
+    public java.util.Map<String, int[]> activeQuestsView() {
+        return java.util.Collections.unmodifiableMap(activeQuests);
+    }
+
+    public boolean isQuestActive(String id) {
+        return activeQuests.containsKey(id);
+    }
+
+    public void startQuest(String id, int objectives) {
+        activeQuests.put(id, new int[objectives]);
+        markDirty();
+    }
+
+    public int[] questProgress(String id) {
+        return activeQuests.get(id);
+    }
+
+    /** Adds to a counted objective (kills); returns true if it changed. */
+    public boolean addQuestProgress(String id, int objective, int amount, int cap) {
+        int[] p = activeQuests.get(id);
+        if (p == null || objective >= p.length || p[objective] >= cap) return false;
+        p[objective] = Math.min(cap, p[objective] + amount);
+        markDirty();
+        return true;
+    }
+
+    public void finishQuest(String id) {
+        activeQuests.remove(id);
+        completedQuests.merge(id, 1, Integer::sum);
+        markDirty();
+    }
+
+    public int timesCompleted(String id) {
+        return completedQuests.getOrDefault(id, 0);
+    }
+
+    public int getPatrolRep() {
+        return patrolRep;
+    }
+
+    public void addPatrolRep(int amount) {
+        patrolRep = Math.max(0, patrolRep + amount);
+        markDirty();
+    }
+
     // ------------------------------------------------------------------ gear set bonus (runtime, recomputed from armor each tick)
 
     private double gearStr = 1.0;
@@ -827,6 +878,13 @@ public class PlayerData {
         tag.putDouble("returnZ", returnZ);
         tag.putLong("chamberAt", chamberEnteredAt);
         tag.putLong("immortalUntil", immortalUntil);
+        CompoundTag aq = new CompoundTag();
+        activeQuests.forEach((k, v) -> aq.putIntArray(k, v));
+        tag.put("activeQuests", aq);
+        CompoundTag cq = new CompoundTag();
+        completedQuests.forEach(cq::putInt);
+        tag.put("completedQuests", cq);
+        tag.putInt("patrolRep", patrolRep);
         return tag;
     }
 
@@ -883,6 +941,13 @@ public class PlayerData {
         returnZ = tag.getDouble("returnZ");
         chamberEnteredAt = tag.contains("chamberAt") ? tag.getLong("chamberAt") : -1;
         immortalUntil = tag.contains("immortalUntil") ? tag.getLong("immortalUntil") : -1;
+        activeQuests.clear();
+        CompoundTag aq = tag.getCompound("activeQuests");
+        for (String k : aq.getAllKeys()) activeQuests.put(k, aq.getIntArray(k));
+        completedQuests.clear();
+        CompoundTag cq = tag.getCompound("completedQuests");
+        for (String k : cq.getAllKeys()) completedQuests.put(k, cq.getInt(k));
+        patrolRep = tag.getInt("patrolRep");
         if (initialized && tag.getInt("DataVersion") < 2) { // v1 -> v2: keep every technique v1 allowed
             learned.addAll(V1_TECHNIQUES);
             deck.addAll(V1_TECHNIQUES.subList(0, 4));

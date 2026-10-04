@@ -66,5 +66,7 @@ public final class ClientSetup {
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.ANDROID_UNIT.get(), ctx -> new FighterRenderer<>(ctx, "android_unit", 1f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.TYRANT_LORD.get(), ctx -> new FighterRenderer<>(ctx, "tyrant_lord", 1.1f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.RAMPAGE_BRUTE.get(), ctx -> new FighterRenderer<>(ctx, "rampage_brute", 1.6f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.MASTER.get(), ctx -> new FighterRenderer<>(ctx, "martial_arts_master", 0.95f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.PATROL_OFFICER.get(), ctx -> new FighterRenderer<>(ctx, "patrol_officer", 1f));
     }
 }

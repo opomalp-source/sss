@@ -87,6 +87,7 @@ public final class FormHandler {
     /** Enters a form with effects. No requirement checks (callers check). */
     public static void enter(ServerPlayer player, PlayerData data, Form form) {
         data.setFormId(form.id());
+        if (!form.isBase()) data.setFlag("has_transformed", true);
         data.recomputeIfStale();
         if (!form.allowsOverdrive()) Overdrive.stop(player, data, false);
         if (!form.allowsFlight() && data.isFlying()) com.dbzenith.ki.FlightHandler.stop(player, data);

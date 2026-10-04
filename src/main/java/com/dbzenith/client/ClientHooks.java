@@ -25,6 +25,11 @@ public final class ClientHooks {
         creationPrompted = false;
     }
 
+    /** A quest giver was right-clicked. */
+    public static void openQuestScreen(com.dbzenith.quest.Quest.Giver giver) {
+        Minecraft.getInstance().setScreen(new com.dbzenith.client.screen.QuestScreen(giver));
+    }
+
     /** The dragon asks for a wish. */
     public static void openWishScreen(int dragonId) {
         Minecraft.getInstance().setScreen(new com.dbzenith.client.screen.WishScreen(dragonId));

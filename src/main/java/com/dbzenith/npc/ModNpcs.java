@@ -49,6 +49,13 @@ public final class ModNpcs {
             () -> EntityType.Builder.<BossFighter>of((t, l) -> new BossFighter(t, l, BRUTE_PROFILE, BossEvent.BossBarColor.RED, 0xFF5030),
                     MobCategory.MONSTER).sized(1.2f, 3.0f).clientTrackingRange(10).build("rampage_brute"));
 
+    public static final RegistryObject<EntityType<QuestGiverEntity>> MASTER = TYPES.register("martial_arts_master",
+            () -> EntityType.Builder.<QuestGiverEntity>of((t, l) -> new QuestGiverEntity(t, l, com.dbzenith.quest.Quest.Giver.MASTER), MobCategory.CREATURE)
+                    .sized(0.6f, 1.8f).clientTrackingRange(10).build("martial_arts_master"));
+    public static final RegistryObject<EntityType<QuestGiverEntity>> PATROL_OFFICER = TYPES.register("patrol_officer",
+            () -> EntityType.Builder.<QuestGiverEntity>of((t, l) -> new QuestGiverEntity(t, l, com.dbzenith.quest.Quest.Giver.PATROL), MobCategory.CREATURE)
+                    .sized(0.6f, 1.9f).clientTrackingRange(10).build("patrol_officer"));
+
     private ModNpcs() {}
 
     public static void register(IEventBus modBus) {
@@ -62,6 +69,8 @@ public final class ModNpcs {
         event.put(ANDROID_UNIT.get(), KiFighter.attributes(60, 6, 0.24).add(Attributes.ARMOR, 8).build());
         event.put(TYRANT_LORD.get(), KiFighter.attributes(400, 10, 0.3).add(Attributes.KNOCKBACK_RESISTANCE, 0.6).build());
         event.put(RAMPAGE_BRUTE.get(), KiFighter.attributes(600, 14, 0.27).add(Attributes.KNOCKBACK_RESISTANCE, 0.9).build());
+        event.put(MASTER.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2).add(Attributes.MAX_HEALTH, 100).build());
+        event.put(PATROL_OFFICER.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2).add(Attributes.MAX_HEALTH, 100).build());
     }
 
     @SubscribeEvent

@@ -137,6 +137,7 @@ public final class DragonBalls {
         DragonSpiritEntity dragon = new DragonSpiritEntity(ModEntities.DRAGON_SPIRIT.get(), level);
         dragon.setPos(clicked.getX() + 0.5, clicked.getY(), clicked.getZ() + 0.5);
         dragon.setSummoner(player.getUUID());
+        com.dbzenith.data.ModCapabilities.get(player).ifPresent(d -> d.setFlag("summoned_dragon", true));
         level.addFreshEntity(dragon);
         level.setWeatherParameters(0, 2400, true, true);
         level.playSound(null, clicked, SoundEvents.ENDER_DRAGON_GROWL, SoundSource.AMBIENT, 4f, 0.6f);

@@ -56,6 +56,10 @@ public final class ModItems {
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.dbzenith.npc.ModNpcs.KI_SOLDIER, 0xE8E8E8, 0x3A3A4A, new Item.Properties()));
     public static final RegistryObject<Item> ANDROID_UNIT_EGG = ITEMS.register("android_unit_spawn_egg",
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.dbzenith.npc.ModNpcs.ANDROID_UNIT, 0x808890, 0xC02020, new Item.Properties()));
+    public static final RegistryObject<Item> MASTER_EGG = ITEMS.register("martial_arts_master_spawn_egg",
+            () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.dbzenith.npc.ModNpcs.MASTER, 0xF07820, 0xF4F4F4, new Item.Properties()));
+    public static final RegistryObject<Item> PATROL_EGG = ITEMS.register("patrol_officer_spawn_egg",
+            () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.dbzenith.npc.ModNpcs.PATROL_OFFICER, 0x2A4AA0, 0xE0E0E0, new Item.Properties()));
     public static final RegistryObject<Item> TYRANT_SIGIL = ITEMS.register("tyrant_sigil",
             () -> new BossSummonItem(com.dbzenith.npc.ModNpcs.TYRANT_LORD, new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)));
     public static final RegistryObject<Item> RAGE_TOTEM = ITEMS.register("rage_totem",

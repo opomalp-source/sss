@@ -1,7 +1,6 @@
 package com.dbzenith.client.render;
 
 import com.dbzenith.DBZenith;
-import com.dbzenith.npc.KiFighter;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -10,7 +9,7 @@ import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.resources.ResourceLocation;
 
 /** Humanoid renderer for enemy fighters with a per-type placeholder skin (64x64 humanoid layout) and size. */
-public class FighterRenderer<T extends KiFighter> extends HumanoidMobRenderer<T, HumanoidModel<T>> {
+public class FighterRenderer<T extends net.minecraft.world.entity.Mob> extends HumanoidMobRenderer<T, HumanoidModel<T>> {
     private final ResourceLocation texture;
     private final float scale;
 
