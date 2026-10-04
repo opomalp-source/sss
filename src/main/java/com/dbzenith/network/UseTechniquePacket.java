@@ -20,6 +20,9 @@ public record UseTechniquePacket(String techniqueId) {
 
     public static void handle(UseTechniquePacket msg, Supplier<NetworkEvent.Context> ctx) {
         ServerPlayer player = ctx.get().getSender();
-        if (player != null) TechniqueHandler.use(player, Techniques.byId(msg.techniqueId));
+        if (player == null) return;
+        TechniqueHandler.Result r = TechniqueHandler.use(player, Techniques.byId(msg.techniqueId));
+        if (r == TechniqueHandler.Result.STUNNED) player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.dbzenith.stunned"), true);
+        if (r == TechniqueHandler.Result.SEALED) player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.dbzenith.ki_sealed"), true);
     }
 }

@@ -23,6 +23,10 @@ public final class FlightHandler {
             return false;
         }
         if (!com.dbzenith.transform.Forms.byId(data.getFormId()).allowsFlight()) return false;
+        if (com.dbzenith.registry.ModEffects.isKiSealed(player)) {
+            player.displayClientMessage(Component.translatable("message.dbzenith.ki_sealed"), true);
+            return false;
+        }
         if (data.getKi() <= 0 && !player.getAbilities().instabuild) {
             player.displayClientMessage(Component.translatable("message.dbzenith.no_ki_to_fly"), true);
             return false;
@@ -49,13 +53,18 @@ public final class FlightHandler {
 
     static void tick(ServerPlayer player, PlayerData data) {
         if (!data.isFlying()) return;
+        if (com.dbzenith.registry.ModEffects.isKiSealed(player) && !player.getAbilities().instabuild) {
+            stop(player, data);
+            player.displayClientMessage(Component.translatable("message.dbzenith.ki_sealed"), true);
+            return;
+        }
         Abilities a = player.getAbilities();
         boolean changed = false;
         if (!a.mayfly) { // e.g. a gamemode change cleared it
             a.mayfly = true;
             changed = true;
         }
-        float speed = speed(data);
+        float speed = com.dbzenith.registry.ModEffects.isStunned(player) ? 0f : speed(data);
         if (Math.abs(a.getFlyingSpeed() - speed) > 1e-4f) {
             a.setFlyingSpeed(speed);
             changed = true;

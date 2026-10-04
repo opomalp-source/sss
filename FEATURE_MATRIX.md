@@ -13,7 +13,7 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Derived: defense, evasion, ki control, melee/ki damage | B | done | Applied in DamageCalculator; GameTests |
 | Derived: attack/move speed | B | done | Vanilla attribute modifiers; GameTest |
 | Derived: spirit modifier | B | done | Scales form + Overdrive mastery gain |
-| Derived: ki transfer | B | stubbed | Phase 3 |
+| Derived: ki transfer | B | done | SPI sets the rate; Ki Transfer technique gives ki to the player you look at. GameTest |
 | Release % | B | done | Scales ki damage + ki cost; charging raises, key lowers; GameTests |
 | Physical / mental age | V | stubbed | Stored only |
 | TP pool: earning | C | done | Damage dealt, kills, charging; MIND bonus |
@@ -31,10 +31,10 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Ki blast framework | B | done | GameTested + all styles seen rendering in-client |
 | Techniques: ki blast, wave beam, finger beam, volley, disk, homing orb | B | done | Seen in-client; beams are true sustained beams (side view verified), homing curves |
 | Techniques: explosive wave, teleport, heal, sense | B | done | Explosive Wave, Instant Step, Ki Heal, Ki Sense |
-| Techniques: grab-throw, ball-drop | B | todo | |
+| Techniques: grab-throw, ball-drop | B | done | Grab & Throw (hold, throw, impact damage; bosses immune), Gathering Sphere (forms overhead, hurled at the crosshair). GameTests |
 | Melee combo, knockback, stamina, guard | B | done | GameTests (combo, stamina, guard reduction) |
 | Heavy (charged) hit | B | done | GameTest (>2x damage); HUD tag seen in-client after a real H key press |
-| Aerial combat feel (air combos, knock-up) | B | todo | Flight + dash exist |
+| Aerial combat feel (air combos, knock-up) | B | done | Air hits +15% and juggle; heavy from the ground launches, heavy from above looking down spikes. GameTest |
 | Flight | B | done | Toggle, ki drain, auto-stop at 0 ki; GameTest |
 | Dash / burst movement + afterimage | B | done | GameTest (velocity, cost, cooldown, evasion); seen in-client |
 | Central DamageCalculator | B | done | combat.DamageCalculator; GameTests |
@@ -72,7 +72,7 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Technique library | B | done | 18 techniques; GameTests |
 | Deck / loadout + hotkeys | V | done | Techniques screen seen in-client; R/Y use the deck |
 | Racial skills | B | done | One per race |
-| Status effects (custom) | B | todo | Vanilla blindness/slowness/glowing used so far |
+| Status effects (custom) | B | done | Stunned (Paralysis Wave, grabs) and Ki Sealed (Seal Orb, Tyrant Lord); HUD chips; GameTests |
 | Acquisition: TP + scrolls | B | done | Masters and quests in Phase 4 |
 
 ## 3.6 Progression & training

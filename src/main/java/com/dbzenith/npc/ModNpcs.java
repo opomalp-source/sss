@@ -29,7 +29,7 @@ public final class ModNpcs {
     public static final KiFighter.Profile SOLDIER_PROFILE = new KiFighter.Profile("entity.dbzenith.ki_soldier", 25, List.of(Techniques.KI_BLAST), 60);
     public static final KiFighter.Profile ANDROID_PROFILE = new KiFighter.Profile("entity.dbzenith.android_unit", 35, List.of(Techniques.ARM_CANNON), 80);
     public static final KiFighter.Profile TYRANT_PROFILE = new KiFighter.Profile("entity.dbzenith.tyrant_lord", 90,
-            List.of(Techniques.FINGER_BEAM, Techniques.SUPERNOVA_ORB, Techniques.KI_BLAST), 50);
+            List.of(Techniques.FINGER_BEAM, Techniques.SUPERNOVA_ORB, Techniques.KI_BLAST, Techniques.SEAL_ORB), 50);
     public static final KiFighter.Profile BRUTE_PROFILE = new KiFighter.Profile("entity.dbzenith.rampage_brute", 70,
             List.of(Techniques.WAVE_BEAM, Techniques.RAPID_VOLLEY), 70);
 

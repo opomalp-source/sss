@@ -26,6 +26,7 @@ public final class DashHandler {
         DBZConfig.Server c = DBZConfig.SERVER;
         long now = player.level().getGameTime();
         if (data.isOnCooldown(COOLDOWN_ID, now)) return false;
+        if (com.dbzenith.registry.ModEffects.isStunned(player)) return false;
         boolean free = player.getAbilities().instabuild;
         if (!free && (data.getStamina() < c.dashStaminaCost.get() || data.getKi() < c.dashKiCost.get())) return false;
 

@@ -45,6 +45,10 @@ public final class FormHandler {
     public static boolean transformUp(ServerPlayer player) {
         PlayerData data = ModCapabilities.get(player).orElse(null);
         if (data == null || !player.isAlive()) return false;
+        if (com.dbzenith.registry.ModEffects.isKiSealed(player)) {
+            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.dbzenith.ki_sealed"), true);
+            return false;
+        }
         Form current = Forms.byId(data.getFormId());
         Form next = null;
         if (Forms.exists(data.getTargetForm())) {

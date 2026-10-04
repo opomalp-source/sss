@@ -46,6 +46,9 @@ public class KiBlastEntity extends Projectile {
     private Technique.Effect effect = Technique.Effect.NONE;
     private double effectPower;
     private final Set<Integer> hitIds = new HashSet<>();
+    /** Ball-drop: ticks left hovering above the caster before it is hurled. */
+    private int holdTicks;
+    private float launchSpeed;
 
     public KiBlastEntity(EntityType<? extends KiBlastEntity> type, Level level) {
         super(type, level);
@@ -61,6 +64,8 @@ public class KiBlastEntity extends Projectile {
         blast.explosionPower = technique.explosionPower();
         blast.effect = technique.effect();
         blast.effectPower = technique.effectPower();
+        blast.holdTicks = technique.holdTicks();
+        blast.launchSpeed = technique.speed();
         blast.entityData.set(SIZE, technique.size());
         blast.entityData.set(COLOR, technique.color());
         blast.entityData.set(STYLE, technique.style().ordinal());
@@ -117,6 +122,11 @@ public class KiBlastEntity extends Projectile {
             return;
         }
 
+        if (holdTicks > 0) {
+            if (!level.isClientSide) hover();
+            return;
+        }
+
         HitResult hit = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
         if (hit.getType() != HitResult.Type.MISS && !ForgeEventFactory.onProjectileImpact(this, hit)) {
             onHit(hit);
@@ -142,6 +152,30 @@ public class KiBlastEntity extends Projectile {
         }
     }
 
+    /** Above the caster's head while it forms; then hurled at whatever the caster is looking at. */
+    private void hover() {
+        if (!(getOwner() instanceof LivingEntity caster) || !caster.isAlive() || caster.level() != level()) {
+            discard();
+            return;
+        }
+        Vec3 above = caster.getEyePosition().add(0, 2.0 + getSize() / 2.0, 0);
+        setPos(above.x, above.y - getSize() / 2.0, above.z);
+        setDeltaMovement(Vec3.ZERO);
+        if (--holdTicks > 0) return;
+        Vec3 eye = caster.getEyePosition();
+        Vec3 end = eye.add(caster.getLookAngle().scale(64));
+        BlockHitResult aim = level().clip(new net.minecraft.world.level.ClipContext(eye, end,
+                net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, caster));
+        Vec3 dir = aim.getLocation().subtract(getBoundingBox().getCenter());
+        if (dir.lengthSqr() < 1e-4) dir = caster.getLookAngle();
+        setDeltaMovement(dir.normalize().scale(launchSpeed));
+        hasImpulse = true;
+    }
+
+    public boolean isHovering() {
+        return holdTicks > 0;
+    }
+
     @Override
     protected boolean canHitEntity(Entity target) {
         return super.canHitEntity(target) && target != getOwner() && !hitIds.contains(target.getId());
@@ -156,6 +190,9 @@ public class KiBlastEntity extends Projectile {
         if (effect == Technique.Effect.CANDY && TechniqueEffects.candy(target, effectPower)) {
             discard();
             return;
+        }
+        if (effect == Technique.Effect.KI_SEAL && target instanceof LivingEntity living) {
+            living.addEffect(new net.minecraft.world.effect.MobEffectInstance(com.dbzenith.registry.ModEffects.KI_SEAL.get(), (int) effectPower, 0));
         }
         target.invulnerableTime = 0; // volleys must not be eaten by i-frames
         target.hurt(ModDamageTypes.kiBlast(level(), this, getOwner()), (float) damage);
@@ -190,6 +227,8 @@ public class KiBlastEntity extends Projectile {
         tag.putInt("style", entityData.get(STYLE));
         tag.putString("effect", effect.name());
         tag.putDouble("effectPower", effectPower);
+        tag.putInt("hold", holdTicks);
+        tag.putFloat("launchSpeed", launchSpeed);
     }
 
     @Override
@@ -209,5 +248,7 @@ public class KiBlastEntity extends Projectile {
             effect = Technique.Effect.NONE;
         }
         effectPower = tag.getDouble("effectPower");
+        holdTicks = tag.getInt("hold");
+        launchSpeed = tag.getFloat("launchSpeed");
     }
 }

@@ -37,6 +37,16 @@ public final class Techniques {
             .cost(60).cooldown(200).color(0x9CFF9C).learn(400, 90));
     public static final Technique FINGER_BEAM = add(Technique.builder("finger_beam").style(Style.BEAM).cost(45).damage(2.0).speed(48f).size(0.18f)
             .cooldown(40).color(0xFF5FD2).life(8).learn(500, 120));
+    public static final Technique KI_TRANSFER = add(Technique.builder("ki_transfer").style(Style.SELF).effect(Effect.KI_TRANSFER, 8)
+            .cost(0).cooldown(60).color(0xA8F0FF).learn(200, 30));
+    public static final Technique GRAB_THROW = add(Technique.builder("grab_throw").style(Style.SELF).effect(Effect.GRAB, 4)
+            .cost(15).cooldown(10).color(0xFFFFFF).learn(250, 40));
+    public static final Technique PARALYSIS_WAVE = add(Technique.builder("paralysis_wave").style(Style.SELF).effect(Effect.STUN_AREA, 50)
+            .cost(60).cooldown(300).color(0xF2E94E).learn(450, 100));
+    public static final Technique SEAL_ORB = add(Technique.builder("seal_orb").effect(Effect.KI_SEAL, 100).cost(50).damage(0.5)
+            .speed(1.5f).size(0.5f).cooldown(200).color(0x6A3FA0).life(60).learn(500, 130));
+    public static final Technique GATHERING_SPHERE = add(Technique.builder("gathering_sphere").cost(300).damage(6.0).speed(0.9f).size(3.5f)
+            .cooldown(400).explosion(4.5f).color(0x9FE8FF).life(220).drop(30).learn(1500, 300));
 
     // ---------------------------------------------------------------- racial
     public static final Technique SOLAR_FLARE = add(Technique.builder("solar_flare").style(Style.SELF).effect(Effect.BLIND_AREA, 12)

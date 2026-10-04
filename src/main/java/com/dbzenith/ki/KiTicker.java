@@ -48,7 +48,7 @@ public final class KiTicker {
         }
 
         if (data.isCharging()) {
-            if (data.getStamina() <= 0) {
+            if (data.getStamina() <= 0 || com.dbzenith.registry.ModEffects.isKiSealed(player)) {
                 data.setCharging(false);
             } else {
                 int t = data.tickCharge();
@@ -64,7 +64,8 @@ public final class KiTicker {
                             SoundSource.PLAYERS, 0.8f, 1.6f);
                 }
             }
-        } else if (!(data.isFlying() && player.getAbilities().flying) && !data.isTransformed()) {
+        } else if (!(data.isFlying() && player.getAbilities().flying) && !data.isTransformed()
+                && !com.dbzenith.registry.ModEffects.isKiSealed(player)) {
             // No passive ki regen while transformed: forms are sustained by charging and mastery.
             data.setKi(data.getKi() + perTick(s.maxKi(), c.kiRegenPercentPerSecond.get()) * race.kiRegenMultiplier()
                     * (data.isMeditating() ? c.meditationKiRegenMultiplier.get() : 1.0));

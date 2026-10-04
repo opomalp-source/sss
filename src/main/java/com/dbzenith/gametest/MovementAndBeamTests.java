@@ -83,7 +83,7 @@ public final class MovementAndBeamTests {
         float start = zombie.getHealth();
         ServerPlayer player = TestPlayers.create(helper);
         player.setGameMode(GameType.SURVIVAL);
-        player.moveTo(zombie.getX() - 8, zombie.getY(), zombie.getZ(), -90f, 0f); // yaw -90 faces +X
+        player.moveTo(zombie.getX() - 3, zombie.getY(), zombie.getZ(), -90f, 0f); // yaw -90 faces +X; close, so neighbouring tests cannot get in the way
         helper.assertTrue(TechniqueHandler.use(player, Techniques.FINGER_BEAM, true) == TechniqueHandler.Result.FIRED, "beam should fire");
         helper.assertTrue(!helper.getLevel().getEntitiesOfClass(KiBeamEntity.class, player.getBoundingBox().inflate(3)).isEmpty(),
                 "a beam entity should exist at the caster");

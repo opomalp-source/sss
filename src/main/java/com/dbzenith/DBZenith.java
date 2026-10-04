@@ -33,6 +33,7 @@ public class DBZenith {
         ModEntities.register(modBus);
         ModBlocks.register(modBus);
         ModBlockEntities.register(modBus);
+        com.dbzenith.registry.ModEffects.register(modBus);
         com.dbzenith.npc.ModNpcs.register(modBus);
         ModCreativeTabs.register(modBus);
         modBus.addListener(ModCapabilities::register);

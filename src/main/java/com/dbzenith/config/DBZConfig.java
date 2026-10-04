@@ -102,6 +102,15 @@ public final class DBZConfig {
         public final ForgeConfigSpec.IntValue dashCooldownTicks;
         public final ForgeConfigSpec.IntValue dashEvadeTicks;
         public final ForgeConfigSpec.IntValue beamDamageIntervalTicks;
+        public final ForgeConfigSpec.DoubleValue airComboBonus;
+        public final ForgeConfigSpec.DoubleValue airJuggleLift;
+        public final ForgeConfigSpec.DoubleValue knockUpVelocity;
+        public final ForgeConfigSpec.DoubleValue spikeVelocity;
+        public final ForgeConfigSpec.DoubleValue spikeDamageBonus;
+        public final ForgeConfigSpec.IntValue grabHoldTicks;
+        public final ForgeConfigSpec.DoubleValue throwSpeed;
+        public final ForgeConfigSpec.DoubleValue throwDamageMultiplier;
+        public final ForgeConfigSpec.DoubleValue kiTransferSeconds;
 
         // --- TP gains ---
         public final ForgeConfigSpec.DoubleValue tpPerDamageDealt;
@@ -300,6 +309,22 @@ public final class DBZConfig {
                     .defineInRange("dashEvadeTicks", 6, 0, 200);
             beamDamageIntervalTicks = b.comment("A beam damages what it touches every this many ticks")
                     .defineInRange("beamDamageIntervalTicks", 4, 1, 100);
+            airComboBonus = b.comment("Extra melee damage against an airborne target (air combo)")
+                    .defineInRange("airComboBonus", 0.15, 0.0, 10.0);
+            airJuggleLift = b.comment("Upward speed given to an airborne target on each hit, keeping it in the air")
+                    .defineInRange("airJuggleLift", 0.18, 0.0, 2.0);
+            knockUpVelocity = b.comment("A heavy hit from the ground launches the target up at this speed (blocks/tick)")
+                    .defineInRange("knockUpVelocity", 1.1, 0.0, 5.0);
+            spikeVelocity = b.comment("A heavy hit from above while looking down slams the target down at this speed")
+                    .defineInRange("spikeVelocity", 2.0, 0.0, 10.0);
+            spikeDamageBonus = b.defineInRange("spikeDamageBonus", 0.25, 0.0, 10.0);
+            grabHoldTicks = b.comment("Grab and Throw: longest hold before the target is thrown automatically")
+                    .defineInRange("grabHoldTicks", 60, 1, 1200);
+            throwSpeed = b.defineInRange("throwSpeed", 2.2, 0.0, 10.0);
+            throwDamageMultiplier = b.comment("Impact damage of a thrown target, times the thrower's melee damage")
+                    .defineInRange("throwDamageMultiplier", 1.5, 0.0, 100.0);
+            kiTransferSeconds = b.comment("Ki Transfer gives this many seconds of the ki-transfer rate (SPI) in one use")
+                    .defineInRange("kiTransferSeconds", 5.0, 0.1, 1000.0);
             b.pop();
 
             b.comment("Training point gains").push("tp_gains");

@@ -20,7 +20,7 @@ public final class TechniqueHandler {
     private static final double HOMING_RANGE = 32.0;
     private static final double HOMING_CONE_COS = Math.cos(Math.toRadians(35));
 
-    public enum Result { FIRED, COOLDOWN, NOT_ENOUGH_KI, NOT_EQUIPPED, INVALID }
+    public enum Result { FIRED, COOLDOWN, NOT_ENOUGH_KI, NOT_EQUIPPED, INVALID, STUNNED, SEALED }
 
     private TechniqueHandler() {}
 
@@ -33,6 +33,8 @@ public final class TechniqueHandler {
         if (technique == null || !player.isAlive() || player.isSpectator()) return Result.INVALID;
         PlayerData data = ModCapabilities.get(player).orElse(null);
         if (data == null || !Forms.byId(data.getFormId()).allowsTechniques()) return Result.INVALID;
+        if (com.dbzenith.registry.ModEffects.isStunned(player)) return Result.STUNNED;
+        if (com.dbzenith.registry.ModEffects.isKiSealed(player)) return Result.SEALED;
         if (!bypassDeck && !(data.knows(technique.id()) && data.deckView().contains(technique.id()))) return Result.NOT_EQUIPPED;
         data.recomputeIfStale();
 

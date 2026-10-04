@@ -109,6 +109,42 @@ public final class TechniqueEffects {
                 level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1, player.getZ(), 30, 0.5, 0.8, 0.5, 0.5);
                 return true;
             }
+            case KI_TRANSFER -> {
+                Player target = lookedAtPlayer(player, power).orElse(null);
+                PlayerData td = target == null ? null : ModCapabilities.get(target).orElse(null);
+                if (td == null) {
+                    player.displayClientMessage(Component.translatable("message.dbzenith.no_transfer_target"), true);
+                    return false;
+                }
+                double rate = Math.max(20.0, data.getDerived().kiTransfer() * com.dbzenith.config.DBZConfig.SERVER.kiTransferSeconds.get());
+                double amount = Math.min(Math.min(rate, data.getKi()), td.getDerived().maxKi() - td.getKi());
+                if (amount <= 0) return false;
+                data.setKi(data.getKi() - amount);
+                td.setKi(td.getKi() + amount);
+                Vec3 from = player.getEyePosition();
+                Vec3 step = target.getEyePosition().subtract(from).scale(1 / 8.0);
+                for (int i = 1; i < 8; i++) {
+                    Vec3 p = from.add(step.scale(i));
+                    level.sendParticles(ParticleTypes.END_ROD, p.x, p.y - 0.3, p.z, 2, 0.05, 0.05, 0.05, 0.01);
+                }
+                target.displayClientMessage(Component.translatable("message.dbzenith.ki_received", (int) amount, player.getDisplayName()), true);
+                return true;
+            }
+            case STUN_AREA -> {
+                Vec3 look = player.getLookAngle();
+                for (LivingEntity e : around(player, 6)) {
+                    Vec3 to = e.position().subtract(player.position()).normalize();
+                    if (to.dot(look) < 0.3) continue;
+                    e.addEffect(new MobEffectInstance(com.dbzenith.registry.ModEffects.STUN.get(), (int) power, 0));
+                }
+                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX() + look.x * 2, player.getEyeY(), player.getZ() + look.z * 2,
+                        40, 1.5, 0.8, 1.5, 0.2);
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 0.3f, 2.0f);
+                return true; // a miss still spends the ki
+            }
+            case GRAB -> {
+                return GrabThrow.use(player, data, power);
+            }
             default -> {
                 return false;
             }

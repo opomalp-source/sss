@@ -237,6 +237,48 @@ public class AssetGen {
         hairTexture("assets/dbzenith/textures/entity/form_hair.png");
 
         // --- gametest structure: empty 3x3x3 template ---
+        // --- status effect icons (18x18) ---
+        pixelArt("assets/dbzenith/textures/mob_effect/stun.png", Map.of(
+                '#', 0xFF7A6A10, 'a', 0xFFF2E94E, 'b', 0xFFFFFFC0),
+                "..................",
+                "..........###.....",
+                ".........#aa#.....",
+                "........#aab#.....",
+                ".......#aab#......",
+                "......#aab#.......",
+                ".....#aabb####....",
+                "....#aabbbbaa#....",
+                "....####bbaa#.....",
+                ".......#baa#......",
+                "......#baa#.......",
+                ".....#baa#........",
+                ".....#aa#.........",
+                "....#aa#..........",
+                "....#a#...........",
+                "....##............",
+                "..................",
+                "..................");
+        pixelArt("assets/dbzenith/textures/mob_effect/ki_seal.png", Map.of(
+                '#', 0xFF2E1A4A, 'a', 0xFF6A3FA0, 'b', 0xFFB48CF0, 'c', 0xFFE8DAFF),
+                "..................",
+                "......######......",
+                "....##aaaaaa##....",
+                "...#aabbbbbbaa#...",
+                "..#abb######bba#..",
+                "..#ab#cccccc#ba#..",
+                ".#ab#cc####cc#ba#.",
+                ".#ab#c#....#c#ba#.",
+                ".#ab#c#....#c#ba#.",
+                ".#ab#c#....#c#ba#.",
+                ".#ab#c#....#c#ba#.",
+                ".#ab#cc####cc#ba#.",
+                "..#ab#cccccc#ba#..",
+                "..#abb######bba#..",
+                "...#aabbbbbbaa#...",
+                "....##aaaaaa##....",
+                "......######......",
+                "..................");
+
         emptyStructure("data/dbzenith/structures/empty.nbt", 3);
         System.out.println("AssetGen done");
     }

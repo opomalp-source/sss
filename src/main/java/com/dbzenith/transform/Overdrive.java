@@ -21,6 +21,10 @@ public final class Overdrive {
     public static boolean raise(ServerPlayer player) {
         PlayerData data = ModCapabilities.get(player).orElse(null);
         if (data == null || !player.isAlive()) return false;
+        if (com.dbzenith.registry.ModEffects.isKiSealed(player)) {
+            player.displayClientMessage(Component.translatable("message.dbzenith.ki_sealed"), true);
+            return false;
+        }
         Form form = Forms.byId(data.getFormId());
         if (!form.allowsOverdrive()) {
             player.displayClientMessage(Component.translatable("message.dbzenith.overdrive_form"), true);

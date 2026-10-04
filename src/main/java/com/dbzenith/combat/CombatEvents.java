@@ -45,14 +45,15 @@ public final class CombatEvents {
         if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return;
 
         boolean isKi = source.is(ModDamageTypes.KI_BLAST);
+        boolean isThrow = source.is(ModDamageTypes.THROW);
         Player attacker = source.getEntity() instanceof Player p ? p : null;
         boolean isMelee = !isKi && attacker != null && source.is(DamageTypes.PLAYER_ATTACK) && source.getDirectEntity() == attacker;
         PlayerData attackerData = attacker != null ? ModCapabilities.get(attacker).orElse(null) : null;
 
         // 1) raw DBZ damage
         double raw;
-        if (isKi) {
-            raw = event.getAmount(); // ki blasts deal raw DBZ damage
+        if (isKi || isThrow) {
+            raw = event.getAmount(); // ki blasts and throws deal raw DBZ damage
         } else if (isMelee && attackerData != null) {
             attackerData.recomputeIfStale();
             DBZConfig.Server c = DBZConfig.SERVER;
@@ -67,10 +68,14 @@ public final class CombatEvents {
                 victim.level().playSound(null, victim.getX(), victim.getY(), victim.getZ(),
                         net.minecraft.sounds.SoundEvents.PLAYER_ATTACK_CRIT, net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, 0.6f);
             }
-            if (extraKnockback > 0) {
+            boolean aerial = AerialCombat.isAirborne(victim);
+            if (aerial) raw *= 1.0 + c.airComboBonus.get();
+            if (heavy > 1.0 && AerialCombat.isSpike(attacker)) raw *= 1.0 + c.spikeDamageBonus.get();
+            if (extraKnockback > 0 && !aerial) {
                 float yaw = attacker.getYRot() * Mth.DEG_TO_RAD;
                 victim.knockback(Math.min(3.0, extraKnockback), Mth.sin(yaw), -Mth.cos(yaw));
             }
+            AerialCombat.afterHit(attacker, victim, heavy > 1.0, aerial);
         } else {
             raw = DamageCalculator.fromVanilla(event.getAmount());
         }
@@ -81,7 +86,7 @@ public final class CombatEvents {
         if (victimData != null) {
             Player player = (Player) victim;
             victimData.recomputeIfStale();
-            if (!isKi && !isMelee && !source.is(DamageTypeTags.BYPASSES_ARMOR) && event.getAmount() > 0) {
+            if (!isKi && !isThrow && !isMelee && !source.is(DamageTypeTags.BYPASSES_ARMOR) && event.getAmount() > 0) {
                 // Vanilla armor still matters against mobs and the environment.
                 float afterArmor = CombatRules.getDamageAfterAbsorb(event.getAmount(), player.getArmorValue(),
                         (float) player.getAttributeValue(Attributes.ARMOR_TOUGHNESS));
@@ -89,7 +94,7 @@ public final class CombatEvents {
             }
             boolean afterimage = source.getEntity() != null && victim.level().getGameTime() <= victimData.getDashEvadeUntil();
             if (isKi && !afterimage) raw *= RacePassives.absorbKiHit(victimData, raw, victim.level().getGameTime());
-            dealt = afterimage ? 0 : DamageCalculator.againstPlayer(raw, victimData, source.getEntity() != null, victim.getRandom());
+            dealt = afterimage ? 0 : DamageCalculator.againstPlayer(raw, victimData, source.getEntity() != null && !isThrow, victim.getRandom());
             if (victimData.isGuarding() && dealt > 0) {
                 victimData.setStamina(victimData.getStamina() - DamageCalculator.guardPrevented(dealt) * DBZConfig.SERVER.guardStaminaPerDamage.get());
                 if (victimData.getStamina() <= 0) victimData.setGuarding(false); // guard broken
@@ -108,7 +113,7 @@ public final class CombatEvents {
             }
         } else {
             dealt = raw;
-            if (isKi || isMelee) event.setAmount(DamageCalculator.toVanilla(raw));
+            if (isKi || isThrow || isMelee) event.setAmount(DamageCalculator.toVanilla(raw));
         }
 
         // 3) training points for the attacker

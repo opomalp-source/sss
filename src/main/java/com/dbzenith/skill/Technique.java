@@ -13,7 +13,7 @@ public final class Technique {
     public enum Style { BALL, DISK, BEAM, SELF }
 
     /** Special behavior. NONE = plain damage. */
-    public enum Effect { NONE, HEAL_SELF, HEAL_ALLY, BLIND_AREA, EXPLOSIVE_WAVE, TELEPORT, KI_SENSE, ENERGY_ABSORB, CANDY }
+    public enum Effect { NONE, HEAL_SELF, HEAL_ALLY, BLIND_AREA, EXPLOSIVE_WAVE, TELEPORT, KI_SENSE, ENERGY_ABSORB, CANDY, KI_TRANSFER, STUN_AREA, KI_SEAL, GRAB }
 
     private final String id;
     private final double kiCost;
@@ -34,6 +34,7 @@ public final class Technique {
     private final long learnCost;
     private final int unlockLevel;
     private final Set<Race> races;
+    private final int holdTicks;
 
     private Technique(Builder b) {
         id = b.id;
@@ -55,6 +56,7 @@ public final class Technique {
         learnCost = b.learnCost;
         unlockLevel = b.unlockLevel;
         races = b.races;
+        holdTicks = b.holdTicks;
     }
 
     public static Builder builder(String id) {
@@ -92,6 +94,9 @@ public final class Technique {
     /** Races that may learn it (all races unless restricted). */
     public Set<Race> races() { return races; }
 
+    /** Ball-drop: the ball forms above the caster's head for this many ticks, then is hurled at the crosshair (0 = fired at once). */
+    public int holdTicks() { return holdTicks; }
+
     public boolean isRacial() {
         return races.size() < Race.values().length;
     }
@@ -120,6 +125,7 @@ public final class Technique {
         private long learnCost;
         private int unlockLevel;
         private Set<Race> races = EnumSet.allOf(Race.class);
+        private int holdTicks;
 
         private Builder(String id) {
             this.id = id;
@@ -139,6 +145,7 @@ public final class Technique {
         public Builder style(Style s) { style = s; return this; }
         public Builder effect(Effect e, double power) { effect = e; effectPower = power; return this; }
         public Builder learn(long tp, int level) { learnCost = tp; unlockLevel = level; return this; }
+        public Builder drop(int ticksAboveHead) { holdTicks = ticksAboveHead; return this; }
         public Builder race(Race first, Race... rest) { races = EnumSet.of(first, rest); return this; }
 
         public Technique build() {
