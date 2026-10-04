@@ -6,6 +6,8 @@ import com.dbzenith.data.PlayerData;
 import com.dbzenith.stats.DerivedStats;
 import com.dbzenith.stats.SpeedModifiers;
 import com.dbzenith.stats.StatCalculator;
+import com.dbzenith.transform.FormHandler;
+import com.dbzenith.transform.Overdrive;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -55,7 +57,8 @@ public final class KiTicker {
                             SoundSource.PLAYERS, 0.8f, 1.6f);
                 }
             }
-        } else if (!(data.isFlying() && player.getAbilities().flying)) {
+        } else if (!(data.isFlying() && player.getAbilities().flying) && !data.isTransformed()) {
+            // No passive ki regen while transformed: forms are sustained by charging and mastery.
             data.setKi(data.getKi() + perTick(s.maxKi(), c.kiRegenPercentPerSecond.get()));
         }
 
@@ -66,6 +69,8 @@ public final class KiTicker {
             data.setBody(data.getBody() + perTick(s.maxBody(), c.bodyRegenPercentPerSecond.get()));
         }
 
+        FormHandler.tick(player, data, now);
+        Overdrive.tick(player, data, now);
         FlightHandler.tick(player, data);
         BodyHealth.mirror(player, data);
     }

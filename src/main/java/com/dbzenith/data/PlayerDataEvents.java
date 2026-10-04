@@ -45,6 +45,7 @@ public final class PlayerDataEvents {
                     if (event.isWasDeath()) {
                         newData.refill();
                         newData.setFlying(false); // vanilla resets abilities on death
+                        newData.setFormId(PlayerData.BASE_FORM);
                     }
                 }));
         original.invalidateCaps();

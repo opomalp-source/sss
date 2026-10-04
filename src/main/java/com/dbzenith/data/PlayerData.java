@@ -248,6 +248,99 @@ public class PlayerData {
         }
     }
 
+    // ------------------------------------------------------------------ transformations (saved)
+
+    public static final String BASE_FORM = "base";
+
+    private String formId = BASE_FORM;
+    private final java.util.Map<String, Double> mastery = new java.util.HashMap<>();
+    private final java.util.Set<String> flags = new java.util.HashSet<>();
+    private boolean hasTail = true;
+    private String targetForm = "";
+    private int overdriveLevel; // runtime only: 0 = off
+
+    public String getFormId() {
+        return formId;
+    }
+
+    public boolean isTransformed() {
+        return !BASE_FORM.equals(formId);
+    }
+
+    public void setFormId(String formId) {
+        String v = formId == null || formId.isEmpty() ? BASE_FORM : formId;
+        if (!v.equals(this.formId)) {
+            this.formId = v;
+            derivedStale = true;
+            markDirty();
+        }
+    }
+
+    public double getMastery(String id) {
+        return mastery.getOrDefault(id, 0.0);
+    }
+
+    public void setMastery(String id, double value) {
+        double v = Mth.clamp(value, 0, 100);
+        if (v != getMastery(id)) {
+            mastery.put(id, v);
+            derivedStale = true;
+            markDirty();
+        }
+    }
+
+    public java.util.Map<String, Double> masteryView() {
+        return java.util.Collections.unmodifiableMap(mastery);
+    }
+
+    public boolean hasFlag(String flag) {
+        return flags.contains(flag);
+    }
+
+    public void setFlag(String flag, boolean on) {
+        if (on ? flags.add(flag) : flags.remove(flag)) markDirty();
+    }
+
+    public java.util.Set<String> flagsView() {
+        return java.util.Collections.unmodifiableSet(flags);
+    }
+
+    public boolean hasTail() {
+        return hasTail;
+    }
+
+    public void setTail(boolean tail) {
+        if (tail != hasTail) {
+            hasTail = tail;
+            markDirty();
+        }
+    }
+
+    public String getTargetForm() {
+        return targetForm;
+    }
+
+    public void setTargetForm(String id) {
+        String v = id == null ? "" : id;
+        if (!v.equals(targetForm)) {
+            targetForm = v;
+            markDirty();
+        }
+    }
+
+    public int getOverdriveLevel() {
+        return overdriveLevel;
+    }
+
+    public void setOverdriveLevel(int level) {
+        int v = Math.max(0, level);
+        if (v != overdriveLevel) {
+            overdriveLevel = v;
+            derivedStale = true;
+            markDirty();
+        }
+    }
+
     // ------------------------------------------------------------------ combat state (runtime only, synced but not saved)
 
     private boolean charging;
@@ -452,6 +545,15 @@ public class PlayerData {
         tag.putDouble("physicalAge", physicalAge);
         tag.putDouble("mentalAge", mentalAge);
         tag.putBoolean("flying", flying);
+        tag.putString("form", formId);
+        CompoundTag m = new CompoundTag();
+        mastery.forEach(m::putDouble);
+        tag.put("mastery", m);
+        net.minecraft.nbt.ListTag fl = new net.minecraft.nbt.ListTag();
+        for (String f : flags) fl.add(net.minecraft.nbt.StringTag.valueOf(f));
+        tag.put("flags", fl);
+        tag.putBoolean("tail", hasTail);
+        tag.putString("targetForm", targetForm);
         return tag;
     }
 
@@ -476,6 +578,15 @@ public class PlayerData {
         physicalAge = tag.contains("physicalAge") ? tag.getDouble("physicalAge") : 16;
         mentalAge = tag.contains("mentalAge") ? tag.getDouble("mentalAge") : 16;
         flying = tag.getBoolean("flying");
+        formId = tag.contains("form") ? tag.getString("form") : BASE_FORM;
+        mastery.clear();
+        CompoundTag m = tag.getCompound("mastery");
+        for (String k : m.getAllKeys()) mastery.put(k, m.getDouble(k));
+        flags.clear();
+        net.minecraft.nbt.ListTag fl = tag.getList("flags", net.minecraft.nbt.Tag.TAG_STRING);
+        for (int i = 0; i < fl.size(); i++) flags.add(fl.getString(i));
+        hasTail = !tag.contains("tail") || tag.getBoolean("tail");
+        targetForm = tag.getString("targetForm");
         derivedStale = true;
         markDirty();
     }
@@ -492,6 +603,7 @@ public class PlayerData {
         tag.putBoolean("charging", charging);
         tag.putBoolean("guarding", guarding);
         tag.putInt("combo", comboHits);
+        tag.putInt("overdrive", overdriveLevel);
         tag.putBoolean("heavyCharging", heavyChargeTicks >= 0);
         tag.putDouble("heavyArmed", heavyArmedMultiplier);
         return tag;
@@ -505,6 +617,7 @@ public class PlayerData {
         charging = tag.getBoolean("charging");
         guarding = tag.getBoolean("guarding");
         comboHits = tag.getInt("combo");
+        overdriveLevel = tag.getInt("overdrive");
         heavyChargeTicks = tag.getBoolean("heavyCharging") ? 0 : -1;
         heavyArmedMultiplier = tag.getDouble("heavyArmed");
         dirty = false;

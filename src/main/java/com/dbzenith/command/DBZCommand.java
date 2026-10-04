@@ -14,6 +14,11 @@ import com.dbzenith.skill.TechniqueHandler;
 import com.dbzenith.skill.Techniques;
 import com.dbzenith.stats.Attribute;
 import com.dbzenith.stats.AttributeTraining;
+import com.dbzenith.transform.Form;
+import com.dbzenith.transform.FormHandler;
+import com.dbzenith.transform.FormMath;
+import com.dbzenith.transform.Forms;
+import com.dbzenith.transform.Overdrive;
 import com.dbzenith.stats.DerivedStats;
 import com.dbzenith.stats.FightingPath;
 import com.dbzenith.stats.Race;
@@ -63,6 +68,8 @@ public final class DBZCommand {
             new DynamicCommandExceptionType(id -> Component.literal("Unknown race: " + id));
     private static final DynamicCommandExceptionType UNKNOWN_PATH =
             new DynamicCommandExceptionType(id -> Component.literal("Unknown path: " + id));
+    private static final DynamicCommandExceptionType UNKNOWN_FORM =
+            new DynamicCommandExceptionType(id -> Component.literal("Unknown form: " + id));
     private static final DynamicCommandExceptionType UNKNOWN_TECHNIQUE =
             new DynamicCommandExceptionType(id -> Component.literal("Unknown technique: " + id));
 
@@ -173,6 +180,61 @@ public final class DBZCommand {
                                                     int times = IntegerArgumentType.getInteger(ctx, "times");
                                                     return apply(ctx, "Spent TP on " + id + " (up to " + times + ") for", d -> AttributeTraining.upgrade(d, a, times));
                                                 })))))
+                .then(Commands.literal("form")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("form", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(Forms.all().stream().map(Form::id), b))
+                                        .executes(ctx -> {
+                                            String id = StringArgumentType.getString(ctx, "form");
+                                            if (!Forms.exists(id)) throw UNKNOWN_FORM.create(id);
+                                            int n = 0;
+                                            for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
+                                                FormHandler.enter(p, ModCapabilities.getOrThrow(p), Forms.byId(id));
+                                                n++;
+                                            }
+                                            int count = n;
+                                            ctx.getSource().sendSuccess(() -> Component.literal("Forced form " + id + " on " + count + " player(s)"), true);
+                                            return n;
+                                        }))))
+                .then(Commands.literal("transform")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .executes(ctx -> {
+                                    int n = 0;
+                                    for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) if (FormHandler.transformUp(p)) n++;
+                                    int count = n;
+                                    ctx.getSource().sendSuccess(() -> Component.literal("Transformed " + count + " player(s)"), true);
+                                    return n;
+                                })))
+                .then(Commands.literal("mastery")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("form", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(
+                                                java.util.stream.Stream.concat(Forms.all().stream().map(Form::id), java.util.stream.Stream.of(FormMath.OVERDRIVE_MASTERY)), b))
+                                        .then(Commands.argument("value", DoubleArgumentType.doubleArg(0, 100))
+                                                .executes(ctx -> {
+                                                    String id = StringArgumentType.getString(ctx, "form");
+                                                    double v = DoubleArgumentType.getDouble(ctx, "value");
+                                                    return apply(ctx, "Set " + id + " mastery " + v + " for", d -> d.setMastery(id, v));
+                                                })))))
+                .then(Commands.literal("flag")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("flag", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.List.of("god_ki", "overdrive"), b))
+                                        .then(Commands.argument("on", BoolArgumentType.bool())
+                                                .executes(ctx -> {
+                                                    String flag = StringArgumentType.getString(ctx, "flag");
+                                                    boolean on = BoolArgumentType.getBool(ctx, "on");
+                                                    return apply(ctx, "Set flag " + flag + "=" + on + " for", d -> d.setFlag(flag, on));
+                                                })))))
+                .then(Commands.literal("overdrive")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .executes(ctx -> {
+                                    int n = 0;
+                                    for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) if (Overdrive.raise(p)) n++;
+                                    int count = n;
+                                    ctx.getSource().sendSuccess(() -> Component.literal("Raised overdrive for " + count + " player(s)"), true);
+                                    return n;
+                                })))
                 .then(Commands.literal("cast")
                         .then(Commands.argument("caster", EntityArgument.entity())
                                 .then(Commands.argument("technique", StringArgumentType.word())

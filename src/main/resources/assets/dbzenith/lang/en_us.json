@@ -63,5 +63,33 @@
 
   "message.dbzenith.selected_technique": "Technique: %s",
   "message.dbzenith.no_ki_to_fly": "Not enough ki to fly",
-  "message.dbzenith.out_of_ki": "Out of ki!"
+  "message.dbzenith.out_of_ki": "Out of ki!",
+
+  "form.dbzenith.base": "Base",
+  "form.dbzenith.super_saiyan": "Super Saiyan",
+  "form.dbzenith.super_saiyan_g2": "Ascended Super Saiyan",
+  "form.dbzenith.super_saiyan_g3": "Ultra Super Saiyan",
+  "form.dbzenith.super_saiyan_2": "Super Saiyan 2",
+  "form.dbzenith.super_saiyan_3": "Super Saiyan 3",
+  "form.dbzenith.super_saiyan_god": "Super Saiyan God",
+  "form.dbzenith.super_saiyan_blue": "Super Saiyan Blue",
+  "form.dbzenith.great_ape": "Great Ape",
+  "form.dbzenith.problem.race": "Your race cannot use this form",
+  "form.dbzenith.problem.trigger": "This form cannot be entered at will",
+  "form.dbzenith.problem.flag.god_ki": "Requires god ki (a ritual, Phase 4)",
+  "form.dbzenith.problem.level": "Requires level %s",
+  "form.dbzenith.problem.mastery": "Requires %s mastery %s%%",
+  "form.dbzenith.problem.none": "No further form available",
+
+  "key.dbzenith.transform": "Transform (Shift: revert one form)",
+  "key.dbzenith.overdrive": "Overdrive (Shift: end)",
+  "hud.dbzenith.overdrive": "OVERDRIVE x%s",
+  "message.dbzenith.transformed": "%s!",
+  "message.dbzenith.form_exhausted": "Out of ki: you drop out of your form",
+  "message.dbzenith.no_ki_to_transform": "Not enough ki to transform",
+  "message.dbzenith.overdrive": "Overdrive x%s!",
+  "message.dbzenith.overdrive_form": "Overdrive does not work in this form",
+  "message.dbzenith.overdrive_locked": "Overdrive unlocks at level %s",
+  "message.dbzenith.overdrive_max": "Overdrive is at your limit (train its mastery)",
+  "message.dbzenith.overdrive_ended": "Your body gives out: Overdrive ends"
 }

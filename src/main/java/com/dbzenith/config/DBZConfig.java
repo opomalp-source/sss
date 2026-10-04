@@ -109,6 +109,20 @@ public final class DBZConfig {
         public final ForgeConfigSpec.IntValue tpChargeTrainingInterval;
         public final ForgeConfigSpec.IntValue tpPerChargeInterval;
 
+        // --- transformations ---
+        public final ForgeConfigSpec.DoubleValue unlockLevelScale;
+        public final ForgeConfigSpec.DoubleValue transformKiCostPercent;
+        public final ForgeConfigSpec.DoubleValue masteryGainPerSecond;
+        public final ForgeConfigSpec.DoubleValue masteryMaxMultiplierBonus;
+        public final ForgeConfigSpec.DoubleValue masteryMaxDrainReduction;
+        public final ForgeConfigSpec.ConfigValue<java.util.List<? extends Double>> overdriveLevels;
+        public final ForgeConfigSpec.IntValue overdriveUnlockLevel;
+        public final ForgeConfigSpec.DoubleValue overdriveMasteryPerLevel;
+        public final ForgeConfigSpec.DoubleValue overdriveBodyDrainPercent;
+        public final ForgeConfigSpec.DoubleValue overdriveStaminaDrainPercent;
+        public final ForgeConfigSpec.DoubleValue overdriveBacklashPercent;
+        public final ForgeConfigSpec.DoubleValue overdriveMinBodyPercent;
+
         // --- character ---
         public final ForgeConfigSpec.DoubleValue startingAge;
 
@@ -249,6 +263,33 @@ public final class DBZConfig {
             tpChargeTrainingInterval = b.comment("Charging ki grants TP every this many ticks (spiritual training)")
                     .defineInRange("tpChargeTrainingInterval", 100, 1, 72000);
             tpPerChargeInterval = b.defineInRange("tpPerChargeInterval", 2, 0, 1_000_000);
+            b.pop();
+
+            b.comment("Forms and the Overdrive buff (see transform package)").push("transformations");
+            unlockLevelScale = b.comment("Multiplies every form's unlock level (0.5 = forms unlock twice as early)")
+                    .defineInRange("unlockLevelScale", 1.0, 0.0, 100.0);
+            transformKiCostPercent = b.comment("Ki spent to transform, % of max ki")
+                    .defineInRange("transformKiCostPercent", 5.0, 0.0, 100.0);
+            masteryGainPerSecond = b.comment("Form mastery (0-100) gained per second in a form, before spirit and tier scaling")
+                    .defineInRange("masteryGainPerSecond", 0.05, 0.0, 100.0);
+            masteryMaxMultiplierBonus = b.comment("At 100 mastery a form's bonus (multiplier - 1) grows by this fraction")
+                    .defineInRange("masteryMaxMultiplierBonus", 0.2, 0.0, 10.0);
+            masteryMaxDrainReduction = b.comment("At 100 mastery a form's drain is reduced by this fraction")
+                    .defineInRange("masteryMaxDrainReduction", 0.75, 0.0, 1.0);
+            overdriveLevels = b.comment("Overdrive multipliers per level, lowest first")
+                    .defineList("overdriveLevels", java.util.List.of(2.0, 3.0, 4.0, 10.0, 20.0), o -> o instanceof Double d && d >= 1.0);
+            overdriveUnlockLevel = b.comment("Character level needed to use Overdrive (or the 'overdrive' flag)")
+                    .defineInRange("overdriveUnlockLevel", 100, 0, 1_000_000);
+            overdriveMasteryPerLevel = b.comment("Overdrive mastery needed per extra level (level 1 always allowed)")
+                    .defineInRange("overdriveMasteryPerLevel", 20.0, 0.0, 100.0);
+            overdriveBodyDrainPercent = b.comment("Body drained per second, % of max, per point of multiplier above 1")
+                    .defineInRange("overdriveBodyDrainPercent", 0.4, 0.0, 100.0);
+            overdriveStaminaDrainPercent = b.comment("Stamina drained per second, % of max, per point of multiplier above 1")
+                    .defineInRange("overdriveStaminaDrainPercent", 1.0, 0.0, 100.0);
+            overdriveBacklashPercent = b.comment("On ending Overdrive: body lost, % of max, per point of multiplier above 1")
+                    .defineInRange("overdriveBacklashPercent", 0.5, 0.0, 100.0);
+            overdriveMinBodyPercent = b.comment("Overdrive switches off below this body %")
+                    .defineInRange("overdriveMinBodyPercent", 10.0, 0.0, 100.0);
             b.pop();
 
             b.push("character");

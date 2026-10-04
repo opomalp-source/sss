@@ -22,6 +22,7 @@ public final class FlightHandler {
             stop(player, data);
             return false;
         }
+        if (!com.dbzenith.transform.Forms.byId(data.getFormId()).allowsFlight()) return false;
         if (data.getKi() <= 0 && !player.getAbilities().instabuild) {
             player.displayClientMessage(Component.translatable("message.dbzenith.no_ki_to_fly"), true);
             return false;

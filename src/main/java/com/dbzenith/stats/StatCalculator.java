@@ -2,6 +2,8 @@ package com.dbzenith.stats;
 
 import com.dbzenith.config.DBZConfig;
 import com.dbzenith.data.PlayerData;
+import com.dbzenith.transform.FormMath;
+import com.dbzenith.transform.Forms;
 
 /**
  * The single place where base attributes become derived stats, and where TP costs are priced.
@@ -12,10 +14,12 @@ public final class StatCalculator {
 
     public static DerivedStats compute(PlayerData data) {
         DBZConfig.Server c = DBZConfig.SERVER;
-        int str = data.getAttribute(Attribute.STRENGTH);
-        int dex = data.getAttribute(Attribute.DEXTERITY);
+        double str = effective(data, Attribute.STRENGTH);
+        double dex = effective(data, Attribute.DEXTERITY);
+        int baseDex = data.getAttribute(Attribute.DEXTERITY);
+        double speedBonus = Forms.byId(data.getFormId()).speedBonus();
         int con = data.getAttribute(Attribute.CONSTITUTION);
-        int kip = data.getAttribute(Attribute.KI_POWER);
+        double kip = effective(data, Attribute.KI_POWER);
         int wil = data.getAttribute(Attribute.WILLPOWER);
         int mnd = data.getAttribute(Attribute.MIND);
         int spi = data.getAttribute(Attribute.SPIRIT);
@@ -31,8 +35,13 @@ public final class StatCalculator {
                 Math.min(c.kiControlCap.get(), mnd * c.kiControlPerMind.get()),
                 1.0 + spi * c.spiritModifierPerSpirit.get(),
                 spi * c.kiTransferPerSpirit.get(),
-                Math.min(c.attackSpeedCap.get(), dex * c.attackSpeedPerDexterity.get()),
-                Math.min(c.moveSpeedCap.get(), dex * c.moveSpeedPerDexterity.get()));
+                Math.min(c.attackSpeedCap.get(), baseDex * c.attackSpeedPerDexterity.get()),
+                Math.max(-0.9, Math.min(c.moveSpeedCap.get(), baseDex * c.moveSpeedPerDexterity.get()) + speedBonus));
+    }
+
+    /** Attribute value after form and overdrive multipliers (combat attributes only). */
+    public static double effective(PlayerData data, Attribute attribute) {
+        return data.getAttribute(attribute) * FormMath.attributeMultiplier(data, attribute);
     }
 
     /** TP needed to raise {@code attribute} by one point from its current value. */
@@ -65,8 +74,8 @@ public final class StatCalculator {
      * Battle power as shown by a scouter: grows with every attribute and scales with the current release %.
      */
     public static long battlePower(PlayerData data) {
-        long sum = 0;
-        for (Attribute a : Attribute.values()) sum += data.getAttribute(a);
+        double sum = 0;
+        for (Attribute a : Attribute.values()) sum += effective(data, a);
         return Math.round(sum * 10.0 * data.getReleasePercent() / 100.0);
     }
 }

@@ -4,6 +4,9 @@ import com.dbzenith.data.PlayerData;
 import com.dbzenith.skill.Technique;
 import com.dbzenith.stats.DerivedStats;
 import com.dbzenith.stats.StatCalculator;
+import com.dbzenith.transform.Form;
+import com.dbzenith.transform.FormMath;
+import com.dbzenith.transform.Forms;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -40,7 +43,8 @@ public final class DbzHud implements IGuiOverlay {
 
         int x = 6;
         int y = 6;
-        g.fill(x - 3, y - 3, x + BAR_W + 52, y + 64, FRAME);
+        boolean formLine = d.isTransformed() || d.getOverdriveLevel() > 0;
+        g.fill(x - 3, y - 3, x + BAR_W + 52, y + (formLine ? 76 : 64), FRAME);
 
         g.drawString(font, Component.translatable("hud.dbzenith.power_level", String.format("%,d", StatCalculator.battlePower(d))), x, y, TEXT);
         y += 11;
@@ -68,6 +72,23 @@ public final class DbzHud implements IGuiOverlay {
         if (d.isChargingHeavy()) cx = chip(g, font, cx, y, Component.translatable("hud.dbzenith.heavy_charging"), 0xFFFF6040);
         else if (d.getHeavyArmedMultiplier() > 0) {
             cx = chip(g, font, cx, y, Component.translatable("hud.dbzenith.heavy_ready", String.format("%.1f", d.getHeavyArmedMultiplier())), 0xFFFF6040);
+        }
+
+        // form + overdrive
+        Form form = Forms.byId(d.getFormId());
+        if (!form.isBase() || d.getOverdriveLevel() > 0) {
+            y += 12;
+            int fx = x;
+            if (!form.isBase()) {
+                Component name = Component.translatable(form.translationKey());
+                g.drawString(font, name, fx, y, 0xFF000000 | (form.hairColor() >= 0 ? form.hairColor() : form.auraColor()));
+                fx += font.width(name) + 4;
+                g.drawString(font, String.format("M%.0f%%", d.getMastery(form.id())), fx, y, DIM);
+                fx += 30;
+            }
+            if (d.getOverdriveLevel() > 0) {
+                chip(g, font, fx, y, Component.translatable("hud.dbzenith.overdrive", String.format("%.0f", FormMath.overdriveMultiplier(d))), 0xFFFF4030);
+            }
         }
 
         // combo

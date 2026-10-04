@@ -8,6 +8,7 @@ import com.dbzenith.network.ModNetwork;
 import com.dbzenith.network.UseTechniquePacket;
 import com.dbzenith.skill.Technique;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
@@ -66,6 +67,12 @@ public final class ClientInput {
                 ModNetwork.sendToServer(new UseTechniquePacket(t.id()));
                 ClientCombatState.startCooldown(t, now);
             }
+        }
+        while (ModKeys.TRANSFORM.consumeClick()) {
+            ModNetwork.sendToServer(new InputPacket(Screen.hasShiftDown() ? InputPacket.Action.TRANSFORM_DOWN : InputPacket.Action.TRANSFORM_UP));
+        }
+        while (ModKeys.OVERDRIVE.consumeClick()) {
+            ModNetwork.sendToServer(new InputPacket(Screen.hasShiftDown() ? InputPacket.Action.OVERDRIVE_OFF : InputPacket.Action.OVERDRIVE_UP));
         }
         while (ModKeys.STATS.consumeClick()) mc.setScreen(new StatScreen());
     }

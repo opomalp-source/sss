@@ -12,7 +12,7 @@ import java.util.function.Supplier;
  * Server to every client tracking a player (and the player): the visible subset of their state,
  * used for auras and (Phase 2) forms. Sent only when it changes.
  */
-public record PublicStatePacket(int entityId, int flags, int release, int auraColor) {
+public record PublicStatePacket(int entityId, int flags, int release, int auraColor, String form, int overdrive) {
     public static final int CHARGING = 1;
     public static final int FLYING = 2;
     public static final int GUARDING = 4;
@@ -21,11 +21,11 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
     public static PublicStatePacket of(int entityId, PlayerData d) {
         int flags = (d.isCharging() ? CHARGING : 0) | (d.isFlying() ? FLYING : 0)
                 | (d.isGuarding() ? GUARDING : 0) | (d.isChargingHeavy() ? HEAVY : 0);
-        return new PublicStatePacket(entityId, flags, d.getReleasePercent(), Aura.color(d));
+        return new PublicStatePacket(entityId, flags, d.getReleasePercent(), Aura.color(d), d.getFormId(), d.getOverdriveLevel());
     }
 
     public int stateHash() {
-        return (flags * 31 + release) * 31 + auraColor;
+        return (((flags * 31 + release) * 31 + auraColor) * 31 + form.hashCode()) * 31 + overdrive;
     }
 
     public boolean has(int flag) {
@@ -37,10 +37,12 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
         buf.writeByte(msg.flags);
         buf.writeByte(msg.release);
         buf.writeInt(msg.auraColor);
+        buf.writeUtf(msg.form, 64);
+        buf.writeByte(msg.overdrive);
     }
 
     public static PublicStatePacket decode(FriendlyByteBuf buf) {
-        return new PublicStatePacket(buf.readVarInt(), buf.readByte(), buf.readByte(), buf.readInt());
+        return new PublicStatePacket(buf.readVarInt(), buf.readByte(), buf.readByte(), buf.readInt(), buf.readUtf(64), buf.readByte());
     }
 
     public static void handle(PublicStatePacket msg, Supplier<NetworkEvent.Context> ctx) {

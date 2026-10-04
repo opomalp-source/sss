@@ -3,6 +3,7 @@ package com.dbzenith.skill;
 import com.dbzenith.combat.DamageCalculator;
 import com.dbzenith.data.ModCapabilities;
 import com.dbzenith.data.PlayerData;
+import com.dbzenith.transform.Forms;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -26,7 +27,7 @@ public final class TechniqueHandler {
     public static Result use(ServerPlayer player, Technique technique) {
         if (technique == null || !player.isAlive() || player.isSpectator()) return Result.INVALID;
         PlayerData data = ModCapabilities.get(player).orElse(null);
-        if (data == null) return Result.INVALID;
+        if (data == null || !Forms.byId(data.getFormId()).allowsTechniques()) return Result.INVALID;
         data.recomputeIfStale();
 
         ServerLevel level = player.serverLevel();
