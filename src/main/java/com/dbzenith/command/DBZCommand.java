@@ -18,6 +18,7 @@ import com.dbzenith.transform.Form;
 import com.dbzenith.transform.FormHandler;
 import com.dbzenith.transform.FormMath;
 import com.dbzenith.transform.Forms;
+import com.dbzenith.transform.GreatApe;
 import com.dbzenith.transform.Overdrive;
 import com.dbzenith.stats.DerivedStats;
 import com.dbzenith.stats.FightingPath;
@@ -235,6 +236,20 @@ public final class DBZCommand {
                                     ctx.getSource().sendSuccess(() -> Component.literal("Raised overdrive for " + count + " player(s)"), true);
                                     return n;
                                 })))
+                .then(Commands.literal("tail")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("on", BoolArgumentType.bool())
+                                        .executes(ctx -> {
+                                            boolean on = BoolArgumentType.getBool(ctx, "on");
+                                            return apply(ctx, "Set tail " + on + " for", d -> d.setTail(on));
+                                        }))))
+                .then(Commands.literal("moon")
+                        .executes(ctx -> {
+                            var pos = ctx.getSource().getPosition();
+                            GreatApe.spawnFalseMoon(ctx.getSource().getLevel(), pos.x, pos.y + 2, pos.z);
+                            ctx.getSource().sendSuccess(() -> Component.literal("False moon rising"), true);
+                            return 1;
+                        }))
                 .then(Commands.literal("cast")
                         .then(Commands.argument("caster", EntityArgument.entity())
                                 .then(Commands.argument("technique", StringArgumentType.word())

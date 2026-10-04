@@ -94,3 +94,19 @@
 - Screenshots: Wave Beam side-on (thick blue beam to target), aura in third person, heavy-ready tag, dash cloud burst.
 - **The human was playing in the scripted test client window** (inventory/XP/TP spending appeared, Y/R/H/F5 pressed). That explained "mystery" COOLDOWN results and moved camera angles. Side effect: real keybinds Y, R, H confirmed working. Next time, warn before launching the test client: it takes keyboard focus.
 - **Intermittent login hang** of the dev client (the server sends all 23 FML handshake packets, the client receives none, times out at 30 s) happened again with the original network setup, so it is not about the bind address. Cause unknown. The dev client now auto-retries from the "Failed to connect" screen (dev automation only). Watch whether players hit this on real servers; if so, investigate (netty, FML handshake on 47.1.106).
+
+## 2026-10-04 — Session 1 (cont.): Phase 2 transformations (v0.4.0)
+
+### Built
+- **Form system** (`transform`): `Form` (builder: multipliers on STR/DEX/KI_POWER only; pools never multiply), `Forms` registry with the Saiyan line (Super Saiyan, Ascended, Ultra (-30% speed, stamina drain), SSJ2, SSJ3, God, Blue) and Great Ape. `FormMath` = single place for mastery-scaled multipliers/drain, unlock scaling, Overdrive math; `StatCalculator` now works on effective attributes, and battle power reflects forms.
+- **Rules** (`FormHandler`): requirements (race, trigger, flag, level x `unlockLevelScale`, parent mastery), J = next unlocked child or the selected target if every step is unlocked, Shift+J = revert one tier, transform costs 5% ki, drain per tick, mastery per second (`masteryGainPerSecond` x spirit / (1 + tier/2)), forced revert at 0 ki. **Passive ki regen is off while transformed** (otherwise regen outpaced SSJ drain and forms never ended). Death reverts to base.
+- **Overdrive** (kaio-style, N / Shift+N): config levels x2 to x20; level 1 at char level 100 or `overdrive` flag; extra levels per 20 mastery; drains body+stamina (less with mastery), blocks body regen, auto-ends under 10% body, backlash on end (never lethal). Allowed in base and Blue only.
+- **Great Ape** (`GreatApe`, `FalseMoonEntity`, Moon Orb item, `/dbz moon`, `/dbz tail`): checked every second; Saiyan/Half-Saiyan + tail + sky + (full moon at night or a risen false moon within 64 blocks). 3x size via `EntityEvent.Size` (hitbox + eye height) and `FormScaleRenderer` (push in Pre / pop in Post, both LOWEST priority). No techniques or flight.
+- **Visuals**: `FormHairModel` built in code (tapered spikes aimed by direction vectors; rotation solved from the direction because MC applies Z*Y*X), 4 styles + glowing pupils via `FormHairLayer` on both player skins; idle aura while transformed; lightning sparks (SSJ2/3); aura color from form / Overdrive red. Public state now carries form + Overdrive level (protocol 5); clients refresh entity dimensions when another player changes form.
+- **UI**: HUD form line (name, mastery, Overdrive chip); `FormScreen` (button on the Training screen): tree, Ready / requirement (clipped + tooltip), mastery bar, multiplier, click to set the transform target.
+- Commands: `/dbz form|transform|mastery|flag|overdrive|tail|moon`. Keys: J transform, N Overdrive (T and X clash with vanilla chat / toolbar keys).
+- 30 GameTests green (8 new form tests).
+
+### Problems
+- The first hair attempt (straight boxes) read as a cone or helmet in screenshots, and the cap covered the eyes. Rebuilt with tapered, outward-aimed spikes and a raised cap. Still placeholder art (ASSETS_TODO).
+- The Bash tool breaks on apostrophes inside heredocs (the command is wrapped in single quotes). Write files with the editor; keep apostrophes out of shell commands.

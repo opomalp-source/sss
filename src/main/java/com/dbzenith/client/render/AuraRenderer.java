@@ -45,7 +45,7 @@ public final class AuraRenderer {
         int g = (c >> 8) & 0xFF;
         int b = c & 0xFF;
         float t = player.tickCount + event.getPartialTick();
-        float strength = (0.6f + 0.4f * state.release() / 100f) * (powering ? 1f : 0.7f) * form.scale();
+        float strength = (0.6f + 0.4f * state.release() / 100f) * (powering ? 1f : 0.7f); // giant forms are already scaled by FormScaleRenderer
         float pulse = 1f + 0.06f * Mth.sin(t * 0.9f);
         int alpha = (int) (Math.min(1f, strength) * (powering ? 200 : 110));
 

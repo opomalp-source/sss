@@ -37,6 +37,25 @@ public class AssetGen {
                 "................",
                 "................");
 
+        pixelArt("assets/dbzenith/textures/item/moon_orb.png", Map.of(
+                '#', 0xFF8A93B8, 'a', 0xFFDDE4FF, 'b', 0xFFFFFFFF, 'c', 0xFFB7C1E8),
+                "................",
+                "................",
+                ".....######.....",
+                "....#aaaaaa#....",
+                "...#abbaaaaa#...",
+                "..#abbbaaaaac#..",
+                "..#abbaaaaaac#..",
+                "..#aaaaaaaaac#..",
+                "..#aaaaaaaaac#..",
+                "..#aaaaaaaacc#..",
+                "..#caaaaaacc#...",
+                "...#ccaaacc#....",
+                "....#cccccc#....",
+                ".....######.....",
+                "................",
+                "................");
+
         // --- ki glow: soft radial white, tinted per technique at render time ---
         radialGlow("assets/dbzenith/textures/entity/ki_glow.png", 32);
         beamGlow("assets/dbzenith/textures/entity/ki_beam.png", 32);

@@ -37,12 +37,14 @@ Resume from the first unchecked item. Each phase ends with a git tag.
 - [x] Tag `phase-1-combat`
 
 ## Phase 2 — Transformations
-- [ ] Form framework (data-driven form definitions: multipliers, drain, aura color, unlock conditions)
-- [ ] Saiyan line reference implementation (SSJ tiers → ascended → God/Blue-style), Great Ape + false moon
-- [ ] Mastery per form (reduces drain, raises multiplier)
-- [ ] Transform keybind + selection radial/UI; hair/eye/aura visual swap
-- [ ] Kaio-style stackable buff with backlash
-- [ ] Tag `phase-2-transformations`
+- [x] Form framework (`transform.Form`/`Forms`: multipliers on STR/DEX/KI_POWER, ki+stamina drain, colors, hair style, unlock level + parent mastery + flags, scale, trigger)
+- [x] Saiyan line: Super Saiyan, Ascended, Ultra, SSJ2, SSJ3, God (needs `god_ki` flag), Blue; Great Ape via full moon or Moon Orb false moon (tail required, 3x size)
+- [ ] God ki ritual (Phase 4 quest) to grant `god_ki` properly; tail regrowth / tail cutting
+- [x] Mastery per form (time in form x spirit / tier; up to -75% drain, +20% bonus)
+- [x] J transform / Shift+J revert; Forms screen (from K) with target selection; hair (4 styles), eye color, form aura, lightning sparks
+- [ ] Real art: hair model/textures, Great Ape model (GeckoLib) instead of a scaled player
+- [x] Overdrive (N / Shift+N): x2-x20 levels gated by mastery, body+stamina drain, backlash; stacks with base and Blue only
+- [x] Tag `phase-2-transformations`
 
 ## Phase 3 — Races & character creation
 - [ ] Race passives + growth weighting + signature mechanic for all 8 races

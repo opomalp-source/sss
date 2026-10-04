@@ -1,6 +1,7 @@
 package com.dbzenith.client;
 
 import com.dbzenith.DBZenith;
+import com.dbzenith.client.render.FalseMoonRenderer;
 import com.dbzenith.client.render.FormHairLayer;
 import com.dbzenith.client.render.FormHairModel;
 import com.dbzenith.client.render.KiBeamRenderer;
@@ -48,5 +49,6 @@ public final class ClientSetup {
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.KI_BLAST.get(), KiBlastRenderer::new);
         event.registerEntityRenderer(ModEntities.KI_BEAM.get(), KiBeamRenderer::new);
+        event.registerEntityRenderer(ModEntities.FALSE_MOON.get(), FalseMoonRenderer::new);
     }
 }

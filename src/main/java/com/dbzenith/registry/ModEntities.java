@@ -2,6 +2,7 @@ package com.dbzenith.registry;
 
 import com.dbzenith.DBZenith;
 import com.dbzenith.skill.KiBeamEntity;
+import com.dbzenith.transform.FalseMoonEntity;
 import com.dbzenith.skill.KiBlastEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -27,6 +28,13 @@ public final class ModEntities {
                     .updateInterval(1)
                     .noSave()
                     .build("ki_beam"));
+
+    public static final RegistryObject<EntityType<FalseMoonEntity>> FALSE_MOON = ENTITIES.register("false_moon",
+            () -> EntityType.Builder.<FalseMoonEntity>of(FalseMoonEntity::new, MobCategory.MISC)
+                    .sized(1f, 1f)
+                    .clientTrackingRange(16)
+                    .updateInterval(2)
+                    .build("false_moon"));
 
     private ModEntities() {}
 

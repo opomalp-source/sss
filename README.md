@@ -27,7 +27,9 @@ Install **NeoForge 1.20.1-47.1.106** into a dedicated game directory, then put `
 | Y | Next technique (Ki Blast, Wave Beam, Finger Beam, Rapid Volley, Cutter Disk, Homing Orb) |
 | H (hold, release) | Charge a heavy strike: your next punch hits 1.5x-3x harder |
 | B | Dash in your movement direction (brief afterimage: attacks miss) |
-| K | Training screen: spend TP on attributes (Shift+click = +10) |
+| J | Transform to your next form (or your chosen target). Shift+J: drop one form |
+| N | Overdrive: stackable power multiplier that burns your body. Shift+N: end |
+| K | Training screen: spend TP on attributes (Shift+click = +10). The **Forms >** button shows your form tree, requirements and mastery |
 
 ## In-game
 - Creative tab **Dragon Block Zenith** → Senzu Bean (full heal + ki/stamina refill).

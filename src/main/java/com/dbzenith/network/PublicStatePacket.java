@@ -46,6 +46,8 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
     }
 
     public static void handle(PublicStatePacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ClientPublicStates.put(msg); // client thread; ClientPublicStates has no client-only imports
+        PublicStatePacket old = ClientPublicStates.get(msg.entityId);
+        ClientPublicStates.put(msg);
+        if (old == null || !old.form.equals(msg.form)) com.dbzenith.client.ClientHooks.refreshDimensions(msg.entityId); // client thread; ClientPublicStates has no client-only imports
     }
 }

@@ -8,7 +8,9 @@ import com.dbzenith.skill.TechniqueHandler;
 import com.dbzenith.skill.Techniques;
 import com.dbzenith.stats.Attribute;
 import com.dbzenith.stats.Race;
+import com.dbzenith.transform.FalseMoonEntity;
 import com.dbzenith.transform.FormHandler;
+import com.dbzenith.transform.GreatApe;
 import com.dbzenith.transform.FormMath;
 import com.dbzenith.transform.Forms;
 import com.dbzenith.transform.Overdrive;
@@ -149,6 +151,30 @@ public final class FormTests {
         helper.assertTrue(!Overdrive.raise(p), "overdrive does not stack with Super Saiyan");
         TestPlayers.remove(helper, p);
         helper.succeed();
+    }
+
+    @GameTest(template = EMPTY, timeoutTicks = 120)
+    public static void falseMoonTriggersGreatApe(GameTestHelper helper) {
+        ServerPlayer saiyan = saiyan(helper, 0);
+        PlayerData d = ModCapabilities.getOrThrow(saiyan);
+        ServerPlayer human = TestPlayers.create(helper);
+        PlayerData h = ModCapabilities.getOrThrow(human);
+        float normalHeight = saiyan.getBbHeight();
+        GreatApe.spawnFalseMoon(helper.getLevel(), saiyan.getX(), saiyan.getY() + 3, saiyan.getZ());
+        helper.runAfterDelay(FalseMoonEntity.RISE_TICKS + 5, () -> {
+            helper.assertTrue(GreatApe.seesMoon(saiyan), "the risen false moon should be visible");
+            GreatApe.tick(saiyan, d);
+            GreatApe.tick(human, h);
+            helper.assertTrue("great_ape".equals(d.getFormId()), "Saiyan with a tail should become a Great Ape, was " + d.getFormId());
+            helper.assertTrue(!h.isTransformed(), "humans are unaffected");
+            helper.assertTrue(saiyan.getBbHeight() > normalHeight * 2.5f, "Great Ape should be giant: " + saiyan.getBbHeight());
+            d.setTail(false);
+            GreatApe.tick(saiyan, d);
+            helper.assertTrue(!d.isTransformed() && saiyan.getBbHeight() == normalHeight, "losing the tail ends the transformation");
+            TestPlayers.remove(helper, saiyan);
+            TestPlayers.remove(helper, human);
+            helper.succeed();
+        });
     }
 
     @GameTest(template = EMPTY)

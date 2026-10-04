@@ -100,5 +100,9 @@
   "screen.dbzenith.ready": "Ready",
   "screen.dbzenith.moon_only": "Full moon only",
   "screen.dbzenith.form_keys": "J: transform    Shift+J: revert one form",
-  "screen.dbzenith.overdrive_info": "N: Overdrive (max level %s, mastery %s%%)    Shift+N: end"
+  "screen.dbzenith.overdrive_info": "N: Overdrive (max level %s, mastery %s%%)    Shift+N: end",
+  "item.dbzenith.moon_orb": "Moon Orb",
+  "entity.dbzenith.false_moon": "False Moon",
+  "message.dbzenith.great_ape": "The moon... you lose yourself to the Great Ape!",
+  "message.dbzenith.great_ape_end": "The moonlight fades. You collapse, exhausted."
 }

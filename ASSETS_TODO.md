@@ -11,3 +11,13 @@ Reference material (for drawing originals, or for adding art yourself for **priv
 | `data/dbzenith/structures/empty.nbt` | Empty 3×3×3 GameTest template | final (test fixture) | — |
 
 Upcoming slots (added as features land): HUD bars, aura particles, ki blast/beam textures, scouter, dragon balls (1–7 star), radar GUI, gi armor, hair/eye overlays per form, character-creation GUI.
+
+## Added in Phase 1-2
+| Asset | What | Status | Notes |
+|---|---|---|---|
+| `assets/dbzenith/textures/entity/ki_glow.png` | Radial glow for blasts, aura, false moon | placeholder | Tinted at render time |
+| `assets/dbzenith/textures/entity/ki_beam.png` | Beam cross-section glow | placeholder | Tinted at render time |
+| `assets/dbzenith/textures/entity/form_hair.png` + `client/render/FormHairModel` | Transformation hair (spiky/tall/long/slim) and pupils, built from boxes in code | placeholder | Replace with a proper model (Blockbench/GeckoLib) and per-form textures; reference: DBC hair styles, DBV wiki form pages |
+| Great Ape | Currently the player model scaled 3x with red eyes | placeholder | Needs a real ape model + fur texture (GeckoLib) |
+| `assets/dbzenith/textures/item/moon_orb.png` | Moon Orb item | placeholder | |
+| HUD | Flat-color bars and chips | placeholder | Textured HUD frame later |

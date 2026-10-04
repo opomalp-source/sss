@@ -12,7 +12,8 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Derived: body, ki, stamina max | B | done | `StatCalculator` |
 | Derived: defense, evasion, ki control, melee/ki damage | B | done | Applied in DamageCalculator; GameTests |
 | Derived: attack/move speed | B | done | Vanilla attribute modifiers; GameTest |
-| Derived: spirit modifier, ki transfer | B | stubbed | Computed + shown; used from Phase 2 (mastery) / Phase 3 (transfer) |
+| Derived: spirit modifier | B | done | Scales form + Overdrive mastery gain |
+| Derived: ki transfer | B | stubbed | Phase 3 |
 | Release % | B | done | Scales ki damage + ki cost; charging raises, key lowers; GameTests |
 | Physical / mental age | V | stubbed | Stored only |
 | TP pool: earning | C | done | Damage dealt, kills, charging; MIND bonus |
@@ -41,12 +42,12 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 ## 3.3 Transformations
 | Feature | Src | Status | Notes |
 |---|---|---|---|
-| Form framework (multipliers, drain, aura, unlocks) | B | todo | |
-| Saiyan line (SSJ tiers, ascended, God/Blue-style) | B | todo | |
-| Great Ape + false moon | C | todo | |
-| Hair/eye/aura visual swap | B | todo | |
-| Form mastery | B | todo | |
-| Kaio-style stackable buff | B | todo | |
+| Form framework (multipliers, drain, aura, unlocks) | B | done | transform package; 8 GameTests |
+| Saiyan line (SSJ tiers, ascended, God/Blue-style) | B | done | 7 forms seen in-client; God gated by flag until the Phase 4 ritual |
+| Great Ape + false moon | C | done | Moon Orb item + full moon; tail; 3x size; GameTest + seen in-client. Placeholder look (scaled player) |
+| Hair/eye/aura visual swap | B | done | Code-built placeholder hair (4 styles), pupils, form aura, lightning; seen in-client |
+| Form mastery | B | done | Drain reduction + multiplier bonus; GameTest |
+| Kaio-style stackable buff (Overdrive) | B | done | Levels, drain, backlash, form gating; GameTest; seen in-client |
 
 ## 3.4 Races & character creation
 | Feature | Src | Status | Notes |
