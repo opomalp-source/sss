@@ -1,0 +1,26 @@
+{
+  "has_precipitation": true,
+  "temperature": 0.9,
+  "downfall": 0.5,
+  "effects": {
+    "sky_color": 10479808,
+    "fog_color": 12645328,
+    "water_color": 5234880,
+    "water_fog_color": 3121280,
+    "grass_color": 7065740,
+    "foliage_color": 5426288
+  },
+  "spawners": {
+    "monster": [{"type": "dbzenith:sproutling", "weight": 60, "minCount": 2, "maxCount": 4}, {"type": "dbzenith:ki_soldier", "weight": 25, "minCount": 1, "maxCount": 2}],
+    "creature": [], "ambient": [], "axolotls": [], "underground_water_creature": [], "water_creature": [], "water_ambient": [], "misc": []
+  },
+  "spawn_costs": {},
+  "carvers": {"air": ["minecraft:cave", "minecraft:canyon"]},
+  "features": [
+    [], [], [], [], [], [],
+    ["minecraft:ore_dirt", "minecraft:ore_gravel", "minecraft:ore_coal_upper", "minecraft:ore_iron_middle", "minecraft:ore_gold", "minecraft:ore_diamond"],
+    [], [],
+    ["minecraft:trees_savanna", "minecraft:patch_grass_savanna"],
+    []
+  ]
+}

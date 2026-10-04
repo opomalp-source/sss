@@ -30,6 +30,11 @@ public final class ClientHooks {
         Minecraft.getInstance().setScreen(new com.dbzenith.client.screen.QuestScreen(giver));
     }
 
+    /** The Space Pod was used. */
+    public static void openPlanetScreen() {
+        Minecraft.getInstance().setScreen(new com.dbzenith.client.screen.PlanetScreen());
+    }
+
     /** The dragon asks for a wish. */
     public static void openWishScreen(int dragonId) {
         Minecraft.getInstance().setScreen(new com.dbzenith.client.screen.WishScreen(dragonId));

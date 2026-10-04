@@ -65,6 +65,9 @@ public final class ModItems {
     public static final RegistryObject<Item> RAGE_TOTEM = ITEMS.register("rage_totem",
             () -> new BossSummonItem(com.dbzenith.npc.ModNpcs.RAMPAGE_BRUTE, new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)));
 
+    public static final RegistryObject<Item> SPACE_POD = ITEMS.register("space_pod",
+            () -> new com.dbzenith.item.SpacePodItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE)));
+
     public static final RegistryObject<Item> MOON_ORB = ITEMS.register("moon_orb",
             () -> new MoonOrbItem(new Item.Properties().stacksTo(4).rarity(Rarity.RARE)));
 

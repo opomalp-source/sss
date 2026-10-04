@@ -335,5 +335,17 @@
   "quest.dbzenith.bounty_tyrant": "Bounty: The Tyrant Lord",
   "quest.dbzenith.bounty_tyrant.desc": "Use a Tyrant Sigil to draw out the Tyrant Lord, then defeat him. (Inspector rank)",
   "quest.dbzenith.bounty_brute": "Bounty: The Rampage Brute",
-  "quest.dbzenith.bounty_brute.desc": "Use a Rage Totem to call the Rampage Brute and stop it. (Inspector rank)"
+  "quest.dbzenith.bounty_brute.desc": "Use a Rage Totem to call the Rampage Brute and stop it. (Inspector rank)",
+  "item.dbzenith.space_pod": "Space Pod",
+  "screen.dbzenith.planets": "Set a course",
+  "planet.dbzenith.earth": "Earth",
+  "planet.dbzenith.earth.desc": "Home.",
+  "planet.dbzenith.namek": "Namek",
+  "planet.dbzenith.namek.desc": "A peaceful green world with blue-green seas. Raiders have been seen there.",
+  "planet.dbzenith.northern_planet": "Northern Planet",
+  "planet.dbzenith.northern_planet.desc": "A tiny world with ten times Earth's gravity. Perfect for training.",
+  "dimension.dbzenith.namek": "Namek",
+  "dimension.dbzenith.northern_planet": "the Northern Planet",
+  "message.dbzenith.pod_landed": "Your pod touches down on %s.",
+  "message.dbzenith.pod_recharging": "The pod is still refuelling."
 }

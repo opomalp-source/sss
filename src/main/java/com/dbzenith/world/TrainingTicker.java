@@ -38,6 +38,8 @@ public final class TrainingTicker {
         DBZConfig.Server c = DBZConfig.SERVER;
         boolean chamber = TimeChamber.isIn(player);
         if (chamber) data.applyGravity(c.chamberGravity.get(), now + 20);
+        Planet planet = Planet.of(player.level());
+        if (planet != null && planet.gravity() > 1) data.applyGravity(planet.gravity(), now + 20);
         data.expireGravity(now);
         double g = data.getGravity(now);
         double excess = Math.max(0, g - tolerance(data));

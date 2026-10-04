@@ -1,0 +1,3 @@
+{"type": "minecraft:crafting_shaped", "pattern": ["IGI", "IEI", "FBF"],
+ "key": {"I": {"item": "minecraft:iron_block"}, "G": {"item": "minecraft:glass"}, "E": {"item": "minecraft:ender_eye"}, "F": {"item": "minecraft:fire_charge"}, "B": {"item": "minecraft:blast_furnace"}},
+ "result": {"item": "dbzenith:space_pod"}}
