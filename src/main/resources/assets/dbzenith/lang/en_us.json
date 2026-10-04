@@ -1,0 +1,25 @@
+{
+  "itemGroup.dbzenith.main": "Dragon Block Zenith",
+  "item.dbzenith.senzu_bean": "Senzu Bean",
+
+  "stat.dbzenith.strength": "Strength",
+  "stat.dbzenith.dexterity": "Dexterity",
+  "stat.dbzenith.constitution": "Constitution",
+  "stat.dbzenith.ki_power": "Ki Power",
+  "stat.dbzenith.willpower": "Willpower",
+  "stat.dbzenith.mind": "Mind",
+  "stat.dbzenith.spirit": "Spirit",
+
+  "race.dbzenith.human": "Human",
+  "race.dbzenith.saiyan": "Saiyan",
+  "race.dbzenith.half_saiyan": "Half-Saiyan",
+  "race.dbzenith.namekian": "Namekian",
+  "race.dbzenith.frost_demon": "Frost Demon",
+  "race.dbzenith.majin": "Majin",
+  "race.dbzenith.android": "Android",
+  "race.dbzenith.cyborg": "Cyborg",
+
+  "path.dbzenith.fighter": "Fighter",
+  "path.dbzenith.spiritualist": "Spiritualist",
+  "path.dbzenith.hybrid": "Hybrid"
+}
