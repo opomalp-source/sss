@@ -4,6 +4,7 @@ import com.dbzenith.DBZenith;
 import com.dbzenith.config.DBZConfig;
 import com.dbzenith.data.ModCapabilities;
 import com.dbzenith.data.PlayerData;
+import com.dbzenith.race.RacePassives;
 import com.dbzenith.stats.StatCalculator;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
@@ -87,6 +88,7 @@ public final class CombatEvents {
                 raw *= afterArmor / event.getAmount();
             }
             boolean afterimage = source.getEntity() != null && victim.level().getGameTime() <= victimData.getDashEvadeUntil();
+            if (isKi && !afterimage) raw *= RacePassives.absorbKiHit(victimData, raw, victim.level().getGameTime());
             dealt = afterimage ? 0 : DamageCalculator.againstPlayer(raw, victimData, source.getEntity() != null, victim.getRandom());
             if (victimData.isGuarding() && dealt > 0) {
                 victimData.setStamina(victimData.getStamina() - DamageCalculator.guardPrevented(dealt) * DBZConfig.SERVER.guardStaminaPerDamage.get());
@@ -117,8 +119,12 @@ public final class CombatEvents {
     public static void onDeath(LivingDeathEvent event) {
         if (event.getEntity().level().isClientSide) return;
         if (event.getSource().getEntity() instanceof Player killer && killer != event.getEntity()) {
-            ModCapabilities.get(killer).ifPresent(data -> data.addTrainingProgress(StatCalculator.scaleTpGain(data,
-                    event.getEntity().getMaxHealth() * DBZConfig.SERVER.tpPerKillHealth.get())));
+            ModCapabilities.get(killer).ifPresent(data -> {
+                data.addTrainingProgress(StatCalculator.scaleTpGain(data,
+                        event.getEntity().getMaxHealth() * DBZConfig.SERVER.tpPerKillHealth.get()));
+                double heal = RacePassives.traits(data).killHeal(); // Majin: absorb the fallen
+                if (heal > 0) data.setBody(data.getBody() + data.getDerived().maxBody() * heal);
+            });
         }
     }
 }

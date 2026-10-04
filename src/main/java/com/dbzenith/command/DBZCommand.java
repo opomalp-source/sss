@@ -110,7 +110,7 @@ public final class DBZCommand {
                                             String id = StringArgumentType.getString(ctx, "race");
                                             Race race = Arrays.stream(Race.values()).filter(r -> r.id().equals(id)).findFirst()
                                                     .orElseThrow(() -> UNKNOWN_RACE.create(id));
-                                            return apply(ctx, "Set race " + race.id() + " for", d -> d.setRace(race));
+                                            return apply(ctx, "Set race " + race.id() + " for", d -> com.dbzenith.race.CharacterCreation.applyRace(d, race));
                                         }))))
                 .then(Commands.literal("path")
                         .then(Commands.argument("targets", EntityArgument.players())

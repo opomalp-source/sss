@@ -2,6 +2,7 @@ package com.dbzenith.stats;
 
 import com.dbzenith.config.DBZConfig;
 import com.dbzenith.data.PlayerData;
+import com.dbzenith.race.Races;
 import com.dbzenith.transform.FormMath;
 import com.dbzenith.transform.Forms;
 
@@ -50,13 +51,15 @@ public final class StatCalculator {
         int current = data.getAttribute(attribute);
         double cost = c.tpCostBase.get() + current * c.tpCostPerPoint.get();
         cost *= data.getPath().costWeight(attribute);
+        cost *= Races.of(data.getRace()).costWeight(attribute);
         if (current >= c.attributeSoftCap.get()) cost *= c.tpSoftCapCostMultiplier.get();
         return Math.max(1L, Math.round(cost));
     }
 
     /** Applies the MIND bonus to a raw TP gain. */
     public static double scaleTpGain(PlayerData data, double rawGain) {
-        double mult = 1.0 + data.getAttribute(Attribute.MIND) * DBZConfig.SERVER.tpGainPerMind.get();
+        double mult = (1.0 + data.getAttribute(Attribute.MIND) * DBZConfig.SERVER.tpGainPerMind.get())
+                * (1.0 + Races.of(data.getRace()).tpGainBonus());
         return rawGain * mult;
     }
 

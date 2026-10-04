@@ -18,7 +18,11 @@ import net.minecraft.util.Mth;
  */
 public class PlayerData {
     /** Bump when the NBT layout changes and add a migration in {@link #load}. */
-    public static final int DATA_VERSION = 1;
+    public static final int DATA_VERSION = 2;
+
+    /** Techniques every v1 character could use before the deck system existed (migration). */
+    private static final java.util.List<String> V1_TECHNIQUES =
+            java.util.List.of("ki_blast", "wave_beam", "finger_beam", "rapid_volley", "cutter_disk", "homing_orb");
 
     private static final int FALLBACK_ATTRIBUTE = 10;
 
@@ -57,6 +61,8 @@ public class PlayerData {
         releasePercent = c.defaultReleasePercent.get();
         physicalAge = c.startingAge.get();
         mentalAge = c.startingAge.get();
+        learned.add("ki_blast");
+        if (deck.isEmpty()) deck.add("ki_blast");
         initialized = true;
         recomputeIfStale();
         body = derived.maxBody();
@@ -246,6 +252,135 @@ public class PlayerData {
             this.releasePercent = v;
             markDirty();
         }
+    }
+
+    // ------------------------------------------------------------------ appearance (saved)
+
+    public enum BodyType { SLIM, NORMAL, BULKY }
+
+    private BodyType bodyType = BodyType.NORMAL;
+    private int hairStyle;            // Form.HairStyle ordinal for the base form; 0 = NONE (own skin)
+    private int hairColor = 0x1C1A1A;
+    private int eyeColor = -1;        // -1 = skin default
+
+    public BodyType getBodyType() {
+        return bodyType;
+    }
+
+    public void setBodyType(BodyType type) {
+        if (type != null && type != bodyType) {
+            bodyType = type;
+            markDirty();
+        }
+    }
+
+    public int getHairStyle() {
+        return hairStyle;
+    }
+
+    public void setHairStyle(int style) {
+        if (style != hairStyle) {
+            hairStyle = Math.max(0, style);
+            markDirty();
+        }
+    }
+
+    public int getHairColor() {
+        return hairColor;
+    }
+
+    public void setHairColor(int color) {
+        if (color != hairColor) {
+            hairColor = color & 0xFFFFFF;
+            markDirty();
+        }
+    }
+
+    public int getEyeColor() {
+        return eyeColor;
+    }
+
+    public void setEyeColor(int color) {
+        if (color != eyeColor) {
+            eyeColor = color < 0 ? -1 : color & 0xFFFFFF;
+            markDirty();
+        }
+    }
+
+    // ------------------------------------------------------------------ zenkai (saved)
+
+    private boolean zenkaiArmed;
+    private long lastZenkai = Long.MIN_VALUE / 2;
+    private int zenkaiCount;
+
+    public boolean isZenkaiArmed() {
+        return zenkaiArmed;
+    }
+
+    public void setZenkaiArmed(boolean armed) {
+        zenkaiArmed = armed;
+    }
+
+    public long getLastZenkai() {
+        return lastZenkai;
+    }
+
+    public int getZenkaiCount() {
+        return zenkaiCount;
+    }
+
+    public void recordZenkai(long gameTime) {
+        lastZenkai = gameTime;
+        zenkaiCount++;
+        zenkaiArmed = false;
+        markDirty();
+    }
+
+    // ------------------------------------------------------------------ techniques (saved)
+
+    private final java.util.Set<String> learned = new java.util.LinkedHashSet<>();
+    private final java.util.List<String> deck = new java.util.ArrayList<>();
+    private long absorbUntil; // runtime: Android energy-absorb window
+
+    public boolean knows(String techniqueId) {
+        return learned.contains(techniqueId);
+    }
+
+    public void learn(String techniqueId) {
+        if (learned.add(techniqueId)) markDirty();
+    }
+
+    public void forget(String techniqueId) {
+        if (learned.remove(techniqueId)) {
+            deck.remove(techniqueId);
+            markDirty();
+        }
+    }
+
+    public java.util.Set<String> learnedView() {
+        return java.util.Collections.unmodifiableSet(learned);
+    }
+
+    public java.util.List<String> deckView() {
+        return java.util.Collections.unmodifiableList(deck);
+    }
+
+    /** Replaces the deck (callers validate learned + size). */
+    public void setDeck(java.util.List<String> ids) {
+        if (!deck.equals(ids)) {
+            deck.clear();
+            deck.addAll(ids);
+            markDirty();
+        }
+    }
+
+    public long getAbsorbUntil() {
+        return absorbUntil;
+    }
+
+    public void setAbsorbUntil(long gameTime) {
+        absorbUntil = gameTime;
+        markDirty();
     }
 
     // ------------------------------------------------------------------ transformations (saved)
@@ -554,6 +689,19 @@ public class PlayerData {
         tag.put("flags", fl);
         tag.putBoolean("tail", hasTail);
         tag.putString("targetForm", targetForm);
+        tag.putString("bodyType", bodyType.name());
+        tag.putInt("hairStyle", hairStyle);
+        tag.putInt("hairColor", hairColor);
+        tag.putInt("eyeColor", eyeColor);
+        tag.putBoolean("zenkaiArmed", zenkaiArmed);
+        tag.putLong("lastZenkai", lastZenkai);
+        tag.putInt("zenkaiCount", zenkaiCount);
+        net.minecraft.nbt.ListTag lt = new net.minecraft.nbt.ListTag();
+        for (String s : learned) lt.add(net.minecraft.nbt.StringTag.valueOf(s));
+        tag.put("learned", lt);
+        net.minecraft.nbt.ListTag dk = new net.minecraft.nbt.ListTag();
+        for (String s : deck) dk.add(net.minecraft.nbt.StringTag.valueOf(s));
+        tag.put("deck", dk);
         return tag;
     }
 
@@ -587,6 +735,27 @@ public class PlayerData {
         for (int i = 0; i < fl.size(); i++) flags.add(fl.getString(i));
         hasTail = !tag.contains("tail") || tag.getBoolean("tail");
         targetForm = tag.getString("targetForm");
+        try {
+            bodyType = tag.contains("bodyType") ? BodyType.valueOf(tag.getString("bodyType")) : BodyType.NORMAL;
+        } catch (IllegalArgumentException e) {
+            bodyType = BodyType.NORMAL;
+        }
+        hairStyle = tag.getInt("hairStyle");
+        hairColor = tag.contains("hairColor") ? tag.getInt("hairColor") : 0x1C1A1A;
+        eyeColor = tag.contains("eyeColor") ? tag.getInt("eyeColor") : -1;
+        zenkaiArmed = tag.getBoolean("zenkaiArmed");
+        lastZenkai = tag.contains("lastZenkai") ? tag.getLong("lastZenkai") : Long.MIN_VALUE / 2;
+        zenkaiCount = tag.getInt("zenkaiCount");
+        learned.clear();
+        net.minecraft.nbt.ListTag lt = tag.getList("learned", net.minecraft.nbt.Tag.TAG_STRING);
+        for (int i = 0; i < lt.size(); i++) learned.add(lt.getString(i));
+        deck.clear();
+        net.minecraft.nbt.ListTag dk = tag.getList("deck", net.minecraft.nbt.Tag.TAG_STRING);
+        for (int i = 0; i < dk.size(); i++) deck.add(dk.getString(i));
+        if (initialized && tag.getInt("DataVersion") < 2) { // v1 -> v2: keep every technique v1 allowed
+            learned.addAll(V1_TECHNIQUES);
+            deck.addAll(V1_TECHNIQUES.subList(0, 4));
+        }
         derivedStale = true;
         markDirty();
     }

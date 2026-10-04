@@ -123,6 +123,14 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue overdriveBacklashPercent;
         public final ForgeConfigSpec.DoubleValue overdriveMinBodyPercent;
 
+        // --- races ---
+        public final ForgeConfigSpec.DoubleValue zenkaiTriggerPercent;
+        public final ForgeConfigSpec.DoubleValue zenkaiRecoverPercent;
+        public final ForgeConfigSpec.IntValue zenkaiCooldownTicks;
+        public final ForgeConfigSpec.IntValue deckBaseSlots;
+        public final ForgeConfigSpec.IntValue deckLevelsPerExtraSlot;
+        public final ForgeConfigSpec.IntValue deckMaxSlots;
+
         // --- character ---
         public final ForgeConfigSpec.DoubleValue startingAge;
 
@@ -290,6 +298,20 @@ public final class DBZConfig {
                     .defineInRange("overdriveBacklashPercent", 0.5, 0.0, 100.0);
             overdriveMinBodyPercent = b.comment("Overdrive switches off below this body %")
                     .defineInRange("overdriveMinBodyPercent", 10.0, 0.0, 100.0);
+            b.pop();
+
+            b.comment("Racial mechanics and the technique deck").push("races");
+            zenkaiTriggerPercent = b.comment("Saiyan Zenkai arms when body falls below this %")
+                    .defineInRange("zenkaiTriggerPercent", 15.0, 0.0, 100.0);
+            zenkaiRecoverPercent = b.comment("...and fires when body recovers to this %")
+                    .defineInRange("zenkaiRecoverPercent", 60.0, 0.0, 100.0);
+            zenkaiCooldownTicks = b.comment("Minimum ticks between Zenkai boosts")
+                    .defineInRange("zenkaiCooldownTicks", 12000, 0, 10_000_000);
+            deckBaseSlots = b.comment("Technique deck slots every character has")
+                    .defineInRange("deckBaseSlots", 4, 1, 20);
+            deckLevelsPerExtraSlot = b.comment("One extra deck slot per this many character levels")
+                    .defineInRange("deckLevelsPerExtraSlot", 250, 1, 1_000_000);
+            deckMaxSlots = b.defineInRange("deckMaxSlots", 8, 1, 20);
             b.pop();
 
             b.push("character");

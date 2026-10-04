@@ -3,6 +3,9 @@ package com.dbzenith.ki;
 import com.dbzenith.combat.BodyHealth;
 import com.dbzenith.config.DBZConfig;
 import com.dbzenith.data.PlayerData;
+import com.dbzenith.race.RacePassives;
+import com.dbzenith.race.RaceTraits;
+import com.dbzenith.race.Races;
 import com.dbzenith.stats.DerivedStats;
 import com.dbzenith.stats.SpeedModifiers;
 import com.dbzenith.stats.StatCalculator;
@@ -32,6 +35,7 @@ public final class KiTicker {
         data.recomputeIfStale();
         BodyHealth.adoptExternalChanges(player, data);
         DerivedStats s = data.getDerived();
+        RaceTraits race = Races.of(data.getRace());
 
         data.tickCombo(now, c.comboWindowTicks.get());
         SpeedModifiers.apply(player, s);
@@ -60,16 +64,17 @@ public final class KiTicker {
             }
         } else if (!(data.isFlying() && player.getAbilities().flying) && !data.isTransformed()) {
             // No passive ki regen while transformed: forms are sustained by charging and mastery.
-            data.setKi(data.getKi() + perTick(s.maxKi(), c.kiRegenPercentPerSecond.get()));
+            data.setKi(data.getKi() + perTick(s.maxKi(), c.kiRegenPercentPerSecond.get()) * race.kiRegenMultiplier());
         }
 
         if (!data.isCharging() && !data.isGuarding()) {
-            data.setStamina(data.getStamina() + perTick(s.maxStamina(), c.staminaRegenPercentPerSecond.get()));
+            data.setStamina(data.getStamina() + perTick(s.maxStamina(), c.staminaRegenPercentPerSecond.get()) * race.staminaRegenMultiplier());
         }
-        if (now - data.getLastDamagedTick() > c.bodyRegenDelayTicks.get()) {
-            data.setBody(data.getBody() + perTick(s.maxBody(), c.bodyRegenPercentPerSecond.get()));
+        if (now - data.getLastDamagedTick() > c.bodyRegenDelayTicks.get() * race.regenDelayFactor()) {
+            data.setBody(data.getBody() + perTick(s.maxBody(), c.bodyRegenPercentPerSecond.get()) * race.regenMultiplier());
         }
 
+        RacePassives.tick(player, data, now);
         if (now % 20 == 0) GreatApe.tick(player, data);
         FormHandler.tick(player, data, now);
         Overdrive.tick(player, data, now);

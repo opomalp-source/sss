@@ -12,6 +12,7 @@ public final class Aura {
 
     public static int color(PlayerData data) {
         if (data.getOverdriveLevel() > 0) return Overdrive.RED;
+        if (!data.isTransformed()) return com.dbzenith.race.Races.of(data.getRace()).auraColor();
         return Forms.byId(data.getFormId()).auraColor();
     }
 }
