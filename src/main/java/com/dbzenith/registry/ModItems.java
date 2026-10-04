@@ -26,6 +26,9 @@ public final class ModItems {
     public static final RegistryObject<Item> HEAVY_TRAINING_WEIGHTS = ITEMS.register("heavy_training_weights",
             () -> new TrainingWeightsItem(2.5, 0.25, new Item.Properties().rarity(Rarity.UNCOMMON)));
 
+    public static final RegistryObject<Item> DRAGON_RADAR = ITEMS.register("dragon_radar",
+            () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.RARE)));
+
     public static final RegistryObject<Item> MOON_ORB = ITEMS.register("moon_orb",
             () -> new MoonOrbItem(new Item.Properties().stacksTo(4).rarity(Rarity.RARE)));
 

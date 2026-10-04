@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["IRI", "GCG", "IRI"],
+  "key": {"I": {"item": "minecraft:iron_ingot"}, "R": {"item": "minecraft:redstone"}, "G": {"item": "minecraft:glass_pane"}, "C": {"item": "minecraft:compass"}},
+  "result": {"item": "dbzenith:dragon_radar"}
+}

@@ -149,6 +149,16 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue chamberGravity;
         public final ForgeConfigSpec.IntValue chamberMaxStayTicks;
 
+        // --- dragon balls ---
+        public final ForgeConfigSpec.BooleanValue dragonBallsEnabled;
+        public final ForgeConfigSpec.IntValue dragonBallScatterRadius;
+        public final ForgeConfigSpec.IntValue dragonBallInertTicks;
+        public final ForgeConfigSpec.IntValue radarRange;
+        public final ForgeConfigSpec.LongValue wishPowerTp;
+        public final ForgeConfigSpec.IntValue wishSenzuCount;
+        public final ForgeConfigSpec.IntValue wishImmortalityTicks;
+        public final ForgeConfigSpec.IntValue wishDiamonds;
+
         // --- character ---
         public final ForgeConfigSpec.DoubleValue startingAge;
 
@@ -356,6 +366,20 @@ public final class DBZConfig {
             chamberGravity = b.comment("Gravity inside the Hyperbolic Time Chamber").defineInRange("chamberGravity", 10.0, 1.0, 10_000.0);
             chamberMaxStayTicks = b.comment("Longest stay in the chamber before being sent back (24000 = one day)")
                     .defineInRange("chamberMaxStayTicks", 24000, 20, 10_000_000);
+            b.pop();
+
+            b.comment("Dragon Balls, radar and wishes").push("dragon_balls");
+            dragonBallsEnabled = b.comment("Scatter Dragon Balls in the overworld").define("enabled", true);
+            dragonBallScatterRadius = b.comment("Balls scatter within this many blocks of world spawn")
+                    .defineInRange("scatterRadius", 800, 16, 30_000);
+            dragonBallInertTicks = b.comment("After a wish the balls are stone for this long, then scatter again (48000 = 2 days)")
+                    .defineInRange("inertTicks", 48000, 0, 10_000_000);
+            radarRange = b.comment("Dragon Radar range in blocks").defineInRange("radarRange", 1000, 16, 30_000);
+            wishPowerTp = b.comment("TP granted by the power wish").defineInRange("wishPowerTp", 5000L, 0L, Long.MAX_VALUE);
+            wishSenzuCount = b.defineInRange("wishSenzuCount", 10, 1, 64);
+            wishImmortalityTicks = b.comment("How long the immortality wish lasts (36000 = 30 minutes)")
+                    .defineInRange("wishImmortalityTicks", 36000, 20, 10_000_000);
+            wishDiamonds = b.defineInRange("wishDiamonds", 16, 1, 64);
             b.pop();
 
             b.push("character");

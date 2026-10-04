@@ -1,0 +1,19 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {"particle": "#ball"},
+  "elements": [
+    {
+      "from": [5, 0, 5],
+      "to": [11, 6, 11],
+      "faces": {
+        "north": {"uv": [0, 0, 16, 16], "texture": "#ball"},
+        "south": {"uv": [0, 0, 16, 16], "texture": "#ball"},
+        "east": {"uv": [0, 0, 16, 16], "texture": "#ball"},
+        "west": {"uv": [0, 0, 16, 16], "texture": "#ball"},
+        "up": {"uv": [0, 0, 16, 16], "texture": "#ball"},
+        "down": {"uv": [0, 0, 16, 16], "texture": "#ball"}
+      }
+    }
+  ]
+}

@@ -25,6 +25,11 @@ public final class ClientHooks {
         creationPrompted = false;
     }
 
+    /** The dragon asks for a wish. */
+    public static void openWishScreen(int dragonId) {
+        Minecraft.getInstance().setScreen(new com.dbzenith.client.screen.WishScreen(dragonId));
+    }
+
     /** A player changed form: recompute their hitbox and eye height (giant forms). */
     public static void refreshDimensions(int entityId) {
         Minecraft mc = Minecraft.getInstance();

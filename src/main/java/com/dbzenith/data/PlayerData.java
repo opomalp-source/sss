@@ -390,6 +390,17 @@ public class PlayerData {
         markDirty();
     }
 
+    private long immortalUntil = -1;
+
+    public long getImmortalUntil() {
+        return immortalUntil;
+    }
+
+    public void setImmortalUntil(long gameTime) {
+        immortalUntil = gameTime;
+        markDirty();
+    }
+
     // ------------------------------------------------------------------ zenkai (saved)
 
     private boolean zenkaiArmed;
@@ -790,6 +801,7 @@ public class PlayerData {
         tag.putDouble("returnY", returnY);
         tag.putDouble("returnZ", returnZ);
         tag.putLong("chamberAt", chamberEnteredAt);
+        tag.putLong("immortalUntil", immortalUntil);
         return tag;
     }
 
@@ -845,6 +857,7 @@ public class PlayerData {
         returnY = tag.getDouble("returnY");
         returnZ = tag.getDouble("returnZ");
         chamberEnteredAt = tag.contains("chamberAt") ? tag.getLong("chamberAt") : -1;
+        immortalUntil = tag.contains("immortalUntil") ? tag.getLong("immortalUntil") : -1;
         if (initialized && tag.getInt("DataVersion") < 2) { // v1 -> v2: keep every technique v1 allowed
             learned.addAll(V1_TECHNIQUES);
             deck.addAll(V1_TECHNIQUES.subList(0, 4));

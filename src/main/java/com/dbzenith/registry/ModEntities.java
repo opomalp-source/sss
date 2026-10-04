@@ -1,6 +1,7 @@
 package com.dbzenith.registry;
 
 import com.dbzenith.DBZenith;
+import com.dbzenith.dragonball.DragonSpiritEntity;
 import com.dbzenith.skill.KiBeamEntity;
 import com.dbzenith.transform.FalseMoonEntity;
 import com.dbzenith.skill.KiBlastEntity;
@@ -35,6 +36,13 @@ public final class ModEntities {
                     .clientTrackingRange(16)
                     .updateInterval(2)
                     .build("false_moon"));
+
+    public static final RegistryObject<EntityType<DragonSpiritEntity>> DRAGON_SPIRIT = ENTITIES.register("dragon_spirit",
+            () -> EntityType.Builder.<DragonSpiritEntity>of(DragonSpiritEntity::new, MobCategory.MISC)
+                    .sized(4f, 24f)
+                    .clientTrackingRange(16)
+                    .updateInterval(20)
+                    .build("dragon_spirit"));
 
     private ModEntities() {}
 

@@ -35,6 +35,7 @@ public final class ClientEvents {
         ClientPlayerData.clear();
         ClientCombatState.clear();
         ClientPublicStates.clear();
+        ClientRadar.clear();
         ClientHooks.resetCreationPrompt();
         ticksInWorld = 0;
     }

@@ -105,6 +105,41 @@ public class AssetGen {
         });
         texture("assets/dbzenith/textures/models/armor/weights_layer_2.png", 64, 32, (x, y) -> 0);
 
+        // --- dragon balls: orange glassy sphere with N red stars ---
+        int[][][] starLayouts = {
+                {{8, 8}},
+                {{6, 8}, {10, 8}},
+                {{8, 5}, {5, 10}, {11, 10}},
+                {{5, 5}, {11, 5}, {5, 11}, {11, 11}},
+                {{8, 4}, {4, 8}, {12, 8}, {6, 12}, {10, 12}},
+                {{5, 4}, {11, 4}, {4, 8}, {12, 8}, {5, 12}, {11, 12}},
+                {{8, 3}, {4, 6}, {12, 6}, {8, 8}, {4, 11}, {12, 11}, {8, 13}}};
+        for (int n = 1; n <= 7; n++) {
+            int[][] stars = starLayouts[n - 1];
+            texture("assets/dbzenith/textures/block/dragon_ball_" + n + ".png", 16, 16, (x, y) -> {
+                for (int[] s : stars) {
+                    int dx = Math.abs(x - s[0]);
+                    int dy = Math.abs(y - s[1]);
+                    if (dx + dy <= 1) return 0xFFD01818;                         // small red star
+                }
+                double d = Math.hypot(x - 6.0, y - 5.5) / 11.0;                  // highlight top-left
+                int r = 255;
+                int g = (int) Math.max(90, 200 - d * 120);
+                int b = (int) Math.max(0, 70 - d * 90);
+                if (Math.hypot(x - 5, y - 4) < 1.6) return 0xFFFFF4D0;            // glint
+                return 0xFF000000 | (r << 16) | (g << 8) | b;
+            });
+        }
+        texture("assets/dbzenith/textures/item/dragon_radar.png", 16, 16, (x, y) -> {
+            double d = Math.hypot(x - 7.5, y - 8.5);
+            if (d > 7) return 0;
+            if (d > 6) return 0xFFB0B0B8;                                        // casing
+            if (y == 2 && x >= 6 && x <= 9) return 0xFF808088;                   // button
+            if (Math.abs(x - 7.5) < 0.6 || Math.abs(y - 8.5) < 0.6) return 0xFF40FF60;
+            if ((x == 11 && y == 6) || (x == 4 && y == 11)) return 0xFFFFC020;   // blips
+            return 0xFF104A20;
+        });
+
         // --- ki glow: soft radial white, tinted per technique at render time ---
         radialGlow("assets/dbzenith/textures/entity/ki_glow.png", 32);
         beamGlow("assets/dbzenith/textures/entity/ki_beam.png", 32);

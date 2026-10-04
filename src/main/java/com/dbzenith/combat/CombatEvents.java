@@ -97,6 +97,9 @@ public final class CombatEvents {
             BodyHealth.adoptExternalChanges(player, victimData);
             victimData.setBody(victimData.getBody() - dealt);
             victimData.setLastDamagedTick(victim.level().getGameTime());
+            if (victimData.getBody() <= 0 && victim.level().getGameTime() < victimData.getImmortalUntil()) {
+                victimData.setBody(1); // the immortality wish
+            }
             if (victimData.getBody() <= 0) {
                 event.setAmount(LETHAL);
             } else {

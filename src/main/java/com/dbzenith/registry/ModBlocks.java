@@ -1,6 +1,7 @@
 package com.dbzenith.registry;
 
 import com.dbzenith.DBZenith;
+import com.dbzenith.dragonball.DragonBallBlock;
 import com.dbzenith.world.TrainingBlocks;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -27,6 +28,13 @@ public final class ModBlocks {
     public static final RegistryObject<Block> TIME_CHAMBER_DOOR = register("time_chamber_door",
             () -> new TrainingBlocks.TimeChamberDoor(BlockBehaviour.Properties.of().mapColor(MapColor.SNOW)
                     .strength(-1f, 3_600_000f).lightLevel(s -> 12).sound(SoundType.STONE)));
+
+    /** One-star to seven-star Dragon Balls (index = star - 1). Explosion-proof, glowing. */
+    public static final java.util.List<RegistryObject<Block>> DRAGON_BALLS = java.util.stream.IntStream.rangeClosed(1, 7)
+            .mapToObj(star -> register("dragon_ball_" + star, () -> new DragonBallBlock(star, BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_ORANGE).strength(0.5f, 3_600_000f).lightLevel(s -> 10).noOcclusion()
+                    .sound(SoundType.GLASS).pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK))))
+            .toList();
 
     private ModBlocks() {}
 
