@@ -133,9 +133,9 @@ public class DeckScreen extends Screen {
         super.render(g, mouseX, mouseY, partialTick);
         if (tooltipFor != null) {
             Technique t = tooltipFor;
-            g.renderTooltip(font, Component.translatable("screen.dbzenith.technique_info", (int) t.kiCost(),
+            g.renderTooltip(font, font.split(Component.translatable("screen.dbzenith.technique_info", (int) t.kiCost(),
                     String.format("%.1f", t.cooldownTicks() / 20.0), String.format("%.1f", t.damageMult()),
-                    Component.translatable(t.translationKey() + ".desc")), mouseX, mouseY);
+                    Component.translatable(t.translationKey() + ".desc")), 200), mouseX, mouseY);
         }
     }
 

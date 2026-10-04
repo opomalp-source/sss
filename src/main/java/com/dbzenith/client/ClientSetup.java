@@ -5,6 +5,8 @@ import com.dbzenith.client.render.FalseMoonRenderer;
 import com.dbzenith.client.render.FormHairLayer;
 import com.dbzenith.client.render.FormHairModel;
 import com.dbzenith.client.render.KiBeamRenderer;
+import com.dbzenith.client.render.RaceFeatureLayer;
+import com.dbzenith.client.render.RaceFeatureModel;
 import com.dbzenith.client.render.KiBlastRenderer;
 import com.dbzenith.registry.ModEntities;
 import net.minecraft.client.KeyMapping;
@@ -35,13 +37,17 @@ public final class ClientSetup {
     @SubscribeEvent
     public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(FormHairModel.LAYER, FormHairModel::createLayer);
+        event.registerLayerDefinition(RaceFeatureModel.LAYER, RaceFeatureModel::createLayer);
     }
 
     @SubscribeEvent
     public static void addLayers(EntityRenderersEvent.AddLayers event) {
         for (String skin : event.getSkins()) {
             PlayerRenderer renderer = event.getSkin(skin);
-            if (renderer != null) renderer.addLayer(new FormHairLayer(renderer, event.getEntityModels()));
+            if (renderer != null) {
+                renderer.addLayer(new FormHairLayer(renderer, event.getEntityModels()));
+                renderer.addLayer(new RaceFeatureLayer(renderer, event.getEntityModels()));
+            }
         }
     }
 

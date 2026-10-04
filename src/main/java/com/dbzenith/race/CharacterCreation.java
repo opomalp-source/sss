@@ -25,9 +25,13 @@ public final class CharacterCreation {
         RaceTraits t = Races.of(race);
         data.setRace(race);
         data.setTail(t.tail());
+        for (String id : java.util.List.copyOf(data.learnedView())) { // drop the old race's racial techniques
+            com.dbzenith.skill.Technique known = com.dbzenith.skill.Techniques.byId(id);
+            if (known != null && !known.races().contains(race)) data.forget(id);
+        }
         for (String id : t.racialTechniques()) {
             data.learn(id);
-            if (!data.deckView().contains(id) && data.deckView().size() < DBZConfig.SERVER.deckBaseSlots.get()) {
+            if (!data.deckView().contains(id) && data.deckView().size() < com.dbzenith.skill.TechniqueLibrary.deckSlots(data)) {
                 java.util.List<String> deck = new java.util.ArrayList<>(data.deckView());
                 deck.add(id);
                 data.setDeck(deck);

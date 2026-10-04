@@ -30,7 +30,8 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Charging / power up | B | done | GameTested + seen in-client (HUD chip, stamina drain). First-person aura is subtle by design |
 | Ki blast framework | B | done | GameTested + all styles seen rendering in-client |
 | Techniques: ki blast, wave beam, finger beam, volley, disk, homing orb | B | done | Seen in-client; beams are true sustained beams (side view verified), homing curves |
-| Techniques: grab-throw, ball-drop, explosive wave, teleport, heal, sense | B | todo | |
+| Techniques: explosive wave, teleport, heal, sense | B | done | Explosive Wave, Instant Step, Ki Heal, Ki Sense |
+| Techniques: grab-throw, ball-drop | B | todo | |
 | Melee combo, knockback, stamina, guard | B | done | GameTests (combo, stamina, guard reduction) |
 | Heavy (charged) hit | B | done | GameTest (>2x damage); HUD tag seen in-client after a real H key press |
 | Aerial combat feel (air combos, knock-up) | B | todo | Flight + dash exist |
@@ -52,24 +53,27 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 ## 3.4 Races & character creation
 | Feature | Src | Status | Notes |
 |---|---|---|---|
-| Race selection (8 races) | B | stubbed | Enum + `/dbz race`; no effects |
-| Saiyan Zenkai | B | todo | |
-| Half-Saiyan | B | todo | |
-| Human | B | todo | |
-| Namekian regen / fusion / giant | B | todo | |
-| Frost Demon restriction forms | B | todo | |
-| Majin absorb / regen / magic | B | todo | |
-| Android / Cyborg (no hunger, energy absorb, no fatigue) | B | todo | |
-| Character-creation screen | B | todo | `created` flag stored |
+| Race selection (8 races) | B | done | Creation screen + `/dbz race`; traits, start bonuses, TP weights |
+| Saiyan Zenkai | B | done | Arms below 15% body, fires on recovery, cooldown; GameTest |
+| Half-Saiyan | B | done | Smaller Zenkai, +5% TP, tail, Saiyan line + Ultimate (flag) |
+| Human | B | done | +15% TP, -15% ki cost, Full Power/Buffed/Potential Unleashed, Solar Flare |
+| Namekian regen / giant | B | done | 3x regen, Giant/Super/Orange forms, Regenerate; GameTest |
+| Namekian fusion | B | todo | |
+| Frost Demon restriction forms | B | done | Second/Third/Final/Golden, breathless, horns, Supernova Orb |
+| Majin regen / magic | B | done | 5x regen, kill heal, Candy Beam; GameTests |
+| Majin absorption of other fighters | B | todo | |
+| Android / Cyborg (no hunger, energy absorb, no fatigue) | B | done | Passives + Energy Absorb / Arm Cannon; GameTests |
+| Character-creation screen | B | done | Seen in-client with live preview |
 | Alignment | V | stubbed | Stored, clamped −100..100 |
 
 ## 3.5 Skills & deck
 | Feature | Src | Status | Notes |
 |---|---|---|---|
-| Technique library | B | todo | |
-| Deck / loadout + hotkeys | V | todo | |
-| Racial skills, status effects | B | todo | |
-| Acquisition: training, masters, scrolls, quests | B | todo | |
+| Technique library | B | done | 18 techniques; GameTests |
+| Deck / loadout + hotkeys | V | done | Techniques screen seen in-client; R/Y use the deck |
+| Racial skills | B | done | One per race |
+| Status effects (custom) | B | todo | Vanilla blindness/slowness/glowing used so far |
+| Acquisition: TP + scrolls | B | done | Masters and quests in Phase 4 |
 
 ## 3.6 Progression & training
 | Feature | Src | Status | Notes |
@@ -102,7 +106,7 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | DBZ HUD (bars, release, status, combo, technique) | B | done | Seen in-client. Form display Phase 2 |
 | Aura visuals (seen by others) | B | done | Public state sync + aura glow renderer; seen in third person |
 | Stat screen | B | done | Seen in-client (opened via dev hook) |
-| Skill/deck screen | V | todo | |
+| Skill/deck screen | V | done | Techniques screen |
 | Dragon Ball radar screen | B | todo | |
 | Keybinds | B | done | Real presses observed in the test client (Y, R, H, F5). G charge, Z lower release, V fly, LAlt guard, R fire, Y next, K stats |
 | Config for every tunable | B | in-progress | All Phase 0 numbers in config |

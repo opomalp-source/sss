@@ -19,8 +19,20 @@ public final class FormScaleRenderer {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void pre(RenderPlayerEvent.Pre event) {
         float s = GreatApe.scaleOf(event.getEntity());
+        float width = bodyWidth(event.getEntity().getId());
         event.getPoseStack().pushPose();
-        if (s != 1f) event.getPoseStack().scale(s, s, s);
+        if (s != 1f || width != 1f) event.getPoseStack().scale(s * width, s, s * width);
+    }
+
+    /** Body type: slim and bulky characters are drawn narrower or wider (looks only; hitbox unchanged). */
+    private static float bodyWidth(int entityId) {
+        com.dbzenith.network.PublicStatePacket state = com.dbzenith.client.ClientPublicStates.get(entityId);
+        if (state == null) return 1f;
+        return switch (state.bodyType()) {
+            case 0 -> 0.92f;
+            case 2 -> 1.12f;
+            default -> 1f;
+        };
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

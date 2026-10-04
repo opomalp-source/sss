@@ -36,18 +36,25 @@ public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         PublicStatePacket state = ClientPublicStates.get(player.getId());
         if (state == null) return;
         Form form = Forms.byId(state.form());
-        if (form.isBase()) return;
+        Form.HairStyle[] styles = Form.HairStyle.values();
+        Form.HairStyle custom = state.hairStyle() >= 0 && state.hairStyle() < styles.length ? styles[state.hairStyle()] : Form.HairStyle.NONE;
+        // A form with its own hair overrides the chosen hairstyle; otherwise the character's own look shows.
+        boolean formHair = form.hairStyle() != Form.HairStyle.NONE && form.hairColor() >= 0;
+        Form.HairStyle style = formHair ? form.hairStyle() : custom;
+        int hairColor = formHair ? form.hairColor() : state.hairColor();
+        int eyeColor = form.eyeColor() >= 0 ? form.eyeColor() : state.eyeColor();
+        if (style == Form.HairStyle.NONE && eyeColor < 0) return;
 
         model.copyHead(getParentModel().head);
         VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
-        int glow = LightTexture.FULL_BRIGHT; // transformed hair glows
-        if (form.hairStyle() != Form.HairStyle.NONE && form.hairColor() >= 0) {
-            int c = form.hairColor();
-            model.renderHair(pose, vc, glow, OverlayTexture.NO_OVERLAY, form.hairStyle(),
+        int glow = form.isBase() ? light : LightTexture.FULL_BRIGHT; // transformed hair and eyes glow
+        if (style != Form.HairStyle.NONE) {
+            int c = hairColor;
+            model.renderHair(pose, vc, formHair ? LightTexture.FULL_BRIGHT : light, OverlayTexture.NO_OVERLAY, style,
                     ((c >> 16) & 0xFF) / 255f, ((c >> 8) & 0xFF) / 255f, (c & 0xFF) / 255f);
         }
-        if (form.eyeColor() >= 0) {
-            int c = form.eyeColor();
+        if (eyeColor >= 0) {
+            int c = eyeColor;
             model.renderEyes(pose, vc, glow, OverlayTexture.NO_OVERLAY,
                     ((c >> 16) & 0xFF) / 255f, ((c >> 8) & 0xFF) / 255f, (c & 0xFF) / 255f);
         }

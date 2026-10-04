@@ -110,3 +110,19 @@
 ### Problems
 - The first hair attempt (straight boxes) read as a cone or helmet in screenshots, and the cap covered the eyes. Rebuilt with tapered, outward-aimed spikes and a raised cap. Still placeholder art (ASSETS_TODO).
 - The Bash tool breaks on apostrophes inside heredocs (the command is wrapped in single quotes). Write files with the editor; keep apostrophes out of shell commands.
+
+## 2026-10-04 — Session 1 (cont.): Phase 3 races, techniques, character creation (v0.5.0)
+
+### Built
+- **Races** (`race`): `RaceTraits` (builder) + `Races` for all 8 races: TP cost weights per attribute (on top of path weights), start bonuses, aura color, TP-gain and ki-cost bonuses, regen multiplier + delay factor, Zenkai %, tail, breathless, no/slow hunger, staminaless, ki absorb fraction, ki/stamina regen multipliers, kill heal, head feature, racial techniques. `RacePassives`: Zenkai (arms under 15% body, fires at 60% recovery, 10 min cooldown, +3% / +1.5% of STR/DEX/CON/KI_POWER), hunger/air/stamina rules, `absorbKiHit`.
+- **Race form lines** (3-4 tiers each): Human (Full Power, Buffed, Potential Unleashed), Namekian (Giant at 2.5x size, Super, Orange), Frost Demon (Second, Third, Final, Golden), Majin (Evil, Super, Pure), Android upgrades (Mk II, Mk III, Super Android), Cyborg (Overclock, Full Conversion, Machine Mutant), Half-Saiyan Ultimate (flag `potential_unlocked`).
+- **Techniques**: `Technique` is now a builder class (learn cost/level, race set, SELF style, effect + power). 18 techniques: generic library + one racial per race. `TechniqueEffects` handles SELF effects and the Candy Beam on-hit. `TechniqueLibrary`: deck slots (4 + level/250, max 8), TP learning with level gate, free learning (scrolls), sanitized deck edits. `TechniqueHandler.use` enforces learned + equipped (admin commands bypass). Technique Scroll item (one per learnable technique in the creative tab).
+- **PlayerData v2**: appearance (body type, hair style/color, eye color), Zenkai state, learned set + deck. Migration: v1 characters keep all six Phase 1 techniques with four equipped.
+- **Character creation**: `CharacterCreation.create` (once only) + `CreateCharacterPacket`; `CharacterCreationScreen` (race list + description, path, body, hair style, color swatches, eyes, alignment slider, live entity preview that temporarily overrides the local public state). Opens once per session for uncreated characters, from the sync handler and the client tick (skipped in dev automation).
+- **Visuals**: public state carries race, tail, body type, hair and eyes (protocol 7). `RaceFeatureLayer` (antennae, horns, tentacle, swaying tail), base hair/eye customization in `FormHairLayer`, body type width scaling.
+- 47 GameTests green (8 race + 9 technique tests new).
+
+### Problems
+- The test client paused itself whenever its window lost focus, so the pause menu covered screenshots. Set `pauseOnLostFocus:false` in `run-clienttest/options.txt`.
+- Racial auto-equip compared against the base slot count instead of the real deck size. Fixed. Changing race now drops the previous race's racial techniques.
+- `/dbz race` goes through `CharacterCreation.applyRace` (tail, racial techniques, invalid form dropped) but gives no start bonuses (those are creation-only).

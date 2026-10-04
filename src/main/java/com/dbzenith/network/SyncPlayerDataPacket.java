@@ -22,5 +22,6 @@ public record SyncPlayerDataPacket(CompoundTag tag) {
     public static void handle(SyncPlayerDataPacket msg, Supplier<NetworkEvent.Context> ctx) {
         // consumerMainThread runs this on the client thread. ClientPlayerData has no client-only imports, so this is dist-safe.
         ClientPlayerData.apply(msg.tag);
+        com.dbzenith.client.ClientHooks.maybeOpenCreation(); // client-only class, loaded only here on the client
     }
 }

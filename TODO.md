@@ -47,11 +47,14 @@ Resume from the first unchecked item. Each phase ends with a git tag.
 - [x] Tag `phase-2-transformations`
 
 ## Phase 3 — Races & character creation
-- [ ] Race passives + growth weighting + signature mechanic for all 8 races
-- [ ] One transformation line per race (later forms may be stubbed)
-- [ ] Skill library + deck/loadout + hotkey slots
-- [ ] Character-creation screen on first join (race, body type, colors, hair, eyes, alignment)
-- [ ] Tag `phase-3-races`
+- [x] Race passives + growth weighting + signature mechanic for all 8 races (`race.RaceTraits`/`Races`/`RacePassives`): Zenkai, Namekian/Majin regen, Majin kill-heal, Android no hunger/fatigue + ki absorb, Cyborg, Frost Demon breathless, Human TP/ki-cost bonuses
+- [ ] Namekian fusion, Majin absorption of players, Frost Demon space survival (needs Phase 4 space)
+- [x] One transformation line per race (Human, Namekian incl. Giant, Frost Demon, Majin, Android upgrades, Cyborg; Half-Saiyan Ultimate gated by flag)
+- [x] Technique library (18 incl. 8 racial), TP learning with level gates, Technique Scrolls, deck (4 + 1 per 250 levels, max 8), Techniques screen; R/Y use the deck
+- [ ] Custom status effects (stun, ki-seal), grab-and-throw, ball-drop techniques
+- [x] Character-creation screen on first join (race, path, body type, hair style + color, eye color, alignment) with live preview; racial features (antennae, horns, tentacle, tail)
+- [ ] Skin color / full racial skins (art)
+- [x] Tag `phase-3-races`
 
 ## Phase 4 — Progression & world
 - [ ] Training blocks + gravity chamber

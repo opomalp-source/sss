@@ -21,3 +21,10 @@ Upcoming slots (added as features land): HUD bars, aura particles, ki blast/beam
 | Great Ape | Currently the player model scaled 3x with red eyes | placeholder | Needs a real ape model + fur texture (GeckoLib) |
 | `assets/dbzenith/textures/item/moon_orb.png` | Moon Orb item | placeholder | |
 | HUD | Flat-color bars and chips | placeholder | Textured HUD frame later |
+
+## Added in Phase 3
+| Asset | What | Status | Notes |
+|---|---|---|---|
+| `client/render/RaceFeatureModel` | Namekian antennae, Frost Demon horns, Majin tentacle, Saiyan tail (code-built boxes, tinted) | placeholder | Proper models; races really need full skins (green Namekian, white/purple Frost Demon, pink Majin) |
+| `assets/dbzenith/textures/item/technique_scroll.png` | Technique Scroll | placeholder | |
+| Character creation | Uses the player's own skin plus chosen hair and eyes | placeholder | A skin-color option needs race skins first |

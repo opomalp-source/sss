@@ -35,6 +35,7 @@ public final class ClientEvents {
         ClientPlayerData.clear();
         ClientCombatState.clear();
         ClientPublicStates.clear();
+        ClientHooks.resetCreationPrompt();
         ticksInWorld = 0;
     }
 
@@ -44,12 +45,15 @@ public final class ClientEvents {
         Minecraft mc = Minecraft.getInstance();
         devAutoReconnect(mc);
         if (mc.level == null || mc.player == null) return;
+        ClientHooks.maybeOpenCreation();
         ticksInWorld++;
         if (pendingShot != null && --pendingShotTicks <= 0) {
             String shot = pendingShot;
             pendingShot = null;
             devScreenshot(shot, 0);
-            if (mc.screen instanceof com.dbzenith.client.screen.StatScreen || mc.screen instanceof com.dbzenith.client.screen.FormScreen) mc.setScreen(null);
+            if (mc.screen instanceof com.dbzenith.client.screen.StatScreen || mc.screen instanceof com.dbzenith.client.screen.FormScreen
+                    || mc.screen instanceof com.dbzenith.client.screen.CharacterCreationScreen
+                    || mc.screen instanceof com.dbzenith.client.screen.DeckScreen) mc.setScreen(null);
             if (shot.startsWith("third_") || shot.startsWith("front_")) mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON);
         }
         if (DEV_SCREENSHOT_TICKS.contains(ticksInWorld)) {
@@ -71,6 +75,14 @@ public final class ClientEvents {
         if (wanted != null && mc.options.getCameraType() != wanted) {
             mc.options.setCameraType(wanted);
             delayTicks = Math.max(delayTicks, 4);
+        }
+        if (name.startsWith("create_") && !(mc.screen instanceof com.dbzenith.client.screen.CharacterCreationScreen)) {
+            mc.setScreen(new com.dbzenith.client.screen.CharacterCreationScreen());
+            delayTicks = Math.max(delayTicks, 6);
+        }
+        if (name.startsWith("deck_") && !(mc.screen instanceof com.dbzenith.client.screen.DeckScreen)) {
+            mc.setScreen(new com.dbzenith.client.screen.DeckScreen(null));
+            delayTicks = Math.max(delayTicks, 5);
         }
         if (name.startsWith("forms_") && !(mc.screen instanceof com.dbzenith.client.screen.FormScreen)) {
             mc.setScreen(new com.dbzenith.client.screen.FormScreen(null));

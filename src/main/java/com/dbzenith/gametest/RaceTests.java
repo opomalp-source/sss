@@ -156,6 +156,8 @@ public final class RaceTests {
         helper.assertTrue(!d.hasTail() && d.getAlignment() == -30 && d.getEyeColor() == 0xFF0000, "tail, alignment, eyes");
         helper.assertTrue(d.knows("regenerate"), "racial technique learned");
         helper.assertTrue(!CharacterCreation.create(d, c), "creation cannot be repeated");
+        CharacterCreation.applyRace(d, Race.MAJIN);
+        helper.assertTrue(!d.knows("regenerate") && d.knows("candy_beam"), "changing race swaps racial techniques");
         helper.succeed();
     }
 
