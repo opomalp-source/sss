@@ -20,6 +20,7 @@ public class ArtGen {
         Armor.all();
         Skins.all();
         Creatures.all();
+        Gui.all();
         System.out.println("ArtGen done");
     }
 
@@ -483,6 +484,35 @@ public class ArtGen {
             punchingBag();
             gravityChamber();
             timeChamberDoor();
+            namekTree();
+        }
+
+        /** Namek trees: smooth pale bark, ring-cut ends, round blue-green leaf clusters (cutout gaps). */
+        static void namekTree() throws IOException {
+            int[] bark = ramp(0xFFD8DCC8, 5), leaf = ramp(0xFF3AB89A, 5);
+            Canvas side = new Canvas(16, 16);
+            for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) {
+                int i = 2 + (int) Math.round(Math.sin(x * 0.9 + noise(x, 0, 401) * 2) * 0.8);
+                if (noise(x, y / 3, 402) > 0.9) i--;                                                  // knots
+                side.set(x, y, bark[Math.max(0, Math.min(4, i))]);
+            }
+            side.save("block/namek_log.png");
+            Canvas top = new Canvas(16, 16);
+            for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) {
+                double d = Math.hypot(x + 0.5 - 8, y + 0.5 - 8);
+                top.set(x, y, d > 7 ? bark[1] : ((int) d % 2 == 0 ? bark[3] : bark[2]));
+            }
+            top.save("block/namek_log_top.png");
+            Canvas leaves = new Canvas(16, 16);
+            for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) {
+                int cx = (x / 4) * 4 + 2, cy = (y / 4) * 4 + 2 + ((x / 4) % 2) * 2 - 1;        // clustered round leaves
+                double d = Math.hypot(x - cx, y - cy);
+                if (d > 2.3 && noise(x, y, 403) > 0.35) continue;                                    // gaps
+                int i = d < 1 ? 4 : d < 2 ? 3 : 2;
+                if (noise(x, y, 404) > 0.85) i--;
+                leaves.set(x, y, leaf[Math.max(0, i)]);
+            }
+            leaves.save("block/namek_leaves.png");
         }
 
         /** Star positions inside the 6x6 star face (local 0..5); the model shows that face on the four front sides. */
@@ -1169,6 +1199,59 @@ public class ArtGen {
         static void all() throws IOException {
             greatApe();
             dragon();
+            formHair();
+            spacePod();
+        }
+
+        /** Texture for client.render.SpacePodRenderer (128x128): white panelled shell, red window, dark legs and thruster. */
+        static void spacePod() throws IOException {
+            int[] w = ramp(0xFFE8ECF2, 5), dark = ramp(0xFF3A3E48, 3), red = ramp(0xFFD03040, 4);
+            Canvas c = new Canvas(128, 128);
+            FaceFn shell = (f, x, y, wd, h) -> {
+                int i = switch (f) { case TOP -> 4; case FRONT -> 3; case BOTTOM -> 1; default -> 2; };
+                if (x % 6 == 5 || y % 8 == 7) i = Math.max(0, i - 1);                                 // panel lines
+                if (f != Face.TOP && f != Face.BOTTOM && y == h / 2) return 0xFFD03040;              // red band
+                return w[i];
+            };
+            box(c, 0, 0, 24, 16, 18, shell);
+            box(c, 0, 34, 18, 24, 18, shell);
+            box(c, 0, 76, 18, 16, 24, shell);
+            box(c, 86, 0, 12, 8, 1, (f, x, y, wd, h) -> f == Face.FRONT
+                    ? (x + y < 4 ? 0xFFFFC0C8 : red[y < 2 ? 3 : y > 5 ? 1 : 2]) : dark[1]);         // window
+            box(c, 86, 10, 2, 8, 2, (f, x, y, wd, h) -> y >= 7 ? dark[0] : dark[f == Face.FRONT ? 2 : 1]); // legs
+            box(c, 86, 20, 8, 2, 8, (f, x, y, wd, h) -> f == Face.BOTTOM
+                    ? (Math.hypot(x - 3.5, y - 3.5) < 2.5 ? 0xFFFF8020 : dark[0]) : dark[1]);       // thruster glow
+            c.save("entity/space_pod.png");
+        }
+
+        /**
+         * Hair for client.render.FormHairModel (64x64, greyscale: the hair colour tints it). Regions: cap (0,0),
+         * long hair (0,16), eyes (40,0) white, spike tiers (0,48) roots / (16,48) middles / (32,48) tips.
+         */
+        static void formHair() throws IOException {
+            Canvas c = new Canvas(64, 64);
+            for (int y = 0; y < 12; y++) for (int x = 0; x < 32; x++) {                              // cap: dense strands
+                double v = 0.80 + (noise(x, 0, 301) - 0.5) * 0.16 - (y > 7 ? 0.08 : 0);
+                c.set(x, y, grey(v));
+            }
+            for (int y = 16; y < 44; y++) for (int x = 0; x < 24; x++) {                              // long hair: falling strands
+                double v = 0.92 - (y - 16) * 0.006 + (noise(x, 1, 302) - 0.5) * 0.18;
+                c.set(x, y, grey(v));
+            }
+            c.rect(40, 0, 42, 1, 0xFFFFFFFF);                                                         // eyes
+            double[] tier = {0.70, 0.86, 1.0};
+            for (int t = 0; t < 3; t++)
+                for (int y = 48; y < 60; y++) for (int x = t * 16; x < t * 16 + 16; x++) {
+                    double v = tier[t] + (noise(x, 2, 303 + t) - 0.5) * 0.12;
+                    if (t == 2 && (x + y) % 5 == 0) v = 1.0;                                         // glinting tips
+                    c.set(x, y, grey(v));
+                }
+            c.save("entity/form_hair.png");
+        }
+
+        static int grey(double v) {
+            int g = (int) Math.round(Math.max(0, Math.min(1, v)) * 255);
+            return 0xFF000000 | g << 16 | g << 8 | g;
         }
 
         /** Scales: staggered arcs, darker at each scale's lower edge. */
@@ -1249,6 +1332,105 @@ public class ArtGen {
             box(c, 70, 16, 5, 10, 5, (f, x, y, w, h) -> y >= 8 ? dark[f == Face.FRONT ? 2 : 1] : fur(fur, f, x, y, 204)); // legs + feet
             box(c, 92, 16, 2, 2, 8, (f, x, y, w, h) -> fur(fur, f, x, y, 205));                 // tail
             c.save("entity/great_ape.png");
+        }
+    }
+
+    // ================================================================== GUI
+
+    static final class Gui {
+        static void all() throws IOException {
+            hud();
+        }
+
+        /**
+         * HUD sprite sheet (256x256: GuiGraphics nine-slicing assumes that size) for client.DbzHud. Panel nine-slice (0,0) 16x16 slice 4; chip nine-slice (16,0)
+         * 16x16 slice 3; icons 8x8 at (32,0) body, (40,0) ki, (48,0) stamina, (56,0) release; bars 112x7: track
+         * (0,16), body (0,24), ki (0,32), stamina (0,40), release (0,48).
+         */
+        static void hud() throws IOException {
+            Canvas c = new Canvas(256, 256);
+            int[] gold = ramp(0xFFD8A040, 4);
+            for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) {                       // panel
+                boolean edge = x == 0 || y == 0 || x == 15 || y == 15;
+                boolean inner = x == 1 || y == 1 || x == 14 || y == 14;
+                boolean corner = (x < 3 || x > 12) && (y < 3 || y > 12);
+                int col = edge ? 0xF0181014 : inner ? (corner ? gold[3] : gold[x < 8 && y < 8 ? 2 : 1]) : alpha(0xFF101018, 0xC8);
+                if (corner && edge) col = gold[0];
+                c.set(x, y, col);
+            }
+            for (int y = 0; y < 16; y++) for (int x = 16; x < 32; x++) {                      // chip
+                int lx = x - 16;
+                boolean edge = lx == 0 || y == 0 || lx == 15 || y == 15;
+                c.set(x, y, edge ? 0xE0303040 : 0xB0000000);
+            }
+            Canvas icons = new Canvas(8, 8);                                                 // body: red heart-cross
+            icons.paint(0, 0, java.util.Map.of('#', 0xFFE0453A, 'h', 0xFFFF9080, 'd', 0xFF901818),
+                    ".##.##..",
+                    "#hh###d.",
+                    "#h####d.",
+                    ".#####d.",
+                    "..###d..",
+                    "...#d...",
+                    "........",
+                    "........");
+            blitInto(c, icons, 32, 0);
+            Canvas ki = new Canvas(8, 8);                                                    // ki: blue flame
+            ki.paint(0, 0, java.util.Map.of('#', 0xFF3CC8FF, 'h', 0xFFD0F4FF, 'd', 0xFF1868B0),
+                    "...#....",
+                    "..##....",
+                    "..#h#...",
+                    ".##h#d..",
+                    ".#hh##d.",
+                    ".#hh##d.",
+                    "..####..",
+                    "........");
+            blitInto(c, ki, 40, 0);
+            Canvas st = new Canvas(8, 8);                                                    // stamina: bolt
+            st.paint(0, 0, java.util.Map.of('#', 0xFFF2C43A, 'd', 0xFFA07010),
+                    "....##..",
+                    "...##...",
+                    "..##d...",
+                    ".######.",
+                    "...d##..",
+                    "...##...",
+                    "..##....",
+                    "........");
+            blitInto(c, st, 48, 0);
+            Canvas rel = new Canvas(8, 8);                                                   // release: burst
+            rel.paint(0, 0, java.util.Map.of('#', 0xFFFF8A2A, 'h', 0xFFFFE0A0),
+                    "...#....",
+                    ".#.#.#..",
+                    "..###...",
+                    "###h###.",
+                    "..###...",
+                    ".#.#.#..",
+                    "...#....",
+                    "........");
+            blitInto(c, rel, 56, 0);
+            bar(c, 16, 0xFF2A2A33, true);
+            bar(c, 24, 0xFFE0453A, false);
+            bar(c, 32, 0xFF3CC8FF, false);
+            bar(c, 40, 0xFFF2C43A, false);
+            bar(c, 48, 0xFFFF8A2A, false);
+            c.save("gui/hud.png");
+        }
+
+        /** A 112x7 bar at row {@code v}: bevelled track, or a glossy gradient fill with a soft notch every 10%. */
+        static void bar(Canvas c, int v, int base, boolean track) {
+            int[] r = ramp(base, 5);
+            for (int y = 0; y < 7; y++) for (int x = 0; x < 112; x++) {
+                int col;
+                if (track) col = y == 0 ? 0xFF15151C : y == 6 ? 0xFF3A3A48 : base;
+                else {
+                    col = r[y == 0 ? 4 : y == 1 ? 3 : y >= 5 ? 1 : 2];
+                    if (x % 11 == 10 && y > 0) col = mix(col, 0xFF000000, 0.25);
+                }
+                c.set(x, v + y, col);
+            }
+        }
+
+        static void blitInto(Canvas dst, Canvas src, int x0, int y0) {
+            for (int y = 0; y < src.h; y++) for (int x = 0; x < src.w; x++) if (src.opaque(x, y)) dst.set(x0 + x, y0 + y, src.get(x, y));
         }
     }
 }

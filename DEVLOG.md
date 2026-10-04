@@ -193,3 +193,17 @@
 - The race skin showed the player's own sleeves and jacket on top; that outer layer is hidden while a race look is on.
 - The NPC renderer used the zombie model, which ignores outer layers and mirrors the left limbs.
 - Someone was playing in the test window during several checks (transforming, switching items), which spoiled shots; the dev shots gained a `first_` prefix to force first person.
+
+## 2026-10-05 — Session 1 (cont.): Remaining art (v0.8.1)
+
+### Built
+- Hair: every spike's three tiers have their own texture region (dark roots, mid-tones, bright glinting tips; hair colour tints it), more spikes on spiky, tall and slim styles. Hair texture moved into ArtGen.
+- HUD: `textures/gui/hud.png` sprite sheet (nine-slice gold-trimmed panel, chip, bar icons, bevelled tracks, glossy fills); `DbzHud` draws from it.
+- Namek: `namek_log` / `namek_leaves` blocks (art, models, loot, tags), a `namek_tree` configured feature (pale trunk, round blob canopy) replacing savanna trees, and `NamekHouseFeature` (white dome houses with round windows, skylight, lantern, sometimes an annex) in the surface-structures step. New chunks only.
+- Space Pod entity (`world.SpacePodEntity`, `SpacePodRenderer`): the item now sets a pod down; climb in and pick a planet and it launches with flames, then a pod lands at the destination with you inside and stays parked there. Using the item in the air still travels instantly. Punch a parked pod to pack it up.
+- 98 GameTests green (tree, house, pod flight new).
+
+### Problems
+- `GuiGraphics.blitNineSliced` assumes a 256x256 texture; the 256x64 HUD sheet came out as stripes. The sheet is 256x256 now.
+- `spreadplayers` from RCON again used the overworld's heights in another dimension; run it with `execute in <dimension>`.
+- Someone flew the test character to the Northern Planet with the new pod mid-check, so one dome house landed there in the dev world.

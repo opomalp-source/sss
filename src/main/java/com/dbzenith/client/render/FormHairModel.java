@@ -16,7 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 /**
- * Transformation hair and eyes, built in code (placeholder geometry; see ASSETS_TODO.md).
+ * Transformation and character hair, and eyes, modelled in code: tapered three-tier spikes per style.
  * All styles live in one mesh as separate groups whose visibility is toggled per form.
  * Coordinates are in head space: the player's head cube spans x/z -4..4 and y -8..0.
  */
@@ -67,6 +67,12 @@ public class FormHairModel {
         spike(spiky, "back", 0, -5.5f, 4, 3, 6, 0, 0.4f, 1);
         spike(spiky, "back_l", -2.5f, -4.5f, 4, 2.6f, 5, -0.5f, 0.2f, 1);
         spike(spiky, "back_r", 2.5f, -4.5f, 4, 2.6f, 5, 0.5f, 0.2f, 1);
+        spike(spiky, "crown_fl", -1.2f, -8, -1.5f, 2.6f, 6.5f, -0.35f, 1, -0.35f);
+        spike(spiky, "crown_fr", 1.2f, -8, -1.5f, 2.6f, 6.5f, 0.35f, 1, -0.35f);
+        spike(spiky, "bang_ll", -3.4f, -7, -3, 2, 4, -0.8f, 0.4f, -1);       // fringe framing the face
+        spike(spiky, "bang_rr", 3.4f, -7, -3, 2, 4, 0.8f, 0.4f, -1);
+        spike(spiky, "nape_l", -3.2f, -3.5f, 3.6f, 2.2f, 4, -0.7f, -0.2f, 1);
+        spike(spiky, "nape_r", 3.2f, -3.5f, 3.6f, 2.2f, 4, 0.7f, -0.2f, 1);
 
         PartDefinition tall = root.addOrReplaceChild("tall", CubeListBuilder.create(), PartPose.ZERO);
         spike(tall, "crown", 0, -8, 0.5f, 3.4f, 10, 0, 1, 0.25f);
@@ -79,6 +85,10 @@ public class FormHairModel {
         spike(tall, "side_l", -4, -7, 0.5f, 2.6f, 7, -0.8f, 1, 0.2f);
         spike(tall, "side_r", 4, -7, 0.5f, 2.6f, 7, 0.8f, 1, 0.2f);
         spike(tall, "back", 0, -6, 4, 3, 7, 0, 0.6f, 1);
+        spike(tall, "crown_fl", -1, -8, -1.6f, 2.8f, 9, -0.2f, 1, -0.2f);
+        spike(tall, "crown_fr", 1, -8, -1.6f, 2.8f, 9, 0.2f, 1, -0.2f);
+        spike(tall, "back_l", -2.6f, -5, 4, 2.6f, 6, -0.5f, 0.5f, 1);
+        spike(tall, "back_r", 2.6f, -5, 4, 2.6f, 6, 0.5f, 0.5f, 1);
         spike(tall, "bang", -0.8f, -7.2f, -4.3f, 1.4f, 4.5f, 0.15f, -1, -0.25f); // single bang hanging over the forehead
 
         PartDefinition longHair = root.addOrReplaceChild("long", CubeListBuilder.create()
@@ -99,6 +109,8 @@ public class FormHairModel {
         spike(slim, "front_l", -2, -7.8f, -2.5f, 2.2f, 4, -0.3f, 1, 0.6f);
         spike(slim, "front_r", 2, -7.8f, -2.5f, 2.2f, 4, 0.3f, 1, 0.6f);
         spike(slim, "back", 0, -6, 3.8f, 2.6f, 5, 0, 0.3f, 1);
+        spike(slim, "side_l", -3.8f, -6.5f, 0.5f, 2, 4, -1, 0.6f, 0.4f);
+        spike(slim, "side_r", 3.8f, -6.5f, 0.5f, 2, 4, 1, 0.6f, 0.4f);
 
         // Pupils: two thin boxes just in front of the default skin's inner eye pixels.
         root.addOrReplaceChild("eyes", CubeListBuilder.create().texOffs(40, 0)
@@ -122,10 +134,11 @@ public class FormHairModel {
         float zRot = (float) Math.atan2(nx, nu);
         float w2 = width * 0.62f;
         float w3 = width * 0.3f;
-        parent.addOrReplaceChild(name, CubeListBuilder.create().texOffs(0, 32)
-                        .addBox(-width / 2, -height * 0.45f, -width / 2, width, height * 0.45f, width)
-                        .addBox(-w2 / 2, -height * 0.8f, -w2 / 2, w2, height * 0.35f, w2)
-                        .addBox(-w3 / 2, -height, -w3 / 2, w3, height * 0.2f, w3),
+        // Each tier has its own texture region: dark roots, mid-tone, bright tips (see tools/ArtGen.java).
+        parent.addOrReplaceChild(name, CubeListBuilder.create()
+                        .texOffs(0, 48).addBox(-width / 2, -height * 0.45f, -width / 2, width, height * 0.45f, width)
+                        .texOffs(16, 48).addBox(-w2 / 2, -height * 0.8f, -w2 / 2, w2, height * 0.35f, w2)
+                        .texOffs(32, 48).addBox(-w3 / 2, -height, -w3 / 2, w3, height * 0.2f, w3),
                 PartPose.offsetAndRotation(x, y, z, xRot, 0, zRot));
     }
 

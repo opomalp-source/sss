@@ -17,15 +17,13 @@ import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 
 /**
  * The DBZ HUD: body / ki / stamina bars, power level, release %, status (charging, flying, guard),
- * combo counter and the selected technique with its cooldown. Drawn with flat fills (placeholder style;
- * see ASSETS_TODO.md for the textured version).
+ * combo counter and the selected technique with its cooldown. Drawn from the sprite sheet textures/gui/hud.png
+ * (tools/ArtGen.java).
  */
 public final class DbzHud implements IGuiOverlay {
+    private static final net.minecraft.resources.ResourceLocation HUD = new net.minecraft.resources.ResourceLocation(com.dbzenith.DBZenith.MOD_ID, "textures/gui/hud.png");
     private static final int BAR_W = 112;
     private static final int BAR_H = 7;
-    private static final int FRAME = 0xC0101018;
-    private static final int TRACK = 0xFF2A2A33;
-    private static final int BODY = 0xFFE0453A;
     private static final int KI = 0xFF3CC8FF;
     private static final int STAMINA = 0xFFF2C43A;
     private static final int RELEASE = 0xFFFF8A2A;
@@ -44,21 +42,20 @@ public final class DbzHud implements IGuiOverlay {
         int x = 6;
         int y = 6;
         boolean formLine = d.isTransformed() || d.getOverdriveLevel() > 0;
-        g.fill(x - 3, y - 3, x + BAR_W + 52, y + (formLine ? 76 : 64), FRAME);
+        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+        panel(g, x - 4, y - 4, BAR_W + 52, formLine ? 82 : 70);
 
         g.drawString(font, Component.translatable("hud.dbzenith.power_level", String.format("%,d", StatCalculator.battlePower(d))), x, y, TEXT);
         y += 11;
-        y = bar(g, font, x, y, "BODY", d.getBody(), s.maxBody(), BODY);
-        y = bar(g, font, x, y, "KI", d.getKi(), s.maxKi(), KI);
-        y = bar(g, font, x, y, "STA", d.getStamina(), s.maxStamina(), STAMINA);
+        y = bar(g, font, x, y, 0, d.getBody(), s.maxBody());
+        y = bar(g, font, x, y, 1, d.getKi(), s.maxKi());
+        y = bar(g, font, x, y, 2, d.getStamina(), s.maxStamina());
 
         // release %
-        Component release = Component.translatable("hud.dbzenith.release", d.getReleasePercent());
-        g.drawString(font, release, x, y, RELEASE);
-        int rx = x + font.width(release) + 4;
-        int rEnd = x + 26 + BAR_W;
-        g.fill(rx, y + 2, rEnd, y + 6, TRACK);
-        g.fill(rx, y + 2, rx + (int) ((rEnd - rx) * d.getReleasePercent() / 100f), y + 6, RELEASE);
+        g.blit(HUD, x, y, 56, 0, 8, 8, 256, 256);                                         // release burst icon
+        g.blit(HUD, x + 11, y + 1, 0, 16, BAR_W, 5, 256, 256);
+        g.blit(HUD, x + 11, y + 1, 0, 48, (int) (BAR_W * d.getReleasePercent() / 100f), 5, 256, 256);
+        g.drawString(font, d.getReleasePercent() + "%", x + 15 + BAR_W, y, RELEASE);
         y += 12;
 
         // form + overdrive
@@ -115,7 +112,7 @@ public final class DbzHud implements IGuiOverlay {
         int tx = width / 2 + 96;
         int ty = height - 23;
         int tw = 104;
-        g.fill(tx - 2, ty - 2, tx + tw + 2, ty + 20, FRAME);
+        panel(g, tx - 3, ty - 3, tw + 6, 26);
         if (t == null) {
             g.drawString(font, Component.translatable("hud.dbzenith.empty_deck"), tx + 2, ty + 5, DIM);
         } else {
@@ -127,20 +124,25 @@ public final class DbzHud implements IGuiOverlay {
         }
     }
 
-    private static int bar(GuiGraphics g, Font font, int x, int y, String label, double value, double max, int color) {
-        g.drawString(font, label, x, y, DIM);
-        int bx = x + 26;
-        g.fill(bx, y, bx + BAR_W, y + BAR_H, TRACK);
+    /** Icon, bevelled track and glossy fill from the HUD sheet (kind: 0 body, 1 ki, 2 stamina). */
+    private static int bar(GuiGraphics g, Font font, int x, int y, int kind, double value, double max) {
+        g.blit(HUD, x, y, 32 + kind * 8, 0, 8, 8, 256, 256);
+        int bx = x + 11;
+        g.blit(HUD, bx, y, 0, 16, BAR_W, BAR_H, 256, 256);
         float frac = max <= 0 ? 0 : (float) Mth.clamp(value / max, 0, 1);
-        g.fill(bx, y, bx + (int) (BAR_W * frac), y + BAR_H, color);
-        g.fill(bx, y, bx + (int) (BAR_W * frac), y + 2, 0x40FFFFFF); // highlight
+        g.blit(HUD, bx, y, 0, 24 + kind * 8, (int) (BAR_W * frac), BAR_H, 256, 256);
         g.drawString(font, compact(value), bx + BAR_W + 4, y, TEXT);
-        return y + BAR_H + 3;
+        return y + BAR_H + 4;
+    }
+
+    /** The gold-trimmed glass panel (nine-slice). */
+    private static void panel(GuiGraphics g, int x, int y, int w, int h) {
+        g.blitNineSliced(HUD, x, y, w, h, 4, 4, 16, 16, 0, 0);
     }
 
     private static int chip(GuiGraphics g, Font font, int x, int y, Component text, int color) {
         int w = font.width(text) + 6;
-        g.fill(x, y - 1, x + w, y + 9, 0xA0000000);
+        g.blitNineSliced(HUD, x, y - 1, w, 10, 3, 3, 16, 16, 16, 0);
         g.drawString(font, text, x + 3, y, color);
         return x + w + 3;
     }

@@ -86,5 +86,5 @@ Resume from the first unchecked item. Each phase ends with a git tag.
 - [x] Balance pass 1 (model-based, see BALANCE.md): pacing targets, enemy scaling, TP rewards, training caps, Zenkai, fusion, quests, late forms
 - [ ] Balance pass 2 with real play: ki techniques per ki, Overdrive late, PvP between races, gear sets
 - [x] Art pass (v0.8.0, tools/ArtGen.java): items, blocks and models, gi/armor, NPC skins, race looks, Great Ape model, Eternal Dragon model
-- [ ] Art still open: hand-modelled form hair, textured HUD frame, Namek terrain blocks, a Space Pod entity (see ASSETS_TODO.md)
+- [x] Remaining art (v0.8.1): tiered hair, textured HUD, Namek trees and dome houses, Space Pod entity with launch and landing
 - [ ] More content: more bosses and questlines, more planets, a space dimension (Frost Demon vacuum survival), children for partners

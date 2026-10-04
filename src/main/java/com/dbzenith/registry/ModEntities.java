@@ -44,6 +44,13 @@ public final class ModEntities {
                     .updateInterval(20)
                     .build("dragon_spirit"));
 
+    public static final RegistryObject<EntityType<com.dbzenith.world.SpacePodEntity>> SPACE_POD = ENTITIES.register("space_pod",
+            () -> EntityType.Builder.<com.dbzenith.world.SpacePodEntity>of(com.dbzenith.world.SpacePodEntity::new, MobCategory.MISC)
+                    .sized(1.5f, 1.6f)
+                    .clientTrackingRange(10)
+                    .updateInterval(1)
+                    .build("space_pod"));
+
     private ModEntities() {}
 
     public static void register(IEventBus modBus) {

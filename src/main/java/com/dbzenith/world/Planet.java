@@ -54,8 +54,8 @@ public enum Planet {
         return null;
     }
 
-    /** Fly there. Fails during the cooldown, from the Time Chamber, or to the planet you are on. */
-    public static boolean travel(ServerPlayer player, Planet target) {
+    /** Whether a flight to {@code target} may start now (tells the player why not). */
+    public static boolean canTravel(ServerPlayer player, Planet target) {
         PlayerData d = ModCapabilities.get(player).orElse(null);
         long now = player.level().getGameTime();
         if (d == null || TimeChamber.isIn(player) || Planet.of(player.level()) == target) return false;
@@ -63,6 +63,14 @@ public enum Planet {
             player.displayClientMessage(Component.translatable("message.dbzenith.pod_recharging"), true);
             return false;
         }
+        return true;
+    }
+
+    /** Fly there. Fails during the cooldown, from the Time Chamber, or to the planet you are on. */
+    public static boolean travel(ServerPlayer player, Planet target) {
+        if (!canTravel(player, target)) return false;
+        PlayerData d = ModCapabilities.get(player).orElse(null);
+        long now = player.level().getGameTime();
         ServerLevel level = player.server.getLevel(target.dimension);
         if (level == null) return false;
         BlockPos base = landingSite(level, target == EARTH ? level.getSharedSpawnPos() : BlockPos.ZERO);

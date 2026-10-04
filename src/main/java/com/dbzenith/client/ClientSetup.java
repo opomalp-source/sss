@@ -44,6 +44,7 @@ public final class ClientSetup {
         event.registerLayerDefinition(RaceFeatureModel.LAYER, RaceFeatureModel::createLayer);
         event.registerLayerDefinition(com.dbzenith.client.render.GreatApeModel.LAYER, com.dbzenith.client.render.GreatApeModel::createLayer);
         event.registerLayerDefinition(com.dbzenith.client.render.DragonModel.LAYER, com.dbzenith.client.render.DragonModel::createLayer);
+        event.registerLayerDefinition(com.dbzenith.client.render.SpacePodRenderer.LAYER, com.dbzenith.client.render.SpacePodRenderer::createLayer);
     }
 
     @SubscribeEvent
@@ -65,6 +66,7 @@ public final class ClientSetup {
         event.registerEntityRenderer(ModEntities.KI_BEAM.get(), KiBeamRenderer::new);
         event.registerEntityRenderer(ModEntities.FALSE_MOON.get(), FalseMoonRenderer::new);
         event.registerEntityRenderer(ModEntities.DRAGON_SPIRIT.get(), DragonSpiritRenderer::new);
+        event.registerEntityRenderer(ModEntities.SPACE_POD.get(), com.dbzenith.client.render.SpacePodRenderer::new);
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.SPROUTLING.get(), ctx -> new FighterRenderer<>(ctx, "sproutling", 0.7f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.KI_SOLDIER.get(), ctx -> new FighterRenderer<>(ctx, "ki_soldier", 1f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.ANDROID_UNIT.get(), ctx -> new FighterRenderer<>(ctx, "android_unit", 1f));

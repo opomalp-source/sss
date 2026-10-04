@@ -36,6 +36,12 @@ public final class ModBlocks {
                     .sound(SoundType.GLASS).pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK))))
             .toList();
 
+    /** Namek trees: pale trunks and round blue-green canopies (generated on Namek). */
+    public static final RegistryObject<Block> NAMEK_LOG = register("namek_log",
+            () -> new net.minecraft.world.level.block.RotatedPillarBlock(BlockBehaviour.Properties.copy(net.minecraft.world.level.block.Blocks.BIRCH_LOG)));
+    public static final RegistryObject<Block> NAMEK_LEAVES = register("namek_leaves",
+            () -> new net.minecraft.world.level.block.LeavesBlock(BlockBehaviour.Properties.copy(net.minecraft.world.level.block.Blocks.OAK_LEAVES)));
+
     private ModBlocks() {}
 
     private static RegistryObject<Block> register(String name, Supplier<Block> block) {

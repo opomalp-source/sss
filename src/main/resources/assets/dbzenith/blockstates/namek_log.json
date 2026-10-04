@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "axis=x": {"model": "dbzenith:block/namek_log", "x": 90, "y": 90},
+    "axis=y": {"model": "dbzenith:block/namek_log"},
+    "axis=z": {"model": "dbzenith:block/namek_log", "x": 90}
+  }
+}

@@ -17,10 +17,10 @@
   "spawn_costs": {},
   "carvers": {"air": ["minecraft:cave", "minecraft:canyon"]},
   "features": [
-    [], [], [], [], [], [],
+    [], [], [], [], ["dbzenith:namek_house"], [],
     ["minecraft:ore_dirt", "minecraft:ore_gravel", "minecraft:ore_coal_upper", "minecraft:ore_iron_middle", "minecraft:ore_gold", "minecraft:ore_diamond"],
     [], [],
-    ["minecraft:trees_savanna", "minecraft:patch_grass_savanna"],
+    ["dbzenith:namek_trees", "minecraft:patch_grass_savanna"],
     []
   ]
 }

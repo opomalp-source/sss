@@ -26,11 +26,11 @@ Reference material (for drawing originals, or for adding art yourself for **priv
 | `textures/entity/race/{namekian,frost_demon,majin}` | Optional full race looks for players (Life screen) | **drawn** | |
 | `textures/entity/great_ape` + `client/render/GreatApeModel` | Real ape model: hunched body, long arms, muzzle, brow, tail; walk and swipe animation | **drawn** | |
 | `textures/entity/eternal_dragon` + `client/render/DragonModel` | Scaled serpent coil with dorsal spikes; head with snout, jaw, horns, whiskers, glowing eyes | **drawn** | |
-| `textures/entity/form_hair` + `client/render/FormHairModel` | Transformation hair (spiky, tall, long, slim), built from boxes | good placeholder | Hand-modelled hair per form would be nicer |
+| `textures/entity/form_hair` + `client/render/FormHairModel` | Hair per style (spiky, tall, long, slim): tapered three-tier spikes, dark roots to bright tips, strand texture | **drawn** | |
 | `client/render/RaceFeatureModel` | Antennae, horns, tentacle, tail | good placeholder | |
 | `textures/entity/ki_glow`, `ki_beam` | Ki projectiles and beams, tinted at render time | final for now | |
 | `textures/mob_effect/*`, `entity/cosmetics/*` | Status icons, scars, tattoos | final for now | |
-| HUD | Flat-colour bars and chips | placeholder | A textured frame would suit the art |
-| Space Pod | Item only (travel is instant) | n/a | A pod entity with a launch animation would need code too |
-| Namek / Northern Planet terrain | Vanilla blocks with tinted biome colours | placeholder | Custom Namek blocks and trees, houses |
+| `textures/gui/hud.png` + `client/DbzHud` | Gold-trimmed glass panel (nine-slice), bar icons, bevelled tracks, glossy fills | **drawn** | |
+| `textures/entity/space_pod` + `client/render/SpacePodRenderer` | Space Pod entity: place it, climb in, it launches with flames and a pod lands at the destination | **drawn** | |
+| Namek terrain | Namek trees (pale log, round teal leaves) and white dome houses (world feature) in new chunks; grass and water tinted by the biome | **drawn** | The Northern Planet is still plain grass |
 | Spawn eggs | Vanilla template, tinted | fine | |
