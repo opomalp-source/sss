@@ -82,6 +82,7 @@ public final class CombatEvents {
 
         // 2) apply to victim
         PlayerData victimData = victim instanceof Player vp ? ModCapabilities.get(vp).orElse(null) : null;
+        raw *= godKiFactor(attackerData, victimData);
         double dealt;
         if (victimData != null) {
             Player player = (Player) victim;
@@ -121,6 +122,15 @@ public final class CombatEvents {
             attackerData.addTrainingProgress(StatCalculator.scaleTpGain(attackerData,
                     dealt * DBZConfig.SERVER.tpPerDamageDealt.get()));
         }
+    }
+
+    /** God ki over ordinary ki: hits harder against it, takes less from it. */
+    public static double godKiFactor(PlayerData attacker, PlayerData victim) {
+        boolean a = attacker != null && attacker.hasFlag("god_ki");
+        boolean v = victim != null && victim.hasFlag("god_ki");
+        if (a == v) return 1.0;
+        double edge = DBZConfig.SERVER.godKiEdge.get();
+        return a ? 1.0 + edge : 1.0 - edge;
     }
 
     @SubscribeEvent

@@ -28,7 +28,7 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
                 | (Races.of(d.getRace()).tail() && d.hasTail() ? TAIL : 0);
         return new PublicStatePacket(entityId, flags, d.getReleasePercent(), Aura.color(d), d.getFormId(), d.getOverdriveLevel(),
                 d.getRace().ordinal(), d.getBodyType().ordinal(), d.getHairStyle(), d.getHairColor(), d.getEyeColor(),
-                com.dbzenith.stats.StatCalculator.battlePower(d));
+                d.hasFlag("god_ki") ? -1 : com.dbzenith.stats.StatCalculator.battlePower(d)); // -1: god ki cannot be read
     }
 
     public int stateHash() {

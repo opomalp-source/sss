@@ -41,17 +41,18 @@ public final class TechniqueHandler {
         ServerLevel level = player.serverLevel();
         long now = level.getGameTime();
         if (data.isOnCooldown(technique.id(), now)) return Result.COOLDOWN;
-        double cost = DamageCalculator.kiCost(data, technique.kiCost());
+        double cost = DamageCalculator.kiCost(data, technique.kiCost()) * TechniqueMastery.costMultiplier(data, technique);
         if (!player.getAbilities().instabuild && data.getKi() < cost) return Result.NOT_ENOUGH_KI;
 
         if (technique.style() == Technique.Style.SELF) {
             if (!TechniqueEffects.apply(player, data, technique)) return Result.INVALID;
         } else {
-            spawn(level, player, technique, DamageCalculator.kiOutgoing(data, technique.damageMult()));
+            spawn(level, player, technique, DamageCalculator.kiOutgoing(data, technique.damageMult()) * TechniqueMastery.damageMultiplier(data, technique));
         }
 
         if (!player.getAbilities().instabuild) data.setKi(data.getKi() - cost);
-        data.setCooldown(technique.id(), now + technique.cooldownTicks());
+        data.setCooldown(technique.id(), now + TechniqueMastery.cooldownTicks(data, technique));
+        TechniqueMastery.gain(data, technique);
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 technique.explosionPower() > 0 ? SoundEvents.BEACON_POWER_SELECT : SoundEvents.FIRECHARGE_USE,
                 SoundSource.PLAYERS, 0.6f, 1.4f + level.random.nextFloat() * 0.3f);

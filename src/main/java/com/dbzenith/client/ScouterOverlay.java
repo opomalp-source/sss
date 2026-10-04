@@ -39,7 +39,8 @@ public final class ScouterOverlay implements IGuiOverlay {
 
         Font font = mc.font;
         Component name = target.getDisplayName();
-        Component reading = Component.translatable("hud.dbzenith.scouter_power", String.format("%,d", power));
+        Component reading = power < 0 ? Component.translatable("hud.dbzenith.scouter_unreadable")
+                : Component.translatable("hud.dbzenith.scouter_power", String.format("%,d", power));
         Component dist = Component.translatable("hud.dbzenith.scouter_distance", (int) mc.player.distanceTo(target));
         g.drawString(font, name, cx + r + 4, cy - r, GREEN);
         g.drawString(font, reading, cx + r + 4, cy - r + 10, GREEN);

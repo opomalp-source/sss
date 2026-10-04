@@ -124,6 +124,14 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue masteryGainPerSecond;
         public final ForgeConfigSpec.DoubleValue masteryMaxMultiplierBonus;
         public final ForgeConfigSpec.DoubleValue masteryMaxDrainReduction;
+        public final ForgeConfigSpec.DoubleValue techniqueMasteryPerUse;
+        public final ForgeConfigSpec.DoubleValue techniqueMasteryDamageBonus;
+        public final ForgeConfigSpec.DoubleValue techniqueMasteryCostReduction;
+        public final ForgeConfigSpec.DoubleValue techniqueMasteryCooldownReduction;
+        public final ForgeConfigSpec.IntValue prestigeLevel;
+        public final ForgeConfigSpec.DoubleValue prestigeTpBonus;
+        public final ForgeConfigSpec.DoubleValue prestigePowerBonus;
+        public final ForgeConfigSpec.DoubleValue godKiEdge;
         public final ForgeConfigSpec.ConfigValue<java.util.List<? extends Double>> overdriveLevels;
         public final ForgeConfigSpec.IntValue overdriveUnlockLevel;
         public final ForgeConfigSpec.DoubleValue overdriveMasteryPerLevel;
@@ -355,6 +363,20 @@ public final class DBZConfig {
                     .defineInRange("masteryMaxMultiplierBonus", 0.2, 0.0, 10.0);
             masteryMaxDrainReduction = b.comment("At 100 mastery a form's drain is reduced by this fraction")
                     .defineInRange("masteryMaxDrainReduction", 0.75, 0.0, 1.0);
+            techniqueMasteryPerUse = b.comment("Technique mastery gained per use, times the SPI spirit modifier (100 = mastered)")
+                    .defineInRange("techniqueMasteryPerUse", 0.5, 0.0, 100.0);
+            techniqueMasteryDamageBonus = b.comment("At 100 technique mastery: damage bonus")
+                    .defineInRange("techniqueMasteryDamageBonus", 0.25, 0.0, 10.0);
+            techniqueMasteryCostReduction = b.comment("At 100 technique mastery: ki cost reduction")
+                    .defineInRange("techniqueMasteryCostReduction", 0.30, 0.0, 0.95);
+            techniqueMasteryCooldownReduction = b.comment("At 100 technique mastery: cooldown reduction")
+                    .defineInRange("techniqueMasteryCooldownReduction", 0.25, 0.0, 0.95);
+            prestigeLevel = b.comment("Character level needed to prestige (attributes and TP reset for a permanent bonus)")
+                    .defineInRange("prestigeLevel", 2000, 1, 10_000_000);
+            prestigeTpBonus = b.comment("TP gain bonus per prestige").defineInRange("prestigeTpBonus", 0.25, 0.0, 100.0);
+            prestigePowerBonus = b.comment("STR/DEX/KI_POWER multiplier bonus per prestige").defineInRange("prestigePowerBonus", 0.05, 0.0, 10.0);
+            godKiEdge = b.comment("God ki against ordinary ki: damage dealt up and taken down by this fraction")
+                    .defineInRange("godKiEdge", 0.25, 0.0, 0.95);
             overdriveLevels = b.comment("Overdrive multipliers per level, lowest first")
                     .defineList("overdriveLevels", java.util.List.of(2.0, 3.0, 4.0, 10.0, 20.0), o -> o instanceof Double d && d >= 1.0);
             overdriveUnlockLevel = b.comment("Character level needed to use Overdrive (or the 'overdrive' flag)")

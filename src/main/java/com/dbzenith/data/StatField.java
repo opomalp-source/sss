@@ -30,6 +30,7 @@ public record StatField(String id, ToDoubleFunction<PlayerData> getter, BiConsum
         register("alignment", PlayerData::getAlignment, (d, v) -> d.setAlignment((int) Math.round(v)));
         register("physical_age", PlayerData::getPhysicalAge, PlayerData::setPhysicalAge);
         register("mental_age", PlayerData::getMentalAge, PlayerData::setMentalAge);
+        register("prestige", d -> d.getPrestige(), (d, v) -> d.setPrestige((int) Math.round(v)));
     }
 
     private static void register(String id, ToDoubleFunction<PlayerData> getter, BiConsumer<PlayerData, Double> setter) {

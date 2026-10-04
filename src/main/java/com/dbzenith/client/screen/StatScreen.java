@@ -47,6 +47,15 @@ public class StatScreen extends Screen {
         }).bounds(left + 8, top + H - 24, 140, 18).build());
         addRenderableWidget(Button.builder(Component.translatable("screen.dbzenith.techniques_button"), b -> minecraft.setScreen(new DeckScreen(this)))
                 .bounds(left + W - 156, top + H - 24, 82, 18).build());
+        if (com.dbzenith.stats.Prestige.eligible(ClientPlayerData.get())) {
+            addRenderableWidget(Button.builder(Component.translatable("screen.dbzenith.prestige_button"), b -> minecraft.setScreen(
+                    new net.minecraft.client.gui.screens.ConfirmScreen(yes -> {
+                        if (yes) ModNetwork.sendToServer(new com.dbzenith.stats.Prestige.Packet());
+                        minecraft.setScreen(this);
+                    }, Component.translatable("screen.dbzenith.prestige_title"),
+                            Component.translatable("screen.dbzenith.prestige_confirm", ClientPlayerData.get().getPrestige() + 1))))
+                    .bounds(left + W - 80, top + H - 46, 72, 18).build());
+        }
         Attribute[] attrs = Attribute.values();
         for (int i = 0; i < attrs.length; i++) {
             Attribute a = attrs[i];
@@ -66,9 +75,9 @@ public class StatScreen extends Screen {
         DerivedStats s = d.getDerived();
 
         g.drawString(font, title, left + 8, top + 8, HEADER);
-        g.drawString(font, Component.translatable("screen.dbzenith.identity_age",
+        g.drawString(font, Component.translatable(d.getPrestige() > 0 ? "screen.dbzenith.identity_prestige" : "screen.dbzenith.identity_age",
                 Component.translatable(d.getRace().translationKey()), Component.translatable(d.getPath().translationKey()),
-                (int) d.getPhysicalAge()), left + 8, top + 20, DIM);
+                (int) d.getPhysicalAge(), d.getPrestige()), left + 8, top + 20, DIM);
         g.drawString(font, Component.translatable("screen.dbzenith.tp", String.format("%,d", d.getTrainingPoints())), left + W - 110, top + 8, 0xFF7CFF7C);
 
         Attribute[] attrs = Attribute.values();

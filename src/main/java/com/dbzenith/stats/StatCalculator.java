@@ -60,7 +60,8 @@ public final class StatCalculator {
     public static double scaleTpGain(PlayerData data, double rawGain) {
         double mult = (1.0 + data.getAttribute(Attribute.MIND) * DBZConfig.SERVER.tpGainPerMind.get())
                 * (1.0 + Races.of(data.getRace()).tpGainBonus())
-                * data.getTrainingMultiplier(); // gravity, weights, Time Chamber (set by TrainingTicker)
+                * data.getTrainingMultiplier() // gravity, weights, Time Chamber (set by TrainingTicker)
+                * (1.0 + DBZConfig.SERVER.prestigeTpBonus.get() * data.getPrestige());
         return rawGain * mult;
     }
 

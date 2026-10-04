@@ -34,6 +34,9 @@ public class DeckScreen extends Screen {
     private final Screen parent;
     private int left;
     private int top;
+    /** First library row shown (the list scrolls with the mouse wheel). */
+    private int scroll;
+    private static final int VISIBLE = 11;
 
     public DeckScreen(Screen parent) {
         super(Component.translatable("screen.dbzenith.techniques"));
@@ -56,7 +59,15 @@ public class DeckScreen extends Screen {
         int y0 = top + 34;
         if (mx < left + 6 || mx > left + 236 || my < y0) return -1;
         int i = (int) ((my - y0) / ROW);
+        if (i >= VISIBLE) return -1;
+        i += scroll;
         return i < library().size() ? i : -1;
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        scroll = Math.max(0, Math.min(Math.max(0, library().size() - VISIBLE), scroll - (int) Math.signum(delta)));
+        return true;
     }
 
     private int deckRow(double mx, double my) {
@@ -103,9 +114,10 @@ public class DeckScreen extends Screen {
         List<Technique> lib = library();
         int hover = listRow(mouseX, mouseY);
         Technique tooltipFor = null;
-        for (int i = 0; i < lib.size(); i++) {
+        scroll = Math.max(0, Math.min(Math.max(0, lib.size() - VISIBLE), scroll));
+        for (int i = scroll; i < Math.min(lib.size(), scroll + VISIBLE); i++) {
             Technique t = lib.get(i);
-            int y = top + 34 + i * ROW;
+            int y = top + 34 + (i - scroll) * ROW;
             if (i == hover) {
                 g.fill(left + 4, y - 3, left + 238, y + ROW - 4, 0x30FFFFFF);
                 tooltipFor = t;
@@ -116,6 +128,13 @@ public class DeckScreen extends Screen {
             else if (d.knows(t.id())) g.drawString(font, Component.translatable("screen.dbzenith.learned"), sx, y, TEXT);
             else if (problemIsLevel(d, t)) g.drawString(font, Component.translatable("screen.dbzenith.needs_level", t.unlockLevel()), sx, y, BAD);
             else g.drawString(font, Component.translatable("screen.dbzenith.learn_for", t.learnCost()), sx, y, GOLD);
+        }
+        if (lib.size() > VISIBLE) { // scroll bar
+            int trackTop = top + 32, trackH = VISIBLE * ROW;
+            int barH = Math.max(10, trackH * VISIBLE / lib.size());
+            int barY = trackTop + (trackH - barH) * scroll / Math.max(1, lib.size() - VISIBLE);
+            g.fill(left + 239, trackTop, left + 241, trackTop + trackH, 0x40FFFFFF);
+            g.fill(left + 239, barY, left + 241, barY + barH, 0xC0FFFFFF);
         }
 
         int dx = left + 248;
@@ -135,6 +154,7 @@ public class DeckScreen extends Screen {
             Technique t = tooltipFor;
             g.renderTooltip(font, font.split(Component.translatable("screen.dbzenith.technique_info", (int) t.kiCost(),
                     String.format("%.1f", t.cooldownTicks() / 20.0), String.format("%.1f", t.damageMult()),
+                    (int) com.dbzenith.skill.TechniqueMastery.get(d, t),
                     Component.translatable(t.translationKey() + ".desc")), 200), mouseX, mouseY);
         }
     }

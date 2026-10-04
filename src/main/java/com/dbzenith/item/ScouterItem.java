@@ -54,7 +54,7 @@ public class ScouterItem extends ArmorItem {
     /** Power level of any living thing: players from their stats, creatures from health and armor. */
     public static long powerOf(LivingEntity e) {
         if (e instanceof Player p) {
-            return ModCapabilities.get(p).map(StatCalculator::battlePower).orElse(0L);
+            return ModCapabilities.get(p).map(d -> d.hasFlag("god_ki") ? 0L : StatCalculator.battlePower(d)).orElse(0L); // god ki is invisible to machines
         }
         return mobPower(e);
     }

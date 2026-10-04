@@ -493,6 +493,20 @@ public class PlayerData {
         markDirty();
     }
 
+    // ------------------------------------------------------------------ prestige (saved)
+
+    private int prestige;
+
+    public int getPrestige() {
+        return prestige;
+    }
+
+    public void setPrestige(int value) {
+        prestige = Math.max(0, value);
+        derivedStale = true;
+        markDirty();
+    }
+
     // ------------------------------------------------------------------ Namekian fusion / Majin absorption (saved)
 
     private int fusions;
@@ -938,6 +952,7 @@ public class PlayerData {
         tag.putLong("chamberAt", chamberEnteredAt);
         tag.putLong("immortalUntil", immortalUntil);
         tag.putInt("fusions", fusions);
+        tag.putInt("prestige", prestige);
         tag.putInt("majinStacks", majinStacks);
         tag.putLong("majinUntil", majinUntil);
         CompoundTag aq = new CompoundTag();
@@ -1005,6 +1020,7 @@ public class PlayerData {
         chamberEnteredAt = tag.contains("chamberAt") ? tag.getLong("chamberAt") : -1;
         immortalUntil = tag.contains("immortalUntil") ? tag.getLong("immortalUntil") : -1;
         fusions = tag.getInt("fusions");
+        prestige = tag.getInt("prestige");
         majinStacks = tag.getInt("majinStacks");
         majinUntil = tag.contains("majinUntil") ? tag.getLong("majinUntil") : -1;
         activeQuests.clear();

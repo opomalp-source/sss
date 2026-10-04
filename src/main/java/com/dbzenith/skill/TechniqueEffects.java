@@ -91,7 +91,10 @@ public final class TechniqueEffects {
                 return true;
             }
             case KI_SENSE -> {
-                List<LivingEntity> sensed = around(player, power);
+                boolean divine = data.hasFlag("god_ki");
+                List<LivingEntity> sensed = around(player, power).stream()
+                        .filter(e -> divine || !(e instanceof Player p && ModCapabilities.get(p).map(pd -> pd.hasFlag("god_ki")).orElse(false)))
+                        .toList(); // only god ki senses god ki
                 StringBuilder sb = new StringBuilder();
                 sensed.stream()
                         .filter(e -> e instanceof Player)

@@ -81,8 +81,8 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Physical / spiritual training | B | done | Punching Bag, moving under gravity, meditation (sneak still 3 s), ki charging; training multiplier. GameTests |
 | Gravity chamber | B | done | Block 1-100g, radius 6; tolerance 1 + (STR+CON) x 0.02; slowdown + body strain above it; x(1 + 0.1/g) training. GameTests + seen in-client |
 | Hyperbolic Time Chamber | B | done | Door block, white void dimension, 10g, x4 training, 1-day stay, sends you back. GameTests + seen in-client |
-| Mastery (forms & techniques) | B | in-progress | Form mastery done (Phase 2); technique mastery todo |
-| Prestige / God Ki scaling | B | in-progress | `god_ki` from the Divine Ritual quest or the Godly Ki wish; prestige todo |
+| Mastery (forms & techniques) | B | done | Forms (Phase 2); techniques: +0.5 x SPI modifier per use, at 100: +25% damage, -30% ki, -25% cooldown; shown in the Techniques screen. GameTest |
+| Prestige / God Ki scaling | B | done | Prestige at level 2000 (stat screen): attributes + TP reset, +25% TP and +5% power each. God ki (ritual or wish): +25% dealt / -25% taken vs ordinary ki, invisible to scouters and Ki Sense. GameTests |
 
 ## 3.7 World, items & endgame
 | Feature | Src | Status | Notes |
