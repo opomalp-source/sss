@@ -91,5 +91,14 @@
   "message.dbzenith.overdrive_form": "Overdrive does not work in this form",
   "message.dbzenith.overdrive_locked": "Overdrive unlocks at level %s",
   "message.dbzenith.overdrive_max": "Overdrive is at your limit (train its mastery)",
-  "message.dbzenith.overdrive_ended": "Your body gives out: Overdrive ends"
+  "message.dbzenith.overdrive_ended": "Your body gives out: Overdrive ends",
+  "screen.dbzenith.forms": "Forms",
+  "screen.dbzenith.forms_button": "Forms >",
+  "screen.dbzenith.current_form": "Current: %s  (click a form to make it your transform target)",
+  "screen.dbzenith.clear_target": "Clear target",
+  "screen.dbzenith.no_forms": "Your race has no forms yet (coming in Phase 3).",
+  "screen.dbzenith.ready": "Ready",
+  "screen.dbzenith.moon_only": "Full moon only",
+  "screen.dbzenith.form_keys": "J: transform    Shift+J: revert one form",
+  "screen.dbzenith.overdrive_info": "N: Overdrive (max level %s, mastery %s%%)    Shift+N: end"
 }

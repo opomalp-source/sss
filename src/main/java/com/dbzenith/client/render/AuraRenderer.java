@@ -3,6 +3,8 @@ package com.dbzenith.client.render;
 import com.dbzenith.DBZenith;
 import com.dbzenith.client.ClientPublicStates;
 import com.dbzenith.network.PublicStatePacket;
+import com.dbzenith.transform.Form;
+import com.dbzenith.transform.Forms;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -32,16 +34,20 @@ public final class AuraRenderer {
     public static void onRenderPlayer(RenderPlayerEvent.Post event) {
         Player player = event.getEntity();
         PublicStatePacket state = ClientPublicStates.get(player.getId());
-        if (state == null || !(state.has(PublicStatePacket.CHARGING) || state.has(PublicStatePacket.HEAVY))) return;
+        if (state == null) return;
+        boolean powering = state.has(PublicStatePacket.CHARGING) || state.has(PublicStatePacket.HEAVY);
+        Form form = Forms.byId(state.form());
+        boolean idle = !form.isBase() || state.overdrive() > 0; // transformed: a calmer, constant aura
+        if (!powering && !idle) return;
 
         int c = state.auraColor();
         int r = (c >> 16) & 0xFF;
         int g = (c >> 8) & 0xFF;
         int b = c & 0xFF;
         float t = player.tickCount + event.getPartialTick();
-        float strength = 0.6f + 0.4f * state.release() / 100f;
+        float strength = (0.6f + 0.4f * state.release() / 100f) * (powering ? 1f : 0.7f) * form.scale();
         float pulse = 1f + 0.06f * Mth.sin(t * 0.9f);
-        int alpha = (int) (200 * strength);
+        int alpha = (int) (Math.min(1f, strength) * (powering ? 200 : 110));
 
         PoseStack pose = event.getPoseStack();
         pose.pushPose();

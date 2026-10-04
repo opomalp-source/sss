@@ -40,6 +40,7 @@ public class AssetGen {
         // --- ki glow: soft radial white, tinted per technique at render time ---
         radialGlow("assets/dbzenith/textures/entity/ki_glow.png", 32);
         beamGlow("assets/dbzenith/textures/entity/ki_beam.png", 32);
+        hairTexture("assets/dbzenith/textures/entity/form_hair.png");
 
         // --- gametest structure: empty 3x3x3 template ---
         emptyStructure("data/dbzenith/structures/empty.nbt", 3);
@@ -89,6 +90,25 @@ public class AssetGen {
                 img.setRGB(x, y, (alpha << 24) | 0xFFFFFF);
             }
         }
+        File out = new File(RES + path);
+        out.getParentFile().mkdirs();
+        ImageIO.write(img, "png", out);
+        System.out.println("wrote " + out);
+    }
+
+    /** Light strands (tinted per form at render time) plus a pure white patch at (40,0) for pupils. */
+    static void hairTexture(String path) throws IOException {
+        BufferedImage img = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
+        java.util.Random rnd = new java.util.Random(7);
+        int[] column = new int[64];
+        for (int x = 0; x < 64; x++) column[x] = 200 + rnd.nextInt(56);
+        for (int y = 0; y < 64; y++) {
+            for (int x = 0; x < 64; x++) {
+                int v = Math.min(255, column[x] - (y % 8 == 7 ? 25 : 0) + rnd.nextInt(10));
+                img.setRGB(x, y, 0xFF000000 | (v << 16) | (v << 8) | v);
+            }
+        }
+        for (int y = 0; y < 8; y++) for (int x = 40; x < 48; x++) img.setRGB(x, y, 0xFFFFFFFF);
         File out = new File(RES + path);
         out.getParentFile().mkdirs();
         ImageIO.write(img, "png", out);

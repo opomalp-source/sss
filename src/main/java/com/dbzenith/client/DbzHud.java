@@ -61,23 +61,9 @@ public final class DbzHud implements IGuiOverlay {
         g.fill(rx, y + 2, rx + (int) ((rEnd - rx) * d.getReleasePercent() / 100f), y + 6, RELEASE);
         y += 12;
 
-        // status chips
-        int cx = x;
-        if (d.isCharging()) {
-            int pulse = 0xFF000000 | (int) (180 + 75 * Mth.sin(time * 0.6f)) << 8 | 0xFF;
-            cx = chip(g, font, cx, y, Component.translatable("hud.dbzenith.charging"), pulse);
-        }
-        if (d.isFlying()) cx = chip(g, font, cx, y, Component.translatable("hud.dbzenith.flying"), KI);
-        if (d.isGuarding()) cx = chip(g, font, cx, y, Component.translatable("hud.dbzenith.guard"), STAMINA);
-        if (d.isChargingHeavy()) cx = chip(g, font, cx, y, Component.translatable("hud.dbzenith.heavy_charging"), 0xFFFF6040);
-        else if (d.getHeavyArmedMultiplier() > 0) {
-            cx = chip(g, font, cx, y, Component.translatable("hud.dbzenith.heavy_ready", String.format("%.1f", d.getHeavyArmedMultiplier())), 0xFFFF6040);
-        }
-
         // form + overdrive
         Form form = Forms.byId(d.getFormId());
         if (!form.isBase() || d.getOverdriveLevel() > 0) {
-            y += 12;
             int fx = x;
             if (!form.isBase()) {
                 Component name = Component.translatable(form.translationKey());
@@ -89,6 +75,20 @@ public final class DbzHud implements IGuiOverlay {
             if (d.getOverdriveLevel() > 0) {
                 chip(g, font, fx, y, Component.translatable("hud.dbzenith.overdrive", String.format("%.0f", FormMath.overdriveMultiplier(d))), 0xFFFF4030);
             }
+            y += 12;
+        }
+
+        // status chips
+        int cx = x;
+        if (d.isCharging()) {
+            int pulse = 0xFF000000 | (int) (180 + 75 * Mth.sin(time * 0.6f)) << 8 | 0xFF;
+            cx = chip(g, font, cx, y, Component.translatable("hud.dbzenith.charging"), pulse);
+        }
+        if (d.isFlying()) cx = chip(g, font, cx, y, Component.translatable("hud.dbzenith.flying"), KI);
+        if (d.isGuarding()) cx = chip(g, font, cx, y, Component.translatable("hud.dbzenith.guard"), STAMINA);
+        if (d.isChargingHeavy()) cx = chip(g, font, cx, y, Component.translatable("hud.dbzenith.heavy_charging"), 0xFFFF6040);
+        else if (d.getHeavyArmedMultiplier() > 0) {
+            cx = chip(g, font, cx, y, Component.translatable("hud.dbzenith.heavy_ready", String.format("%.1f", d.getHeavyArmedMultiplier())), 0xFFFF6040);
         }
 
         // combo

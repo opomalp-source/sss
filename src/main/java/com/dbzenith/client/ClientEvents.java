@@ -49,8 +49,8 @@ public final class ClientEvents {
             String shot = pendingShot;
             pendingShot = null;
             devScreenshot(shot, 0);
-            if (mc.screen instanceof com.dbzenith.client.screen.StatScreen) mc.setScreen(null);
-            if (shot.startsWith("third_")) mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON);
+            if (mc.screen instanceof com.dbzenith.client.screen.StatScreen || mc.screen instanceof com.dbzenith.client.screen.FormScreen) mc.setScreen(null);
+            if (shot.startsWith("third_") || shot.startsWith("front_")) mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON);
         }
         if (DEV_SCREENSHOT_TICKS.contains(ticksInWorld)) {
             Screenshot.grab(mc.gameDirectory, "dbz_dev_" + ticksInWorld + ".png", mc.getMainRenderTarget(),
@@ -66,9 +66,15 @@ public final class ClientEvents {
     public static void devScreenshot(String name, int delayTicks) {
         if (!DEV_AUTOMATION) return;
         Minecraft mc = Minecraft.getInstance();
-        if (name.startsWith("third_") && mc.options.getCameraType() == net.minecraft.client.CameraType.FIRST_PERSON) {
-            mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK);
+        net.minecraft.client.CameraType wanted = name.startsWith("third_") ? net.minecraft.client.CameraType.THIRD_PERSON_BACK
+                : name.startsWith("front_") ? net.minecraft.client.CameraType.THIRD_PERSON_FRONT : null;
+        if (wanted != null && mc.options.getCameraType() != wanted) {
+            mc.options.setCameraType(wanted);
             delayTicks = Math.max(delayTicks, 4);
+        }
+        if (name.startsWith("forms_") && !(mc.screen instanceof com.dbzenith.client.screen.FormScreen)) {
+            mc.setScreen(new com.dbzenith.client.screen.FormScreen(null));
+            delayTicks = Math.max(delayTicks, 5);
         }
         if (delayTicks > 0) {
             pendingShot = name;
