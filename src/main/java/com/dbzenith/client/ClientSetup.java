@@ -68,5 +68,6 @@ public final class ClientSetup {
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.RAMPAGE_BRUTE.get(), ctx -> new FighterRenderer<>(ctx, "rampage_brute", 1.6f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.MASTER.get(), ctx -> new FighterRenderer<>(ctx, "martial_arts_master", 0.95f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.PATROL_OFFICER.get(), ctx -> new FighterRenderer<>(ctx, "patrol_officer", 1f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.NAMEKIAN_WARRIOR.get(), ctx -> new FighterRenderer<>(ctx, "namekian_warrior", 1.05f));
     }
 }

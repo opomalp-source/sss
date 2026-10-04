@@ -17,6 +17,9 @@ public final class ModDamageTypes {
     public static final ResourceKey<DamageType> THROW =
             ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(DBZenith.MOD_ID, "throw"));
 
+    public static final ResourceKey<DamageType> ABSORBED =
+            ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(DBZenith.MOD_ID, "absorbed"));
+
     private ModDamageTypes() {}
 
     /** A ki blast hit. The hurt amount passed with this source is raw DBZ damage, converted in CombatEvents. */
@@ -27,5 +30,10 @@ public final class ModDamageTypes {
     /** A thrown body hitting the ground or a wall. The amount is raw DBZ damage, like a ki blast. */
     public static DamageSource thrown(Level level, Entity thrower) {
         return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(THROW), thrower, thrower);
+    }
+
+    /** Absorbed by a Majin: certain death (bypasses invulnerability, armor and resistance via damage-type tags). */
+    public static DamageSource absorbed(Level level, Entity majin) {
+        return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(ABSORBED), majin, majin);
     }
 }

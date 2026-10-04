@@ -145,6 +145,12 @@ public final class TechniqueEffects {
             case GRAB -> {
                 return GrabThrow.use(player, data, power);
             }
+            case FUSE -> {
+                return com.dbzenith.race.Absorption.fuse(player, data, lookedAtLiving(player, power));
+            }
+            case ABSORB -> {
+                return com.dbzenith.race.Absorption.absorb(player, data, lookedAtLiving(player, power));
+            }
             default -> {
                 return false;
             }
@@ -171,6 +177,14 @@ public final class TechniqueEffects {
         AABB box = player.getBoundingBox().inflate(radius);
         return player.level().getEntitiesOfClass(LivingEntity.class, box,
                 e -> e != player && e.isAlive() && !e.isSpectator() && e.distanceToSqr(player) <= radius * radius);
+    }
+
+    private static LivingEntity lookedAtLiving(ServerPlayer player, double range) {
+        Vec3 eye = player.getEyePosition();
+        Vec3 end = eye.add(player.getLookAngle().scale(range));
+        return player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(range),
+                        e -> e != player && e.isAlive() && e.getBoundingBox().inflate(0.4).clip(eye, end).isPresent())
+                .stream().min(Comparator.comparingDouble(e -> e.distanceToSqr(player))).orElse(null);
     }
 
     private static java.util.Optional<Player> lookedAtPlayer(ServerPlayer player, double range) {

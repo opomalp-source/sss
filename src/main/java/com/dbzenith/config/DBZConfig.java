@@ -136,6 +136,13 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue zenkaiTriggerPercent;
         public final ForgeConfigSpec.DoubleValue zenkaiRecoverPercent;
         public final ForgeConfigSpec.IntValue zenkaiCooldownTicks;
+        public final ForgeConfigSpec.DoubleValue fusionAttributeShare;
+        public final ForgeConfigSpec.IntValue fusionMax;
+        public final ForgeConfigSpec.IntValue fusionNpcPointsPerLevel;
+        public final ForgeConfigSpec.DoubleValue absorbHealthThreshold;
+        public final ForgeConfigSpec.DoubleValue majinAbsorbBonusPerStack;
+        public final ForgeConfigSpec.IntValue majinAbsorbMaxStacks;
+        public final ForgeConfigSpec.IntValue majinAbsorbDurationTicks;
         public final ForgeConfigSpec.IntValue deckBaseSlots;
         public final ForgeConfigSpec.IntValue deckLevelsPerExtraSlot;
         public final ForgeConfigSpec.IntValue deckMaxSlots;
@@ -371,6 +378,18 @@ public final class DBZConfig {
                     .defineInRange("zenkaiRecoverPercent", 60.0, 0.0, 100.0);
             zenkaiCooldownTicks = b.comment("Minimum ticks between Zenkai boosts")
                     .defineInRange("zenkaiCooldownTicks", 12000, 0, 10_000_000);
+            fusionAttributeShare = b.comment("Namekian fusion with a player: share of the partner's attributes added to yours")
+                    .defineInRange("fusionAttributeShare", 0.25, 0.0, 1.0);
+            fusionMax = b.comment("Most fusions one Namekian can make").defineInRange("fusionMax", 3, 0, 100);
+            fusionNpcPointsPerLevel = b.comment("Fusing with a Namekian Warrior: points per warrior level added to STR, CON, KI_POWER and SPI")
+                    .defineInRange("fusionNpcPointsPerLevel", 3, 0, 1000);
+            absorbHealthThreshold = b.comment("Fusion and absorption need the target at or below this share of its health")
+                    .defineInRange("absorbHealthThreshold", 0.25, 0.0, 1.0);
+            majinAbsorbBonusPerStack = b.comment("Majin absorption: STR/DEX/KI_POWER multiplier bonus per absorbed fighter")
+                    .defineInRange("majinAbsorbBonusPerStack", 0.10, 0.0, 10.0);
+            majinAbsorbMaxStacks = b.defineInRange("majinAbsorbMaxStacks", 3, 1, 100);
+            majinAbsorbDurationTicks = b.comment("How long absorbed power lasts (12000 = 10 minutes)")
+                    .defineInRange("majinAbsorbDurationTicks", 12000, 20, 10_000_000);
             deckBaseSlots = b.comment("Technique deck slots every character has")
                     .defineInRange("deckBaseSlots", 4, 1, 20);
             deckLevelsPerExtraSlot = b.comment("One extra deck slot per this many character levels")

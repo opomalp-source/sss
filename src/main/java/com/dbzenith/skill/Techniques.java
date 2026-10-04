@@ -66,6 +66,11 @@ public final class Techniques {
     public static final Technique ARM_CANNON = add(Technique.builder("arm_cannon").cost(30).damage(1.8).speed(2.6f).size(0.45f)
             .cooldown(15).color(0xFFB050).life(40).race(Race.CYBORG));
 
+    public static final Technique NAMEKIAN_FUSION = add(Technique.builder("namekian_fusion").style(Style.SELF).effect(Effect.FUSE, 4)
+            .cost(50).cooldown(200).color(0x7CFF6A).race(Race.NAMEKIAN).learn(400, 60));
+    public static final Technique MAJIN_ABSORB = add(Technique.builder("majin_absorb").style(Style.SELF).effect(Effect.ABSORB, 4)
+            .cost(50).cooldown(200).color(0xFF80C0).race(Race.MAJIN).learn(400, 60));
+
     private Techniques() {}
 
     private static Technique add(Technique.Builder b) {

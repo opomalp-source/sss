@@ -493,6 +493,49 @@ public class PlayerData {
         markDirty();
     }
 
+    // ------------------------------------------------------------------ Namekian fusion / Majin absorption (saved)
+
+    private int fusions;
+    private int majinStacks;
+    private long majinUntil = -1;
+
+    /** How many times this Namekian has fused with another. */
+    public int getFusions() {
+        return fusions;
+    }
+
+    public void addFusion() {
+        fusions++;
+        markDirty();
+    }
+
+    /** Active Majin absorption stacks (each one multiplies STR/DEX/KI_POWER). */
+    public int getMajinStacks() {
+        return majinStacks;
+    }
+
+    public long getMajinUntil() {
+        return majinUntil;
+    }
+
+    /** One more absorbed fighter: a stack (up to {@code max}), and the timer restarts. */
+    public void addMajinStack(long now, int max, long durationTicks) {
+        if (now >= majinUntil) majinStacks = 0;
+        majinStacks = Math.min(max, majinStacks + 1);
+        majinUntil = now + durationTicks;
+        derivedStale = true;
+        markDirty();
+    }
+
+    /** Drops expired stacks. */
+    public void tickMajin(long now) {
+        if (majinStacks > 0 && now >= majinUntil) {
+            majinStacks = 0;
+            derivedStale = true;
+            markDirty();
+        }
+    }
+
     // ------------------------------------------------------------------ zenkai (saved)
 
     private boolean zenkaiArmed;
@@ -894,6 +937,9 @@ public class PlayerData {
         tag.putDouble("returnZ", returnZ);
         tag.putLong("chamberAt", chamberEnteredAt);
         tag.putLong("immortalUntil", immortalUntil);
+        tag.putInt("fusions", fusions);
+        tag.putInt("majinStacks", majinStacks);
+        tag.putLong("majinUntil", majinUntil);
         CompoundTag aq = new CompoundTag();
         activeQuests.forEach((k, v) -> aq.putIntArray(k, v));
         tag.put("activeQuests", aq);
@@ -958,6 +1004,9 @@ public class PlayerData {
         returnZ = tag.getDouble("returnZ");
         chamberEnteredAt = tag.contains("chamberAt") ? tag.getLong("chamberAt") : -1;
         immortalUntil = tag.contains("immortalUntil") ? tag.getLong("immortalUntil") : -1;
+        fusions = tag.getInt("fusions");
+        majinStacks = tag.getInt("majinStacks");
+        majinUntil = tag.contains("majinUntil") ? tag.getLong("majinUntil") : -1;
         activeQuests.clear();
         CompoundTag aq = tag.getCompound("activeQuests");
         for (String k : aq.getAllKeys()) activeQuests.put(k, aq.getIntArray(k));

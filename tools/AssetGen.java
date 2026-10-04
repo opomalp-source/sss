@@ -210,6 +210,7 @@ public class AssetGen {
         skin("rampage_brute", 0xFFB07040, 0xFFFF4020, 0xFF802020, 0xFFB07040, 0xFFB07040, 0xFF402820, 0xFF2A1A10, 0xFFFFC020);
         skin("martial_arts_master", 0xFFE8C0A0, 0xFF202020, 0xFFF07820, 0xFFE8C0A0, 0xFFE8C0A0, 0xFFF07820, 0xFF6A4020, 0xFF2040B0);
         skin("patrol_officer", 0xFFD8B090, 0xFF203060, 0xFF2A4AA0, 0xFF2A4AA0, 0xFFD8B090, 0xFF1A2A60, 0xFF101010, 0xFFE0E0E0);
+        skin("namekian_warrior", 0xFF5DB040, 0xFF101010, 0xFF6A3A9A, 0xFF5DB040, 0xFF5DB040, 0xFF6A3A9A, 0xFF6A4020, 0xFF60B0E0);
         texture("assets/dbzenith/textures/item/space_pod.png", 16, 16, (x, y) -> {
             double d = Math.hypot(x - 7.5, y - 6.5);
             if (y >= 12 && (x == 4 || x == 11) && y <= 14) return 0xFF505058;       // legs

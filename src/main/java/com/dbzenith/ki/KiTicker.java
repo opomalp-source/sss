@@ -84,6 +84,7 @@ public final class KiTicker {
         if (now % 20 == 0) TimeChamber.tick(player, data, now);
         if (now % 20 == 0) com.dbzenith.quest.QuestManager.tick(player, data);
         if (now % 20 == 0) com.dbzenith.world.LifeSim.tick(player, data);
+        data.tickMajin(now);
         RacePassives.tick(player, data, now);
         if (now % 20 == 0) GreatApe.tick(player, data);
         FormHandler.tick(player, data, now);

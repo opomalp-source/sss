@@ -58,10 +58,10 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Half-Saiyan | B | done | Smaller Zenkai, +5% TP, tail, Saiyan line + Ultimate (flag) |
 | Human | B | done | +15% TP, -15% ki cost, Full Power/Buffed/Potential Unleashed, Solar Flare |
 | Namekian regen / giant | B | done | 3x regen, Giant/Super/Orange forms, Regenerate; GameTest |
-| Namekian fusion | B | todo | |
+| Namekian fusion | B | done | Fuse with a beaten Namekian Warrior (spawn on Namek) or a consenting Namekian player (25% of their attributes + techniques; they start over); max 3. GameTests |
 | Frost Demon restriction forms | B | done | Second/Third/Final/Golden, breathless, horns, Supernova Orb |
 | Majin regen / magic | B | done | 5x regen, kill heal, Candy Beam; GameTests |
-| Majin absorption of other fighters | B | todo | |
+| Majin absorption of other fighters | B | done | Absorb a beaten non-boss: +10% STR/DEX/KI per stack (max 3, 10 min), steals a technique from players; respects PvP. GameTests |
 | Android / Cyborg (no hunger, energy absorb, no fatigue) | B | done | Passives + Energy Absorb / Arm Cannon; GameTests |
 | Character-creation screen | B | done | Seen in-client with live preview |
 | Alignment | V | stubbed | Stored, clamped −100..100 |
