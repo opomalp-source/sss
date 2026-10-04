@@ -15,7 +15,8 @@ import java.util.function.Supplier;
  * auras, forms, racial features and appearance. Sent only when it changes.
  */
 public record PublicStatePacket(int entityId, int flags, int release, int auraColor, String form, int overdrive,
-                                int race, int bodyType, int hairStyle, int hairColor, int eyeColor, long battlePower) {
+                                int race, int bodyType, int hairStyle, int hairColor, int eyeColor, long battlePower,
+                                int looks) {
     public static final int CHARGING = 1;
     public static final int FLYING = 2;
     public static final int GUARDING = 4;
@@ -28,17 +29,26 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
                 | (Races.of(d.getRace()).tail() && d.hasTail() ? TAIL : 0);
         return new PublicStatePacket(entityId, flags, d.getReleasePercent(), Aura.color(d), d.getFormId(), d.getOverdriveLevel(),
                 d.getRace().ordinal(), d.getBodyType().ordinal(), d.getHairStyle(), d.getHairColor(), d.getEyeColor(),
-                d.hasFlag("god_ki") ? -1 : com.dbzenith.stats.StatCalculator.battlePower(d)); // -1: god ki cannot be read
+                d.hasFlag("god_ki") ? -1 : com.dbzenith.stats.StatCalculator.battlePower(d), // -1: god ki cannot be read
+                d.getScar() | d.getTattoo() << 4);
     }
 
     public int stateHash() {
         int h = (((flags * 31 + release) * 31 + auraColor) * 31 + form.hashCode()) * 31 + overdrive;
         h = ((h * 31 + race) * 31 + bodyType) * 31 + hairStyle;
-        return ((h * 31 + hairColor) * 31 + eyeColor) * 31 + Long.hashCode(battlePower);
+        return (((h * 31 + hairColor) * 31 + eyeColor) * 31 + Long.hashCode(battlePower)) * 31 + looks;
     }
 
     public boolean has(int flag) {
         return (flags & flag) != 0;
+    }
+
+    public int scar() {
+        return looks & 0xF;
+    }
+
+    public int tattoo() {
+        return (looks >> 4) & 0xF;
     }
 
     public Race raceEnum() {
@@ -59,11 +69,13 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
         buf.writeInt(msg.hairColor);
         buf.writeInt(msg.eyeColor);
         buf.writeVarLong(msg.battlePower);
+        buf.writeByte(msg.looks);
     }
 
     public static PublicStatePacket decode(FriendlyByteBuf buf) {
         return new PublicStatePacket(buf.readVarInt(), buf.readByte(), buf.readByte(), buf.readInt(), buf.readUtf(64), buf.readByte(),
-                buf.readByte(), buf.readByte(), buf.readByte(), buf.readInt(), buf.readInt(), buf.readVarLong());
+                buf.readByte(), buf.readByte(), buf.readByte(), buf.readInt(), buf.readInt(), buf.readVarLong(),
+                buf.readUnsignedByte());
     }
 
     public static void handle(PublicStatePacket msg, Supplier<NetworkEvent.Context> ctx) {

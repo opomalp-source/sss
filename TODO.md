@@ -67,7 +67,7 @@ Resume from the first unchecked item. Each phase ends with a git tag.
 - [x] Galactic Patrol: Patrol Officer, 4 repeatable bounties, 5 ranks from reputation
 - [x] Planets: Namek (1g) and Northern Planet (10g) dimensions, Space Pod travel screen, planet gravity
 - [x] Life sim (config-toggleable): aging by race, STR/DEX decline in old age, eternal youth wish, earned titles shown before the name
-- [ ] Life-sim extras: thirst, temperature, family, tattoos/scars
+- [x] Life-sim extras: thirst, temperature, partners (Promise Ring), scars and tattoos (Life screen)
 - [ ] Namekian fusion, Majin absorption, Frost Demon space survival
 - [ ] Structures (master's house, Patrol outpost) for the quest NPCs instead of open ground
 - [ ] Real art for every Phase 4 block/item/mob (see ASSETS_TODO.md)

@@ -201,6 +201,11 @@ public final class DBZConfig {
         // --- life sim ---
         public final ForgeConfigSpec.BooleanValue agingEnabled;
         public final ForgeConfigSpec.DoubleValue agingDaysPerYear;
+        public final ForgeConfigSpec.BooleanValue thirstEnabled;
+        public final ForgeConfigSpec.DoubleValue thirstDaysToEmpty;
+        public final ForgeConfigSpec.BooleanValue temperatureEnabled;
+        public final ForgeConfigSpec.DoubleValue partnerTpBonus;
+        public final ForgeConfigSpec.IntValue partnerRange;
 
         // --- character ---
         public final ForgeConfigSpec.DoubleValue startingAge;
@@ -497,6 +502,15 @@ public final class DBZConfig {
                     .define("agingEnabled", true);
             agingDaysPerYear = b.comment("In-game days per year of age (Androids and Majins never age; Namekians and Frost Demons age 4x slower)")
                     .defineInRange("agingDaysPerYear", 8.0, 0.1, 10_000.0);
+            thirstEnabled = b.comment("Thirst: drink (water bottles, milk, soups, melon) or swim to refill. Thirsty fighters recover stamina slowly")
+                    .define("thirstEnabled", true);
+            thirstDaysToEmpty = b.comment("In-game days for a full thirst bar to run dry (twice as fast while charging, flying or hot)")
+                    .defineInRange("thirstDaysToEmpty", 2.0, 0.05, 1000.0);
+            temperatureEnabled = b.comment("Deserts by day and the Nether are hot, snowy places are cold (stamina recovers slowly; a fire nearby or a chestplate keeps you warm)")
+                    .define("temperatureEnabled", true);
+            partnerTpBonus = b.comment("Partners training near each other gain this much more TP")
+                    .defineInRange("partnerTpBonus", 0.10, 0.0, 10.0);
+            partnerRange = b.defineInRange("partnerRange", 32, 1, 1000);
             b.pop();
 
             b.push("character");

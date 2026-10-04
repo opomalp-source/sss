@@ -280,6 +280,38 @@ public class AssetGen {
                 "......######......",
                 "..................");
 
+        pixelArt("assets/dbzenith/textures/item/promise_ring.png", Map.of(
+                '#', 0xFF8A6A10, 'a', 0xFFE8C040, 'b', 0xFFFFF0A0, 'd', 0xFFA0F0FF, 'e', 0xFFFFFFFF),
+                "................",
+                "................",
+                "......#dd#......",
+                ".....#deed#.....",
+                "......#dd#......",
+                ".....##aa##.....",
+                "....#aa##aa#....",
+                "...#ab#..#aa#...",
+                "...#ab#..#aa#...",
+                "...#aa#..#aa#...",
+                "....#aa##aa#....",
+                ".....#aaaa#.....",
+                "......####......",
+                "................",
+                "................",
+                "................");
+
+        // --- scars and tattoos: 64x64 skin-layout overlays, transparent except the mark ---
+        int scarColor = 0xFFB0505A, ink = 0xFF1C1C3A;
+        overlay("scar_eye", (x, y) -> x == 13 && y >= 10 && y <= 14 ? scarColor : 0);
+        overlay("scar_cheek", (x, y) -> (x == 12 && y == 14) || (x == 13 && y == 13) || (x == 14 && y == 12) ? scarColor : 0);
+        overlay("scar_chest", (x, y) -> x >= 21 && x <= 26 && y - 20 == x - 20 ? scarColor : 0);
+        overlay("tattoo_arm", (x, y) -> x >= 40 && x <= 55 && (y == 22 || y == 23) ? ink : 0);
+        overlay("tattoo_back", (x, y) -> {
+            int dx = x - 35, dy = y - 24;                                   // a ring with a bar through it
+            double r = Math.sqrt((dx + 0.5) * (dx + 0.5) + (dy + 0.5) * (dy + 0.5));
+            return x >= 32 && x <= 39 && y >= 20 && y <= 28 && (Math.abs(r - 2.6) < 0.7 || (x == 35 || x == 36) && y >= 21 && y <= 27) ? ink : 0;
+        });
+        overlay("tattoo_chest", (x, y) -> x >= 22 && x <= 25 && y >= 21 && y <= 24 && Math.abs(x - 23.5) + Math.abs(y - 22.5) <= 2 ? ink : 0);
+
         emptyStructure("data/dbzenith/structures/empty.nbt", 3);
         System.out.println("AssetGen done");
     }
@@ -329,6 +361,11 @@ public class AssetGen {
         if (!shape) return 0;
         if (x == 3 || x == 12 || y == 13) return 0xFF1A1A1E;
         return (y - 3) % 3 == 0 ? strap : body;
+    }
+
+    /** A 64x64 cosmetic overlay in skin layout (see client.render.CosmeticsLayer). */
+    static void overlay(String name, Pixel pixel) throws IOException {
+        texture("assets/dbzenith/textures/entity/cosmetics/" + name + ".png", 64, 64, pixel);
     }
 
     static void pixelArt(String path, Map<Character, Integer> palette, String... rows) throws IOException {

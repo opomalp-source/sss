@@ -96,7 +96,7 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | NPC enemies + bosses | B | done | Sproutling, Ki Soldier, Android Unit (scale to the nearest player, ki attacks); Tyrant Lord + Rampage Brute bosses with summon items and loot. GameTests |
 | Galactic Patrol faction | V | done | Patrol Officer, 4 repeatable bounties, 5 ranks from reputation (0/50/150/400/1000), good alignment required. GameTests + seen in-client |
 | Planets / dimensions / travel | V | done | Namek (1g), Northern Planet (10g), Earth; Space Pod screen, 1-min recharge, lands on dry ground. GameTests + seen in-client |
-| Aging, needs, family, cosmetics | V | in-progress | Aging by race + old-age STR/DEX decline + youth wish, earned titles done; needs/family/tattoos todo |
+| Aging, needs, family, cosmetics | V | done | Aging, titles; thirst (drinks, swimming; androids exempt) and temperature (desert sun, Nether, snow; fire/chestplate warm you; Frost Demons exempt) slow stamina recovery; partners via Promise Ring (+10% TP near each other); scars and tattoos (Life screen). Config toggles. GameTests |
 | Quest system | B | done | 7-quest master line + bounties; objectives (level, learn, kill, collect, form, flag, visit), rewards, quest screen. GameTests + seen in-client |
 
 ## 3.8 UI/UX

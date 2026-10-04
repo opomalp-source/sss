@@ -377,6 +377,80 @@ public class PlayerData {
         }
     }
 
+    // ------------------------------------------------------------------ life sim: needs, family, looks
+
+    private double thirst = 100;
+    /** Sync-only: -1 cold, 0 comfortable, 1 hot. */
+    private int temperature;
+    /** Sync-only: the partner is close by (training together). */
+    private boolean nearPartner;
+    private String partnerId = "";
+    private String partnerName = "";
+    private int scar;
+    private int tattoo;
+
+    public double getThirst() {
+        return thirst;
+    }
+
+    public void setThirst(double value) {
+        double v = Mth.clamp(value, 0, 100);
+        if ((int) v != (int) thirst) markDirty();
+        thirst = v;
+    }
+
+    public int getTemperature() {
+        return temperature;
+    }
+
+    public void setTemperature(int t) {
+        if (t != temperature) {
+            temperature = t;
+            markDirty();
+        }
+    }
+
+    public boolean isNearPartner() {
+        return nearPartner;
+    }
+
+    public void setNearPartner(boolean near) {
+        if (near != nearPartner) {
+            nearPartner = near;
+            markDirty();
+        }
+    }
+
+    /** The partner's UUID as a string (empty = single). */
+    public String getPartnerId() {
+        return partnerId;
+    }
+
+    public String getPartnerName() {
+        return partnerName;
+    }
+
+    public void setPartner(String id, String name) {
+        partnerId = id == null ? "" : id;
+        partnerName = name == null ? "" : name;
+        if (partnerId.isEmpty()) nearPartner = false;
+        markDirty();
+    }
+
+    public int getScar() {
+        return scar;
+    }
+
+    public int getTattoo() {
+        return tattoo;
+    }
+
+    public void setCosmetics(int scar, int tattoo) {
+        this.scar = Math.max(0, scar);
+        this.tattoo = Math.max(0, tattoo);
+        markDirty();
+    }
+
     private String title = "";
 
     public String getTitle() {
@@ -978,6 +1052,11 @@ public class PlayerData {
         tag.putLong("immortalUntil", immortalUntil);
         tag.putInt("fusions", fusions);
         tag.putInt("prestige", prestige);
+        tag.putDouble("thirst", thirst);
+        tag.putString("partnerId", partnerId);
+        tag.putString("partnerName", partnerName);
+        tag.putInt("scar", scar);
+        tag.putInt("tattoo", tattoo);
         tag.putLong("tailCutAt", tailCutAt);
         tag.putInt("majinStacks", majinStacks);
         tag.putLong("majinUntil", majinUntil);
@@ -1048,6 +1127,11 @@ public class PlayerData {
         immortalUntil = tag.contains("immortalUntil") ? tag.getLong("immortalUntil") : -1;
         fusions = tag.getInt("fusions");
         prestige = tag.getInt("prestige");
+        thirst = tag.contains("thirst") ? tag.getDouble("thirst") : 100;
+        partnerId = tag.getString("partnerId");
+        partnerName = tag.getString("partnerName");
+        scar = tag.getInt("scar");
+        tattoo = tag.getInt("tattoo");
         tailCutAt = tag.contains("tailCutAt") ? tag.getLong("tailCutAt") : TAIL_NOT_CUT;
         majinStacks = tag.getInt("majinStacks");
         majinUntil = tag.contains("majinUntil") ? tag.getLong("majinUntil") : -1;
@@ -1082,6 +1166,8 @@ public class PlayerData {
         tag.putInt("overdrive", overdriveLevel);
         tag.putDouble("gravity", envGravity);
         tag.putBoolean("meditating", meditating);
+        tag.putInt("temperature", temperature);
+        tag.putBoolean("nearPartner", nearPartner);
         tag.putBoolean("heavyCharging", heavyChargeTicks >= 0);
         tag.putDouble("heavyArmed", heavyArmedMultiplier);
         return tag;
@@ -1098,6 +1184,8 @@ public class PlayerData {
         overdriveLevel = tag.getInt("overdrive");
         envGravity = tag.contains("gravity") ? tag.getDouble("gravity") : 1.0;
         meditating = tag.getBoolean("meditating");
+        temperature = tag.getInt("temperature");
+        nearPartner = tag.getBoolean("nearPartner");
         heavyChargeTicks = tag.getBoolean("heavyCharging") ? 0 : -1;
         heavyArmedMultiplier = tag.getDouble("heavyArmed");
         dirty = false;

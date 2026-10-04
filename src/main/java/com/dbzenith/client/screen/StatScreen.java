@@ -44,7 +44,9 @@ public class StatScreen extends Screen {
             for (int i = 0; i < earned.size(); i++) if (earned.get(i).id().equals(current)) idx = i;
             String next = idx + 1 < earned.size() ? earned.get(idx + 1).id() : "";
             ModNetwork.sendToServer(new com.dbzenith.network.SelectTitlePacket(next));
-        }).bounds(left + 8, top + H - 24, 140, 18).build());
+        }).bounds(left + 8, top + H - 24, 104, 18).build());
+        addRenderableWidget(Button.builder(Component.translatable("screen.dbzenith.life_button"), b -> minecraft.setScreen(new LifeScreen(this)))
+                .bounds(left + 116, top + H - 24, 44, 18).build());
         addRenderableWidget(Button.builder(Component.translatable("screen.dbzenith.techniques_button"), b -> minecraft.setScreen(new DeckScreen(this)))
                 .bounds(left + W - 156, top + H - 24, 82, 18).build());
         if (com.dbzenith.stats.Prestige.eligible(ClientPlayerData.get())) {

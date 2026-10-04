@@ -67,7 +67,8 @@ public final class StatCalculator {
                 * data.getTrainingMultiplier() // gravity, weights, Time Chamber (set by TrainingTicker)
                 * (1.0 + DBZConfig.SERVER.prestigeTpBonus.get() * data.getPrestige())
                 * (data.getPath() == FightingPath.HYBRID ? 1.0 + DBZConfig.SERVER.hybridTpBonus.get() : 1.0)
-                * com.dbzenith.world.LifeSim.wisdomMultiplier(data);
+                * com.dbzenith.world.LifeSim.wisdomMultiplier(data)
+                * com.dbzenith.world.Family.tpMultiplier(data);
         return rawGain * mult;
     }
 

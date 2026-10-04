@@ -72,7 +72,8 @@ public final class KiTicker {
         }
 
         if (!data.isCharging() && !data.isGuarding()) {
-            data.setStamina(data.getStamina() + perTick(s.maxStamina(), c.staminaRegenPercentPerSecond.get()) * race.staminaRegenMultiplier());
+            data.setStamina(data.getStamina() + perTick(s.maxStamina(), c.staminaRegenPercentPerSecond.get()) * race.staminaRegenMultiplier()
+                    * com.dbzenith.world.Needs.staminaRegenMultiplier(data));
         }
         if (now - data.getLastDamagedTick() > c.bodyRegenDelayTicks.get() * race.regenDelayFactor()) {
             data.setBody(data.getBody() + perTick(s.maxBody(), c.bodyRegenPercentPerSecond.get()) * race.regenMultiplier());
@@ -87,6 +88,8 @@ public final class KiTicker {
         data.tickMajin(now);
         RacePassives.tick(player, data, now);
         if (now % 20 == 0) com.dbzenith.race.TailRules.tick(player, data);
+        if (now % 20 == 0) com.dbzenith.world.Needs.tick(player, data);
+        if (now % 20 == 0) com.dbzenith.world.Family.tick(player, data);
         if (now % 20 == 0) GreatApe.tick(player, data);
         FormHandler.tick(player, data, now);
         Overdrive.tick(player, data, now);
