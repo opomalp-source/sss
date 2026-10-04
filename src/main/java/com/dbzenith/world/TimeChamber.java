@@ -27,6 +27,9 @@ public final class TimeChamber {
     public static final int FLOOR_Y = 4;
     public static final BlockPos EXIT_DOOR = new BlockPos(0, FLOOR_Y, 3);
 
+    /** Cooldown id for re-entering after a stay. */
+    public static final String COOLDOWN = "time_chamber";
+
     private TimeChamber() {}
 
     public static boolean isIn(Player player) {
@@ -37,6 +40,12 @@ public final class TimeChamber {
         ServerLevel chamber = player.server.getLevel(KEY);
         PlayerData data = ModCapabilities.get(player).orElse(null);
         if (chamber == null || data == null || isIn(player)) return false;
+        long now = player.level().getGameTime();
+        if (data.isOnCooldown(COOLDOWN, now) && !player.getAbilities().instabuild) {
+            long minutes = (data.getCooldownUntil(COOLDOWN) - now) / 1200 + 1;
+            player.displayClientMessage(Component.translatable("message.dbzenith.chamber_rest", minutes), true);
+            return false;
+        }
         data.setChamberReturn(player.level().dimension().location().toString(), player.getX(), player.getY(), player.getZ(),
                 player.level().getGameTime());
         if (!chamber.getBlockState(EXIT_DOOR).is(ModBlocks.TIME_CHAMBER_DOOR.get())) {
@@ -63,6 +72,7 @@ public final class TimeChamber {
             player.teleportTo(back, data.getReturnX(), data.getReturnY(), data.getReturnZ(), player.getYRot(), 0f);
         }
         data.clearChamber();
+        data.setCooldown(COOLDOWN, player.level().getGameTime() + DBZConfig.SERVER.chamberCooldownTicks.get());
         player.displayClientMessage(Component.translatable("message.dbzenith.chamber_exit"), true);
         return true;
     }

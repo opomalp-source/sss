@@ -28,6 +28,9 @@ public final class DBZConfig {
     private DBZConfig() {}
 
     public static final class Server {
+        /** Bump when a balance pass changes defaults; older config files get the listed values reset once. */
+        public static final int BALANCE_VERSION = 2;
+        public final ForgeConfigSpec.IntValue balanceVersion;
         // --- attributes ---
         public final ForgeConfigSpec.IntValue startingAttribute;
         public final ForgeConfigSpec.IntValue attributeSoftCap;
@@ -38,6 +41,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue tpCostPerPoint;
         public final ForgeConfigSpec.DoubleValue tpSoftCapCostMultiplier;
         public final ForgeConfigSpec.DoubleValue tpGainPerMind;
+        public final ForgeConfigSpec.DoubleValue tpGainMultiplier;
 
         // --- derived stats ---
         public final ForgeConfigSpec.DoubleValue baseBody;
@@ -113,8 +117,8 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue kiTransferSeconds;
 
         // --- TP gains ---
-        public final ForgeConfigSpec.DoubleValue tpPerDamageDealt;
-        public final ForgeConfigSpec.DoubleValue tpPerKillHealth;
+        public final ForgeConfigSpec.DoubleValue tpPerHit;
+        public final ForgeConfigSpec.DoubleValue tpPerKill;
         public final ForgeConfigSpec.IntValue tpChargeTrainingInterval;
         public final ForgeConfigSpec.IntValue tpPerChargeInterval;
 
@@ -146,7 +150,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.IntValue zenkaiCooldownTicks;
         public final ForgeConfigSpec.DoubleValue fusionAttributeShare;
         public final ForgeConfigSpec.IntValue fusionMax;
-        public final ForgeConfigSpec.IntValue fusionNpcPointsPerLevel;
+        public final ForgeConfigSpec.DoubleValue fusionNpcShare;
         public final ForgeConfigSpec.DoubleValue absorbHealthThreshold;
         public final ForgeConfigSpec.DoubleValue majinAbsorbBonusPerStack;
         public final ForgeConfigSpec.IntValue majinAbsorbMaxStacks;
@@ -180,6 +184,8 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue chamberTrainingMultiplier;
         public final ForgeConfigSpec.DoubleValue chamberGravity;
         public final ForgeConfigSpec.IntValue chamberMaxStayTicks;
+        public final ForgeConfigSpec.IntValue chamberCooldownTicks;
+        public final ForgeConfigSpec.DoubleValue trainingMultiplierCap;
 
         // --- dragon balls ---
         public final ForgeConfigSpec.BooleanValue dragonBallsEnabled;
@@ -199,7 +205,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.IntValue falseMoonTicks;
 
         // --- enemies ---
-        public final ForgeConfigSpec.DoubleValue enemyPowerPerLevelSquared;
+        public final ForgeConfigSpec.DoubleValue enemyPowerPerLevel;
         public final ForgeConfigSpec.IntValue enemyMaxLevel;
         public final ForgeConfigSpec.DoubleValue enemyHealthPerLevel;
         public final ForgeConfigSpec.DoubleValue enemyDamagePerLevel;
@@ -221,6 +227,8 @@ public final class DBZConfig {
         public final ForgeConfigSpec.IntValue syncIntervalTicks;
 
         Server(ForgeConfigSpec.Builder b) {
+            balanceVersion = b.comment("Balance revision of this file. When the mod rebalances, values from older revisions are reset to the new defaults once (see BALANCE.md). Leave it alone.")
+                    .defineInRange("balanceVersion", 0, 0, 1000);
             b.comment("Base attributes (STR, DEX, CON, KI_POWER, WIL, MND, SPI)").push("attributes");
             startingAttribute = b.comment("Value every attribute starts at for a new character")
                     .defineInRange("startingAttribute", 10, 1, 1_000_000);
@@ -234,11 +242,13 @@ public final class DBZConfig {
             tpCostBase = b.comment("Flat TP cost to raise any attribute by one point")
                     .defineInRange("tpCostBase", 5.0, 0.0, 1e9);
             tpCostPerPoint = b.comment("Extra TP cost per point the attribute already has")
-                    .defineInRange("tpCostPerPoint", 0.25, 0.0, 1e9);
+                    .defineInRange("tpCostPerPoint", 0.45, 0.0, 1e9);
             tpSoftCapCostMultiplier = b.comment("Cost multiplier once an attribute is at or above the soft cap")
                     .defineInRange("tpSoftCapCostMultiplier", 2.0, 1.0, 1000.0);
             tpGainPerMind = b.comment("Fractional bonus to all TP gains per point of MIND (0.002 = +0.2%)")
                     .defineInRange("tpGainPerMind", 0.002, 0.0, 10.0);
+            tpGainMultiplier = b.comment("Global speed of progression: every TP gain is multiplied by this (2.0 = twice as fast)")
+                    .defineInRange("tpGainMultiplier", 1.0, 0.01, 1000.0);
             b.pop();
 
             b.comment("How base attributes turn into derived stats. All math is in StatCalculator.").push("derived");
@@ -363,12 +373,12 @@ public final class DBZConfig {
             b.pop();
 
             b.comment("Training point gains").push("tp_gains");
-            tpPerDamageDealt = b.comment("TP per point of DBZ damage dealt")
-                    .defineInRange("tpPerDamageDealt", 0.05, 0.0, 1e6);
-            tpPerKillHealth = b.comment("TP per point of max health of a killed entity")
-                    .defineInRange("tpPerKillHealth", 1.0, 0.0, 1e6);
+            tpPerHit = b.comment("TP per landed hit = this x square root of the DBZ damage dealt")
+                    .defineInRange("tpPerHit", 0.04, 0.0, 1e6);
+            tpPerKill = b.comment("TP per kill = this x square root of the victim's effective max health (leveled foes count their toughness)")
+                    .defineInRange("tpPerKill", 0.5, 0.0, 1e6);
             tpChargeTrainingInterval = b.comment("Charging ki grants TP every this many ticks (spiritual training)")
-                    .defineInRange("tpChargeTrainingInterval", 100, 1, 72000);
+                    .defineInRange("tpChargeTrainingInterval", 400, 1, 72000);
             tpPerChargeInterval = b.defineInRange("tpPerChargeInterval", 2, 0, 1_000_000);
             b.pop();
 
@@ -418,13 +428,13 @@ public final class DBZConfig {
                     .defineInRange("zenkaiTriggerPercent", 15.0, 0.0, 100.0);
             zenkaiRecoverPercent = b.comment("...and fires when body recovers to this %")
                     .defineInRange("zenkaiRecoverPercent", 60.0, 0.0, 100.0);
-            zenkaiCooldownTicks = b.comment("Minimum ticks between Zenkai boosts")
-                    .defineInRange("zenkaiCooldownTicks", 12000, 0, 10_000_000);
+            zenkaiCooldownTicks = b.comment("Minimum ticks between Zenkai boosts (36000 = 30 minutes). Each boost adds about 0.25 x sqrt(value) to STR, DEX, CON and KI_POWER (Half-Saiyans 0.15)")
+                    .defineInRange("zenkaiCooldownTicks", 36000, 0, 10_000_000);
             fusionAttributeShare = b.comment("Namekian fusion with a player: share of the partner's attributes added to yours")
                     .defineInRange("fusionAttributeShare", 0.25, 0.0, 1.0);
             fusionMax = b.comment("Most fusions one Namekian can make").defineInRange("fusionMax", 3, 0, 100);
-            fusionNpcPointsPerLevel = b.comment("Fusing with a Namekian Warrior: points per warrior level added to STR, CON, KI_POWER and SPI")
-                    .defineInRange("fusionNpcPointsPerLevel", 3, 0, 1000);
+            fusionNpcShare = b.comment("Fusing with a Namekian Warrior raises STR, CON, KI_POWER and SPI by this share of their value (at least 3 points)")
+                    .defineInRange("fusionNpcShare", 0.05, 0.0, 10.0);
             absorbHealthThreshold = b.comment("Fusion and absorption need the target at or below this share of its health")
                     .defineInRange("absorbHealthThreshold", 0.25, 0.0, 1.0);
             majinAbsorbBonusPerStack = b.comment("Majin absorption: STR/DEX/KI_POWER multiplier bonus per absorbed fighter")
@@ -465,18 +475,22 @@ public final class DBZConfig {
                     .defineInRange("gravitySlowPerExcess", 0.05, 0.0, 1.0);
             gravityBodyDamagePercentPerExcess = b.comment("Body lost per second, % of max, per g above your tolerance (capped at 5%/s)")
                     .defineInRange("gravityBodyDamagePercentPerExcess", 0.4, 0.0, 100.0);
-            tpPerPunch = b.comment("TP per Punching Bag hit before multipliers").defineInRange("tpPerPunch", 0.5, 0.0, 1e6);
+            tpPerPunch = b.comment("TP per Punching Bag hit before multipliers").defineInRange("tpPerPunch", 0.08, 0.0, 1e6);
             punchCooldownTicks = b.defineInRange("punchCooldownTicks", 8, 0, 200);
             tpPerSecondMovingUnderGravity = b.comment("TP per second spent moving under more than 1g, per g")
-                    .defineInRange("tpPerSecondMovingUnderGravity", 0.05, 0.0, 1e6);
+                    .defineInRange("tpPerSecondMovingUnderGravity", 0.01, 0.0, 1e6);
             meditationStartTicks = b.comment("Sneak and stand still this long to start meditating").defineInRange("meditationStartTicks", 60, 1, 72000);
-            tpPerMeditationSecond = b.defineInRange("tpPerMeditationSecond", 0.2, 0.0, 1e6);
+            tpPerMeditationSecond = b.defineInRange("tpPerMeditationSecond", 0.08, 0.0, 1e6);
             meditationKiRegenMultiplier = b.defineInRange("meditationKiRegenMultiplier", 3.0, 0.0, 100.0);
             chamberTrainingMultiplier = b.comment("Extra training multiplier inside the Hyperbolic Time Chamber")
                     .defineInRange("chamberTrainingMultiplier", 4.0, 1.0, 1000.0);
             chamberGravity = b.comment("Gravity inside the Hyperbolic Time Chamber").defineInRange("chamberGravity", 10.0, 1.0, 10_000.0);
             chamberMaxStayTicks = b.comment("Longest stay in the chamber before being sent back (24000 = one day)")
                     .defineInRange("chamberMaxStayTicks", 24000, 20, 10_000_000);
+            chamberCooldownTicks = b.comment("After leaving the chamber you must wait this long to enter again (24000 = one day)")
+                    .defineInRange("chamberCooldownTicks", 24000, 0, 10_000_000);
+            trainingMultiplierCap = b.comment("Gravity, weights and the Time Chamber multiply together, up to this")
+                    .defineInRange("trainingMultiplierCap", 4.0, 1.0, 1000.0);
             b.pop();
 
             b.comment("Dragon Balls, radar and wishes").push("dragon_balls");
@@ -506,11 +520,11 @@ public final class DBZConfig {
             b.pop();
 
             b.comment("Enemy fighters and bosses scale to the strongest nearby player").push("enemies");
-            enemyPowerPerLevelSquared = b.comment("Enemy level = 1 + sqrt(nearest player power level / this)")
-                    .defineInRange("powerPerLevelSquared", 1500.0, 1.0, 1e12);
-            enemyMaxLevel = b.defineInRange("maxLevel", 60, 1, 10_000);
-            enemyHealthPerLevel = b.comment("Health gained per enemy level (fraction of base)").defineInRange("healthPerLevel", 0.6, 0.0, 100.0);
-            enemyDamagePerLevel = b.comment("Damage gained per enemy level (fraction of base)").defineInRange("damagePerLevel", 0.35, 0.0, 100.0);
+            enemyPowerPerLevel = b.comment("Enemy level = nearest player's full power level (at 100% release) / this, at least 1. Linear, so foes keep pace")
+                    .defineInRange("powerPerLevel", 700.0, 1.0, 1e12);
+            enemyMaxLevel = b.defineInRange("maxLevel", 200, 1, 10_000);
+            enemyHealthPerLevel = b.comment("Health gained per enemy level (fraction of base)").defineInRange("healthPerLevel", 0.5, 0.0, 100.0);
+            enemyDamagePerLevel = b.comment("Damage gained per enemy level (fraction of base)").defineInRange("damagePerLevel", 0.55, 0.0, 100.0);
             bossEnrageHealth = b.comment("Bosses enrage below this share of their health").defineInRange("bossEnrageHealth", 0.5, 0.0, 1.0);
             b.pop();
 

@@ -133,6 +133,11 @@ public class PlayerData {
 
     private double tpFraction;
 
+    /** TP earned so far including the fraction not yet worth a whole point. */
+    public double getTrainingProgress() {
+        return trainingPoints + tpFraction;
+    }
+
     /** Adds a fractional TP gain (already scaled); whole points are banked, the remainder carries over. */
     public void addTrainingProgress(double amount) {
         if (amount <= 0) return;
@@ -825,6 +830,16 @@ public class PlayerData {
     private int comboHits;
     private long lastHitTick = Long.MIN_VALUE / 2;
     private long lastDamagedTick = Long.MIN_VALUE / 2;
+    private long lastFoeHitTick = Long.MIN_VALUE / 2;
+
+    /** Last time a living foe (not the world) hurt this player. */
+    public long getLastFoeHitTick() {
+        return lastFoeHitTick;
+    }
+
+    public void setLastFoeHitTick(long tick) {
+        lastFoeHitTick = tick;
+    }
     private int chargeTicks;
     private float lastSetHealth = -1;
     private final java.util.Map<String, Long> cooldownUntil = new java.util.HashMap<>();
@@ -979,6 +994,10 @@ public class PlayerData {
         cooldownUntil.put(id, untilGameTime);
     }
 
+    public long getCooldownUntil(String id) {
+        return cooldownUntil.getOrDefault(id, Long.MIN_VALUE);
+    }
+
     // ------------------------------------------------------------------ sync bookkeeping
 
     public void markDirty() {
@@ -1052,6 +1071,9 @@ public class PlayerData {
         tag.putLong("immortalUntil", immortalUntil);
         tag.putInt("fusions", fusions);
         tag.putInt("prestige", prestige);
+        CompoundTag cds = new CompoundTag();
+        cooldownUntil.forEach(cds::putLong); // game time is world-wide, so these stay valid across relogs
+        tag.put("cooldowns", cds);
         tag.putDouble("thirst", thirst);
         tag.putString("partnerId", partnerId);
         tag.putString("partnerName", partnerName);
@@ -1127,6 +1149,9 @@ public class PlayerData {
         immortalUntil = tag.contains("immortalUntil") ? tag.getLong("immortalUntil") : -1;
         fusions = tag.getInt("fusions");
         prestige = tag.getInt("prestige");
+        cooldownUntil.clear();
+        CompoundTag cds = tag.getCompound("cooldowns");
+        for (String k : cds.getAllKeys()) cooldownUntil.put(k, cds.getLong(k));
         thirst = tag.contains("thirst") ? tag.getDouble("thirst") : 100;
         partnerId = tag.getString("partnerId");
         partnerName = tag.getString("partnerName");

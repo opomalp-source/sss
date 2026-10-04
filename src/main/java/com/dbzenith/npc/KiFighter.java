@@ -91,15 +91,15 @@ public class KiFighter extends Monster {
                                         SpawnGroupData data, CompoundTag tag) {
         SpawnGroupData result = super.finalizeSpawn(world, difficulty, reason, data, tag);
         Player nearest = world.getNearestPlayer(this, 64);
-        long power = nearest == null ? 0 : ModCapabilities.get(nearest).map(StatCalculator::battlePower).orElse(0L);
+        long power = nearest == null ? 0 : ModCapabilities.get(nearest).map(StatCalculator::fullPower).orElse(0L);
         setFighterLevel(levelFor(power));
         return result;
     }
 
-    /** Level from a power level: 1 + sqrt(power / enemies.powerPerLevelSquared), capped. */
+    /** Level from a full power level: power / enemies.powerPerLevel (linear, so foes keep pace), at least 1, capped. */
     public static int levelFor(long power) {
         DBZConfig.Server c = DBZConfig.SERVER;
-        int lvl = 1 + (int) Math.sqrt(Math.max(0, power) / c.enemyPowerPerLevelSquared.get());
+        int lvl = (int) Math.round(Math.max(0, power) / c.enemyPowerPerLevel.get());
         return Mth.clamp(lvl, 1, c.enemyMaxLevel.get());
     }
 
@@ -107,12 +107,21 @@ public class KiFighter extends Monster {
         level = Math.max(1, lvl);
         var health = getAttribute(Attributes.MAX_HEALTH);
         var damage = getAttribute(Attributes.ATTACK_DAMAGE);
-        double baseHealth = defaultHealth();
-        if (health != null) health.setBaseValue(baseHealth * (1 + DBZConfig.SERVER.enemyHealthPerLevel.get() * (level - 1)));
+        if (health != null) health.setBaseValue(defaultHealth()); // levels add toughness, not health (vanilla caps health at 1024)
         if (damage != null) damage.setBaseValue(defaultDamage() * (1 + DBZConfig.SERVER.enemyDamagePerLevel.get() * (level - 1)));
         setHealth(getMaxHealth());
         setCustomName(Component.translatable("entity.dbzenith.leveled", Component.translatable(profile.nameKey()), level));
         setCustomNameVisible(false);
+    }
+
+    /** Incoming damage is divided by this: 1 + enemies.healthPerLevel x (level - 1). */
+    public double toughness() {
+        return 1.0 + DBZConfig.SERVER.enemyHealthPerLevel.get() * (level - 1);
+    }
+
+    /** Health as it really lasts: max health x toughness for fighters, plain max health for anything else. */
+    public static double effectiveMaxHealth(LivingEntity e) {
+        return e instanceof KiFighter f ? e.getMaxHealth() * f.toughness() : e.getMaxHealth();
     }
 
     private double defaultHealth() {
@@ -165,6 +174,11 @@ public class KiFighter extends Monster {
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         level = Math.max(1, tag.getInt("fighterLevel"));
+        var health = getAttribute(Attributes.MAX_HEALTH);
+        if (health != null && health.getBaseValue() != defaultHealth()) { // saved before levels became toughness
+            health.setBaseValue(defaultHealth());
+            setHealth(Math.min(getHealth(), getMaxHealth()));
+        }
     }
 
     /** Ranged ki attacks when the target is visible and not too close. */

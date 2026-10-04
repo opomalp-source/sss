@@ -25,12 +25,12 @@ public final class Races {
 
         add(RaceTraits.builder(Race.SAIYAN).costs(0.85, 1.0, 0.95, 0.9, 1.0, 1.2, 1.1)
                 .bonus(STRENGTH, 3).bonus(KI_POWER, 2).aura(0xFFF0C8)
-                .zenkai(0.03).tail()
+                .zenkai(0.25).tail()
                 .racial("crimson_beam"));
 
         add(RaceTraits.builder(Race.HALF_SAIYAN).costs(0.95, 0.95, 1.0, 0.9, 0.95, 0.95, 1.0)
                 .bonus(KI_POWER, 2).bonus(MIND, 2).bonus(STRENGTH, 1).aura(0xFFF6DC)
-                .zenkai(0.015).tpGain(0.05).tail()
+                .zenkai(0.15).tpGain(0.05).tail()
                 .racial("twin_wave"));
 
         add(RaceTraits.builder(Race.NAMEKIAN).costs(1.1, 1.0, 0.9, 0.9, 0.9, 0.9, 0.85)

@@ -83,6 +83,7 @@ Resume from the first unchecked item. Each phase ends with a git tag.
 - [x] Tag `phase-5-complete`
 
 ## Next
-- [ ] Balance pass with real play (TP pacing, enemy scaling, form multipliers vs. bosses)
+- [x] Balance pass 1 (model-based, see BALANCE.md): pacing targets, enemy scaling, TP rewards, training caps, Zenkai, fusion, quests, late forms
+- [ ] Balance pass 2 with real play: ki techniques per ki, Overdrive late, PvP between races, gear sets
 - [ ] Real art (see ASSETS_TODO.md): hair, Great Ape, dragon, race skins, NPC models, item and block textures
 - [ ] More content: more bosses and questlines, more planets, a space dimension (Frost Demon vacuum survival), children for partners

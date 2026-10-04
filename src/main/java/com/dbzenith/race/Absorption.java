@@ -71,9 +71,11 @@ public final class Absorption {
                 player.displayClientMessage(Component.translatable("message.dbzenith.fusion_not_beaten"), true);
                 return false;
             }
-            int points = warrior.fighterLevel() * c.fusionNpcPointsPerLevel.get();
+            int points = 0;
             for (Attribute a : List.of(Attribute.STRENGTH, Attribute.CONSTITUTION, Attribute.KI_POWER, Attribute.SPIRIT)) {
-                data.setAttribute(a, data.getAttribute(a) + points);
+                int gain = fusionGain(data.getAttribute(a));
+                data.setAttribute(a, data.getAttribute(a) + gain);
+                points += gain;
             }
             data.addFusion();
             burst(player.serverLevel(), warrior.position(), NAMEK_GREEN);
@@ -97,6 +99,11 @@ public final class Absorption {
         }
         player.displayClientMessage(Component.translatable("message.dbzenith.fusion_needs_namekian"), true);
         return false;
+    }
+
+    /** Points one attribute gains from fusing with a Namekian Warrior. */
+    public static int fusionGain(int value) {
+        return Math.max(3, (int) Math.round(value * DBZConfig.SERVER.fusionNpcShare.get()));
     }
 
     /** The asked player agrees: they become part of the one who asked. Returns false if there is no valid request. */

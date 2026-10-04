@@ -68,7 +68,8 @@ public final class StatCalculator {
                 * (1.0 + DBZConfig.SERVER.prestigeTpBonus.get() * data.getPrestige())
                 * (data.getPath() == FightingPath.HYBRID ? 1.0 + DBZConfig.SERVER.hybridTpBonus.get() : 1.0)
                 * com.dbzenith.world.LifeSim.wisdomMultiplier(data)
-                * com.dbzenith.world.Family.tpMultiplier(data);
+                * com.dbzenith.world.Family.tpMultiplier(data)
+                * DBZConfig.SERVER.tpGainMultiplier.get();
         return rawGain * mult;
     }
 
@@ -80,6 +81,13 @@ public final class StatCalculator {
         int total = 0;
         for (Attribute a : Attribute.values()) total += data.getAttribute(a) - start;
         return Math.max(0, total);
+    }
+
+    /** Battle power at 100% release: what the character can really do (enemies scale to this). */
+    public static long fullPower(PlayerData data) {
+        double sum = 0;
+        for (Attribute a : Attribute.values()) sum += effective(data, a);
+        return Math.round(sum * 10.0);
     }
 
     /**

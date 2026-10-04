@@ -31,7 +31,8 @@ public final class EnemyTests {
         float base = soldier.getMaxHealth();
         double ki = soldier.kiDamage();
         soldier.setFighterLevel(10);
-        helper.assertTrue(soldier.getMaxHealth() > base * 5, "health scales with level: " + soldier.getMaxHealth());
+        helper.assertTrue(soldier.getMaxHealth() == base && soldier.toughness() > 5, "levels add toughness: " + soldier.toughness());
+        helper.assertTrue(KiFighter.effectiveMaxHealth(soldier) > base * 5, "so it lasts longer");
         helper.assertTrue(soldier.kiDamage() > ki * 3, "ki damage scales with level");
         helper.assertTrue(soldier.getHealth() == soldier.getMaxHealth(), "spawned at full health");
         helper.succeed();

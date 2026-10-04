@@ -55,7 +55,7 @@ public final class TrainingTicker {
         }
 
         double weights = player.getItemBySlot(EquipmentSlot.CHEST).getItem() instanceof TrainingWeightsItem w ? w.trainingFactor() : 1.0;
-        data.setTrainingMultiplier(gravityMultiplier(g) * weights * (chamber ? c.chamberTrainingMultiplier.get() : 1.0));
+        data.setTrainingMultiplier(Math.min(c.trainingMultiplierCap.get(), gravityMultiplier(g) * weights * (chamber ? c.chamberTrainingMultiplier.get() : 1.0)));
 
         boolean moving = player.getDeltaMovement().horizontalDistanceSqr() > 0.0025 || player.getAbilities().flying;
         if (g > 1 && moving && now % 20 == 0) {

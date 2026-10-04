@@ -45,13 +45,19 @@ public final class RacePassives {
      * Zenkai: dropping below {@code zenkaiTriggerPercent} body arms it; recovering to {@code zenkaiRecoverPercent}
      * (by regen, a Senzu Bean, anything) permanently raises the combat attributes, once per cooldown.
      */
+    /** Points a Zenkai adds to one attribute: {@code strength} x the square root of its value, at least 1. */
+    public static int zenkaiGain(int value, double strength) {
+        return Math.max(1, (int) Math.round(Math.sqrt(Math.max(0, value)) * strength));
+    }
+
     static void zenkai(ServerPlayer player, PlayerData data, RaceTraits t, long now) {
         DBZConfig.Server c = DBZConfig.SERVER;
         double max = data.getDerived().maxBody();
         if (max <= 0) return;
         double percent = 100.0 * data.getBody() / max;
         if (percent < c.zenkaiTriggerPercent.get()) {
-            data.setZenkaiArmed(true);
+            // Only a real fight arms it: gravity strain and other hazards never trigger a Zenkai.
+            if (now - data.getLastFoeHitTick() <= 100) data.setZenkaiArmed(true);
         } else if (data.isZenkaiArmed() && percent >= c.zenkaiRecoverPercent.get()) {
             if (now - data.getLastZenkai() < c.zenkaiCooldownTicks.get()) {
                 data.setZenkaiArmed(false);
@@ -60,7 +66,7 @@ public final class RacePassives {
             int cap = c.attributeHardCap.get();
             for (Attribute a : ZENKAI_ATTRIBUTES) {
                 int v = data.getAttribute(a);
-                data.setAttribute(a, Math.min(cap, v + Math.max(1, (int) Math.round(v * t.zenkaiPercent()))));
+                data.setAttribute(a, Math.min(cap, v + zenkaiGain(v, t.zenkaiPercent())));
             }
             data.recordZenkai(now);
             data.recomputeIfStale();

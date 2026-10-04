@@ -38,6 +38,8 @@ public class DBZenith {
         ModCreativeTabs.register(modBus);
         modBus.addListener(ModCapabilities::register);
         modBus.addListener(this::commonSetup);
+        modBus.addListener((net.minecraftforge.fml.event.config.ModConfigEvent.Loading e) -> com.dbzenith.config.BalanceMigration.onLoad(e));
+        modBus.addListener((net.minecraftforge.fml.event.config.ModConfigEvent.Reloading e) -> com.dbzenith.config.BalanceMigration.onLoad(e));
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, DBZConfig.SERVER_SPEC);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, DBZConfig.CLIENT_SPEC);

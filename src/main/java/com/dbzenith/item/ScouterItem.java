@@ -60,7 +60,7 @@ public class ScouterItem extends ArmorItem {
     }
 
     public static long mobPower(LivingEntity e) {
-        return Math.round(e.getMaxHealth() * 10 + e.getAttributeValue(Attributes.ARMOR) * 25);
+        return Math.round(com.dbzenith.npc.KiFighter.effectiveMaxHealth(e) * 10 + e.getAttributeValue(Attributes.ARMOR) * 25);
     }
 
     public static double range() {

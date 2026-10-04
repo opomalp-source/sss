@@ -103,12 +103,16 @@ public final class RaceTests {
         long now = helper.getLevel().getGameTime();
         d.setBody(d.getDerived().maxBody() * 0.05);
         RacePassives.tick(p, d, now);
-        helper.assertTrue(d.isZenkaiArmed(), "near death arms Zenkai");
+        helper.assertTrue(!d.isZenkaiArmed(), "hazards like gravity strain do not arm Zenkai");
+        d.setLastFoeHitTick(now); // beaten down by an enemy
+        RacePassives.tick(p, d, now);
+        helper.assertTrue(d.isZenkaiArmed(), "near death in a fight arms Zenkai");
         d.refill(); // e.g. a Senzu Bean
         RacePassives.tick(p, d, now + 1);
-        helper.assertTrue(d.getAttribute(Attribute.STRENGTH) > 500, "recovering grants a permanent boost");
+        helper.assertTrue(d.getAttribute(Attribute.STRENGTH) == 500 + RacePassives.zenkaiGain(500, 0.25), "recovering grants a permanent boost: " + d.getAttribute(Attribute.STRENGTH));
         int after = d.getAttribute(Attribute.STRENGTH);
         d.setBody(d.getDerived().maxBody() * 0.05);
+        d.setLastFoeHitTick(now + 2);
         RacePassives.tick(p, d, now + 2);
         d.refill();
         RacePassives.tick(p, d, now + 3);

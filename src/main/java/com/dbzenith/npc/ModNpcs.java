@@ -72,8 +72,8 @@ public final class ModNpcs {
         event.put(SPROUTLING.get(), KiFighter.attributes(16, 3, 0.32).build());
         event.put(KI_SOLDIER.get(), KiFighter.attributes(30, 4, 0.27).build());
         event.put(ANDROID_UNIT.get(), KiFighter.attributes(60, 6, 0.24).add(Attributes.ARMOR, 8).build());
-        event.put(TYRANT_LORD.get(), KiFighter.attributes(400, 10, 0.3).add(Attributes.KNOCKBACK_RESISTANCE, 0.6).build());
-        event.put(RAMPAGE_BRUTE.get(), KiFighter.attributes(600, 14, 0.27).add(Attributes.KNOCKBACK_RESISTANCE, 0.9).build());
+        event.put(TYRANT_LORD.get(), KiFighter.attributes(400, 6, 0.3).add(Attributes.KNOCKBACK_RESISTANCE, 0.6).build());
+        event.put(RAMPAGE_BRUTE.get(), KiFighter.attributes(500, 9, 0.27).add(Attributes.KNOCKBACK_RESISTANCE, 0.9).build());
         event.put(NAMEKIAN_WARRIOR.get(), KiFighter.attributes(50, 5, 0.25).build());
         event.put(MASTER.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2).add(Attributes.MAX_HEALTH, 100).build());
         event.put(PATROL_OFFICER.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2).add(Attributes.MAX_HEALTH, 100).build());

@@ -166,3 +166,16 @@
 - The Techniques screen overflowed with 17+ techniques; it scrolls now.
 - A visual-check run hung: the client compiled mid-edit and failed while the script waited forever for a join. Waits are now bounded and check for build failures.
 - `spreadplayers` in 1.20.1 never changes dimension, so a check run took screenshots underground on the Northern Planet; teleport into the overworld first.
+
+## 2026-10-04 — Session 1 (cont.): Balance pass 1 (v0.7.1)
+
+### Built
+- `gametest.BalanceReport`: reference characters at levels 0-2000 measured with the real formulas against the real enemies; writes `run-gametest/balance-report.md` and asserts the targets in BALANCE.md (`defaultsMeetTheBalanceTargets`).
+- The first report showed level 2000 in 1.4 hours of fighting, x19 stacked training, foes stuck at level 4, bosses capped by vanilla's 1024 max health, Zenkai worth 3x fighting late, fusion worth ~360 levels, repeatable bounties paying 5x. All fixed; see BALANCE.md for every value.
+- New: linear enemy levels with toughness, square-root TP rewards, `tpGainMultiplier`, training cap x4, Time Chamber cooldown, persistent cooldowns, Zenkai and fusion rework, five level-1500 forms, `config.BalanceMigration` (existing worlds get the new values once).
+- 96 GameTests green.
+
+### Problems
+- Vanilla `MAX_HEALTH` caps at 1024, so leveled bosses silently stopped scaling. Levels now add damage reduction instead.
+- The GameTest world kept its old server config, which hid the new defaults. That is exactly what players' worlds do, hence the migration.
+- `playerFusionNeedsConsent` was flaky: new players land anywhere within the spawn radius, so the pair could be more than 16 blocks apart.

@@ -105,6 +105,7 @@ public final class CombatEvents {
             BodyHealth.adoptExternalChanges(player, victimData);
             victimData.setBody(victimData.getBody() - dealt);
             victimData.setLastDamagedTick(victim.level().getGameTime());
+            if (source.getEntity() instanceof net.minecraft.world.entity.LivingEntity foe && foe != victim) victimData.setLastFoeHitTick(victim.level().getGameTime());
             if (victimData.getBody() <= 0 && victim.level().getGameTime() < victimData.getImmortalUntil()) {
                 victimData.setBody(1); // the immortality wish
             }
@@ -116,13 +117,15 @@ public final class CombatEvents {
             }
         } else {
             dealt = raw;
-            if (isKi || isThrow || isMelee) event.setAmount(DamageCalculator.toVanilla(raw));
+            float amount = isKi || isThrow || isMelee ? DamageCalculator.toVanilla(raw) : event.getAmount();
+            if (victim instanceof com.dbzenith.npc.KiFighter fighter) amount /= (float) fighter.toughness(); // leveled foes
+            event.setAmount(amount);
         }
 
         // 3) training points for the attacker
         if (attackerData != null && attacker != victim && dealt > 0) {
             attackerData.addTrainingProgress(StatCalculator.scaleTpGain(attackerData,
-                    dealt * DBZConfig.SERVER.tpPerDamageDealt.get()));
+                    Math.sqrt(dealt) * DBZConfig.SERVER.tpPerHit.get()));
         }
     }
 
@@ -141,7 +144,7 @@ public final class CombatEvents {
         if (event.getSource().getEntity() instanceof Player killer && killer != event.getEntity()) {
             ModCapabilities.get(killer).ifPresent(data -> {
                 data.addTrainingProgress(StatCalculator.scaleTpGain(data,
-                        event.getEntity().getMaxHealth() * DBZConfig.SERVER.tpPerKillHealth.get()));
+                        Math.sqrt(com.dbzenith.npc.KiFighter.effectiveMaxHealth(event.getEntity())) * DBZConfig.SERVER.tpPerKill.get()));
                 double heal = RacePassives.traits(data).killHeal(); // Majin: absorb the fallen
                 if (heal > 0) data.setBody(data.getBody() + data.getDerived().maxBody() * heal);
             });

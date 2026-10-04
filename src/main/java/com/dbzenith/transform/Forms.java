@@ -65,7 +65,7 @@ public final class Forms {
             .races(Race.HUMAN).multipliers(2.6, 1.5, 1.8).drain(1.5, 1.0).speedBonus(-0.15)
             .colors(0xFFE8C0, -1, -1).unlock(300, 30).build());
     public static final Form POTENTIAL_UNLEASHED = add(Form.builder("potential_unleashed").parent("full_power", 3)
-            .races(Race.HUMAN).multiplier(3.0).drain(1.0, 0).colors(0xFFFFFF, -1, 0x9FD8FF).unlock(700, 50).build());
+            .races(Race.HUMAN).multiplier(3.4).drain(1.0, 0).colors(0xFFFFFF, -1, 0x9FD8FF).unlock(700, 50).build());
 
     // --- Namekian ---
     public static final Form GIANT_NAMEKIAN = add(Form.builder("giant_namekian").parent("base", 1)
@@ -111,6 +111,18 @@ public final class Forms {
             .races(Race.CYBORG).multiplier(2.6).drain(1.2, 0).colors(0xC0C8D0, -1, 0xFF2020).unlock(400, 30).build());
     public static final Form MACHINE_MUTANT = add(Form.builder("machine_mutant").parent("full_conversion", 3)
             .races(Race.CYBORG).multiplier(3.5).drain(1.8, 0).colors(0x60FFB0, -1, 0x60FFB0).unlock(900, 50).build());
+
+    // --- Late tiers (balance pass): every race gets a level-1500 form so no line tops out a thousand levels early ---
+    public static final Form TRANSCENDENT = add(Form.builder("transcendent").parent("potential_unleashed", 4)
+            .races(Race.HUMAN).multiplier(5.0).drain(2.0, 0).colors(0xE0F0FF, -1, 0xC0E8FF).unlock(1500, 50).build());
+    public static final Form DRAGON_CLAN = add(Form.builder("dragon_clan").parent("orange_namekian", 4)
+            .races(Race.NAMEKIAN).multiplier(5.0).drain(2.5, 0).colors(0x40FFB0, -1, 0x40FFB0).unlock(1500, 50).build());
+    public static final Form PRIMORDIAL_MAJIN = add(Form.builder("primordial_majin").parent("pure_majin", 4)
+            .races(Race.MAJIN).multipliers(5.4, 4.8, 4.8).drain(3.0, 1.0).colors(0xFF2080, -1, 0xFF2040).unlock(1500, 50).build());
+    public static final Form INFINITE_CORE = add(Form.builder("infinite_core").parent("super_android", 4)
+            .races(Race.ANDROID).multiplier(4.8).drain(1.8, 0).colors(0x60E0FF, -1, 0x00FFFF).unlock(1500, 50).build());
+    public static final Form OMEGA_FRAME = add(Form.builder("omega_frame").parent("machine_mutant", 4)
+            .races(Race.CYBORG).multiplier(4.8).drain(2.4, 0).colors(0xFF6040, -1, 0xFF3010).unlock(1500, 50).build());
 
     private Forms() {}
 

@@ -51,8 +51,9 @@ public final class TrainingTests {
             double body = d.getBody();
             for (int i = 0; i < 40; i++) KiTicker.tick(p, d);
             helper.assertTrue(d.getBody() < body, "100g strains a weak body");
-            helper.assertTrue(d.getTrainingMultiplier() > 5, "heavy gravity multiplies training: " + d.getTrainingMultiplier());
-            helper.assertTrue(StatCalculator.scaleTpGain(d, 10) > 50, "TP gains use the training multiplier");
+            helper.assertTrue(d.getTrainingMultiplier() == com.dbzenith.config.DBZConfig.SERVER.trainingMultiplierCap.get(),
+                    "heavy gravity multiplies training, up to the cap: " + d.getTrainingMultiplier());
+            helper.assertTrue(StatCalculator.scaleTpGain(d, 10) > 39, "TP gains use the training multiplier");
             TestPlayers.remove(helper, p);
             helper.succeed();
         });
@@ -74,10 +75,10 @@ public final class TrainingTests {
         ServerPlayer p = player(helper);
         PlayerData d = ModCapabilities.getOrThrow(p);
         d.setTrainingMultiplier(10); // e.g. under gravity
-        long tp = d.getTrainingPoints();
+        double tp = d.getTrainingProgress();
         helper.assertTrue(TrainingBlocks.PunchingBag.punch(p), "first punch counts");
         helper.assertTrue(!TrainingBlocks.PunchingBag.punch(p), "spamming is on cooldown");
-        helper.assertTrue(d.getTrainingPoints() > tp, "punching gives TP");
+        helper.assertTrue(d.getTrainingProgress() > tp, "punching gives TP");
         TestPlayers.remove(helper, p);
         helper.succeed();
     }

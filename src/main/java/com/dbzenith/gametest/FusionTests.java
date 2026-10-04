@@ -47,10 +47,11 @@ public final class FusionTests {
         KiFighter warrior = helper.spawnWithNoFreeWill(ModNpcs.NAMEKIAN_WARRIOR.get(), new BlockPos(1, 1, 1));
         warrior.setFighterLevel(5);
         int str = d.getAttribute(Attribute.STRENGTH);
+        int expected = Absorption.fusionGain(str);
         helper.assertTrue(!Absorption.fuse(p, d, warrior), "a healthy warrior refuses");
         warrior.setHealth(warrior.getMaxHealth() * 0.2f);
         helper.assertTrue(Absorption.fuse(p, d, warrior), "a beaten warrior joins");
-        helper.assertTrue(d.getAttribute(Attribute.STRENGTH) == str + 15, "+3 per level: " + (d.getAttribute(Attribute.STRENGTH) - str));
+        helper.assertTrue(d.getAttribute(Attribute.STRENGTH) == str + expected, "a share of your own strength: " + (d.getAttribute(Attribute.STRENGTH) - str));
         helper.assertTrue(warrior.isRemoved() && d.getFusions() == 1, "the warrior is gone, one fusion used");
         d.addFusion();
         d.addFusion();
@@ -65,6 +66,7 @@ public final class FusionTests {
     public static void playerFusionNeedsConsent(GameTestHelper helper) {
         ServerPlayer host = as(helper, Race.NAMEKIAN);
         ServerPlayer partner = as(helper, Race.NAMEKIAN);
+        partner.teleportTo(host.getX() + 1, host.getY(), host.getZ()); // new players land anywhere within the spawn radius
         PlayerData hd = ModCapabilities.getOrThrow(host);
         PlayerData pd = ModCapabilities.getOrThrow(partner);
         pd.setAttribute(Attribute.KI_POWER, 400);
