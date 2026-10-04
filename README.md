@@ -24,7 +24,9 @@ Install **NeoForge 1.20.1-47.1.106** into a dedicated game directory, then put `
 | V | Toggle flight (drains ki) |
 | Left Alt (hold) | Guard: blocks 60% of damage, costs stamina |
 | R | Use selected technique |
-| Y | Next technique (Ki Blast, Wave Beam, Rapid Volley, Cutter Disk, Homing Orb) |
+| Y | Next technique (Ki Blast, Wave Beam, Finger Beam, Rapid Volley, Cutter Disk, Homing Orb) |
+| H (hold, release) | Charge a heavy strike: your next punch hits 1.5x-3x harder |
+| B | Dash in your movement direction (brief afterimage: attacks miss) |
 | K | Training screen: spend TP on attributes (Shift+click = +10) |
 
 ## In-game

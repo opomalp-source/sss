@@ -333,6 +333,75 @@ public class PlayerData {
         this.lastSetHealth = health;
     }
 
+    // heavy hit: charge while the key is held, armed on release, consumed by the next melee hit
+    private int heavyChargeTicks = -1;
+    private double heavyArmedMultiplier;
+    private long heavyArmedUntil;
+    private long dashEvadeUntil;
+    private int lastPublicStateHash;
+
+    public boolean isChargingHeavy() {
+        return heavyChargeTicks >= 0;
+    }
+
+    public void startHeavyCharge() {
+        heavyChargeTicks = 0;
+        markDirty();
+    }
+
+    public int tickHeavyCharge() {
+        return heavyChargeTicks >= 0 ? ++heavyChargeTicks : -1;
+    }
+
+    /** Ends the charge; returns ticks held, or -1 if none was in progress. */
+    public int releaseHeavyCharge() {
+        int t = heavyChargeTicks;
+        heavyChargeTicks = -1;
+        markDirty();
+        return t;
+    }
+
+    public void armHeavy(double multiplier, long untilGameTime) {
+        heavyArmedMultiplier = multiplier;
+        heavyArmedUntil = untilGameTime;
+        markDirty();
+    }
+
+    /** Client-side display: the armed multiplier, or 0 when nothing is armed (expiry is server-side). */
+    public double getHeavyArmedMultiplier() {
+        return heavyArmedMultiplier;
+    }
+
+    public boolean isHeavyArmed(long gameTime) {
+        return heavyArmedMultiplier > 0 && gameTime <= heavyArmedUntil;
+    }
+
+    /** Returns the armed multiplier (1 if none) and disarms. */
+    public double consumeHeavy(long gameTime) {
+        double m = isHeavyArmed(gameTime) ? heavyArmedMultiplier : 1.0;
+        if (heavyArmedMultiplier > 0) {
+            heavyArmedMultiplier = 0;
+            markDirty();
+        }
+        return m;
+    }
+
+    public long getDashEvadeUntil() {
+        return dashEvadeUntil;
+    }
+
+    public void setDashEvadeUntil(long gameTime) {
+        dashEvadeUntil = gameTime;
+    }
+
+    public int getLastPublicStateHash() {
+        return lastPublicStateHash;
+    }
+
+    public void setLastPublicStateHash(int hash) {
+        lastPublicStateHash = hash;
+    }
+
     public boolean isOnCooldown(String id, long gameTime) {
         return cooldownUntil.getOrDefault(id, Long.MIN_VALUE) > gameTime;
     }
@@ -423,6 +492,8 @@ public class PlayerData {
         tag.putBoolean("charging", charging);
         tag.putBoolean("guarding", guarding);
         tag.putInt("combo", comboHits);
+        tag.putBoolean("heavyCharging", heavyChargeTicks >= 0);
+        tag.putDouble("heavyArmed", heavyArmedMultiplier);
         return tag;
     }
 
@@ -434,6 +505,8 @@ public class PlayerData {
         charging = tag.getBoolean("charging");
         guarding = tag.getBoolean("guarding");
         comboHits = tag.getInt("combo");
+        heavyChargeTicks = tag.getBoolean("heavyCharging") ? 0 : -1;
+        heavyArmedMultiplier = tag.getDouble("heavyArmed");
         dirty = false;
     }
 }

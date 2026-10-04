@@ -1,6 +1,7 @@
 package com.dbzenith.client;
 
 import com.dbzenith.DBZenith;
+import com.dbzenith.client.render.KiBeamRenderer;
 import com.dbzenith.client.render.KiBlastRenderer;
 import com.dbzenith.registry.ModEntities;
 import net.minecraft.client.KeyMapping;
@@ -30,5 +31,6 @@ public final class ClientSetup {
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.KI_BLAST.get(), KiBlastRenderer::new);
+        event.registerEntityRenderer(ModEntities.KI_BEAM.get(), KiBeamRenderer::new);
     }
 }

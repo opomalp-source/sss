@@ -34,6 +34,7 @@ public final class ClientEvents {
     public static void loggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientPlayerData.clear();
         ClientCombatState.clear();
+        ClientPublicStates.clear();
         ticksInWorld = 0;
     }
 
@@ -41,6 +42,7 @@ public final class ClientEvents {
     public static void clientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getInstance();
+        devAutoReconnect(mc);
         if (mc.level == null || mc.player == null) return;
         ticksInWorld++;
         if (pendingShot != null && --pendingShotTicks <= 0) {
@@ -48,6 +50,7 @@ public final class ClientEvents {
             pendingShot = null;
             devScreenshot(shot, 0);
             if (mc.screen instanceof com.dbzenith.client.screen.StatScreen) mc.setScreen(null);
+            if (shot.startsWith("third_")) mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON);
         }
         if (DEV_SCREENSHOT_TICKS.contains(ticksInWorld)) {
             Screenshot.grab(mc.gameDirectory, "dbz_dev_" + ticksInWorld + ".png", mc.getMainRenderTarget(),
@@ -63,6 +66,10 @@ public final class ClientEvents {
     public static void devScreenshot(String name, int delayTicks) {
         if (!DEV_AUTOMATION) return;
         Minecraft mc = Minecraft.getInstance();
+        if (name.startsWith("third_") && mc.options.getCameraType() == net.minecraft.client.CameraType.FIRST_PERSON) {
+            mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK);
+            delayTicks = Math.max(delayTicks, 4);
+        }
         if (delayTicks > 0) {
             pendingShot = name;
             pendingShotTicks = delayTicks;
@@ -77,6 +84,23 @@ public final class ClientEvents {
         String safe = name.replaceAll("[^a-zA-Z0-9_-]", "_");
         Screenshot.grab(mc.gameDirectory, "dbz_" + safe + ".png", mc.getMainRenderTarget(),
                 msg -> DBZenith.LOGGER.info("[dev] {}", msg.getString()));
+    }
+
+    private static int disconnectedTicks;
+
+    /** Dev automation: the scripted test client retries a failed connection to the dev server. */
+    private static void devAutoReconnect(Minecraft mc) {
+        if (!DEV_AUTOMATION || !(mc.screen instanceof net.minecraft.client.gui.screens.DisconnectedScreen)) {
+            disconnectedTicks = 0;
+            return;
+        }
+        if (++disconnectedTicks == 40) {
+            String address = System.getProperty("dbzenith.devServer", "localhost:25565");
+            DBZenith.LOGGER.info("[dev] connection failed, retrying {}", address);
+            net.minecraft.client.gui.screens.ConnectScreen.startConnecting(new net.minecraft.client.gui.screens.TitleScreen(), mc,
+                    net.minecraft.client.multiplayer.resolver.ServerAddress.parseString(address),
+                    new net.minecraft.client.multiplayer.ServerData("dev", address, false), false);
+        }
     }
 
     private static Set<Integer> parseTicks(String csv) {

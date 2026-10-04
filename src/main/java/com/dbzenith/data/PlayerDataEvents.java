@@ -4,6 +4,7 @@ import com.dbzenith.DBZenith;
 import com.dbzenith.config.DBZConfig;
 import com.dbzenith.ki.KiTicker;
 import com.dbzenith.network.ModNetwork;
+import com.dbzenith.network.PublicStatePacket;
 import com.dbzenith.network.SyncPlayerDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -72,10 +73,23 @@ public final class PlayerDataEvents {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
         ModCapabilities.get(player).ifPresent(data -> {
             KiTicker.tick(player, data);
+            PublicStatePacket state = PublicStatePacket.of(player.getId(), data);
+            if (state.stateHash() != data.getLastPublicStateHash()) {
+                data.setLastPublicStateHash(state.stateHash());
+                ModNetwork.sendToTrackingAndSelf(player, state);
+            }
             if (data.tickSyncTimer(DBZConfig.SERVER.syncIntervalTicks.get())) {
                 ModNetwork.sendTo(player, new SyncPlayerDataPacket(data.writeSyncTag()));
             }
         });
+    }
+
+    /** A client starts seeing another player: send that player's visible state. */
+    @SubscribeEvent
+    public static void startTracking(PlayerEvent.StartTracking event) {
+        if (event.getTarget() instanceof ServerPlayer target && event.getEntity() instanceof ServerPlayer viewer) {
+            ModCapabilities.get(target).ifPresent(d -> ModNetwork.sendTo(viewer, PublicStatePacket.of(target.getId(), d)));
+        }
     }
 
     /** Sends the full state to the owning client immediately. */

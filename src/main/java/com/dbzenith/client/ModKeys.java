@@ -15,9 +15,11 @@ public final class ModKeys {
     public static final KeyMapping GUARD = key("guard", GLFW.GLFW_KEY_LEFT_ALT);
     public static final KeyMapping KI_ATTACK = key("ki_attack", GLFW.GLFW_KEY_R);
     public static final KeyMapping NEXT_TECHNIQUE = key("next_technique", GLFW.GLFW_KEY_Y);
+    public static final KeyMapping HEAVY = key("heavy", GLFW.GLFW_KEY_H);
+    public static final KeyMapping DASH = key("dash", GLFW.GLFW_KEY_B);
     public static final KeyMapping STATS = key("stats", GLFW.GLFW_KEY_K);
 
-    public static final KeyMapping[] ALL = {CHARGE, LOWER_RELEASE, FLY, GUARD, KI_ATTACK, NEXT_TECHNIQUE, STATS};
+    public static final KeyMapping[] ALL = {CHARGE, LOWER_RELEASE, FLY, GUARD, KI_ATTACK, NEXT_TECHNIQUE, HEAVY, DASH, STATS};
 
     private ModKeys() {}
 

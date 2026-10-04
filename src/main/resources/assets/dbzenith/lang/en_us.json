@@ -32,6 +32,8 @@
   "technique.dbzenith.rapid_volley": "Rapid Volley",
   "technique.dbzenith.cutter_disk": "Cutter Disk",
   "technique.dbzenith.homing_orb": "Homing Orb",
+  "technique.dbzenith.finger_beam": "Finger Beam",
+  "entity.dbzenith.ki_beam": "Ki Beam",
 
   "key.categories.dbzenith": "Dragon Block Zenith",
   "key.dbzenith.charge": "Charge ki (hold)",
@@ -41,12 +43,16 @@
   "key.dbzenith.ki_attack": "Use technique",
   "key.dbzenith.next_technique": "Next technique",
   "key.dbzenith.stats": "Training / stats",
+  "key.dbzenith.heavy": "Heavy strike (hold, release to arm)",
+  "key.dbzenith.dash": "Dash",
 
   "hud.dbzenith.power_level": "Power Level %s",
   "hud.dbzenith.release": "Release %s%%",
   "hud.dbzenith.charging": "CHARGING",
   "hud.dbzenith.flying": "FLYING",
   "hud.dbzenith.guard": "GUARD",
+  "hud.dbzenith.heavy_charging": "HEAVY...",
+  "hud.dbzenith.heavy_ready": "HEAVY x%s",
   "hud.dbzenith.technique_keys": "[R] fire  [Y] next",
 
   "screen.dbzenith.stats": "Training",

@@ -4,6 +4,7 @@ import com.dbzenith.combat.BodyHealth;
 import com.dbzenith.config.DBZConfig;
 import com.dbzenith.data.PlayerData;
 import com.dbzenith.stats.DerivedStats;
+import com.dbzenith.stats.SpeedModifiers;
 import com.dbzenith.stats.StatCalculator;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -18,9 +19,6 @@ import org.joml.Vector3f;
  * and the body/health mirror. Called from {@code PlayerDataEvents.tick}.
  */
 public final class KiTicker {
-    /** Default aura color until forms/races define their own (Phase 2/3). */
-    private static final Vector3f AURA_COLOR = new Vector3f(0.85f, 0.95f, 1.0f);
-
     private KiTicker() {}
 
     public static void tick(ServerPlayer player, PlayerData data) {
@@ -33,6 +31,12 @@ public final class KiTicker {
         DerivedStats s = data.getDerived();
 
         data.tickCombo(now, c.comboWindowTicks.get());
+        SpeedModifiers.apply(player, s);
+        if (data.getHeavyArmedMultiplier() > 0 && !data.isHeavyArmed(now)) data.consumeHeavy(now); // expired
+        int heavy = data.tickHeavyCharge();
+        if (heavy > 0 && heavy % 4 == 0) {
+            level.sendParticles(ParticleTypes.CRIT, player.getX(), player.getY() + 1.1, player.getZ(), 3, 0.3, 0.2, 0.3, 0.1);
+        }
 
         if (data.isCharging()) {
             if (data.getStamina() <= 0) {
@@ -45,7 +49,7 @@ public final class KiTicker {
                 if (t % c.tpChargeTrainingInterval.get() == 0) {
                     data.addTrainingProgress(StatCalculator.scaleTpGain(data, c.tpPerChargeInterval.get()));
                 }
-                if (t % 3 == 0) aura(level, player);
+                if (t % 3 == 0) aura(level, player, data);
                 if (t % 20 == 1) {
                     level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_AMBIENT,
                             SoundSource.PLAYERS, 0.8f, 1.6f);
@@ -70,8 +74,10 @@ public final class KiTicker {
         return max * percentPerSecond / 100.0 / 20.0;
     }
 
-    private static void aura(ServerLevel level, ServerPlayer player) {
-        level.sendParticles(new DustParticleOptions(AURA_COLOR, 1.4f),
+    private static void aura(ServerLevel level, ServerPlayer player, PlayerData data) {
+        int c = Aura.color(data);
+        Vector3f rgb = new Vector3f(((c >> 16) & 0xFF) / 255f, ((c >> 8) & 0xFF) / 255f, (c & 0xFF) / 255f);
+        level.sendParticles(new DustParticleOptions(rgb, 1.4f),
                 player.getX(), player.getY() + 1.0, player.getZ(), 8, 0.45, 0.9, 0.45, 0.02);
         level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 0.2, player.getZ(), 1, 0.4, 0.1, 0.4, 0.05);
     }

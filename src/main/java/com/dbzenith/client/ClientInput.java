@@ -2,6 +2,7 @@ package com.dbzenith.client;
 
 import com.dbzenith.DBZenith;
 import com.dbzenith.client.screen.StatScreen;
+import com.dbzenith.network.DashPacket;
 import com.dbzenith.network.InputPacket;
 import com.dbzenith.network.ModNetwork;
 import com.dbzenith.network.UseTechniquePacket;
@@ -18,6 +19,7 @@ import net.minecraftforge.fml.common.Mod;
 public final class ClientInput {
     private static boolean wasCharging;
     private static boolean wasGuarding;
+    private static boolean wasHeavy;
 
     private ClientInput() {}
 
@@ -26,7 +28,7 @@ public final class ClientInput {
         if (event.phase != TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) {
-            wasCharging = wasGuarding = false;
+            wasCharging = wasGuarding = wasHeavy = false;
             return;
         }
 
@@ -39,6 +41,15 @@ public final class ClientInput {
         if (guarding != wasGuarding) {
             ModNetwork.sendToServer(new InputPacket(guarding ? InputPacket.Action.GUARD_START : InputPacket.Action.GUARD_STOP));
             wasGuarding = guarding;
+        }
+
+        boolean heavy = ModKeys.HEAVY.isDown() && mc.screen == null;
+        if (heavy != wasHeavy) {
+            ModNetwork.sendToServer(new InputPacket(heavy ? InputPacket.Action.HEAVY_START : InputPacket.Action.HEAVY_STOP));
+            wasHeavy = heavy;
+        }
+        while (ModKeys.DASH.consumeClick()) {
+            ModNetwork.sendToServer(new DashPacket(mc.player.input.forwardImpulse, mc.player.input.leftImpulse));
         }
 
         while (ModKeys.FLY.consumeClick()) ModNetwork.sendToServer(new InputPacket(InputPacket.Action.TOGGLE_FLIGHT));

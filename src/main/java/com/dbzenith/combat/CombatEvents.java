@@ -57,8 +57,15 @@ public final class CombatEvents {
             DBZConfig.Server c = DBZConfig.SERVER;
             int combo = attackerData.registerHit(victim.level().getGameTime(), c.comboWindowTicks.get(), c.comboMaxHits.get());
             raw = DamageCalculator.meleeOutgoing(attackerData, event.getAmount(), combo);
+            double heavy = attackerData.consumeHeavy(victim.level().getGameTime());
+            raw *= heavy;
             attackerData.setStamina(attackerData.getStamina() - c.meleeStaminaCost.get());
             double extraKnockback = attackerData.getAttribute(com.dbzenith.stats.Attribute.STRENGTH) * c.meleeKnockbackPerStrength.get();
+            if (heavy > 1.0) {
+                extraKnockback += c.heavyKnockback.get();
+                victim.level().playSound(null, victim.getX(), victim.getY(), victim.getZ(),
+                        net.minecraft.sounds.SoundEvents.PLAYER_ATTACK_CRIT, net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, 0.6f);
+            }
             if (extraKnockback > 0) {
                 float yaw = attacker.getYRot() * Mth.DEG_TO_RAD;
                 victim.knockback(Math.min(3.0, extraKnockback), Mth.sin(yaw), -Mth.cos(yaw));
@@ -79,7 +86,8 @@ public final class CombatEvents {
                         (float) player.getAttributeValue(Attributes.ARMOR_TOUGHNESS));
                 raw *= afterArmor / event.getAmount();
             }
-            dealt = DamageCalculator.againstPlayer(raw, victimData, source.getEntity() != null, victim.getRandom());
+            boolean afterimage = source.getEntity() != null && victim.level().getGameTime() <= victimData.getDashEvadeUntil();
+            dealt = afterimage ? 0 : DamageCalculator.againstPlayer(raw, victimData, source.getEntity() != null, victim.getRandom());
             if (victimData.isGuarding() && dealt > 0) {
                 victimData.setStamina(victimData.getStamina() - DamageCalculator.guardPrevented(dealt) * DBZConfig.SERVER.guardStaminaPerDamage.get());
                 if (victimData.getStamina() <= 0) victimData.setGuarding(false); // guard broken

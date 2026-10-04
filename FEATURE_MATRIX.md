@@ -11,7 +11,8 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | 7 base attributes (STR/DEX/CON/KIP/WIL/MND/SPI) | C | done | Values, soft/hard caps, per-point config |
 | Derived: body, ki, stamina max | B | done | `StatCalculator` |
 | Derived: defense, evasion, ki control, melee/ki damage | B | done | Applied in DamageCalculator; GameTests |
-| Derived: spirit modifier, ki transfer, attack/move speed | B | stubbed | Computed + shown; flight speed uses move bonus; rest Phase 2+ |
+| Derived: attack/move speed | B | done | Vanilla attribute modifiers; GameTest |
+| Derived: spirit modifier, ki transfer | B | stubbed | Computed + shown; used from Phase 2 (mastery) / Phase 3 (transfer) |
 | Release % | B | done | Scales ki damage + ki cost; charging raises, key lowers; GameTests |
 | Physical / mental age | V | stubbed | Stored only |
 | TP pool: earning | C | done | Damage dealt, kills, charging; MIND bonus |
@@ -27,12 +28,13 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Ki control spend efficiency | B | done | DamageCalculator.kiCost |
 | Charging / power up | B | done | GameTested + seen in-client (HUD chip, stamina drain). First-person aura is subtle by design |
 | Ki blast framework | B | done | GameTested + all styles seen rendering in-client |
-| Techniques: ki blast, wave beam, volley, disk, homing orb | B | done | Seen in-client; homing visibly curves. Wave Beam is a big orb until true beam rendering |
-| Techniques: finger beam, grab-throw, ball-drop, explosive wave, teleport/afterimage, heal, sense | B | todo | |
+| Techniques: ki blast, wave beam, finger beam, volley, disk, homing orb | B | done | Seen in-client; beams are true sustained beams (side view verified), homing curves |
+| Techniques: grab-throw, ball-drop, explosive wave, teleport, heal, sense | B | todo | |
 | Melee combo, knockback, stamina, guard | B | done | GameTests (combo, stamina, guard reduction) |
-| Heavy (charged) hit, aerial combat feel | B | todo | |
+| Heavy (charged) hit | B | done | GameTest (>2x damage); HUD tag seen in-client after a real H key press |
+| Aerial combat feel (air combos, knock-up) | B | todo | Flight + dash exist |
 | Flight | B | done | Toggle, ki drain, auto-stop at 0 ki; GameTest |
-| Dash / burst movement | B | todo | |
+| Dash / burst movement + afterimage | B | done | GameTest (velocity, cost, cooldown, evasion); seen in-client |
 | Central DamageCalculator | B | done | combat.DamageCalculator; GameTests |
 | Body pool as real health (DBC-style) | C | done | BodyHealth mirror; GameTests (hit, mirror, lethal) |
 
@@ -97,9 +99,10 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 |---|---|---|---|
 | Debug stat overlay | — | done | Config `hud.showDebugOverlay` |
 | DBZ HUD (bars, release, status, combo, technique) | B | done | Seen in-client. Form display Phase 2 |
+| Aura visuals (seen by others) | B | done | Public state sync + aura glow renderer; seen in third person |
 | Stat screen | B | done | Seen in-client (opened via dev hook) |
 | Skill/deck screen | V | todo | |
 | Dragon Ball radar screen | B | todo | |
-| Keybinds | B | in-progress | Registered; actions verified via the same server paths, physical key presses not yet scripted. G charge, Z lower release, V fly, LAlt guard, R fire, Y next, K stats |
+| Keybinds | B | done | Real presses observed in the test client (Y, R, H, F5). G charge, Z lower release, V fly, LAlt guard, R fire, Y next, K stats |
 | Config for every tunable | B | in-progress | All Phase 0 numbers in config |
 | Admin/debug command `/dbz` | — | done | GameTest `commandSetsStats` |

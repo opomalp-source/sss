@@ -90,6 +90,18 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue kiCostReleaseScaling;
         public final ForgeConfigSpec.DoubleValue kiBlastBaseDamage;
         public final ForgeConfigSpec.BooleanValue kiBlastsBreakBlocks;
+        public final ForgeConfigSpec.IntValue heavyMaxChargeTicks;
+        public final ForgeConfigSpec.DoubleValue heavyMinMultiplier;
+        public final ForgeConfigSpec.DoubleValue heavyMaxMultiplier;
+        public final ForgeConfigSpec.IntValue heavyArmedTicks;
+        public final ForgeConfigSpec.DoubleValue heavyStaminaCost;
+        public final ForgeConfigSpec.DoubleValue heavyKnockback;
+        public final ForgeConfigSpec.DoubleValue dashStrength;
+        public final ForgeConfigSpec.DoubleValue dashStaminaCost;
+        public final ForgeConfigSpec.DoubleValue dashKiCost;
+        public final ForgeConfigSpec.IntValue dashCooldownTicks;
+        public final ForgeConfigSpec.IntValue dashEvadeTicks;
+        public final ForgeConfigSpec.IntValue beamDamageIntervalTicks;
 
         // --- TP gains ---
         public final ForgeConfigSpec.DoubleValue tpPerDamageDealt;
@@ -206,6 +218,27 @@ public final class DBZConfig {
                     .defineInRange("kiBlastBaseDamage", 40.0, 0.0, 1e9);
             kiBlastsBreakBlocks = b.comment("Whether explosive techniques break blocks")
                     .define("kiBlastsBreakBlocks", false);
+            heavyMaxChargeTicks = b.comment("Ticks of holding the heavy-hit key for a full charge")
+                    .defineInRange("heavyMaxChargeTicks", 30, 1, 1200);
+            heavyMinMultiplier = b.comment("Heavy hit multiplier for a tap")
+                    .defineInRange("heavyMinMultiplier", 1.5, 1.0, 100.0);
+            heavyMaxMultiplier = b.comment("Heavy hit multiplier at full charge")
+                    .defineInRange("heavyMaxMultiplier", 3.0, 1.0, 100.0);
+            heavyArmedTicks = b.comment("How long an armed heavy hit waits for a melee hit")
+                    .defineInRange("heavyArmedTicks", 60, 1, 1200);
+            heavyStaminaCost = b.comment("Stamina to arm a fully charged heavy hit (scaled by charge)")
+                    .defineInRange("heavyStaminaCost", 25.0, 0.0, 1e6);
+            heavyKnockback = b.comment("Extra knockback of a heavy hit")
+                    .defineInRange("heavyKnockback", 1.5, 0.0, 10.0);
+            dashStrength = b.comment("Dash velocity (blocks/tick) before the DEX move bonus")
+                    .defineInRange("dashStrength", 1.6, 0.0, 20.0);
+            dashStaminaCost = b.defineInRange("dashStaminaCost", 15.0, 0.0, 1e6);
+            dashKiCost = b.defineInRange("dashKiCost", 5.0, 0.0, 1e6);
+            dashCooldownTicks = b.defineInRange("dashCooldownTicks", 15, 0, 1200);
+            dashEvadeTicks = b.comment("Afterimage: ticks after a dash during which entity attacks miss")
+                    .defineInRange("dashEvadeTicks", 6, 0, 200);
+            beamDamageIntervalTicks = b.comment("A beam damages what it touches every this many ticks")
+                    .defineInRange("beamDamageIntervalTicks", 4, 1, 100);
             b.pop();
 
             b.comment("Training point gains").push("tp_gains");

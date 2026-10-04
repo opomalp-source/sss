@@ -78,3 +78,19 @@
 - Verified in screenshots: HUD (power level, bars, release, chips), charging, Rapid Volley, Wave Beam, Cutter Disk (edge-on spinning disk), Homing Orb (curves to target), Ki Blast, flight + guard chips, Training screen. A husk took damage (20 → 9 HP).
 - Fixed: the old debug overlay still showed because existing `dbzenith-client.toml` files from 0.1.0 kept `showDebugOverlay=true`. Key renamed to `showDebugStats` (default false). Training screen derived-stat column now right-aligns values (space padding doesn't work in MC's proportional font). Release bar now starts after its label (the label overlapped at 100%; fix compiled, not re-screenshotted).
 - Deployed 0.2.0 to `.minecraft\mods` via the switch script (0.1.0 removed). OptiFine jars stay parked.
+
+## 2026-10-04 — Session 1 (cont.): Phase 1 complete (v0.3.0)
+
+### Built
+- **Heavy strike** (`combat.HeavyStrike`, H): hold to charge (crit particles), release to arm 1.5x→3x (config) for `heavyArmedTicks`; the next melee hit consumes it (+knockback, crit sound). Expired charges are disarmed by the ticker so the HUD tag can't stick.
+- **True beams** (`skill.KiBeamEntity`, `client.render.KiBeamRenderer`): the beam entity re-anchors to the caster every tick (follows aim), extends `speed` blocks/tick up to 48, stops at blocks, damages everything along the segment every `beamDamageIntervalTicks` (total damage split across pulses), optional explosion at a block end. Rendered as a camera-facing ribbon (colored glow + white core, `ki_beam.png`) plus glow "beads" along the axis. Without the beads a beam is invisible when viewed straight down its axis, i.e. from the caster. Wave Beam converted; new **Finger Beam** (thin, instant, pink).
+- `TechniqueHandler.spawn(level, caster, technique, damage)` works for any LivingEntity (NPC-ready); `/dbz cast <entity> <technique> <damage>`.
+- **Dash** (`ki.DashHandler`, B): client sends input impulses, server validates (stamina, ki, cooldown) and sets velocity (`hurtMarked`), vertical aim while flying, `dashEvadeTicks` afterimage window where entity attacks miss.
+- **DEX speed** via vanilla attribute modifiers (`stats.SpeedModifiers`, fixed UUIDs, MULTIPLY_BASE).
+- **Public state** (`network.PublicStatePacket`): charging/flying/guard/heavy flags, release, aura color, sent to trackers + self when its hash changes and on StartTracking. `client.render.AuraRenderer` draws a two-layer pulsing glow around charging players (RenderPlayerEvent.Post). Aura color comes from `ki.Aura` (forms/races hook in later).
+- Network protocol 4. 22 GameTests green (new: heavy hit >2x, dash velocity/cost/cooldown/afterimage, beam hits mob along its line, DEX speed, public state hash).
+
+### Verification notes
+- Screenshots: Wave Beam side-on (thick blue beam to target), aura in third person, heavy-ready tag, dash cloud burst.
+- **The human was playing in the scripted test client window** (inventory/XP/TP spending appeared, Y/R/H/F5 pressed). That explained "mystery" COOLDOWN results and moved camera angles. Side effect: real keybinds Y, R, H confirmed working. Next time, warn before launching the test client: it takes keyboard focus.
+- **Intermittent login hang** of the dev client (the server sends all 23 FML handshake packets, the client receives none, times out at 30 s) happened again with the original network setup, so it is not about the bind address. Cause unknown. The dev client now auto-retries from the "Failed to connect" screen (dev automation only). Watch whether players hit this on real servers; if so, investigate (netty, FML handshake on 47.1.106).

@@ -35,18 +35,7 @@ public final class TechniqueHandler {
         double cost = DamageCalculator.kiCost(data, technique.kiCost());
         if (!player.getAbilities().instabuild && data.getKi() < cost) return Result.NOT_ENOUGH_KI;
 
-        double damage = DamageCalculator.kiOutgoing(data, technique.damageMult());
-        Vec3 look = player.getLookAngle();
-        LivingEntity homingTarget = technique.homing() ? findTarget(player, look) : null;
-        for (int i = 0; i < technique.count(); i++) {
-            Vec3 dir = technique.spreadDegrees() > 0 ? spread(look, technique.spreadDegrees(), player) : look;
-            KiBlastEntity blast = KiBlastEntity.create(level, player, technique, damage);
-            Vec3 start = player.getEyePosition().add(look.scale(0.6)).subtract(0, technique.size() / 2.0, 0);
-            blast.moveTo(start.x, start.y, start.z, player.getYRot(), player.getXRot());
-            blast.setDeltaMovement(dir.normalize().scale(technique.speed()));
-            blast.setHomingTarget(homingTarget);
-            level.addFreshEntity(blast);
-        }
+        spawn(level, player, technique, DamageCalculator.kiOutgoing(data, technique.damageMult()));
 
         if (!player.getAbilities().instabuild) data.setKi(data.getKi() - cost);
         data.setCooldown(technique.id(), now + technique.cooldownTicks());
@@ -56,20 +45,42 @@ public final class TechniqueHandler {
         return Result.FIRED;
     }
 
-    private static Vec3 spread(Vec3 dir, float degrees, ServerPlayer player) {
-        float yaw = (player.getRandom().nextFloat() - 0.5f) * 2 * degrees * Mth.DEG_TO_RAD;
-        float pitch = (player.getRandom().nextFloat() - 0.5f) * 2 * degrees * Mth.DEG_TO_RAD;
+    /**
+     * Spawns a technique's projectiles or beam for any caster, with no cost or cooldown checks.
+     * Players go through {@link #use}; NPCs (Phase 4) and {@code /dbz cast} call this directly.
+     */
+    public static void spawn(ServerLevel level, LivingEntity caster, Technique technique, double damage) {
+        Vec3 look = caster.getLookAngle();
+        if (technique.style() == Technique.Style.BEAM) {
+            level.addFreshEntity(KiBeamEntity.create(level, caster, technique, damage));
+            return;
+        }
+        LivingEntity homingTarget = technique.homing() ? findTarget(caster, look) : null;
+        for (int i = 0; i < technique.count(); i++) {
+            Vec3 dir = technique.spreadDegrees() > 0 ? spread(look, technique.spreadDegrees(), caster) : look;
+            KiBlastEntity blast = KiBlastEntity.create(level, caster, technique, damage);
+            Vec3 start = caster.getEyePosition().add(look.scale(0.6)).subtract(0, technique.size() / 2.0, 0);
+            blast.moveTo(start.x, start.y, start.z, caster.getYRot(), caster.getXRot());
+            blast.setDeltaMovement(dir.normalize().scale(technique.speed()));
+            blast.setHomingTarget(homingTarget);
+            level.addFreshEntity(blast);
+        }
+    }
+
+    private static Vec3 spread(Vec3 dir, float degrees, LivingEntity caster) {
+        float yaw = (caster.getRandom().nextFloat() - 0.5f) * 2 * degrees * Mth.DEG_TO_RAD;
+        float pitch = (caster.getRandom().nextFloat() - 0.5f) * 2 * degrees * Mth.DEG_TO_RAD;
         return dir.yRot(yaw).xRot(pitch);
     }
 
-    private static LivingEntity findTarget(ServerPlayer player, Vec3 look) {
-        Vec3 eye = player.getEyePosition();
-        AABB box = player.getBoundingBox().inflate(HOMING_RANGE);
-        return player.level().getEntitiesOfClass(LivingEntity.class, box, e -> e != player && e.isAlive() && !e.isSpectator()
+    private static LivingEntity findTarget(LivingEntity caster, Vec3 look) {
+        Vec3 eye = caster.getEyePosition();
+        AABB box = caster.getBoundingBox().inflate(HOMING_RANGE);
+        return caster.level().getEntitiesOfClass(LivingEntity.class, box, e -> e != caster && e.isAlive() && !e.isSpectator()
                         && e.getBoundingBox().getCenter().subtract(eye).normalize().dot(look) > HOMING_CONE_COS
-                        && player.hasLineOfSight(e))
+                        && caster.hasLineOfSight(e))
                 .stream()
-                .min(Comparator.comparingDouble(e -> e.distanceToSqr(player)))
+                .min(Comparator.comparingDouble(e -> e.distanceToSqr(caster)))
                 .orElse(null);
     }
 }

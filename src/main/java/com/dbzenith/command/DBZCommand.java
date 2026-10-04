@@ -4,6 +4,8 @@ import com.dbzenith.DBZenith;
 import com.dbzenith.data.ModCapabilities;
 import com.dbzenith.data.PlayerData;
 import com.dbzenith.data.StatField;
+import com.dbzenith.combat.HeavyStrike;
+import com.dbzenith.ki.DashHandler;
 import com.dbzenith.ki.FlightHandler;
 import com.dbzenith.network.DevScreenshotPacket;
 import com.dbzenith.network.ModNetwork;
@@ -31,6 +33,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -170,6 +173,45 @@ public final class DBZCommand {
                                                     int times = IntegerArgumentType.getInteger(ctx, "times");
                                                     return apply(ctx, "Spent TP on " + id + " (up to " + times + ") for", d -> AttributeTraining.upgrade(d, a, times));
                                                 })))))
+                .then(Commands.literal("cast")
+                        .then(Commands.argument("caster", EntityArgument.entity())
+                                .then(Commands.argument("technique", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(Techniques.all().stream().map(Technique::id), b))
+                                        .then(Commands.argument("damage", DoubleArgumentType.doubleArg(0))
+                                                .executes(ctx -> {
+                                                    String id = StringArgumentType.getString(ctx, "technique");
+                                                    Technique t = Techniques.byId(id);
+                                                    if (t == null) throw UNKNOWN_TECHNIQUE.create(id);
+                                                    if (!(EntityArgument.getEntity(ctx, "caster") instanceof LivingEntity caster)) return 0;
+                                                    TechniqueHandler.spawn(ctx.getSource().getLevel(), caster, t, DoubleArgumentType.getDouble(ctx, "damage"));
+                                                    ctx.getSource().sendSuccess(() -> Component.literal("Cast " + id), true);
+                                                    return 1;
+                                                })))))
+                .then(Commands.literal("dash")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .executes(ctx -> {
+                                    int n = 0;
+                                    for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) if (DashHandler.dash(p, 1, 0)) n++;
+                                    int dashed = n;
+                                    ctx.getSource().sendSuccess(() -> Component.literal("Dashed " + dashed + " player(s)"), true);
+                                    return n;
+                                })))
+                .then(Commands.literal("heavy")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("chargeTicks", IntegerArgumentType.integer(0, 1200))
+                                        .executes(ctx -> {
+                                            int ticks = IntegerArgumentType.getInteger(ctx, "chargeTicks");
+                                            int n = 0;
+                                            for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
+                                                PlayerData d = ModCapabilities.getOrThrow(p);
+                                                d.startHeavyCharge();
+                                                for (int i = 0; i < ticks; i++) d.tickHeavyCharge();
+                                                double m = HeavyStrike.release(p, d);
+                                                ctx.getSource().sendSuccess(() -> Component.literal(p.getGameProfile().getName() + " heavy armed x" + m), true);
+                                                n++;
+                                            }
+                                            return n;
+                                        }))))
                 .then(Commands.literal("devshot")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("name", StringArgumentType.word())

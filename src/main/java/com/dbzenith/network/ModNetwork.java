@@ -13,7 +13,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
  * so mismatched client/server versions are refused at login instead of desyncing.
  */
 public final class ModNetwork {
-    private static final String PROTOCOL = "3";
+    private static final String PROTOCOL = "4";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(DBZenith.MOD_ID, "main"),
@@ -36,6 +36,16 @@ public final class ModNetwork {
                 .decoder(DevScreenshotPacket::decode)
                 .consumerMainThread(DevScreenshotPacket::handle)
                 .add();
+        CHANNEL.messageBuilder(PublicStatePacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(PublicStatePacket::encode)
+                .decoder(PublicStatePacket::decode)
+                .consumerMainThread(PublicStatePacket::handle)
+                .add();
+        CHANNEL.messageBuilder(DashPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(DashPacket::encode)
+                .decoder(DashPacket::decode)
+                .consumerMainThread(DashPacket::handle)
+                .add();
         CHANNEL.messageBuilder(InputPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(InputPacket::encode)
                 .decoder(InputPacket::decode)
@@ -55,6 +65,11 @@ public final class ModNetwork {
 
     public static void sendTo(ServerPlayer player, Object packet) {
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
+    }
+
+    /** To everyone tracking {@code player}, and the player. */
+    public static void sendToTrackingAndSelf(ServerPlayer player, Object packet) {
+        CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player), packet);
     }
 
     public static void sendToServer(Object packet) {

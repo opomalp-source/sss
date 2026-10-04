@@ -6,8 +6,8 @@ package com.dbzenith.skill;
  * @param id             stable id (lang key {@code technique.dbzenith.<id>})
  * @param kiCost         base ki cost before ki control / release scaling
  * @param damageMult     multiplier on {@code DamageCalculator.kiOutgoing}
- * @param speed          blocks per tick
- * @param size           projectile diameter in blocks
+ * @param speed          blocks per tick (beams: how fast the beam extends)
+ * @param size           projectile diameter / beam width in blocks
  * @param cooldownTicks  ticks before it can be used again
  * @param count          projectiles per use (volleys)
  * @param spreadDegrees  random cone for multi-projectile techniques
@@ -15,7 +15,7 @@ package com.dbzenith.skill;
  * @param homing         steers toward the target it was aimed at
  * @param explosionPower vanilla explosion power on impact (0 = none)
  * @param color          0xRRGGBB tint
- * @param lifeTicks      max flight time
+ * @param lifeTicks      max flight time / beam duration
  * @param style          visual style
  */
 public record Technique(
@@ -34,7 +34,7 @@ public record Technique(
         int lifeTicks,
         Style style) {
 
-    public enum Style { BALL, DISK }
+    public enum Style { BALL, DISK, BEAM }
 
     public String translationKey() {
         return "technique.dbzenith." + id;

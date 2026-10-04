@@ -23,18 +23,18 @@ Resume from the first unchecked item. Each phase ends with a git tag.
 - [x] Release %: charging (G, hold) raises it + fills ki, drains stamina, aura particles; Z lowers it; scales ki damage + cost
 - [x] `combat.DamageCalculator`: melee, ki, defense floor, guard, evasion, ki cost
 - [x] Melee: STR-scaled damage, combo counter + bonus, extra knockback, stamina cost, exhausted penalty, guard (Left Alt)
-- [ ] Melee: charged heavy hit
+- [x] Melee: charged heavy hit (H hold/release: 1.5x-3x on the next hit, extra knockback, stamina cost)
 - [x] Ki blast entity framework (`skill.KiBlastEntity`: size, color, speed, pierce, homing, explosion, life)
 - [x] Techniques: Ki Blast, Wave Beam, Rapid Volley, Cutter Disk, Homing Orb (R fire, Y cycle)
-- [ ] True beam rendering (stretched beam instead of a large projectile)
+- [x] True beams: `KiBeamEntity` anchored to the caster, follows aim, pulses damage along its line; ribbon + glow beads renderer. Wave Beam converted, Finger Beam added
 - [x] Flight toggle (V), ki drain, DEX-scaled speed, ends when ki runs out
-- [ ] Dash / burst movement
+- [x] Dash (B): input-direction burst (aims vertically while flying), stamina + ki cost, cooldown, afterimage evasion window
 - [x] DBZ HUD: body/ki/stamina bars, power level, release %, charging/flying/guard chips, combo counter, technique panel + cooldown (debug overlay now off by default)
-- [ ] Apply DEX attack-speed/move-speed bonuses via vanilla attribute modifiers
-- [ ] Sync a public subset (release %, charging, flying, form) to tracking players for visuals
-- [x] GameTests: 10 combat tests (17 total) green
+- [x] DEX attack/move speed bonuses as vanilla attribute modifiers (`stats.SpeedModifiers`)
+- [x] Public state (charging/flying/guard/heavy, release, aura color) synced to trackers; aura glow rendered around charging players (`client.render.AuraRenderer`)
+- [x] GameTests: 22 total green (combat + movement/beam suites)
 - [x] In-client visual check (scripted, screenshots): HUD, charging, all 5 techniques in flight, flight + guard chips, stat screen
-- [ ] Tag `phase-1-combat`
+- [x] Tag `phase-1-combat`
 
 ## Phase 2 — Transformations
 - [ ] Form framework (data-driven form definitions: multipliers, drain, aura color, unlock conditions)

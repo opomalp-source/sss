@@ -39,6 +39,7 @@ public class AssetGen {
 
         // --- ki glow: soft radial white, tinted per technique at render time ---
         radialGlow("assets/dbzenith/textures/entity/ki_glow.png", 32);
+        beamGlow("assets/dbzenith/textures/entity/ki_beam.png", 32);
 
         // --- gametest structure: empty 3x3x3 template ---
         emptyStructure("data/dbzenith/structures/empty.nbt", 3);
@@ -67,6 +68,24 @@ public class AssetGen {
                 double a = Math.max(0, 1 - d);
                 a = Math.pow(a, 1.6);
                 int alpha = (int) Math.round(255 * Math.min(1, a * 1.4));
+                img.setRGB(x, y, (alpha << 24) | 0xFFFFFF);
+            }
+        }
+        File out = new File(RES + path);
+        out.getParentFile().mkdirs();
+        ImageIO.write(img, "png", out);
+        System.out.println("wrote " + out);
+    }
+
+    /** Soft across the width (u), uniform along the length (v). */
+    static void beamGlow(String path, int size) throws IOException {
+        BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        double c = (size - 1) / 2.0;
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                double d = Math.abs(x - c) / (size / 2.0);
+                double a = Math.pow(Math.max(0, 1 - d), 1.3);
+                int alpha = (int) Math.round(255 * Math.min(1, a * 1.5));
                 img.setRGB(x, y, (alpha << 24) | 0xFFFFFF);
             }
         }

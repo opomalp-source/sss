@@ -1,6 +1,7 @@
 package com.dbzenith.registry;
 
 import com.dbzenith.DBZenith;
+import com.dbzenith.skill.KiBeamEntity;
 import com.dbzenith.skill.KiBlastEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -18,6 +19,14 @@ public final class ModEntities {
                     .clientTrackingRange(8)
                     .updateInterval(1)
                     .build("ki_blast"));
+
+    public static final RegistryObject<EntityType<KiBeamEntity>> KI_BEAM = ENTITIES.register("ki_beam",
+            () -> EntityType.Builder.<KiBeamEntity>of(KiBeamEntity::new, MobCategory.MISC)
+                    .sized(0.2f, 0.2f)
+                    .clientTrackingRange(10)
+                    .updateInterval(1)
+                    .noSave()
+                    .build("ki_beam"));
 
     private ModEntities() {}
 
