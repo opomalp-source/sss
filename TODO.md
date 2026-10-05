@@ -133,7 +133,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [ ] CX-5 Universal skills: Kaioken, Limit Break, Ki Sense, Instant Transmission, Ki Barrier, Echo Strike...
 - [ ] CX-6 Combat v3: Z-hits, sweeps, directionals, revenge counter, breaker wave, vanish / chase, dodges, recovery, clashes, downed state
 - [ ] CX-7 Ki Creator v2 (methods, origins, shapes, types, 14 modifiers)
-- [ ] CX-8 Character creator v2 + better hair presets + hair physics
+- [ ] CX-8 Character creator v2 + better hair presets + hair physics. Done: 19 presets rebuilt on a volume layer (9 new: Prince flame, Rebel lock, Legend mane, Sage, Curtains, Buzz cut, Cloud puff, Twin tails, Side cut), spring-damped hair physics (movement, falling, turning, idle, aura updraft, gravity on head tilt; setting "Hair physics"). Still to do: face parts
 - [ ] CX-9 Animation v3
 - [ ] CX-10 Sound
 - [ ] CX-11 VFX v3

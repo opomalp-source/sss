@@ -34,6 +34,12 @@ public final class AppearanceTests {
             helper.assertTrue(strands.equals(HairCode.decode(p.code())), p + " survives encode and decode");
             helper.assertTrue(p.code().length() <= HairCode.MAX_CODE_LENGTH, p + " fits the code length");
         }
+        for (HairCode.Preset p : HairCode.Preset.values()) {
+            for (com.dbzenith.transform.Form f : Forms.all()) {
+                List<Strand> grown = HairCode.decode(HairCode.forForm(p.code(), f));
+                helper.assertTrue(grown != null && grown.size() <= HairCode.MAX_STRANDS, p + " grows into " + f.id() + "'s hair");
+            }
+        }
         helper.assertTrue(HairCode.decode("").isEmpty() && "".equals(HairCode.sanitize("")), "empty code = bald");
         helper.assertTrue(HairCode.sanitize("not a hair code") == null, "garbage is rejected");
         helper.assertTrue(HairCode.sanitize(HairCode.PREFIX + "!!!") == null, "bad base64 is rejected");

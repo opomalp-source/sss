@@ -601,6 +601,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue hudScale;
         public final ForgeConfigSpec.IntValue auraDetail;
         public final ForgeConfigSpec.BooleanValue fovEffects;
+        public final ForgeConfigSpec.BooleanValue hairPhysics;
 
         Client(ForgeConfigSpec.Builder b) {
             b.push("hud");
@@ -628,6 +629,8 @@ public final class DBZConfig {
                     .defineInRange("auraDetail", 1, 0, 2);
             fovEffects = b.comment("Zoom punch on heavy blows and the widening rush on dashes")
                     .define("fovEffects", true);
+            hairPhysics = b.comment("Hair sways with movement, falling, turning and auras")
+                    .define("hairPhysics", true);
             b.pop();
         }
     }

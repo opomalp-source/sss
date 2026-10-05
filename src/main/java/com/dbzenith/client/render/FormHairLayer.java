@@ -72,7 +72,8 @@ public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
             }
             pose.pushPose();
             getParentModel().head.translateAndRotate(pose);
-            HairMesh.render(pose, vc, HairMesh.of(code), hairLight, OverlayTexture.NO_OVERLAY, r, g, b);
+            HairWind.State wind = HairWind.of(player, getParentModel().head, state, formHair, partialTick);
+            HairMesh.render(pose, vc, HairMesh.of(code), wind, hairLight, OverlayTexture.NO_OVERLAY, r, g, b);
             pose.popPose();
         }
         if (eyeColor >= 0) {

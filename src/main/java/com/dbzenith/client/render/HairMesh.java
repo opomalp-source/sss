@@ -19,8 +19,17 @@ import java.util.Map;
  * the tip (texture rows of textures/entity/form_hair.png). Meshes are cached by code.
  */
 public final class HairMesh {
-    /** One segment: eight corners (bit 0 = +side, bit 1 = +side2, bit 2 = towards the tip) and its shade tier. */
-    record Segment(float[][] corners, Vec3 axis, Vec3 side, Vec3 side2, int tier) {}
+    /**
+     * One segment: eight corners (bit 0 = +side, bit 1 = +side2, bit 2 = towards the tip), its shade tier, its strand
+     * and how far along the strand its two ends lie (for the wind).
+     */
+    record Segment(float[][] corners, Vec3 axis, Vec3 side, Vec3 side2, int tier, Root strand, float d0, float d1) {}
+
+    /** A strand as the wind sees it: its root, root-to-tip direction, outward normal, flexibility and how it hangs. */
+    record Root(Vec3 root, Vec3 dir, Vec3 normal, float flex, float hang) {}
+
+    /** Pixels a strand's tip moves for a unit of wind at sixteen pixels long. */
+    private static final float SWAY = 7f;
 
     private static final Map<String, List<Segment>> CACHE = new LinkedHashMap<>(64, 0.75f, true) {
         @Override
@@ -73,17 +82,33 @@ public final class HairMesh {
             case LIFT -> 0.3f;
             case STRAIGHT -> 0f;
         };
+        Vec3[] pts = new Vec3[segs + 1];
+        pts[0] = p;
         for (int i = 0; i < segs; i++) {
             if (i > 0 && target != null) dir = dir.add(target.subtract(dir).scale(rate)).normalize();
+            pts[i + 1] = pts[i].add(dir.scale(segLen));
+        }
+        Vec3 span = pts[segs].subtract(pts[0]);
+        float flex = switch (s.bend()) {
+            case HANG -> 1f;
+            case DROOP -> 0.8f;
+            case LIFT -> 0.55f;
+            case STRAIGHT -> 0.35f;
+        };
+        float hang = switch (s.bend()) {
+            case HANG -> 1f;
+            case DROOP -> 0.5f;
+            default -> 0f;
+        };
+        Root root = new Root(pts[0], span.lengthSqr() < 1e-6 ? f[1] : span.normalize(), f[1], flex, hang);
+        for (int i = 0; i < segs; i++) {
             float w = Math.max(0.45f, s.width() * (1 - 0.7f * i / Math.max(1, segs - 1)));
-            Vec3 end = p.add(dir.scale(segLen));
             int tier = i == 0 ? 0 : i == segs - 1 ? 2 : 1;
-            out.add(box(p, end, w, tier));
-            p = end;
+            out.add(box(pts[i], pts[i + 1], w, tier, root, i * segLen, (i + 1) * segLen));
         }
     }
 
-    static Segment box(Vec3 from, Vec3 to, float width, int tier) {
+    static Segment box(Vec3 from, Vec3 to, float width, int tier, Root strand, float d0, float d1) {
         Vec3 axis = to.subtract(from);
         double len = axis.length();
         axis = axis.normalize();
@@ -98,7 +123,7 @@ public final class HairMesh {
                     .add(axis.scale((i & 4) != 0 ? half : -half));
             corners[i] = new float[]{(float) p.x, (float) p.y, (float) p.z};
         }
-        return new Segment(corners, axis, side, side2, tier);
+        return new Segment(corners, axis, side, side2, tier, strand, d0, d1);
     }
 
     // faces as corner indices, with the axis (0 side, 1 side2, 2 axis) and sign of their normal
@@ -111,20 +136,60 @@ public final class HairMesh {
      * coordinates are in model pixels.
      */
     public static void render(PoseStack pose, VertexConsumer vc, List<Segment> mesh, int light, int overlay, float r, float g, float b) {
+        render(pose, vc, mesh, HairWind.State.STILL, light, overlay, r, g, b);
+    }
+
+    /**
+     * Draw with the wind: each strand swings about its root, away from the wind and towards gravity, more the
+     * further along it is and the more flexible it is (hanging hair most, stiff spikes least).
+     */
+    public static void render(PoseStack pose, VertexConsumer vc, List<Segment> mesh, HairWind.State wind, int light, int overlay,
+                              float r, float g, float b) {
         pose.pushPose();
         pose.scale(1 / 16f, 1 / 16f, 1 / 16f);
         Matrix4f m = pose.last().pose();
         Matrix3f n = pose.last().normal();
+        Vec3 sag = wind.gravity().subtract(DOWN);
+        boolean calm = wind.wind().lengthSqr() < 1e-4 && sag.lengthSqr() < 1e-4;
+        Root last = null;
+        Vec3 push = Vec3.ZERO;
+        double pushLen = 0;
+        float[][] moved = new float[8][3];
         for (Segment s : mesh) {
+            float[][] corners = s.corners;
+            if (!calm) {
+                if (s.strand != last) {
+                    last = s.strand;
+                    Vec3 w = wind.wind().scale(last.flex() * wind.stiffness()).add(sag.scale(last.hang()));
+                    double along = w.dot(last.dir());
+                    push = w.subtract(last.dir().scale(along));
+                    if (along < 0) push = push.add(last.normal().scale(-along * 0.8));   // head-on: the strand flips outward
+                    pushLen = push.length();
+                    if (pushLen > 1e-6) push = push.scale(1 / pushLen);
+                }
+                if (pushLen > 1e-3) {
+                    Vec3 dir = last.dir();
+                    for (int i = 0; i < 8; i++) {
+                        float d = (i & 4) != 0 ? s.d1 : s.d0;
+                        double delta = Math.min(0.9 * d, pushLen * SWAY * Math.pow(d / 16.0, 1.3));
+                        double back = d - Math.sqrt(Math.max(0, d * d - delta * delta));          // swinging, not stretching
+                        float[] c = s.corners[i];
+                        moved[i][0] = (float) (c[0] + push.x * delta - dir.x * back);
+                        moved[i][1] = (float) (c[1] + push.y * delta - dir.y * back);
+                        moved[i][2] = (float) (c[2] + push.z * delta - dir.z * back);
+                    }
+                    corners = moved;
+                }
+            }
             float u0 = (s.tier * 16 + 3) / 64f, u1 = (s.tier * 16 + 9) / 64f, v0 = 50 / 64f, v1 = 56 / 64f;
             for (int f = 0; f < 6; f++) {
                 Vec3 axis = FACE_AXIS[f] == 0 ? s.side : FACE_AXIS[f] == 1 ? s.side2 : s.axis;
                 float nx = (float) axis.x * FACE_SIGN[f], ny = (float) axis.y * FACE_SIGN[f], nz = (float) axis.z * FACE_SIGN[f];
                 int[] q = FACES[f];
-                vertex(vc, m, n, s.corners[q[0]], u0, v0, r, g, b, light, overlay, nx, ny, nz);
-                vertex(vc, m, n, s.corners[q[1]], u1, v0, r, g, b, light, overlay, nx, ny, nz);
-                vertex(vc, m, n, s.corners[q[2]], u1, v1, r, g, b, light, overlay, nx, ny, nz);
-                vertex(vc, m, n, s.corners[q[3]], u0, v1, r, g, b, light, overlay, nx, ny, nz);
+                vertex(vc, m, n, corners[q[0]], u0, v0, r, g, b, light, overlay, nx, ny, nz);
+                vertex(vc, m, n, corners[q[1]], u1, v0, r, g, b, light, overlay, nx, ny, nz);
+                vertex(vc, m, n, corners[q[2]], u1, v1, r, g, b, light, overlay, nx, ny, nz);
+                vertex(vc, m, n, corners[q[3]], u0, v1, r, g, b, light, overlay, nx, ny, nz);
             }
         }
         pose.popPose();

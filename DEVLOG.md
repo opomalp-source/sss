@@ -369,3 +369,19 @@
 - 118 GameTests green.
 - Screenshots reviewed: every new race and variant skin and feature, Legendary Full Power, SSJ4, Blood Rush, the Tuffle cut-in, the path choice, settings.
 - Fixed: Gen Alien's checkered skull, SSJ4 names drawn near-black, the path subtitle overflowing.
+
+## 2026-10-05 — Session 3 (cont.): CX-8a Hair presets and hair physics (v0.14.1)
+- **Presets rebuilt:** every preset now sits on a volume layer (short, thick strands over the crown, sides and back) so no scalp shows between shaped strands. Hero spikes are fewer, bigger spikes going up and out, with bangs that frame the eyes instead of covering them. There are 9 new presets: Prince flame, Rebel lock, Legend mane, Sage, Curtains, Buzz cut, Cloud puff, Twin tails and Side cut (19 in total). Transforming keeps the volume layer short instead of turning it into extra spikes; fully cropped hair still flares into spikes.
+- **Hair physics (`HairWind`, `HairMesh`):** each player has a spring-damped wind that slightly overshoots, so hair bounces when you stop. The wind comes from:
+  - movement relative to the body (hair streams back),
+  - vertical speed (hair lifts as you fall),
+  - head turning (hair lags),
+  - an idle breathing sway,
+  - an aura updraft that flickers while charging or transformed.
+
+  The wind is turned into head space together with gravity, so long hair keeps hanging when the head tilts. Each strand swings about its root rather than stretching; how far depends on its curve (hanging hair moves most, stiff spikes least) and how far along the strand you are, and transformed hair is stiffer. Meshes stay cached, and the bending is a per-vertex offset at draw time. The "Hair physics" setting is under Effects.
+- **Tests:** every preset grows into every form's hair within the strand limit.
+
+### Verified
+- 118 GameTests green.
+- Front and back screenshots of all presets. Mid-fall shots show Sage and Legend mane lifting and streaming.
