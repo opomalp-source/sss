@@ -738,3 +738,19 @@ The user sent reference pictures for the art direction they want: chunky anime-s
 
 ### Still to do (14b part 2)
 - Combat expressions: shouting while powering up and transforming, gritting when hurt.
+
+## 2026-10-06 — Session 3 (cont.): 14g proportions and 14c hair v3 (v0.30.0)
+- **Proportions (`BodyShape`, user request: "the chest is a little bigger than the torso"):**
+  - The player model's body gets a chest block over the upper half of the torso, wider and deeper than the waist: the V-taper of the references.
+  - It comes in three sizes (lean, athletic, bulky) and is added at runtime as a child of the body part, by reflection on `ModelPart`'s children map, since the project has no mixins.
+  - Because it belongs to the body, every layer that draws the body draws the chest with the same texture: race skins, painted bodies, outfits, fur and glows. It follows every animation, the pecs sit on it and the abs run on below.
+  - It shows only for the mod's looks, not for Minecraft skins or the Classic art style.
+- **Hair v3 (`HairMesh` chunky mode; hair codes unchanged):**
+  - Clumps are half as wide again, taper less, use fewer and blockier segments and are rooted deeper.
+  - A solid hair mass (`FormHairModel`) hugs the skull: a top slab whose front edge stays above the brows, a thick back and the temples. It is skipped for styles without volume, such as the mohawk (`HairCode.hasVolume`).
+  - Each tier is lifted toward white (roots 5%, shafts 12%, tips 22%), so black hair keeps a visible root-to-tip gradient where it used to be a flat silhouette.
+  - The Classic art style keeps the thin spikes.
+- **Dev:** `/dbz bodytype <player> <0-2>`, and a `turn` devshot flag that twists the body 45° for three-quarter views.
+
+### Verified
+- Three-quarter screenshots: the lean and bulky builds, a Frost Demon and a Namekian with the chest block; the spiky, prince, wild, teen and mane hair from the front and back; SSJ and SSJ3.

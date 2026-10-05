@@ -91,6 +91,10 @@ public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
             if (state.skinTone() < 0 && !state.raceLook()) {                       // hide the skin's own painted hair
                 model.renderCap(pose, vc, hairLight, OverlayTexture.NO_OVERLAY, r, g, b);
             }
+            if (ArtStyle.get() != ArtStyle.CLASSIC && HairCode.hasVolume(code)) {                  // the mass the clumps grow from
+                model.copyHead(getParentModel().head);
+                model.renderMass(pose, vc, hairLight, OverlayTexture.NO_OVERLAY, r * 0.85f + 0.03f, g * 0.85f + 0.03f, b * 0.85f + 0.03f);
+            }
             pose.pushPose();
             getParentModel().head.translateAndRotate(pose);
             HairWind.State wind = HairWind.of(player, getParentModel().head, state, formHair, partialTick);

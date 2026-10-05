@@ -87,6 +87,8 @@ public final class CameraFx {
 
     /** Dev automation: a fixed narrow field of view for close-up screenshots (0 = off). */
     public static float devZoom;
+    /** Dev automation: the local player's body turned this many degrees from their view, for three-quarter screenshots. */
+    public static float devTurn;
 
     @SubscribeEvent
     public static void onFov(ViewportEvent.ComputeFov event) {

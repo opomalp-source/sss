@@ -300,6 +300,23 @@ public final class HairCode {
         return s;
     }
 
+    /** Whether a hair covers the skull (strands rooted across the top, both sides of the middle): a mohawk does not. */
+    public static boolean hasVolume(String code) {
+        return VOLUME.computeIfAbsent(code, c -> {
+            List<Strand> s = decode(c);
+            if (s == null) return false;
+            boolean left = false, right = false;
+            for (Strand st : s) {
+                if (st.face() != Face.TOP && st.face() != Face.BACK) continue;
+                if (st.u() <= 2) left = true;
+                if (st.u() >= 5) right = true;
+            }
+            return left && right;
+        });
+    }
+
+    private static final java.util.Map<String, Boolean> VOLUME = new java.util.concurrent.ConcurrentHashMap<>();
+
     // ------------------------------------------------------------------ transformations
 
     /**

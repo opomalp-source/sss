@@ -430,6 +430,19 @@ public final class DBZCommand {
                                         .then(Commands.argument("skinTone", IntegerArgumentType.integer(-1, 0xFFFFFF))
                                                 .then(Commands.argument("height", IntegerArgumentType.integer(PlayerData.MIN_HEIGHT, PlayerData.MAX_HEIGHT))
                                                         .executes(DBZCommand::look))))))
+                .then(Commands.literal("bodytype")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("type", IntegerArgumentType.integer(0, 2))
+                                        .executes(ctx -> {
+                                            var targets = EntityArgument.getPlayers(ctx, "targets");
+                                            PlayerData.BodyType type = PlayerData.BodyType.values()[IntegerArgumentType.getInteger(ctx, "type")];
+                                            for (ServerPlayer p : targets) {
+                                                ModCapabilities.get(p).ifPresent(d -> d.setBodyType(type));
+                                                com.dbzenith.data.PlayerDataEvents.sync(p);
+                                            }
+                                            ctx.getSource().sendSuccess(() -> Component.literal("Body type " + type + " for " + targets.size() + " player(s)"), true);
+                                            return targets.size();
+                                        }))))
                 .then(Commands.literal("devshot")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("name", StringArgumentType.word())

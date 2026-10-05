@@ -61,6 +61,7 @@ public final class ClientSetup {
         for (String skin : event.getSkins()) {
             PlayerRenderer renderer = event.getSkin(skin);
             if (renderer != null) {
+                com.dbzenith.client.render.BodyShape.attach(renderer.getModel());
                 renderer.addLayer(new com.dbzenith.client.render.BodySkinLayer(renderer));
                 renderer.addLayer(new com.dbzenith.client.render.RaceSkinLayer(renderer));
                 renderer.addLayer(new com.dbzenith.client.render.FormOverlayLayer(renderer));

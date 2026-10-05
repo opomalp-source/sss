@@ -37,16 +37,19 @@ public final class HairMesh {
             return size() > 128;
         }
     };
+    /** How far each tier (root, shaft, tip) is lifted towards white, so black hair keeps a gradient. */
+    static final float[] LIFT = {0.05f, 0.12f, 0.22f};
     private static final Vec3 DOWN = new Vec3(0, 1, 0);
     private static final Vec3 UP = new Vec3(0, -1, 0);
 
     private HairMesh() {}
 
     public static List<Segment> of(String code) {
-        return CACHE.computeIfAbsent(code, c -> {
-            List<Strand> strands = HairCode.decode(c);
+        boolean chunky = ArtStyle.get() != ArtStyle.CLASSIC;
+        return CACHE.computeIfAbsent((chunky ? "c" : "t") + code, k -> {
+            List<Strand> strands = HairCode.decode(code);
             List<Segment> out = new ArrayList<>();
-            if (strands != null) for (Strand s : strands) build(s, out);
+            if (strands != null) for (Strand s : strands) build(s, out, chunky);
             return out;
         });
     }
@@ -63,14 +66,18 @@ public final class HairMesh {
         };
     }
 
-    static void build(Strand s, List<Segment> out) {
+    /**
+     * One strand. Chunky (the painted and HD styles, CX-14c): clumps half as wide again, tapering less, in fewer and
+     * blockier segments rooted deeper, like the stacked voxel hair of the references; thin: the original spikes.
+     */
+    static void build(Strand s, List<Segment> out, boolean chunky) {
         Vec3[] f = frame(s);
         double yaw = Math.toRadians(s.yaw() * 15), pitch = Math.toRadians(s.pitch() * 15);
         Vec3 dir = f[1].scale(Math.cos(pitch) * Math.cos(yaw)).add(f[2].scale(Math.sin(yaw) * Math.cos(pitch)))
                 .add(f[3].scale(-Math.sin(pitch))).normalize();
-        int segs = s.length() <= 5 ? 3 : s.length() <= 10 ? 4 : 5;
+        int segs = chunky ? (s.length() <= 5 ? 2 : s.length() <= 10 ? 3 : 4) : s.length() <= 5 ? 3 : s.length() <= 10 ? 4 : 5;
         float segLen = s.length() / (float) segs;
-        Vec3 p = f[0].subtract(f[1].scale(0.3));                                // root sunk a little into the scalp
+        Vec3 p = f[0].subtract(f[1].scale(chunky ? 0.7 : 0.3));                              // root sunk a little into the scalp
         Vec3 target = switch (s.bend()) {
             case DROOP, HANG -> DOWN;
             case LIFT -> UP;
@@ -102,7 +109,8 @@ public final class HairMesh {
         };
         Root root = new Root(pts[0], span.lengthSqr() < 1e-6 ? f[1] : span.normalize(), f[1], flex, hang);
         for (int i = 0; i < segs; i++) {
-            float w = Math.max(0.45f, s.width() * (1 - 0.7f * i / Math.max(1, segs - 1)));
+            float w = chunky ? Math.max(1.1f, s.width() * 1.5f * (1 - 0.55f * i / Math.max(1, segs - 1)))
+                    : Math.max(0.45f, s.width() * (1 - 0.7f * i / Math.max(1, segs - 1)));
             int tier = i == 0 ? 0 : i == segs - 1 ? 2 : 1;
             out.add(box(pts[i], pts[i + 1], w, tier, root, i * segLen, (i + 1) * segLen));
         }
@@ -221,6 +229,10 @@ public final class HairMesh {
             float sr = s.tier == 2 ? tr : s.tier == 1 && tips >= 0 ? (r + tr) / 2 : r;          // dyed tips blend in along the shaft
             float sg = s.tier == 2 ? tg : s.tier == 1 && tips >= 0 ? (g + tg) / 2 : g;
             float sb = s.tier == 2 ? tb : s.tier == 1 && tips >= 0 ? (b + tb) / 2 : b;
+            float lift = LIFT[s.tier];                                                          // dark hair still shows its shape: roots to tips
+            sr += (1 - sr) * lift;
+            sg += (1 - sg) * lift;
+            sb += (1 - sb) * lift;
             for (int f = 0; f < 6; f++) {
                 Vec3 axis = FACE_AXIS[f] == 0 ? s.side : FACE_AXIS[f] == 1 ? s.side2 : s.axis;
                 float nx = (float) axis.x * FACE_SIGN[f], ny = (float) axis.y * FACE_SIGN[f], nz = (float) axis.z * FACE_SIGN[f];
