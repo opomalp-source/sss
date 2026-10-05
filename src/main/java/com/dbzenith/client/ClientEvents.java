@@ -100,6 +100,10 @@ public final class ClientEvents {
             mc.setScreen(new com.dbzenith.client.screen.PathChoiceScreen(null));
             delayTicks = Math.max(delayTicks, 6);
         }
+        if (name.startsWith("universal_") && !(mc.screen instanceof com.dbzenith.client.screen.RacialScreen)) {
+            mc.setScreen(new com.dbzenith.client.screen.RacialScreen(null, true));
+            delayTicks = Math.max(delayTicks, 6);
+        }
         if (name.startsWith("racial_") && !(mc.screen instanceof com.dbzenith.client.screen.RacialScreen)) {
             mc.setScreen(new com.dbzenith.client.screen.RacialScreen(null));
             delayTicks = Math.max(delayTicks, 6);

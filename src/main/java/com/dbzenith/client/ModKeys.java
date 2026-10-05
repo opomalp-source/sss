@@ -22,8 +22,10 @@ public final class ModKeys {
     public static final KeyMapping STATS = key("stats", GLFW.GLFW_KEY_K);
     public static final KeyMapping RADIAL = key("radial", GLFW.GLFW_KEY_X);
     public static final KeyMapping RACIAL = key("racial", GLFW.GLFW_KEY_U);
+    public static final KeyMapping SKILL = key("skill", GLFW.GLFW_KEY_I);
+    public static final KeyMapping KAIOKEN = key("kaioken", GLFW.GLFW_KEY_O);
 
-    public static final KeyMapping[] ALL = {CHARGE, LOWER_RELEASE, FLY, GUARD, KI_ATTACK, NEXT_TECHNIQUE, HEAVY, DASH, TRANSFORM, OVERDRIVE, STATS, RADIAL, RACIAL};
+    public static final KeyMapping[] ALL = {CHARGE, LOWER_RELEASE, FLY, GUARD, KI_ATTACK, NEXT_TECHNIQUE, HEAVY, DASH, TRANSFORM, OVERDRIVE, STATS, RADIAL, RACIAL, SKILL, KAIOKEN};
 
     private ModKeys() {}
 

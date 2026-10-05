@@ -41,6 +41,11 @@ public final class ClientHooks {
     }
 
     /** The first milestone: choose a path (only if nothing else is open; the Training screen offers it too). */
+    public static void openTransmission(java.util.List<com.dbzenith.network.RacialPackets.Destination> list) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null) mc.setScreen(new com.dbzenith.client.screen.TransmissionScreen(list));
+    }
+
     public static void openPathChoice() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen == null && mc.player != null) mc.setScreen(new com.dbzenith.client.screen.PathChoiceScreen(null));

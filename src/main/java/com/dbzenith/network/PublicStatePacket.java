@@ -25,13 +25,17 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
     public static final int MEDITATING = 32;
     /** Powering up into a form ({@link #transformTarget}). */
     public static final int TRANSFORMING = 64;
+    public static final int KAIOKEN = 128;
+    /** A Ki Barrier is up. */
+    public static final int BARRIER = 256;
     /** Bit in {@code looks}: show the full race skin. */
     public static final int RACE_LOOK = 256;
 
     public static PublicStatePacket of(int entityId, PlayerData d) {
         int flags = (d.isCharging() ? CHARGING : 0) | (d.isFlying() ? FLYING : 0)
                 | (d.isGuarding() ? GUARDING : 0) | (d.isChargingHeavy() ? HEAVY : 0)
-                | (Races.of(d.getRace()).tail() && d.hasTail() ? TAIL : 0) | (d.isMeditating() ? MEDITATING : 0) | (d.isTransforming() ? TRANSFORMING : 0);
+                | (Races.of(d.getRace()).tail() && d.hasTail() ? TAIL : 0) | (d.isMeditating() ? MEDITATING : 0) | (d.isTransforming() ? TRANSFORMING : 0)
+                | (d.getKaiokenStage() > 0 ? KAIOKEN : 0) | (d.getRacialActive().contains("ki_barrier") ? BARRIER : 0);
         return new PublicStatePacket(entityId, flags, d.getReleasePercent(), Aura.color(d), d.getFormId(), d.getOverdriveLevel(),
                 d.getRace().ordinal(), d.getBodyType().ordinal(), d.getHairStyle(), d.getHairColor(), d.getEyeColor(),
                 d.hasFlag("god_ki") ? -1 : com.dbzenith.stats.StatCalculator.battlePower(d), // -1: god ki cannot be read
@@ -85,7 +89,7 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
 
     public static void encode(PublicStatePacket msg, FriendlyByteBuf buf) {
         buf.writeVarInt(msg.entityId);
-        buf.writeByte(msg.flags);
+        buf.writeVarInt(msg.flags);
         buf.writeByte(msg.release);
         buf.writeInt(msg.auraColor);
         buf.writeUtf(msg.form, 64);
@@ -105,7 +109,7 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
     }
 
     public static PublicStatePacket decode(FriendlyByteBuf buf) {
-        return new PublicStatePacket(buf.readVarInt(), buf.readByte(), buf.readByte(), buf.readInt(), buf.readUtf(64), buf.readByte(),
+        return new PublicStatePacket(buf.readVarInt(), buf.readVarInt(), buf.readByte(), buf.readInt(), buf.readUtf(64), buf.readByte(),
                 buf.readByte(), buf.readByte(), buf.readByte(), buf.readInt(), buf.readInt(), buf.readVarLong(),
                 buf.readUnsignedShort(), buf.readUtf(com.dbzenith.appearance.HairCode.MAX_CODE_LENGTH), buf.readInt(), buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUtf(64));
     }

@@ -83,6 +83,17 @@ public final class ClientInput {
         }
         while (ModKeys.STATS.consumeClick()) mc.setScreen(new StatScreen());
         while (ModKeys.RADIAL.consumeClick()) com.dbzenith.client.ui.RadialMenuScreen.open();
+        while (ModKeys.KAIOKEN.consumeClick()) {
+            ModNetwork.sendToServer(new InputPacket(Screen.hasShiftDown() ? InputPacket.Action.KAIOKEN_OFF : InputPacket.Action.KAIOKEN_UP));
+        }
+        while (ModKeys.SKILL.consumeClick()) {                          // shift: browse the universal skills
+            com.dbzenith.data.PlayerData pd = ClientPlayerData.get();
+            if (Screen.hasShiftDown()) mc.setScreen(new com.dbzenith.client.screen.RacialScreen(null, true));
+            else if (pd.getSkillSelected().equals("instant_transmission") && pd.getSkillLevel("instant_transmission") > 0) {
+                if (mc.level.getGameTime() >= pd.getRacialCooldown("instant_transmission")) ModNetwork.sendToServer(new com.dbzenith.network.RacialPackets.TransmitRequest());
+                else ModNetwork.sendToServer(new InputPacket(InputPacket.Action.SKILL_USE));   // the server says how long
+            } else ModNetwork.sendToServer(new InputPacket(InputPacket.Action.SKILL_USE));
+        }
         while (ModKeys.RACIAL.consumeClick()) {                         // shift: browse the racial skills
             if (Screen.hasShiftDown()) mc.setScreen(new com.dbzenith.client.screen.RacialScreen(null));
             else ModNetwork.sendToServer(new InputPacket(InputPacket.Action.RACIAL_USE));

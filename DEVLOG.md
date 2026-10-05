@@ -433,3 +433,31 @@
 
 ### Verified
 - Screenshots: the Racial Skills screen (Legendary Saiyan; Dragon Clan with Reincarnation locked at level 700), Venting throwing zombies, Bat Swarm, and the HUD readouts with cooldowns.
+
+## 2026-10-05 — Session 3 (cont.): CX-5 Universal skills (v0.16.0)
+- **Engine:** universal skills run on the racial-skill engine. `RacialSkill.learned(tp, levels...)` marks a skill as learned with TP by any race, with skill levels gated by character level, and `PlayerData.skillLevels` holds what has been learned. `RacialSkills.kit` merges the race's skills with the universal ones for every modifier, so timed buffs, backlash, conditions and the blow hooks all apply unchanged. `learnProblem` and `learn` handle buying, and the `RacialPackets.Learn` packet sends it.
+- **The nine skills:**
+  - **Ki Sense** (`KiSenseHud`):
+    - Lv1: a pulsing warning with a direction arrow when a ki above 1.5x yours is within 64 blocks.
+    - Lv2: arrows around the crosshair for ki blasts flying at you, coloured like the blast, larger the closer.
+    - Lv3: the Skill key scans for 10 s, marking every living thing within 64 blocks with its power (red, yellow or green against yours).
+    - God ki cannot be felt without it.
+  - **Kaioken** (`transform.Kaioken`): the O key raises it one stage; Shift+O releases it. Body burn with Willpower/Spirit strain. A red roaring aura, mixed with the god form's colour on Blue. A "KAIOKEN xN" HUD chip. Leaves on entering a non-calm form.
+  - **Rising Charge:** `PlayerData` keeps the charge you just released for 2 s, and `TechniqueHandler` spends it.
+  - **Echo Strike:** on an afterimage dodge of a blow, you appear behind the attacker and strike back.
+  - **Spirit Shock:** a stun burst that also lowers guards.
+  - **Ki Barrier:** a buff; `BarrierRenderer` draws the sphere (bright at the rim, with a rolling light band) for everyone through a new BARRIER flag on the public state.
+  - **Desperate Gambit:** a buff with a death guard.
+  - **Limit Break:** a buff and backlash; Half-Saiyans and the New Generation go further.
+  - **Instant Transmission:** the Skill key asks the server for every ki you can sense in your dimension (nearest first, with power, god ki only if yours is too) plus home. `TransmissionScreen` picks one, and you arrive behind the target.
+- **UI:**
+  - The skills screen has Racial and Universal tabs. Universal cards show the level or price, and a Learn button shows the next level's cost or what is missing.
+  - The screen was resized to 236 px, because it overflowed a 240 px GUI.
+  - The Skill readout sits above the racial one on the HUD, with chips for buffs and backlash.
+  - New keys: Skill (I; Shift+I to browse) and Kaioken (O; Shift+O to release).
+  - `/dbz skill <targets> <skill> <level>`.
+- **Network:** the public state flags became a varint (KAIOKEN 128, BARRIER 256). New packets: SelectSkill, Learn, TransmitRequest, TransmitTargets, Transmit. Protocol 23.
+- **Tests (128):** `UniversalSkillTests` (4): learning with TP and level gates; Kaioken stages, burn and form rules; Limit Break by race, Ki Barrier, Desperate Gambit; Rising Charge and Echo Strike.
+
+### Verified
+- Screenshots: the Universal tab, the Kaioken aura, the Ki Barrier sphere over Kaioken, and Ki Sense scan markers over mobs.

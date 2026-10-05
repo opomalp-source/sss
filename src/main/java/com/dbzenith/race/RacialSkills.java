@@ -227,6 +227,20 @@ public final class RacialSkills {
                 .mod(Stat.LIFESTEAL, 0.08, When.IN_COMBAT));
         add(RacialSkill.active("dark_aura").only(Variant.DEMON).level(300).color(DEMON).use(8, 90, 15)
                 .mod(Stat.POWER, 0.10, When.ACTIVE));
+
+        // ---------------------------------------------------------- Universal: learned with TP, any race
+        add(RacialSkill.active("ki_sense").learned(2000, 50, 250, 600).use(2, 20, 10).color(0x80E0FF));
+        add(RacialSkill.active("kaioken").learned(4000, 100, 400, 800, 1200).use(0, 1, 0).color(0xFF3030));
+        add(RacialSkill.passive("rising_charge").learned(8000, 150).color(0xFFB040));
+        add(RacialSkill.passive("echo_strike").learned(12000, 200, 500, 900).color(0xC0C8FF));
+        add(RacialSkill.active("spirit_shock").learned(10000, 250).use(10, 25, 0).color(0xB0FFE0));
+        add(RacialSkill.active("ki_barrier").learned(15000, 300).use(15, 40, 8).color(0x60C0FF)
+                .mod(Stat.DAMAGE_TAKEN, -0.20, When.ACTIVE));
+        add(RacialSkill.active("desperate_gambit").learned(20000, 400).use(0, 180, 10).color(0xFF4060)
+                .mod(Stat.DAMAGE_DEALT, 0.40, When.ACTIVE).mod(Stat.KI_REGEN, -1.0, When.AFTER));
+        add(RacialSkill.active("limit_break").learned(30000, 500).use(10, 300, 60).color(0xFFE040)
+                .mod(Stat.POWER, 0.25, When.ACTIVE).mod(Stat.POWER, -0.30, When.AFTER));
+        add(RacialSkill.active("instant_transmission").learned(60000, 900).use(25, 30, 0).color(0xE0E8FF));
     }
 
     // ------------------------------------------------------------------ queries
@@ -243,10 +257,53 @@ public final class RacialSkills {
     public static List<RacialSkill> forCharacter(Race race, Variant variant) {
         return BY_CHARACTER.computeIfAbsent(race, r -> new EnumMap<>(Variant.class)).computeIfAbsent(variant, v -> {
             List<RacialSkill> out = new ArrayList<>();
-            for (RacialSkill s : ALL.values()) if (s.fits(race, v)) out.add(s);
+            for (RacialSkill s : ALL.values()) if (!s.learned() && s.fits(race, v)) out.add(s);
             out.sort(java.util.Comparator.comparingInt(RacialSkill::unlockLevel));
             return List.copyOf(out);
         });
+    }
+
+    private static List<RacialSkill> universal;
+    private static final Map<Race, Map<Variant, List<RacialSkill>>> KIT = new EnumMap<>(Race.class);
+
+    /** The universal skills (learned with TP), in unlock order. */
+    public static List<RacialSkill> universal() {
+        if (universal == null) {
+            List<RacialSkill> out = new ArrayList<>();
+            for (RacialSkill s : ALL.values()) if (s.learned()) out.add(s);
+            out.sort(java.util.Comparator.comparingInt(RacialSkill::unlockLevel));
+            universal = List.copyOf(out);
+        }
+        return universal;
+    }
+
+    /** Everything a character could have: their race's skills and the universal ones. */
+    static List<RacialSkill> kit(PlayerData d) {
+        return KIT.computeIfAbsent(d.getRace(), r -> new EnumMap<>(Variant.class)).computeIfAbsent(d.getVariant(), v -> {
+            List<RacialSkill> out = new ArrayList<>(forCharacter(d.getRace(), v));
+            out.addAll(universal());
+            return List.copyOf(out);
+        });
+    }
+
+    /** Why the next level of a universal skill cannot be learned, or null if it can. */
+    public static net.minecraft.network.chat.Component learnProblem(PlayerData d, RacialSkill s) {
+        if (!s.learned()) return net.minecraft.network.chat.Component.translatable("skill.dbzenith.problem.racial");
+        int next = d.getSkillLevel(s.id()) + 1;
+        if (next > s.maxLevel()) return net.minecraft.network.chat.Component.translatable("skill.dbzenith.problem.max");
+        int need = (int) Math.round(s.unlockLevelFor(next) * DBZConfig.SERVER.unlockLevelScale.get());
+        if (StatCalculator.level(d) < need) return net.minecraft.network.chat.Component.translatable("skill.dbzenith.problem.level", need);
+        if (d.getTrainingPoints() < s.tpCost(next)) return net.minecraft.network.chat.Component.translatable("skill.dbzenith.problem.tp", s.tpCost(next));
+        return null;
+    }
+
+    /** Learn the next level of a universal skill, paying its TP. */
+    public static boolean learn(PlayerData d, RacialSkill s) {
+        if (learnProblem(d, s) != null) return false;
+        int next = d.getSkillLevel(s.id()) + 1;
+        d.setTrainingPoints(d.getTrainingPoints() - s.tpCost(next));
+        d.setSkillLevel(s.id(), next);
+        return true;
     }
 
     public static int unlockLevel(RacialSkill s) {
@@ -254,6 +311,7 @@ public final class RacialSkills {
     }
 
     public static boolean unlocked(PlayerData d, RacialSkill s) {
+        if (s.learned()) return d.getSkillLevel(s.id()) > 0;
         return s.fits(d.getRace(), d.getVariant()) && StatCalculator.level(d) >= unlockLevel(s);
     }
 
@@ -292,17 +350,23 @@ public final class RacialSkills {
     /** How much of a modifier holds right now, from what the fighter alone knows (0..1). */
     static double holds(PlayerData d, RacialSkill s, When w) {
         return switch (w) {
-            case ACTIVE -> d.getRacialActive().contains(s.id()) ? 1 : 0;
+            case ACTIVE -> d.getRacialActive().contains(s.id()) ? (s.id().equals("limit_break") ? limitBreakScale(d) : 1) : 0;
             case AFTER -> d.getRacialAfter().contains(s.id()) ? 1 : 0;
             case COMBAT_RAMP -> (d.getRacialMask() >>> RAMP_SHIFT & 15) / 10.0;
             default -> w.selfOnly() && (d.getRacialMask() & bit(w)) != 0 ? 1 : 0;
         };
     }
 
+    /** How far past the limit Limit Break goes: x2 for Half-Saiyans, x4 for the New Generation. */
+    static double limitBreakScale(PlayerData d) {
+        if (d.getVariant() == Variant.NEW_GENERATION) return 4;
+        return d.getRace() == Race.HALF_SAIYAN ? 2 : 1;
+    }
+
     /** The product of every (1 + amount) for a stat, over unlocked skills, for the self-only conditions. */
     public static double factor(PlayerData d, Stat stat) {
         double f = 1.0;
-        for (RacialSkill s : forCharacter(d.getRace(), d.getVariant())) {
+        for (RacialSkill s : kit(d)) {
             if (s.mods().isEmpty() || !unlocked(d, s)) continue;
             for (RacialSkill.Mod m : s.mods()) {
                 if (m.stat() != stat || !m.when().selfOnly()) continue;
@@ -315,7 +379,7 @@ public final class RacialSkills {
     /** The sum of a stat's amounts (knockback resistance, lifesteal, ki on hit). */
     public static double sum(PlayerData d, Stat stat) {
         double t = 0;
-        for (RacialSkill s : forCharacter(d.getRace(), d.getVariant())) {
+        for (RacialSkill s : kit(d)) {
             if (s.mods().isEmpty() || !unlocked(d, s)) continue;
             for (RacialSkill.Mod m : s.mods()) if (m.stat() == stat && m.when().selfOnly()) t += m.amount() * holds(d, s, m.when());
         }
@@ -340,7 +404,7 @@ public final class RacialSkills {
         double f = 1.0;
         if (attacker != null) {
             f *= factor(attacker, Stat.DAMAGE_DEALT);
-            for (RacialSkill s : forCharacter(attacker.getRace(), attacker.getVariant())) {
+            for (RacialSkill s : kit(attacker)) {
                 if (!unlocked(attacker, s)) continue;
                 for (RacialSkill.Mod m : s.mods()) {
                     if (m.stat() != Stat.DAMAGE_DEALT) continue;
@@ -351,7 +415,8 @@ public final class RacialSkills {
         }
         if (victim != null) {
             f *= factor(victim, Stat.DAMAGE_TAKEN);
-            for (RacialSkill s : forCharacter(victim.getRace(), victim.getVariant())) {
+            if (ki && victim.getRacialActive().contains("ki_barrier")) f *= 0.3;      // the barrier eats most ki outright
+            for (RacialSkill s : kit(victim)) {
                 if (!unlocked(victim, s)) continue;
                 for (RacialSkill.Mod m : s.mods()) {
                     if (m.stat() != Stat.DAMAGE_TAKEN) continue;

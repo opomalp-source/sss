@@ -217,6 +217,24 @@ public final class DBZCommand {
                                                     double v = DoubleArgumentType.getDouble(ctx, "value");
                                                     return apply(ctx, "Set " + id + " mastery " + v + " for", d -> d.setMastery(id, v));
                                                 })))))
+                .then(Commands.literal("skill")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("skill", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(
+                                                com.dbzenith.race.RacialSkills.universal().stream().map(com.dbzenith.race.RacialSkill::id), b))
+                                        .then(Commands.argument("level", IntegerArgumentType.integer(0, 10))
+                                                .executes(ctx -> {
+                                                    com.dbzenith.race.RacialSkill s = com.dbzenith.race.RacialSkills.byId(StringArgumentType.getString(ctx, "skill"));
+                                                    if (s == null || !s.learned()) {
+                                                        ctx.getSource().sendFailure(Component.literal("Not a universal skill"));
+                                                        return 0;
+                                                    }
+                                                    int lv = Math.min(s.maxLevel(), IntegerArgumentType.getInteger(ctx, "level"));
+                                                    return apply(ctx, "Set " + s.id() + " level " + lv + " for", d -> {
+                                                        d.setSkillLevel(s.id(), lv);
+                                                        if (lv > 0 && s.isActive()) d.setSkillSelected(s.id());
+                                                    });
+                                                })))))
                 .then(Commands.literal("racial")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("skill", StringArgumentType.word())

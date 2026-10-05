@@ -62,6 +62,9 @@ public final class RacialSkill {
     private final int cooldownTicks;
     private final int durationTicks;
     private final int color;
+    private final int maxLevel;
+    private final int[] levelUnlocks;
+    private final long tpBase;
 
     private RacialSkill(Builder b) {
         id = b.id;
@@ -74,6 +77,9 @@ public final class RacialSkill {
         cooldownTicks = b.cooldownTicks;
         durationTicks = b.durationTicks;
         color = b.color;
+        maxLevel = b.maxLevel;
+        levelUnlocks = b.levelUnlocks;
+        tpBase = b.tpBase;
     }
 
     public String id() { return id; }
@@ -89,6 +95,14 @@ public final class RacialSkill {
     /** Length of the timed buff ({@link When#ACTIVE}); the {@link When#AFTER} backlash lasts twice as long. */
     public int durationTicks() { return durationTicks; }
     public int color() { return color; }
+
+    /** Universal skills are learned with TP (any race) and may have levels; racial skills come with the race. */
+    public boolean learned() { return tpBase > 0; }
+    public int maxLevel() { return maxLevel; }
+    /** Character level needed to learn skill level {@code level} (1-based). */
+    public int unlockLevelFor(int level) { return levelUnlocks.length == 0 ? unlockLevel : levelUnlocks[Math.min(levelUnlocks.length, Math.max(1, level)) - 1]; }
+    /** TP to learn skill level {@code level}: the base times the level squared. */
+    public long tpCost(int level) { return tpBase * level * level; }
 
     public boolean fits(Race race, Variant variant) {
         return races.contains(race) && (variants.isEmpty() || variants.contains(variant));
@@ -111,6 +125,9 @@ public final class RacialSkill {
         private int cooldownTicks;
         private int durationTicks;
         private int color = 0xFFD8A040;
+        private int maxLevel = 1;
+        private int[] levelUnlocks = new int[0];
+        private long tpBase;
 
         private Builder(String id, Kind kind) {
             this.id = id;
@@ -134,6 +151,15 @@ public final class RacialSkill {
             return this;
         }
         public Builder color(int rgb) { color = 0xFF000000 | rgb; return this; }
+        /** Learned with TP by any race: the TP for level 1 and the character level each skill level needs. */
+        public Builder learned(long tp, int... unlocks) {
+            races = EnumSet.allOf(Race.class);
+            tpBase = tp;
+            levelUnlocks = unlocks.length == 0 ? new int[]{unlockLevel} : unlocks;
+            maxLevel = Math.max(1, levelUnlocks.length);
+            unlockLevel = levelUnlocks[0];
+            return this;
+        }
 
         public RacialSkill build() {
             if (races.isEmpty()) throw new IllegalStateException(id + " has no race");

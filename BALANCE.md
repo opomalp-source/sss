@@ -113,3 +113,25 @@ Android ki absorption, Majin kill-heal) tip close duels; whether the pacing targ
   - Sacred Barrier: -60% for 6 s every 60 s.
 - **Instant actives:** their damage uses the ki damage formula, at x0.3 to x0.8 of a ki blast.
 - **Cheating death:** Second Wind (Human) restores 35% body and stamina every 10 minutes. Death Regeneration (Majin, level 400) returns you at 20% body every 10 minutes. Reincarnation (Namekian, level 700) returns you at 30% body every 30 minutes.
+
+## Universal skills (CX-5, v0.16.0)
+- **Learning:** TP for level n is the base TP x n². Character level gates each skill level (`unlockLevelScale` applies).
+  - Ki Sense: 2k TP; levels at 50, 250 and 600.
+  - Kaioken: 4k TP; levels at 100, 400, 800 and 1200.
+  - Rising Charge: 8k at 150.
+  - Spirit Shock: 10k at 250.
+  - Echo Strike: 12k; levels at 200, 500 and 900.
+  - Ki Barrier: 15k at 300.
+  - Desperate Gambit: 20k at 400.
+  - Limit Break: 30k at 500.
+  - Instant Transmission: 60k at 900.
+- **Kaioken:** +10% power a stage up to x2 at stage 10, then +5% a stage to x2.5 at stage 20. Levels cap the stage at 2, 4, 10 and 20.
+  - Burn: 0.4% max body per second per stage, times the strain 1 + min(2, (SPI - WIL) / WIL).
+  - It gives out below 10% body and cannot start below 15%. It only works in base form or a calm god form, which makes it a base-form and Blue amplifier, far below the forms on its own.
+- **Limit Break:** +25% power for 60 s, then -30% for 120 s, every 300 s. Half-Saiyans get +50%, the New Generation +100%.
+- **Ki Barrier:** 8 s. Ki damage x0.3 x0.8 (the general -20%), so x0.24; blows x0.8. Every 40 s, for 15% ki.
+- **Desperate Gambit:** only below 25% body. Costs half your ki and all your stamina. +40% damage dealt and no death for 10 s, then no ki regeneration for 20 s. Every 180 s.
+- **Echo Strike:** a counter of one melee hit (x1, x1.3 or x1.6) after an afterimage dodge, every 6 s.
+- **Rising Charge:** a technique fired within 2 s of releasing a charge held at least 2 s gets +10% per second held, up to +50%.
+- **Spirit Shock:** a 1.5 s stun in 4.5 blocks that also breaks guards; 10% ki, every 25 s.
+- **Instant Transmission:** 25% ki, every 30 s.

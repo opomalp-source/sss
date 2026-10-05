@@ -64,6 +64,38 @@ public final class RacialSkillEffects {
         return use(player, d, s);
     }
 
+    /** The Skill key: fire the selected universal skill (Kaioken goes up a stage). */
+    public static boolean useSkill(ServerPlayer player) {
+        PlayerData d = ModCapabilities.get(player).orElse(null);
+        if (d == null || !player.isAlive()) return false;
+        RacialSkill s = RacialSkills.byId(d.getSkillSelected());
+        if (s == null || !s.isActive() || !RacialSkills.unlocked(d, s)) {
+            s = RacialSkills.universal().stream().filter(x -> x.isActive() && RacialSkills.unlocked(d, x)).findFirst().orElse(null);
+            if (s == null) {
+                player.displayClientMessage(Component.translatable("message.dbzenith.skill_none"), true);
+                return false;
+            }
+            d.setSkillSelected(s.id());
+        }
+        if (s.id().equals("kaioken")) return com.dbzenith.transform.Kaioken.raise(player, d);
+        return use(player, d, s);
+    }
+
+    /** Instant Transmission's destination, set by the target picker just before the skill fires. */
+    private static final java.util.Map<java.util.UUID, Vec3> TRANSMISSION = new java.util.HashMap<>();
+
+    public static boolean transmit(ServerPlayer player, Vec3 destination) {
+        PlayerData d = ModCapabilities.get(player).orElse(null);
+        RacialSkill s = RacialSkills.byId("instant_transmission");
+        if (d == null || s == null) return false;
+        TRANSMISSION.put(player.getUUID(), destination);
+        try {
+            return use(player, d, s);
+        } finally {
+            TRANSMISSION.remove(player.getUUID());
+        }
+    }
+
     public static boolean use(ServerPlayer player, PlayerData d, RacialSkill s) {
         long now = player.level().getGameTime();
         if (!RacialSkills.unlocked(d, s)) {
@@ -240,8 +272,52 @@ public final class RacialSkillEffects {
                 ImpactPacket.at(player.position(), new Vec3(0, 1, 0), ImpactPacket.SPIKE, 1.5f, 0xC0A060, player.getId()).send(level);
                 level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 1f, 0.5f);
             }
+            case "kaioken" -> {
+                return com.dbzenith.transform.Kaioken.raise(player, d);
+            }
+            case "ki_sense" -> {                                 // the scan: every ki near you shows for ten seconds
+                if (d.getSkillLevel("ki_sense") < 3) {
+                    player.displayClientMessage(Component.translatable("message.dbzenith.ki_sense_scan_locked"), true);
+                    return false;
+                }
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1f, 1.4f);
+            }
+            case "spirit_shock" -> {                             // a point-blank shock: stuns, and breaks guards
+                boolean any = false;
+                for (LivingEntity e : TechniqueEffects.around(player, 4.5)) {
+                    any = true;
+                    e.addEffect(new MobEffectInstance(com.dbzenith.registry.ModEffects.STUN.get(), 30, 0));
+                    if (e instanceof Player p) ModCapabilities.get(p).ifPresent(o -> {
+                        if (o.isGuarding()) com.dbzenith.combat.GuardRules.lower(o);
+                    });
+                    Vec3 push = e.position().subtract(player.position()).normalize().scale(0.6);
+                    e.push(push.x, 0.2, push.z);
+                }
+                if (!any) return false;
+                ImpactPacket.at(player.position().add(0, 1, 0), player.getLookAngle(), ImpactPacket.GUARD_BREAK, 1.2f, s.color() & 0xFFFFFF, player.getId()).send(level);
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_THUNDER, SoundSource.PLAYERS, 0.6f, 1.6f);
+            }
+            case "desperate_gambit" -> {
+                if (d.getBody() > d.getDerived().maxBody() * 0.25) {
+                    player.displayClientMessage(Component.translatable("message.dbzenith.gambit_not_yet"), true);
+                    return false;
+                }
+                d.setKi(d.getKi() * 0.5);
+                d.setStamina(0);
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 0.5f, 1.6f);
+            }
+            case "instant_transmission" -> {
+                Vec3 dest = TRANSMISSION.get(player.getUUID());
+                if (dest == null) return false;
+                level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1, player.getZ(), 24, 0.3, 0.6, 0.3, 0.05);
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 1f, 1.4f);
+                player.teleportTo(dest.x, dest.y, dest.z);
+                player.fallDistance = 0;
+                level.sendParticles(ParticleTypes.END_ROD, dest.x, dest.y + 1, dest.z, 24, 0.3, 0.6, 0.3, 0.05);
+                level.playSound(null, dest.x, dest.y, dest.z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 1f, 1.6f);
+            }
             case "sheer_willpower", "saiyans_resolve", "shattering_the_limit", "blazing_spirit", "mindless_gambit", "overclock",
-                    "blur", "sacred_barrier", "dark_aura" -> level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                    "blur", "sacred_barrier", "dark_aura", "limit_break", "ki_barrier" -> level.playSound(null, player.getX(), player.getY(), player.getZ(),
                     SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1f, 0.9f);   // timed buffs: the buff is the effect
             default -> { }
         }
@@ -336,6 +412,13 @@ public final class RacialSkillEffects {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         PlayerData d = ModCapabilities.get(player).orElse(null);
         if (d == null) return;
+        if (d.getRacialActive().contains("desperate_gambit")) {       // the gambit: you will not fall while it lasts
+            event.setCanceled(true);
+            d.setBody(1);
+            player.setHealth(1f);
+            BodyHealth.mirror(player, d);
+            return;
+        }
         long now = player.level().getGameTime();
         String id = RacialSkills.has(d, "death_regeneration") && now - d.getRacialOnce("death_regeneration") >= DEATH_REGEN_COOLDOWN ? "death_regeneration"
                 : RacialSkills.has(d, "reincarnation") && now - d.getRacialOnce("reincarnation") >= REINCARNATION_COOLDOWN ? "reincarnation" : null;
@@ -384,5 +467,32 @@ public final class RacialSkillEffects {
         }
         double ki = RacialSkills.sum(d, Stat.KI_ON_HIT);
         if (ki > 0) d.setKi(d.getKi() + d.getDerived().maxKi() * ki);
+    }
+
+    /**
+     * Echo Strike: dodging a blow with an afterimage leaves you behind the attacker, striking back: Light (x1),
+     * Weightless (x1.3), Phantom (x1.6). Once every six seconds.
+     */
+    public static void echoStrike(ServerPlayer player, PlayerData d, LivingEntity attacker, long now) {
+        int level = d.getSkillLevel("echo_strike");
+        if (level <= 0 || attacker == null || attacker == player || now < d.getRacialCooldown("echo_strike")) return;
+        d.setRacialCooldown("echo_strike", now + 120);
+        Vec3 behind = attacker.position().subtract(attacker.getLookAngle().multiply(1, 0, 1).normalize().scale(1.4));
+        ServerLevel lvl = player.serverLevel();
+        lvl.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + 1, player.getZ(), 10, 0.3, 0.6, 0.3, 0.02);
+        player.teleportTo(behind.x, attacker.getY(), behind.z);
+        player.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, attacker.getEyePosition());
+        double damage = DamageCalculator.meleeOutgoing(d, 1.0, 1) * (level == 1 ? 1.0 : level == 2 ? 1.3 : 1.6);
+        attacker.invulnerableTime = 0;
+        attacker.hurt(ModDamageTypes.thrown(lvl, player), (float) damage);
+        ImpactPacket.melee(player, attacker, ImpactPacket.HEAVY).send(lvl);
+        lvl.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1f, 1.3f);
+    }
+
+    /** Rising Charge: a technique fired within two seconds of letting go of a charge gains up to +50% (at five seconds held). */
+    public static double risingChargeBonus(PlayerData d) {
+        int held = d.takeRisingCharge();
+        if (d.getSkillLevel("rising_charge") <= 0 || held < 40) return 1.0;
+        return 1.0 + Math.min(0.5, held / 100.0 * 0.5);
     }
 }

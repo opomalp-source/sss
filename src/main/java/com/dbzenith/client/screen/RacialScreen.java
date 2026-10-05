@@ -23,19 +23,27 @@ import java.util.List;
  * unlocked active to put it on the Racial key.
  */
 public class RacialScreen extends Screen {
-    private static final int W = 420, H = 248, CARD_W = 196, CARD_H = 30, COLS = 2, ROWS = 4;
+    private static final int W = 420, H = 236, CARD_W = 196, CARD_H = 30, COLS = 2, ROWS = 3, CARDS_Y = 35;
     private final Screen parent;
     private int left, top, scroll;
     private RacialSkill focused;
+    /** The universal (learned) skills instead of the racial ones. */
+    private boolean universal;
+    private net.minecraft.client.gui.components.Button learn;
 
     public RacialScreen(Screen parent) {
+        this(parent, false);
+    }
+
+    public RacialScreen(Screen parent, boolean universal) {
         super(Component.translatable("screen.dbzenith.racial"));
         this.parent = parent;
+        this.universal = universal;
     }
 
     private List<RacialSkill> skills() {
         PlayerData d = ClientPlayerData.get();
-        return RacialSkills.forCharacter(d.getRace(), d.getVariant());
+        return universal ? RacialSkills.universal() : RacialSkills.forCharacter(d.getRace(), d.getVariant());
     }
 
     @Override
@@ -44,6 +52,21 @@ public class RacialScreen extends Screen {
         top = (height - H) / 2;
         addRenderableWidget(ThemedButton.of(Component.translatable("gui.done"), b -> onClose())
                 .bounds(left + W - 64, top + H - 22, 56, 16).build());
+        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.tab_racial"), b -> tab(false))
+                .bounds(left + 10, top + 17, 70, 14).build().selected(!universal));
+        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.tab_universal"), b -> tab(true))
+                .bounds(left + 84, top + 17, 70, 14).build().selected(universal));
+        learn = addRenderableWidget(ThemedButton.of(Component.empty(), b -> {
+            if (focused != null) ModNetwork.sendToServer(new RacialPackets.Learn(focused.id()));
+        }).bounds(left + W - 64 - 156, top + H - 22, 150, 16).build());
+        learn.visible = false;
+    }
+
+    private void tab(boolean u) {
+        universal = u;
+        scroll = 0;
+        focused = null;
+        rebuildWidgets();
     }
 
     private int maxScroll() {
@@ -62,7 +85,7 @@ public class RacialScreen extends Screen {
         for (int i = 0; i < all.size(); i++) {
             int row = i / COLS - scroll, col = i % COLS;
             if (row < 0 || row >= ROWS) continue;
-            int x = left + 10 + col * (CARD_W + 8), y = top + 34 + row * (CARD_H + 4);
+            int x = left + 10 + col * (CARD_W + 8), y = top + CARDS_Y + row * (CARD_H + 4);
             if (mx >= x && mx < x + CARD_W && my >= y && my < y + CARD_H) return all.get(i);
         }
         return null;
@@ -75,8 +98,13 @@ public class RacialScreen extends Screen {
             focused = s;
             PlayerData d = ClientPlayerData.get();
             if (s.isActive() && RacialSkills.unlocked(d, s)) {
-                ModNetwork.sendToServer(new RacialPackets.Select(s.id()));
-                d.setRacialSelected(s.id());                       // at once; the server's sync confirms it
+                if (s.learned()) {
+                    ModNetwork.sendToServer(new RacialPackets.SelectSkill(s.id()));
+                    d.setSkillSelected(s.id());
+                } else {
+                    ModNetwork.sendToServer(new RacialPackets.Select(s.id()));
+                    d.setRacialSelected(s.id());                   // at once; the server's sync confirms it
+                }
             }
             return true;
         }
@@ -89,10 +117,11 @@ public class RacialScreen extends Screen {
         PlayerData d = ClientPlayerData.get();
         Variant v = d.getVariant();
         Component who = Component.translatable(v.kind() == Variant.Kind.DEFAULT ? d.getRace().translationKey() : v.translationKey());
-        DbzTheme.window(g, font, Component.translatable("screen.dbzenith.racial_title", who), left, top, W, H);
+        DbzTheme.window(g, font, universal ? Component.translatable("screen.dbzenith.universal_title")
+                : Component.translatable("screen.dbzenith.racial_title", who), left, top, W, H);
         int level = StatCalculator.level(d);
-        Component sub = Component.translatable("screen.dbzenith.racial_sub", level);
-        DbzTheme.text(g, font, sub, left + W / 2f - font.width(sub) * 0.75f / 2, top + 20, DbzTheme.DIM, 0.75f);
+        Component sub = universal ? Component.translatable("screen.dbzenith.universal_sub", String.format("%,d", d.getTrainingPoints()))
+                : Component.translatable("screen.dbzenith.racial_sub", level);
 
         long now = minecraft.level == null ? 0 : minecraft.level.getGameTime();
         RacialSkill hover = at(mouseX, mouseY);
@@ -101,8 +130,8 @@ public class RacialScreen extends Screen {
             int row = i / COLS - scroll, col = i % COLS;
             if (row < 0 || row >= ROWS) continue;
             RacialSkill s = all.get(i);
-            int x = left + 10 + col * (CARD_W + 8), y = top + 34 + row * (CARD_H + 4);
-            boolean open = RacialSkills.unlocked(d, s), selected = s.id().equals(d.getRacialSelected()), hot = s == hover || s == focused;
+            int x = left + 10 + col * (CARD_W + 8), y = top + CARDS_Y + row * (CARD_H + 4);
+            boolean open = RacialSkills.unlocked(d, s), selected = s.id().equals(s.learned() ? d.getSkillSelected() : d.getRacialSelected()), hot = s == hover || s == focused;
             int c = s.color();
             int fill = open ? DbzTheme.withAlpha(DbzTheme.darken(c, 0.25f), hot ? 200 : 140) : 0xA0181820;
             DbzTheme.slant(g, x, y, CARD_W, CARD_H, 4, fill, 0xC0080A12);
@@ -124,29 +153,50 @@ public class RacialScreen extends Screen {
             DbzTheme.text(g, font, name, x + 30, y + 5, open ? DbzTheme.TEXT : DbzTheme.DIM, 0.9f);
             Component tag = Component.translatable(s.isActive() ? "screen.dbzenith.racial_active" : "screen.dbzenith.racial_passive");
             DbzTheme.text(g, font, tag, x + 30, y + 17, open ? DbzTheme.brighten(c, 1.15f) : 0xFF606068, 0.65f);
-            Component state = open ? (selected ? Component.translatable("screen.dbzenith.racial_on_key") : Component.empty())
-                    : Component.translatable("screen.dbzenith.racial_unlock", RacialSkills.unlockLevel(s));
-            DbzTheme.text(g, font, state, x + CARD_W - 8 - font.width(state) * 0.65f, y + 17, open ? DbzTheme.TITLE : DbzTheme.BAD, 0.65f);
+            Component state;
+            if (s.learned()) {
+                int lv = d.getSkillLevel(s.id());
+                state = lv > 0 ? Component.translatable(selected ? "screen.dbzenith.skill_level_key" : "screen.dbzenith.skill_level", lv, s.maxLevel())
+                        : Component.translatable("screen.dbzenith.skill_learnable", s.tpCost(1));
+            } else {
+                state = open ? (selected ? Component.translatable("screen.dbzenith.racial_on_key") : Component.empty())
+                        : Component.translatable("screen.dbzenith.racial_unlock", RacialSkills.unlockLevel(s));
+            }
+            DbzTheme.text(g, font, state, x + CARD_W - 8 - font.width(state) * 0.65f, y + 17, open ? DbzTheme.TITLE : s.learned() ? DbzTheme.DIM : DbzTheme.BAD, 0.65f);
         }
         if (maxScroll() > 0) {                                  // scroll thumb
             int track = ROWS * (CARD_H + 4) - 4;
             int th = Math.max(12, track * ROWS / (ROWS + maxScroll()));
-            int ty = top + 34 + (track - th) * scroll / maxScroll();
-            g.fill(left + W - 6, top + 34, left + W - 4, top + 34 + track, 0x40FFFFFF);
+            int ty = top + CARDS_Y + (track - th) * scroll / maxScroll();
+            g.fill(left + W - 6, top + 34, left + W - 4, top + CARDS_Y + track, 0x40FFFFFF);
             g.fill(left + W - 6, ty, left + W - 4, ty + th, 0xC0FFD27A);
         }
 
+        // learning: the next level of the clicked universal skill
+        learn.visible = focused != null && focused.learned();
+        if (learn.visible) {
+            int next = d.getSkillLevel(focused.id()) + 1;
+            Component problem = RacialSkills.learnProblem(d, focused);
+            learn.active = problem == null;
+            learn.setMessage(next > focused.maxLevel() ? Component.translatable("screen.dbzenith.skill_mastered")
+                    : Component.translatable("screen.dbzenith.skill_learn", next, String.format("%,d", focused.tpCost(next))));
+            if (problem != null && next <= focused.maxLevel()) {
+                DbzTheme.text(g, font, problem, left + W - 70 - font.width(problem) * 0.65f, top + H - 32, DbzTheme.BAD, 0.65f);
+            }
+        }
         // details of the hovered (or last clicked) skill
         RacialSkill s = hover != null ? hover : focused;
-        int dy = top + 34 + ROWS * (CARD_H + 4) + 2;
+        int dy = top + CARDS_Y + ROWS * (CARD_H + 4) + 2;
         DbzTheme.divider(g, left + 10, dy, W - 20);
         if (s == null) {
-            DbzTheme.wrapped(g, font, Component.translatable("screen.dbzenith.racial_help"), left + 12, dy + 6, W - 90, DbzTheme.DIM);
+            DbzTheme.wrapped(g, font, sub, left + 12, dy + 6, W - 24, DbzTheme.TEXT);
+            DbzTheme.wrapped(g, font, Component.translatable(universal ? "screen.dbzenith.universal_help" : "screen.dbzenith.racial_help"), left + 12, dy + 28, W - 24, DbzTheme.DIM);
         } else {
             DbzTheme.text(g, font, Component.translatable(s.translationKey()), left + 12, dy + 5, s.color(), 1f);
-            DbzTheme.wrapped(g, font, Component.translatable(s.descriptionKey()), left + 12, dy + 17, W - 90, DbzTheme.TEXT);
+            Component desc = Component.translatable(s.descriptionKey());
+            DbzTheme.wrapped(g, font, desc, left + 12, dy + 17, W - 24, DbzTheme.TEXT);
             List<Component> lines = effects(s);
-            int ly = dy + 39;
+            int ly = dy + 19 + font.split(desc, W - 24).size() * 10;
             for (Component line : lines) {
                 DbzTheme.text(g, font, line, left + 14, ly, DbzTheme.GOOD, 0.7f);
                 ly += 8;

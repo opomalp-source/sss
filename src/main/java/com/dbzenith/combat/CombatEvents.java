@@ -112,6 +112,10 @@ public final class CombatEvents {
                 raw *= kept;
             }
             boolean afterimage = source.getEntity() != null && victim.level().getGameTime() <= victimData.getDashEvadeUntil();
+            if (afterimage && !isKi && victim instanceof net.minecraft.server.level.ServerPlayer sp
+                    && source.getEntity() instanceof net.minecraft.world.entity.LivingEntity foe && foe != victim) {
+                com.dbzenith.race.RacialSkillEffects.echoStrike(sp, victimData, foe, victim.level().getGameTime());
+            }
             if (isKi && !afterimage) raw *= RacePassives.absorbKiHit(victimData, raw, victim.level().getGameTime());
             dealt = afterimage ? 0 : DamageCalculator.againstPlayer(raw, victimData, source.getEntity() != null && !isThrow, victim.getRandom());
             dealt *= 1 - victimData.getGearReduction();                          // a full gi or armour set

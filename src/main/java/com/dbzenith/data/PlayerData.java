@@ -968,6 +968,10 @@ public class PlayerData {
 
     public void setCharging(boolean charging) {
         if (this.charging != charging) {
+            if (!charging && chargeTicks > 0) {               // let go: the charge waits for a technique (Rising Charge)
+                risingCharge = chargeTicks;
+                risingAge = 0;
+            }
             this.charging = charging;
             chargeTicks = 0;
             markDirty();
@@ -1052,6 +1056,66 @@ public class PlayerData {
         racialAfter.clear();
         racialAfter.addAll(after);
         invalidateDerived();
+    }
+
+    // universal skills: learned levels and the active on the Skill key (saved); Kaioken's stage and Rising Charge
+    // (synced, not saved)
+    private final java.util.Map<String, Integer> skillLevels = new java.util.HashMap<>();
+    private String skillSelected = "";
+    private int kaiokenStage;
+    private int risingCharge, risingAge;
+
+    public int getSkillLevel(String id) {
+        return skillLevels.getOrDefault(id, 0);
+    }
+
+    public void setSkillLevel(String id, int level) {
+        if (level <= 0) skillLevels.remove(id);
+        else skillLevels.put(id, level);
+        derivedStale = true;
+        markDirty();
+    }
+
+    public java.util.Map<String, Integer> skillLevelsView() {
+        return java.util.Collections.unmodifiableMap(skillLevels);
+    }
+
+    public String getSkillSelected() {
+        return skillSelected;
+    }
+
+    public void setSkillSelected(String id) {
+        skillSelected = id == null ? "" : id;
+        markDirty();
+    }
+
+    public int getKaiokenStage() {
+        return kaiokenStage;
+    }
+
+    public void setKaiokenStage(int stage) {
+        int s = Math.max(0, stage);
+        if (s != kaiokenStage) {
+            kaiokenStage = s;
+            invalidateDerived();
+        }
+    }
+
+    /** Ticks of charging just released, for Rising Charge (0 when none is waiting). */
+    public int getRisingCharge() {
+        return risingCharge;
+    }
+
+    /** Spend the waiting charge: returns the ticks held. */
+    public int takeRisingCharge() {
+        int r = risingCharge;
+        risingCharge = 0;
+        return r;
+    }
+
+    /** Ages the waiting charge: it is lost two seconds after letting go. */
+    public void tickRisingCharge() {
+        if (risingCharge > 0 && !charging && ++risingAge > 40) risingCharge = 0;
     }
 
     // God Ki: experience towards levels 1-10 (saved); see transform.GodKi
@@ -1364,6 +1428,10 @@ public class PlayerData {
         tag.put("mastery", m);
         tag.putDouble("godKiXp", godKiXp);
         tag.putString("racialSelected", racialSelected);
+        CompoundTag sl = new CompoundTag();
+        skillLevels.forEach(sl::putInt);
+        tag.put("skillLevels", sl);
+        tag.putString("skillSelected", skillSelected);
         CompoundTag rc = new CompoundTag();
         racialCooldowns.forEach(rc::putLong);
         tag.put("racialCooldowns", rc);
@@ -1465,6 +1533,10 @@ public class PlayerData {
         for (String k : m.getAllKeys()) mastery.put(k, m.getDouble(k));
         godKiXp = tag.getDouble("godKiXp");
         racialSelected = tag.getString("racialSelected");
+        skillLevels.clear();
+        CompoundTag sl = tag.getCompound("skillLevels");
+        for (String k : sl.getAllKeys()) skillLevels.put(k, sl.getInt(k));
+        skillSelected = tag.getString("skillSelected");
         racialCooldowns.clear();
         CompoundTag rc = tag.getCompound("racialCooldowns");
         for (String k : rc.getAllKeys()) racialCooldowns.put(k, rc.getLong(k));
@@ -1575,6 +1647,8 @@ public class PlayerData {
         tag.putInt("transformTicks", transformTicks);
         tag.putInt("transformTotal", transformTotal);
         tag.putInt("racialMask", racialMask);
+        tag.putInt("kaioken", kaiokenStage);
+        tag.putInt("risingCharge", risingCharge);
         tag.putString("racialActive", String.join(",", racialActive));
         tag.putString("racialAfter", String.join(",", racialAfter));
         return tag;
@@ -1599,6 +1673,8 @@ public class PlayerData {
         transformTicks = tag.getInt("transformTicks");
         transformTotal = tag.getInt("transformTotal");
         racialMask = tag.getInt("racialMask");
+        kaiokenStage = tag.getInt("kaioken");
+        risingCharge = tag.getInt("risingCharge");
         racialActive.clear();
         for (String s : tag.getString("racialActive").split(",")) if (!s.isEmpty()) racialActive.add(s);
         racialAfter.clear();

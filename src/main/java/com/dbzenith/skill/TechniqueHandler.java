@@ -48,7 +48,8 @@ public final class TechniqueHandler {
         if (technique.style() == Technique.Style.SELF) {
             if (!TechniqueEffects.apply(player, data, technique)) return Result.INVALID;
         } else {
-            spawn(level, player, technique, DamageCalculator.kiOutgoing(data, technique.damageMult()) * TechniqueMastery.damageMultiplier(data, technique));
+            spawn(level, player, technique, DamageCalculator.kiOutgoing(data, technique.damageMult()) * TechniqueMastery.damageMultiplier(data, technique)
+                    * com.dbzenith.race.RacialSkillEffects.risingChargeBonus(data));
         }
 
         if (!player.getAbilities().instabuild) data.setKi(data.getKi() - cost);

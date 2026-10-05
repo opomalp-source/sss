@@ -49,13 +49,14 @@ public final class AuraRenderer {
         if (state == null) return;
         boolean powering = state.powering();
         Form form = Forms.byId(state.form());
-        boolean held = !form.isBase() || state.overdrive() > 0;
+        boolean kaioken = state.has(PublicStatePacket.KAIOKEN);
+        boolean held = !form.isBase() || state.overdrive() > 0 || kaioken;
         if (!powering && !held) return;
         if (form == Forms.GREAT_APE) return; // the ape has no ki aura, only its size
 
         float partial = event.getPartialTick();
         float t = player.tickCount + partial;
-        boolean calm = form.calmAura();
+        boolean calm = form.calmAura() && !kaioken;                          // Kaioken roars, even on a god form
         float release = 0.75f + 0.25f * Mth.clamp(state.release() / 100f, 0f, 1.5f);
         float tier = 1f + 0.07f * Math.min(5, form.tier());
         float height = (powering ? 2.5f : 2.05f) * release * tier * (calm ? 0.88f : 1f);

@@ -13,7 +13,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
  * so mismatched client/server versions are refused at login instead of desyncing.
  */
 public final class ModNetwork {
-    private static final String PROTOCOL = "22";
+    private static final String PROTOCOL = "23";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(DBZenith.MOD_ID, "main"),
@@ -98,6 +98,16 @@ public final class ModNetwork {
                 .add();
         CHANNEL.messageBuilder(PathPackets.Open.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(PathPackets.Open::encode).decoder(PathPackets.Open::decode).consumerMainThread(PathPackets.Open::handle).add();
+        CHANNEL.messageBuilder(RacialPackets.SelectSkill.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(RacialPackets.SelectSkill::encode).decoder(RacialPackets.SelectSkill::decode).consumerMainThread(RacialPackets.SelectSkill::handle).add();
+        CHANNEL.messageBuilder(RacialPackets.Learn.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(RacialPackets.Learn::encode).decoder(RacialPackets.Learn::decode).consumerMainThread(RacialPackets.Learn::handle).add();
+        CHANNEL.messageBuilder(RacialPackets.TransmitRequest.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(RacialPackets.TransmitRequest::encode).decoder(RacialPackets.TransmitRequest::decode).consumerMainThread(RacialPackets.TransmitRequest::handle).add();
+        CHANNEL.messageBuilder(RacialPackets.TransmitTargets.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(RacialPackets.TransmitTargets::encode).decoder(RacialPackets.TransmitTargets::decode).consumerMainThread(RacialPackets.TransmitTargets::handle).add();
+        CHANNEL.messageBuilder(RacialPackets.Transmit.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(RacialPackets.Transmit::encode).decoder(RacialPackets.Transmit::decode).consumerMainThread(RacialPackets.Transmit::handle).add();
         CHANNEL.messageBuilder(RacialPackets.Select.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(RacialPackets.Select::encode).decoder(RacialPackets.Select::decode).consumerMainThread(RacialPackets.Select::handle).add();
         CHANNEL.messageBuilder(PathPackets.Choose.class, nextId++, NetworkDirection.PLAY_TO_SERVER)

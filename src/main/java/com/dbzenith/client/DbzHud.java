@@ -120,6 +120,16 @@ public final class DbzHud implements IGuiOverlay {
             int pulse = 0xFF000000 | (int) (180 + 75 * Mth.sin(t * 0.6f)) << 8 | 0xFF;
             chipX = chip(g, font, chipX, ly, Component.translatable("hud.dbzenith.charging"), pulse);
         }
+        if (d.getKaiokenStage() > 0) {
+            int pulse = DbzTheme.mix(0xFFFF2A1E, 0xFFFFC0A0, 0.5f + 0.5f * Mth.sin(t * 0.5f));
+            chipX = chip(g, font, chipX, ly, Component.translatable("hud.dbzenith.kaioken", d.getKaiokenStage()), pulse);
+        }
+        for (String buff : new String[]{"limit_break", "ki_barrier", "desperate_gambit"}) {          // universal buffs and their backlash
+            com.dbzenith.race.RacialSkill rs = com.dbzenith.race.RacialSkills.byId(buff);
+            if (d.getRacialActive().contains(buff)) chipX = chip(g, font, chipX, ly, Component.translatable(rs.translationKey()), rs.color());
+            else if (d.getRacialAfter().contains(buff)) chipX = chip(g, font, chipX, ly, Component.translatable("hud.dbzenith.backlash",
+                    Component.translatable(rs.translationKey())), 0xFF909098);
+        }
         if (d.isFlying()) chipX = chip(g, font, chipX, ly, Component.translatable("hud.dbzenith.flying"), DbzTheme.KI);
         if (com.dbzenith.registry.ModEffects.isStunned(mc.player)) chipX = chip(g, font, chipX, ly, Component.translatable("hud.dbzenith.stunned"), 0xFFF2E94E);
         if (com.dbzenith.registry.ModEffects.isKiSealed(mc.player)) chipX = chip(g, font, chipX, ly, Component.translatable("hud.dbzenith.sealed"), 0xFF8A5FD0);
@@ -176,6 +186,8 @@ public final class DbzHud implements IGuiOverlay {
         // ---------------------------------------------------------- technique, right of the hotbar
         technique(g, font, d, width / 2 + 114, height - 24, time, t);
         racial(g, font, d, width / 2 - 114 - 86, height - 24, time, t);
+        skill(g, font, d, width / 2 - 114 - 86, height - 50, time, t);
+        KiSenseHud.render(g, font, d, width, height, partialTick, t);
     }
 
     /** One slanted bar with its eased fill, ghost of recent loss, shimmer and value. Returns the next row's y. */
@@ -210,6 +222,13 @@ public final class DbzHud implements IGuiOverlay {
         return y + h + 3;
     }
 
+    /** The universal skill on the Skill key, above the racial one. */
+    private static void skill(GuiGraphics g, Font font, PlayerData d, int x, int y, long time, float t) {
+        com.dbzenith.race.RacialSkill s = com.dbzenith.race.RacialSkills.byId(d.getSkillSelected());
+        if (s == null || !com.dbzenith.race.RacialSkills.unlocked(d, s)) return;
+        skillChip(g, font, d, s, x, y, time, t, "hud.dbzenith.skill_ready");
+    }
+
     /** The active racial skill on the Racial key, left of the hotbar: ready, cooling down, or running. */
     private static void racial(GuiGraphics g, Font font, PlayerData d, int x, int y, long time, float t) {
         com.dbzenith.race.RacialSkill s = com.dbzenith.race.RacialSkills.byId(d.getRacialSelected());
@@ -218,6 +237,10 @@ public final class DbzHud implements IGuiOverlay {
                     .filter(r -> r.isActive() && com.dbzenith.race.RacialSkills.unlocked(d, r)).findFirst().orElse(null);
         }
         if (s == null) return;
+        skillChip(g, font, d, s, x, y, time, t, "hud.dbzenith.racial_ready");
+    }
+
+    private static void skillChip(GuiGraphics g, Font font, PlayerData d, com.dbzenith.race.RacialSkill s, int x, int y, long time, float t, String readyKey) {
         int w = 86, h = 22, color = s.color();
         DbzTheme.slant(g, x - 1, y - 1, w + 2, h + 2, 6, 0xF0040508, 0xF0040508);
         DbzTheme.slant(g, x, y, w, h, 6, 0xE0182238, 0xE00A0E18);
@@ -233,7 +256,7 @@ public final class DbzHud implements IGuiOverlay {
         DbzTheme.text(g, font, name, x + 25, y + 3, color, font.width(name) > 58 ? 58f / font.width(name) : 1f);
         Component state = running ? Component.translatable("hud.dbzenith.racial_running", (s.durationTicks() - (time - began)) / 20 + 1)
                 : cd > 0 ? Component.translatable("hud.dbzenith.racial_cooldown", (ready - time) / 20 + 1)
-                : Component.translatable("hud.dbzenith.racial_ready");
+                : Component.translatable(readyKey);
         DbzTheme.text(g, font, state, x + 25, y + 13, running ? color : cd > 0 ? DbzTheme.DIM : DbzTheme.GOOD, 0.6f);
     }
 
