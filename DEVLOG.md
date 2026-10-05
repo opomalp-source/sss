@@ -652,3 +652,22 @@ User request: "delete the overdrive feature altogether because it's the same as 
   - its language strings.
 - **Kept, for the ones Overdrive used to drive:** Kaioken now drives the held aura, the aura sound and the screen-edge aura. The Forms screen shows your Kaioken limit. The controls help, the README and the feature matrix point at Kaioken.
 - **Old data:** balance revision 3, which only reset an Overdrive value, is now empty. Overdrive was never saved, so worlds need no migration.
+
+## 2026-10-06 — Session 3 (cont.): 13d UI v2 (v0.26.0)
+- **Zenith UI sheet (`ArtGen.GuiHd` -> `gui/ui_hd.png`, 512x512, drawn at a quarter scale so each GUI pixel holds four):**
+  - a window frame: a bevelled gold band with an engraved groove, an inner glow line and amber gem corners with glints; the middle is clear;
+  - a faint hex tile;
+  - four button skins: navy with gold trim, a hover with a blue edge glow, disabled grey, and a selected orange-gold gradient, each with a top gloss and a lower shadow;
+  - a radial glow.
+- **`DbzTheme`:** every screen's look changes through it.
+  - `screenBackground`: a deeper gradient, a blue glow behind the window, and ki motes drifting up.
+  - `panel`: dark glass with a faint hex lattice and light from above, under the frame.
+  - `header`: flared, gem-tipped ends on the title ribbon.
+  - `divider`: a gold diamond in the middle and a blue underglow.
+  - `button` (and sliders): the HD skins.
+  - `nine`: a nine-slice helper for the HD sheet (any texture size, scaled), since vanilla's nine-slice assumes 256x256.
+- **Setting:** Settings > Style > "UI style" (Zenith or Classic).
+- **Fixed after review:** the first pass's hex lattice was too busy and was made larger and fainter; the corner gems were made bigger.
+
+### Verified
+- Screenshots of Settings, Training (stats), Racial Skills, Ki Creator and character creation in the Zenith style, and Settings in Classic.

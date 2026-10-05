@@ -27,6 +27,7 @@ public class ArtGen {
         HdRaces.all();
         FormLooks.all();
         FormFx.all();
+        GuiHd.all();
         System.out.println("ArtGen done");
     }
 
@@ -905,6 +906,111 @@ public class ArtGen {
             s.arm = bolt;
             s.leg = bolt;
             s.save("entity/form/sparks_" + frame + ".png");
+        }
+    }
+
+    // ================================================================== UI v2 (CX-13d)
+
+    /**
+     * The Zenith UI sheet (512x512, drawn at a quarter scale so every GUI pixel holds four): an ornate window frame
+     * (bevelled gold with an engraved groove, an inner glow line and amber gem corners; the middle left clear), a hex
+     * tile for window bodies, four button skins (normal, hover, disabled, selected) and a radial glow.
+     * Regions: frame (0,0,128,128) border 32; hex tile (0,128,64,64); buttons (128, state*48, 96, 48) border 12;
+     * glow (256,0,256,256).
+     */
+    static final class GuiHd {
+        static void all() throws IOException {
+            Canvas c = new Canvas(512, 512);
+            frame(c);
+            hexTile(c);
+            for (int s = 0; s < 4; s++) button(c, s);
+            glow(c);
+            c.save("gui/ui_hd.png");
+        }
+
+        static void frame(Canvas c) {
+            int[] gold = ramp(0xFFD8A040, 7);
+            for (int y = 0; y < 128; y++) for (int x = 0; x < 128; x++) {
+                int e = Math.min(Math.min(x, y), Math.min(127 - x, 127 - y));
+                boolean lit = (x < 64 && x == e) || (y < 64 && y == e);                       // top and left faces catch the light
+                int col;
+                if (e < 2) col = 0xFF05060A;
+                else if (e < 12) {
+                    double t = (e - 2) / 9.0;
+                    double l = 3.2 + (lit ? 1.4 : -0.6) * Math.cos(t * Math.PI) - 2.4 * Math.exp(-Math.pow((t - 0.5) / 0.09, 2));   // bevel, groove
+                    l += (noise(x, y, 701) - 0.5) * 0.6;
+                    col = gold[(int) Math.max(0, Math.min(gold.length - 1, Math.round(l)))];
+                } else if (e < 14) col = 0xFF0A0C14;
+                else if (e < 16) col = e == 14 ? 0xC04AA8E0 : 0x504AA8E0;                         // an inner glow line
+                else col = 0;
+                c.set(x, y, col);
+            }
+            for (int corner = 0; corner < 4; corner++) {                                          // amber gems at the corners
+                int cx = corner % 2 == 0 ? 15 : 112, cy = corner < 2 ? 15 : 112;
+                for (int y = -14; y <= 14; y++) for (int x = -14; x <= 14; x++) {
+                    double r = Math.hypot(x, y);
+                    if (r > 13.6) continue;
+                    int col;
+                    if (r > 11.8) col = 0xFF2A1404;
+                    else if (r > 9.8) col = gold[r > 10.8 ? 3 : 5];
+                    else {
+                        double l = 1 - Math.hypot(x + 3.2, y + 3.2) / 12.5;
+                        col = mix(0xFF8A2A04, 0xFFFFD27A, Math.max(0, Math.min(1, l)));
+                        if (Math.hypot(x + 3.8, y + 3.8) < 2.4) col = 0xFFFFF6E0;                  // a glint
+                    }
+                    c.set(cx + x, cy + y, col);
+                }
+            }
+        }
+
+        /** A faint hex lattice, tiled behind window bodies at low alpha. */
+        static void hexTile(Canvas c) {
+            for (int y = 0; y < 64; y++) for (int x = 0; x < 64; x++) {
+                double qx = x / 16.0, qy = y / 13.86;
+                int row = (int) Math.floor(qy);
+                double ox = qx - (row % 2 == 0 ? 0 : 0.5);
+                double fx = ox - Math.floor(ox) - 0.5, fy = qy - row - 0.5;
+                double d = Math.max(Math.abs(fx) * 1.15 + Math.abs(fy) * 0.6, Math.abs(fy) * 1.2);
+                int a = d > 0.53 && d < 0.58 ? 22 : 0;
+                c.set(x, 128 + y, a << 24 | 0x6A8AC0);
+            }
+        }
+
+        static void button(Canvas c, int state) {
+            int top, bottom, trim, glowEdge;
+            switch (state) {
+                case 1 -> { top = 0xFF2E4A86; bottom = 0xFF18264A; trim = 0xFFFFD27A; glowEdge = 0x9060B8FF; }
+                case 2 -> { top = 0xFF2A2A32; bottom = 0xFF18181E; trim = 0xFF4A4A55; glowEdge = 0; }
+                case 3 -> { top = 0xFFFFB848; bottom = 0xFFB0400E; trim = 0xFFFFE6A0; glowEdge = 0x80FFD27A; }
+                default -> { top = 0xFF22305A; bottom = 0xFF0E1628; trim = 0xFFB08030; glowEdge = 0; }
+            }
+            int x0 = 128, y0 = state * 48;
+            for (int y = 0; y < 48; y++) for (int x = 0; x < 96; x++) {
+                int e = Math.min(Math.min(x, y), Math.min(95 - x, 47 - y));
+                boolean corner = (x < 3 || x > 92) && (y < 3 || y > 44) && e < 2;
+                if (corner) continue;
+                int col;
+                if (e < 2) col = glowEdge != 0 ? glowEdge : 0xFF05060A;
+                else if (e < 4) col = e == 2 ? 0xFF05060A : trim;
+                else if (e < 6) col = e == 4 ? mix(trim, 0xFF000000, 0.45) : 0xFF0A0C14;
+                else {
+                    double t = (y - 6) / 36.0;
+                    col = mix(top, bottom, Math.max(0, Math.min(1, t)));
+                    if (y == 6 || y == 7) col = mix(col, 0xFFFFFFFF, 0.28);                            // the top gloss
+                    if (y >= 40) col = mix(col, 0xFF000000, 0.25);                                    // a lower shadow
+                    col = mix(col, noise(x, y, 711 + state) > 0.5 ? 0xFFFFFFFF : 0xFF000000, 0.03);
+                }
+                c.set(x0 + x, y0 + y, col);
+            }
+        }
+
+        static void glow(Canvas c) {
+            for (int y = 0; y < 256; y++) for (int x = 0; x < 256; x++) {
+                double r = Math.hypot(x - 127.5, y - 127.5) / 128;
+                double a = Math.max(0, 1 - r);
+                a = a * a * (3 - 2 * a);
+                c.set(256 + x, y, (int) (a * 255) << 24 | 0xFFFFFF);
+            }
         }
     }
     // ================================================================== faces

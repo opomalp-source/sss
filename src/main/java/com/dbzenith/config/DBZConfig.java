@@ -598,6 +598,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue hairPhysics;
         public final ForgeConfigSpec.BooleanValue proceduralMotion;
         public final ForgeConfigSpec.BooleanValue hdArt;
+        public final ForgeConfigSpec.IntValue uiStyle;
 
         Client(ForgeConfigSpec.Builder b) {
             b.push("hud");
@@ -627,6 +628,8 @@ public final class DBZConfig {
                     .define("fovEffects", true);
             hairPhysics = b.comment("Hair sways with movement, falling, turning and auras")
                     .define("hairPhysics", true);
+            uiStyle = b.comment("Screens: 0 Zenith (ornate frames, animated backdrop), 1 Classic")
+                    .defineInRange("uiStyle", 0, 0, 1);
             hdArt = b.comment("High-detail textures for bodies and faces (off: the classic pixel look)")
                     .define("hdArt", true);
             proceduralMotion = b.comment("Bodies bank into flying turns, lean into climbs, dives and fast runs, and squash on hard landings")

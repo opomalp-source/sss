@@ -41,14 +41,84 @@ public final class DbzTheme {
 
     // ------------------------------------------------------------------ screens
 
-    /** Darkened world behind a screen, a little heavier at the bottom. */
+    /** The Zenith UI sheet (512x512, drawn at a quarter scale): frame, hex tile, buttons, glow. See ArtGen.GuiHd. */
+    public static final ResourceLocation UI_HD = new ResourceLocation(DBZenith.MOD_ID, "textures/gui/ui_hd.png");
+    private static final int HD = 4;
+
+    /** The ornate Zenith look (the default), or the classic flat one (Settings > Style > UI style). */
+    public static boolean zenith() {
+        try {
+            return com.dbzenith.config.DBZConfig.CLIENT.uiStyle.get() == 0;
+        } catch (IllegalStateException e) {
+            return true;
+        }
+    }
+
+    /** Darkened world behind a screen, a little heavier at the bottom; in Zenith, a glow and drifting ki motes. */
     public static void screenBackground(GuiGraphics g, int width, int height) {
-        g.fillGradient(0, 0, width, height, 0xB0060812, 0xD8020308);
+        if (!zenith()) {
+            g.fillGradient(0, 0, width, height, 0xB0060812, 0xD8020308);
+            return;
+        }
+        g.fillGradient(0, 0, width, height, 0xC8050812, 0xE8010206);
+        RenderSystem.enableBlend();
+        int gw = (int) (width * 1.1), gh = (int) (height * 1.2);
+        g.setColor(0.25f, 0.42f, 0.85f, 0.32f);                                  // a deep blue glow behind the window
+        g.blit(UI_HD, (width - gw) / 2, (height - gh) / 2, gw, gh, 256, 0, 256, 256, 512, 512);
+        g.setColor(1, 1, 1, 1);
+        double t = System.currentTimeMillis() / 1000.0;
+        for (int i = 0; i < 46; i++) {                                           // ki motes drifting up
+            double seed = i * 12.9898;
+            double fx = (Math.sin(seed) * 43758.5453) % 1, speed = 6 + 10 * Math.abs((Math.sin(seed * 1.7) * 9631.1) % 1);
+            double x = Math.abs(fx) * width + Math.sin(t * 0.6 + i) * 6;
+            double y = height - ((t * speed + i * 37) % (height + 20));
+            float a = (float) (0.25 + 0.35 * Math.abs(Math.sin(t * 1.3 + i)));
+            int col = i % 3 == 0 ? 0xFFD27A : 0x7CC8FF;
+            int s = i % 5 == 0 ? 2 : 1;
+            g.fill((int) x, (int) y, (int) x + s, (int) y + s, (int) (a * 255) << 24 | col);
+        }
     }
 
     public static void panel(GuiGraphics g, int x, int y, int w, int h) {
         RenderSystem.enableBlend();
-        g.blitNineSliced(UI, x, y, w, h, 8, 8, 32, 32, 112, 0);
+        if (!zenith()) {
+            g.blitNineSliced(UI, x, y, w, h, 8, 8, 32, 32, 112, 0);
+            return;
+        }
+        g.fillGradient(x + 3, y + 3, x + w - 3, y + h - 3, 0xEE141C34, 0xF2060A14);  // dark glass
+        g.enableScissor(x + 3, y + 3, x + w - 3, y + h - 3);
+        for (int ty = y; ty < y + h; ty += 40) for (int tx = x; tx < x + w; tx += 40) {   // the hex lattice, faint
+            g.blit(UI_HD, tx, ty, 40, 40, 0, 128, 64, 64, 512, 512);
+        }
+        g.disableScissor();
+        g.fillGradient(x + 3, y + 3, x + w - 3, y + 3 + Math.min(40, h / 3), 0x302A4A8A, 0x002A4A8A);   // light from above
+        nine(g, x, y, w, h, 0, 0, 128, 128, 32, false);
+    }
+
+    /**
+     * A nine-slice from the HD sheet: corners at true size (a quarter scale), edges and the middle stretched.
+     * {@code border} is in sheet pixels; {@code middle} draws the centre too.
+     */
+    public static void nine(GuiGraphics g, int x, int y, int w, int h, int u, int v, int uw, int vh, int border, boolean middle) {
+        g.pose().pushPose();
+        g.pose().translate(x, y, 0);
+        g.pose().scale(1f / HD, 1f / HD, 1);
+        int W = w * HD, H = h * HD, b = border, cw = uw - 2 * b, ch = vh - 2 * b;
+        int bw = Math.min(b, W / 2), bh = Math.min(b, H / 2);
+        g.blit(UI_HD, 0, 0, bw, bh, u, v, bw, bh, 512, 512);
+        g.blit(UI_HD, W - bw, 0, bw, bh, u + uw - bw, v, bw, bh, 512, 512);
+        g.blit(UI_HD, 0, H - bh, bw, bh, u, v + vh - bh, bw, bh, 512, 512);
+        g.blit(UI_HD, W - bw, H - bh, bw, bh, u + uw - bw, v + vh - bh, bw, bh, 512, 512);
+        if (W > 2 * bw) {
+            g.blit(UI_HD, bw, 0, W - 2 * bw, bh, u + b, v, cw, bh, 512, 512);
+            g.blit(UI_HD, bw, H - bh, W - 2 * bw, bh, u + b, v + vh - bh, cw, bh, 512, 512);
+        }
+        if (H > 2 * bh) {
+            g.blit(UI_HD, 0, bh, bw, H - 2 * bh, u, v + b, bw, ch, 512, 512);
+            g.blit(UI_HD, W - bw, bh, bw, H - 2 * bh, u + uw - bw, v + b, bw, ch, 512, 512);
+        }
+        if (middle && W > 2 * bw && H > 2 * bh) g.blit(UI_HD, bw, bh, W - 2 * bw, H - 2 * bh, u + b, v + b, cw, ch, 512, 512);
+        g.pose().popPose();
     }
 
     /** Panel with a slanted title ribbon across its top edge. */
@@ -66,6 +136,14 @@ public final class DbzTheme {
         slant(g, x - 1, y - 1, w + 2, h + 2, 6, 0xFF2A1404, 0xFF2A1404);
         slant(g, x, y, w, h, 6, 0xFFFFB040, 0xFFB0400E);
         slant(g, x + 3, y + 1, w - 6, 2, 1, 0x70FFFFFF, 0x30FFFFFF);
+        if (zenith()) {                                                        // flared, gem-tipped ends
+            for (int side = -1; side <= 1; side += 2) {
+                float ex = side < 0 ? x - 1 : x + w + 6, ey = y + h / 2f;
+                quad(g, ex, ey - 7, ex + side * 9, ey, ex, ey + 7, ex - side * 2, ey, 0xFF2A1404, 0xFF2A1404, 0xFF2A1404, 0xFF2A1404);
+                quad(g, ex, ey - 5, ex + side * 7, ey, ex, ey + 5, ex - side * 1, ey, 0xFFFFC860, 0xFFE07018, 0xFFB0400E, 0xFFE07018);
+                g.fill((int) (ex + side * 3) - 1, (int) ey - 1, (int) (ex + side * 3) + 2, (int) ey + 2, 0xFFFFF6E0);
+            }
+        }
         g.drawString(font, title, cx - tw / 2 + 3, y + 3, 0xFFFFF4D8, true);
     }
 
@@ -74,6 +152,11 @@ public final class DbzTheme {
         int mid = x + w / 2;
         hGradient(g, x, y, mid, y + 1, 0x00D8A040, 0xFFD8A040);
         hGradient(g, mid, y, x + w, y + 1, 0xFFD8A040, 0x00D8A040);
+        if (zenith()) {                                                        // a diamond at the middle
+            quad(g, mid, y - 3, mid + 4, y + 0.5f, mid, y + 4, mid - 4, y + 0.5f, 0xFFFFE6A0, 0xFFD8A040, 0xFF8A5A10, 0xFFD8A040);
+            hGradient(g, x + w / 6f, y + 2, mid - 6, y + 3, 0x004AA8E0, 0x604AA8E0);
+            hGradient(g, mid + 6, y + 2, x + w - w / 6f, y + 3, 0x604AA8E0, 0x004AA8E0);
+        }
     }
 
     /** Row highlight: a slanted glass strip, gold when selected. */
@@ -85,6 +168,10 @@ public final class DbzTheme {
     /** A button skin: 0 normal, 1 hover, 2 disabled, 3 selected. */
     public static void button(GuiGraphics g, int x, int y, int w, int h, int state) {
         RenderSystem.enableBlend();
+        if (zenith() && h >= 8) {
+            nine(g, x, y, w, h, 128, state * 48, 96, 48, 12, true);
+            return;
+        }
         g.blitNineSliced(UI, x, y, w, h, 4, 4, 32, 16, 144, state * 16);
     }
 
