@@ -129,7 +129,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [x] CX-1 Settings menu (pause menu, mod list Config, wheel; HUD / effects / camera / controls)
 - [x] CX-2 Races v2: variants (clans, rare destinies, paths), 5 new races, race and variant skins, 3 new head and back features
 - [x] CX-3 Forms v2: 70 new forms on the mapped DBV scale, ranged (mastery-grown) and rising (combat) multipliers. Done since: power-ups below 75% mastery (interruptible), God Ki levels 1-10 (v0.14.2)
-- [ ] CX-4 Racial skills (actives on a Racial key and wheel ring, passives)
+- [x] CX-4 Racial skills: 92 skills (70 passives built from condition and modifier data, 22 actives), Racial key (U, shift to browse), Racial Skills screen, HUD readout, wheel slice, /dbz racial (v0.15.0)
 - [ ] CX-5 Universal skills: Kaioken, Limit Break, Ki Sense, Instant Transmission, Ki Barrier, Echo Strike...
 - [ ] CX-6 Combat v3: Z-hits, sweeps, directionals, revenge counter, breaker wave, vanish / chase, dodges, recovery, clashes, downed state
 - [ ] CX-7 Ki Creator v2 (methods, origins, shapes, types, 14 modifiers)

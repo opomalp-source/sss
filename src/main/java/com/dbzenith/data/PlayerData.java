@@ -982,6 +982,78 @@ public class PlayerData {
         return guarding;
     }
 
+    // racial skills: the active on the Racial key, cooldowns and buffs (saved, as game-time ticks), and the live
+    // conditions their passives read (not saved; see race.RacialSkills)
+    private String racialSelected = "";
+    private final java.util.Map<String, Long> racialCooldowns = new java.util.HashMap<>();
+    private final java.util.Map<String, Long> racialBuffs = new java.util.HashMap<>();
+    private int racialMask;
+    private final java.util.Set<String> racialActive = new java.util.HashSet<>();
+    private final java.util.Set<String> racialAfter = new java.util.HashSet<>();
+    private final java.util.Map<String, Long> racialOnce = new java.util.HashMap<>();
+
+    public String getRacialSelected() {
+        return racialSelected;
+    }
+
+    public void setRacialSelected(String id) {
+        racialSelected = id == null ? "" : id;
+        markDirty();
+    }
+
+    /** Game tick the skill is ready again (0 = ready). */
+    public long getRacialCooldown(String id) {
+        return racialCooldowns.getOrDefault(id, 0L);
+    }
+
+    public void setRacialCooldown(String id, long readyAt) {
+        racialCooldowns.put(id, readyAt);
+        markDirty();
+    }
+
+    /** Game tick a timed racial buff began, or absent. */
+    public java.util.Map<String, Long> getRacialBuffs() {
+        return racialBuffs;
+    }
+
+    public void startRacialBuff(String id, long now) {
+        racialBuffs.put(id, now);
+        markDirty();
+    }
+
+    /** Once-in-a-while passives (Second Wind, Death Regeneration...): the tick they last fired. */
+    public long getRacialOnce(String id) {
+        return racialOnce.getOrDefault(id, Long.MIN_VALUE / 2);
+    }
+
+    public void setRacialOnce(String id, long now) {
+        racialOnce.put(id, now);
+        markDirty();
+    }
+
+    public int getRacialMask() {
+        return racialMask;
+    }
+
+    public java.util.Set<String> getRacialActive() {
+        return racialActive;
+    }
+
+    public java.util.Set<String> getRacialAfter() {
+        return racialAfter;
+    }
+
+    /** New live conditions: derived stats are recomputed when they change. */
+    public void setRacialState(int mask, java.util.Set<String> active, java.util.Set<String> after) {
+        if (mask == racialMask && active.equals(racialActive) && after.equals(racialAfter)) return;
+        racialMask = mask;
+        racialActive.clear();
+        racialActive.addAll(active);
+        racialAfter.clear();
+        racialAfter.addAll(after);
+        invalidateDerived();
+    }
+
     // God Ki: experience towards levels 1-10 (saved); see transform.GodKi
     private double godKiXp;
 
@@ -1291,6 +1363,16 @@ public class PlayerData {
         mastery.forEach(m::putDouble);
         tag.put("mastery", m);
         tag.putDouble("godKiXp", godKiXp);
+        tag.putString("racialSelected", racialSelected);
+        CompoundTag rc = new CompoundTag();
+        racialCooldowns.forEach(rc::putLong);
+        tag.put("racialCooldowns", rc);
+        CompoundTag rb = new CompoundTag();
+        racialBuffs.forEach(rb::putLong);
+        tag.put("racialBuffs", rb);
+        CompoundTag ro = new CompoundTag();
+        racialOnce.forEach(ro::putLong);
+        tag.put("racialOnce", ro);
         net.minecraft.nbt.ListTag fl = new net.minecraft.nbt.ListTag();
         for (String f : flags) fl.add(net.minecraft.nbt.StringTag.valueOf(f));
         tag.put("flags", fl);
@@ -1382,6 +1464,16 @@ public class PlayerData {
         CompoundTag m = tag.getCompound("mastery");
         for (String k : m.getAllKeys()) mastery.put(k, m.getDouble(k));
         godKiXp = tag.getDouble("godKiXp");
+        racialSelected = tag.getString("racialSelected");
+        racialCooldowns.clear();
+        CompoundTag rc = tag.getCompound("racialCooldowns");
+        for (String k : rc.getAllKeys()) racialCooldowns.put(k, rc.getLong(k));
+        racialBuffs.clear();
+        CompoundTag rb = tag.getCompound("racialBuffs");
+        for (String k : rb.getAllKeys()) racialBuffs.put(k, rb.getLong(k));
+        racialOnce.clear();
+        CompoundTag ro = tag.getCompound("racialOnce");
+        for (String k : ro.getAllKeys()) racialOnce.put(k, ro.getLong(k));
         flags.clear();
         net.minecraft.nbt.ListTag fl = tag.getList("flags", net.minecraft.nbt.Tag.TAG_STRING);
         for (int i = 0; i < fl.size(); i++) flags.add(fl.getString(i));
@@ -1482,6 +1574,9 @@ public class PlayerData {
         tag.putString("transformTarget", transformTarget);
         tag.putInt("transformTicks", transformTicks);
         tag.putInt("transformTotal", transformTotal);
+        tag.putInt("racialMask", racialMask);
+        tag.putString("racialActive", String.join(",", racialActive));
+        tag.putString("racialAfter", String.join(",", racialAfter));
         return tag;
     }
 
@@ -1503,6 +1598,11 @@ public class PlayerData {
         transformTarget = tag.getString("transformTarget");
         transformTicks = tag.getInt("transformTicks");
         transformTotal = tag.getInt("transformTotal");
+        racialMask = tag.getInt("racialMask");
+        racialActive.clear();
+        for (String s : tag.getString("racialActive").split(",")) if (!s.isEmpty()) racialActive.add(s);
+        racialAfter.clear();
+        for (String s : tag.getString("racialAfter").split(",")) if (!s.isEmpty()) racialAfter.add(s);
         dirty = false;
     }
 }

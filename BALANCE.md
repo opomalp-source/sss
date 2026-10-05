@@ -102,3 +102,14 @@ Android ki absorption, Majin kill-heal) tip close duels; whether the pacing targ
 - **Per level past the first:** god forms gain +2% power (+18% at level 10) and drain 5% less (-45% at level 10).
 - **Between god ki users:** the god ki edge becomes `godKiEdge * 0.08` per level of difference, capped at 5 levels (±10% with the default edge).
 - **Required levels:** god forms ask for level 1, those unlocked at 1500 or later for level 2, those grown out of a god form (Blue) for level 3, and god forms unlocked at 1800 or later for level 5.
+
+## Racial skills (CX-4, v0.15.0)
+- **Passives:** always-on modifiers stay at +10% or less (most -8% to -15% taken, or +8% to +10% to one stat). Conditional ones stay at +25% or less, and the conditions cost something: below 30% body, at night, while transformed, against a stronger foe, building over 3 minutes of combat.
+- **Stacking:** the most stacked case, a Legendary in combat at full ramp, is +8% (Warrior Race) x +15% (Escalating Power) = x1.24 power. That sits beside the forms' x5 to x60, so form balance (Races2Tests) holds.
+- **Actives:** the buffs are short, with cooldowns about 6 to 10 times their length.
+  - Saiyan's Resolve: -30% taken for 15 s every 90 s.
+  - Shattering the Limit: +25% for 12 s, then -15% for 24 s, every 150 s.
+  - Mindless Gambit: +30% dealt and +30% taken.
+  - Sacred Barrier: -60% for 6 s every 60 s.
+- **Instant actives:** their damage uses the ki damage formula, at x0.3 to x0.8 of a ki blast.
+- **Cheating death:** Second Wind (Human) restores 35% body and stamina every 10 minutes. Death Regeneration (Majin, level 400) returns you at 20% body every 10 minutes. Reincarnation (Namekian, level 700) returns you at 30% body every 30 minutes.

@@ -76,6 +76,6 @@ public final class DamageCalculator {
         double control = 1.0 - user.getDerived().kiControl();
         double release = 1.0 + (DBZConfig.SERVER.kiCostReleaseScaling.get() - 1.0) * releaseFactor(user);
         double racial = 1.0 - com.dbzenith.race.Races.of(user.getRace()).kiCostReduction();
-        return baseCost * control * release * racial;
+        return baseCost * control * release * racial * com.dbzenith.race.RacialSkills.factor(user, com.dbzenith.race.RacialSkill.Stat.KI_COST);
     }
 }

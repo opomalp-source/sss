@@ -402,3 +402,34 @@
 
 ### Verified
 - Screenshots in survival: the aura, the debris, the HUD bar, the hair flicker, and the form taking hold with the cut-in.
+
+## 2026-10-05 — Session 3 (cont.): CX-4 Racial skills (v0.15.0)
+- **Model (`RacialSkill`, `RacialSkills`):** 92 skills (70 passive, 22 active), gated by race and optionally variant, and unlocked by level (scaled by `unlockLevelScale`).
+  - A skill is a list of modifiers, each a stat, an amount and a condition.
+  - Stats: power, melee, ki, speed, damage dealt and taken, body and ki regen, ki cost, form drain, TP gain, mastery gain, knockback resistance, lifesteal, and ki on hit.
+  - Conditions: low, critical or full body; fighting; a 3-minute combat ramp; transformed or base form; night or day; high or low ki; hurt recently; while an active runs or the backlash after it; against stronger or weakened foes; and from blows or from ki.
+  - Each race has its own skills, and lineages, clans, castes, strains and paths add theirs. The DBV wiki skill names were the inspiration (Persistence, Saiyan's Resolve, Primal Zenkai, Vacuum Breathing, Limb Regeneration, Gum Body...), with new ones for the new races.
+- **Live conditions:** every 5 ticks, `RacialSkillEffects.refresh` folds the fighter's state into a mask (with the combat ramp quantised to tenths) and works out which timed buffs are running or in backlash. Derived stats are recomputed only when that changes. Blow-time conditions (the foe, the kind of hit) are applied in `CombatEvents` through `RacialSkills.blowFactor`.
+- **Hooked into:**
+  - attribute multipliers (`FormMath`), move speed and TP gain (`StatCalculator`), ki costs (`DamageCalculator`);
+  - body and ki regeneration (`KiTicker`), form drain and mastery (`FormHandler`), Zenkai (`RacePassives`);
+  - knockback and fall events, and lifesteal and ki on hit after a blow lands.
+- **Custom passives:**
+  - Second Wind, Death Regeneration and Reincarnation (cheating death, with timers saved in `racialOnce`);
+  - Limb Regeneration (sheds ailments), Vacuum Breathing, Revitalizing Metamorphosis (heals on transforming);
+  - Elastic Monster (no fall damage), Primal Zenkai (x1.5).
+- **Actives:** Venting, Roaring Evolution, Tyrant's Glare, Spirit Disruption, Dragon's Blessing, Remote Absorb, Self-Repair, Nano Repair, Bat Swarm, Cellular Absorption, System Scan, Void Step and Seismic Stomp, plus timed buffs (Sheer Willpower, Saiyan's Resolve, Shattering the Limit, Blazing Spirit with its burning aura, Mindless Gambit, Overclock, Blur, Sacred Barrier, Dark Aura that weakens everyone nearby).
+- **Controls:**
+  - The Racial key (U) fires the selected active; Shift+U opens the Racial Skills screen.
+  - The screen shows cards with an emblem, passive or active tag, lock level and cooldown sweep; hovering shows the details and modifier lines generated from the data. Click an active to put it on the key.
+  - Also reachable from the stat screen button and a new wheel slice (helix icon in the ArtGen UI sheet).
+  - A HUD readout left of the hotbar shows ready, the cooldown, or the running buff with its ring.
+  - `/dbz racial <targets> <skill>`.
+- **Network:** `RacialPackets.Select`, and `InputPacket.RACIAL_USE`. Protocol 22.
+- **Tests (124):** `RacialSkillTests`, 4 tests: every race and variant has a full kit; passives follow their conditions; actives cost ki, cool down, buff and backlash; Majin cheats death once and racial state is saved.
+- **Fixed:**
+  - `DbzTheme.brighten` takes a factor above 1; passing 0.3 produced garbage colours (caught on the Dragon's Blessing emblem).
+  - `questNpcsGetBuildings` built at the same spot in the kept test world every run, stacking dojos until they reached build height. It now builds somewhere new each run.
+
+### Verified
+- Screenshots: the Racial Skills screen (Legendary Saiyan; Dragon Clan with Reincarnation locked at level 700), Venting throwing zombies, Bat Swarm, and the HUD readouts with cooldowns.

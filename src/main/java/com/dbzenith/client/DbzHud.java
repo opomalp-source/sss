@@ -175,6 +175,7 @@ public final class DbzHud implements IGuiOverlay {
 
         // ---------------------------------------------------------- technique, right of the hotbar
         technique(g, font, d, width / 2 + 114, height - 24, time, t);
+        racial(g, font, d, width / 2 - 114 - 86, height - 24, time, t);
     }
 
     /** One slanted bar with its eased fill, ghost of recent loss, shimmer and value. Returns the next row's y. */
@@ -207,6 +208,33 @@ public final class DbzHud implements IGuiOverlay {
         }
         DbzTheme.text(g, font, compact(value), x + w + skew + 3, y + (h - 6) / 2f, DbzTheme.TEXT, 0.75f);
         return y + h + 3;
+    }
+
+    /** The active racial skill on the Racial key, left of the hotbar: ready, cooling down, or running. */
+    private static void racial(GuiGraphics g, Font font, PlayerData d, int x, int y, long time, float t) {
+        com.dbzenith.race.RacialSkill s = com.dbzenith.race.RacialSkills.byId(d.getRacialSelected());
+        if (s == null || !com.dbzenith.race.RacialSkills.unlocked(d, s)) {
+            s = com.dbzenith.race.RacialSkills.forCharacter(d.getRace(), d.getVariant()).stream()
+                    .filter(r -> r.isActive() && com.dbzenith.race.RacialSkills.unlocked(d, r)).findFirst().orElse(null);
+        }
+        if (s == null) return;
+        int w = 86, h = 22, color = s.color();
+        DbzTheme.slant(g, x - 1, y - 1, w + 2, h + 2, 6, 0xF0040508, 0xF0040508);
+        DbzTheme.slant(g, x, y, w, h, 6, 0xE0182238, 0xE00A0E18);
+        long ready = d.getRacialCooldown(s.id());
+        float cd = time < ready ? (ready - time) / (float) Math.max(1, s.cooldownTicks()) : 0;
+        Long began = d.getRacialBuffs().get(s.id());
+        boolean running = began != null && time - began < s.durationTicks();
+        int ox = x + 5, oy = y + 3;
+        DbzTheme.icon(g, DbzTheme.ICON_RACIAL, ox, oy, 16, cd > 0 && !running ? DbzTheme.darken(color, 0.5f) : color);
+        if (running) DbzTheme.arc(g, ox + 8, oy + 8, 8.5f, 10.5f, -90, 360 * (1 - (time - began) / (float) s.durationTicks()), color, color);
+        else if (cd > 0) DbzTheme.arc(g, ox + 8, oy + 8, 0, 9, -90, -360 * cd, 0x90000000, 0x90000000);
+        Component name = Component.translatable(s.translationKey());
+        DbzTheme.text(g, font, name, x + 25, y + 3, color, font.width(name) > 58 ? 58f / font.width(name) : 1f);
+        Component state = running ? Component.translatable("hud.dbzenith.racial_running", (s.durationTicks() - (time - began)) / 20 + 1)
+                : cd > 0 ? Component.translatable("hud.dbzenith.racial_cooldown", (ready - time) / 20 + 1)
+                : Component.translatable("hud.dbzenith.racial_ready");
+        DbzTheme.text(g, font, state, x + 25, y + 13, running ? color : cd > 0 ? DbzTheme.DIM : DbzTheme.GOOD, 0.6f);
     }
 
     private static void technique(GuiGraphics g, Font font, PlayerData d, int x, int y, long time, float t) {

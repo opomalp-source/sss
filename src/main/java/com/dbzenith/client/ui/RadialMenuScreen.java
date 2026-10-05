@@ -54,6 +54,7 @@ public class RadialMenuScreen extends Screen {
         inner.add(new Slice(tr("forms"), tr("forms.hint"), DbzTheme.ICON_FORMS, -1, () -> minecraft.setScreen(new FormScreen(null))));
         inner.add(new Slice(tr("techniques"), tr("techniques.hint"), DbzTheme.ICON_TECHNIQUES, -1, () -> minecraft.setScreen(new DeckScreen(null))));
         inner.add(new Slice(tr("life"), tr("life.hint"), DbzTheme.ICON_LIFE, -1, () -> minecraft.setScreen(new LifeScreen(null))));
+        inner.add(new Slice(tr("racial"), tr("racial.hint"), DbzTheme.ICON_RACIAL, -1, () -> minecraft.setScreen(new com.dbzenith.client.screen.RacialScreen(null))));
         inner.add(new Slice(tr("settings"), tr("settings.hint"), DbzTheme.ICON_SETTINGS, -1, () -> minecraft.setScreen(new com.dbzenith.client.screen.SettingsScreen(null))));
         if (ClientPlayerData.hasData()) {
             List<String> deck = ClientPlayerData.get().deckView();

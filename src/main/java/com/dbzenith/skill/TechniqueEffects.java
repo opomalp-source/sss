@@ -191,13 +191,13 @@ public final class TechniqueEffects {
         return true;
     }
 
-    private static List<LivingEntity> around(ServerPlayer player, double radius) {
+    public static List<LivingEntity> around(ServerPlayer player, double radius) {
         AABB box = player.getBoundingBox().inflate(radius);
         return player.level().getEntitiesOfClass(LivingEntity.class, box,
                 e -> e != player && e.isAlive() && !e.isSpectator() && e.distanceToSqr(player) <= radius * radius);
     }
 
-    private static LivingEntity lookedAtLiving(ServerPlayer player, double range) {
+    public static LivingEntity lookedAtLiving(ServerPlayer player, double range) {
         Vec3 eye = player.getEyePosition();
         Vec3 end = eye.add(player.getLookAngle().scale(range));
         return player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(range),

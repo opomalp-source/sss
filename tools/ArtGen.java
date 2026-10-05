@@ -1724,7 +1724,7 @@ public class ArtGen {
         static void icons(Canvas c, int[] gold) {
             int ink = 0xFFF4F0E6;
             int[] red = ramp(0xFFE8402A, 5), blue = ramp(0xFF5AB8FF, 5), cl = ramp(0xFFF2CE5A, 5);
-            Canvas[] ic = new Canvas[12];
+            Canvas[] ic = new Canvas[13];
             for (int i = 0; i < ic.length; i++) ic[i] = new Canvas(16, 16);
             // 0 transform up: spiky crown of hair over an up arrow
             for (int i = 0; i < 3; i++) ic[0].line(2 + i * 4, 7, 4 + i * 4, 1, gold[4]).line(4 + i * 4, 1, 6 + i * 4, 7, gold[3]);
@@ -1763,6 +1763,14 @@ public class ArtGen {
                 double dx = x + 0.5 - 8, dy = y + 0.5 - 8, r = Math.sqrt(dx * dx + dy * dy), a = Math.atan2(dy, dx);
                 boolean tooth = Math.cos(a * 8) > 0.3 && r < 7.2;
                 if ((r < 5.2 || tooth) && r > 2.2) ic[11].set(x, y, mix(0xFFB8C0D0, 0xFF6A7488, (dx + dy + 10) / 20.0));
+            }
+            // 12 racial skills: a double helix, gold and blue, with rungs
+            for (int y = 1; y < 15; y++) {
+                double ph = (y - 1) / 13.0 * Math.PI * 2;
+                int xa = (int) Math.round(7.5 + Math.sin(ph) * 4.5), xb = (int) Math.round(7.5 - Math.sin(ph) * 4.5);
+                if (y % 3 == 0) ic[12].hline(Math.min(xa, xb), Math.max(xa, xb), y, 0xFF8A8A98);
+                ic[12].set(xa, y, Math.cos(ph) > 0 ? gold[4] : gold[1]).set(xb, y, Math.cos(ph) < 0 ? blue[4] : blue[1]);
+                ic[12].set(xa + 1, y, Math.cos(ph) > 0 ? gold[3] : gold[0]).set(xb + 1, y, Math.cos(ph) < 0 ? blue[3] : blue[0]);
             }
             for (int i = 0; i < ic.length; i++) {
                 ic[i].outline();

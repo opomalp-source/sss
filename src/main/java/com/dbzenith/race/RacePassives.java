@@ -66,7 +66,7 @@ public final class RacePassives {
             int cap = c.attributeHardCap.get();
             for (Attribute a : ZENKAI_ATTRIBUTES) {
                 int v = data.getAttribute(a);
-                data.setAttribute(a, Math.min(cap, v + zenkaiGain(v, t.zenkaiPercent())));
+                data.setAttribute(a, Math.min(cap, v + zenkaiGain(v, t.zenkaiPercent() * RacialSkillEffects.zenkaiFactor(data))));
             }
             data.recordZenkai(now);
             data.recomputeIfStale();

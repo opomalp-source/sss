@@ -20,7 +20,7 @@ import net.minecraft.network.chat.Component;
  */
 public class StatScreen extends Screen {
     private static final int W = 320;
-    private static final int H = 196;
+    private static final int H = 218;
     private static final int HEADER = 0xFFFFB330;
     private static final int TEXT = 0xFFF0F0F0;
     private static final int DIM = 0xFFA0A0B0;
@@ -46,6 +46,8 @@ public class StatScreen extends Screen {
             String next = idx + 1 < earned.size() ? earned.get(idx + 1).id() : "";
             ModNetwork.sendToServer(new com.dbzenith.network.SelectTitlePacket(next));
         }).bounds(left + 8, top + H - 24, 104, 18).build());
+        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.racial_button"), b -> minecraft.setScreen(new RacialScreen(this)))
+                .bounds(left + 8, top + H - 46, 104, 18).build());
         addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.life_button"), b -> minecraft.setScreen(new LifeScreen(this)))
                 .bounds(left + 116, top + H - 24, 44, 18).build());
         addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.techniques_button"), b -> minecraft.setScreen(new DeckScreen(this)))

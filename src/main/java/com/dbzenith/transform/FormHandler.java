@@ -175,6 +175,7 @@ public final class FormHandler {
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
                 form.isBase() ? SoundEvents.BEACON_DEACTIVATE : SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.7f, form.isBase() ? 1.2f : 1.5f);
         player.refreshDimensions();
+        com.dbzenith.race.RacialSkillEffects.onFormEntered(player, data, form.isBase());
         if (!form.isBase()) {
             player.displayClientMessage(Component.translatable("message.dbzenith.transformed", Component.translatable(form.translationKey())), true);
         }
@@ -203,14 +204,15 @@ public final class FormHandler {
         Form form = Forms.byId(data.getFormId());
         if (form.isBase()) return;
         double mastery = data.getMastery(form.id());
-        double kiDrain = FormMath.masteredDrain(form.kiDrainPercent(), mastery) * GodKi.drainFactor(data, form) * data.getDerived().maxKi() / 100.0 / 20.0;
-        double staDrain = FormMath.masteredDrain(form.staminaDrainPercent(), mastery) * GodKi.drainFactor(data, form) * data.getDerived().maxStamina() / 100.0 / 20.0;
+        double kiDrain = FormMath.masteredDrain(form.kiDrainPercent(), mastery) * GodKi.drainFactor(data, form) * com.dbzenith.race.RacialSkills.factor(data, com.dbzenith.race.RacialSkill.Stat.FORM_DRAIN) * data.getDerived().maxKi() / 100.0 / 20.0;
+        double staDrain = FormMath.masteredDrain(form.staminaDrainPercent(), mastery) * GodKi.drainFactor(data, form) * com.dbzenith.race.RacialSkills.factor(data, com.dbzenith.race.RacialSkill.Stat.FORM_DRAIN) * data.getDerived().maxStamina() / 100.0 / 20.0;
         if (!player.getAbilities().instabuild) {
             data.setKi(data.getKi() - kiDrain);
             data.setStamina(data.getStamina() - staDrain);
         }
         if (gameTime % 20 == 0) {
-            double gain = DBZConfig.SERVER.masteryGainPerSecond.get() * data.getDerived().spiritModifier() / (1.0 + 0.5 * form.tier());
+            double gain = DBZConfig.SERVER.masteryGainPerSecond.get() * data.getDerived().spiritModifier() / (1.0 + 0.5 * form.tier())
+                    * com.dbzenith.race.RacialSkills.factor(data, com.dbzenith.race.RacialSkill.Stat.MASTERY_GAIN);
             data.setMastery(form.id(), mastery + gain);
         }
         if (form.kiDrainPercent() > 0 && data.getKi() <= 0 && !player.getAbilities().instabuild) {

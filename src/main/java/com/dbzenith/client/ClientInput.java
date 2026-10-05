@@ -83,5 +83,9 @@ public final class ClientInput {
         }
         while (ModKeys.STATS.consumeClick()) mc.setScreen(new StatScreen());
         while (ModKeys.RADIAL.consumeClick()) com.dbzenith.client.ui.RadialMenuScreen.open();
+        while (ModKeys.RACIAL.consumeClick()) {                         // shift: browse the racial skills
+            if (Screen.hasShiftDown()) mc.setScreen(new com.dbzenith.client.screen.RacialScreen(null));
+            else ModNetwork.sendToServer(new InputPacket(InputPacket.Action.RACIAL_USE));
+        }
     }
 }

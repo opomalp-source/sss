@@ -18,7 +18,8 @@ public final class StatCalculator {
         double str = effective(data, Attribute.STRENGTH);
         double dex = effective(data, Attribute.DEXTERITY);
         int baseDex = data.getAttribute(Attribute.DEXTERITY);
-        double speedBonus = Forms.byId(data.getFormId()).speedBonus();
+        double speedBonus = Forms.byId(data.getFormId()).speedBonus()
+                + com.dbzenith.race.RacialSkills.factor(data, com.dbzenith.race.RacialSkill.Stat.SPEED) - 1.0;
         int con = data.getAttribute(Attribute.CONSTITUTION);
         double kip = effective(data, Attribute.KI_POWER);
         int wil = data.getAttribute(Attribute.WILLPOWER);
@@ -69,7 +70,8 @@ public final class StatCalculator {
                 * (data.getPath() == FightingPath.HYBRID ? 1.0 + DBZConfig.SERVER.hybridTpBonus.get() : 1.0)
                 * com.dbzenith.world.LifeSim.wisdomMultiplier(data)
                 * com.dbzenith.world.Family.tpMultiplier(data)
-                * DBZConfig.SERVER.tpGainMultiplier.get();
+                * DBZConfig.SERVER.tpGainMultiplier.get()
+                * com.dbzenith.race.RacialSkills.factor(data, com.dbzenith.race.RacialSkill.Stat.TP_GAIN);
         return rawGain * mult;
     }
 

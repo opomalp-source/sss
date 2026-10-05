@@ -35,7 +35,7 @@ public final class DbzTheme {
 
     /** Radial / HUD icon indices on the sheet (16x16 at (index * 16, 64)). */
     public static final int ICON_TRANSFORM = 0, ICON_POWER_DOWN = 1, ICON_FLY = 2, ICON_OVERDRIVE = 3, ICON_OVERDRIVE_OFF = 4,
-            ICON_STATS = 5, ICON_FORMS = 6, ICON_TECHNIQUES = 7, ICON_LIFE = 8, ICON_CLOSE = 9, ICON_ORB = 10, ICON_SETTINGS = 11;
+            ICON_STATS = 5, ICON_FORMS = 6, ICON_TECHNIQUES = 7, ICON_LIFE = 8, ICON_CLOSE = 9, ICON_ORB = 10, ICON_SETTINGS = 11, ICON_RACIAL = 12;
 
     private DbzTheme() {}
 

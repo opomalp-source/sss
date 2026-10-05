@@ -101,7 +101,8 @@ public final class NeedsTests {
     @GameTest(template = EMPTY)
     public static void questNpcsGetBuildings(GameTestHelper helper) {
         net.minecraft.server.level.ServerLevel level = helper.getLevel();
-        net.minecraft.core.BlockPos far = new net.minecraft.core.BlockPos(30_000, 0, 30_000); // away from the other tests
+        // away from the other tests, and somewhere new each run: the test world is kept, and dojos would stack up
+        net.minecraft.core.BlockPos far = new net.minecraft.core.BlockPos(30_000 + level.random.nextInt(4000) * 48, 0, 30_000 + level.random.nextInt(4000) * 48);
         com.dbzenith.npc.QuestNpcPlacement.buildWithNpc(level, com.dbzenith.npc.NpcStructures.Kind.DOJO, far);
         var masters = level.getEntitiesOfClass(com.dbzenith.npc.QuestGiverEntity.class, new net.minecraft.world.phys.AABB(far).inflate(8, 400, 8));
         helper.assertTrue(masters.size() == 1, "the master stands in the dojo");

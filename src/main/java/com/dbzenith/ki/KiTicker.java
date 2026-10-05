@@ -64,13 +64,14 @@ public final class KiTicker {
         } else if (!(data.isFlying() && player.getAbilities().flying) && !data.isTransformed()
                 && !com.dbzenith.registry.ModEffects.isKiSealed(player)) {
             // No passive ki regen while transformed: forms are sustained by charging and mastery.
-            data.setKi(data.getKi() + perTick(s.maxKi(), c.kiRegenPercentPerSecond.get()) * race.kiRegenMultiplier()
+            data.setKi(data.getKi() + perTick(s.maxKi(), c.kiRegenPercentPerSecond.get()) * race.kiRegenMultiplier() * com.dbzenith.race.RacialSkills.factor(data, com.dbzenith.race.RacialSkill.Stat.KI_REGEN)
                     * (data.isMeditating() ? c.meditationKiRegenMultiplier.get() : 1.0) * com.dbzenith.race.Alignment.kiRegenMultiplier(data));
         }
 
         com.dbzenith.combat.GuardRules.tick(data, now);
         if (now % 20 == 0) com.dbzenith.race.Milestones.tick(player, data);
         if (now % 20 == 0) com.dbzenith.transform.GodKi.tickSecond(player, data);
+        com.dbzenith.race.RacialSkillEffects.tick(player, data, now);
         boolean fighting = now - data.getLastCombatTick() < 200;                      // ten seconds since the last blow
         int before = data.getCombatTicks();
         data.setCombatTicks(fighting ? before + 1 : 0);
@@ -80,7 +81,8 @@ public final class KiTicker {
                     * com.dbzenith.world.Needs.staminaRegenMultiplier(data));
         }
         if (now - data.getLastDamagedTick() > c.bodyRegenDelayTicks.get() * race.regenDelayFactor()) {
-            data.setBody(data.getBody() + perTick(s.maxBody(), c.bodyRegenPercentPerSecond.get()) * race.regenMultiplier());
+            data.setBody(data.getBody() + perTick(s.maxBody(), c.bodyRegenPercentPerSecond.get()) * race.regenMultiplier()
+                    * com.dbzenith.race.RacialSkills.factor(data, com.dbzenith.race.RacialSkill.Stat.BODY_REGEN));
         }
 
         com.dbzenith.item.GiArmorItem.updateBonus(player, data);

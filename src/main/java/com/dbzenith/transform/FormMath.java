@@ -46,7 +46,8 @@ public final class FormMath {
         if (isCombatAttribute(attribute)) {
             m *= overdriveMultiplier(data) * data.getGearMultiplier(attribute) * com.dbzenith.world.LifeSim.ageMultiplier(data, attribute)
                     * (1.0 + DBZConfig.SERVER.majinAbsorbBonusPerStack.get() * data.getMajinStacks())
-                    * (1.0 + DBZConfig.SERVER.prestigePowerBonus.get() * data.getPrestige());
+                    * (1.0 + DBZConfig.SERVER.prestigePowerBonus.get() * data.getPrestige())
+                    * com.dbzenith.race.RacialSkills.attributeFactor(data, attribute);
         }
         return m;
     }

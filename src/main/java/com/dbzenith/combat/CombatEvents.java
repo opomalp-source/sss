@@ -88,6 +88,15 @@ public final class CombatEvents {
         PlayerData victimData = victim instanceof Player vp ? ModCapabilities.get(vp).orElse(null) : null;
         raw *= godKiFactor(attackerData, victimData);
         if (attackerData != null && (isKi || isMelee || isThrow)) raw *= com.dbzenith.race.Alignment.damageMultiplier(attackerData);
+        if (attackerData != null || victimData != null) {                      // racial skills on both sides of the blow
+            PlayerData by = isKi || isMelee || isThrow ? attackerData : null;
+            double foeBody = victimData != null ? victimData.getBody() / Math.max(1, victimData.getDerived().maxBody())
+                    : victim.getHealth() / Math.max(1f, victim.getMaxHealth());
+            boolean stronger = by != null && (victimData != null
+                    ? com.dbzenith.stats.StatCalculator.battlePower(victimData) > com.dbzenith.stats.StatCalculator.battlePower(by)
+                    : com.dbzenith.npc.KiFighter.effectiveMaxHealth(victim) > by.getDerived().maxBody());
+            raw *= com.dbzenith.race.RacialSkills.blowFactor(by, victimData, foeBody, stronger, isKi);
+        }
         double dealt;
         if (victimData != null) {
             Player player = (Player) victim;
@@ -148,6 +157,9 @@ public final class CombatEvents {
         }
 
         if (attackerData != null && dealt > 0) attackerData.markCombat(victim.level().getGameTime());
+        if (attackerData != null && attacker instanceof net.minecraft.server.level.ServerPlayer sp && attacker != victim) {
+            com.dbzenith.race.RacialSkillEffects.afterHit(sp, attackerData, dealt);
+        }
         if (victimData != null && source.getEntity() != null) victimData.markCombat(victim.level().getGameTime());
         if (victimData != null && victimData.isTransforming() && victim instanceof net.minecraft.server.level.ServerPlayer sp
                 && dealt >= victimData.getDerived().maxBody() * DBZConfig.SERVER.transformInterruptDamage.get()) {

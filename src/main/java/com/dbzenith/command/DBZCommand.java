@@ -217,6 +217,27 @@ public final class DBZCommand {
                                                     double v = DoubleArgumentType.getDouble(ctx, "value");
                                                     return apply(ctx, "Set " + id + " mastery " + v + " for", d -> d.setMastery(id, v));
                                                 })))))
+                .then(Commands.literal("racial")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("skill", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(
+                                                com.dbzenith.race.RacialSkills.all().stream().filter(com.dbzenith.race.RacialSkill::isActive)
+                                                        .map(com.dbzenith.race.RacialSkill::id), b))
+                                        .executes(ctx -> {
+                                            com.dbzenith.race.RacialSkill s = com.dbzenith.race.RacialSkills.byId(StringArgumentType.getString(ctx, "skill"));
+                                            if (s == null || !s.isActive()) {
+                                                ctx.getSource().sendFailure(Component.literal("Not an active racial skill"));
+                                                return 0;
+                                            }
+                                            int n = 0;
+                                            for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
+                                                PlayerData d = ModCapabilities.getOrThrow(p);
+                                                if (com.dbzenith.race.RacialSkillEffects.use(p, d, s)) n++;
+                                            }
+                                            int count = n;
+                                            ctx.getSource().sendSuccess(() -> Component.literal("Used " + s.id() + " for " + count + " player(s)"), true);
+                                            return n;
+                                        }))))
                 .then(Commands.literal("godki")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("level", IntegerArgumentType.integer(0, com.dbzenith.transform.GodKi.MAX))

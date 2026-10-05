@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 /** Client to server: a held-key or toggle input. The server decides what it means. */
 public record InputPacket(Action action) {
     public enum Action { CHARGE_START, CHARGE_STOP, GUARD_START, GUARD_STOP, TOGGLE_FLIGHT, LOWER_RELEASE, HEAVY_START, HEAVY_STOP,
-        TRANSFORM_UP, TRANSFORM_DOWN, OVERDRIVE_UP, OVERDRIVE_OFF }
+        TRANSFORM_UP, TRANSFORM_DOWN, OVERDRIVE_UP, OVERDRIVE_OFF, RACIAL_USE }
 
     public static void encode(InputPacket msg, FriendlyByteBuf buf) {
         buf.writeEnum(msg.action);
@@ -42,6 +42,7 @@ public record InputPacket(Action action) {
                 case TRANSFORM_DOWN -> FormHandler.revertOne(player);
                 case OVERDRIVE_UP -> Overdrive.raise(player);
                 case OVERDRIVE_OFF -> Overdrive.stop(player, data, true);
+                case RACIAL_USE -> com.dbzenith.race.RacialSkillEffects.use(player);
             }
         });
     }
