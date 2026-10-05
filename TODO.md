@@ -151,7 +151,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
     - clean dark line art for the anatomy (pecs, abs, obliques, biceps, deltoids, back muscles, knees);
     - 2-3 tone cel shading with soft highlights, readable at 64x64;
     - race markings drawn as clean shapes (Namekian arm and leg muscle patches, Frost Demon plates and gems, Majin dots).
-  - [ ] 14b Anime faces v2: a bold upper lid line, white sclera, coloured irises with pupils and a highlight, sharp angled brows, a nose hook line and a small mouth; expressions (calm, angry, shouting, hurt); every race default reworked.
+  - [x] 14b Anime faces v2 (v0.29.0, part 1: eyes, brows, nose, mouths redrawn; expressions in combat still to do): a bold upper lid line, white sclera, coloured irises with pupils and a highlight, sharp angled brows, a nose hook line and a small mouth; expressions (calm, angry, shouting, hurt); every race default reworked.
   - [ ] 14c Hair v3: chunky voxel clumps (stacked, tapering cuboids per spike, wrapping the back and sides, darker roots to lighter tips). All presets and every form's hair (SSJ, SSJ2, SSJ3 long, SSJ4 mane, God, Blue, LSSJ) rebuilt.
   - [ ] 14d 3D body parts:
     - Namekian pointed ears and curved antennae;

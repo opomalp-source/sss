@@ -333,10 +333,12 @@ public class ArtGen {
 
         static void all() throws IOException {
             String[][] eyes = {
-                    // normal                          wide                             narrow
-                    {".LLLLL.", "LWIIHW.", ".WIPIW.", "..SSS.."}, {".LLLLL.", "LWIIHW.", ".WIPIW.", ".WIIIW.", "..SSS.."}, {"LLLLLL.", ".LIPIL.", "..SSS.."},
-                    // sharp                           gentle                           tired
-                    {"...LLLL", ".LWIIHL", "..WIPIW", "....SS."}, {"..LLL..", ".LWIHW.", ".WIPIW.", ".TTTTT."}, {".LLLLL.", "LLLLLL.", ".WIPIW.", ".SSSSS."},
+                    // anime style (CX-14b): a thick top lid with a flick at the outer corner, open whites, a small iris
+                    // toward the nose with a highlight, a soft lower lid. Column 0 is the outer corner.
+                    // normal                          wide                                      narrow
+                    {"LLLLLL.", ".WWIHL.", ".WWPIL.", "..SSS.."}, {".LLLLL.", "LWWIHL.", ".WWIIL.", ".WWPIW.", "..SSS.."}, {"LLLLLL.", ".LWPHL.", "..SSS.."},
+                    // sharp (the lid slants down to the nose)  gentle                           tired
+                    {"LLL....", ".WWLLL.", ".WWIHL.", "..WPIL.", "...SS.."}, {"..LLL..", ".LWIHL.", ".WWPIW.", "..SSS.."}, {".LLLLL.", "LLLLLL.", ".WIPIW.", ".SSSSS."},
                     // closed                          cat
                     {".......", "L.....L", ".LLLLL.", "......."}, {".LLLLL.", "LIIHII.", ".IIPII.", ".IIPII.", "..SSS.."}};
             for (int i = 0; i < eyes.length; i++) {
@@ -350,7 +352,7 @@ public class ArtGen {
                             switch (ch) {
                                 case 'W' -> px(whites, x, y, WHITE);
                                 case 'L' -> px(whites, x, y, LASH);
-                                case 'S' -> px(whites, x, y, 0x48301820);
+                                case 'S' -> px(whites, x, y, 0x28301820);
                                 case 'T' -> px(whites, x, y, 0x40FFFFFF);
                                 case 'I' -> px(iris, x, y, TINT);
                                 case 'P' -> { px(iris, x, y, TINT); px(pupils, x, y, PUPIL); }
@@ -365,9 +367,9 @@ public class ArtGen {
                 pupils.save("entity/face_hd/pupil_" + i + ".png");
             }
             String[][] brows = {
-                    {"..TTTT.", ".TTTTTT"},                                   // normal arc
+                    {".......", ".TTTTT."},                                   // normal: a clean bar one row above the eye
                     {".TTTTTT", "TTTTTTT", ".TTTT.."},                       // thick
-                    {"TT.....", ".TTTT..", "...TTTT"},                       // fierce: low at the inner end
+                    {"TT.....", ".TTT...", "...TTT."},                        // fierce: low at the inner end
                     {"...TTTT", ".TTTT..", "TT....."},                       // worried
                     {".TTTTTTT", ".TTTTTTT"},                                 // joined (runs to the middle)
                     {}};
@@ -380,13 +382,13 @@ public class ArtGen {
                 }
                 c.save("entity/face_hd/brows_" + i + ".png");
             }
-            int line = 0xFF5A2620, teeth = 0xFFF4F0E6, tongue = 0xFFC05058, deep = 0xFF3A1014;
+            int line = 0xFF3E201C, teeth = 0xFFF4F0E6, tongue = 0xFFC05058, deep = 0xFF3A1014;
             String[][] mouths = {
-                    {"..LLLL..", "...pp..."},                                 // neutral
-                    {"L......L", ".LLLLLL.", "..pppp.."},                     // smile
+                    {"..LLLL.."},                                             // neutral: one short line
+                    {".L....L.", "..LLLL.."},                                 // smile
                     {"LLLLLLLL", "LTTTTTTL", ".DDDDDD.", "..pppp.."},         // grin
-                    {"..pppp..", ".LLLLLL.", "L......L"},                     // frown
-                    {"......LL", "..LLLL..", "....pp.."},                     // smirk
+                    {"..LLLL..", ".L....L."},                                 // frown
+                    {"......L.", "..LLLL.."},                                 // smirk
                     {"..LLLL..", ".LDDDDL.", ".LDggDL.", "..LLLL.."}};        // shout
             for (int i = 0; i < mouths.length; i++) {
                 Canvas c = new Canvas(128, 128);
@@ -407,7 +409,7 @@ public class ArtGen {
             for (int i = 0; i < 4; i++) {
                 Canvas c = new Canvas(128, 128);
                 switch (i) {
-                    case 0 -> { px(c, 7, 11, 0x30000000); px(c, 6, 11, 0x40000000); px(c, 9, 11, 0x40000000); px(c, 8, 11, 0x20000000); px(c, 7, 10, 0x18000000); }
+                    case 0 -> { px(c, 8, 10, 0x70301818); px(c, 7, 11, 0x90301818); }   // a small hook
                     case 1 -> { }
                     case 2 -> { px(c, 7, 11, 0x50000000); px(c, 8, 11, 0x50000000); }
                     default -> { for (int y = 7; y <= 10; y++) px(c, 7, y, 0x30FFFFFF); px(c, 8, 10, 0x30000000); px(c, 6, 11, 0x50000000); px(c, 9, 11, 0x50000000); }

@@ -723,3 +723,18 @@ The user sent reference pictures for the art direction they want: chunky anime-s
 
 ### Verified
 - Close-up screenshots: the Saiyan front and back, Namekian, Frost Demon, Majin, Vampire, Bio-Android, Tuffle and Gen Alien.
+
+## 2026-10-06 — Session 3 (cont.): 14b Anime faces v2, part 1 (v0.29.0)
+- **Eyes (`HdFaces`):** redrawn toward the references: a thick top lid with a flick at the outer corner, open whites, a small iris set toward the nose with a highlight, and a fainter lower-lid shadow.
+  - Normal and wide eyes are bigger and more open.
+  - The sharp eye's lid slants down toward the nose for the angry look.
+  - Narrow and gentle eyes were reworked.
+- **Brows:** the normal brow is a clean bar one row above the eye. Its earlier outer drop touched the lid and read as a "G". The fierce brow is a three-step slant.
+- **Nose and mouths:** the nose is a small hook low on the face, where the earlier one ran between the eyes. The mouths are plain dark lines; the pink lower lip that read as lipstick is gone.
+- **Dev:** the `zoomface` flag in devshot names gives a face close-up (FOV 14).
+
+### Verified
+- Face close-ups of several eye and brow combinations on a Saiyan, plus the race defaults of the Frost Demon, Namekian and Majin.
+
+### Still to do (14b part 2)
+- Combat expressions: shouting while powering up and transforming, gritting when hurt.
