@@ -95,9 +95,10 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 "Phase 5 — Feature completion" above was this project's own phase; brief v2's **Phase 5 is Story mode** (milestone V2-G).
 
 ## V2-A — Animation foundation
-- [ ] playerAnimator (KosmX, `1.0.2-rc1+1.20`) and GeckoLib (1.20.1) as real dependencies, build + runtime verified
-- [ ] Player animation set, keyframed in code: idle breathing, charge stance, flight (cruise / fast / hover / descend), dash, light combo 1-3, heavy, launcher, spike, block, ki fire (one hand / two-hand beam / volley / throw), transformation sequence, hit reactions (light / heavy / launched), power-down, victory
-- [ ] Animations synced to other players (server-driven state)
+- [x] playerAnimator (KosmX, `1.0.2-rc1+1.20`) as a real dependency, build + runtime verified
+- [ ] GeckoLib (1.20.1), added with the first converted entity (V2-H bosses)
+- [x] Player animation set, keyframed in code (30 animations; still to add: idle breathing, descend, launched, victory): idle breathing, charge stance, flight (cruise / fast / hover / descend), dash, light combo 1-3, heavy, launcher, spike, block, ki fire (one hand / two-hand beam / volley / throw), transformation sequence, hit reactions (light / heavy / launched), power-down, victory
+- [x] Animations synced to other players (public state + AnimEventPacket)
 ## V2-B — VFX and game feel
 - [ ] Flame-shaped layered aura (per form colour/shape), charge dust ring, rising sparks, lightning for tier-2 forms
 - [ ] Hitstop, screen shake, camera kick on heavy hits, impact flashes and shockwave rings, landing craters

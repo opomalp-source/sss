@@ -79,6 +79,8 @@ public final class ClientEvents {
             mc.options.setCameraType(wanted);
             delayTicks = Math.max(delayTicks, 4);
         }
+        int anim = name.indexOf("anim_");
+        if (anim >= 0) com.dbzenith.client.anim.AnimController.devPreview(name.substring(anim + 5).replaceAll("_\\d+$", ""));
         if (name.startsWith("noscreen_") && mc.screen != null) {
             mc.setScreen(null);
             delayTicks = Math.max(delayTicks, 3);

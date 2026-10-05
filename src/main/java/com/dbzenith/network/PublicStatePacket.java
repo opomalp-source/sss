@@ -22,13 +22,14 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
     public static final int GUARDING = 4;
     public static final int HEAVY = 8;
     public static final int TAIL = 16;
+    public static final int MEDITATING = 32;
     /** Bit in {@code looks}: show the full race skin. */
     public static final int RACE_LOOK = 256;
 
     public static PublicStatePacket of(int entityId, PlayerData d) {
         int flags = (d.isCharging() ? CHARGING : 0) | (d.isFlying() ? FLYING : 0)
                 | (d.isGuarding() ? GUARDING : 0) | (d.isChargingHeavy() ? HEAVY : 0)
-                | (Races.of(d.getRace()).tail() && d.hasTail() ? TAIL : 0);
+                | (Races.of(d.getRace()).tail() && d.hasTail() ? TAIL : 0) | (d.isMeditating() ? MEDITATING : 0);
         return new PublicStatePacket(entityId, flags, d.getReleasePercent(), Aura.color(d), d.getFormId(), d.getOverdriveLevel(),
                 d.getRace().ordinal(), d.getBodyType().ordinal(), d.getHairStyle(), d.getHairColor(), d.getEyeColor(),
                 d.hasFlag("god_ki") ? -1 : com.dbzenith.stats.StatCalculator.battlePower(d), // -1: god ki cannot be read

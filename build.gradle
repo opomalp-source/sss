@@ -85,8 +85,18 @@ obfuscation {
     createRemappingConfiguration(configurations.localRuntime)
 }
 
+repositories {
+    maven { url = "https://maven.kosmx.dev/" }                                   // playerAnimator (KosmX)
+    maven { url = "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/" } // GeckoLib
+}
+
 dependencies {
     // Mod dependencies must use the mod* configurations so they are remapped (see ModDevGradle LEGACY.md).
+    // Both are MIT-licensed and bundled with Jar-in-Jar, so players install a single jar.
+    modImplementation "dev.kosmx.player-anim:player-animation-lib-forge:${player_anim_version}"
+    jarJar("dev.kosmx.player-anim:player-animation-lib-forge") {
+        version { strictly "[${player_anim_version}]" }
+    }
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {

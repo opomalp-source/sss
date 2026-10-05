@@ -214,3 +214,18 @@
 - `gametest.BalanceReport2`: techniques (damage per ki, spam DPS vs punching), Overdrive bursts (duration and extra output by level and mastery), a race-vs-race table of best-form multipliers from level 100 to 2000, and gear (soldier hits to beat you with vanilla armour and gi sets). Targets in BALANCE.md, asserted by `pass2TargetsHold`.
 - Findings and fixes: weak area/utility techniques buffed and the Arm Cannon trimmed; Overdrive's burst halved; summoned bosses now match the summoner's peak form (`StatCalculator.peakPower`); Human, Frost Demon and Saiyan form curves smoothed and second tiers moved to level 300; netherite gave 4.5x survival against fighters, so fighters now punch through vanilla armour (a quarter counts) and full gi sets reduce all damage (5% / 15%). Balance revision 3 migrates the Overdrive drain in existing worlds.
 - 100 GameTests green.
+
+## 2026-10-05 — Session 2: Brief v2, V2-A player animation (v0.9.0)
+
+### Built
+- Brief v2 adopted (BRIEF.md; v1 kept in docs/BRIEF_v1.md). Gap analysis in TODO.md ("Brief v2 roadmap", V2-A to V2-H) and POLISH_TODO.md.
+- **playerAnimator** (KosmX, `1.0.2-rc1+1.20`, maven.kosmx.dev) bundled with jarJar; mods.toml dependency `[1.0.2-rc1,)` (a plain `[1.0.2,)` refuses the rc build).
+- `client.anim.Anims`: 30 original animations keyframed in code with easing: stances (charge, guard, heavy wind-up, hover, cruise, full-speed flight, meditation); melee (jab, cross, hook, roundhouse kick, heavy punch, launcher uppercut, spike); ki (blast, volley, beam held for the beam's life, giant-sphere hold and throw, explosive wave, focus); transformation (strain, tremble and roar), power-down, light and heavy hit reactions, dash.
+- `client.anim.AnimController`: two layers per player (stance loop at 1000 under one-shot actions at 1500, so a punch mid-flight keeps the flight pose). Stances come from the public state (new MEDITATING flag) and movement, with a 3-tick settle and 5-tick fades. Actions come from bare-handed swings (a five-hit combo; uppercut when looking up, spike when airborne looking down), heavy releases, form changes, hurt time, and the server's `AnimEventPacket` (technique casts, dashes). Every client runs the same logic for every visible player, so all players see each other's animations. Protocol 16.
+- Dev automation: `/dbz devshot <p> front_anim_<NAME>_<n> <tick>` plays an animation and screenshots it mid-motion. `tools/ShotSheet.java` crops a series of screenshots into a review grid.
+
+### Learned
+- playerAnimator's whole-figure `body` offsets are in **blocks, y up**, and body pitch pivots at the feet. `Anims.Keys.pos` converts from pixels, and `tilt` pivots flight poses about the waist.
+
+### Verified
+- Every animation was screenshotted in the dev client (front and angled) and the sheet reviewed; fixed the floating charge stance, the vanished meditation pose and the flight poses lying flat. 101 GameTests green, including technique-to-animation mapping and the meditation flag.

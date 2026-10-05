@@ -118,6 +118,25 @@ public final class MovementAndBeamTests {
         PublicStatePacket charging = PublicStatePacket.of(1, d);
         helper.assertTrue(!idle.has(PublicStatePacket.CHARGING) && charging.has(PublicStatePacket.CHARGING), "charging flag");
         helper.assertTrue(idle.stateHash() != charging.stateHash(), "state change must change the hash (triggers a send)");
+        d.setCharging(false);
+        d.setMeditating(true);
+        helper.assertTrue(PublicStatePacket.of(1, d).has(PublicStatePacket.MEDITATING), "meditation is visible to others (sitting pose)");
+        helper.succeed();
+    }
+
+    @GameTest(template = EMPTY)
+    public static void techniquesPickTheirCastAnimation(GameTestHelper helper) {
+        java.util.function.ToIntFunction<com.dbzenith.skill.Technique> kind = t -> com.dbzenith.network.AnimEventPacket.forTechnique(1, t).kind();
+        helper.assertTrue(kind.applyAsInt(com.dbzenith.skill.Techniques.KI_BLAST) == com.dbzenith.network.AnimEventPacket.BLAST, "ki blast: palm thrust");
+        helper.assertTrue(kind.applyAsInt(com.dbzenith.skill.Techniques.RAPID_VOLLEY) == com.dbzenith.network.AnimEventPacket.VOLLEY, "volley: alternating palms");
+        helper.assertTrue(kind.applyAsInt(com.dbzenith.skill.Techniques.EXPLOSIVE_WAVE) == com.dbzenith.network.AnimEventPacket.WAVE, "explosive wave: arms flung out");
+        helper.assertTrue(kind.applyAsInt(com.dbzenith.skill.Techniques.KI_HEAL) == com.dbzenith.network.AnimEventPacket.FOCUS, "heal: focus");
+        var beam = com.dbzenith.network.AnimEventPacket.forTechnique(1, com.dbzenith.skill.Techniques.WAVE_BEAM);
+        helper.assertTrue(beam.kind() == com.dbzenith.network.AnimEventPacket.BEAM && beam.data() == com.dbzenith.skill.Techniques.WAVE_BEAM.lifeTicks(),
+                "beams hold the pose as long as the beam burns");
+        var sphere = com.dbzenith.network.AnimEventPacket.forTechnique(1, com.dbzenith.skill.Techniques.GATHERING_SPHERE);
+        helper.assertTrue(sphere.kind() == com.dbzenith.network.AnimEventPacket.THROW && sphere.data() == com.dbzenith.skill.Techniques.GATHERING_SPHERE.holdTicks(),
+                "giant spheres are held overhead, then thrown");
         helper.succeed();
     }
 }

@@ -26,6 +26,11 @@ public final class ClientSetup {
     private ClientSetup() {}
 
     @SubscribeEvent
+    public static void clientSetup(net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent event) {
+        event.enqueueWork(com.dbzenith.client.anim.AnimController::registerLayers);
+    }
+
+    @SubscribeEvent
     public static void registerOverlays(RegisterGuiOverlaysEvent event) {
         event.registerAboveAll("hud", new DbzHud());
         event.registerAboveAll("dragon_radar", new RadarOverlay());

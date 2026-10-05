@@ -36,6 +36,7 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Heavy (charged) hit | B | done | GameTest (>2x damage); HUD tag seen in-client after a real H key press |
 | Aerial combat feel (air combos, knock-up) | B | done | Air hits +15% and juggle; heavy from the ground launches, heavy from above looking down spikes. GameTest |
 | Flight | B | done | Toggle, ki drain, auto-stop at 0 ki; GameTest |
+| Player animation (playerAnimator) | B | done | 30 keyframed animations (stances, combo, ki casts, transform, hits, dash), layered and synced to all viewers; screenshotted in the dev client; GameTest for cast mapping |
 | Dash / burst movement + afterimage | B | done | GameTest (velocity, cost, cooldown, evasion); seen in-client |
 | Central DamageCalculator | B | done | combat.DamageCalculator; GameTests |
 | Body pool as real health (DBC-style) | C | done | BodyHealth mirror; GameTests (hit, mirror, lethal) |

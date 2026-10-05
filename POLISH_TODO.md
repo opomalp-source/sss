@@ -3,8 +3,8 @@
 Everything still below the brief v2 quality bar (Part 18: real model + animation + VFX + sound + UI). A feature leaves
 this list only when it reaches the bar. Grouped by what is missing.
 
-## Animation (no keyframed animation yet)
-- Player: charging, flight, dashing, melee, blocking, ki firing, transforming, hit reactions all use vanilla poses
+## Animation
+- Player: keyframed set done (V2-A). Still missing: idle breathing, descend pose, launched/knocked-down reaction, victory pose, first-person arm animation, weapon-specific swings
 - NPC fighters and bosses: vanilla humanoid walk/attack only
 - Great Ape: walk + swipe only; Eternal Dragon: static coil drift
 

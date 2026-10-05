@@ -45,6 +45,8 @@ public final class DashHandler {
         Vec3 v = dir.normalize().scale(speed);
         player.setDeltaMovement(v.x, player.onGround() ? Math.max(0.15, v.y) : v.y, v.z);
         player.hurtMarked = true; // pushes the velocity to the client
+        com.dbzenith.network.ModNetwork.sendToTrackingAndSelf(player, new com.dbzenith.network.AnimEventPacket(player.getId(),
+                com.dbzenith.network.AnimEventPacket.DASH, 0));
 
         if (!free) {
             data.setStamina(data.getStamina() - c.dashStaminaCost.get());

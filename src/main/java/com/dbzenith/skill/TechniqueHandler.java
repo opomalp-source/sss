@@ -53,6 +53,7 @@ public final class TechniqueHandler {
         if (!player.getAbilities().instabuild) data.setKi(data.getKi() - cost);
         data.setCooldown(technique.id(), now + TechniqueMastery.cooldownTicks(data, technique));
         TechniqueMastery.gain(data, technique);
+        com.dbzenith.network.ModNetwork.sendToTrackingAndSelf(player, com.dbzenith.network.AnimEventPacket.forTechnique(player, technique));
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 technique.explosionPower() > 0 ? SoundEvents.BEACON_POWER_SELECT : SoundEvents.FIRECHARGE_USE,
                 SoundSource.PLAYERS, 0.6f, 1.4f + level.random.nextFloat() * 0.3f);
