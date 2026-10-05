@@ -105,7 +105,8 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 |---|---|---|---|
 | Debug stat overlay | — | done | Config `hud.showDebugOverlay` |
 | DBZ HUD (bars, release, status, combo, technique) | B | done | Seen in-client. Form display Phase 2 |
-| Aura visuals (seen by others) | B | done | Public state sync + aura glow renderer; seen in third person |
+| Aura visuals (seen by others) | B | done | Layered flame aura (outer, white-hot core, licks), halo, ground glow, lightning bolts, calm god-ki style, first-person screen-edge flames; screenshotted |
+| Impact feel (V2-B) | B | done | Hit flashes, shockwave rings, debris, landing craters, trauma screen shake, FOV kick, hitstop, transformation burst + flash, afterimages; ImpactPacket GameTest; screenshotted |
 | Stat screen | B | done | Seen in-client (opened via dev hook) |
 | Skill/deck screen | V | done | Techniques screen |
 | Dragon Ball radar screen | B | done | HUD radar while holding the Dragon Radar; seen in-client |

@@ -79,6 +79,18 @@ public final class ClientEvents {
             mc.options.setCameraType(wanted);
             delayTicks = Math.max(delayTicks, 4);
         }
+        int impact = name.indexOf("impact_");
+        if (impact >= 0 && mc.player != null) {
+            String kind = name.substring(impact + 7).replaceAll("_\\d+$", "");
+            int k = java.util.List.of("PUNCH", "HEAVY", "SPIKE", "GUARD", "KI_HIT", "EXPLOSION").indexOf(kind);
+            net.minecraft.world.phys.Vec3 at = mc.player.getEyePosition().add(mc.player.getLookAngle().scale(2.5));
+            if (k >= 0) com.dbzenith.client.fx.ImpactFx.onImpact(com.dbzenith.network.ImpactPacket.at(at, mc.player.getLookAngle(), k,
+                    k == 5 ? 3f : 1f, 0xFFC040, -1));
+        }
+        if (name.contains("crater_") && mc.player != null && mc.level != null) {
+            net.minecraft.world.phys.Vec3 look = mc.player.getLookAngle().multiply(1, 0, 1).normalize();
+            com.dbzenith.client.fx.ImpactFx.crater(mc.level, mc.player.position().add(look.scale(3)), 2.5f, 30);
+        }
         int anim = name.indexOf("anim_");
         if (anim >= 0) com.dbzenith.client.anim.AnimController.devPreview(name.substring(anim + 5).replaceAll("_\\d+$", ""));
         if (name.startsWith("noscreen_") && mc.screen != null) {

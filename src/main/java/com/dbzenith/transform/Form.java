@@ -31,6 +31,7 @@ public final class Form {
     private final int eyeColor;
     private final HairStyle hairStyle;
     private final boolean lightning;
+    private final boolean calmAura;
     private final int unlockLevel;
     private final double parentMasteryRequired;
     private final String requiredFlag;
@@ -56,6 +57,7 @@ public final class Form {
         eyeColor = b.eyeColor;
         hairStyle = b.hairStyle;
         lightning = b.lightning;
+        calmAura = b.calmAura;
         unlockLevel = b.unlockLevel;
         parentMasteryRequired = b.parentMasteryRequired;
         requiredFlag = b.requiredFlag;
@@ -82,6 +84,8 @@ public final class Form {
     public int eyeColor() { return eyeColor; }
     public HairStyle hairStyle() { return hairStyle; }
     public boolean lightning() { return lightning; }
+    /** God-ki style: a tight, smooth, steady flame instead of a roaring one. */
+    public boolean calmAura() { return calmAura; }
     public int unlockLevel() { return unlockLevel; }
     public double parentMasteryRequired() { return parentMasteryRequired; }
     public String requiredFlag() { return requiredFlag; }
@@ -123,6 +127,7 @@ public final class Form {
         private int eyeColor = -1;
         private HairStyle hairStyle = HairStyle.NONE;
         private boolean lightning;
+        private boolean calmAura;
         private int unlockLevel;
         private double parentMasteryRequired;
         private String requiredFlag;
@@ -149,6 +154,7 @@ public final class Form {
         public Builder colors(int aura, int hair, int eyes) { auraColor = aura; hairColor = hair; eyeColor = eyes; return this; }
         public Builder hair(HairStyle style) { hairStyle = style; return this; }
         public Builder lightning() { lightning = true; return this; }
+        public Builder calmAura() { calmAura = true; return this; }
         public Builder unlock(int level, double parentMastery) { unlockLevel = level; parentMasteryRequired = parentMastery; return this; }
         public Builder requiresFlag(String flag) { requiredFlag = flag; return this; }
         public Builder allowsOverdrive() { allowsOverdrive = true; return this; }

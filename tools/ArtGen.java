@@ -21,6 +21,7 @@ public class ArtGen {
         Skins.all();
         Creatures.all();
         Gui.all();
+        Fx.all();
         System.out.println("ArtGen done");
     }
 
@@ -1431,6 +1432,170 @@ public class ArtGen {
 
         static void blitInto(Canvas dst, Canvas src, int x0, int y0) {
             for (int y = 0; y < src.h; y++) for (int x = 0; x < src.w; x++) if (src.opaque(x, y)) dst.set(x0 + x, y0 + y, src.get(x, y));
+        }
+    }
+
+    // ================================================================== effects (tinted at render time: white/grey + alpha)
+
+    static final class Fx {
+        static void all() throws IOException {
+            auraFlame();
+            impactStar();
+            shockRing();
+            crater();
+            streak();
+            auraEdge();
+            beamFlow();
+        }
+
+        static double smooth(double e0, double e1, double x) {
+            double t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0)));
+            return t * t * (3 - 2 * t);
+        }
+
+        static int white(double alpha, double lum) {
+            int a = (int) Math.round(Math.max(0, Math.min(1, alpha)) * 255);
+            int l = (int) Math.round(Math.max(0, Math.min(1, lum)) * 255);
+            return a << 24 | l << 16 | l << 8 | l;
+        }
+
+        /**
+         * Eight looping frames of one flame tongue, 32x64 each, side by side. Every moving term uses whole multiples
+         * of the frame phase, so frame 7 flows back into frame 0.
+         */
+        static void auraFlame() throws IOException {
+            int fw = 32, fh = 64, frames = 8;
+            Canvas c = new Canvas(fw * frames, fh);
+            for (int f = 0; f < frames; f++) {
+                double ph = f * Math.PI * 2 / frames;
+                for (int y = 0; y < fh; y++) {
+                    double v = 1 - y / (double) (fh - 1);                       // 0 base .. 1 tip
+                    double half = 0.46 * Math.pow(1 - v, 0.55) * (0.9 + 0.1 * Math.sin(v * Math.PI));
+                    double cx = 0.5 + 0.13 * Math.pow(v, 1.4) * Math.sin(ph + v * 5) + 0.04 * Math.sin(2 * ph + v * 11);
+                    for (int x = 0; x < fw; x++) {
+                        double u = (x + 0.5) / fw;
+                        double edge = 0.16 * Math.sin(v * 23 - 3 * ph + u * 9) + 0.08 * Math.sin(v * 41 + 2 * ph - u * 17);
+                        double d = Math.abs(u - cx) / Math.max(1e-3, half) + edge * v;
+                        double mask = 1 - smooth(0.55, 1.0, d);
+                        double streak = 0.5 + 0.5 * Math.sin(v * 15 - 2 * ph + Math.sin(u * 8 + ph) * 1.4);
+                        double tipBreak = v > 0.7 ? 0.55 + 0.45 * Math.sin(v * 30 - 4 * ph + u * 6) : 1;
+                        double base = smooth(0.0, 0.12, v);
+                        double a = mask * (0.6 + 0.4 * streak) * Math.max(0, tipBreak) * base;
+                        double core = 1 - smooth(0.0, 0.7, d);
+                        c.set(f * fw + x, y, a <= 0.01 ? 0 : white(a, 0.78 + 0.22 * core));
+                    }
+                }
+            }
+            c.save("entity/aura_flame.png");
+        }
+
+        /** A hit flash: eight tapering spikes over a round glow. */
+        static void impactStar() throws IOException {
+            int n = 64;
+            Canvas c = new Canvas(n, n);
+            for (int y = 0; y < n; y++)
+                for (int x = 0; x < n; x++) {
+                    double dx = (x + 0.5) / n * 2 - 1, dy = (y + 0.5) / n * 2 - 1;
+                    double r = Math.sqrt(dx * dx + dy * dy), ang = Math.atan2(dy, dx);
+                    double spikes = Math.pow(Math.abs(Math.cos(ang * 2)), 18) + 0.55 * Math.pow(Math.abs(Math.cos(ang * 2 + Math.PI / 4)), 26);
+                    double spike = spikes * (1 - smooth(0.1, 1.0, r));
+                    double glow = Math.exp(-r * r * 9);
+                    double a = Math.min(1, glow + spike);
+                    c.set(x, y, a < 0.01 ? 0 : white(a, 1));
+                }
+            c.save("entity/impact_star.png");
+        }
+
+        /** A shockwave: a bright thin ring with a soft trailing inner haze. */
+        static void shockRing() throws IOException {
+            int n = 64;
+            Canvas c = new Canvas(n, n);
+            for (int y = 0; y < n; y++)
+                for (int x = 0; x < n; x++) {
+                    double dx = (x + 0.5) / n * 2 - 1, dy = (y + 0.5) / n * 2 - 1;
+                    double r = Math.sqrt(dx * dx + dy * dy);
+                    double ring = Math.exp(-Math.pow((r - 0.86) / 0.05, 2));
+                    double haze = r < 0.86 ? 0.22 * Math.pow(r / 0.86, 3) : 0;
+                    double a = Math.min(1, ring + haze);
+                    c.set(x, y, a < 0.01 ? 0 : white(a, 1));
+                }
+            c.save("entity/shock_ring.png");
+        }
+
+        /** A landing crater decal: scorched pit, a pale rim, cracks running out, fading at the edge. */
+        static void crater() throws IOException {
+            int n = 64;
+            Canvas c = new Canvas(n, n);
+            int cracks = 9;
+            double[] crackAng = new double[cracks];
+            for (int i = 0; i < cracks; i++) crackAng[i] = (i + noise(i, 3, 77) * 0.7) * Math.PI * 2 / cracks;
+            for (int y = 0; y < n; y++)
+                for (int x = 0; x < n; x++) {
+                    double dx = (x + 0.5) / n * 2 - 1, dy = (y + 0.5) / n * 2 - 1;
+                    double r = Math.sqrt(dx * dx + dy * dy), ang = Math.atan2(dy, dx);
+                    double grain = noise(x, y, 5) * 0.25;
+                    double pit = 1 - smooth(0.15, 0.5, r);                     // dark scorched middle
+                    double rim = Math.exp(-Math.pow((r - 0.55) / 0.08, 2));     // raised, lighter ring
+                    double crack = 0;
+                    for (double ca : crackAng) {
+                        double diff = Math.abs(Math.atan2(Math.sin(ang - ca), Math.cos(ang - ca)));
+                        double wobble = 0.05 * Math.sin(r * 23 + ca * 3);
+                        double width = 0.05 * (1.1 - r);
+                        if (r > 0.2 && r < 0.98 && Math.abs(diff - wobble) * r < width) crack = Math.max(crack, 1 - r * 0.8);
+                    }
+                    double fade = 1 - smooth(0.7, 1.0, r);
+                    double a = Math.max(Math.max(pit * 0.9, rim * 0.55), crack * 0.85) * fade;
+                    double lum = rim > pit && rim > crack ? 0.42 + grain : 0.08 + grain * 0.4;
+                    if (a < 0.02) { c.set(x, y, 0); continue; }
+                    int l = (int) Math.round(Math.min(1, lum) * 255);
+                    int col = (int) Math.round(a * 255) << 24 | Math.min(255, (int) (l * 1.1)) << 16 | l << 8 | (int) (l * 0.85);
+                    c.set(x, y, col);
+                }
+            c.save("entity/crater.png");
+        }
+
+        /** First-person aura: flames licking in from the screen edges, strongest along the bottom. Stretched over the screen. */
+        static void auraEdge() throws IOException {
+            int n = 128;
+            Canvas c = new Canvas(n, n);
+            for (int y = 0; y < n; y++)
+                for (int x = 0; x < n; x++) {
+                    double u = (x + 0.5) / n, v = (y + 0.5) / n;
+                    double dx = Math.abs(u * 2 - 1), dy = Math.abs(v * 2 - 1);
+                    double d = Math.pow(Math.pow(dx, 5) + Math.pow(dy, 5), 0.2);
+                    double flick = 0.07 * Math.sin(u * 25 + v * 7) + 0.05 * Math.sin(u * 41 - v * 13) + 0.04 * Math.sin(v * 33 + u * 5);
+                    double a = smooth(0.6, 1.02, d + flick) * (0.65 + 0.35 * v);
+                    c.set(x, y, a < 0.01 ? 0 : white(a, 1));
+                }
+            c.save("gui/aura_edge.png");
+        }
+
+        /** Beam core: bright middle, soft edges, pulses of energy that tile seamlessly along v (it scrolls forward). */
+        static void beamFlow() throws IOException {
+            int w = 32, h = 64;
+            Canvas c = new Canvas(w, h);
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++) {
+                    double u = (x + 0.5) / w, v = (double) y / h, d = Math.abs(u * 2 - 1);
+                    double profile = Math.exp(-d * d * 3.2);
+                    double pulse = 0.62 + 0.38 * Math.sin(Math.PI * 2 * (v * 2) + Math.sin(u * 9) * 0.9)
+                            * (0.6 + 0.4 * Math.sin(Math.PI * 2 * (v * 3) + u * 5));
+                    double a = profile * pulse;
+                    c.set(x, y, a < 0.01 ? 0 : white(a, d < 0.35 ? 1 : 0.8));
+                }
+            c.save("entity/beam_flow.png");
+        }
+
+        /** A soft streak, bright along its middle: lightning bolts and speed lines. */
+        static void streak() throws IOException {
+            Canvas c = new Canvas(16, 16);
+            for (int y = 0; y < 16; y++)
+                for (int x = 0; x < 16; x++) {
+                    double d = Math.abs((x + 0.5) / 16 * 2 - 1);
+                    double a = Math.exp(-d * d * 6);
+                    c.set(x, y, white(a, d < 0.25 ? 1 : 0.85));
+                }
+            c.save("entity/fx_streak.png");
         }
     }
 }

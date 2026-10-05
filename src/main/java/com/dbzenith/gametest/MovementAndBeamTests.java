@@ -125,6 +125,29 @@ public final class MovementAndBeamTests {
     }
 
     @GameTest(template = EMPTY)
+    public static void impactsSurviveTheWireAndLandOnTheVictim(GameTestHelper helper) {
+        ServerPlayer attacker = TestPlayers.create(helper);
+        Zombie victim = helper.spawn(EntityType.ZOMBIE, new BlockPos(1, 2, 3));
+        attacker.moveTo(helper.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 0.5)));
+        var hit = com.dbzenith.network.ImpactPacket.melee(attacker, victim, com.dbzenith.network.ImpactPacket.HEAVY);
+        // the flash sits on the victim's side facing the attacker, at chest height
+        helper.assertTrue(hit.z() < victim.getZ() && Math.abs(hit.y() - victim.getBoundingBox().getCenter().y) < 0.01,
+                "impact faces the attacker at the victim's middle");
+        var buf = new net.minecraft.network.FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
+        com.dbzenith.network.ImpactPacket.encode(hit, buf);
+        var back = com.dbzenith.network.ImpactPacket.decode(buf);
+        helper.assertTrue(back.equals(hit), "impact packet round-trips: " + back + " vs " + hit);
+        var orphan = com.dbzenith.network.ImpactPacket.at(victim.position(), victim.getLookAngle(), com.dbzenith.network.ImpactPacket.EXPLOSION, 3f, 0xFF8800, -1);
+        buf.clear();
+        com.dbzenith.network.ImpactPacket.encode(orphan, buf);
+        helper.assertTrue(com.dbzenith.network.ImpactPacket.decode(buf).attackerId() == -1, "no attacker (-1) survives the varint offset");
+        helper.assertTrue(com.dbzenith.transform.Forms.SUPER_SAIYAN_BLUE.calmAura() && !com.dbzenith.transform.Forms.SUPER_SAIYAN.calmAura(),
+                "god-ki forms burn calm, the others roar");
+        TestPlayers.remove(helper, attacker);
+        helper.succeed();
+    }
+
+    @GameTest(template = EMPTY)
     public static void techniquesPickTheirCastAnimation(GameTestHelper helper) {
         java.util.function.ToIntFunction<com.dbzenith.skill.Technique> kind = t -> com.dbzenith.network.AnimEventPacket.forTechnique(1, t).kind();
         helper.assertTrue(kind.applyAsInt(com.dbzenith.skill.Techniques.KI_BLAST) == com.dbzenith.network.AnimEventPacket.BLAST, "ki blast: palm thrust");

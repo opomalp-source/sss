@@ -333,11 +333,11 @@ public final class Anims {
         }
 
         /**
-         * Tips the whole figure forward by {@code pitch} degrees about its middle instead of its feet (where the body
-         * part pivots), plus an extra offset in pixels.
+         * Tips the whole figure forward by {@code pitch} degrees about the middle of the figure. playerAnimator pivots the
+         * body part 0.7 blocks (11.2 px) above the feet; the figure's middle sits a little higher, so this nudges for the gap.
          */
         public Keys tilt(int tick, float pitch, float dy, Ease ease) {
-            double r = Math.toRadians(pitch), mid = 14;  // pixels from the feet to the middle of the figure
+            double r = Math.toRadians(pitch), mid = 3.2;  // pixels from the pivot up to the middle of the figure
             rot("body", tick, pitch, 0, 0, ease);
             return pos("body", tick, 0, (float) (mid * (1 - Math.cos(r))) * -1 + dy, (float) (mid * Math.sin(r)), ease);
         }

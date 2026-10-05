@@ -229,3 +229,28 @@
 
 ### Verified
 - Every animation was screenshotted in the dev client (front and angled) and the sheet reviewed; fixed the floating charge stance, the vanished meditation pose and the flight poses lying flat. 101 GameTests green, including technique-to-animation mapping and the meditation flag.
+
+## 2026-10-05 — Session 2 (cont.): V2-B VFX and game feel (v0.10.0)
+
+### Built
+- `client.fx` package:
+  - `FxRenderTypes`: additive (SRC_ALPHA, ONE; vanilla's ADDITIVE_TRANSPARENCY is ONE, ONE and ignores texture alpha, which turned soft glows into solid discs) and soft translucent, both full-bright, double-sided, no depth write.
+  - `FxDraw`: billboards, oriented planes, camera-facing ribbons.
+  - `CameraFx`: trauma-squared screen shake, FOV kick, dash FOV rush, full-screen flash.
+  - `ImpactFx`: star flashes, shockwave rings, crater decals with flying debris and dust, landing detection for players and fighters, hitstop trigger, transformation burst.
+  - `Afterimages`: ghost copies of the player model along dash and fast-flight paths. Each ghost repeats playerAnimator's whole-body transform (translate y+0.7, Z/Y/X rotations, translate -0.7, read from the bytecode).
+  - `AuraEdgeOverlay`: first-person aura flames around the screen edge and the flash.
+- `AuraRenderer` rewritten: rings of animated flame tongues leaning in over the head (8-frame looping texture), additive white-hot core, tall licks while powering up, halo, ground glow, procedural lightning bolts for lightning forms. New `Form.calmAura()` (SSG, Blue, Ultimate, Transcendent): tight, smooth, steady.
+- `ClientFormEffects`: client-side charge particles (outward dust, rising pebbles of the ground block, ki sparks, aura dust), sparkles for calm forms; nothing hugging the camera in your own first person. The server's broadcast aura particles were removed.
+- Beams: saturated body, forward-flowing core (new `beam_flow` texture), two helical strands, muzzle flare, flickering head. Blasts: shell, white core, spinning crackle, tapered comet trail; disks with a bright rim.
+- Server: `ImpactPacket` (protocol 17) sent to players within 96 blocks for player and fighter melee (punch / heavy / spike / guard; none on an afterimage dodge), ki hits, and blast and beam explosions.
+- Hitstop: a `SpeedModifier` on both animation layers is set to 0 for 1-4 ticks on both fighters when a blow connects.
+- Client config `effects`: `screenShake` (0-2), `hitstop`, `afterimages`, `firstPersonAura`.
+- ArtGen `Fx`: aura_flame (8 frames), impact_star, shock_ring, crater, fx_streak, beam_flow, gui/aura_edge.
+- Dev automation: `devshot ... impact_<KIND>` and `crater_`.
+
+### Fixed along the way
+- playerAnimator pivots body rotation 0.7 blocks above the feet; `Anims.tilt` now compensates only the small gap to the figure's middle.
+
+### Verified
+- Three screenshot passes reviewed: base, SSJ, SSJ2 and Blue auras, charging and held, front, back and first person; transformation burst; every impact kind; a real 25-block fall crater; a beam and a supernova orb seen from the side via an armour-stand caster; dash ghosts. Shake and hitstop are motion and were checked in code (SpeedModifier only multiplies by speed, so 0 is a clean freeze). 102 GameTests green.

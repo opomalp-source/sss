@@ -4,6 +4,7 @@ import com.dbzenith.DBZenith;
 import com.dbzenith.config.DBZConfig;
 import com.dbzenith.data.ModCapabilities;
 import com.dbzenith.data.PlayerData;
+import com.dbzenith.network.ImpactPacket;
 import com.dbzenith.race.RacePassives;
 import com.dbzenith.stats.StatCalculator;
 import net.minecraft.tags.DamageTypeTags;
@@ -52,6 +53,7 @@ public final class CombatEvents {
 
         // 1) raw DBZ damage
         double raw;
+        int impact = -1; // which hit effect the clients draw (ImpactPacket), -1 for none
         if (isKi || isThrow) {
             raw = event.getAmount(); // ki blasts and throws deal raw DBZ damage
         } else if (isMelee && attackerData != null) {
@@ -76,8 +78,10 @@ public final class CombatEvents {
                 victim.knockback(Math.min(3.0, extraKnockback), Mth.sin(yaw), -Mth.cos(yaw));
             }
             AerialCombat.afterHit(attacker, victim, heavy > 1.0, aerial);
+            impact = heavy <= 1.0 ? ImpactPacket.PUNCH : AerialCombat.isSpike(attacker) ? ImpactPacket.SPIKE : ImpactPacket.HEAVY;
         } else {
             raw = DamageCalculator.fromVanilla(event.getAmount());
+            if (source.getEntity() instanceof com.dbzenith.npc.KiFighter f && source.getDirectEntity() == f) impact = ImpactPacket.PUNCH;
         }
 
         // 2) apply to victim
@@ -102,6 +106,8 @@ public final class CombatEvents {
             if (isKi && !afterimage) raw *= RacePassives.absorbKiHit(victimData, raw, victim.level().getGameTime());
             dealt = afterimage ? 0 : DamageCalculator.againstPlayer(raw, victimData, source.getEntity() != null && !isThrow, victim.getRandom());
             dealt *= 1 - victimData.getGearReduction();                          // a full gi or armour set
+            if (afterimage) impact = -1;                                         // dodged: nothing landed
+            else if (impact >= 0 && victimData.isGuarding()) impact = ImpactPacket.GUARD;
             if (victimData.isGuarding() && dealt > 0) {
                 victimData.setStamina(victimData.getStamina() - DamageCalculator.guardPrevented(dealt) * DBZConfig.SERVER.guardStaminaPerDamage.get());
                 if (victimData.getStamina() <= 0) victimData.setGuarding(false); // guard broken
@@ -125,6 +131,10 @@ public final class CombatEvents {
             float amount = isKi || isThrow || isMelee ? DamageCalculator.toVanilla(raw) : event.getAmount();
             if (victim instanceof com.dbzenith.npc.KiFighter fighter) amount /= (float) fighter.toughness(); // leveled foes
             event.setAmount(amount);
+        }
+
+        if (impact >= 0 && source.getEntity() != null && victim.level() instanceof net.minecraft.server.level.ServerLevel level) {
+            ImpactPacket.melee(source.getEntity(), victim, impact).send(level);
         }
 
         // 3) training points for the attacker

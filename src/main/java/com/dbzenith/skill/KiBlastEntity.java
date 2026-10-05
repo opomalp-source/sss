@@ -196,6 +196,10 @@ public class KiBlastEntity extends Projectile {
         }
         target.invulnerableTime = 0; // volleys must not be eaten by i-frames
         target.hurt(ModDamageTypes.kiBlast(level(), this, getOwner()), (float) damage);
+        if (explosionPower <= 0 && level() instanceof net.minecraft.server.level.ServerLevel sl) {
+            com.dbzenith.network.ImpactPacket.at(target.getBoundingBox().getCenter(), getDeltaMovement().normalize(),
+                    com.dbzenith.network.ImpactPacket.KI_HIT, Math.max(0.5f, getSize()), getColor(), getOwner() == null ? -1 : getOwner().getId()).send(sl);
+        }
         if (pierceLeft-- <= 0) impact();
     }
 
@@ -210,6 +214,10 @@ public class KiBlastEntity extends Projectile {
             Level.ExplosionInteraction interaction = DBZConfig.SERVER.kiBlastsBreakBlocks.get()
                     ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE;
             level().explode(this, getX(), getY(), getZ(), explosionPower, interaction);
+            if (level() instanceof net.minecraft.server.level.ServerLevel sl) {
+                com.dbzenith.network.ImpactPacket.at(position().add(0, getBbHeight() / 2, 0), getDeltaMovement().normalize(),
+                        com.dbzenith.network.ImpactPacket.EXPLOSION, explosionPower, getColor(), getOwner() == null ? -1 : getOwner().getId()).send(sl);
+            }
         }
         discard();
     }

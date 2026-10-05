@@ -32,6 +32,7 @@ public final class ClientSetup {
 
     @SubscribeEvent
     public static void registerOverlays(RegisterGuiOverlaysEvent event) {
+        event.registerBelowAll("aura_edge", new com.dbzenith.client.fx.AuraEdgeOverlay());
         event.registerAboveAll("hud", new DbzHud());
         event.registerAboveAll("dragon_radar", new RadarOverlay());
         event.registerAboveAll("scouter", new ScouterOverlay());

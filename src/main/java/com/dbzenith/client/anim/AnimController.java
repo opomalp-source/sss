@@ -9,6 +9,7 @@ import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.KeyframeAnimationPlayer;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;
 import dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier;
+import dev.kosmx.playerAnim.api.layered.modifier.SpeedModifier;
 import dev.kosmx.playerAnim.core.data.KeyframeAnimation;
 import dev.kosmx.playerAnim.core.util.Ease;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
@@ -40,13 +41,21 @@ public final class AnimController {
     private static final Map<AbstractClientPlayer, Track> TRACKS = new WeakHashMap<>();
     /** A stance must hold this many ticks before the loop swaps, so brief flickers in speed do not jitter the pose. */
     private static final int STATE_SETTLE = 3;
+    private static final Map<AbstractClientPlayer, SpeedModifier[]> SPEEDS = new WeakHashMap<>();
 
     private AnimController() {}
 
     /** Called once from client setup. */
     public static void registerLayers() {
-        PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(STATE_LAYER, 1000, player -> new ModifierLayer<>());
-        PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(ACTION_LAYER, 1500, player -> new ModifierLayer<>());
+        PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(STATE_LAYER, 1000, player -> withSpeed(player, 0));
+        PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(ACTION_LAYER, 1500, player -> withSpeed(player, 1));
+    }
+
+    /** Each layer carries a speed control, so a landed blow can freeze both fighters for a few frames (hitstop). */
+    private static ModifierLayer<IAnimation> withSpeed(AbstractClientPlayer player, int slot) {
+        SpeedModifier speed = new SpeedModifier(1f);
+        SPEEDS.computeIfAbsent(player, p -> new SpeedModifier[2])[slot] = speed;
+        return new ModifierLayer<>(null, speed);
     }
 
     private static final class Track {
@@ -61,6 +70,7 @@ public final class AnimController {
         long lastPunch;
         long actionLockUntil;          // a transformation is not interrupted by small actions
         long suppressSwingUntil;       // the swing that releases a heavy strike is part of the heavy animation
+        long hitstopUntil;             // animations frozen until then
     }
 
     @SubscribeEvent
@@ -72,6 +82,8 @@ public final class AnimController {
         for (AbstractClientPlayer player : mc.level.players()) {
             Track t = TRACKS.computeIfAbsent(player, p -> new Track());
             PublicStatePacket state = ClientPublicStates.get(player.getId());
+            tickHitstop(player, t, now);
+            tickHitstop(player, t, now);
             tickStance(player, t, state);
             tickActions(player, t, state, now);
         }
@@ -108,7 +120,10 @@ public final class AnimController {
         if (state.has(PublicStatePacket.FLYING) && !player.onGround()) {
             double dx = player.getX() - player.xo, dz = player.getZ() - player.zo;
             double horizontal = Math.sqrt(dx * dx + dz * dz);
-            if (horizontal > 0.9) return Anims.FLY_FAST;
+            if (horizontal > 0.9) {
+                com.dbzenith.client.fx.Afterimages.keepAlive(player, 3);
+                return Anims.FLY_FAST;
+            }
             if (horizontal > 0.12) return Anims.FLY_FORWARD;
             return Anims.FLY_HOVER;
         }
@@ -122,7 +137,10 @@ public final class AnimController {
         String form = state == null ? null : state.form();
         if (form != null && t.form != null && !form.equals(t.form) && !isApe(form)) {
             if (PlayerData.BASE_FORM.equals(form)) play(player, t, Anims.POWER_DOWN, now, 0);
-            else play(player, t, Anims.TRANSFORM, now, 30);
+            else {
+                play(player, t, Anims.TRANSFORM, now, 30);
+                com.dbzenith.client.fx.ImpactFx.transformBurst(player, state.auraColor());
+            }
         }
         t.form = form;
 
@@ -178,6 +196,27 @@ public final class AnimController {
         };
         play(player, t, anim, now, 0);
         t.suppressSwingUntil = now + 3;
+        if (msg.kind() == AnimEventPacket.DASH) {
+            com.dbzenith.client.fx.Afterimages.keepAlive(player, 8);
+            if (player == mc.player) com.dbzenith.client.fx.CameraFx.rush();
+        }
+    }
+
+    /** Freeze a player's animations for {@code ticks} (the moment a blow connects). Ignored for anyone not a player. */
+    public static void hitstop(int entityId, int ticks) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null || entityId < 0 || !com.dbzenith.config.DBZConfig.CLIENT.hitstop.get()) return;
+        if (!(mc.level.getEntity(entityId) instanceof AbstractClientPlayer player)) return;
+        Track t = TRACKS.computeIfAbsent(player, p -> new Track());
+        t.hitstopUntil = Math.max(t.hitstopUntil, mc.level.getGameTime() + ticks);
+        tickHitstop(player, t, mc.level.getGameTime());
+    }
+
+    private static void tickHitstop(AbstractClientPlayer player, Track t, long now) {
+        SpeedModifier[] speeds = SPEEDS.get(player);
+        if (speeds == null) return;
+        float s = now < t.hitstopUntil ? 0f : 1f;
+        for (SpeedModifier m : speeds) if (m != null) m.speed = s;
     }
 
     private static void play(AbstractClientPlayer player, Track t, KeyframeAnimation anim, long now, int lockTicks) {

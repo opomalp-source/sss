@@ -9,10 +9,7 @@ this list only when it reaches the bar. Grouped by what is missing.
 - Great Ape: walk + swipe only; Eternal Dragon: static coil drift
 
 ## VFX
-- Aura: glow billboards, not a flame-shaped layered aura; no charge dust or rising sparks
-- No hitstop, screen shake, impact flashes, shockwave rings or craters
-- Beams and blasts: glow quads only, no trails or bloom
-- No afterimages
+- V2-B done (flame aura, impacts, shake, hitstop, craters, afterimages, beam/blast upgrade). Still missing: real bloom (post-processing), per-race aura shapes beyond flame/calm, ground-scarring beams, NPC fighters with auras and hit freezes (they use no playerAnimator)
 
 ## Sound
 - Every sound is a vanilla placeholder (anvil, beacon, firework, explosion)

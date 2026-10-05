@@ -128,6 +128,10 @@ public class KiBeamEntity extends Entity {
             if (hit.isPresent() || box.contains(start)) {
                 target.invulnerableTime = 0;
                 target.hurt(ModDamageTypes.kiBlast(level(), this, owner), (float) damagePerPulse);
+                if (level() instanceof net.minecraft.server.level.ServerLevel sl) {
+                    com.dbzenith.network.ImpactPacket.at(hit.orElse(target.getBoundingBox().getCenter()), end.subtract(start).normalize(),
+                            com.dbzenith.network.ImpactPacket.KI_HIT, getWidth(), getColor(), owner == null ? -1 : owner.getId()).send(sl);
+                }
             }
         }
     }
@@ -138,6 +142,9 @@ public class KiBeamEntity extends Entity {
             Level.ExplosionInteraction interaction = DBZConfig.SERVER.kiBlastsBreakBlocks.get()
                     ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE;
             level().explode(this, end.x, end.y, end.z, explosionPower, interaction);
+            if (level() instanceof net.minecraft.server.level.ServerLevel sl) {
+                com.dbzenith.network.ImpactPacket.at(end, direction(), com.dbzenith.network.ImpactPacket.EXPLOSION, explosionPower, getColor(), getOwner().getId()).send(sl);
+            }
         }
         discard();
     }

@@ -100,9 +100,9 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [x] Player animation set, keyframed in code (30 animations; still to add: idle breathing, descend, launched, victory): idle breathing, charge stance, flight (cruise / fast / hover / descend), dash, light combo 1-3, heavy, launcher, spike, block, ki fire (one hand / two-hand beam / volley / throw), transformation sequence, hit reactions (light / heavy / launched), power-down, victory
 - [x] Animations synced to other players (public state + AnimEventPacket)
 ## V2-B — VFX and game feel
-- [ ] Flame-shaped layered aura (per form colour/shape), charge dust ring, rising sparks, lightning for tier-2 forms
-- [ ] Hitstop, screen shake, camera kick on heavy hits, impact flashes and shockwave rings, landing craters
-- [ ] Afterimage trails on dashes and fast flight
+- [x] Flame-shaped layered aura (per form colour/shape), charge dust ring, rising sparks, lightning for tier-2 forms
+- [x] Hitstop, screen shake, camera kick on heavy hits, impact flashes and shockwave rings, landing craters
+- [x] Afterimage trails on dashes and fast flight
 ## V2-C — UI v2
 - [ ] HUD: portrait ring with the live player head, angled body / ki / stamina bars, BP and release readout, form badge, per-form colour shift, animated fills
 - [ ] Hotbar skin, radial action menu (forms, flight, techniques, menus)

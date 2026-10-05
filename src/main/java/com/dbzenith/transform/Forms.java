@@ -43,11 +43,11 @@ public final class Forms {
 
     public static final Form SUPER_SAIYAN_GOD = add(Form.builder("super_saiyan_god").parent("base", 4)
             .races(Race.SAIYAN, Race.HALF_SAIYAN).multiplier(5.0).drain(1.0, 0)
-            .colors(0xFF3B3B, 0xC8283C, 0xD0263E).hair(Form.HairStyle.SLIM).unlock(1200, 0).requiresFlag("god_ki").build());
+            .colors(0xFF3B3B, 0xC8283C, 0xD0263E).calmAura().hair(Form.HairStyle.SLIM).unlock(1200, 0).requiresFlag("god_ki").build());
 
     public static final Form SUPER_SAIYAN_BLUE = add(Form.builder("super_saiyan_blue").parent("super_saiyan_god", 5)
             .races(Race.SAIYAN, Race.HALF_SAIYAN).multiplier(6.0).drain(3.0, 0).allowsOverdrive()
-            .colors(0x36B8FF, 0x4FC3FF, 0x2E7DFF).hair(Form.HairStyle.SPIKY).unlock(1800, 50).build());
+            .colors(0x36B8FF, 0x4FC3FF, 0x2E7DFF).calmAura().hair(Form.HairStyle.SPIKY).unlock(1800, 50).build());
 
     public static final Form GREAT_APE = add(Form.builder("great_ape").parent("base", 1)
             .races(Race.SAIYAN, Race.HALF_SAIYAN).multipliers(4.0, 0.6, 2.0).drain(0, 0)
@@ -56,7 +56,7 @@ public final class Forms {
     // --- Half-Saiyan exclusive (also uses the Saiyan line above) ---
     public static final Form ULTIMATE = add(Form.builder("ultimate").parent("base", 4)
             .races(Race.HALF_SAIYAN).multiplier(4.5).drain(0.6, 0)
-            .colors(0xFFFFFF, -1, -1).unlock(1000, 0).requiresFlag("potential_unlocked").build());
+            .colors(0xFFFFFF, -1, -1).calmAura().unlock(1000, 0).requiresFlag("potential_unlocked").build());
 
     // --- Human ---
     public static final Form FULL_POWER = add(Form.builder("full_power").parent("base", 1)
@@ -114,7 +114,7 @@ public final class Forms {
 
     // --- Late tiers (balance pass): every race gets a level-1500 form so no line tops out a thousand levels early ---
     public static final Form TRANSCENDENT = add(Form.builder("transcendent").parent("potential_unleashed", 4)
-            .races(Race.HUMAN).multiplier(5.0).drain(2.0, 0).colors(0xE0F0FF, -1, 0xC0E8FF).unlock(1500, 50).build());
+            .races(Race.HUMAN).multiplier(5.0).drain(2.0, 0).colors(0xE0F0FF, -1, 0xC0E8FF).calmAura().unlock(1500, 50).build());
     public static final Form DRAGON_CLAN = add(Form.builder("dragon_clan").parent("orange_namekian", 4)
             .races(Race.NAMEKIAN).multiplier(5.0).drain(2.5, 0).colors(0x40FFB0, -1, 0x40FFB0).unlock(1500, 50).build());
     public static final Form PRIMORDIAL_MAJIN = add(Form.builder("primordial_majin").parent("pure_majin", 4)

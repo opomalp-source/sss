@@ -561,11 +561,25 @@ public final class DBZConfig {
 
     public static final class Client {
         public final ForgeConfigSpec.BooleanValue showDebugOverlay;
+        public final ForgeConfigSpec.DoubleValue screenShake;
+        public final ForgeConfigSpec.BooleanValue hitstop;
+        public final ForgeConfigSpec.BooleanValue afterimages;
+        public final ForgeConfigSpec.BooleanValue firstPersonAura;
 
         Client(ForgeConfigSpec.Builder b) {
             b.push("hud");
             showDebugOverlay = b.comment("Show the raw stat debug overlay (developer aid, drawn under the HUD position)")
                     .define("showDebugStats", false);
+            b.pop();
+            b.push("effects");
+            screenShake = b.comment("Camera shake strength from hits, explosions and landings (0 = off)")
+                    .defineInRange("screenShake", 1.0, 0.0, 2.0);
+            hitstop = b.comment("Freeze the fighters' animations for a few frames when a blow lands")
+                    .define("hitstop", true);
+            afterimages = b.comment("Draw afterimages behind dashing and fast-flying fighters")
+                    .define("afterimages", true);
+            firstPersonAura = b.comment("Show your own aura and transformation flashes around the screen edge in first person")
+                    .define("firstPersonAura", true);
             b.pop();
         }
     }
