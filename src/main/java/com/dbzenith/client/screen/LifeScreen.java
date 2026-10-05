@@ -29,6 +29,8 @@ public class LifeScreen extends Screen {
     private int scar;
     private int tattoo;
     private boolean raceLook;
+    private int skinTone;
+    private static final int SKIN_ROW = 92, SWATCH = 9;
 
     public LifeScreen(Screen parent) {
         super(Component.translatable("screen.dbzenith.life"));
@@ -43,6 +45,11 @@ public class LifeScreen extends Screen {
         scar = Math.min(d.getScar(), Cosmetics.SCARS.size() - 1);
         tattoo = Math.min(d.getTattoo(), Cosmetics.TATTOOS.size() - 1);
         raceLook = d.isRaceLook();
+        skinTone = d.getSkinTone();
+        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.barber"), b ->
+                minecraft.setScreen(new HairEditorScreen(this, d.getHairCode(), d.getHairColor(), (code, color) ->
+                        ModNetwork.sendToServer(new com.dbzenith.network.AppearancePacket(code, color, d.getEyeColor(), skinTone)))))
+                .bounds(left + 144, top + H - 48, 84, 18).build());
         if (com.dbzenith.client.render.RaceSkinLayer.texture(d.getRace()) != null) {
             addRenderableWidget(ThemedButton.of(raceLookLabel(), b -> {
                 raceLook = !raceLook;
@@ -83,8 +90,24 @@ public class LifeScreen extends Screen {
         if (s != null) { // preview at once; the server's public state confirms it
             ClientPublicStates.put(new PublicStatePacket(s.entityId(), s.flags(), s.release(), s.auraColor(), s.form(), s.overdrive(),
                     s.race(), s.bodyType(), s.hairStyle(), s.hairColor(), s.eyeColor(), s.battlePower(),
-                    scar | tattoo << 4 | (raceLook ? PublicStatePacket.RACE_LOOK : 0)));
+                    scar | tattoo << 4 | (raceLook ? PublicStatePacket.RACE_LOOK : 0), s.hairCode(), s.skinTone(), s.height()));
         }
+    }
+
+    @Override
+    public boolean mouseClicked(double mx, double my, int button) {
+        for (int i = 0; i < com.dbzenith.appearance.Palettes.SKIN.length; i++) {
+            int x = left + 40 + i * (SWATCH + 2), y = top + SKIN_ROW;
+            if (mx >= x && mx < x + SWATCH && my >= y && my < y + SWATCH) {
+                skinTone = com.dbzenith.appearance.Palettes.SKIN[i];
+                PlayerData d = ClientPlayerData.get();
+                ModNetwork.sendToServer(new com.dbzenith.network.AppearancePacket(d.getHairCode(), d.getHairColor(), d.getEyeColor(), skinTone));
+                PublicStatePacket s = ClientPublicStates.get(minecraft.player.getId());
+                if (s != null) ClientPublicStates.put(s.withAppearance(s.hairCode(), s.hairColor(), s.eyeColor(), skinTone));
+                return true;
+            }
+        }
+        return super.mouseClicked(mx, my, button);
     }
 
     @Override
@@ -107,6 +130,13 @@ public class LifeScreen extends Screen {
         Component partner = d.getPartnerId().isEmpty() ? Component.translatable("screen.dbzenith.life_single")
                 : Component.translatable(d.isNearPartner() ? "screen.dbzenith.life_partner_near" : "screen.dbzenith.life_partner", d.getPartnerName());
         g.drawString(font, partner, left + 8, y, 0xFFFF90D0);
+        DbzTheme.text(g, font, Component.translatable("screen.dbzenith.skin"), left + 8, top + SKIN_ROW + 1, DIM, 0.85f);
+        for (int i = 0; i < com.dbzenith.appearance.Palettes.SKIN.length; i++) {
+            int x = left + 40 + i * (SWATCH + 2), c = com.dbzenith.appearance.Palettes.SKIN[i];
+            g.fill(x - 1, top + SKIN_ROW - 1, x + SWATCH + 1, top + SKIN_ROW + SWATCH + 1, c == skinTone ? 0xFFFFFFFF : 0xFF404048);
+            g.fill(x, top + SKIN_ROW, x + SWATCH, top + SKIN_ROW + SWATCH, c < 0 ? 0xFF707078 : 0xFF000000 | c);
+            if (c < 0) g.fill(x + 2, top + SKIN_ROW + 4, x + SWATCH - 2, top + SKIN_ROW + 5, 0xFFE0E0E0);
+        }
         super.render(g, mouseX, mouseY, partialTick);
         if (minecraft != null && minecraft.player != null) {
             int px = left + W - 50, py = top + H - 34;

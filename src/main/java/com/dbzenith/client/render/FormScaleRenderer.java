@@ -52,8 +52,9 @@ public final class FormScaleRenderer {
     public static void pre(RenderPlayerEvent.Pre event) {
         float s = GreatApe.scaleOf(event.getEntity());
         float width = bodyWidth(event.getEntity().getId());
+        float height = com.dbzenith.appearance.Stature.heightScale(event.getEntity());
         event.getPoseStack().pushPose();
-        if (s != 1f || width != 1f) event.getPoseStack().scale(s * width, s, s * width);
+        if (s != 1f || width != 1f || height != 1f) event.getPoseStack().scale(s * width, s * height, s * width);
     }
 
     /** Body type: slim and bulky characters are drawn narrower or wider (looks only; hitbox unchanged). */

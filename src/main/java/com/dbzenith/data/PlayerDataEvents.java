@@ -55,13 +55,17 @@ public final class PlayerDataEvents {
     public static void login(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             ModCapabilities.get(player).ifPresent(PlayerData::initDefaultsIfNeeded);
+            player.refreshDimensions(); // height (appearance.Stature) is only known once the data has loaded
             sync(player);
         }
     }
 
     @SubscribeEvent
     public static void respawn(PlayerEvent.PlayerRespawnEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) sync(player);
+        if (event.getEntity() instanceof ServerPlayer player) {
+            player.refreshDimensions();
+            sync(player);
+        }
     }
 
     @SubscribeEvent

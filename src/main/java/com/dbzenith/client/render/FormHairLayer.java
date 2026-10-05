@@ -1,6 +1,7 @@
 package com.dbzenith.client.render;
 
 import com.dbzenith.DBZenith;
+import com.dbzenith.appearance.HairCode;
 import com.dbzenith.client.ClientPublicStates;
 import com.dbzenith.network.PublicStatePacket;
 import com.dbzenith.transform.Form;
@@ -18,15 +19,34 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 
-/** Draws form hair (colored, glowing) and eye color on any player whose public state says they are transformed. */
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+/**
+ * Hair and eyes. The character's own hair code is drawn strand by strand ({@link HairMesh}); a form with hair of its
+ * own grows it from that code ({@link HairCode#forForm}) and makes it glow in the form's colour. With the player's
+ * own Minecraft skin a cap covers their painted hair first.
+ */
 public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
     private static final ResourceLocation TEXTURE = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/form_hair.png");
+    private static final Map<String, String> FORM_HAIR = new LinkedHashMap<>(32, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<String, String> e) {
+            return size() > 64;
+        }
+    };
 
     private final FormHairModel model;
 
     public FormHairLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> parent, EntityModelSet models) {
         super(parent);
         this.model = new FormHairModel(models.bakeLayer(FormHairModel.LAYER));
+    }
+
+    /** The hair code shown for a character in a form (cached: deriving it decodes and re-encodes the strands). */
+    public static String hairFor(String baseCode, Form form) {
+        if (form.hairStyle() == Form.HairStyle.NONE) return baseCode;
+        return FORM_HAIR.computeIfAbsent(form.id() + "|" + baseCode, k -> HairCode.forForm(baseCode, form));
     }
 
     @Override
@@ -36,26 +56,29 @@ public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         PublicStatePacket state = ClientPublicStates.get(player.getId());
         if (state == null) return;
         Form form = Forms.byId(state.form());
-        Form.HairStyle[] styles = Form.HairStyle.values();
-        Form.HairStyle custom = state.hairStyle() >= 0 && state.hairStyle() < styles.length ? styles[state.hairStyle()] : Form.HairStyle.NONE;
-        // A form with its own hair overrides the chosen hairstyle; otherwise the character's own look shows.
         boolean formHair = form.hairStyle() != Form.HairStyle.NONE && form.hairColor() >= 0;
-        Form.HairStyle style = formHair ? form.hairStyle() : custom;
-        int hairColor = formHair ? form.hairColor() : state.hairColor();
+        String code = hairFor(state.hairCode(), form);
+        int hairColor = form.hairColor() >= 0 ? form.hairColor() : state.hairColor();
         int eyeColor = form.eyeColor() >= 0 ? form.eyeColor() : state.eyeColor();
-        if (style == Form.HairStyle.NONE && eyeColor < 0) return;
+        if (code.isEmpty() && eyeColor < 0) return;
 
-        model.copyHead(getParentModel().head);
         VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
-        int glow = form.isBase() ? light : LightTexture.FULL_BRIGHT; // transformed hair and eyes glow
-        if (style != Form.HairStyle.NONE) {
-            int c = hairColor;
-            model.renderHair(pose, vc, formHair ? LightTexture.FULL_BRIGHT : light, OverlayTexture.NO_OVERLAY, style,
-                    ((c >> 16) & 0xFF) / 255f, ((c >> 8) & 0xFF) / 255f, (c & 0xFF) / 255f);
+        int hairLight = formHair ? LightTexture.FULL_BRIGHT : light;              // transformed hair glows
+        float r = ((hairColor >> 16) & 0xFF) / 255f, g = ((hairColor >> 8) & 0xFF) / 255f, b = (hairColor & 0xFF) / 255f;
+        if (!code.isEmpty()) {
+            model.copyHead(getParentModel().head);
+            if (state.skinTone() < 0 && !state.raceLook()) {                       // hide the skin's own painted hair
+                model.renderCap(pose, vc, hairLight, OverlayTexture.NO_OVERLAY, r, g, b);
+            }
+            pose.pushPose();
+            getParentModel().head.translateAndRotate(pose);
+            HairMesh.render(pose, vc, HairMesh.of(code), hairLight, OverlayTexture.NO_OVERLAY, r, g, b);
+            pose.popPose();
         }
         if (eyeColor >= 0) {
             int c = eyeColor;
-            model.renderEyes(pose, vc, glow, OverlayTexture.NO_OVERLAY,
+            model.copyHead(getParentModel().head);
+            model.renderEyes(pose, vc, form.isBase() ? light : LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
                     ((c >> 16) & 0xFF) / 255f, ((c >> 8) & 0xFF) / 255f, (c & 0xFF) / 255f);
         }
     }

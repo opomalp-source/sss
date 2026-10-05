@@ -53,7 +53,8 @@ public final class PortraitRenderer {
         drawing = true;
         PoseStack pose = g.pose();
         pose.pushPose();
-        pose.translate(cx, cy + 1.5f * scale, 150);                 // head centre: 1.5 blocks up, at any form scale
+        float tall = com.dbzenith.appearance.Stature.heightScale(player);
+        pose.translate(cx, cy + 1.5f * scale * tall, 150);          // head centre: 1.5 blocks up, at any form scale and height
         pose.mulPoseMatrix(new Matrix4f().scaling(s, s, -s));
         pose.mulPose(new Quaternionf().rotateZ((float) Math.PI));
         undoBodyTransform(pose, player, facing);

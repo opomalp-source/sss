@@ -109,8 +109,8 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [x] Menu theme: stats, techniques, life, quests, radar, planets screens restyled to one look
 - [x] Transformation cut-in (portrait slash, flash)
 ## V2-D — Appearance
-- [ ] Voxel hair editor (strands placed on a head grid, saved as a hair code), presets, per-form hair from the base hair
-- [ ] Skin tone, height, body shape (lean / athletic / bulky), muscle-shaded body textures
+- [x] Voxel hair editor (strands placed on a head grid, saved as a hair code), presets, per-form hair from the base hair
+- [x] Skin tone, height, body shape (lean / athletic / bulky), muscle-shaded body textures
 ## V2-E — Combat depth
 - [ ] Guard meter, guard break, perfect-guard parry window, deflecting ki blasts
 - [ ] Beam struggles (beam-vs-beam contest)

@@ -878,6 +878,102 @@ public class ArtGen {
             raceNamekian();
             raceFrostDemon();
             raceMajin();
+            body("lean", 0.55);
+            body("athletic", 1.0);
+            body("bulky", 1.45);
+            outfit();
+        }
+
+        // ---- generated bodies (V2-D): greyscale flesh with muscle definition, tinted by skin tone at render time
+
+        /** Light per face, as flesh() does it, in luminance. */
+        static double faceLight(Face f) {
+            return switch (f) { case FRONT -> 0.96; case TOP -> 1.0; case RIGHT -> 0.86; case LEFT -> 0.84; case BACK -> 0.8; case BOTTOM -> 0.68; };
+        }
+
+        static int lum(double v) {
+            int g = (int) Math.round(Math.max(0, Math.min(1, v)) * 255);
+            return 0xFF000000 | g << 16 | g << 8 | g;
+        }
+
+        /** A bare-chested body: pecs, abs, obliques, shoulder blades, deltoids, biceps, quads, calves; k = definition. */
+        static void body(String name, double k) throws IOException {
+            Skin s = new Skin();
+            s.head = (f, x, y, w, h) -> {
+                double v = faceLight(f);
+                if (f == Face.FRONT) {
+                    if (y >= 5 && (x == 0 || x == 7)) v -= 0.05;                         // jaw
+                    if (y == 7) v -= 0.06;                                                // chin shadow
+                    if (y == 5 && (x == 3 || x == 4)) v -= 0.05;                          // nose
+                }
+                if ((f == Face.RIGHT || f == Face.LEFT) && y >= 3 && y <= 5 && x >= 3 && x <= 4) v -= 0.07; // ear
+                return lum(v);
+            };
+            s.body = (f, x, y, w, h) -> {
+                double v = faceLight(f);
+                if (f == Face.FRONT) {
+                    if (y >= 1 && y <= 3 && x >= 1 && x <= 6) v += 0.05 * k;              // pecs
+                    if (y == 3 && (x == 3 || x == 4)) v -= 0.03 * k;
+                    if (y == 4 && x >= 1 && x <= 6) v -= 0.11 * k;                        // under the pecs
+                    if (y >= 5 && y <= 10 && x >= 2 && x <= 5) {                          // abs
+                        if (y == 6 || y == 8) v -= 0.08 * k;
+                        else v += 0.04 * k;
+                        if (x == 3) v -= 0.03 * k;
+                    }
+                    if (y >= 5 && y <= 10 && (x == 1 || x == 6)) v -= 0.06 * k;          // obliques
+                    if (y == 0 && (x == 2 || x == 5)) v -= 0.04 * k;                      // collarbones
+                }
+                if (f == Face.BACK) {
+                    if (y >= 1 && y <= 4 && (x <= 2 || x >= 5)) v += 0.05 * k;            // shoulder blades
+                    if (x == 3 || x == 4) v -= 0.04 * k;                                  // spine
+                    if (y >= 6 && y <= 9 && (x == 0 || x == 7)) v -= 0.05 * k;            // lats
+                }
+                return lum(v);
+            };
+            s.arm = (f, x, y, w, h) -> {
+                double v = faceLight(f);
+                if (f != Face.TOP && f != Face.BOTTOM) {
+                    if (y <= 2) v += 0.05 * k;                                            // deltoid
+                    if (y == 3) v -= 0.07 * k;
+                    if (f == Face.FRONT && y >= 4 && y <= 6) v += 0.06 * k;               // biceps
+                    if (f == Face.BACK && y >= 4 && y <= 6) v += 0.03 * k;                // triceps
+                    if (y == 7) v -= 0.06 * k;                                            // elbow
+                    if (y >= 8 && y <= 10 && x == 1) v += 0.03 * k;                       // forearm
+                }
+                return lum(v);
+            };
+            s.leg = (f, x, y, w, h) -> {
+                double v = faceLight(f);
+                if (f == Face.FRONT && y >= 1 && y <= 5) v += 0.05 * k;                   // quads
+                if (f == Face.FRONT && y == 6) v -= 0.07 * k;                             // knee
+                if (f == Face.BACK && y >= 7 && y <= 9) v += 0.05 * k;                    // calves
+                return lum(v);
+            };
+            s.save("entity/body/" + name + ".png");
+        }
+
+        /** Untinted overlay for the generated bodies: face, training pants with a belt, boots and wristbands. */
+        static void outfit() throws IOException {
+            int[] pants = ramp(0xFF26346E, 5), boots = ramp(0xFF7A4424, 4), band = ramp(0xFF26346E, 4);
+            Skin s = new Skin();
+            s.head = (f, x, y, w, h) -> {
+                if (f != Face.FRONT) return 0;
+                if (y == 3 && (x == 1 || x == 2 || x == 5 || x == 6)) return 0xFF3A2414;    // brows
+                if (y == 4 && (x == 1 || x == 6)) return 0xFFF2F2F2;                         // eye whites
+                if (y == 4 && (x == 2 || x == 5)) return 0xFF1E1610;                         // irises (form eyes draw over)
+                if (y == 6 && (x == 3 || x == 4)) return 0xFF7A3E30;                         // mouth
+                return 0;
+            };
+            s.body = (f, x, y, w, h) -> y == 10 ? 0xFF121A36 : y == 11 ? pants[f == Face.FRONT ? 3 : 2] : 0;
+            s.arm = (f, x, y, w, h) -> f != Face.TOP && f != Face.BOTTOM && (y == 9 || y == 10) ? band[f == Face.FRONT ? 3 : y == 9 ? 2 : 1] : 0;
+            s.leg = (f, x, y, w, h) -> {
+                if (y >= 9 || f == Face.BOTTOM) return boots[f == Face.FRONT ? 3 : y == 9 ? 2 : 1];
+                if (f == Face.TOP) return 0;
+                int i = f == Face.FRONT ? 3 : f == Face.BACK ? 1 : 2;
+                if (y == 6 && f == Face.FRONT) i--;                                           // a crease at the knee
+                return pants[Math.max(0, i - (y == 8 ? 1 : 0))];
+            };
+            s.save("entity/body/outfit.png");
         }
 
         // ---- full race looks for players (optional, Life screen). Eyes stay at x 2 and 5 so form eye colours line up.

@@ -7,15 +7,14 @@ import com.dbzenith.stats.FightingPath;
 import com.dbzenith.stats.Race;
 import com.dbzenith.transform.Form;
 import com.dbzenith.transform.Forms;
-import net.minecraft.util.Mth;
 
 /** Server-side application of a race and of the character-creation choices. */
 public final class CharacterCreation {
     private CharacterCreation() {}
 
     /** The full set of first-join choices. Validated and clamped in {@link #create}. */
-    public record Choices(Race race, FightingPath path, PlayerData.BodyType body, int hairStyle, int hairColor,
-                          int eyeColor, int alignment) {}
+    public record Choices(Race race, FightingPath path, PlayerData.BodyType body, String hairCode, int hairColor,
+                          int eyeColor, int alignment, int skinTone, int heightPercent) {}
 
     /**
      * Sets the race: tail per race, racial techniques learned (and slotted if there is room), and a form the new
@@ -54,7 +53,9 @@ public final class CharacterCreation {
         }
         data.setPath(c.path());
         data.setBodyType(c.body());
-        data.setHairStyle(Mth.clamp(c.hairStyle(), 0, Form.HairStyle.values().length - 1));
+        data.setHairCode(c.hairCode());                         // an invalid code is ignored (stays bald)
+        data.setSkinTone(c.skinTone());
+        data.setHeightPercent(c.heightPercent());
         data.setHairColor(c.hairColor());
         data.setEyeColor(c.eyeColor());
         data.setAlignment(c.alignment());

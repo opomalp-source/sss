@@ -318,6 +318,12 @@ public final class DBZCommand {
                                             }
                                             return n;
                                         }))))
+                .then(Commands.literal("look")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("hair", StringArgumentType.word())
+                                        .then(Commands.argument("skinTone", IntegerArgumentType.integer(-1, 0xFFFFFF))
+                                                .then(Commands.argument("height", IntegerArgumentType.integer(PlayerData.MIN_HEIGHT, PlayerData.MAX_HEIGHT))
+                                                        .executes(DBZCommand::look))))))
                 .then(Commands.literal("devshot")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("name", StringArgumentType.word())
@@ -327,6 +333,36 @@ public final class DBZCommand {
                 .then(Commands.literal("reset")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .executes(ctx -> apply(ctx, "Reset character of", PlayerData::reset)))));
+    }
+
+    /** /dbz look: hair (a preset name or a hair code), skin tone (-1 = own skin) and height in percent. */
+    private static int look(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        String hair = StringArgumentType.getString(ctx, "hair");
+        String code;
+        try {
+            code = com.dbzenith.appearance.HairCode.Preset.valueOf(hair.toUpperCase(java.util.Locale.ROOT)).code();
+        } catch (IllegalArgumentException e) {
+            code = com.dbzenith.appearance.HairCode.sanitize(hair);
+        }
+        if (code == null) {
+            ctx.getSource().sendFailure(Component.literal("Not a hair preset or code: " + hair));
+            return 0;
+        }
+        String finalCode = code;
+        int tone = IntegerArgumentType.getInteger(ctx, "skinTone");
+        int height = IntegerArgumentType.getInteger(ctx, "height");
+        var targets = EntityArgument.getPlayers(ctx, "targets");
+        for (ServerPlayer p : targets) {
+            ModCapabilities.get(p).ifPresent(d -> {
+                d.setHairCode(finalCode);
+                d.setSkinTone(tone);
+                d.setHeightPercent(height);
+            });
+            p.refreshDimensions();
+            com.dbzenith.data.PlayerDataEvents.sync(p);
+        }
+        ctx.getSource().sendSuccess(() -> Component.literal("Restyled " + targets.size() + " player(s)"), true);
+        return targets.size();
     }
 
     private static int devshot(CommandContext<CommandSourceStack> ctx, int delay) throws CommandSyntaxException {

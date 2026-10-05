@@ -59,6 +59,7 @@ public final class ClientSetup {
         for (String skin : event.getSkins()) {
             PlayerRenderer renderer = event.getSkin(skin);
             if (renderer != null) {
+                renderer.addLayer(new com.dbzenith.client.render.BodySkinLayer(renderer));
                 renderer.addLayer(new com.dbzenith.client.render.RaceSkinLayer(renderer));
                 renderer.addLayer(new com.dbzenith.client.render.CosmeticsLayer(renderer));
                 renderer.addLayer(new FormHairLayer(renderer, event.getEntityModels()));

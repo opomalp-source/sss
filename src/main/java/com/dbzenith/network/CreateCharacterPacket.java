@@ -19,22 +19,28 @@ public record CreateCharacterPacket(CharacterCreation.Choices choices) {
         buf.writeEnum(c.race());
         buf.writeEnum(c.path());
         buf.writeEnum(c.body());
-        buf.writeVarInt(c.hairStyle());
+        buf.writeUtf(c.hairCode(), com.dbzenith.appearance.HairCode.MAX_CODE_LENGTH);
         buf.writeInt(c.hairColor());
         buf.writeInt(c.eyeColor());
         buf.writeVarInt(c.alignment());
+        buf.writeInt(c.skinTone());
+        buf.writeByte(c.heightPercent());
     }
 
     public static CreateCharacterPacket decode(FriendlyByteBuf buf) {
         return new CreateCharacterPacket(new CharacterCreation.Choices(buf.readEnum(Race.class), buf.readEnum(FightingPath.class),
-                buf.readEnum(PlayerData.BodyType.class), buf.readVarInt(), buf.readInt(), buf.readInt(), buf.readVarInt()));
+                buf.readEnum(PlayerData.BodyType.class), buf.readUtf(com.dbzenith.appearance.HairCode.MAX_CODE_LENGTH), buf.readInt(), buf.readInt(),
+                buf.readVarInt(), buf.readInt(), buf.readUnsignedByte()));
     }
 
     public static void handle(CreateCharacterPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ServerPlayer player = ctx.get().getSender();
         if (player == null) return;
         ModCapabilities.get(player).ifPresent(d -> {
-            if (CharacterCreation.create(d, msg.choices)) PlayerDataEvents.sync(player);
+            if (CharacterCreation.create(d, msg.choices)) {
+                PlayerDataEvents.sync(player);
+                player.refreshDimensions(); // the chosen height
+            }
         });
     }
 }

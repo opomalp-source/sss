@@ -41,7 +41,8 @@ public class RaceSkinLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         @net.minecraftforge.eventbus.api.SubscribeEvent
         public static void pre(net.minecraftforge.client.event.RenderPlayerEvent.Pre event) {
             PublicStatePacket state = ClientPublicStates.get(event.getEntity().getId());
-            if (state == null || !state.raceLook() || texture(state.raceEnum()) == null) return;
+            boolean raceSkin = state != null && state.raceLook() && texture(state.raceEnum()) != null;
+            if (!raceSkin && !BodySkinLayer.active(state)) return;
             PlayerModel<AbstractClientPlayer> m = event.getRenderer().getModel();
             m.hat.visible = false;
             m.jacket.visible = false;

@@ -16,7 +16,7 @@ import java.util.function.Supplier;
  */
 public record PublicStatePacket(int entityId, int flags, int release, int auraColor, String form, int overdrive,
                                 int race, int bodyType, int hairStyle, int hairColor, int eyeColor, long battlePower,
-                                int looks) {
+                                int looks, String hairCode, int skinTone, int height) {
     public static final int CHARGING = 1;
     public static final int FLYING = 2;
     public static final int GUARDING = 4;
@@ -33,13 +33,21 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
         return new PublicStatePacket(entityId, flags, d.getReleasePercent(), Aura.color(d), d.getFormId(), d.getOverdriveLevel(),
                 d.getRace().ordinal(), d.getBodyType().ordinal(), d.getHairStyle(), d.getHairColor(), d.getEyeColor(),
                 d.hasFlag("god_ki") ? -1 : com.dbzenith.stats.StatCalculator.battlePower(d), // -1: god ki cannot be read
-                d.getScar() | d.getTattoo() << 4 | (d.isRaceLook() ? RACE_LOOK : 0));
+                d.getScar() | d.getTattoo() << 4 | (d.isRaceLook() ? RACE_LOOK : 0),
+                d.getHairCode(), d.getSkinTone(), d.getHeightPercent());
     }
 
     public int stateHash() {
         int h = (((flags * 31 + release) * 31 + auraColor) * 31 + form.hashCode()) * 31 + overdrive;
         h = ((h * 31 + race) * 31 + bodyType) * 31 + hairStyle;
-        return (((h * 31 + hairColor) * 31 + eyeColor) * 31 + Long.hashCode(battlePower)) * 31 + looks;
+        h = (((h * 31 + hairColor) * 31 + eyeColor) * 31 + Long.hashCode(battlePower)) * 31 + looks;
+        return ((h * 31 + hairCode.hashCode()) * 31 + skinTone) * 31 + height;
+    }
+
+    /** A copy with a different look (client previews in the creation, barber and Life screens). */
+    public PublicStatePacket withAppearance(String hairCode, int hairColor, int eyeColor, int skinTone) {
+        return new PublicStatePacket(entityId, flags, release, auraColor, form, overdrive, race, bodyType, hairStyle, hairColor,
+                eyeColor, battlePower, looks, hairCode, skinTone, height);
     }
 
     public boolean has(int flag) {
@@ -77,17 +85,20 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
         buf.writeInt(msg.eyeColor);
         buf.writeVarLong(msg.battlePower);
         buf.writeShort(msg.looks);
+        buf.writeUtf(msg.hairCode, com.dbzenith.appearance.HairCode.MAX_CODE_LENGTH);
+        buf.writeInt(msg.skinTone);
+        buf.writeByte(msg.height);
     }
 
     public static PublicStatePacket decode(FriendlyByteBuf buf) {
         return new PublicStatePacket(buf.readVarInt(), buf.readByte(), buf.readByte(), buf.readInt(), buf.readUtf(64), buf.readByte(),
                 buf.readByte(), buf.readByte(), buf.readByte(), buf.readInt(), buf.readInt(), buf.readVarLong(),
-                buf.readUnsignedShort());
+                buf.readUnsignedShort(), buf.readUtf(com.dbzenith.appearance.HairCode.MAX_CODE_LENGTH), buf.readInt(), buf.readUnsignedByte());
     }
 
     public static void handle(PublicStatePacket msg, Supplier<NetworkEvent.Context> ctx) {
         PublicStatePacket old = ClientPublicStates.get(msg.entityId);
         ClientPublicStates.put(msg);
-        if (old == null || !old.form.equals(msg.form)) com.dbzenith.client.ClientHooks.refreshDimensions(msg.entityId);
+        if (old == null || !old.form.equals(msg.form) || old.height != msg.height) com.dbzenith.client.ClientHooks.refreshDimensions(msg.entityId);
     }
 }

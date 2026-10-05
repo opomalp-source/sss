@@ -318,6 +318,49 @@ public class PlayerData {
         return eyeColor;
     }
 
+    private String hairCode = "";     // appearance.HairCode; "" = bald (or the player's own skin hair)
+    private int skinTone = -1;        // -1 = the player's own Minecraft skin; otherwise the generated body in this tone
+    private int heightPercent = 100;  // 85..115: model and hitbox
+
+    public static final int MIN_HEIGHT = 85, MAX_HEIGHT = 115;
+
+    public String getHairCode() {
+        return hairCode;
+    }
+
+    /** Ignores invalid codes. */
+    public void setHairCode(String code) {
+        String clean = com.dbzenith.appearance.HairCode.sanitize(code);
+        if (clean != null && !clean.equals(hairCode)) {
+            hairCode = clean;
+            markDirty();
+        }
+    }
+
+    public int getSkinTone() {
+        return skinTone;
+    }
+
+    public void setSkinTone(int tone) {
+        int t = tone < 0 ? -1 : tone & 0xFFFFFF;
+        if (t != skinTone) {
+            skinTone = t;
+            markDirty();
+        }
+    }
+
+    public int getHeightPercent() {
+        return heightPercent;
+    }
+
+    public void setHeightPercent(int percent) {
+        int p = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, percent));
+        if (p != heightPercent) {
+            heightPercent = p;
+            markDirty();
+        }
+    }
+
     public void setEyeColor(int color) {
         if (color != eyeColor) {
             eyeColor = color < 0 ? -1 : color & 0xFFFFFF;
@@ -1076,6 +1119,9 @@ public class PlayerData {
         tag.putInt("hairStyle", hairStyle);
         tag.putInt("hairColor", hairColor);
         tag.putInt("eyeColor", eyeColor);
+        tag.putString("hairCode", hairCode);
+        tag.putInt("skinTone", skinTone);
+        tag.putInt("heightPercent", heightPercent);
         tag.putBoolean("zenkaiArmed", zenkaiArmed);
         tag.putLong("lastZenkai", lastZenkai);
         tag.putInt("zenkaiCount", zenkaiCount);
@@ -1155,6 +1201,14 @@ public class PlayerData {
         hairStyle = tag.getInt("hairStyle");
         hairColor = tag.contains("hairColor") ? tag.getInt("hairColor") : 0x1C1A1A;
         eyeColor = tag.contains("eyeColor") ? tag.getInt("eyeColor") : -1;
+        if (tag.contains("hairCode")) {
+            String code = com.dbzenith.appearance.HairCode.sanitize(tag.getString("hairCode"));
+            hairCode = code == null ? "" : code;
+        } else {
+            hairCode = com.dbzenith.appearance.HairCode.fromLegacyStyle(hairStyle); // saved before hair codes existed
+        }
+        skinTone = tag.contains("skinTone") ? tag.getInt("skinTone") : -1;
+        heightPercent = tag.contains("heightPercent") ? Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, tag.getInt("heightPercent"))) : 100;
         zenkaiArmed = tag.getBoolean("zenkaiArmed");
         lastZenkai = tag.contains("lastZenkai") ? tag.getLong("lastZenkai") : Long.MIN_VALUE / 2;
         zenkaiCount = tag.getInt("zenkaiCount");

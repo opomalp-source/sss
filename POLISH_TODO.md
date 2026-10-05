@@ -18,8 +18,7 @@ this list only when it reaches the bar. Grouped by what is missing.
 - V2-C done (portrait HUD, hotbar skin, radial wheel, one theme across every screen, transformation cut-in). Still missing: icons per technique (all share a tinted orb), a portrait for other fighters (boss bars), a scouter-style BP font, screen open/close transitions, gamepad support for the wheel; some long texts still overflow (Forms requirements, Life partner line)
 
 ## Appearance
-- Hair: preset spike styles only; no editor
-- No skin tone, height or body-shape options; no muscle-shaded bodies
+- V2-D done (hair codes + barber, presets, form hair grown from your own, skin tone with muscle-shaded generated bodies in three builds, height 85-115% with hitbox). Still missing: 3D click-to-place on the preview head, per-strand colour or highlights, face presets (eye shapes, brows), clothing colours for the generated outfit, height for NPC fighters
 
 ## Combat depth
 - Guard is hold-to-reduce only (no meter, break or parry); no beam struggles; no Ki Creator

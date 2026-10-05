@@ -83,6 +83,10 @@ public final class ClientEvents {
             mc.setScreen(com.dbzenith.client.ui.RadialMenuScreen.dev(Integer.parseInt(name.substring(7).replaceAll("\\D.*", ""))));
             delayTicks = Math.max(delayTicks, 6);
         }
+        if (name.startsWith("barber_") && mc.player != null && !(mc.screen instanceof com.dbzenith.client.screen.HairEditorScreen)) {
+            mc.setScreen(new com.dbzenith.client.screen.HairEditorScreen(null, ClientPlayerData.get().getHairCode(), ClientPlayerData.get().getHairColor(), (c, col) -> {}));
+            delayTicks = Math.max(delayTicks, 6);
+        }
         if (name.contains("cutin_")) com.dbzenith.client.ui.CutInOverlay.play(net.minecraft.network.chat.Component.translatable("form.dbzenith.super_saiyan"), 0xFFD040);
         int impact = name.indexOf("impact_");
         if (impact >= 0 && mc.player != null) {

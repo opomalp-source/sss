@@ -152,12 +152,15 @@ public final class RaceTests {
         int spi = d.getAttribute(Attribute.SPIRIT);
         int con = d.getAttribute(Attribute.CONSTITUTION);
         CharacterCreation.Choices c = new CharacterCreation.Choices(Race.NAMEKIAN, FightingPath.SPIRITUALIST,
-                PlayerData.BodyType.BULKY, 1, 0x40A040, 0xFF0000, -30);
+                PlayerData.BodyType.BULKY, com.dbzenith.appearance.HairCode.Preset.MOHAWK.code(), 0x40A040, 0xFF0000, -30, 0xC08060, 140);
         helper.assertTrue(CharacterCreation.create(d, c), "first creation succeeds");
         helper.assertTrue(d.getRace() == Race.NAMEKIAN && d.getPath() == FightingPath.SPIRITUALIST && d.isCharacterCreated(), "choices applied");
         helper.assertTrue(d.getAttribute(Attribute.SPIRIT) == spi + Races.of(Race.NAMEKIAN).startBonus(Attribute.SPIRIT), "racial start bonus");
         helper.assertTrue(d.getAttribute(Attribute.CONSTITUTION) == con + 3, "bulky body bonus");
         helper.assertTrue(!d.hasTail() && d.getAlignment() == -30 && d.getEyeColor() == 0xFF0000, "tail, alignment, eyes");
+        helper.assertTrue(d.getHairCode().equals(com.dbzenith.appearance.HairCode.Preset.MOHAWK.code()) && d.getSkinTone() == 0xC08060,
+                "hair code and skin tone applied");
+        helper.assertTrue(d.getHeightPercent() == PlayerData.MAX_HEIGHT, "height is clamped to the allowed range");
         helper.assertTrue(d.knows("regenerate"), "racial technique learned");
         helper.assertTrue(!CharacterCreation.create(d, c), "creation cannot be repeated");
         CharacterCreation.applyRace(d, Race.MAJIN);

@@ -276,3 +276,32 @@
 
 ### Verified
 - Two screenshot passes: HUD in base and Super Saiyan, the wheel, the cut-in, and the Training, Forms, Techniques, Appearance, Quests, Planets and Creation screens. Fixed: head too small in the portrait, oversized bars, the ki tint too close to stamina, the wheel hint off-screen at GUI scale 2, ribbons off the top of full-height windows, low-contrast selected labels. 102 GameTests green.
+
+## 2026-10-05 — Session 2 (cont.): V2-D Appearance (v0.12.0)
+
+### Built
+- `appearance.HairCode`: hair is a list of strands.
+  - Each strand is anchored on a face of the head (top, front, back, left, right) at a cell of its 8x8 grid, aimed by yaw and pitch in 15° steps, with a length of 1-16, a width of 1-4 and a curve (straight, droops, hangs, lifts).
+  - A strand packs into 25 bits (four bytes). A hair travels as a shareable code `DBZH1-<base64url>`, up to 64 strands. Malformed codes are rejected and out-of-range values clamped.
+  - Ten presets: bald, spiky, wild, swept, slick, bowl, mohawk, ponytail, long, topknot.
+  - `forForm` grows a form's hair from your own. Super Saiyan stiffens and lifts every strand; tall forms lengthen them further; the long-haired form adds a mane; god forms tame them. A bald character gets the form's stock hair.
+- `client.render.HairMesh`: each strand is drawn as a chain of square segments that taper and curve, shaded dark at the root, mid along the shaft and bright at the tip. Meshes are cached by code and drawn in head space. `FormHairLayer` now draws codes. `FormHairModel` is trimmed to the scalp cap (only with a Minecraft skin) and the pupils.
+- Generated bodies (`BodySkinLayer`): choosing a skin tone replaces the Minecraft skin with an ArtGen body per build.
+  - Lean, athletic and bulky builds carry increasing muscle definition: pecs, abs, obliques, shoulder blades, deltoids, biceps, quads, calves.
+  - The greyscale body is tinted to the tone, under an untinted outfit: face, training pants with a belt, boots, wristbands.
+  - Full race looks still take precedence, and the skin's own outer layer is hidden.
+- `appearance.Stature`: height of 85-115% scales the model, the hitbox and the eye height (EntityEvent.Size), refreshed on login, respawn and creation. `Palettes`: hair, eye and skin choices (13 tones incl. green, pink, lavender, pale blue).
+- Data and network:
+  - PlayerData gains `hairCode`, `skinTone` and `heightPercent`; saved hairstyles become hair codes on load.
+  - PublicStatePacket carries the code, tone and height (protocol 18).
+  - Creation choices include them.
+  - New `AppearancePacket` (the barber, after creation) covers hair, colours and skin. Height and build stay fixed after creation.
+- Screens:
+  - `HairEditorScreen` (the barber) works on an unfolded head: click to plant or pick, right-click to pull. It has Sweep, Lift, Length and Thickness steppers, a curve cycle, Pull, Mirror (sides swap with u and yaw flipped), Shave, presets, colours, copy/paste code, and a live preview turned by dragging.
+  - Creation is reorganised: build labels Lean / Athletic / Bulky; hair presets plus the Barber; colour, eye and skin rows; height and alignment sliders.
+  - The Life screen gains the Barber and a skin row.
+- `/dbz look <players> <preset|code> <skinTone> <height>`; dev hook `devshot ... barber_`.
+
+### Verified
+- 107 GameTests green, 5 new: codes round-trip and reject garbage, form hair grows from your own, legacy hairstyles migrate, height scales the hitbox, barber rules.
+- Screenshots reviewed: spiky on a Minecraft skin; wild on a toned athletic body; that hair as Super Saiyan and SSJ3 (front and back); ponytail at 115% (front and back); mohawk at 85%; the barber; creation. Fixed: invisible planted squares with dark hair, cropped preview, colliding labels, slider handle over its text.
