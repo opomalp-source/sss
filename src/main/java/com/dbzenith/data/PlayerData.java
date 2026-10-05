@@ -318,6 +318,30 @@ public class PlayerData {
         return eyeColor;
     }
 
+    // ------------------------------------------------------------------ Ki Creator designs (skill.CustomTechniques)
+
+    private final com.dbzenith.skill.CustomTechniques.Spec[] customSpecs = new com.dbzenith.skill.CustomTechniques.Spec[com.dbzenith.skill.CustomTechniques.MAX_SLOTS];
+    private final com.dbzenith.skill.Technique[] customBuilt = new com.dbzenith.skill.Technique[com.dbzenith.skill.CustomTechniques.MAX_SLOTS];
+
+    public com.dbzenith.skill.CustomTechniques.Spec getCustomSpec(int slot) {
+        return slot >= 0 && slot < customSpecs.length ? customSpecs[slot] : null;
+    }
+
+    public void setCustomSpec(int slot, com.dbzenith.skill.CustomTechniques.Spec spec) {
+        if (slot < 0 || slot >= customSpecs.length) return;
+        customSpecs[slot] = spec;
+        customBuilt[slot] = null;
+        markDirty();
+    }
+
+    /** The technique a custom id ({@code custom_<slot>}) stands for in this player's slots, or null. */
+    public com.dbzenith.skill.Technique customTechnique(String id) {
+        int slot = com.dbzenith.skill.CustomTechniques.slotOf(id);
+        if (slot < 0 || customSpecs[slot] == null) return null;
+        if (customBuilt[slot] == null) customBuilt[slot] = com.dbzenith.skill.CustomTechniques.build(slot, customSpecs[slot]);
+        return customBuilt[slot];
+    }
+
     private String hairCode = "";     // appearance.HairCode; "" = bald (or the player's own skin hair)
     private int skinTone = -1;        // -1 = the player's own Minecraft skin; otherwise the generated body in this tone
     private int heightPercent = 100;  // 85..115: model and hitbox
@@ -929,6 +953,51 @@ public class PlayerData {
         return guarding;
     }
 
+    // guard meter (combat.GuardRules): 0..100, empties under blocked hits and breaks the guard
+    private double guardMeter = 100;
+    private long guardStartTick = Long.MIN_VALUE / 2;   // when the guard last went up (parry window); not saved
+    private long guardLockUntil;                          // no guarding until then (after a break)
+    private long lastGuardHitTick = Long.MIN_VALUE / 2;
+
+    public double getGuardMeter() {
+        return guardMeter;
+    }
+
+    public void setGuardMeter(double v) {
+        double c = Math.max(0, Math.min(100, v));
+        if (Math.abs(c - guardMeter) > 1e-6) {
+            guardMeter = c;
+            markDirty();
+        }
+    }
+
+    public long getGuardStartTick() {
+        return guardStartTick;
+    }
+
+    public void setGuardStartTick(long t) {
+        guardStartTick = t;
+    }
+
+    public long getGuardLockUntil() {
+        return guardLockUntil;
+    }
+
+    public void setGuardLockUntil(long t) {
+        if (t != guardLockUntil) {
+            guardLockUntil = t;
+            markDirty();
+        }
+    }
+
+    public long getLastGuardHitTick() {
+        return lastGuardHitTick;
+    }
+
+    public void setLastGuardHitTick(long t) {
+        lastGuardHitTick = t;
+    }
+
     public void setGuarding(boolean guarding) {
         if (this.guarding != guarding) {
             this.guarding = guarding;
@@ -1120,6 +1189,16 @@ public class PlayerData {
         tag.putInt("hairColor", hairColor);
         tag.putInt("eyeColor", eyeColor);
         tag.putString("hairCode", hairCode);
+        tag.putDouble("guardMeter", guardMeter);
+        net.minecraft.nbt.ListTag customs = new net.minecraft.nbt.ListTag();
+        for (int i = 0; i < customSpecs.length; i++) {
+            if (customSpecs[i] == null) continue;
+            CompoundTag c = customSpecs[i].save();
+            c.putInt("slot", i);
+            customs.add(c);
+        }
+        tag.put("customTechniques", customs);
+        tag.putLong("guardLockUntil", guardLockUntil);
         tag.putInt("skinTone", skinTone);
         tag.putInt("heightPercent", heightPercent);
         tag.putBoolean("zenkaiArmed", zenkaiArmed);
@@ -1208,6 +1287,16 @@ public class PlayerData {
             hairCode = com.dbzenith.appearance.HairCode.fromLegacyStyle(hairStyle); // saved before hair codes existed
         }
         skinTone = tag.contains("skinTone") ? tag.getInt("skinTone") : -1;
+        guardMeter = tag.contains("guardMeter") ? tag.getDouble("guardMeter") : 100;
+        java.util.Arrays.fill(customSpecs, null);
+        java.util.Arrays.fill(customBuilt, null);
+        net.minecraft.nbt.ListTag customs = tag.getList("customTechniques", net.minecraft.nbt.Tag.TAG_COMPOUND);
+        for (int i = 0; i < customs.size(); i++) {
+            CompoundTag c = customs.getCompound(i);
+            int slot = c.getInt("slot");
+            if (slot >= 0 && slot < customSpecs.length) customSpecs[slot] = com.dbzenith.skill.CustomTechniques.Spec.load(c);
+        }
+        guardLockUntil = tag.getLong("guardLockUntil");
         heightPercent = tag.contains("heightPercent") ? Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, tag.getInt("heightPercent"))) : 100;
         zenkaiArmed = tag.getBoolean("zenkaiArmed");
         lastZenkai = tag.contains("lastZenkai") ? tag.getLong("lastZenkai") : Long.MIN_VALUE / 2;

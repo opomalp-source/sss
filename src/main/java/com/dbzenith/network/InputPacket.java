@@ -32,8 +32,8 @@ public record InputPacket(Action action) {
             switch (msg.action) {
                 case CHARGE_START -> data.setCharging(true);
                 case CHARGE_STOP -> data.setCharging(false);
-                case GUARD_START -> data.setGuarding(data.getStamina() > 0);
-                case GUARD_STOP -> data.setGuarding(false);
+                case GUARD_START -> com.dbzenith.combat.GuardRules.raise(data, player.level().getGameTime());
+                case GUARD_STOP -> com.dbzenith.combat.GuardRules.lower(data);
                 case TOGGLE_FLIGHT -> FlightHandler.toggle(player);
                 case LOWER_RELEASE -> data.setReleasePercent(data.getReleasePercent() - DBZConfig.SERVER.releaseLowerStep.get());
                 case HEAVY_START -> data.startHeavyCharge();

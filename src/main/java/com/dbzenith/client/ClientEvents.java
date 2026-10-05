@@ -34,6 +34,7 @@ public final class ClientEvents {
     public static void loggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientPlayerData.clear();
         ClientCombatState.clear();
+        ClientStruggle.clear();
         ClientPublicStates.clear();
         ClientRadar.clear();
         ClientHooks.resetCreationPrompt();
@@ -87,11 +88,15 @@ public final class ClientEvents {
             mc.setScreen(new com.dbzenith.client.screen.HairEditorScreen(null, ClientPlayerData.get().getHairCode(), ClientPlayerData.get().getHairColor(), (c, col) -> {}));
             delayTicks = Math.max(delayTicks, 6);
         }
+        if (name.startsWith("kicreator_") && !(mc.screen instanceof com.dbzenith.client.screen.KiCreatorScreen)) {
+            mc.setScreen(new com.dbzenith.client.screen.KiCreatorScreen(null));
+            delayTicks = Math.max(delayTicks, 6);
+        }
         if (name.contains("cutin_")) com.dbzenith.client.ui.CutInOverlay.play(net.minecraft.network.chat.Component.translatable("form.dbzenith.super_saiyan"), 0xFFD040);
         int impact = name.indexOf("impact_");
         if (impact >= 0 && mc.player != null) {
             String kind = name.substring(impact + 7).replaceAll("_\\d+$", "");
-            int k = java.util.List.of("PUNCH", "HEAVY", "SPIKE", "GUARD", "KI_HIT", "EXPLOSION").indexOf(kind);
+            int k = java.util.List.of("PUNCH", "HEAVY", "SPIKE", "GUARD", "KI_HIT", "EXPLOSION", "PARRY", "GUARD_BREAK", "DEFLECT").indexOf(kind);
             net.minecraft.world.phys.Vec3 at = mc.player.getEyePosition().add(mc.player.getLookAngle().scale(2.5));
             if (k >= 0) com.dbzenith.client.fx.ImpactFx.onImpact(com.dbzenith.network.ImpactPacket.at(at, mc.player.getLookAngle(), k,
                     k == 5 ? 3f : 1f, 0xFFC040, -1));

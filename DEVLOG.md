@@ -305,3 +305,26 @@
 ### Verified
 - 107 GameTests green, 5 new: codes round-trip and reject garbage, form hair grows from your own, legacy hairstyles migrate, height scales the hitbox, barber rules.
 - Screenshots reviewed: spiky on a Minecraft skin; wild on a toned athletic body; that hair as Super Saiyan and SSJ3 (front and back); ponytail at 115% (front and back); mohawk at 85%; the barber; creation. Fixed: invisible planted squares with dark hair, cropped preview, colliding labels, slider handle over its text.
+
+## 2026-10-05 — Session 2 (cont.): V2-E Combat depth (v0.13.0)
+
+### Built
+- `combat.GuardRules`: guard meter, break (stun and lockout), parry window (attacker stunned and knocked back, plays a stagger and a shove), regen. It replaces the old stamina-per-blocked-damage rule (config `guardStaminaPerDamage` removed; new keys `guardBreakBodyFraction`, `guardHitCost`, `guardRegenPerSecond`, `guardRegenDelayTicks`, `guardBreakLockTicks`, `guardBreakStunTicks`, `parryWindowTicks`, `deflectWindowTicks`, `parryStunTicks`). Ki deflect lives in `KiBlastEntity.deflectedBy`.
+- `ImpactPacket` adds PARRY, GUARD_BREAK and DEFLECT, with their own flashes, rings, sparks, hitstop and screen flash. HUD: a thin guard meter under stamina (pulsing red when low) and a GUARD BROKEN tag.
+- `skill.BeamStruggle`:
+  - Opposing beams (directions at least 105° apart) whose tips or paths meet lock together.
+  - The clash point moves along the caster-to-caster line by relative power. Players mash R (`BeamMashPacket`, 1% max ki per press); NPC casters push steadily.
+  - Beams aim at and stop at the clash, deal no other damage, and live until it resolves.
+  - Win: the loser takes 6× both beams' per-pulse damage. Draw after 10 s: an explosion at the clash.
+  - Clients get a tug-of-war bar (`StrugglePacket`, `StruggleOverlay`). A held beam pose for the struggle ends with a new AnimEventPacket STOP. No other technique can be used while locked.
+- Ki Creator:
+  - `skill.CustomTechniques`: specs (name, kind, power, modifier bits, colour) built into real `Technique`s with id `custom_<slot>`, balanced from medians of the built-ins. Names are cleaned; validation is server-side; TP cost; slots by level.
+  - `Technique` gains an optional display name and summary (`name()`, `description()`, `isCustom()`), now used by every UI that shows technique names.
+  - `Techniques.resolve(data, id)` finds per-player designs; the deck, HUD, wheel, use packet and deck validation go through it.
+  - PlayerData stores designs. `KiCreatorPacket` creates, rewrites or deletes.
+  - `KiCreatorScreen` (from the Techniques screen) lists slots and has name, kind, power pips, modifiers (invalid combinations disabled), colours, and live stats in your hands. Custom techniques head the Techniques list with a star.
+- Protocol 19. Dev hooks: `impact_PARRY|GUARD_BREAK|DEFLECT`, `kicreator_`.
+
+### Verified
+- 113 GameTests green, 6 new: meter, break and refill; parry (once per raise, never on ki); a timed guard deflects a real blast; two zombie casters' beams lock and the 10× stronger one wins; every Ki Creator design stays in the balance bands; creator rules (names, refusals, persistence, delete).
+- Screenshots reviewed: guard pose and meter, the three new impacts, the Ki Creator, a player-vs-armour-stand beam struggle with the tug bar. The bar was moved above the hotbar after the fighter covered it in third person.

@@ -109,8 +109,18 @@ public final class CombatEvents {
             if (afterimage) impact = -1;                                         // dodged: nothing landed
             else if (impact >= 0 && victimData.isGuarding()) impact = ImpactPacket.GUARD;
             if (victimData.isGuarding() && dealt > 0) {
-                victimData.setStamina(victimData.getStamina() - DamageCalculator.guardPrevented(dealt) * DBZConfig.SERVER.guardStaminaPerDamage.get());
-                if (victimData.getStamina() <= 0) victimData.setGuarding(false); // guard broken
+                boolean blow = impact >= 0;                                      // fists and kicks can be parried
+                GuardRules.Outcome g = GuardRules.onHit(player, victimData, source.getEntity(), DamageCalculator.guardPrevented(dealt),
+                        blow, isKi, victim.level().getGameTime());
+                if (g == GuardRules.Outcome.PARRY) {
+                    dealt = 0;
+                    impact = ImpactPacket.PARRY;
+                } else if (g == GuardRules.Outcome.BREAK) {
+                    if (blow) impact = ImpactPacket.GUARD_BREAK;
+                    else if (victim.level() instanceof net.minecraft.server.level.ServerLevel lvl) {   // ki and other breaks get their burst too
+                        ImpactPacket.at(victim.getBoundingBox().getCenter(), victim.getLookAngle(), ImpactPacket.GUARD_BREAK, 1f, 0xAEE6FF, -1).send(lvl);
+                    }
+                }
             }
             if (dealt > 0) com.dbzenith.race.TailRules.onHit(player, victimData, source); // blades can cut a tail
             BodyHealth.adoptExternalChanges(player, victimData);

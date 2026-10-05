@@ -35,6 +35,7 @@ public final class TechniqueHandler {
         if (data == null || !Forms.byId(data.getFormId()).allowsTechniques()) return Result.INVALID;
         if (com.dbzenith.registry.ModEffects.isStunned(player)) return Result.STUNNED;
         if (com.dbzenith.registry.ModEffects.isKiSealed(player)) return Result.SEALED;
+        if (BeamStruggle.isStruggling(player)) return Result.INVALID;     // both hands are busy
         if (!bypassDeck && !(data.knows(technique.id()) && data.deckView().contains(technique.id()))) return Result.NOT_EQUIPPED;
         data.recomputeIfStale();
 

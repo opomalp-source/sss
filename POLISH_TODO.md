@@ -21,7 +21,7 @@ this list only when it reaches the bar. Grouped by what is missing.
 - V2-D done (hair codes + barber, presets, form hair grown from your own, skin tone with muscle-shaded generated bodies in three builds, height 85-115% with hitbox). Still missing: 3D click-to-place on the preview head, per-strand colour or highlights, face presets (eye shapes, brows), clothing colours for the generated outfit, height for NPC fighters
 
 ## Combat depth
-- Guard is hold-to-reduce only (no meter, break or parry); no beam struggles; no Ki Creator
+- V2-E done (guard meter, break, parry, ki deflect, beam struggles with mashing, Ki Creator). Still missing: NPC fighters guarding and parrying, directional guard, revenge counter, Ki Creator kinds beyond the five (waves, rings, mines), a struggle camera
 
 ## World
 - Home world is vanilla terrain; no lookout hub; three planets only; no dungeons

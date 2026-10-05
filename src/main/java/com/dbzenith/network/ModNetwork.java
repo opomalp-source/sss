@@ -13,7 +13,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
  * so mismatched client/server versions are refused at login instead of desyncing.
  */
 public final class ModNetwork {
-    private static final String PROTOCOL = "18";
+    private static final String PROTOCOL = "19";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(DBZenith.MOD_ID, "main"),
@@ -96,6 +96,12 @@ public final class ModNetwork {
                 .decoder(UseTechniquePacket::decode)
                 .consumerMainThread(UseTechniquePacket::handle)
                 .add();
+        CHANNEL.messageBuilder(KiCreatorPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(KiCreatorPacket::encode).decoder(KiCreatorPacket::decode).consumerMainThread(KiCreatorPacket::handle).add();
+        CHANNEL.messageBuilder(StrugglePacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(StrugglePacket::encode).decoder(StrugglePacket::decode).consumerMainThread(StrugglePacket::handle).add();
+        CHANNEL.messageBuilder(BeamMashPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(BeamMashPacket::encode).decoder(BeamMashPacket::decode).consumerMainThread(BeamMashPacket::handle).add();
         CHANNEL.messageBuilder(AppearancePacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(AppearancePacket::encode).decoder(AppearancePacket::decode).consumerMainThread(AppearancePacket::handle).add();
         CHANNEL.messageBuilder(ImpactPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)

@@ -83,6 +83,12 @@ public final class Techniques {
         return BY_ID.get(id);
     }
 
+    /** Built-in by id, or one of this player's Ki Creator techniques ({@code custom_<slot>}). */
+    public static Technique resolve(com.dbzenith.data.PlayerData data, String id) {
+        if (CustomTechniques.isCustom(id)) return data == null ? null : data.customTechnique(id);
+        return BY_ID.get(id);
+    }
+
     public static List<Technique> all() {
         return List.copyOf(BY_ID.values());
     }

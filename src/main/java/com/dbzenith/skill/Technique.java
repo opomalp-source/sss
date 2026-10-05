@@ -35,6 +35,8 @@ public final class Technique {
     private final int unlockLevel;
     private final Set<Race> races;
     private final int holdTicks;
+    private final String displayName;     // player-made techniques carry their own name
+    private final String summary;         // ...and a generated description
 
     private Technique(Builder b) {
         id = b.id;
@@ -57,6 +59,8 @@ public final class Technique {
         unlockLevel = b.unlockLevel;
         races = b.races;
         holdTicks = b.holdTicks;
+        displayName = b.displayName;
+        summary = b.summary;
     }
 
     public static Builder builder(String id) {
@@ -105,6 +109,22 @@ public final class Technique {
         return "technique.dbzenith." + id;
     }
 
+    /** What to call it on screen: its translation, or the name its creator gave it. */
+    public net.minecraft.network.chat.Component name() {
+        return displayName != null ? net.minecraft.network.chat.Component.literal(displayName)
+                : net.minecraft.network.chat.Component.translatable(translationKey());
+    }
+
+    public net.minecraft.network.chat.Component description() {
+        return summary != null ? net.minecraft.network.chat.Component.literal(summary)
+                : net.minecraft.network.chat.Component.translatable(translationKey() + ".desc");
+    }
+
+    /** Made in the Ki Creator. */
+    public boolean isCustom() {
+        return displayName != null;
+    }
+
     public static final class Builder {
         private final String id;
         private double kiCost = 20;
@@ -126,6 +146,8 @@ public final class Technique {
         private int unlockLevel;
         private Set<Race> races = EnumSet.allOf(Race.class);
         private int holdTicks;
+        private String displayName;
+        private String summary;
 
         private Builder(String id) {
             this.id = id;
@@ -147,6 +169,7 @@ public final class Technique {
         public Builder learn(long tp, int level) { learnCost = tp; unlockLevel = level; return this; }
         public Builder drop(int ticksAboveHead) { holdTicks = ticksAboveHead; return this; }
         public Builder race(Race first, Race... rest) { races = EnumSet.of(first, rest); return this; }
+        public Builder named(String name, String description) { displayName = name; summary = description; return this; }
 
         public Technique build() {
             return new Technique(this);

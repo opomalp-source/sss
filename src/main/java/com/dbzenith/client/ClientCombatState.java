@@ -25,7 +25,7 @@ public final class ClientCombatState {
     public static Technique selected() {
         List<String> deck = deck();
         if (deck.isEmpty()) return null;
-        return Techniques.byId(deck.get(Math.floorMod(selected, deck.size())));
+        return Techniques.resolve(ClientPlayerData.get(), deck.get(Math.floorMod(selected, deck.size())));
     }
 
     public static int selectedSlot() {

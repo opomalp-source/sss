@@ -97,6 +97,34 @@ public final class ImpactFx {
                 CameraFx.shakeAt(pos, 0.06f, 12);
                 if (mine) hitstop(m, 1);
             }
+            case ImpactPacket.PARRY -> {
+                add(Kind.FLASH, pos, dir, 0xFFE6A0, 0, 1.8f * s, 5, 255);
+                add(Kind.RING, pos, dir, 0xFFD27A, 0.2f * s, 2.2f * s, 8, 230);
+                add(Kind.FACING_RING, pos, dir, 0xFFFFFF, 0.1f * s, 1.2f * s, 5, 200);
+                burst(level, ParticleTypes.CRIT, pos, dir.reverse(), 18, 0.6);
+                burst(level, ParticleTypes.ENCHANTED_HIT, pos, dir.reverse(), 10, 0.4);
+                CameraFx.shakeAt(pos, 0.22f, 20);
+                if (mine) { CameraFx.kick(0.7f); hitstop(m, 6); }
+                AnimController.playOn(m.attackerId(), com.dbzenith.client.anim.Anims.HIT_HEAVY);   // the attacker reels
+                AnimController.playOn(m.victimId(), com.dbzenith.client.anim.Anims.KI_WAVE);       // the defender throws them off
+            }
+            case ImpactPacket.GUARD_BREAK -> {
+                add(Kind.FLASH, pos, dir, 0xAEE6FF, 0, 2.4f * s, 6, 255);
+                add(Kind.RING, pos, dir, 0xAEE6FF, 0.4f * s, 3.0f * s, 10, 230);
+                add(Kind.FACING_RING, pos, dir, 0xFFFFFF, 0.2f * s, 2.0f * s, 7, 220);
+                burst(level, ParticleTypes.ELECTRIC_SPARK, pos, dir, 24, 0.7);
+                burst(level, ParticleTypes.END_ROD, pos, dir, 10, 0.3);
+                CameraFx.shakeAt(pos, 0.4f, 24);
+                if (mc.player != null && m.victimId() == mc.player.getId()) CameraFx.flash(0xAEE6FF, 0.35f);
+                if (mine) hitstop(m, 5);
+            }
+            case ImpactPacket.DEFLECT -> {
+                add(Kind.FLASH, pos, dir, FxDraw.mix(m.color(), 0xFFFFFF, 0.6f), 0, 1.6f * s, 4, 255);
+                add(Kind.FACING_RING, pos, dir, 0xFFFFFF, 0.1f * s, 1.6f * s, 6, 220);
+                burst(level, ParticleTypes.ELECTRIC_SPARK, pos, dir, 12, 0.5);
+                CameraFx.shakeAt(pos, 0.15f, 16);
+                AnimController.playOn(m.attackerId(), com.dbzenith.client.anim.Anims.HOOK);         // the swat
+            }
             case ImpactPacket.KI_HIT -> {
                 add(Kind.FLASH, pos, dir, tint, 0, 1.4f * s, 3, 230);
                 add(Kind.FACING_RING, pos, dir, m.color(), 0.1f * s, 1.3f * s, 5, 170);

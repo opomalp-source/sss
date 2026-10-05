@@ -68,6 +68,7 @@ public final class KiTicker {
                     * (data.isMeditating() ? c.meditationKiRegenMultiplier.get() : 1.0) * com.dbzenith.race.Alignment.kiRegenMultiplier(data));
         }
 
+        com.dbzenith.combat.GuardRules.tick(data, now);
         if (!data.isCharging() && !data.isGuarding()) {
             data.setStamina(data.getStamina() + perTick(s.maxStamina(), c.staminaRegenPercentPerSecond.get()) * race.staminaRegenMultiplier()
                     * com.dbzenith.world.Needs.staminaRegenMultiplier(data));

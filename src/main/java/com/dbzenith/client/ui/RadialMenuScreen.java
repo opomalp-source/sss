@@ -57,10 +57,10 @@ public class RadialMenuScreen extends Screen {
         if (ClientPlayerData.hasData()) {
             List<String> deck = ClientPlayerData.get().deckView();
             for (int i = 0; i < deck.size(); i++) {
-                Technique t = Techniques.byId(deck.get(i));
+                Technique t = Techniques.resolve(ClientPlayerData.get(), deck.get(i));
                 if (t == null) continue;
                 int slot = i;
-                outer.add(new Slice(Component.translatable(t.translationKey()), tr("technique.hint"), DbzTheme.ICON_ORB,
+                outer.add(new Slice(t.name(), tr("technique.hint"), DbzTheme.ICON_ORB,
                         0xFF000000 | t.color(), () -> ClientCombatState.select(slot)));
             }
         }

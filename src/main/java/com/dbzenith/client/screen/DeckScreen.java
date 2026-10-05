@@ -50,10 +50,20 @@ public class DeckScreen extends Screen {
         top = (height - H) / 2;
         addRenderableWidget(ThemedButton.of(Component.translatable("gui.back"), b -> onClose())
                 .bounds(left + W - 70, top + H - 24, 62, 18).build());
+        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.ki_creator"), b -> minecraft.setScreen(new KiCreatorScreen(this)))
+                .bounds(left + 8, top + H - 24, 96, 18).build());
     }
 
+    /** Your Ki Creator techniques first, then everything your race can learn. */
     private List<Technique> library() {
-        return Techniques.forRace(ClientPlayerData.get().getRace());
+        PlayerData d = ClientPlayerData.get();
+        List<Technique> out = new ArrayList<>();
+        for (int i = 0; i < com.dbzenith.skill.CustomTechniques.MAX_SLOTS; i++) {
+            Technique t = d.customTechnique(com.dbzenith.skill.CustomTechniques.id(i));
+            if (t != null) out.add(t);
+        }
+        out.addAll(Techniques.forRace(d.getRace()));
+        return out;
     }
 
     private int listRow(double mx, double my) {
@@ -123,7 +133,8 @@ public class DeckScreen extends Screen {
                 DbzTheme.row(g, left + 4, y - 3, 230, ROW - 1, false, true);
                 tooltipFor = t;
             }
-            g.drawString(font, Component.translatable(t.translationKey()), left + 10, y, 0xFF000000 | t.color());
+            g.drawString(font, t.name(), left + 10, y, 0xFF000000 | t.color());
+            if (t.isCustom()) DbzTheme.text(g, font, "✦", left + 4, y + 1, DbzTheme.ACCENT, 0.7f);
             int sx = left + 140;
             if (d.deckView().contains(t.id())) g.drawString(font, Component.translatable("screen.dbzenith.equipped"), sx, y, GOOD);
             else if (d.knows(t.id())) g.drawString(font, Component.translatable("screen.dbzenith.learned"), sx, y, TEXT);
@@ -143,12 +154,12 @@ public class DeckScreen extends Screen {
         g.drawString(font, Component.translatable("screen.dbzenith.deck", d.deckView().size(), slots(d)), dx, top + 34, HEADER);
         int dh = deckRow(mouseX, mouseY);
         for (int i = 0; i < d.deckView().size(); i++) {
-            Technique t = Techniques.byId(d.deckView().get(i));
+            Technique t = Techniques.resolve(d, d.deckView().get(i));
             if (t == null) continue;
             int y = top + 46 + i * ROW;
             if (i == dh) g.fill(dx - 2, y - 3, left + W - 6, y + ROW - 4, 0x30FF6060);
             g.drawString(font, (i + 1) + ". ", dx, y, DIM);
-            g.drawString(font, Component.translatable(t.translationKey()), dx + 14, y, 0xFF000000 | t.color());
+            g.drawString(font, t.name(), dx + 14, y, 0xFF000000 | t.color());
         }
         super.render(g, mouseX, mouseY, partialTick);
         if (tooltipFor != null) {
@@ -156,7 +167,7 @@ public class DeckScreen extends Screen {
             g.renderTooltip(font, font.split(Component.translatable("screen.dbzenith.technique_info", (int) t.kiCost(),
                     String.format("%.1f", t.cooldownTicks() / 20.0), String.format("%.1f", t.damageMult()),
                     (int) com.dbzenith.skill.TechniqueMastery.get(d, t),
-                    Component.translatable(t.translationKey() + ".desc")), 200), mouseX, mouseY);
+                    t.description()), 200), mouseX, mouseY);
         }
     }
 

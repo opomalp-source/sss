@@ -21,6 +21,9 @@ public record ImpactPacket(float x, float y, float z, float dx, float dy, float 
     public static final int GUARD = 3;
     public static final int KI_HIT = 4;
     public static final int EXPLOSION = 5;
+    public static final int PARRY = 6;
+    public static final int GUARD_BREAK = 7;
+    public static final int DEFLECT = 8;
 
     private static final double RANGE = 96;
 

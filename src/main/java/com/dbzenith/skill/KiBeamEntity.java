@@ -40,6 +40,7 @@ public class KiBeamEntity extends Entity {
     private int lifeTicks = 30;
     private float explosionPower;
     private boolean hitBlock;
+    BeamStruggle struggle;          // locked with another beam (server only)
 
     public KiBeamEntity(EntityType<? extends KiBeamEntity> type, Level level) {
         super(type, level);
@@ -106,6 +107,11 @@ public class KiBeamEntity extends Entity {
             return;
         }
         anchorTo(owner);
+        if (struggle != null) {
+            lifeTicks = Math.max(lifeTicks, tickCount + 2);  // the struggle decides when this ends
+            if (struggle.a == this) struggle.tick();
+            return;                                          // locked: no extending, no damage
+        }
 
         Vec3 start = position();
         Vec3 dir = direction();
@@ -115,6 +121,8 @@ public class KiBeamEntity extends Entity {
         hitBlock = block.getType() == HitResult.Type.BLOCK;
         if (hitBlock) length = (float) block.getLocation().distanceTo(start);
         entityData.set(LENGTH, length);
+        BeamStruggle.lookFor(this);
+        if (struggle != null) return;
 
         if (tickCount % DBZConfig.SERVER.beamDamageIntervalTicks.get() == 0) pulse(owner, start, start.add(dir.scale(length)));
     }
@@ -137,6 +145,10 @@ public class KiBeamEntity extends Entity {
     }
 
     private void finish() {
+        if (struggle != null && !struggle.over) {
+            struggle.abort();                                 // ends both beams
+            return;
+        }
         if (explosionPower > 0 && hitBlock && getOwner() != null) {
             Vec3 end = position().add(direction().scale(getLength()));
             Level.ExplosionInteraction interaction = DBZConfig.SERVER.kiBlastsBreakBlocks.get()
@@ -147,6 +159,21 @@ public class KiBeamEntity extends Entity {
             }
         }
         discard();
+    }
+
+    /** Struggling: point at the clash and reach exactly to it. */
+    void holdTo(Vec3 clash) {
+        Vec3 d = clash.subtract(position());
+        double len = d.length();
+        if (len < 1e-3) return;
+        float yRot = (float) (Math.toDegrees(Math.atan2(-d.x, d.z)));
+        float xRot = (float) (Math.toDegrees(-Math.asin(d.y / len)));
+        moveTo(getX(), getY(), getZ(), yRot, xRot);
+        entityData.set(LENGTH, (float) len);
+    }
+
+    double damagePerPulse() {
+        return damagePerPulse;
     }
 
     @Override

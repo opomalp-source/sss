@@ -84,6 +84,13 @@ public final class DbzHud implements IGuiOverlay {
         by = bar(g, font, 0, bx, by, 112, 8, bodyFrac, d.getBody(), bodyColor, t, dt);
         by = bar(g, font, 1, bx - 2, by, 102, 7, frac(d.getKi(), s.maxKi()), d.getKi(), kiColor, t, dt);
         by = bar(g, font, 2, bx - 4, by, 92, 6, frac(d.getStamina(), s.maxStamina()), d.getStamina(), DbzTheme.STAMINA, t, dt);
+        if (d.isGuarding() || d.getGuardMeter() < 100) {                                 // guard meter, only when it matters
+            float gf = (float) (d.getGuardMeter() / 100);
+            int gc = gf < 0.3f ? DbzTheme.mix(0xFFAEE6FF, 0xFFFF6A5A, 0.5f + 0.5f * Mth.sin(t * 0.8f)) : 0xFFAEE6FF;
+            DbzTheme.slant(g, bx - 7, by - 1, 82, 5, 3, 0xF0040508, 0xF0040508);
+            DbzTheme.slantBar(g, bx - 6, by, 80, 3, 2, gf, gc);
+            by += 6;
+        }
 
         // ---------------------------------------------------------- battle power, form badge, overdrive
         long bp = StatCalculator.battlePower(d);
@@ -113,6 +120,7 @@ public final class DbzHud implements IGuiOverlay {
         if (com.dbzenith.registry.ModEffects.isStunned(mc.player)) chipX = chip(g, font, chipX, ly, Component.translatable("hud.dbzenith.stunned"), 0xFFF2E94E);
         if (com.dbzenith.registry.ModEffects.isKiSealed(mc.player)) chipX = chip(g, font, chipX, ly, Component.translatable("hud.dbzenith.sealed"), 0xFF8A5FD0);
         if (d.isGuarding()) chipX = chip(g, font, chipX, ly, Component.translatable("hud.dbzenith.guard"), DbzTheme.STAMINA);
+        if (time < d.getGuardLockUntil()) chipX = chip(g, font, chipX, ly, Component.translatable("hud.dbzenith.guard_broken"), 0xFFFF6A5A);
         if (com.dbzenith.config.DBZConfig.SERVER_SPEC.isLoaded() && com.dbzenith.config.DBZConfig.SERVER.thirstEnabled.get()
                 && d.getThirst() < com.dbzenith.world.Needs.THIRSTY_BELOW) chipX = chip(g, font, chipX, ly, Component.translatable("hud.dbzenith.thirsty"), 0xFF60B0FF);
         if (d.getTemperature() > 0) chipX = chip(g, font, chipX, ly, Component.translatable("hud.dbzenith.hot"), 0xFFFF8030);
@@ -195,7 +203,7 @@ public final class DbzHud implements IGuiOverlay {
         DbzTheme.icon(g, DbzTheme.ICON_ORB, ox, oy, 16, cd > 0 ? DbzTheme.darken(color, 0.5f) : color);
         if (cd > 0) DbzTheme.arc(g, ox + 8, oy + 8, 0, 9, -90, -360 * cd, 0x90000000, 0x90000000);
         else DbzTheme.arc(g, ox + 8, oy + 8, 8.5f, 10f, 0, 360, DbzTheme.withAlpha(color, 0), DbzTheme.withAlpha(color, (int) (120 + 60 * Mth.sin(t * 0.3f))));
-        Component name = Component.translatable(tech.translationKey());
+        Component name = tech.name();
         DbzTheme.text(g, font, name, x + 25, y + 3, color, font.width(name) > 70 ? 70f / font.width(name) : 1f);
         DbzTheme.text(g, font, Component.translatable("hud.dbzenith.technique_keys", ClientCombatState.selectedSlot() + 1, d.deckView().size()),
                 x + 25, y + 13, DbzTheme.DIM, 0.6f);

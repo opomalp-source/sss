@@ -61,7 +61,7 @@ public final class TechniqueLibrary {
     public static List<String> setDeck(PlayerData data, List<String> requested) {
         LinkedHashSet<String> clean = new LinkedHashSet<>();
         for (String id : requested) {
-            if (Techniques.byId(id) != null && data.knows(id)) clean.add(id);
+            if (Techniques.resolve(data, id) != null && data.knows(id)) clean.add(id);
         }
         List<String> deck = new ArrayList<>(clean).subList(0, Math.min(clean.size(), deckSlots(data)));
         data.setDeck(new ArrayList<>(deck));

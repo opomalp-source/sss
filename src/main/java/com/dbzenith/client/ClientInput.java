@@ -59,10 +59,15 @@ public final class ClientInput {
             Technique t = ClientCombatState.cycle();
             if (t != null) {
                 mc.player.displayClientMessage(Component.translatable("message.dbzenith.selected_technique",
-                        Component.translatable(t.translationKey())), true);
+                        t.name()), true);
             }
         }
         while (ModKeys.KI_ATTACK.consumeClick()) {
+            if (ClientStruggle.active()) {                       // locked in a beam struggle: every press pushes
+                ModNetwork.sendToServer(new com.dbzenith.network.BeamMashPacket());
+                ClientStruggle.mashed();
+                continue;
+            }
             Technique t = ClientCombatState.selected();
             long now = mc.level.getGameTime();
             if (t != null && !ClientCombatState.onCooldown(t, now)) {

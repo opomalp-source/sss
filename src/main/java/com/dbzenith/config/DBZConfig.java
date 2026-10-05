@@ -90,7 +90,15 @@ public final class DBZConfig {
         public final ForgeConfigSpec.IntValue comboMaxHits;
         public final ForgeConfigSpec.DoubleValue meleeKnockbackPerStrength;
         public final ForgeConfigSpec.DoubleValue guardDamageReduction;
-        public final ForgeConfigSpec.DoubleValue guardStaminaPerDamage;
+        public final ForgeConfigSpec.DoubleValue guardBreakBodyFraction;
+        public final ForgeConfigSpec.DoubleValue guardHitCost;
+        public final ForgeConfigSpec.DoubleValue guardRegenPerSecond;
+        public final ForgeConfigSpec.IntValue guardRegenDelayTicks;
+        public final ForgeConfigSpec.IntValue guardBreakLockTicks;
+        public final ForgeConfigSpec.IntValue guardBreakStunTicks;
+        public final ForgeConfigSpec.IntValue parryWindowTicks;
+        public final ForgeConfigSpec.IntValue deflectWindowTicks;
+        public final ForgeConfigSpec.IntValue parryStunTicks;
         public final ForgeConfigSpec.DoubleValue kiCostReleaseScaling;
         public final ForgeConfigSpec.DoubleValue kiBlastBaseDamage;
         public final ForgeConfigSpec.BooleanValue kiBlastsBreakBlocks;
@@ -326,8 +334,24 @@ public final class DBZConfig {
                     .defineInRange("meleeKnockbackPerStrength", 0.002, 0.0, 10.0);
             guardDamageReduction = b.comment("Fraction of damage blocked while guarding")
                     .defineInRange("guardDamageReduction", 0.6, 0.0, 1.0);
-            guardStaminaPerDamage = b.comment("Stamina spent per point of body damage blocked")
-                    .defineInRange("guardStaminaPerDamage", 0.05, 0.0, 100.0);
+            guardBreakBodyFraction = b.comment("Guard meter: blocking this fraction of your max body in one go empties it (the guard breaks)")
+                    .defineInRange("guardBreakBodyFraction", 0.4, 0.01, 10.0);
+            guardHitCost = b.comment("Guard meter spent by every blocked hit, on top of the damage-based cost (meter is 0-100)")
+                    .defineInRange("guardHitCost", 4.0, 0.0, 100.0);
+            guardRegenPerSecond = b.comment("Guard meter refilled per second while not guarding")
+                    .defineInRange("guardRegenPerSecond", 15.0, 0.0, 1000.0);
+            guardRegenDelayTicks = b.comment("Ticks after the last blocked hit before the guard meter refills")
+                    .defineInRange("guardRegenDelayTicks", 20, 0, 1200);
+            guardBreakLockTicks = b.comment("After a guard break you cannot guard for this many ticks")
+                    .defineInRange("guardBreakLockTicks", 60, 0, 1200);
+            guardBreakStunTicks = b.comment("A guard break stuns you for this many ticks")
+                    .defineInRange("guardBreakStunTicks", 30, 0, 200);
+            parryWindowTicks = b.comment("Raising your guard this many ticks before a blow lands parries it: no damage, the attacker is staggered")
+                    .defineInRange("parryWindowTicks", 5, 0, 40);
+            deflectWindowTicks = b.comment("Raising your guard this many ticks before a ki blast hits sends it back")
+                    .defineInRange("deflectWindowTicks", 8, 0, 40);
+            parryStunTicks = b.comment("How long a parried attacker is staggered (stunned), in ticks")
+                    .defineInRange("parryStunTicks", 25, 0, 200);
             kiCostReleaseScaling = b.comment("Technique ki cost multiplier at 100% release (linear from 1 at 0%)")
                     .defineInRange("kiCostReleaseScaling", 1.5, 0.0, 100.0);
             kiBlastBaseDamage = b.comment("Flat DBZ damage added to every ki technique before multipliers")

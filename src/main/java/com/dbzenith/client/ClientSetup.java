@@ -35,6 +35,7 @@ public final class ClientSetup {
         event.registerBelowAll("aura_edge", new com.dbzenith.client.fx.AuraEdgeOverlay());
         event.registerAboveAll("hud", new DbzHud());
         event.registerAboveAll("transform_cut_in", new com.dbzenith.client.ui.CutInOverlay());
+        event.registerAboveAll("beam_struggle", new com.dbzenith.client.ui.StruggleOverlay());
         event.registerAboveAll("dragon_radar", new RadarOverlay());
         event.registerAboveAll("scouter", new ScouterOverlay());
         event.registerAboveAll("debug_stats", new DebugStatsOverlay());

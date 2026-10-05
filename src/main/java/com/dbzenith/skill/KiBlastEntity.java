@@ -186,6 +186,7 @@ public class KiBlastEntity extends Projectile {
         super.onHitEntity(result);
         if (level().isClientSide) return;
         Entity target = result.getEntity();
+        if (target instanceof net.minecraft.world.entity.player.Player p && deflectedBy(p)) return;
         hitIds.add(target.getId());
         if (effect == Technique.Effect.CANDY && TechniqueEffects.candy(target, effectPower)) {
             discard();
@@ -201,6 +202,29 @@ public class KiBlastEntity extends Projectile {
                     com.dbzenith.network.ImpactPacket.KI_HIT, Math.max(0.5f, getSize()), getColor(), getOwner() == null ? -1 : getOwner().getId()).send(sl);
         }
         if (pierceLeft-- <= 0) impact();
+    }
+
+    /**
+     * A guard raised just in time knocks the blast away where the defender is looking, and it becomes theirs
+     * (a homing blast turns on its thrower). One deflect per raise of the guard.
+     */
+    private boolean deflectedBy(net.minecraft.world.entity.player.Player p) {
+        com.dbzenith.data.PlayerData d = com.dbzenith.data.ModCapabilities.get(p).orElse(null);
+        long now = level().getGameTime();
+        if (d == null || !com.dbzenith.combat.GuardRules.inWindow(d, now, DBZConfig.SERVER.deflectWindowTicks.get())) return false;
+        d.setGuardStartTick(Long.MIN_VALUE / 2);
+        Entity thrower = getOwner();
+        setOwner(p);
+        double speed = Math.max(0.6, getDeltaMovement().length());
+        setDeltaMovement(p.getLookAngle().scale(speed * 1.15));
+        setHomingTarget(thrower instanceof LivingEntity l && l.isAlive() ? l : null);
+        hitIds.clear();
+        hitIds.add(p.getId());
+        if (level() instanceof net.minecraft.server.level.ServerLevel sl) {
+            com.dbzenith.network.ImpactPacket.at(position(), p.getLookAngle(), com.dbzenith.network.ImpactPacket.DEFLECT,
+                    Math.max(0.6f, getSize()), getColor(), p.getId()).send(sl);
+        }
+        return true;
     }
 
     @Override

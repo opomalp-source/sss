@@ -112,9 +112,9 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [x] Voxel hair editor (strands placed on a head grid, saved as a hair code), presets, per-form hair from the base hair
 - [x] Skin tone, height, body shape (lean / athletic / bulky), muscle-shaded body textures
 ## V2-E — Combat depth
-- [ ] Guard meter, guard break, perfect-guard parry window, deflecting ki blasts
-- [ ] Beam struggles (beam-vs-beam contest)
-- [ ] Ki Creator: build techniques from method / shape / type / modifiers (DBV-style)
+- [x] Guard meter, guard break, perfect-guard parry window, deflecting ki blasts
+- [x] Beam struggles (beam-vs-beam contest)
+- [x] Ki Creator: build techniques from method / shape / type / modifiers (DBV-style)
 ## V2-F — Sound
 - [ ] Original synthesized sound set: charge hum, blasts, beams, impacts, whooshes, transformation burst, UI clicks, ambience
 ## V2-G — Phase 5: Story mode

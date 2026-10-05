@@ -19,6 +19,8 @@ public record AnimEventPacket(int entityId, int kind, int data) {
     public static final int WAVE = 4;
     public static final int FOCUS = 5;
     public static final int DASH = 6;
+    /** Clear the action pose (a struggle ended before the beam pose ran out). */
+    public static final int STOP = 7;
 
     /** The animation that fits how a technique is cast. */
     public static AnimEventPacket forTechnique(Entity caster, Technique t) {

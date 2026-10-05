@@ -189,6 +189,12 @@ public final class AnimController {
         if (!(e instanceof AbstractClientPlayer player)) return;
         Track t = TRACKS.computeIfAbsent(player, p -> new Track());
         long now = mc.level.getGameTime();
+        if (msg.kind() == AnimEventPacket.STOP) {             // end the held pose (a beam struggle finished)
+            ModifierLayer<IAnimation> layer = layer(player, ACTION_LAYER);
+            if (layer != null) layer.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(4, Ease.INOUTSINE), null);
+            t.actionLockUntil = 0;
+            return;
+        }
         KeyframeAnimation anim = switch (msg.kind()) {
             case AnimEventPacket.VOLLEY -> Anims.KI_VOLLEY;
             case AnimEventPacket.BEAM -> Anims.kiBeam(msg.data());
@@ -204,6 +210,13 @@ public final class AnimController {
             com.dbzenith.client.fx.Afterimages.keepAlive(player, 8);
             if (player == mc.player) com.dbzenith.client.fx.CameraFx.rush();
         }
+    }
+
+    /** Play a one-shot on whichever player has this entity id (effects that know who did what). */
+    public static void playOn(int entityId, KeyframeAnimation anim) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null || entityId < 0 || !(mc.level.getEntity(entityId) instanceof AbstractClientPlayer player)) return;
+        play(player, TRACKS.computeIfAbsent(player, p -> new Track()), anim, mc.level.getGameTime(), 0);
     }
 
     /** Freeze a player's animations for {@code ticks} (the moment a blow connects). Ignored for anyone not a player. */

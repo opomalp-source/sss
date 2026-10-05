@@ -80,3 +80,9 @@ Changes:
 ## Still for real play
 Feel, not numbers: how fights read with knockback, flight and dashes; whether racial passives (Namekian regeneration,
 Android ki absorption, Majin kill-heal) tip close duels; whether the pacing targets match how people actually play.
+
+## Guard and the Ki Creator (V2-E)
+- **Guard meter** (0-100). Each blocked hit costs 4, plus enough that blocking 40% of your max body in one go empties the meter (`guardBreakBodyFraction`). Ki costs ×1.5. An empty meter breaks the guard: 1.5 s stun, then 3 s before you can guard again. The meter refills 15/s, starting 1 s after the last blocked hit.
+- **Parry**: raising the guard at most 5 ticks before a blow lands (`parryWindowTicks`) cancels it, staggers the attacker for 1.25 s and returns 10 meter. One parry per raise. **Deflect**: 8 ticks before a ki blast sends it back where you look, and it becomes yours.
+- **Ki Creator**: costs are not chosen by the player. Ki cost and cooldown come from the median of the built-in damaging techniques (ki per point of damage, cooldown per point of damage), times a tax per modifier (×1.05-1.2). A design is therefore never more efficient than the typical built-in technique. `CombatDepth2Tests.kiCreatorDesignsStayInBalance` builds every legal design at level 1000 and asserts the pass-2 targets: 0.6-1.6× the median damage per ki, and at most 4× punching when spammed. Creating costs 100 + 80·power² + 150 per modifier TP. Three slots, plus one per 300 levels (max 8), from level 10.
+- **Beam struggles**: the clash moves 0.014 × (power difference / total) of the gap per tick. Power is the beam's damage per pulse × (1 + mash); a mash adds 0.5 (max 3) for 1% max ki and decays 8% a tick. The winner hits the loser for 6× both beams' per-pulse damage; after 10 s it all explodes where the beams meet.
