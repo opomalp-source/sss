@@ -373,9 +373,12 @@ public class PlayerData {
 
     private String hairCode = "";     // appearance.HairCode; "" = bald (or the player's own skin hair)
     private int skinTone = -1;        // -1 = the player's own Minecraft skin; otherwise the generated body in this tone
-    private int heightPercent = 100;  // 85..115: model and hitbox
+    private int heightPercent = 100;  //  80..125: model and hitbox
+    private int face;                 // appearance.FaceParts, packed
+    private int highlightColor = -1;  // hair tips; -1 = none
+    private int auraColor = -1;       // base-form aura; -1 = your race's
 
-    public static final int MIN_HEIGHT = 85, MAX_HEIGHT = 115;
+    public static final int MIN_HEIGHT = 80, MAX_HEIGHT = 125;
 
     public String getHairCode() {
         return hairCode;
@@ -398,6 +401,43 @@ public class PlayerData {
         int t = tone < 0 ? -1 : tone & 0xFFFFFF;
         if (t != skinTone) {
             skinTone = t;
+            markDirty();
+        }
+    }
+
+    public int getFace() {
+        return face;
+    }
+
+    public void setFace(int f) {
+        int v = com.dbzenith.appearance.FaceParts.sanitize(f);
+        if (v != face) {
+            face = v;
+            markDirty();
+        }
+    }
+
+    public int getHighlightColor() {
+        return highlightColor;
+    }
+
+    public void setHighlightColor(int c) {
+        int v = c < 0 ? -1 : c & 0xFFFFFF;
+        if (v != highlightColor) {
+            highlightColor = v;
+            markDirty();
+        }
+    }
+
+    /** Chosen base-form aura colour, or -1 for the race (or lineage) colour. */
+    public int getAuraColor() {
+        return auraColor;
+    }
+
+    public void setAuraColor(int c) {
+        int v = c < 0 ? -1 : c & 0xFFFFFF;
+        if (v != auraColor) {
+            auraColor = v;
             markDirty();
         }
     }
@@ -1472,6 +1512,9 @@ public class PlayerData {
         tag.putLong("guardLockUntil", guardLockUntil);
         tag.putInt("skinTone", skinTone);
         tag.putInt("heightPercent", heightPercent);
+        tag.putInt("face", face);
+        tag.putInt("highlight", highlightColor);
+        tag.putInt("auraColor", auraColor);
         tag.putBoolean("zenkaiArmed", zenkaiArmed);
         tag.putLong("lastZenkai", lastZenkai);
         tag.putInt("zenkaiCount", zenkaiCount);
@@ -1586,6 +1629,9 @@ public class PlayerData {
         }
         guardLockUntil = tag.getLong("guardLockUntil");
         heightPercent = tag.contains("heightPercent") ? Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, tag.getInt("heightPercent"))) : 100;
+        face = com.dbzenith.appearance.FaceParts.sanitize(tag.getInt("face"));
+        highlightColor = tag.contains("highlight") ? tag.getInt("highlight") : -1;
+        auraColor = tag.contains("auraColor") ? tag.getInt("auraColor") : -1;
         zenkaiArmed = tag.getBoolean("zenkaiArmed");
         lastZenkai = tag.contains("lastZenkai") ? tag.getLong("lastZenkai") : Long.MIN_VALUE / 2;
         zenkaiCount = tag.getInt("zenkaiCount");

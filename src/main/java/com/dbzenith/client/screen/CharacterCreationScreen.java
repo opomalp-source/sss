@@ -117,6 +117,10 @@ public class CharacterCreationScreen extends Screen {
                 hairColor = color;
             }));
         }).bounds(mx + 142, y, 72, 15).build());
+        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.face_button"), b -> {
+            toBarber = true;
+            minecraft.setScreen(new FaceScreen(this));
+        }).bounds(mx + 218, y, 44, 15).build());
 
         int sy = top + 197;
         addRenderableWidget(new HeightSlider(mx + 40, sy, 84, 15));
@@ -147,7 +151,7 @@ public class CharacterCreationScreen extends Screen {
         int flags = Races.of(race).tail() ? PublicStatePacket.TAIL : 0;
         ClientPublicStates.put(new PublicStatePacket(minecraft.player.getId(), flags, 50, Races.of(race).auraColor(),
                 PlayerData.BASE_FORM, 0, race.ordinal(), body.ordinal(), 0, hairColor, eyeColor, 0L, PublicStatePacket.RACE_LOOK,
-                hairCode, skinTone, stature, variant.ordinal(), ""));
+                hairCode, skinTone, stature, variant.ordinal(), "", com.dbzenith.client.ClientPlayerData.get().getFace(), com.dbzenith.client.ClientPlayerData.get().getHighlightColor()));
         minecraft.player.refreshDimensions();
     }
 

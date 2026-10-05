@@ -145,6 +145,13 @@ public final class HairMesh {
      */
     public static void render(PoseStack pose, VertexConsumer vc, List<Segment> mesh, HairWind.State wind, int light, int overlay,
                               float r, float g, float b) {
+        render(pose, vc, mesh, wind, light, overlay, r, g, b, -1);
+    }
+
+    /** {@code tips}: a highlight colour for the strand tips (0xRRGGBB), or -1 for none. */
+    public static void render(PoseStack pose, VertexConsumer vc, List<Segment> mesh, HairWind.State wind, int light, int overlay,
+                              float r, float g, float b, int tips) {
+        float tr = tips < 0 ? r : ((tips >> 16) & 255) / 255f, tg = tips < 0 ? g : ((tips >> 8) & 255) / 255f, tb = tips < 0 ? b : (tips & 255) / 255f;
         pose.pushPose();
         pose.scale(1 / 16f, 1 / 16f, 1 / 16f);
         Matrix4f m = pose.last().pose();
@@ -182,14 +189,17 @@ public final class HairMesh {
                 }
             }
             float u0 = (s.tier * 16 + 3) / 64f, u1 = (s.tier * 16 + 9) / 64f, v0 = 50 / 64f, v1 = 56 / 64f;
+            float sr = s.tier == 2 ? tr : s.tier == 1 && tips >= 0 ? (r + tr) / 2 : r;          // dyed tips blend in along the shaft
+            float sg = s.tier == 2 ? tg : s.tier == 1 && tips >= 0 ? (g + tg) / 2 : g;
+            float sb = s.tier == 2 ? tb : s.tier == 1 && tips >= 0 ? (b + tb) / 2 : b;
             for (int f = 0; f < 6; f++) {
                 Vec3 axis = FACE_AXIS[f] == 0 ? s.side : FACE_AXIS[f] == 1 ? s.side2 : s.axis;
                 float nx = (float) axis.x * FACE_SIGN[f], ny = (float) axis.y * FACE_SIGN[f], nz = (float) axis.z * FACE_SIGN[f];
                 int[] q = FACES[f];
-                vertex(vc, m, n, corners[q[0]], u0, v0, r, g, b, light, overlay, nx, ny, nz);
-                vertex(vc, m, n, corners[q[1]], u1, v0, r, g, b, light, overlay, nx, ny, nz);
-                vertex(vc, m, n, corners[q[2]], u1, v1, r, g, b, light, overlay, nx, ny, nz);
-                vertex(vc, m, n, corners[q[3]], u0, v1, r, g, b, light, overlay, nx, ny, nz);
+                vertex(vc, m, n, corners[q[0]], u0, v0, sr, sg, sb, light, overlay, nx, ny, nz);
+                vertex(vc, m, n, corners[q[1]], u1, v0, sr, sg, sb, light, overlay, nx, ny, nz);
+                vertex(vc, m, n, corners[q[2]], u1, v1, sr, sg, sb, light, overlay, nx, ny, nz);
+                vertex(vc, m, n, corners[q[3]], u0, v1, sr, sg, sb, light, overlay, nx, ny, nz);
             }
         }
         pose.popPose();

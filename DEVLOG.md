@@ -498,3 +498,28 @@
 
 ### Verified
 - Screenshot of the new creator: every row fits; tooltips work.
+
+## 2026-10-05 — Session 3 (cont.): CX-8b Face parts and colours (v0.19.0)
+- **Faces (`appearance.FaceParts`):** six parts packed four bits each into one int:
+  - eyes: normal, wide, narrow, sharp, gentle, tired, closed, cat;
+  - brows: normal, thick, fierce, worried, joined, none;
+  - mouth: neutral, smile, grin, frown, smirk, shout;
+  - nose: shadow, none, dot, bridge;
+  - ears: round, pointed;
+  - extra: none, blush, freckles, whiskers, war paint, third eye, stubble, forehead gem.
+  - All zeros is the plain face the generated bodies always had.
+- **Art (`ArtGen.Faces`):** 40 skin-layout overlays touching only the head front. Irises and brows are white so they can be tinted; the soft parts are translucent so they sit on any skin tone. The outfit no longer paints a face.
+- **Rendering:**
+  - `FaceLayer` draws the parts over the generated body. Irises take the eye colour and glow in forms with eyes of their own; brows take the hair colour, so gold Super Saiyan brows come free; it follows the power-up flicker.
+  - `FormHairLayer` drops its old pupil boxes for drawn faces.
+  - Pointed ears reuse the 3D ear feature in skin tone.
+- **Colours:**
+  - The hair-tip highlight tints the strand tips and blends along the shaft (`HairMesh`); a form that recolours hair overrides it.
+  - Your own base-form aura colour overrides the race or lineage colour (`Aura.color`).
+- **Height:** now 80-125% (was 85-115%).
+- **UI (`FaceScreen`):** a close-up of your head (the model drawn large and clipped), arrows for each part, a Surprise-me button, and swatches for the hair tips and aura. Changes preview live; Cancel restores the old look. It opens from the Life screen and from character creation. `/dbz face <targets> <digits>`.
+- **Network:** `PublicStatePacket` gains `face` and `highlight`, and `FacePacket` saves the choice. Protocol 26.
+- **Tests (135):** `facesPackPersistAndColour` covers packing, sanitising, wrapping, saving, the public state and the aura override.
+
+### Verified
+- Close-up screenshots of seven face combinations, the Face screen layout (the hint text was removed after it overlapped the buttons), and pointed ears.

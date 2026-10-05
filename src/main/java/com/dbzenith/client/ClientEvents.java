@@ -56,7 +56,7 @@ public final class ClientEvents {
             if (mc.screen instanceof com.dbzenith.client.screen.StatScreen || mc.screen instanceof com.dbzenith.client.screen.FormScreen
                     || mc.screen instanceof com.dbzenith.client.screen.CharacterCreationScreen
                     || mc.screen instanceof com.dbzenith.client.screen.DeckScreen || mc.screen instanceof com.dbzenith.client.screen.QuestScreen
-                    || mc.screen instanceof com.dbzenith.client.screen.PlanetScreen || mc.screen instanceof com.dbzenith.client.screen.LifeScreen || mc.screen instanceof com.dbzenith.client.screen.RacialScreen) mc.setScreen(null);
+                    || mc.screen instanceof com.dbzenith.client.screen.PlanetScreen || mc.screen instanceof com.dbzenith.client.screen.LifeScreen || mc.screen instanceof com.dbzenith.client.screen.RacialScreen || mc.screen instanceof com.dbzenith.client.screen.FaceScreen) mc.setScreen(null);
             if (shot.startsWith("third_") || shot.startsWith("front_")) mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON);
         }
         if (DEV_SCREENSHOT_TICKS.contains(ticksInWorld)) {
@@ -98,6 +98,10 @@ public final class ClientEvents {
         }
         if (name.startsWith("pathchoice_") && !(mc.screen instanceof com.dbzenith.client.screen.PathChoiceScreen)) {
             mc.setScreen(new com.dbzenith.client.screen.PathChoiceScreen(null));
+            delayTicks = Math.max(delayTicks, 6);
+        }
+        if (name.startsWith("face_") && !(mc.screen instanceof com.dbzenith.client.screen.FaceScreen)) {
+            mc.setScreen(new com.dbzenith.client.screen.FaceScreen(null));
             delayTicks = Math.max(delayTicks, 6);
         }
         if (name.startsWith("universal_") && !(mc.screen instanceof com.dbzenith.client.screen.RacialScreen)) {

@@ -22,9 +22,135 @@ public class ArtGen {
         Creatures.all();
         Gui.all();
         Fx.all();
+        Faces.all();
         System.out.println("ArtGen done");
     }
 
+
+    // ================================================================== faces
+
+    /**
+     * Face parts for the generated bodies (appearance.FaceParts): 64x64 skin-layout overlays touching only the head's
+     * front (8x8 at u 8, v 8). Face rows: brows 2-3, eyes 4-5, nose 5, mouth 6-7. Irises and brows are white here and
+     * tinted when drawn (eye colour, hair colour); everything else carries its own colour, the soft parts translucent so
+     * they sit on any skin tone.
+     */
+    static final class Faces {
+        static final int WHITE = 0xFFF4F4F4, LASH = 0xFF1A1414, TINT = 0xFFFFFFFF;
+
+        static void all() throws IOException {
+            eyes();
+            irises();
+            brows();
+            mouths();
+            noses();
+            extras();
+        }
+
+        static Canvas face() {
+            return new Canvas(64, 64);
+        }
+
+        static void px(Canvas c, int x, int y, int color) {
+            c.set(8 + x, 8 + y, color);
+        }
+
+        static void eyes() throws IOException {
+            for (int i = 0; i < 8; i++) {
+                Canvas c = face();
+                switch (i) {
+                    case 0 -> { px(c, 1, 4, WHITE); px(c, 6, 4, WHITE); }                                   // normal
+                    case 1 -> { px(c, 1, 4, WHITE); px(c, 6, 4, WHITE); px(c, 1, 5, WHITE); px(c, 6, 5, WHITE); }   // wide
+                    case 2 -> { px(c, 1, 4, LASH); px(c, 6, 4, LASH); }                                     // narrow
+                    case 3 -> { px(c, 1, 4, WHITE); px(c, 6, 4, WHITE); px(c, 0, 4, LASH); px(c, 7, 4, LASH); } // sharp
+                    case 4 -> { px(c, 1, 4, WHITE); px(c, 6, 4, WHITE);                                    // gentle
+                        for (int x : new int[]{1, 2, 5, 6}) px(c, x, 5, 0x40FFFFFF); }
+                    case 5 -> { px(c, 1, 4, WHITE); px(c, 6, 4, WHITE);                                    // tired
+                        for (int x : new int[]{1, 2, 5, 6}) px(c, x, 5, 0x58402030); }
+                    case 6 -> { for (int x : new int[]{1, 2, 5, 6}) px(c, x, 4, LASH); }                  // closed
+                    default -> { px(c, 2, 4, LASH); px(c, 5, 4, LASH); }                                    // cat: slit pupils
+                }
+                c.save("entity/face/eyes_" + i + ".png");
+            }
+        }
+
+        /** Where each eye shape keeps its irises (tinted with the eye colour; forms make them glow). */
+        static void irises() throws IOException {
+            for (int i = 0; i < 8; i++) {
+                Canvas c = face();
+                switch (i) {
+                    case 1 -> { px(c, 2, 4, TINT); px(c, 5, 4, TINT); px(c, 2, 5, TINT); px(c, 5, 5, TINT); }
+                    case 6 -> { }
+                    case 7 -> { px(c, 1, 4, TINT); px(c, 6, 4, TINT); }
+                    default -> { px(c, 2, 4, TINT); px(c, 5, 4, TINT); }
+                }
+                c.save("entity/face/iris_" + i + ".png");
+            }
+        }
+
+        static void brows() throws IOException {
+            int[][][] shapes = {
+                    {{1, 3}, {2, 3}, {5, 3}, {6, 3}},                                                      // normal
+                    {{1, 3}, {2, 3}, {5, 3}, {6, 3}, {1, 2}, {2, 2}, {5, 2}, {6, 2}, {0, 3}, {7, 3}},      // thick
+                    {{1, 2}, {2, 3}, {5, 3}, {6, 2}},                                                      // angry
+                    {{1, 3}, {2, 2}, {5, 2}, {6, 3}},                                                      // worried
+                    {{1, 3}, {2, 3}, {3, 3}, {4, 3}, {5, 3}, {6, 3}},                                      // joined
+                    {}};                                                                                    // none
+            for (int i = 0; i < shapes.length; i++) {
+                Canvas c = face();
+                for (int[] p : shapes[i]) px(c, p[0], p[1], TINT);
+                c.save("entity/face/brows_" + i + ".png");
+            }
+        }
+
+        static void mouths() throws IOException {
+            int lip = 0xFF7A3E30, deep = 0xFF4A1414, teeth = 0xFFF2F0E8;
+            for (int i = 0; i < 6; i++) {
+                Canvas c = face();
+                switch (i) {
+                    case 0 -> { px(c, 3, 6, lip); px(c, 4, 6, lip); }                                      // neutral
+                    case 1 -> { px(c, 2, 6, lip); px(c, 3, 7, lip); px(c, 4, 7, lip); px(c, 5, 6, lip); }    // smile
+                    case 2 -> { px(c, 2, 6, deep); px(c, 3, 6, teeth); px(c, 4, 6, teeth); px(c, 5, 6, deep);  // grin
+                        px(c, 3, 7, deep); px(c, 4, 7, deep); }
+                    case 3 -> { px(c, 2, 7, lip); px(c, 3, 6, lip); px(c, 4, 6, lip); px(c, 5, 7, lip); }    // frown
+                    case 4 -> { px(c, 2, 6, lip); px(c, 3, 6, lip); px(c, 4, 6, lip); px(c, 5, 5, lip); }    // smirk
+                    default -> { px(c, 3, 6, deep); px(c, 4, 6, deep); px(c, 3, 7, deep); px(c, 4, 7, deep); } // shout
+                }
+                c.save("entity/face/mouth_" + i + ".png");
+            }
+        }
+
+        static void noses() throws IOException {
+            for (int i = 0; i < 4; i++) {
+                Canvas c = face();
+                switch (i) {
+                    case 0 -> { px(c, 3, 5, 0x38000000); px(c, 4, 5, 0x38000000); }                       // shadow
+                    case 1 -> { }                                                                            // none
+                    case 2 -> px(c, 4, 5, 0x60000000);                                                       // dot
+                    default -> { px(c, 3, 4, 0x38FFFFFF); px(c, 3, 5, 0x48000000); px(c, 4, 5, 0x28000000); } // bridge
+                }
+                c.save("entity/face/nose_" + i + ".png");
+            }
+        }
+
+        static void extras() throws IOException {
+            for (int i = 0; i < 8; i++) {
+                Canvas c = face();
+                switch (i) {
+                    case 1 -> { px(c, 1, 5, 0x70FF6080); px(c, 6, 5, 0x70FF6080); px(c, 0, 5, 0x40FF6080); px(c, 7, 5, 0x40FF6080); }  // blush
+                    case 2 -> { px(c, 1, 5, 0x90804A28); px(c, 2, 6, 0x90804A28); px(c, 5, 6, 0x90804A28); px(c, 6, 5, 0x90804A28); }  // freckles
+                    case 3 -> { for (int y : new int[]{5, 6}) { px(c, 0, y, 0xC0201818); px(c, 7, y, 0xC0201818); }                    // whiskers
+                        px(c, 1, 6, 0x80201818); px(c, 6, 6, 0x80201818); }
+                    case 4 -> { for (int y : new int[]{5, 6}) { px(c, 1, y, 0xFFC02020); px(c, 6, y, 0xFFC02020); } }                  // war paint
+                    case 5 -> { px(c, 3, 1, WHITE); px(c, 4, 1, 0xFFC01830); px(c, 3, 0, LASH); px(c, 4, 0, LASH); }                  // third eye
+                    case 6 -> { for (int x = 1; x <= 6; x++) { if (x != 3 && x != 4) px(c, x, 6, 0x40201010); px(c, x, 7, 0x40201010); } } // stubble
+                    case 7 -> { px(c, 3, 1, 0xFFE03050); px(c, 4, 1, 0xFFE03050); px(c, 3, 0, 0xFFFF80A0); px(c, 4, 2, 0xFFA01030); } // forehead gem
+                    default -> { }
+                }
+                c.save("entity/face/extra_" + i + ".png");
+            }
+        }
+    }
     // ================================================================== colour helpers
 
     /** A shading ramp built from one base colour: index 0 darkest ... n-1 lightest, hue-shifted. */
@@ -1162,14 +1288,7 @@ public class ArtGen {
         static void outfit() throws IOException {
             int[] pants = ramp(0xFF26346E, 5), boots = ramp(0xFF7A4424, 4), band = ramp(0xFF26346E, 4);
             Skin s = new Skin();
-            s.head = (f, x, y, w, h) -> {
-                if (f != Face.FRONT) return 0;
-                if (y == 3 && (x == 1 || x == 2 || x == 5 || x == 6)) return 0xFF3A2414;    // brows
-                if (y == 4 && (x == 1 || x == 6)) return 0xFFF2F2F2;                         // eye whites
-                if (y == 4 && (x == 2 || x == 5)) return 0xFF1E1610;                         // irises (form eyes draw over)
-                if (y == 6 && (x == 3 || x == 4)) return 0xFF7A3E30;                         // mouth
-                return 0;
-            };
+            s.head = (f, x, y, w, h) -> 0;                                                  // the face is drawn by parts (Faces)
             s.body = (f, x, y, w, h) -> y == 10 ? 0xFF121A36 : y == 11 ? pants[f == Face.FRONT ? 3 : 2] : 0;
             s.arm = (f, x, y, w, h) -> f != Face.TOP && f != Face.BOTTOM && (y == 9 || y == 10) ? band[f == Face.FRONT ? 3 : y == 9 ? 2 : 1] : 0;
             s.leg = (f, x, y, w, h) -> {

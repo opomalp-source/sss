@@ -217,6 +217,19 @@ public final class DBZCommand {
                                                     double v = DoubleArgumentType.getDouble(ctx, "value");
                                                     return apply(ctx, "Set " + id + " mastery " + v + " for", d -> d.setMastery(id, v));
                                                 })))))
+                .then(Commands.literal("face")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("parts", StringArgumentType.word())   // one digit a part: eyes brows mouth nose ears extra
+                                        .executes(ctx -> {
+                                            String parts = StringArgumentType.getString(ctx, "parts");
+                                            int face = 0;
+                                            com.dbzenith.appearance.FaceParts.Part[] all = com.dbzenith.appearance.FaceParts.Part.values();
+                                            for (int i = 0; i < Math.min(all.length, parts.length()); i++) {
+                                                face = com.dbzenith.appearance.FaceParts.with(face, all[i], Character.digit(parts.charAt(i), 10));
+                                            }
+                                            int f = face;
+                                            return apply(ctx, "Set face " + parts + " for", d -> d.setFace(f));
+                                        }))))
                 .then(Commands.literal("move")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("move", StringArgumentType.word())

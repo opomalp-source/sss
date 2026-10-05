@@ -20,6 +20,7 @@ public final class Aura {
         }
         if (data.isTransforming()) return Forms.byId(data.getTransformTarget()).auraColor();   // the new power showing through
         if (!data.isTransformed()) {
+            if (data.getAuraColor() >= 0) return data.getAuraColor();                       // chosen in the Face screen
             int variant = data.getVariant().auraColor();
             return variant >= 0 ? variant : com.dbzenith.race.Races.of(data.getRace()).auraColor();
         }

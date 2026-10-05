@@ -93,10 +93,11 @@ public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
             pose.pushPose();
             getParentModel().head.translateAndRotate(pose);
             HairWind.State wind = HairWind.of(player, getParentModel().head, state, formHair, partialTick);
-            HairMesh.render(pose, vc, HairMesh.of(code), wind, hairLight, OverlayTexture.NO_OVERLAY, r, g, b);
+            int tips = (form.isBase() || form.hairColor() < 0) ? state.highlight() : -1;   // dyed tips, until a form recolours the hair
+            HairMesh.render(pose, vc, HairMesh.of(code), wind, hairLight, OverlayTexture.NO_OVERLAY, r, g, b, tips);
             pose.popPose();
         }
-        if (eyeColor >= 0) {
+        if (eyeColor >= 0 && !FaceLayer.active(state)) {                         // drawn faces bring their own irises
             int c = eyeColor;
             model.copyHead(getParentModel().head);
             model.renderEyes(pose, vc, form.isBase() ? light : LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY,

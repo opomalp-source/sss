@@ -50,6 +50,8 @@ public class LifeScreen extends Screen {
                 minecraft.setScreen(new HairEditorScreen(this, d.getHairCode(), d.getHairColor(), (code, color) ->
                         ModNetwork.sendToServer(new com.dbzenith.network.AppearancePacket(code, color, d.getEyeColor(), skinTone)))))
                 .bounds(left + 144, top + H - 48, 84, 18).build());
+        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.face_button"), b -> minecraft.setScreen(new FaceScreen(this)))
+                .bounds(left + 144, top + H - 26, 84, 18).build());
         if (com.dbzenith.client.render.RaceSkinLayer.texture(d.getRace(), d.getVariant()) != null) {
             addRenderableWidget(ThemedButton.of(raceLookLabel(), b -> {
                 raceLook = !raceLook;
@@ -90,7 +92,7 @@ public class LifeScreen extends Screen {
         if (s != null) { // preview at once; the server's public state confirms it
             ClientPublicStates.put(new PublicStatePacket(s.entityId(), s.flags(), s.release(), s.auraColor(), s.form(), s.overdrive(),
                     s.race(), s.bodyType(), s.hairStyle(), s.hairColor(), s.eyeColor(), s.battlePower(),
-                    scar | tattoo << 4 | (raceLook ? PublicStatePacket.RACE_LOOK : 0), s.hairCode(), s.skinTone(), s.height(), s.variant(), s.transformTarget()));
+                    scar | tattoo << 4 | (raceLook ? PublicStatePacket.RACE_LOOK : 0), s.hairCode(), s.skinTone(), s.height(), s.variant(), s.transformTarget(), s.face(), s.highlight()));
         }
     }
 

@@ -40,6 +40,10 @@ public class RaceFeatureLayer extends RenderLayer<AbstractClientPlayer, PlayerMo
         if (state == null) return;
         com.dbzenith.race.Variant variant = state.variantEnum();
         RaceTraits.Feature feature = variant.feature() != null ? variant.feature() : Races.of(state.raceEnum()).feature();
+        if (feature == RaceTraits.Feature.NONE && state.skinTone() >= 0
+                && com.dbzenith.appearance.FaceParts.get(state.face(), com.dbzenith.appearance.FaceParts.Part.EARS) == com.dbzenith.appearance.FaceParts.EARS_POINTED) {
+            feature = RaceTraits.Feature.EARS;                                     // chosen in the Face screen
+        }
         boolean tail = state.has(PublicStatePacket.TAIL);
         if (feature == RaceTraits.Feature.NONE && !tail) return;
 

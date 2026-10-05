@@ -87,6 +87,35 @@ public final class AppearanceTests {
     }
 
     @GameTest(template = EMPTY)
+    public static void facesPackPersistAndColour(GameTestHelper helper) {
+        int face = 0;
+        for (com.dbzenith.appearance.FaceParts.Part p : com.dbzenith.appearance.FaceParts.Part.values()) {
+            face = com.dbzenith.appearance.FaceParts.with(face, p, p.options - 1);
+        }
+        for (com.dbzenith.appearance.FaceParts.Part p : com.dbzenith.appearance.FaceParts.Part.values()) {
+            helper.assertTrue(com.dbzenith.appearance.FaceParts.get(face, p) == p.options - 1, p + " packs");
+        }
+        helper.assertTrue(com.dbzenith.appearance.FaceParts.get(com.dbzenith.appearance.FaceParts.sanitize(0xFFFFFFFF),
+                com.dbzenith.appearance.FaceParts.Part.EARS) == 0, "garbage from the wire falls back to the default");
+        helper.assertTrue(com.dbzenith.appearance.FaceParts.with(0, com.dbzenith.appearance.FaceParts.Part.MOUTH, -1)
+                == com.dbzenith.appearance.FaceParts.with(0, com.dbzenith.appearance.FaceParts.Part.MOUTH, 5), "cycling wraps");
+        PlayerData d = new PlayerData();
+        d.initDefaultsIfNeeded();
+        int raceAura = com.dbzenith.ki.Aura.color(d);
+        d.setFace(face);
+        d.setHighlightColor(0xFF4040);
+        d.setAuraColor(0x40D0A0);
+        helper.assertTrue(com.dbzenith.ki.Aura.color(d) == 0x40D0A0 && raceAura != 0x40D0A0, "your own aura colour in base form");
+        PlayerData copy = new PlayerData();
+        copy.load(d.save());
+        helper.assertTrue(copy.getFace() == face && copy.getHighlightColor() == 0xFF4040 && copy.getAuraColor() == 0x40D0A0, "the face is saved");
+        helper.assertTrue(com.dbzenith.network.PublicStatePacket.of(1, copy).face() == face, "and shown to everyone");
+        d.setAuraColor(-1);
+        helper.assertTrue(com.dbzenith.ki.Aura.color(d) == raceAura, "or the race colour again");
+        helper.succeed();
+    }
+
+    @GameTest(template = EMPTY)
     public static void heightScalesTheHitbox(GameTestHelper helper) {
         ServerPlayer player = TestPlayers.create(helper);
         PlayerData d = ModCapabilities.getOrThrow(player);
