@@ -19,12 +19,13 @@ public class ArtGen {
         Blocks.all();
         Armor.all();
         Skins.all();
-        FormLooks.all();
         Creatures.all();
         Gui.all();
         Fx.all();
         Faces.all();
         Hd.all();
+        HdRaces.all();
+        FormLooks.all();
         System.out.println("ArtGen done");
     }
 
@@ -68,7 +69,13 @@ public class ArtGen {
         }
 
         static void recolor(String from, String to, Pick pick, Shift shift) throws IOException {
-            java.awt.image.BufferedImage src = javax.imageio.ImageIO.read(new File(RES + "entity/race/" + from + ".png"));
+            for (String folder : new String[]{"race", "race_hd"}) recolor(folder, from, to, pick, shift);
+        }
+
+        static void recolor(String folder, String from, String to, Pick pick, Shift shift) throws IOException {
+            File in = new File(RES + "entity/" + folder + "/" + from + ".png");
+            if (!in.exists()) return;
+            java.awt.image.BufferedImage src = javax.imageio.ImageIO.read(in);
             Canvas c = new Canvas(src.getWidth(), src.getHeight());
             float[] hsb = new float[3];
             for (int y = 0; y < src.getHeight(); y++) for (int x = 0; x < src.getWidth(); x++) {
@@ -81,7 +88,7 @@ public class ArtGen {
                 }
                 c.set(x, y, argb);
             }
-            c.save("entity/race/" + to + ".png");
+            c.save("entity/" + folder + "/" + to + ".png");
         }
 
         /** Fur over the torso, upper arms and shoulders (skin layout, base layer: outer layers may be hidden), leaving the chest and the hands bare. */
@@ -188,8 +195,12 @@ public class ArtGen {
         // ---------------------------------------------------------- bodies (greyscale, tinted by skin tone at render)
 
         static void body(String name, double k) throws IOException {
+            anatomy(k, name.hashCode()).save("entity/body_hd/" + name + ".png");
+        }
+
+        /** Greyscale anatomy (luminance about 0.6-1.1) for a definition {@code k}; race skins colour it through a ramp. */
+        static HdSkin anatomy(double k, int seed) {
             HdSkin s = new HdSkin();
-            int seed = name.hashCode();
             s.head = (f, x, y, w, h) -> {
                 double u = uOf(x, w), v = vOf(y, h), l = Skins.faceLight(f);
                 if (f == Face.FRONT) {
@@ -258,7 +269,7 @@ public class ArtGen {
                 l += edgeAo(u, v, 0.06) + 0.02 * (smooth(x, y, 3, seed + 3) - 0.5);
                 return lum(l);
             };
-            s.save("entity/body_hd/" + name + ".png");
+            return s;
         }
 
         // ---------------------------------------------------------- the outfit (untinted)
@@ -417,6 +428,377 @@ public class ArtGen {
 
         static void px(Canvas c, int x, int y, int color) {
             if (x >= 0 && x < 16 && y >= 0 && y < 16) c.set(16 + x, 16 + y, color);
+        }
+    }
+
+    // ================================================================== HD race skins (CX-13b)
+
+    /**
+     * Every race skin at 128x128, built from a small material kit on top of the HD anatomy: skin shaded through the
+     * race's colour ramp, cloth with folds and seams, glossy bevelled shell plates, spots, stripes, cracks and ribbing.
+     * Faces are left plain (FaceLayer draws them); the designs follow the classic skins with far more detail.
+     */
+    static final class HdRaces {
+        static void all() throws IOException {
+            namekian("namekian", 0xFF62B444, 0xFFE09A9A, 0xFF6A3A9A, 0xFF40B0E0, 0xFFE8E4F0, 0xFF5A3418, 1.0);
+            namekian("demon_namekian", 0xFF3A8A6A, 0xFFB070A0, 0xFF1A1420, 0xFFC01830, 0xFF3A2A44, 0xFF2A1A10, 1.1);
+            frostDemon("frost_demon", 0xFFF0EEF4, 0xFF8A4AC8, false);
+            frostDemon("metal_frost_demon", 0xFFD8E2EC, 0xFF6A7A90, true);
+            frostDemon("mutant_frost_demon", 0xFF2A2230, 0xFFE84AB0, false);
+            majin("majin", 0xFFF59AC0, 0xFF2A2234, 0xFFF2F0F4, 0xFFE8C040, 0.35, false);
+            majin("corrupted_majin", 0xFF9A90A8, 0xFF3A1A4A, 0xFF4A4458, 0xFFB070FF, 0.8, true);
+            vampire();
+            bioAndroid();
+            tuffle();
+            genAlien();
+            kai();
+            coreDemon();
+        }
+
+        // ---------------------------------------------------------- the material kit
+
+        static double u(int x, int w) { return (x + 0.5) / w; }
+        static double v(int y, int h) { return (y + 0.5) / h; }
+
+        /** A ramp colour for a luminance (about 0.6 dark to 1.08 bright), smoothly interpolated. */
+        static int tone(int[] r, double l) {
+            double t = Math.max(0, Math.min(1, (l - 0.6) / 0.48)) * (r.length - 1);
+            int i = (int) Math.floor(t);
+            return i >= r.length - 1 ? r[r.length - 1] : mix(r[i], r[i + 1], t - i);
+        }
+
+        static double lumOf(FaceFn fn, Face f, int x, int y, int w, int h) {
+            return (fn.at(f, x, y, w, h) & 255) / 255.0;
+        }
+
+        /** Cloth: face light, long soft folds, fine weave noise, darker at the creases. */
+        static int cloth(int[] r, Face f, int x, int y, int w, int h, int seed, double folds) {
+            double uu = u(x, w), vv = v(y, h);
+            double l = Skins.faceLight(f) + folds * 0.035 * Math.sin(uu * 7 + Hd.smooth(x, y, 6, seed) * 5)
+                    + 0.05 * (Hd.smooth(x, y, 2.2, seed + 1) - 0.5) + Hd.edgeAo(uu, vv, 0.07);
+            return tone(r, l);
+        }
+
+        /** A shell plate between (u0,v0) and (u1,v1): bevelled (bright top edge, dark lower edge) with a gloss spot. */
+        static int plate(int[] r, Face f, double uu, double vv, double u0, double v0, double u1, double v1) {
+            double top = (vv - v0) / (v1 - v0), side = Math.min(uu - u0, u1 - uu) / (u1 - u0);
+            double l = Skins.faceLight(f) + 0.04;
+            if (top < 0.08) l += 0.12;
+            else if (top > 0.9) l -= 0.14;
+            if (side < 0.05) l -= 0.06;
+            l += 0.18 * Hd.g(uu, vv, u0 + 0.3 * (u1 - u0), v0 + 0.25 * (v1 - v0), 0.1 * (u1 - u0) + 0.02, 0.08 * (v1 - v0) + 0.02);
+            return tone(r, l);
+        }
+
+        static boolean in(double uu, double vv, double u0, double v0, double u1, double v1) {
+            return uu >= u0 && uu <= u1 && vv >= v0 && vv <= v1;
+        }
+
+        static int skin(int[] r, FaceFn anat, Face f, int x, int y, int w, int h) {
+            return tone(r, lumOf(anat, f, x, y, w, h));
+        }
+
+        // ---------------------------------------------------------- races
+
+        static void namekian(String name, int skinC, int pinkC, int giC, int sashC, int pantsC, int shoeC, double k) throws IOException {
+            int[] sk = ramp(skinC, 6), pink = ramp(pinkC, 4), gi = ramp(giC, 6), sash = ramp(sashC, 4), pants = ramp(pantsC, 5), shoe = ramp(shoeC, 4);
+            Hd.HdSkin a = Hd.anatomy(k, name.hashCode()), s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                double l = lumOf(a.head, f, x, y, w, h), uu = u(x, w), vv = v(y, h);
+                if (f == Face.TOP) l -= 0.1 * Math.exp(-Math.pow(((vv * 4) % 1) - 0.5, 2) / 0.012);     // the ridged crown
+                if ((f == Face.RIGHT || f == Face.LEFT) && in(uu, vv, 0.25, 0.25, 0.55, 0.6)) l -= 0.06;   // ear hollows
+                return tone(sk, l);
+            };
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (vv > 0.86) return cloth(pants, f, x, y, w, h, 31, 1.2);
+                if (vv > 0.73) {                                                                          // the sash and its knot
+                    int c = cloth(sash, f, x, y, w, h, 32, 0.6);
+                    return f == Face.FRONT && Math.abs(uu - 0.5) < 0.09 ? tone(sash, Skins.faceLight(f) + 0.1 - 0.15 * Math.abs(uu - 0.5) / 0.09) : c;
+                }
+                if (f == Face.FRONT) {
+                    double neck = Math.abs(uu - 0.5) - (0.3 - vv) * 0.85;                                  // the V of the gi
+                    if (neck < 0) return skin(sk, a.body, f, x, y, w, h);
+                    if (neck < 0.03) return gi[1];
+                }
+                return cloth(gi, f, x, y, w, h, 33, 1.0);
+            };
+            s.arm = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (vv < 0.3) return vv > 0.27 ? gi[1] : cloth(gi, f, x, y, w, h, 34, 0.8);
+                if ((f == Face.FRONT || f == Face.RIGHT) && vv > 0.42 && vv < 0.64) {                   // pink muscle bands, striated
+                    double l = lumOf(a.arm, f, x, y, w, h) + 0.07 * Math.sin(vv * 90 + uu * 3);
+                    return tone(pink, l);
+                }
+                return skin(sk, a.arm, f, x, y, w, h);
+            };
+            s.leg = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (vv > 0.84 || f == Face.BOTTOM) return tone(shoe, Skins.faceLight(f) + (f == Face.FRONT ? 0.15 * Hd.g(uu, vv, 0.5, 0.95, 0.3, 0.05) : 0));
+                return cloth(pants, f, x, y, w, h, 35, 1.3);
+            };
+            s.save("entity/race_hd/" + name + ".png");
+        }
+
+        static void frostDemon(String name, int skinC, int shellC, boolean metal) throws IOException {
+            int[] sk = ramp(skinC, 6), shell = ramp(shellC, 6);
+            Hd.HdSkin a = Hd.anatomy(0.8, name.hashCode()), s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.TOP) return plate(shell, f, uu, vv, 0, 0, 1, 1);
+                if (f == Face.FRONT) {
+                    if (vv < 0.18) return plate(shell, f, uu, vv, 0, 0, 1, 0.18);                      // the dome
+                    if ((uu < 0.1 || uu > 0.9) && vv > 0.3 && vv < 0.52) return plate(shell, f, uu, vv, uu < 0.1 ? 0 : 0.9, 0.3, uu < 0.1 ? 0.1 : 1, 0.52);
+                } else if (f != Face.BOTTOM) {
+                    double edge = f == Face.BACK ? 0.48 : 0.22;
+                    if (vv < edge) return plate(shell, f, uu, vv, 0, 0, 1, edge);
+                }
+                return skin(sk, a.head, f, x, y, w, h);
+            };
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.FRONT && in(uu, vv, 0.08, 0.05, 0.92, 0.58)) {
+                    if (Math.abs(uu - 0.5) < 0.012) return shell[0];                                  // the seam down the chest
+                    return plate(shell, f, uu, vv, uu < 0.5 ? 0.08 : 0.5, 0.05, uu < 0.5 ? 0.5 : 0.92, 0.58);
+                }
+                if (f == Face.BACK && in(uu, vv, 0.06, 0.05, 0.94, 0.4)) return plate(shell, f, uu, vv, 0.06, 0.05, 0.94, 0.4);
+                return skin(sk, a.body, f, x, y, w, h);
+            };
+            s.arm = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.TOP || vv < 0.26) return plate(shell, f, uu, vv, 0, 0, 1, 0.26);
+                if (vv > 0.52 && vv < 0.8 && f != Face.BOTTOM) return plate(shell, f, uu, vv, 0, 0.52, 1, 0.8);
+                return skin(sk, a.arm, f, x, y, w, h);
+            };
+            s.leg = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (vv > 0.42 && vv < 0.8 && f != Face.BOTTOM && f != Face.TOP) return plate(shell, f, uu, vv, 0, 0.42, 1, 0.8);
+                int c = skin(sk, a.leg, f, x, y, w, h);
+                return metal && ((int) (vv * h)) % 6 == 0 ? darker(c, 0.92) : c;                     // a metal body shows its panel lines
+            };
+            s.save("entity/race_hd/" + name + ".png");
+        }
+
+        static void majin(String name, int skinC, int vestC, int pantsC, int beltC, double k, boolean corrupted) throws IOException {
+            int[] sk = ramp(skinC, 6), vest = ramp(vestC, 5), pants = ramp(pantsC, 5), belt = ramp(beltC, 4);
+            Hd.HdSkin a = Hd.anatomy(k, name.hashCode()), s = new Hd.HdSkin();
+            FaceFn cracks = (f, x, y, w, h) -> corrupted && Math.abs(Hd.smooth(x, y, 6, name.hashCode() + f.ordinal()) - 0.5) < 0.018 ? 1 : 0;
+            s.head = (f, x, y, w, h) -> {
+                double l = lumOf(a.head, f, x, y, w, h);
+                if (f == Face.TOP) l += 0.05 * Hd.g(u(x, w), v(y, h), 0.5, 0.5, 0.3, 0.3);
+                if (cracks.at(f, x, y, w, h) == 1 && f != Face.FRONT) l -= 0.25;
+                return tone(sk, l);
+            };
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (vv > 0.78) return cloth(pants, f, x, y, w, h, 41, 1.6);
+                if (vv > 0.7) return f == Face.FRONT && Math.abs(uu - 0.5) < 0.09 ? tone(belt, 1.05) : tone(belt, Skins.faceLight(f) + (vv < 0.73 ? 0.08 : 0));
+                if (f == Face.FRONT && Math.abs(uu - 0.5) < 0.28) {                                    // the open vest shows the belly
+                    double l = lumOf(a.body, f, x, y, w, h) + 0.07 * Hd.g(uu, vv, 0.5, 0.5, 0.25, 0.2);
+                    if (cracks.at(f, x, y, w, h) == 1) l -= 0.25;
+                    return tone(sk, l);
+                }
+                if (f == Face.FRONT && Math.abs(uu - 0.5) < 0.31) return corrupted ? vest[0] : belt[2];  // the vest's edge
+                if (corrupted && vv > 0.6 && Hd.smooth(x, y, 2, 77) > 0.6) return 0;                    // torn
+                return cloth(vest, f, x, y, w, h, 42, 0.8);
+            };
+            s.arm = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (vv > 0.72) return vv < 0.76 ? tone(corrupted ? vest : pants, 0.75) : cloth(corrupted ? vest : pants, f, x, y, w, h, 43, 0.5);
+                int c = skin(sk, a.arm, f, x, y, w, h);
+                return cracks.at(f, x, y, w, h) == 1 ? darker(c, 0.7) : c;
+            };
+            s.leg = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (vv > 0.74 || f == Face.BOTTOM) return tone(belt, Skins.faceLight(f) + (vv < 0.78 ? 0.1 : 0) + 0.12 * Hd.g(uu, vv, 0.4, 0.86, 0.15, 0.05));
+                return cloth(pants, f, x, y, w, h, 44, 1.8);
+            };
+            s.save("entity/race_hd/" + name + ".png");
+        }
+
+        static void vampire() throws IOException {
+            int[] sk = ramp(0xFFE6E0EA, 6), coat = ramp(0xFF1A1420, 6), lining = ramp(0xFFA01028, 5), vest = ramp(0xFF5A1020, 5),
+                    hair = ramp(0xFF1C1418, 5), boot = ramp(0xFF2A1A16, 4), trousers = ramp(0xFF24202A, 5), gold = ramp(0xFFE8C040, 3);
+            Hd.HdSkin a = Hd.anatomy(0.6, 61), s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                boolean hairHere = f == Face.TOP || (f != Face.FRONT && f != Face.BOTTOM && vv < (f == Face.BACK ? 0.45 : 0.22))
+                        || (f == Face.FRONT && vv < 0.1 + Math.max(0, 0.12 - Math.abs(uu - 0.5)) * 1.2);   // a widow's peak
+                if (hairHere) return tone(hair, Skins.faceLight(f) + 0.12 * Math.sin(uu * 30 + vv * 6) * 0.5);   // slicked, with a sheen
+                return skin(sk, a.head, f, x, y, w, h);
+            };
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.FRONT) {
+                    double d = Math.abs(uu - 0.5);
+                    if (d < 0.12 && vv < 0.18) return tone(ramp(0xFFF2F0F4, 4), 0.95 + 0.08 * Math.sin(vv * 40));   // the cravat
+                    if (d < 0.2 && vv < 0.62) {                                                                 // the waistcoat and its buttons
+                        if (d < 0.02 && (Math.abs(vv - 0.3) < 0.02 || Math.abs(vv - 0.42) < 0.02 || Math.abs(vv - 0.54) < 0.02)) return gold[2];
+                        return cloth(vest, f, x, y, w, h, 51, 0.5);
+                    }
+                    if (d < 0.26 && vv < 0.95) return cloth(lining, f, x, y, w, h, 52, 0.4);
+                }
+                if (f == Face.BACK && vv < 0.1) return lining[2];
+                return cloth(coat, f, x, y, w, h, 53, 1.0);
+            };
+            s.arm = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (vv > 0.88) return skin(sk, a.arm, f, x, y, w, h);
+                if (vv > 0.82) return lining[2];
+                return cloth(coat, f, x, y, w, h, 54, 0.9);
+            };
+            s.leg = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (vv > 0.76 || f == Face.BOTTOM) return tone(boot, Skins.faceLight(f) + 0.14 * Hd.g(uu, vv, 0.35, 0.82, 0.12, 0.05));
+                return cloth(trousers, f, x, y, w, h, 55, 1.1);
+            };
+            s.save("entity/race_hd/vampire.png");
+        }
+
+        static void bioAndroid() throws IOException {
+            int[] shell = ramp(0xFF5AB04A, 6), joint = ramp(0xFF20242A, 5), mask = ramp(0xFFE8E4D8, 5), spot = ramp(0xFF1E3A1A, 4);
+            Hd.HdSkin a = Hd.anatomy(1.1, 71), s = new Hd.HdSkin();
+            FaceFn spotted = (f, x, y, w, h) -> {
+                double sp = Hd.smooth(x * 1.0, y * 1.0, 3.2, 71 + f.ordinal() * 13);
+                double l = 0;
+                if (sp > 0.7) return tone(spot, 0.8 + (sp - 0.7) * 0.6);
+                if (sp > 0.66) l -= 0.08;                                                              // a soft rim around each spot
+                return tone(shell, l + Skins.faceLight(f) + 0.04);
+            };
+            s.head = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.FRONT && vv > 0.22) {
+                    if ((uu < 0.12 || uu > 0.88) && vv > 0.55) return tone(ramp(0xFF7A3A9A, 4), 0.8 + 0.1 * Math.sin(vv * 40));   // cheek grooves
+                    return skin(mask, a.head, f, x, y, w, h);
+                }
+                if (f == Face.TOP && Math.abs(uu - 0.5) < 0.1) return tone(shell, 0.75 + 0.1 * Math.sin(vv * 30));          // the crest
+                return spotted.at(f, x, y, w, h);
+            };
+            FaceFn ribbed = (f, x, y, w, h) -> tone(joint, Skins.faceLight(f) - 0.05 + 0.08 * Math.sin(v(y, h) * 70));
+            s.body = (f, x, y, w, h) -> f == Face.FRONT && Math.abs(u(x, w) - 0.5) < 0.25 && v(y, h) > 0.5 ? ribbed.at(f, x, y, w, h) : spotted.at(f, x, y, w, h);
+            s.arm = (f, x, y, w, h) -> v(y, h) > 0.33 && v(y, h) < 0.6 ? ribbed.at(f, x, y, w, h) : spotted.at(f, x, y, w, h);
+            s.leg = (f, x, y, w, h) -> v(y, h) > 0.33 && v(y, h) < 0.7 ? ribbed.at(f, x, y, w, h) : spotted.at(f, x, y, w, h);
+            s.save("entity/race_hd/bio_android.png");
+        }
+
+        static void tuffle() throws IOException {
+            int[] sk = ramp(0xFFEDE0D6, 6), suit = ramp(0xFFE8ECF2, 6), trim = ramp(0xFF3A6AB0, 5), hair = ramp(0xFFC8CCD8, 5);
+            Hd.HdSkin a = Hd.anatomy(0.5, 81), s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                boolean hairHere = f == Face.TOP || (f != Face.FRONT && f != Face.BOTTOM && vv < 0.32)
+                        || (f == Face.FRONT && vv < 0.12 + 0.05 * Math.abs(Math.sin(uu * 18)));            // a jagged fringe
+                if (hairHere) return tone(hair, Skins.faceLight(f) + 0.08 * Math.sin(uu * 40 + vv * 10));
+                return skin(sk, a.head, f, x, y, w, h);
+            };
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.FRONT) {
+                    double gem = Math.hypot((uu - 0.5) / 0.75, vv - 0.3);
+                    if (gem < 0.09) return mix(0xFFD01020, 0xFFFF9090, Math.max(0, 1 - Math.hypot(uu - 0.46, vv - 0.26) / 0.06));   // the core gem
+                    if (gem < 0.11) return 0xFFE8C040;
+                }
+                if (vv < 0.06 || (vv > 0.64 && vv < 0.7)) return tone(trim, Skins.faceLight(f) + 0.05);
+                if (Math.abs(uu - 0.3) < 0.01 || Math.abs(uu - 0.7) < 0.01) return suit[2];               // panel seams
+                return cloth(suit, f, x, y, w, h, 61, 0.4);
+            };
+            s.arm = (f, x, y, w, h) -> v(y, h) > 0.76 ? cloth(trim, f, x, y, w, h, 62, 0.3) : cloth(suit, f, x, y, w, h, 63, 0.5);
+            s.leg = (f, x, y, w, h) -> v(y, h) > 0.76 || f == Face.BOTTOM ? cloth(trim, f, x, y, w, h, 64, 0.3) : cloth(suit, f, x, y, w, h, 65, 0.6);
+            s.save("entity/race_hd/tuffle.png");
+        }
+
+        static void genAlien() throws IOException {
+            int[] sk = ramp(0xFF7A9AC0, 6), harness = ramp(0xFF4A3424, 5), metal = ramp(0xFFC8C8D0, 4), pants = ramp(0xFF3A3A4A, 5);
+            Hd.HdSkin a = Hd.anatomy(0.9, 91), s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                double l = lumOf(a.head, f, x, y, w, h), vv = v(y, h);
+                if (f == Face.BACK) l -= 0.12 * Math.exp(-Math.pow(((vv * 5) % 1) - 0.5, 2) / 0.01);    // ridges down the skull
+                return tone(sk, l);
+            };
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if ((f == Face.FRONT || f == Face.BACK) && (Math.abs(uu - 0.25) < 0.05 || Math.abs(uu - 0.75) < 0.05)) {
+                    if (Math.abs(vv - 0.3) < 0.03) return metal[2];                                       // buckles
+                    return tone(harness, Skins.faceLight(f) + 0.05 * Math.sin(vv * 50));
+                }
+                if (vv > 0.66 && vv < 0.72) return tone(metal, Skins.faceLight(f) + 0.06);
+                double l = lumOf(a.body, f, x, y, w, h);
+                if (f == Face.BACK && Math.sin(vv * 20) > 0.75) l -= 0.1;                                // stripes
+                return tone(sk, l);
+            };
+            s.arm = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (vv > 0.66 && vv < 0.76) return tone(harness, Skins.faceLight(f) + 0.04);
+                double l = lumOf(a.arm, f, x, y, w, h);
+                if (f != Face.FRONT && Math.sin(vv * 18) > 0.75) l -= 0.1;
+                return tone(sk, l);
+            };
+            s.leg = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (vv < 0.5) return skin(sk, a.leg, f, x, y, w, h);
+                if (f == Face.FRONT && in(uu, vv, 0.2, 0.55, 0.8, 0.68)) return plate(metal, f, uu, vv, 0.2, 0.55, 0.8, 0.68);   // knee pads
+                return cloth(pants, f, x, y, w, h, 71, 1.0);
+            };
+            s.save("entity/race_hd/gen_alien.png");
+        }
+
+        static void kai() throws IOException {
+            int[] sk = ramp(0xFFD8B8EC, 6), robe = ramp(0xFF2C3A8A, 6), under = ramp(0xFFF4F2F8, 5), gold = ramp(0xFFE8C040, 4), sash = ramp(0xFF5AB0E8, 4);
+            Hd.HdSkin a = Hd.anatomy(0.5, 101), s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.TOP && Math.abs(uu - 0.5) < 0.16) return tone(ramp(0xFFF8F8FF, 4), 0.95 + 0.1 * Math.sin(uu * 60 + vv * 20));   // the white tuft
+                return skin(sk, a.head, f, x, y, w, h);
+            };
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (vv < 0.07) return tone(gold, Skins.faceLight(f) + 0.08 * Math.sin(uu * 60));          // the engraved collar
+                if (vv > 0.66 && vv < 0.76) return cloth(sash, f, x, y, w, h, 81, 0.5);
+                if (f == Face.FRONT) {
+                    double d = Math.abs(uu - 0.5);
+                    if (d < 0.12 && vv < 0.66) return cloth(under, f, x, y, w, h, 82, 0.3);
+                    if (d < 0.15 && vv < 0.66) return ((int) (vv * h)) % 4 < 2 ? gold[2] : gold[1];        // embroidered edge
+                }
+                return cloth(robe, f, x, y, w, h, 83, 1.0);
+            };
+            s.arm = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (vv < 0.52) return cloth(robe, f, x, y, w, h, 84, 0.8);
+                if (vv < 0.55) return gold[2];
+                if (vv < 0.84) return cloth(under, f, x, y, w, h, 85, 0.6);
+                return skin(sk, a.arm, f, x, y, w, h);
+            };
+            s.leg = (f, x, y, w, h) -> v(y, h) > 0.86 || f == Face.BOTTOM ? tone(gold, Skins.faceLight(f) + 0.05) : cloth(under, f, x, y, w, h, 86, 1.1);
+            s.save("entity/race_hd/kai.png");
+        }
+
+        static void coreDemon() throws IOException {
+            int[] sk = ramp(0xFFC83030, 6), garb = ramp(0xFF181418, 6), gold = ramp(0xFFE8C040, 4), hair = ramp(0xFF141010, 4);
+            Hd.HdSkin a = Hd.anatomy(1.25, 111), s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.TOP || (f != Face.BOTTOM && vv < (f == Face.FRONT ? 0.1 : 0.2) + 0.04 * Math.abs(Math.sin(uu * 20)))) {
+                    return tone(hair, Skins.faceLight(f) + 0.08 * Math.sin(uu * 50));                  // short spiky black hair
+                }
+                return skin(sk, a.head, f, x, y, w, h);
+            };
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (vv > 0.74 && vv < 0.8) return tone(gold, Skins.faceLight(f) + 0.05);
+                if (f == Face.FRONT) {
+                    double em = Math.abs(uu - 0.5) * 1.4 + Math.abs(vv - 0.27);                          // the burning emblem
+                    if (em < 0.12) return mix(0xFFFFE070, 0xFFE03010, Math.min(1, em / 0.12));
+                }
+                return cloth(garb, f, x, y, w, h, 91, 0.9);
+            };
+            s.arm = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (vv < 0.4 + 0.04 * Math.abs(Math.sin(uu * 25))) return cloth(garb, f, x, y, w, h, 92, 0.7);   // a clawed hem
+                if (vv > 0.93) return tone(ramp(0xFF101010, 3), 0.8);                                     // claws
+                return skin(sk, a.arm, f, x, y, w, h);
+            };
+            s.leg = (f, x, y, w, h) -> v(y, h) > 0.85 || f == Face.BOTTOM ? tone(garb, Skins.faceLight(f) - 0.1) : cloth(garb, f, x, y, w, h, 93, 1.1);
+            s.save("entity/race_hd/core_demon.png");
         }
     }
     // ================================================================== faces

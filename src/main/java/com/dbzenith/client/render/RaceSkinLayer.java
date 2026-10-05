@@ -23,8 +23,7 @@ public class RaceSkinLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
 
     /** The race's (or variant's) skin, or null if it has none (they look like the player's own skin). */
     public static ResourceLocation texture(Race race, com.dbzenith.race.Variant variant) {
-        String name = skinName(race, variant);
-        return name == null ? null : new ResourceLocation(DBZenith.MOD_ID, "textures/entity/race/" + name + ".png");
+        return path(skinName(race, variant));
     }
 
     /** The race skin a race and lineage wear (before any transformation), or null for races drawn on other bodies. */
@@ -45,8 +44,16 @@ public class RaceSkinLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
 
     /** The skin a player wears now: their race skin, recoloured by their form if it changes the body (transform.FormLooks). */
     public static ResourceLocation texture(PublicStatePacket state) {
-        String name = com.dbzenith.transform.FormLooks.skin(state.form(), skinName(state.raceEnum(), state.variantEnum()));
-        return name == null ? null : new ResourceLocation(DBZenith.MOD_ID, "textures/entity/race/" + name + ".png");
+        return path(com.dbzenith.transform.FormLooks.skin(state.form(), skinName(state.raceEnum(), state.variantEnum())));
+    }
+
+    private static final java.util.Map<String, ResourceLocation> PATHS = new java.util.HashMap<>();
+
+    /** A race skin texture, HD or classic as the Style settings say. */
+    static ResourceLocation path(String name) {
+        if (name == null) return null;
+        String folder = com.dbzenith.config.DBZConfig.CLIENT.hdArt.get() ? "race_hd" : "race";
+        return PATHS.computeIfAbsent(folder + "/" + name, k -> new ResourceLocation(DBZenith.MOD_ID, "textures/entity/" + k + ".png"));
     }
 
     /**

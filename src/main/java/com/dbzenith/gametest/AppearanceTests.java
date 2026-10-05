@@ -94,6 +94,7 @@ public final class AppearanceTests {
             for (var swap : look.skins().entrySet()) {
                 helper.assertTrue(resource("textures/entity/race/" + swap.getKey() + ".png"), id + ": base skin " + swap.getKey() + " exists");
                 helper.assertTrue(resource("textures/entity/race/" + swap.getValue() + ".png"), id + ": its skin " + swap.getValue() + " exists");
+                helper.assertTrue(resource("textures/entity/race_hd/" + swap.getValue() + ".png"), id + ": its HD skin " + swap.getValue() + " exists");
             }
             if (look.overlay() != null) helper.assertTrue(resource("textures/entity/form/" + look.overlay() + ".png"), id + ": overlay exists");
         }

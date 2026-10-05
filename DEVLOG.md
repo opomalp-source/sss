@@ -606,3 +606,26 @@ User requests: transformations should change the character (an orange Namekian i
 
 ### Verified
 - HD and classic face close-ups side by side (normal, wide + grin, cat + blush + smirk), and HD and classic bodies front and back.
+
+## 2026-10-05 — Session 3 (cont.): 13b HD race skins (v0.24.0)
+- **`ArtGen.HdRaces`:** all 13 race and lineage skins repainted at 128x128 from a material kit on top of the HD anatomy (`Hd.anatomy`, factored out of the body painter):
+  - `tone`: a smooth ramp lookup for a luminance;
+  - `cloth`: folds, weave noise and crease shading;
+  - `plate`: bevelled shell plates with a bright top edge, a dark lower edge and a gloss spot;
+  - spots with rims, stripes, cracks and ribbed joints.
+- **Each race:**
+  - Namekian and Demon Namekian: gi with a V-neck and knotted sash, striated pink muscle bands, a ridged crown.
+  - Frost Demon, Metal and Mutant: dome, cheek, chest (with a seam), shoulder, forearm and shin plates; panel lines on the metal body.
+  - Majin and Corrupted Majin: open vest with a trimmed edge, belly, baggy trousers, gloves, gold boots; the corrupted one cracked and torn.
+  - Vampire: slicked hair with a widow's peak, cravat, buttoned waistcoat, red lining, coat, cuffs, boots.
+  - Bio-Android: spotted carapace, ribbed joints, face mask with cheek grooves, crest.
+  - Tuffle: silver fringe, suit with panel seams, gold-rimmed core gem, trims.
+  - Gen Alien: skull ridges, harness with buckles, stripes, bracers, knee pads.
+  - Kai: white tuft, engraved collar, embroidered robe edge, sash, under-sleeves, gold anklets.
+  - Core Demon: spiky black hair, burning emblem, clawed hems, claws.
+- **Recolours:** the form recolours (`FormLooks`) are now generated for both the classic and HD folders.
+- **Runtime:** `RaceSkinLayer` uses `race_hd` when HD art is on. The test checks that the HD recolours exist.
+- **Fixed:** the cloth folds were too contrasty (they read as stripes on trousers) and were softened after review.
+
+### Verified
+- Screenshots of all nine race looks plus the Demon lineage, front and back, with HD faces.
