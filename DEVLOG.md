@@ -487,6 +487,7 @@
   - `KiBlastEntity`: ricochets, splits into three on impact, steers to the crosshair when guided, and waits as a mine when placed.
   - `KiBeamEntity`: a 20-tick charge with ki streaming into the hands, plus traits per pulse.
   - `TechniqueHandler.spawn`: rain falls from 14-20 blocks above the aim point; mines are set at the aim point.
+- **Network:** protocol 25, because the Ki Creator packet carries the new fields.
 - **UI:** the Ki Creator is laid out again within 240 px, with:
   - shape rows (with descriptions as tooltips);
   - cycle buttons for method, origin and type (right-click goes back, tooltips explain);
