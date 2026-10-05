@@ -154,3 +154,36 @@ Constants are in `CombatMoves`.
 - **Side step:** guard + dash with A or D. A 0.55x dash sideways, 8 ticks of evasion.
 - **Clash:** two players hitting each other within 3 ticks. The second blow is cancelled and both are pushed apart.
 - **Downed:** 30 ticks. Half damage, no knockback, no launches.
+
+## Ki Creator v2 (CX-7, v0.18.0)
+- **Shapes:**
+  - Laser: x(1.4 + 0.4p), a 0.2-wide beam, very fast.
+  - Wave: (7+p) shots of x(0.18 + 0.05p) in a 40° fan, 14-tick range.
+  - Nova: a self burst of x(1.2 + 0.5p), radius 4 + 0.6p.
+  - Rain: (6+2p) shots of x(0.3 + 0.08p) falling on the spot you aim at.
+  - Volleys are costed at 60% of shots landing, as before.
+- **Methods:**
+  - Charged: x1.5 damage at a tax of 0.9. A windup over the head, or 20 ticks of gathering for beams.
+  - Placed: a mine with a tax of 0.95. It waits up to 200 ticks and goes off within 2 blocks, hitting everything in 2.5 blocks (minimum explosion 1.2). Out of reach, it is placed 10 blocks ahead.
+- **Origins** change size and speed. Damage per ki does not move, because cost follows damage.
+  - Mouth: x1.08 damage.
+  - Eyes: 0.6 size, 1.3 speed, x0.9 damage.
+  - Finger: 0.6 size, 1.35 speed, +1 pierce, x0.95 damage.
+- **Ki types:**
+  - Pure: x1.05 damage, tax 1.05.
+  - Burning (3 s of fire) and Corrosive (weakness and poison): tax 1.10.
+  - Freezing (slowness II and frost) and Shock (30% chance of an 8-tick stun): tax 1.12.
+  - Draining (heals 15% of the damage): tax 1.15.
+  - Divine: x1.10 damage, tax 1.10; needs god ki.
+- **Modifier taxes:**
+  - Split 1.15 (three shots of x0.4 on impact).
+  - Bounce 1.08 (two ricochets).
+  - Guided 1.12 (steers to the crosshair).
+  - Chain 1.20 (two jumps at half damage, once per attack).
+  - Guard Break 1.12 (-35 guard meter).
+  - Stun 1.18 (10 ticks).
+  - Knockback 1.06.
+  - Rapid: x0.75 damage, x0.6 cooldown.
+  - Efficient: x0.85 damage, x0.75 cost.
+- **Totals:** the combined tax is capped at 1.55. A third modifier slot opens at level 800. TP cost: +200 for a non-pure type, +150 for a non-fired method.
+- **Checked:** `kiCreatorDesignsStayInBalance` covers every shape, power and modifier combination (up to three modifiers at p3), and every shape × method × origin × type at p1/p5 with risky modifier sets. All stay within 0.6-1.6x the median damage per ki of the built-in techniques, and below 4x punching DPS.

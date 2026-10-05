@@ -132,7 +132,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [x] CX-4 Racial skills: 92 skills (70 passives built from condition and modifier data, 22 actives), Racial key (U, shift to browse), Racial Skills screen, HUD readout, wheel slice, /dbz racial (v0.15.0)
 - [x] CX-5 Universal skills: Ki Sense (3 levels), Kaioken (x2/x4/x10/x20), Rising Charge, Echo Strike (3), Spirit Shock, Ki Barrier, Desperate Gambit, Limit Break, Instant Transmission; learned with TP on the Universal tab (v0.16.0)
 - [x] CX-6 Combat v3: Z-hits, directional heavies (rush/uppercut/hook), sweep, chase and chase counter, Revenge Counter, Breaker Wave, snap recovery and ground slide, spot dodge and side step, clashes, downed state; moves guide in Settings > Controls (v0.17.0)
-- [ ] CX-7 Ki Creator v2 (methods, origins, shapes, types, 14 modifiers)
+- [x] CX-7 Ki Creator v2: 9 shapes (+laser, wave, nova, rain), methods (fired, charged, placed mines), origins, 7 ki types, 14 modifiers (third slot at level 800) (v0.18.0)
 - [ ] CX-8 Character creator v2 + better hair presets + hair physics. Done: 19 presets rebuilt on a volume layer (9 new: Prince flame, Rebel lock, Legend mane, Sage, Curtains, Buzz cut, Cloud puff, Twin tails, Side cut), spring-damped hair physics (movement, falling, turning, idle, aura updraft, gravity on head tilt; setting "Hair physics"). Still to do: face parts
 - [ ] CX-9 Animation v3
 - [ ] CX-10 Sound

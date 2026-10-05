@@ -36,6 +36,11 @@ public class KiBeamEntity extends Entity {
     public static final float MAX_RANGE = 48f;
 
     private double damagePerPulse;
+    private Technique.KiType kiType = Technique.KiType.PURE;
+    private int flags;
+    /** Charged beams gather for this long before they fire. */
+    private int chargeTicks;
+    private final java.util.Set<Integer> struck = new java.util.HashSet<>();
     private float extendSpeed = 3f;
     private int lifeTicks = 30;
     private float explosionPower;
@@ -56,7 +61,10 @@ public class KiBeamEntity extends Entity {
         beam.extendSpeed = technique.speed();
         beam.lifeTicks = technique.lifeTicks();
         beam.explosionPower = technique.explosionPower();
-        int pulses = Math.max(1, technique.lifeTicks() / DBZConfig.SERVER.beamDamageIntervalTicks.get());
+        beam.kiType = technique.kiType();
+        beam.flags = technique.flags();
+        beam.chargeTicks = technique.has(Technique.CHARGED) ? 20 : 0;
+        int pulses = Math.max(1, (technique.lifeTicks() - beam.chargeTicks) / DBZConfig.SERVER.beamDamageIntervalTicks.get());
         beam.damagePerPulse = totalDamage / pulses;
         beam.anchorTo(owner);
         return beam;
@@ -113,6 +121,19 @@ public class KiBeamEntity extends Entity {
             return;                                          // locked: no extending, no damage
         }
 
+        if (tickCount <= chargeTicks) {                                  // gathering: ki streams into the hands
+            if (level() instanceof net.minecraft.server.level.ServerLevel sl && tickCount % 2 == 0) {
+                int c = getColor();
+                var dust = new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f), 1.2f);
+                Vec3 at = position();
+                for (int i = 0; i < 4; i++) {
+                    Vec3 from = at.add((random.nextDouble() - 0.5) * 3, (random.nextDouble() - 0.5) * 3, (random.nextDouble() - 0.5) * 3);
+                    Vec3 v = at.subtract(from).scale(0.25);
+                    sl.sendParticles(dust, from.x, from.y, from.z, 0, v.x, v.y, v.z, 1);
+                }
+            }
+            return;
+        }
         Vec3 start = position();
         Vec3 dir = direction();
         float length = Math.min(MAX_RANGE, getLength() + extendSpeed);
@@ -136,6 +157,7 @@ public class KiBeamEntity extends Entity {
             if (hit.isPresent() || box.contains(start)) {
                 target.invulnerableTime = 0;
                 target.hurt(ModDamageTypes.kiBlast(level(), this, owner), (float) damagePerPulse);
+                KiTraits.onHit(this, owner, kiType, flags, target, damagePerPulse, end.subtract(start), struck);
                 if (level() instanceof net.minecraft.server.level.ServerLevel sl) {
                     com.dbzenith.network.ImpactPacket.at(hit.orElse(target.getBoundingBox().getCenter()), end.subtract(start).normalize(),
                             com.dbzenith.network.ImpactPacket.KI_HIT, getWidth(), getColor(), owner == null ? -1 : owner.getId()).send(sl);

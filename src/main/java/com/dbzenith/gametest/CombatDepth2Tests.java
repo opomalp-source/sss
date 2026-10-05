@@ -130,9 +130,22 @@ public final class CombatDepth2Tests {
         double mid = BalanceReport2.median(builtIn);
         double punch = BalanceReport2.punchDps(d);
         int designs = 0;
+        java.util.List<Spec> specs = new ArrayList<>();
         for (Kind k : Kind.values()) for (int p = 1; p <= 5; p++) for (int mods = 0; mods < 1 << Mod.values().length; mods++) {
-            if (Integer.bitCount(mods) > CustomTechniques.MAX_MODS) continue;
-            Spec spec = new Spec("t", k, p, mods, 0xFFFFFF);
+            if (Integer.bitCount(mods) > (p == 3 ? CustomTechniques.MAX_MODS_LATE : CustomTechniques.MAX_MODS)) continue;
+            specs.add(new Spec("t", k, p, mods, 0xFFFFFF, CustomTechniques.Method.FIRED,
+                    k == Kind.NOVA ? CustomTechniques.Origin.BODY : CustomTechniques.Origin.HAND, Technique.KiType.PURE));
+        }
+        int[] sample = {0, 1 << Mod.RAPID.ordinal(), 1 << Mod.EFFICIENT.ordinal(), 1 << Mod.RAPID.ordinal() | 1 << Mod.EFFICIENT.ordinal(),
+                1 << Mod.RAPID.ordinal() | 1 << Mod.EFFICIENT.ordinal() | 1 << Mod.FAST.ordinal(), 1 << Mod.CHAIN.ordinal() | 1 << Mod.STUN.ordinal()};
+        for (Kind k : Kind.values()) for (CustomTechniques.Method m : CustomTechniques.Method.values()) for (CustomTechniques.Origin o : CustomTechniques.Origin.values())
+            for (Technique.KiType ty : Technique.KiType.values()) for (int p : new int[]{1, 5}) for (int mods : sample) {
+                if (!m.fits(k) || !o.fits(k)) continue;
+                specs.add(new Spec("t", k, p, mods, 0xFFFFFF, m, o, ty));
+            }
+        for (Spec spec : specs) {
+            Kind k = spec.kind();
+            int p = spec.power(), mods = spec.mods();
             boolean fits = true;
             for (Mod m : spec.modSet()) fits &= m.fits(k);
             if (!fits) continue;
@@ -140,8 +153,8 @@ public final class CombatDepth2Tests {
             BalanceReport2.TechStats s = BalanceReport2.tech(d, t);
             helper.assertTrue(s != null, k + " p" + p + " deals damage");
             helper.assertTrue(s.perKi() >= mid * 0.6 && s.perKi() <= mid * 1.6,
-                    k + " p" + p + " mods " + mods + ": damage per ki " + s.perKi() + " vs median " + mid);
-            helper.assertTrue(s.dps() / punch <= 4.0, k + " p" + p + " mods " + mods + ": spammed it beats punching " + s.dps() / punch + "x");
+                    spec + ": damage per ki " + s.perKi() + " vs median " + mid);
+            helper.assertTrue(s.dps() / punch <= 4.0, spec + ": spammed it beats punching " + s.dps() / punch + "x");
             designs++;
         }
         helper.assertTrue(designs > 100, "every design was checked: " + designs);
@@ -160,7 +173,12 @@ public final class CombatDepth2Tests {
         helper.assertTrue(d.getTrainingPoints() == 100000 - CustomTechniques.tpCost(ok), "TP was spent");
         helper.assertTrue(CustomTechniques.create(d, 0, new Spec("x", Kind.BEAM, 3, 1 << Mod.HOMING.ordinal(), 0)) != null, "homing beams are refused");
         int three = 1 << Mod.FAST.ordinal() | 1 << Mod.LARGE.ordinal() | 1 << Mod.PIERCING.ordinal();
-        helper.assertTrue(CustomTechniques.create(d, 1, new Spec("x", Kind.BLAST, 3, three, 0)) != null, "three modifiers are refused");
+        helper.assertTrue(CustomTechniques.create(d, 1, new Spec("x", Kind.BLAST, 3, three, 0)) != null, "three modifiers are refused (before level 800)");
+        helper.assertTrue(CustomTechniques.create(d, 1, new Spec("x", Kind.BLAST, 3, 0, 0, CustomTechniques.Method.FIRED, CustomTechniques.Origin.HAND, Technique.KiType.DIVINE)) != null, "divine ki needs god ki");
+        helper.assertTrue(CustomTechniques.create(d, 1, new Spec("x", Kind.NOVA, 3, 0, 0, CustomTechniques.Method.PLACED, CustomTechniques.Origin.BODY, Technique.KiType.PURE)) != null, "a nova cannot be placed");
+        Spec v2 = new Spec("Frost Rain", Kind.RAIN, 2, 1 << Mod.CHAIN.ordinal(), 0x90E0FF, CustomTechniques.Method.FIRED, CustomTechniques.Origin.HAND, Technique.KiType.FREEZING);
+        helper.assertTrue(CustomTechniques.create(d, 1, v2) == null && Techniques.resolve(d, "custom_1").kiType() == Technique.KiType.FREEZING
+                && Techniques.resolve(d, "custom_1").has(Technique.RAIN) && Techniques.resolve(d, "custom_1").has(Technique.CHAIN), "v2 designs build their traits");
         helper.assertTrue(CustomTechniques.create(d, 1, new Spec("x", Kind.BLAST, 9, 0, 0)) != null, "power above 5 is refused");
         helper.assertTrue(CustomTechniques.create(d, CustomTechniques.slots(d), ok) != null, "slots beyond your level are refused");
         PlayerData copy = new PlayerData();

@@ -49,6 +49,11 @@ public class KiBlastEntity extends Projectile {
     /** Ball-drop: ticks left hovering above the caster before it is hurled. */
     private int holdTicks;
     private float launchSpeed;
+    // Ki Creator v2 traits
+    private Technique.KiType kiType = Technique.KiType.PURE;
+    private int flags;
+    private int bouncesLeft;
+    private boolean split;
 
     public KiBlastEntity(EntityType<? extends KiBlastEntity> type, Level level) {
         super(type, level);
@@ -66,6 +71,9 @@ public class KiBlastEntity extends Projectile {
         blast.effectPower = technique.effectPower();
         blast.holdTicks = technique.holdTicks();
         blast.launchSpeed = technique.speed();
+        blast.kiType = technique.kiType();
+        blast.flags = technique.flags();
+        blast.bouncesLeft = technique.has(Technique.BOUNCE) ? 2 : 0;
         blast.entityData.set(SIZE, technique.size());
         blast.entityData.set(COLOR, technique.color());
         blast.entityData.set(STYLE, technique.style().ordinal());
@@ -127,6 +135,15 @@ public class KiBlastEntity extends Projectile {
             return;
         }
 
+        if ((flags & Technique.PLACED) != 0) {                        // a mine: waits where it was put, then goes off
+            setDeltaMovement(Vec3.ZERO);
+            if (!level.isClientSide && (age >= lifeTicks - 1 || !level.getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(2.0),
+                    e -> e != getOwner() && e.isAlive() && !e.isSpectator()).isEmpty())) {
+                detonate();
+            }
+            return;
+        }
+
         HitResult hit = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
         if (hit.getType() != HitResult.Type.MISS && !ForgeEventFactory.onProjectileImpact(this, hit)) {
             onHit(hit);
@@ -134,6 +151,11 @@ public class KiBlastEntity extends Projectile {
         }
 
         Vec3 motion = getDeltaMovement();
+        if (!level.isClientSide && (flags & Technique.GUIDED) != 0 && getOwner() instanceof LivingEntity caster && caster.isAlive()) {
+            Vec3 aim = caster.getEyePosition().add(caster.getLookAngle().scale(48));   // follows the thrower's crosshair
+            motion = motion.lerp(aim.subtract(position()).normalize().scale(motion.length()), 0.18);
+            setDeltaMovement(motion);
+        }
         if (!level.isClientSide && homingTargetId >= 0) {
             Entity target = level.getEntity(homingTargetId);
             if (target != null && target.isAlive()) {
@@ -197,11 +219,15 @@ public class KiBlastEntity extends Projectile {
         }
         target.invulnerableTime = 0; // volleys must not be eaten by i-frames
         target.hurt(ModDamageTypes.kiBlast(level(), this, getOwner()), (float) damage);
+        KiTraits.onHit(this, getOwner(), kiType, flags, target, damage, getDeltaMovement(), null);
         if (explosionPower <= 0 && level() instanceof net.minecraft.server.level.ServerLevel sl) {
             com.dbzenith.network.ImpactPacket.at(target.getBoundingBox().getCenter(), getDeltaMovement().normalize(),
                     com.dbzenith.network.ImpactPacket.KI_HIT, Math.max(0.5f, getSize()), getColor(), getOwner() == null ? -1 : getOwner().getId()).send(sl);
         }
-        if (pierceLeft-- <= 0) impact();
+        if (pierceLeft-- <= 0) {
+            splitApart(getDeltaMovement().scale(-1));
+            impact();
+        }
     }
 
     /**
@@ -230,7 +256,57 @@ public class KiBlastEntity extends Projectile {
     @Override
     protected void onHitBlock(BlockHitResult result) {
         super.onHitBlock(result);
-        if (!level().isClientSide) impact();
+        if (level().isClientSide) return;
+        if (bouncesLeft > 0) {                                        // ricochet off the face it struck
+            bouncesLeft--;
+            Vec3 n = Vec3.atLowerCornerOf(result.getDirection().getNormal());
+            Vec3 v = getDeltaMovement();
+            setDeltaMovement(v.subtract(n.scale(2 * v.dot(n))));
+            hitIds.clear();
+            level().playSound(null, getX(), getY(), getZ(), net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_HIT, net.minecraft.sounds.SoundSource.PLAYERS, 0.8f, 1.6f);
+            return;
+        }
+        splitApart(Vec3.atLowerCornerOf(result.getDirection().getNormal()));
+        impact();
+    }
+
+    /** A mine goes off: everything near takes the blast. */
+    private void detonate() {
+        for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(2.5),
+                e -> e != getOwner() && e.isAlive() && !e.isSpectator())) {
+            e.invulnerableTime = 0;
+            e.hurt(ModDamageTypes.kiBlast(level(), this, getOwner()), (float) damage);
+            KiTraits.onHit(this, getOwner(), kiType, flags, e, damage, e.position().subtract(position()), null);
+        }
+        if (explosionPower <= 0) explosionPower = 1.2f;
+        impact();
+    }
+
+    /** Split: three smaller blasts fan out away from what this one struck. */
+    private void splitApart(Vec3 away) {
+        if ((flags & Technique.SPLIT) == 0 || split || !(getOwner() instanceof LivingEntity owner)) return;
+        split = true;
+        Vec3 base = away.lengthSqr() < 1e-6 ? new Vec3(0, 1, 0) : away.normalize();
+        Vec3 side = base.cross(new Vec3(0, 1, 0));
+        if (side.lengthSqr() < 1e-6) side = new Vec3(1, 0, 0);
+        side = side.normalize();
+        for (int i = -1; i <= 1; i++) {
+            KiBlastEntity child = new KiBlastEntity(ModEntities.KI_BLAST.get(), level());
+            child.setOwner(owner);
+            child.damage = damage * 0.4;
+            child.lifeTicks = 25;
+            child.kiType = kiType;
+            child.flags = flags & ~(Technique.SPLIT | Technique.PLACED);
+            child.split = true;
+            child.entityData.set(SIZE, Math.max(0.25f, getSize() * 0.6f));
+            child.entityData.set(COLOR, getColor());
+            child.entityData.set(STYLE, entityData.get(STYLE));
+            child.refreshDimensions();
+            child.hitIds.addAll(hitIds);
+            child.setPos(getX(), getY(), getZ());
+            child.setDeltaMovement(base.add(side.scale(i * 0.7)).add(0, 0.2, 0).normalize().scale(Math.max(0.8, getDeltaMovement().length() * 0.8)));
+            level().addFreshEntity(child);
+        }
     }
 
     private void impact() {
@@ -261,6 +337,10 @@ public class KiBlastEntity extends Projectile {
         tag.putDouble("effectPower", effectPower);
         tag.putInt("hold", holdTicks);
         tag.putFloat("launchSpeed", launchSpeed);
+        tag.putString("kiType", kiType.name());
+        tag.putInt("flags", flags);
+        tag.putInt("bounces", bouncesLeft);
+        tag.putBoolean("split", split);
     }
 
     @Override
@@ -282,5 +362,13 @@ public class KiBlastEntity extends Projectile {
         effectPower = tag.getDouble("effectPower");
         holdTicks = tag.getInt("hold");
         launchSpeed = tag.getFloat("launchSpeed");
+        try {
+            kiType = Technique.KiType.valueOf(tag.getString("kiType"));
+        } catch (IllegalArgumentException e) {
+            kiType = Technique.KiType.PURE;
+        }
+        flags = tag.getInt("flags");
+        bouncesLeft = tag.getInt("bounces");
+        split = tag.getBoolean("split");
     }
 }

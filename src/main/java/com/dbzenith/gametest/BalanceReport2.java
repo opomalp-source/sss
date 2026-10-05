@@ -52,7 +52,8 @@ public final class BalanceReport2 {
     /** Damage of one use (all volley shots, the whole beam) for a damaging technique, or null for utility ones. */
     static TechStats tech(PlayerData d, Technique t) {
         if (t.style() == Technique.Style.SELF && t.effect() != Technique.Effect.EXPLOSIVE_WAVE) return null;
-        if (t.damageMult() <= 0.25 || t.effect() == Technique.Effect.KI_SEAL) return null;          // candy, seal: effects, not damage
+        double total = t.damageMult() * (t.count() > 1 ? t.count() * 0.6 : 1);
+        if (total <= 0.25 || t.effect() == Technique.Effect.KI_SEAL) return null;                  // candy, seal: effects, not damage
         double hits = t.count() > 1 ? t.count() * 0.6 : 1;                                        // volleys spread: assume 60% land
         double dmg = DamageCalculator.kiOutgoing(d, t.damageMult()) * hits;
         return new TechStats(t, DamageCalculator.kiCost(d, t.kiCost()), dmg, t.cooldownTicks() / 20.0);

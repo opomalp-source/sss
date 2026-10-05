@@ -15,6 +15,13 @@ public final class Technique {
     /** Special behavior. NONE = plain damage. */
     public enum Effect { NONE, HEAL_SELF, HEAL_ALLY, BLIND_AREA, EXPLOSIVE_WAVE, TELEPORT, KI_SENSE, ENERGY_ABSORB, CANDY, KI_TRANSFER, STUN_AREA, KI_SEAL, GRAB, FUSE, ABSORB, LIFE_DRAIN }
 
+    /** What a ki attack does to whatever it hits besides damage (Ki Creator v2). */
+    public enum KiType { PURE, BURNING, FREEZING, SHOCK, CORROSIVE, DRAINING, DIVINE }
+
+    /** Extra behaviours, as bits of {@link #flags()}. */
+    public static final int SPLIT = 1, BOUNCE = 2, GUIDED = 4, CHAIN = 8, GUARD_BREAK = 16, STUN = 32, KNOCKBACK = 64,
+            PLACED = 128, RAIN = 256, CHARGED = 512;
+
     private final String id;
     private final double kiCost;
     private final double damageMult;
@@ -37,6 +44,8 @@ public final class Technique {
     private final int holdTicks;
     private final String displayName;     // player-made techniques carry their own name
     private final String summary;         // ...and a generated description
+    private final KiType kiType;
+    private final int flags;
 
     private Technique(Builder b) {
         id = b.id;
@@ -61,6 +70,8 @@ public final class Technique {
         holdTicks = b.holdTicks;
         displayName = b.displayName;
         summary = b.summary;
+        kiType = b.kiType;
+        flags = b.flags;
     }
 
     public static Builder builder(String id) {
@@ -120,6 +131,10 @@ public final class Technique {
                 : net.minecraft.network.chat.Component.translatable(translationKey() + ".desc");
     }
 
+    public KiType kiType() { return kiType; }
+    public int flags() { return flags; }
+    public boolean has(int flag) { return (flags & flag) != 0; }
+
     /** Made in the Ki Creator. */
     public boolean isCustom() {
         return displayName != null;
@@ -148,6 +163,8 @@ public final class Technique {
         private int holdTicks;
         private String displayName;
         private String summary;
+        private KiType kiType = KiType.PURE;
+        private int flags;
 
         private Builder(String id) {
             this.id = id;
@@ -170,6 +187,8 @@ public final class Technique {
         public Builder drop(int ticksAboveHead) { holdTicks = ticksAboveHead; return this; }
         public Builder race(Race first, Race... rest) { races = EnumSet.of(first, rest); return this; }
         public Builder named(String name, String description) { displayName = name; summary = description; return this; }
+        public Builder kiType(KiType t) { kiType = t; return this; }
+        public Builder flags(int f) { flags |= f; return this; }
 
         public Technique build() {
             return new Technique(this);

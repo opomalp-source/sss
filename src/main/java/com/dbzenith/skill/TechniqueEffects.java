@@ -87,6 +87,7 @@ public final class TechniqueEffects {
                     e.invulnerableTime = 0;
                     e.hurt(ModDamageTypes.kiBlast(level, player, player), (float) damage);
                     Vec3 push = e.position().subtract(player.position()).normalize().scale(1.2);
+                    KiTraits.onHit(player, player, t.kiType(), t.flags(), e, damage, push, null);
                     e.push(push.x, 0.4, push.z);
                 }
                 level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, player.getX(), player.getY() + 1, player.getZ(), 1, 0, 0, 0, 0);

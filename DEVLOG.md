@@ -477,3 +477,23 @@
 
 ### Verified
 - Screenshots of every new animation. Downed lies flat on the back; the sweep crouch and side step were deepened after review.
+
+## 2026-10-05 — Session 3 (cont.): CX-7 Ki Creator v2 (v0.18.0)
+- **Model:** `CustomTechniques.Spec` adds a method, an origin and a ki type. Old saves load as Fired, Hand and Pure. The modifier bits become a short, and the old five modifiers keep their bits.
+  - The 9 shapes, 3 methods, 5 origins and 7 ki types each come with rules about what fits with what.
+  - The 14 modifiers each have a tax; the combined tax is capped. `maxMods` allows 2, or 3 from level 800.
+- **Technique traits:** `Technique.KiType` and flag bits (SPLIT, BOUNCE, GUIDED, CHAIN, GUARD_BREAK, STUN, KNOCKBACK, PLACED, RAIN, CHARGED). `KiTraits.onHit` applies ki types and hit modifiers for blasts, beams (once per target per beam for stun and chain) and novas.
+- **Entities:**
+  - `KiBlastEntity`: ricochets, splits into three on impact, steers to the crosshair when guided, and waits as a mine when placed.
+  - `KiBeamEntity`: a 20-tick charge with ki streaming into the hands, plus traits per pulse.
+  - `TechniqueHandler.spawn`: rain falls from 14-20 blocks above the aim point; mines are set at the aim point.
+- **UI:** the Ki Creator is laid out again within 240 px, with:
+  - shape rows (with descriptions as tooltips);
+  - cycle buttons for method, origin and type (right-click goes back, tooltips explain);
+  - power and colour on one row;
+  - a 14-modifier grid with a count;
+  - a live preview, the stats, and why it cannot be made.
+- **Tests (134):** the balance sweep was extended. `BalanceReport2.tech` now judges volleys by total damage. `kiCreatorRules` adds divine, placed-nova refusal and v2 traits. New `KiCreator2Tests` (2): ki types and hit modifiers on real targets (burning, freezing + stun, chain once, draining heal), and a placed mine that waits, then goes off.
+
+### Verified
+- Screenshot of the new creator: every row fits; tooltips work.

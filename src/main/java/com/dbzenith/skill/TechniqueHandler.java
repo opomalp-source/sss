@@ -73,6 +73,28 @@ public final class TechniqueHandler {
             level.addFreshEntity(KiBeamEntity.create(level, caster, technique, damage));
             return;
         }
+        if (technique.has(Technique.PLACED) || technique.has(Technique.RAIN)) {
+            Vec3 eye = caster.getEyePosition();
+            double reach = technique.has(Technique.PLACED) ? 24 : 40;
+            net.minecraft.world.phys.BlockHitResult aim = level.clip(new net.minecraft.world.level.ClipContext(eye, eye.add(look.scale(reach)),
+                    net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, caster));
+            Vec3 spot = aim.getType() == net.minecraft.world.phys.HitResult.Type.MISS && technique.has(Technique.PLACED)
+                    ? eye.add(look.scale(10))                         // nothing in reach: a mine hangs ten blocks out
+                    : aim.getLocation().subtract(look.scale(0.6));
+            for (int i = 0; i < technique.count(); i++) {
+                KiBlastEntity blast = KiBlastEntity.create(level, caster, technique, damage);
+                if (technique.has(Technique.PLACED)) {              // a mine where you look
+                    blast.moveTo(spot.x, spot.y - technique.size() / 2.0, spot.z, 0, 0);
+                    blast.setDeltaMovement(Vec3.ZERO);
+                } else {                                            // rain: falls on the spot from high above
+                    double r = 3.0 * Math.sqrt(level.random.nextDouble()), a = level.random.nextDouble() * Math.PI * 2;
+                    blast.moveTo(spot.x + Math.cos(a) * r, spot.y + 14 + level.random.nextDouble() * 6, spot.z + Math.sin(a) * r, 0, 90);
+                    blast.setDeltaMovement(new Vec3((level.random.nextDouble() - 0.5) * 0.1, -technique.speed(), (level.random.nextDouble() - 0.5) * 0.1));
+                }
+                level.addFreshEntity(blast);
+            }
+            return;
+        }
         LivingEntity homingTarget = technique.homing() ? findTarget(caster, look) : null;
         for (int i = 0; i < technique.count(); i++) {
             Vec3 dir = technique.spreadDegrees() > 0 ? spread(look, technique.spreadDegrees(), caster) : look;
