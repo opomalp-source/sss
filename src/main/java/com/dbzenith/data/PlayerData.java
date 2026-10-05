@@ -982,6 +982,61 @@ public class PlayerData {
         return guarding;
     }
 
+    // God Ki: experience towards levels 1-10 (saved); see transform.GodKi
+    private double godKiXp;
+
+    public double getGodKiXp() {
+        return godKiXp;
+    }
+
+    public void setGodKiXp(double xp) {
+        double v = Math.max(0, xp);
+        if (v != godKiXp) {
+            godKiXp = v;
+            derivedStale = true;
+            markDirty();
+        }
+    }
+
+    // a transformation being powered up into (not saved; synced): the form, ticks done and ticks needed
+    private String transformTarget = "";
+    private int transformTicks, transformTotal;
+
+    public String getTransformTarget() {
+        return transformTarget;
+    }
+
+    public boolean isTransforming() {
+        return !transformTarget.isEmpty();
+    }
+
+    public int getTransformTicks() {
+        return transformTicks;
+    }
+
+    public int getTransformTotal() {
+        return transformTotal;
+    }
+
+    public void startTransforming(String form, int total) {
+        transformTarget = form;
+        transformTicks = 0;
+        transformTotal = Math.max(1, total);
+        markDirty();
+    }
+
+    public void setTransformTicks(int t) {
+        transformTicks = t;
+        markDirty();
+    }
+
+    public void stopTransforming() {
+        if (transformTarget.isEmpty()) return;
+        transformTarget = "";
+        transformTicks = transformTotal = 0;
+        markDirty();
+    }
+
     // ticks of continuous combat (rising forms); not saved
     private int combatTicks;
     private long lastCombatTick = Long.MIN_VALUE / 2;
@@ -1235,6 +1290,7 @@ public class PlayerData {
         CompoundTag m = new CompoundTag();
         mastery.forEach(m::putDouble);
         tag.put("mastery", m);
+        tag.putDouble("godKiXp", godKiXp);
         net.minecraft.nbt.ListTag fl = new net.minecraft.nbt.ListTag();
         for (String f : flags) fl.add(net.minecraft.nbt.StringTag.valueOf(f));
         tag.put("flags", fl);
@@ -1325,6 +1381,7 @@ public class PlayerData {
         mastery.clear();
         CompoundTag m = tag.getCompound("mastery");
         for (String k : m.getAllKeys()) mastery.put(k, m.getDouble(k));
+        godKiXp = tag.getDouble("godKiXp");
         flags.clear();
         net.minecraft.nbt.ListTag fl = tag.getList("flags", net.minecraft.nbt.Tag.TAG_STRING);
         for (int i = 0; i < fl.size(); i++) flags.add(fl.getString(i));
@@ -1422,6 +1479,9 @@ public class PlayerData {
         tag.putBoolean("nearPartner", nearPartner);
         tag.putBoolean("heavyCharging", heavyChargeTicks >= 0);
         tag.putDouble("heavyArmed", heavyArmedMultiplier);
+        tag.putString("transformTarget", transformTarget);
+        tag.putInt("transformTicks", transformTicks);
+        tag.putInt("transformTotal", transformTotal);
         return tag;
     }
 
@@ -1440,6 +1500,9 @@ public class PlayerData {
         nearPartner = tag.getBoolean("nearPartner");
         heavyChargeTicks = tag.getBoolean("heavyCharging") ? 0 : -1;
         heavyArmedMultiplier = tag.getDouble("heavyArmed");
+        transformTarget = tag.getString("transformTarget");
+        transformTicks = tag.getInt("transformTicks");
+        transformTotal = tag.getInt("transformTotal");
         dirty = false;
     }
 }

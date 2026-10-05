@@ -158,6 +158,21 @@ public final class DbzHud implements IGuiOverlay {
             DbzTheme.text(g, font, Component.translatable("hud.dbzenith.hits"), width / 2f + 22 + font.width(n) * scale / 2 + 2, height / 2f - 30, DbzTheme.TEXT, 0.9f);
         }
 
+        // ---------------------------------------------------------- powering up into a form
+        if (d.isTransforming()) {
+            Form target = Forms.byId(d.getTransformTarget());
+            int tc = 0xFF000000 | target.auraColor();
+            float p = Mth.clamp(d.getTransformTicks() / (float) Math.max(1, d.getTransformTotal()), 0, 1);
+            int w = 120, h = 6, x = width / 2 - w / 2, y = height / 2 + 26;
+            float shake = p > 0.7f ? (p - 0.7f) * 4 * Mth.sin(t * 3.1f) : 0;
+            Component label = Component.translatable("hud.dbzenith.powering_up", Component.translatable(target.translationKey()));
+            DbzTheme.text(g, font, label, width / 2f - font.width(label) * 0.8f / 2 + shake, y - 9, tc, 0.8f);
+            DbzTheme.slant(g, x - 1 + shake, y - 1, w + 2, h + 2, 3, 0xF0040508, 0xF0040508);
+            DbzTheme.slantBar(g, x + shake, y, w, h, 3, p, DbzTheme.mix(tc, 0xFFFFFFFF, 0.25f + 0.25f * Mth.sin(t * 0.9f)));
+            DbzTheme.text(g, font, Component.translatable("hud.dbzenith.powering_hint"), width / 2f - font.width(Component.translatable("hud.dbzenith.powering_hint")) * 0.6f / 2,
+                    y + h + 3, DbzTheme.DIM, 0.6f);
+        }
+
         // ---------------------------------------------------------- technique, right of the hotbar
         technique(g, font, d, width / 2 + 114, height - 24, time, t);
     }

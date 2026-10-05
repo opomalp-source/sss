@@ -116,7 +116,7 @@ public final class AnimController {
         if (state.has(PublicStatePacket.MEDITATING)) return Anims.MEDITATE;
         if (state.has(PublicStatePacket.GUARDING)) return Anims.GUARD;
         if (state.has(PublicStatePacket.HEAVY)) return Anims.HEAVY_WINDUP;
-        if (state.has(PublicStatePacket.CHARGING)) return Anims.CHARGE;
+        if (state.has(PublicStatePacket.CHARGING) || state.has(PublicStatePacket.TRANSFORMING)) return Anims.CHARGE;
         if (state.has(PublicStatePacket.FLYING) && !player.onGround()) {
             double dx = player.getX() - player.xo, dz = player.getZ() - player.zo;
             double horizontal = Math.sqrt(dx * dx + dz * dz);

@@ -30,6 +30,8 @@ public final class FormHandler {
         if (form.requiredFlag() != null && !data.hasFlag(form.requiredFlag())) {
             return Component.translatable("form.dbzenith.problem.flag." + form.requiredFlag());
         }
+        int godKi = GodKi.required(form);
+        if (godKi > 1 && GodKi.level(data) < godKi) return Component.translatable("form.dbzenith.problem.god_ki", godKi);
         int level = FormMath.unlockLevel(form);
         if (StatCalculator.level(data) < level) return Component.translatable("form.dbzenith.problem.level", level);
         if (form.parentMasteryRequired() > 0 && data.getMastery(form.parent()) < form.parentMasteryRequired()) {
@@ -44,8 +46,14 @@ public final class FormHandler {
      * otherwise to the first unlocked child of the current form.
      */
     public static boolean transformUp(ServerPlayer player) {
+        return transformUp(player, false);
+    }
+
+    /** @param instant skip the power-up (tests, scripted scenes) */
+    public static boolean transformUp(ServerPlayer player, boolean instant) {
         PlayerData data = ModCapabilities.get(player).orElse(null);
         if (data == null || !player.isAlive()) return false;
+        if (data.isTransforming()) return false;                         // already powering up
         if (com.dbzenith.registry.ModEffects.isKiSealed(player)) {
             player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.dbzenith.ki_sealed"), true);
             return false;
@@ -77,8 +85,75 @@ public final class FormHandler {
             return false;
         }
         if (!player.getAbilities().instabuild) data.setKi(data.getKi() - cost);
-        enter(player, data, next);
+        int time = instant || player.getAbilities().instabuild ? 0 : transformTime(data, next);
+        if (time <= 0) {
+            enter(player, data, next);
+        } else {
+            data.startTransforming(next.id(), time);
+            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8f, 0.6f);
+        }
         return true;
+    }
+
+    /**
+     * Ticks to power up into a form: instant once it is mastered to {@code instantTransformMastery}, otherwise longer
+     * the higher the tier and the less mastered it is.
+     */
+    public static int transformTime(PlayerData data, Form form) {
+        double instant = DBZConfig.SERVER.instantTransformMastery.get();
+        double mastery = data.getMastery(form.id());
+        if (instant <= 0 || mastery >= instant) return 0;
+        double full = DBZConfig.SERVER.transformTimeBase.get() + DBZConfig.SERVER.transformTimePerTier.get() * form.tier();
+        return Math.max(10, (int) Math.round(full * (1.0 - 0.6 * mastery / instant)));
+    }
+
+    /** One tick of powering up: the aura builds, the ground shakes, and at the end the form takes hold. */
+    static void tickTransforming(ServerPlayer player, PlayerData data) {
+        Form target = Forms.byId(data.getTransformTarget());
+        if (!player.isAlive() || target.isBase() || com.dbzenith.registry.ModEffects.isKiSealed(player)) {
+            data.stopTransforming();
+            return;
+        }
+        int t = data.getTransformTicks() + 1;
+        int total = data.getTransformTotal();
+        data.setTransformTicks(t);
+        ServerLevel level = player.serverLevel();
+        float progress = t / (float) total;
+        player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 5, 3, false, false, false));
+        int c = target.auraColor();
+        Vector3f rgb = new Vector3f(((c >> 16) & 0xFF) / 255f, ((c >> 8) & 0xFF) / 255f, (c & 0xFF) / 255f);
+        if (t % 2 == 0) {
+            level.sendParticles(new DustParticleOptions(rgb, 1.2f + progress), player.getX(), player.getY() + 0.2, player.getZ(),
+                    4 + (int) (progress * 8), 0.5 + progress * 0.5, 0.1, 0.5 + progress * 0.5, 0.15);
+        }
+        if (t % 6 == 0) {                                                     // the ground cracks and lifts
+            net.minecraft.world.level.block.state.BlockState below = level.getBlockState(player.blockPosition().below());
+            if (!below.isAir()) {
+                level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, below), player.getX(), player.getY() + 0.1,
+                        player.getZ(), 6 + (int) (progress * 10), 1.2 + progress, 0.05, 1.2 + progress, 0.25);
+            }
+            level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS,
+                    0.25f + progress * 0.35f, 0.5f + progress);
+        }
+        if (t % 20 == 10 && target.lightning()) {
+            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1, player.getZ(), 12, 0.6, 1.0, 0.6, 0.3);
+        }
+        if (t >= total) {
+            data.stopTransforming();
+            if (problem(data, target) == null) {
+                enter(player, data, target);
+                com.dbzenith.network.ImpactPacket.at(player.position().add(0, 1, 0), new net.minecraft.world.phys.Vec3(0, 1, 0),
+                        com.dbzenith.network.ImpactPacket.EXPLOSION, 0.6f + target.tier() * 0.15f, c, player.getId()).send(level);
+            }
+        }
+    }
+
+    /** A hard enough hit breaks a power-up: the ki spent is lost. */
+    public static void interrupt(ServerPlayer player, PlayerData data) {
+        if (!data.isTransforming()) return;
+        data.stopTransforming();
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.8f, 0.8f);
+        player.displayClientMessage(Component.translatable("message.dbzenith.transform_interrupted"), true);
     }
 
     /** Every form between {@code from} (exclusive) and {@code to} (inclusive) is unlocked. */
@@ -108,6 +183,10 @@ public final class FormHandler {
     /** Shift+transform key: drop one tier (to the parent form). */
     public static void revertOne(ServerPlayer player) {
         ModCapabilities.get(player).ifPresent(data -> {
+            if (data.isTransforming()) {
+                data.stopTransforming();
+                return;
+            }
             Form current = Forms.byId(data.getFormId());
             if (current.isBase() || current.trigger() != Form.Trigger.MANUAL) return;
             enter(player, data, Forms.byId(current.parent()));
@@ -120,11 +199,12 @@ public final class FormHandler {
 
     /** Called every server tick from KiTicker. */
     public static void tick(ServerPlayer player, PlayerData data, long gameTime) {
+        if (data.isTransforming()) tickTransforming(player, data);
         Form form = Forms.byId(data.getFormId());
         if (form.isBase()) return;
         double mastery = data.getMastery(form.id());
-        double kiDrain = FormMath.masteredDrain(form.kiDrainPercent(), mastery) * data.getDerived().maxKi() / 100.0 / 20.0;
-        double staDrain = FormMath.masteredDrain(form.staminaDrainPercent(), mastery) * data.getDerived().maxStamina() / 100.0 / 20.0;
+        double kiDrain = FormMath.masteredDrain(form.kiDrainPercent(), mastery) * GodKi.drainFactor(data, form) * data.getDerived().maxKi() / 100.0 / 20.0;
+        double staDrain = FormMath.masteredDrain(form.staminaDrainPercent(), mastery) * GodKi.drainFactor(data, form) * data.getDerived().maxStamina() / 100.0 / 20.0;
         if (!player.getAbilities().instabuild) {
             data.setKi(data.getKi() - kiDrain);
             data.setStamina(data.getStamina() - staDrain);

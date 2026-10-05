@@ -90,7 +90,7 @@ public class LifeScreen extends Screen {
         if (s != null) { // preview at once; the server's public state confirms it
             ClientPublicStates.put(new PublicStatePacket(s.entityId(), s.flags(), s.release(), s.auraColor(), s.form(), s.overdrive(),
                     s.race(), s.bodyType(), s.hairStyle(), s.hairColor(), s.eyeColor(), s.battlePower(),
-                    scar | tattoo << 4 | (raceLook ? PublicStatePacket.RACE_LOOK : 0), s.hairCode(), s.skinTone(), s.height(), s.variant()));
+                    scar | tattoo << 4 | (raceLook ? PublicStatePacket.RACE_LOOK : 0), s.hairCode(), s.skinTone(), s.height(), s.variant(), s.transformTarget()));
         }
     }
 

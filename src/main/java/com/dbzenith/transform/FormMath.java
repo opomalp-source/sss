@@ -31,6 +31,7 @@ public final class FormMath {
             out = 1.0 + (m - 1.0) * (1.0 + DBZConfig.SERVER.masteryMaxMultiplierBonus.get() * masteryFrac);
         }
         if (form.rising() > 0) out = 1.0 + (out - 1.0) * (1.0 + form.rising() * risingFraction(data));
+        out *= GodKi.powerFactor(data, form);
         return out;
     }
 

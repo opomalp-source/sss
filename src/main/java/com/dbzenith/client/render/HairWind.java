@@ -52,9 +52,9 @@ public final class HairWind {
         double seed = p.getId() * 1.7;
         tx += Math.sin(time * 0.071 + seed) * 0.12;                                   // breathing sway
         tz += 0.08 + Math.sin(time * 0.053 + seed) * 0.08;
-        boolean aura = state != null && (state.has(PublicStatePacket.CHARGING) || transformed);
+        boolean aura = state != null && (state.powering() || transformed);
         if (aura) {                                                                   // the aura's updraft, flickering
-            double heat = state.has(PublicStatePacket.CHARGING) ? 1.3 : 0.55;
+            double heat = state.powering() ? 1.3 : 0.55;
             ty -= heat * (0.8 + 0.2 * Math.sin(time * 0.9 + seed));
             tx += Math.sin(time * 1.37 + seed) * 0.25 * heat;
             tz += Math.sin(time * 1.11 + seed * 2) * 0.25 * heat;

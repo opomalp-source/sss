@@ -39,7 +39,7 @@ public final class ClientFormEffects {
             if (state == null || player.isInvisible()) continue;
             Form form = Forms.byId(state.form());
             if (form == Forms.GREAT_APE) continue;
-            boolean powering = state.has(PublicStatePacket.CHARGING) || state.has(PublicStatePacket.HEAVY);
+            boolean powering = state.powering();
             double h = player.getBbHeight();
             int c = state.auraColor();
 

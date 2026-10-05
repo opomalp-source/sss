@@ -30,7 +30,7 @@ public final class AuraEdgeOverlay implements IGuiOverlay {
         if (enabled && mc.options.getCameraType().isFirstPerson()) {
             PublicStatePacket state = ClientPublicStates.get(mc.player.getId());
             if (state != null) {
-                boolean powering = state.has(PublicStatePacket.CHARGING) || state.has(PublicStatePacket.HEAVY);
+                boolean powering = state.powering();
                 Form form = Forms.byId(state.form());
                 boolean held = !form.isBase() || state.overdrive() > 0;
                 if ((powering || held) && form != Forms.GREAT_APE) {

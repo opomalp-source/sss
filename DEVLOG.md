@@ -385,3 +385,20 @@
 ### Verified
 - 118 GameTests green.
 - Front and back screenshots of all presets. Mid-fall shots show Sage and Legend mane lifting and streaming.
+
+## 2026-10-05 — Session 3 (cont.): CX-3 leftovers, power-ups and God Ki (v0.14.2)
+- **Power-ups:** below 75% mastery, the transform key starts powering up instead of switching at once.
+  - The aura roars in the new form's colour, which `Aura.color` now shows.
+  - The ground cracks and lifts, and lightning forms spark. A rising rumble plays.
+  - Hair and eyes flicker into the new form, faster and for longer each time as the power builds.
+  - A HUD bar ("POWERING UP: <form>") fills, and the player strikes the charge pose.
+  - A hard hit (3% of max body) interrupts it, and so does the revert key. Finishing it plays a burst sized to the form's tier.
+  - `PublicStatePacket` gains the TRANSFORMING flag, `transformTarget` and `powering()` (network protocol 21).
+- **God Ki levels (`GodKi`):** 1-10, from experience gained in god forms and while meditating, and saved.
+  - Effects: stronger and cheaper god forms, and level gates on the highest god forms. It also adds a level edge between god ki users.
+  - It shows on the stat screen with a progress bar. `/dbz godki <targets> <level>`.
+- **Fixed:** a duplicate `screen.dbzenith.alignment` lang key made the stat screen's alignment read just "Alignment".
+- **Tests (120):** `unmasteredFormsPowerUpAndHitsBreakThem` and `godKiGrowsInGodFormsAndGatesTheHighest`. FormTests transform instantly.
+
+### Verified
+- Screenshots in survival: the aura, the debris, the HUD bar, the hair flicker, and the form taking hold with the cut-in.

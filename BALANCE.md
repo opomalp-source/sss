@@ -94,3 +94,11 @@ Android ki absorption, Majin kill-heal) tip close duels; whether the pacing targ
 - New races have a 1.25x starter form at level 100, so the level-100 race median stays where the pass-2 targets put it.
 - New tier-4 forms (Crimson Sovereign, Ultimate Perfect, Tuffle King, Apex Mutation) unlock at 1500, alongside the other races' late tiers.
 - `Races2Tests.everyVariantStaysInBalance`: at levels 500, 1000, 1500 and 2000, every variant's best form is within 0.65-1.45x the median variant, and at least x4.5 by level 2000.
+
+## Transform time and God Ki (v0.14.2)
+- **Power-up time:** `(transformTimeBase + transformTimePerTier * tier) * (1 - 0.6 * mastery / 75)` ticks, at least 10, and instant at 75% mastery (`instantTransformMastery`). With the defaults (24 + 14 per tier), an unmastered tier 1 takes 38 ticks (1.9 s), tier 3 takes 66 ticks (3.3 s), and tier 5 takes 94 ticks (4.7 s). Creative mode, tests and scripted scenes are instant.
+- **Interruption:** a hit for at least 3% of max body (`transformInterruptDamage`) breaks a power-up, and the ki already spent is lost. While powering up, you are slowed (Slowness IV).
+- **God Ki:** awakening it (the ritual quest or a wish) is level 1. Experience for level n is `300 * (n - 1)^2` seconds: 5 minutes for level 2, 20 for 3, 80 for 5, and 6.75 hours for 10. You gain 1 a second in god forms (`godKiXpPerSecond`), and half that while meditating with god ki.
+- **Per level past the first:** god forms gain +2% power (+18% at level 10) and drain 5% less (-45% at level 10).
+- **Between god ki users:** the god ki edge becomes `godKiEdge * 0.08` per level of difference, capped at 5 levels (±10% with the default edge).
+- **Required levels:** god forms ask for level 1, those unlocked at 1500 or later for level 2, those grown out of a god form (Blue) for level 3, and god forms unlocked at 1800 or later for level 5.

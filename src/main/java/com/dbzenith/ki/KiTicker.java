@@ -70,6 +70,7 @@ public final class KiTicker {
 
         com.dbzenith.combat.GuardRules.tick(data, now);
         if (now % 20 == 0) com.dbzenith.race.Milestones.tick(player, data);
+        if (now % 20 == 0) com.dbzenith.transform.GodKi.tickSecond(player, data);
         boolean fighting = now - data.getLastCombatTick() < 200;                      // ten seconds since the last blow
         int before = data.getCombatTicks();
         data.setCombatTicks(fighting ? before + 1 : 0);

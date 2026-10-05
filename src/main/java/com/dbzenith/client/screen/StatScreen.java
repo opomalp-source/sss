@@ -115,6 +115,15 @@ public class StatScreen extends Screen {
             g.drawString(font, row[1], rx + 120 - font.width(row[1]), ry, TEXT);
             ry += 12;
         }
+        int godKi = com.dbzenith.transform.GodKi.level(d);
+        if (godKi > 0) {                                        // divine ki: level and the way to the next
+            int gold = 0xFFFFE08A;
+            g.drawString(font, Component.translatable("screen.dbzenith.god_ki"), rx, ry, gold);
+            String lv = Component.translatable("screen.dbzenith.god_ki_level", godKi, com.dbzenith.transform.GodKi.MAX).getString();
+            g.drawString(font, lv, rx + 120 - font.width(lv), ry, gold);
+            DbzTheme.slant(g, rx, ry + 10, 120, 3, 1, 0xC0101018, 0xC0101018);
+            DbzTheme.slantBar(g, rx, ry + 10, 120, 3, 1, (float) com.dbzenith.transform.GodKi.progress(d), gold);
+        }
         super.render(g, mouseX, mouseY, partialTick);
     }
 

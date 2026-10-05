@@ -10,6 +10,7 @@ import com.dbzenith.stats.Attribute;
 import com.dbzenith.stats.Race;
 import com.dbzenith.transform.FalseMoonEntity;
 import com.dbzenith.transform.FormHandler;
+import com.dbzenith.transform.GodKi;
 import com.dbzenith.transform.GreatApe;
 import com.dbzenith.transform.FormMath;
 import com.dbzenith.transform.Forms;
@@ -65,12 +66,79 @@ public final class FormTests {
     }
 
     @GameTest(template = EMPTY)
+    public static void unmasteredFormsPowerUpAndHitsBreakThem(GameTestHelper helper) {
+        ServerPlayer p = saiyan(helper, 600);
+        PlayerData d = ModCapabilities.getOrThrow(p);
+        int time = FormHandler.transformTime(d, Forms.SUPER_SAIYAN);
+        helper.assertTrue(time >= 20, "an unmastered Super Saiyan takes time: " + time);
+        helper.assertTrue(FormHandler.transformTime(d, Forms.SUPER_SAIYAN_3) > time, "higher tiers take longer");
+        helper.assertTrue(FormHandler.transformUp(p) && d.isTransforming() && !d.isTransformed(), "the key starts powering up");
+        helper.assertTrue(!FormHandler.transformUp(p), "one power-up at a time");
+        for (int t = 1; t < time; t++) FormHandler.tick(p, d, t);
+        helper.assertTrue(!d.isTransformed(), "not yet");
+        FormHandler.tick(p, d, time);
+        helper.assertTrue("super_saiyan".equals(d.getFormId()) && !d.isTransforming(), "and then the form takes hold, got " + d.getFormId());
+
+        FormHandler.revertToBase(p, d);
+        d.refill();
+        FormHandler.transformUp(p);
+        FormHandler.tick(p, d, 1);
+        FormHandler.interrupt(p, d);
+        for (int t = 2; t <= time + 5; t++) FormHandler.tick(p, d, t);
+        helper.assertTrue(!d.isTransformed() && !d.isTransforming(), "an interrupted power-up comes to nothing");
+
+        d.refill();
+        d.setMastery("super_saiyan", 80);
+        helper.assertTrue(FormHandler.transformTime(d, Forms.SUPER_SAIYAN) == 0, "mastered past 75%: instant");
+        FormHandler.transformUp(p);
+        helper.assertTrue("super_saiyan".equals(d.getFormId()), "instant transformation");
+        TestPlayers.remove(helper, p);
+        helper.succeed();
+    }
+
+    @GameTest(template = EMPTY)
+    public static void godKiGrowsInGodFormsAndGatesTheHighest(GameTestHelper helper) {
+        ServerPlayer p = saiyan(helper, 1800);
+        PlayerData d = ModCapabilities.getOrThrow(p);
+        helper.assertTrue(GodKi.level(d) == 0, "no god ki without the awakening");
+        d.setFlag(GodKi.FLAG, true);
+        helper.assertTrue(GodKi.level(d) == 1, "awakening is level 1");
+        helper.assertTrue(GodKi.required(Forms.SUPER_SAIYAN_GOD) == 1 && GodKi.required(Forms.SUPER_SAIYAN_BLUE) == 3
+                && GodKi.required(Forms.SUPER_SAIYAN) == 0, "god forms ask for god ki levels");
+        d.setMastery("super_saiyan_god", 60);
+        helper.assertTrue(FormHandler.problem(d, Forms.SUPER_SAIYAN_GOD) == null, "level 1 opens Super Saiyan God");
+        helper.assertTrue(FormHandler.problem(d, Forms.SUPER_SAIYAN_BLUE) != null, "but Blue needs deeper god ki");
+
+        FormHandler.enter(p, d, Forms.SUPER_SAIYAN_GOD);
+        d.recomputeIfStale();
+        double melee = d.getDerived().meleeDamage();
+        for (int s = 0; s < 300; s++) GodKi.tickSecond(p, d);
+        helper.assertTrue(GodKi.level(d) == 2, "five minutes as a god: level 2, got " + GodKi.level(d));
+        d.recomputeIfStale();
+        helper.assertTrue(d.getDerived().meleeDamage() > melee, "deeper god ki strengthens god forms");
+        helper.assertTrue(GodKi.drainFactor(d, Forms.SUPER_SAIYAN_GOD) < 1 && GodKi.drainFactor(d, Forms.SUPER_SAIYAN) == 1,
+                "and makes them cheaper to hold, only them");
+        d.setGodKiXp(GodKi.xpFor(3));
+        helper.assertTrue(FormHandler.problem(d, Forms.SUPER_SAIYAN_BLUE) == null, "level 3 opens Blue");
+
+        FormHandler.revertToBase(p, d);
+        double xp = d.getGodKiXp();
+        GodKi.tickSecond(p, d);
+        helper.assertTrue(d.getGodKiXp() == xp, "no growth outside god forms (or meditation)");
+        PlayerData copy = new PlayerData();
+        copy.load(d.save());
+        helper.assertTrue(GodKi.level(copy) == 3, "god ki is saved");
+        TestPlayers.remove(helper, p);
+        helper.succeed();
+    }
+
+    @GameTest(template = EMPTY)
     public static void formMultipliesCombatStatsNotPools(GameTestHelper helper) {
         ServerPlayer p = saiyan(helper, 600);
         PlayerData d = ModCapabilities.getOrThrow(p);
         double melee = d.getDerived().meleeDamage();
         double maxKi = d.getDerived().maxKi();
-        helper.assertTrue(FormHandler.transformUp(p), "should transform");
+        helper.assertTrue(FormHandler.transformUp(p, true), "should transform");
         helper.assertTrue("super_saiyan".equals(d.getFormId()), "should be Super Saiyan, was " + d.getFormId());
         d.recomputeIfStale();
         helper.assertTrue(Math.abs(d.getDerived().meleeDamage() / melee - 2.0) < 1e-6, "SSJ doubles melee: " + d.getDerived().meleeDamage() / melee);
@@ -83,7 +151,7 @@ public final class FormTests {
     public static void drainEndsFormAtZeroKi(GameTestHelper helper) {
         ServerPlayer p = saiyan(helper, 600);
         PlayerData d = ModCapabilities.getOrThrow(p);
-        FormHandler.transformUp(p);
+        FormHandler.transformUp(p, true);
         double ki = d.getKi();
         KiTicker.tick(p, d);
         helper.assertTrue(d.getKi() < ki, "forms drain ki");
@@ -98,7 +166,7 @@ public final class FormTests {
     public static void masteryGrowsAndReducesDrain(GameTestHelper helper) {
         ServerPlayer p = saiyan(helper, 600);
         PlayerData d = ModCapabilities.getOrThrow(p);
-        FormHandler.transformUp(p);
+        FormHandler.transformUp(p, true);
         for (int t = 20; t <= 200; t += 20) FormHandler.tick(p, d, t);
         helper.assertTrue(d.getMastery("super_saiyan") > 0, "time in form should build mastery");
         double raw = Forms.SUPER_SAIYAN.kiDrainPercent();
@@ -117,7 +185,7 @@ public final class FormTests {
         PlayerData d = ModCapabilities.getOrThrow(p);
         d.setMastery("super_saiyan", 60);
         d.setTargetForm("super_saiyan_2");
-        helper.assertTrue(FormHandler.transformUp(p), "should transform");
+        helper.assertTrue(FormHandler.transformUp(p, true), "should transform");
         helper.assertTrue("super_saiyan_2".equals(d.getFormId()), "target form should be entered directly, got " + d.getFormId());
         FormHandler.revertOne(p);
         helper.assertTrue("super_saiyan".equals(d.getFormId()), "revert drops one tier, got " + d.getFormId());
@@ -147,7 +215,7 @@ public final class FormTests {
         d.setMastery("super_saiyan", 0);
         d.setAttribute(Attribute.STRENGTH, 700);
         d.recomputeIfStale();
-        FormHandler.transformUp(p);
+        FormHandler.transformUp(p, true);
         helper.assertTrue(!Overdrive.raise(p), "overdrive does not stack with Super Saiyan");
         TestPlayers.remove(helper, p);
         helper.succeed();

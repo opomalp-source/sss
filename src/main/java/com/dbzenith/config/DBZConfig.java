@@ -136,6 +136,11 @@ public final class DBZConfig {
         public final ForgeConfigSpec.IntValue milestoneLevel;
         public final ForgeConfigSpec.DoubleValue transformKiCostPercent;
         public final ForgeConfigSpec.DoubleValue masteryGainPerSecond;
+        public final ForgeConfigSpec.DoubleValue instantTransformMastery;
+        public final ForgeConfigSpec.IntValue transformTimeBase;
+        public final ForgeConfigSpec.IntValue transformTimePerTier;
+        public final ForgeConfigSpec.DoubleValue transformInterruptDamage;
+        public final ForgeConfigSpec.DoubleValue godKiXpPerSecond;
         public final ForgeConfigSpec.DoubleValue masteryMaxMultiplierBonus;
         public final ForgeConfigSpec.DoubleValue masteryMaxDrainReduction;
         public final ForgeConfigSpec.DoubleValue techniqueMasteryPerUse;
@@ -420,6 +425,16 @@ public final class DBZConfig {
                     .defineInRange("transformKiCostPercent", 5.0, 0.0, 100.0);
             masteryGainPerSecond = b.comment("Form mastery (0-100) gained per second in a form, before spirit and tier scaling")
                     .defineInRange("masteryGainPerSecond", 0.05, 0.0, 100.0);
+            instantTransformMastery = b.comment("Mastery of a form (0-100) at which transforming into it becomes instant; below it the transformation powers up and a hit can interrupt it")
+                    .defineInRange("instantTransformMastery", 75.0, 0.0, 100.0);
+            transformTimeBase = b.comment("Ticks to power up into an unmastered tier-0 form")
+                    .defineInRange("transformTimeBase", 24, 0, 400);
+            transformTimePerTier = b.comment("Extra power-up ticks per form tier")
+                    .defineInRange("transformTimePerTier", 14, 0, 400);
+            transformInterruptDamage = b.comment("A hit for at least this fraction of max health interrupts a transformation")
+                    .defineInRange("transformInterruptDamage", 0.03, 0.0, 1.0);
+            godKiXpPerSecond = b.comment("God ki experience per second spent in a god form (half while meditating with god ki)")
+                    .defineInRange("godKiXpPerSecond", 1.0, 0.0, 1000.0);
             masteryMaxMultiplierBonus = b.comment("At 100 mastery a form's bonus (multiplier - 1) grows by this fraction")
                     .defineInRange("masteryMaxMultiplierBonus", 0.2, 0.0, 10.0);
             masteryMaxDrainReduction = b.comment("At 100 mastery a form's drain is reduced by this fraction")

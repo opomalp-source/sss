@@ -149,6 +149,10 @@ public final class CombatEvents {
 
         if (attackerData != null && dealt > 0) attackerData.markCombat(victim.level().getGameTime());
         if (victimData != null && source.getEntity() != null) victimData.markCombat(victim.level().getGameTime());
+        if (victimData != null && victimData.isTransforming() && victim instanceof net.minecraft.server.level.ServerPlayer sp
+                && dealt >= victimData.getDerived().maxBody() * DBZConfig.SERVER.transformInterruptDamage.get()) {
+            com.dbzenith.transform.FormHandler.interrupt(sp, victimData);     // caught mid power-up
+        }
 
         // 3) training points for the attacker
         if (attackerData != null && attacker != victim && dealt > 0) {
@@ -161,8 +165,12 @@ public final class CombatEvents {
     public static double godKiFactor(PlayerData attacker, PlayerData victim) {
         boolean a = attacker != null && attacker.hasFlag("god_ki");
         boolean v = victim != null && victim.hasFlag("god_ki");
-        if (a == v) return 1.0;
         double edge = DBZConfig.SERVER.godKiEdge.get();
+        if (a && v) {                                           // between gods, the deeper god ki has a smaller edge
+            int diff = Math.max(-5, Math.min(5, com.dbzenith.transform.GodKi.level(attacker) - com.dbzenith.transform.GodKi.level(victim)));
+            return 1.0 + edge * 0.08 * diff;
+        }
+        if (a == v) return 1.0;
         return a ? 1.0 + edge : 1.0 - edge;
     }
 

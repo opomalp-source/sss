@@ -47,7 +47,7 @@ public final class AuraRenderer {
         if (player.isInvisible() || player.isSpectator()) return;
         PublicStatePacket state = ClientPublicStates.get(player.getId());
         if (state == null) return;
-        boolean powering = state.has(PublicStatePacket.CHARGING) || state.has(PublicStatePacket.HEAVY);
+        boolean powering = state.powering();
         Form form = Forms.byId(state.form());
         boolean held = !form.isBase() || state.overdrive() > 0;
         if (!powering && !held) return;

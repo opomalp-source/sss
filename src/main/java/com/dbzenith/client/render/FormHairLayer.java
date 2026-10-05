@@ -49,13 +49,33 @@ public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         return FORM_HAIR.computeIfAbsent(form.id() + "|" + baseCode, k -> HairCode.forForm(baseCode, form));
     }
 
+    /** When each player began powering up (client ticks), for the flicker. */
+    private static final Map<Integer, Float> POWERING_SINCE = new java.util.HashMap<>();
+
+    /**
+     * The form whose hair and eyes show: while powering up, the new form flashes through, faster and longer as the
+     * power builds.
+     */
+    static Form flicker(AbstractClientPlayer player, PublicStatePacket state, float age) {
+        Form current = Forms.byId(state.form());
+        if (!state.has(PublicStatePacket.TRANSFORMING) || !Forms.exists(state.transformTarget())) {
+            POWERING_SINCE.remove(player.getId());
+            return current;
+        }
+        float since = POWERING_SINCE.computeIfAbsent(player.getId(), k -> age);
+        float e = Math.max(0, age - since);
+        double phase = Math.pow(e, 1.45) * 0.03;
+        double on = Math.min(0.85, 0.15 + e / 120.0);                         // the new form holds a little longer each flash
+        return phase % 1.0 < on ? Forms.byId(state.transformTarget()) : current;
+    }
+
     @Override
     public void render(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player, float limbSwing,
                        float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
         if (player.isInvisible()) return;
         PublicStatePacket state = ClientPublicStates.get(player.getId());
         if (state == null) return;
-        Form form = Forms.byId(state.form());
+        Form form = flicker(player, state, ageInTicks);
         boolean formHair = form.hairStyle() != Form.HairStyle.NONE && form.hairColor() >= 0;
         String code = hairFor(state.hairCode(), form);
         int hairColor = form.hairColor() >= 0 ? form.hairColor() : state.hairColor();

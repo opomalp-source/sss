@@ -217,6 +217,16 @@ public final class DBZCommand {
                                                     double v = DoubleArgumentType.getDouble(ctx, "value");
                                                     return apply(ctx, "Set " + id + " mastery " + v + " for", d -> d.setMastery(id, v));
                                                 })))))
+                .then(Commands.literal("godki")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("level", IntegerArgumentType.integer(0, com.dbzenith.transform.GodKi.MAX))
+                                        .executes(ctx -> {
+                                            int lv = IntegerArgumentType.getInteger(ctx, "level");
+                                            return apply(ctx, "Set god ki level " + lv + " for", d -> {
+                                                d.setFlag(com.dbzenith.transform.GodKi.FLAG, lv > 0);
+                                                d.setGodKiXp(com.dbzenith.transform.GodKi.xpFor(lv));
+                                            });
+                                        }))))
                 .then(Commands.literal("flag")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("flag", StringArgumentType.word())
