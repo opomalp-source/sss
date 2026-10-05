@@ -59,8 +59,9 @@ public final class LifeSim {
     /** How fast a race ages (years per configured period). Androids and Majins don't age. */
     public static double agingRate(Race race) {
         return switch (race) {
-            case ANDROID, MAJIN -> 0.0;
+            case ANDROID, MAJIN, BIO_ANDROID -> 0.0;
             case NAMEKIAN, FROST_DEMON -> 0.25;
+            case VAMPIRE, CORE_PERSON -> 0.1;          // centuries pass like decades
             default -> 1.0;
         };
     }

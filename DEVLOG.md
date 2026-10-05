@@ -328,3 +328,44 @@
 ### Verified
 - 113 GameTests green, 6 new: meter, break and refill; parry (once per raise, never on ki); a timed guard deflects a real blast; two zombie casters' beams lock and the 10× stronger one wins; every Ki Creator design stays in the balance bands; creator rules (names, refusals, persistence, delete).
 - Screenshots reviewed: guard pose and meter, the three new impacts, the Ki Creator, a player-vs-armour-stand beam struggle with the tug bar. The bar was moved above the hotbar after the fighter covered it in third person.
+
+## 2026-10-05 — Session 3: Content expansion CX-1 to CX-3 (v0.14.0)
+
+### Research
+- 36 pages of the Dragon Block V wiki and the user's pasted design notes, written up with a 12-milestone plan in `docs/CONTENT_EXPANSION.md`.
+
+### CX-1 Settings
+- `SettingsScreen` with HUD, Effects, Camera and Controls tabs: tooltips, per-tab reset, a key-bindings link. It opens from the pause menu (`SettingsEntry`), the mod list's Config button and a gear slice on the wheel.
+- New client options: `hudScale`, `auraDetail` and `fovEffects`.
+
+### CX-2 Races v2
+- **New races:** Vampire, Bio-Android, Tuffle, Gen Alien and Core Person, each with traits, a racial technique (Blood Drain is a new LIFE_DRAIN effect) and aging.
+- **`race.Variant` (39 variants):**
+  - Defaults and creation clans: Primal Saiyan; Namekian Warrior, Dragon and Demon clans; Metal Frost Demon; Vampire Noble and Feral; Bio Apex and Swarm; Tuffle Scientist and Parasite; Gen Alien Heavyworlder, Voidborn and Swiftkin; Core Person Kai and Demon.
+  - Rare destinies: Legendary, Legendary Primal, Mutant and Corrupted. They are rolled at creation (`races.rareVariantChance` 5%) and awaken at the first milestone (`races.milestoneLevel` 150) with a title, a thunderclap and a burst (`Milestones`).
+  - Paths, chosen at the milestone on `PathChoiceScreen`: Half-Saiyan New Generation, Future Lineage and Awakened Evolution; Human Ancient Hermit, Peak Human and Triclops Descendant.
+- **Variant effects:** a variant can change the aura colour, the head feature, the race skin and the forms. PlayerData stores `variant` and `destiny`, and the public state carries the variant (protocol 20).
+- **Commands:** `/dbz variant`.
+- **Art:**
+  - Skins: Vampire, Bio-Android, Tuffle, Gen Alien, Kai, Core Demon, Metal and Mutant Frost Demon, Corrupted Majin, Demon-clan Namekian.
+  - New 3D features: pointed ears, demon horns, bio wings.
+- **Creation screen:** a compact race column for 13 races and a Lineage row.
+
+### CX-3 Forms v2
+- About 70 new forms:
+  - Legendary: Wrathful, C-Type, Full Power, Controlled.
+  - Primal and Awakened: Golden Ape, SSJ4, SSJ4 Full Power, SSJ4 Limit Breaker.
+  - Legendary Primal: seven forms.
+  - Half-Saiyan paths: SSJ Rage, Beast Awakening.
+  - Human paths: Surge, Surge Overflow, Godly Surge; No Ego, Godly Ego; Inner, Awakened and Godly Eye.
+  - Namekian clans: Warlord, Dragon Sage, Demon Namekian, Demon King.
+  - Frost Demon: Mutant Overlord and God; Metal Shell, Overclock, God Core.
+  - Corrupted Majin: Pure Corruption.
+  - New races: six-tier lines each, including starters.
+- **Form model:** forms can be gated to or away from variants (`only`, `except`), take DBV multipliers through `FormScale`, grow with mastery (`dbv(min, max)`), and rise in combat (`rising`). PlayerData tracks combat ticks and invalidates derived stats as a rising form builds.
+- **Balance:** see BALANCE.md. `Races2Tests` (5) covers completeness, balance for every variant, destinies, paths, growth and rising.
+
+### Verified
+- 118 GameTests green.
+- Screenshots reviewed: every new race and variant skin and feature, Legendary Full Power, SSJ4, Blood Rush, the Tuffle cut-in, the path choice, settings.
+- Fixed: Gen Alien's checkered skull, SSJ4 names drawn near-black, the path subtitle overflowing.

@@ -58,7 +58,7 @@ public class FormScreen extends Screen {
     }
 
     private void collect(String parentId, int depth, PlayerData d) {
-        for (Form f : Forms.children(parentId, d.getRace())) {
+        for (Form f : Forms.children(parentId, d.getRace(), d.getVariant())) {
             entries.add(new Entry(f, depth));
             collect(f.id(), depth + 1, d);
         }

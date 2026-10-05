@@ -38,6 +38,7 @@ public class CharacterCreationScreen extends Screen {
     private static final int ROW_COLOR = 154, ROW_EYES = 167, ROW_SKIN = 180;
 
     private Race race = Race.SAIYAN;
+    private com.dbzenith.race.Variant variant = com.dbzenith.race.Variant.SAIYAN;
     private FightingPath path = FightingPath.HYBRID;
     private PlayerData.BodyType body = PlayerData.BodyType.NORMAL;
     private int preset = HairCode.Preset.SPIKY.ordinal();
@@ -70,7 +71,21 @@ public class CharacterCreationScreen extends Screen {
             addRenderableWidget(ThemedButton.of(Component.translatable(r.translationKey()), b -> {
                 race = r;
                 rebuild();
-            }).bounds(left + 8, top + 30 + i * 21, 96, 18).build().selected(r == race));
+            }).bounds(left + 8, top + 28 + i * 15, 96, 14).build().selected(r == race));
+        }
+
+        int vx = left + 112;
+        java.util.List<com.dbzenith.race.Variant> lineages = com.dbzenith.race.Variant.creationChoices(race);
+        if (!lineages.contains(variant)) variant = com.dbzenith.race.Variant.defaultFor(race);
+        if (lineages.size() > 1) {
+            for (int i = 0; i < lineages.size(); i++) {
+                com.dbzenith.race.Variant v = lineages.get(i);
+                addRenderableWidget(ThemedButton.of(Component.translatable(v.translationKey()), b -> {
+                    variant = v;
+                    rebuild();
+                }).bounds(vx + 40 + i * 58, top + 82, 56, 15).tooltip(net.minecraft.client.gui.components.Tooltip.create(
+                        Component.translatable(v.descriptionKey()))).build().selected(v == variant));
+            }
         }
 
         int mx = left + 112;
@@ -132,14 +147,14 @@ public class CharacterCreationScreen extends Screen {
         int flags = Races.of(race).tail() ? PublicStatePacket.TAIL : 0;
         ClientPublicStates.put(new PublicStatePacket(minecraft.player.getId(), flags, 50, Races.of(race).auraColor(),
                 PlayerData.BASE_FORM, 0, race.ordinal(), body.ordinal(), 0, hairColor, eyeColor, 0L, PublicStatePacket.RACE_LOOK,
-                hairCode, skinTone, stature));
+                hairCode, skinTone, stature, variant.ordinal()));
         minecraft.player.refreshDimensions();
     }
 
     private void confirm() {
         confirmed = true;
         ModNetwork.sendToServer(new CreateCharacterPacket(new CharacterCreation.Choices(race, path, body, hairCode, hairColor, eyeColor,
-                alignment, skinTone, stature)));
+                alignment, skinTone, stature, variant.id())));
         minecraft.setScreen(null);
     }
 
@@ -185,7 +200,8 @@ public class CharacterCreationScreen extends Screen {
         int mx = left + 112;
         g.drawString(font, Component.translatable(race.translationKey()), mx, top + 30, HEADER);
         List<FormattedCharSequence> lines = font.split(Component.translatable(Races.of(race).descriptionKey()), 170);
-        for (int i = 0; i < Math.min(lines.size(), 5); i++) g.drawString(font, lines.get(i), mx, top + 41 + i * 10, TEXT);
+        for (int i = 0; i < Math.min(lines.size(), 4); i++) g.drawString(font, lines.get(i), mx, top + 41 + i * 10, TEXT);
+        if (com.dbzenith.race.Variant.creationChoices(race).size() > 1) label(g, "screen.dbzenith.lineage", mx, top + 86);
 
         label(g, "screen.dbzenith.path", mx, top + 104);
         label(g, "screen.dbzenith.body", mx, top + 122);

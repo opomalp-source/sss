@@ -152,7 +152,7 @@ public final class RaceTests {
         int spi = d.getAttribute(Attribute.SPIRIT);
         int con = d.getAttribute(Attribute.CONSTITUTION);
         CharacterCreation.Choices c = new CharacterCreation.Choices(Race.NAMEKIAN, FightingPath.SPIRITUALIST,
-                PlayerData.BodyType.BULKY, com.dbzenith.appearance.HairCode.Preset.MOHAWK.code(), 0x40A040, 0xFF0000, -30, 0xC08060, 140);
+                PlayerData.BodyType.BULKY, com.dbzenith.appearance.HairCode.Preset.MOHAWK.code(), 0x40A040, 0xFF0000, -30, 0xC08060, 140, "demon_clan");
         helper.assertTrue(CharacterCreation.create(d, c), "first creation succeeds");
         helper.assertTrue(d.getRace() == Race.NAMEKIAN && d.getPath() == FightingPath.SPIRITUALIST && d.isCharacterCreated(), "choices applied");
         helper.assertTrue(d.getAttribute(Attribute.SPIRIT) == spi + Races.of(Race.NAMEKIAN).startBonus(Attribute.SPIRIT), "racial start bonus");

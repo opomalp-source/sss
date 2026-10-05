@@ -318,6 +318,35 @@ public class PlayerData {
         return eyeColor;
     }
 
+    // ------------------------------------------------------------------ race variant (race.Variant)
+
+    private String variant = "";       // "" = the race's default
+    private String destiny = "";       // a rare variant rolled at creation, hidden until the first milestone
+
+    public com.dbzenith.race.Variant getVariant() {
+        return com.dbzenith.race.Variant.byId(variant, race);
+    }
+
+    public void setVariant(com.dbzenith.race.Variant v) {
+        String id = v == null || v.race() != race ? "" : v.id();
+        if (!id.equals(variant)) {
+            variant = id;
+            markDirty();
+        }
+    }
+
+    public String getDestiny() {
+        return destiny;
+    }
+
+    public void setDestiny(String d) {
+        String v = d == null ? "" : d;
+        if (!v.equals(destiny)) {
+            destiny = v;
+            markDirty();
+        }
+    }
+
     // ------------------------------------------------------------------ Ki Creator designs (skill.CustomTechniques)
 
     private final com.dbzenith.skill.CustomTechniques.Spec[] customSpecs = new com.dbzenith.skill.CustomTechniques.Spec[com.dbzenith.skill.CustomTechniques.MAX_SLOTS];
@@ -953,6 +982,33 @@ public class PlayerData {
         return guarding;
     }
 
+    // ticks of continuous combat (rising forms); not saved
+    private int combatTicks;
+    private long lastCombatTick = Long.MIN_VALUE / 2;
+
+    /** Hit someone or got hit: the combat clock keeps running. */
+    public void markCombat(long now) {
+        lastCombatTick = now;
+    }
+
+    public long getLastCombatTick() {
+        return lastCombatTick;
+    }
+
+    public int getCombatTicks() {
+        return combatTicks;
+    }
+
+    public void setCombatTicks(int t) {
+        combatTicks = Math.max(0, t);
+    }
+
+    /** Derived stats must be recomputed (something they depend on changed outside the setters). */
+    public void invalidateDerived() {
+        derivedStale = true;
+        markDirty();
+    }
+
     // guard meter (combat.GuardRules): 0..100, empties under blocked hits and breaks the guard
     private double guardMeter = 100;
     private long guardStartTick = Long.MIN_VALUE / 2;   // when the guard last went up (parry window); not saved
@@ -1189,6 +1245,8 @@ public class PlayerData {
         tag.putInt("hairColor", hairColor);
         tag.putInt("eyeColor", eyeColor);
         tag.putString("hairCode", hairCode);
+        tag.putString("variant", variant);
+        tag.putString("destiny", destiny);
         tag.putDouble("guardMeter", guardMeter);
         net.minecraft.nbt.ListTag customs = new net.minecraft.nbt.ListTag();
         for (int i = 0; i < customSpecs.length; i++) {
@@ -1287,6 +1345,8 @@ public class PlayerData {
             hairCode = com.dbzenith.appearance.HairCode.fromLegacyStyle(hairStyle); // saved before hair codes existed
         }
         skinTone = tag.contains("skinTone") ? tag.getInt("skinTone") : -1;
+        variant = tag.getString("variant");
+        destiny = tag.getString("destiny");
         guardMeter = tag.contains("guardMeter") ? tag.getDouble("guardMeter") : 100;
         java.util.Arrays.fill(customSpecs, null);
         java.util.Arrays.fill(customBuilt, null);

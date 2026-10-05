@@ -21,12 +21,25 @@ public class RaceSkinLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         super(parent);
     }
 
-    /** The race's skin, or null if it has none (they look like the player's own skin). */
-    public static ResourceLocation texture(Race race) {
-        return switch (race) {
-            case NAMEKIAN, FROST_DEMON, MAJIN -> new ResourceLocation(DBZenith.MOD_ID, "textures/entity/race/" + race.id() + ".png");
-            default -> null;
+    /** The race's (or variant's) skin, or null if it has none (they look like the player's own skin). */
+    public static ResourceLocation texture(Race race, com.dbzenith.race.Variant variant) {
+        String name = switch (variant) {
+            case METAL -> "metal_frost_demon";
+            case MUTANT -> "mutant_frost_demon";
+            case CORRUPTED -> "corrupted_majin";
+            case DEMON_CLAN -> "demon_namekian";
+            case DEMON -> "core_demon";
+            case KAI -> "kai";
+            default -> switch (race) {
+                case NAMEKIAN, FROST_DEMON, MAJIN, VAMPIRE, BIO_ANDROID, TUFFLE, GEN_ALIEN -> race.id();
+                default -> null;
+            };
         };
+        return name == null ? null : new ResourceLocation(DBZenith.MOD_ID, "textures/entity/race/" + name + ".png");
+    }
+
+    public static ResourceLocation texture(PublicStatePacket state) {
+        return texture(state.raceEnum(), state.variantEnum());
     }
 
     /**
@@ -41,7 +54,7 @@ public class RaceSkinLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         @net.minecraftforge.eventbus.api.SubscribeEvent
         public static void pre(net.minecraftforge.client.event.RenderPlayerEvent.Pre event) {
             PublicStatePacket state = ClientPublicStates.get(event.getEntity().getId());
-            boolean raceSkin = state != null && state.raceLook() && texture(state.raceEnum()) != null;
+            boolean raceSkin = state != null && state.raceLook() && texture(state) != null;
             if (!raceSkin && !BodySkinLayer.active(state)) return;
             PlayerModel<AbstractClientPlayer> m = event.getRenderer().getModel();
             m.hat.visible = false;
@@ -59,7 +72,7 @@ public class RaceSkinLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         if (player.isInvisible()) return;
         PublicStatePacket state = ClientPublicStates.get(player.getId());
         if (state == null || !state.raceLook()) return;
-        ResourceLocation tex = texture(state.raceEnum());
+        ResourceLocation tex = texture(state);
         if (tex != null) renderColoredCutoutModel(getParentModel(), tex, pose, buffers, light, player, 1f, 1f, 1f);
     }
 }

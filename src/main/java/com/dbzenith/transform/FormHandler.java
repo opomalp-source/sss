@@ -25,6 +25,7 @@ public final class FormHandler {
     public static Component problem(PlayerData data, Form form) {
         if (form.isBase()) return null;
         if (!form.races().contains(data.getRace())) return Component.translatable("form.dbzenith.problem.race");
+        if (!form.allows(data.getVariant())) return Component.translatable("form.dbzenith.problem.variant");
         if (form.trigger() != Form.Trigger.MANUAL) return Component.translatable("form.dbzenith.problem.trigger");
         if (form.requiredFlag() != null && !data.hasFlag(form.requiredFlag())) {
             return Component.translatable("form.dbzenith.problem.flag." + form.requiredFlag());
@@ -56,7 +57,7 @@ public final class FormHandler {
             if (target != current && Forms.isOnPath(current.id(), target) && pathUnlocked(data, current, target)) next = target;
         }
         if (next == null) {
-            for (Form child : Forms.children(current.id(), data.getRace())) {
+            for (Form child : Forms.children(current.id(), data.getRace(), data.getVariant())) {
                 if (problem(data, child) == null) {
                     next = child;
                     break;
@@ -64,7 +65,7 @@ public final class FormHandler {
             }
         }
         if (next == null) {
-            List<Form> children = Forms.children(current.id(), data.getRace());
+            List<Form> children = Forms.children(current.id(), data.getRace(), data.getVariant());
             Component reason = children.isEmpty() ? Component.translatable("form.dbzenith.problem.none")
                     : problem(data, children.get(0));
             player.displayClientMessage(reason == null ? Component.translatable("form.dbzenith.problem.none") : reason, true);

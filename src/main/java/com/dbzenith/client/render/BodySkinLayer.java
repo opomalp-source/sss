@@ -30,7 +30,7 @@ public class BodySkinLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
     /** Whether this player is drawn with the generated body. */
     public static boolean active(PublicStatePacket state) {
         if (state == null || state.skinTone() < 0) return false;
-        return !(state.raceLook() && RaceSkinLayer.texture(state.raceEnum()) != null);
+        return !(state.raceLook() && RaceSkinLayer.texture(state) != null);
     }
 
     @Override

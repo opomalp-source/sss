@@ -106,6 +106,7 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Debug stat overlay | — | done | Config `hud.showDebugOverlay` |
 | DBZ HUD (bars, release, status, combo, technique) | B | done | Seen in-client. Form display Phase 2 |
 | Aura visuals (seen by others) | B | done | Layered flame aura (outer, white-hot core, licks), halo, ground glow, lightning bolts, calm god-ki style, first-person screen-edge flames; screenshotted |
+| Races v2 + forms v2 (CX-2/3) | B | done | 13 races, 39 variants (clans, 5% destinies revealed at the first milestone, Human and Half-Saiyan paths), 70 new forms on the DBV scale mapped by FormScale, ranged and rising multipliers; 5 GameTests incl. a balance sweep of every variant; screenshotted |
 | Combat depth (V2-E) | B | done | Guard meter + break + parry + ki deflect; beam struggles (mash R, NPCs push back); Ki Creator (5 kinds, power 1-5, 2 of 5 modifiers, auto-balanced costs); 6 GameTests incl. a balance sweep of every design; screenshotted |
 | Appearance (V2-D) | B | done | Hair codes (shareable, 64 strands), barber editor with presets, form hair grown from your own, skin tones on muscle-shaded bodies (lean / athletic / bulky), height 85-115% incl. hitbox; 5 GameTests; screenshotted |
 | UI v2 (V2-C) | B | done | Portrait HUD (live head, form-tinted ring, release arc, eased bars with damage ghosts), cloud-trim hotbar, radial action wheel, themed screens, transformation cut-in; screenshotted |

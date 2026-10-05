@@ -66,6 +66,19 @@ public final class Techniques {
     public static final Technique ARM_CANNON = add(Technique.builder("arm_cannon").cost(40).damage(1.8).speed(2.6f).size(0.45f)
             .cooldown(20).color(0xFFB050).life(40).race(Race.CYBORG));
 
+    public static final Technique BLOOD_DRAIN = add(Technique.builder("blood_drain").style(Style.SELF).effect(Effect.LIFE_DRAIN, 4)
+            .cost(50).damage(2.2).cooldown(100).color(0xC0102A).race(Race.VAMPIRE));
+    public static final Technique PERFECT_BARRIER = add(Technique.builder("perfect_barrier").style(Style.SELF).effect(Effect.EXPLOSIVE_WAVE, 5)
+            .cost(70).damage(2.2).cooldown(100).color(0x9AFF70).race(Race.BIO_ANDROID));
+    public static final Technique TUFFLE_CANNON = add(Technique.builder("tuffle_cannon").style(Style.BEAM).cost(85).damage(3.2).speed(4f).size(0.9f)
+            .cooldown(70).explosion(1.5f).color(0x8AFF30).life(30).race(Race.TUFFLE));
+    public static final Technique CHAOS_BARRAGE = add(Technique.builder("chaos_barrage").cost(40).damage(0.4).speed(1.8f).size(0.4f)
+            .cooldown(30).volley(6, 9f).color(0x70FFD0).life(50).race(Race.GEN_ALIEN));
+    public static final Technique DIVINE_RESTORE = add(Technique.builder("divine_restore").style(Style.SELF).effect(Effect.HEAL_ALLY, 0.25)
+            .cost(60).cooldown(300).color(0xFFF2A0).race(Race.CORE_PERSON));
+    public static final Technique DARK_SEAL = add(Technique.builder("dark_seal").effect(Effect.KI_SEAL, 100).cost(50).damage(0.5)
+            .speed(1.5f).size(0.5f).cooldown(200).color(0x7A1030).life(60).race(Race.CORE_PERSON));
+
     public static final Technique NAMEKIAN_FUSION = add(Technique.builder("namekian_fusion").style(Style.SELF).effect(Effect.FUSE, 4)
             .cost(50).cooldown(200).color(0x7CFF6A).race(Race.NAMEKIAN).learn(400, 60));
     public static final Technique MAJIN_ABSORB = add(Technique.builder("majin_absorb").style(Style.SELF).effect(Effect.ABSORB, 4)

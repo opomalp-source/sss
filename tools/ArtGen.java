@@ -878,10 +878,216 @@ public class ArtGen {
             raceNamekian();
             raceFrostDemon();
             raceMajin();
+            raceVampire();
+            raceBioAndroid();
+            raceTuffle();
+            raceGenAlien();
+            raceKai();
+            raceCoreDemon();
+            variantFrostDemon("metal_frost_demon", 0xFFD8E2EC, 0xFF6A7A90, 0xFF40E0FF);
+            variantFrostDemon("mutant_frost_demon", 0xFF2A2230, 0xFFE84AB0, 0xFFFF2050);
+            raceCorruptedMajin();
+            raceDemonNamekian();
             body("lean", 0.55);
             body("athletic", 1.0);
             body("bulky", 1.45);
             outfit();
+        }
+
+        // ---- content expansion races and variants (CX-2). Eyes stay at x 2 and 5 so form eye colours line up.
+
+        /** Pale noble: a high-collared black coat lined in red, a waistcoat, fangs at the lip. */
+        static void raceVampire() throws IOException {
+            int[] sk = ramp(0xFFE6E0EA, 5), coat = ramp(0xFF1A1420, 5), lining = ramp(0xFFA01028, 4), vest = ramp(0xFF5A1020, 4);
+            Skin s = new Skin();
+            s.head = (f, x, y, w, h) -> {
+                if (f == Face.FRONT) {
+                    if (y == 6 && (x == 2 || x == 5)) return 0xFFF8F8F8;                       // fangs
+                    if (y == 6 && (x == 3 || x == 4)) return 0xFF6A1020;
+                    return face(sk, x, y, 0xFFE01030, sk[1], true);
+                }
+                if (f == Face.TOP || y <= 1) return ramp(0xFF1C1418, 4)[f == Face.TOP ? 2 : 1];   // slicked dark hair line
+                return flesh(sk, f, x, y);
+            };
+            s.body = (f, x, y, w, h) -> {
+                if (f == Face.FRONT) {
+                    if (x >= 3 && x <= 4 && y <= 8) return y <= 1 ? 0xFFF2F0F4 : vest[x == 3 ? 2 : 1];   // cravat and waistcoat
+                    if ((x == 2 || x == 5) && y <= 9) return lining[2];
+                }
+                if (f == Face.BACK && y <= 1) return lining[1];                                  // collar
+                return cloth(coat, f, x, y, 141);
+            };
+            s.arm = (f, x, y, w, h) -> y >= 10 ? (y == 10 ? lining[2] : flesh(sk, f, x, y)) : cloth(coat, f, x, y, 142);
+            s.leg = (f, x, y, w, h) -> y >= 9 ? ramp(0xFF2A1A16, 4)[f == Face.FRONT ? 2 : 1] : cloth(ramp(0xFF24202A, 4), f, x, y, 143);
+            s.save("entity/race/vampire.png");
+        }
+
+        /** Green carapace mottled with dark spots, black flexible joints, a pale armoured face with cheek grooves. */
+        static void raceBioAndroid() throws IOException {
+            int[] shell = ramp(0xFF5AB04A, 5), joint = ramp(0xFF20242A, 4), face = ramp(0xFFE8E4D8, 5), spot = ramp(0xFF1E3A1A, 3);
+            Skin s = new Skin();
+            FaceFn spotted = (f, x, y, w, h) -> noise(x * 3 + f.ordinal(), y * 5, 151) > 0.72 ? spot[1] : shell[f == Face.FRONT || f == Face.TOP ? 3 : 2];
+            s.head = (f, x, y, w, h) -> {
+                if (f == Face.FRONT && y >= 2) {
+                    if ((x == 1 || x == 6) && y >= 5) return 0xFF7A3A9A;                         // cheek grooves
+                    return face(face, x, y, 0xFFC02060, joint[1], true);
+                }
+                return spotted.at(f, x, y, w, h);
+            };
+            s.body = (f, x, y, w, h) -> f == Face.FRONT && x >= 2 && x <= 5 && y >= 6 ? joint[2] : spotted.at(f, x, y, w, h);
+            s.arm = (f, x, y, w, h) -> y >= 4 && y <= 7 ? joint[f == Face.FRONT ? 2 : 1] : spotted.at(f, x, y, w, h);
+            s.leg = (f, x, y, w, h) -> y >= 4 && y <= 8 ? joint[f == Face.FRONT ? 2 : 1] : spotted.at(f, x, y, w, h);
+            s.save("entity/race/bio_android.png");
+        }
+
+        /** Pale and sharp-featured, in a white lab-armour suit with a red core gem. */
+        static void raceTuffle() throws IOException {
+            int[] sk = ramp(0xFFEDE0D6, 5), suit = ramp(0xFFE8ECF2, 5), trim = ramp(0xFF3A6AB0, 4), hair = ramp(0xFFC8CCD8, 4);
+            Skin s = new Skin();
+            s.head = (f, x, y, w, h) -> {
+                if (f == Face.TOP || (f != Face.FRONT && f != Face.BOTTOM && y <= 2)) return hair[f == Face.TOP ? 3 : 2];
+                if (f == Face.FRONT) return y <= 1 ? hair[2] : face(sk, x, y, 0xFF2A1020, hair[1], true);
+                return flesh(sk, f, x, y);
+            };
+            s.body = (f, x, y, w, h) -> {
+                if (f == Face.FRONT && (x == 3 || x == 4) && (y == 3 || y == 4)) return x == 3 && y == 3 ? 0xFFFF8080 : 0xFFD01020;   // core gem
+                if (y == 0 || y == 8) return trim[2];
+                return cloth(suit, f, x, y, 161);
+            };
+            s.arm = (f, x, y, w, h) -> y >= 9 ? trim[f == Face.FRONT ? 3 : 2] : cloth(suit, f, x, y, 162);
+            s.leg = (f, x, y, w, h) -> y >= 9 ? trim[1] : cloth(suit, f, x, y, 163);
+            s.save("entity/race/tuffle.png");
+        }
+
+        /** Blue-grey alien skin with darker stripes, large dark eyes and a simple explorer harness. */
+        static void raceGenAlien() throws IOException {
+            int[] sk = ramp(0xFF7A9AC0, 5), stripe = ramp(0xFF3A4A70, 3), harness = ramp(0xFF4A3424, 4), metal = ramp(0xFFC8C8D0, 3);
+            Skin s = new Skin();
+            s.head = (f, x, y, w, h) -> {
+                if (f == Face.FRONT) {
+                    if (y >= 3 && y <= 4 && (x == 1 || x == 2 || x == 5 || x == 6)) return x == 2 || x == 5 ? 0xFF101018 : 0xFF2A2A44;   // big eyes
+                    return face(sk, x, y, 0xFF101018, stripe[1], false);
+                }
+                if (f == Face.BACK && y % 3 == 1 && y > 0) return stripe[1];                          // ridges down the back of the skull
+                return flesh(sk, f, x, y);
+            };
+            s.body = (f, x, y, w, h) -> {
+                if ((f == Face.FRONT || f == Face.BACK) && (x == 2 || x == 5)) return harness[2];
+                if (y == 8) return metal[1];
+                if (f == Face.BACK && y % 3 == 0) return stripe[1];
+                return flesh(sk, f, x, y);
+            };
+            s.arm = (f, x, y, w, h) -> y == 8 || y == 9 ? harness[1] : (y % 4 == 0 && f != Face.FRONT ? stripe[1] : flesh(sk, f, x, y));
+            s.leg = (f, x, y, w, h) -> y >= 6 ? cloth(ramp(0xFF3A3A4A, 4), f, x, y, 171) : flesh(sk, f, x, y);
+            s.save("entity/race/gen_alien.png");
+        }
+
+        /** Lavender divine skin, white tufted crown, layered robes with a sash and a collar of gold. */
+        static void raceKai() throws IOException {
+            int[] sk = ramp(0xFFD8B8EC, 5), robe = ramp(0xFF2C3A8A, 5), under = ramp(0xFFF4F2F8, 4), gold = ramp(0xFFE8C040, 3), sash = ramp(0xFF5AB0E8, 3);
+            Skin s = new Skin();
+            s.head = (f, x, y, w, h) -> {
+                if (f == Face.TOP) return x >= 3 && x <= 4 ? 0xFFF8F8FF : sk[3];                // white tuft
+                if (f == Face.FRONT) return face(sk, x, y, 0xFF101018, sk[1], true);
+                return flesh(sk, f, x, y);
+            };
+            s.body = (f, x, y, w, h) -> {
+                if (y == 0) return gold[f == Face.FRONT ? 2 : 1];
+                if (y == 8 || y == 9) return sash[f == Face.FRONT ? 2 : 1];
+                if (f == Face.FRONT && x >= 3 && x <= 4 && y <= 7) return under[2];
+                return cloth(robe, f, x, y, 181);
+            };
+            s.arm = (f, x, y, w, h) -> y <= 6 ? cloth(robe, f, x, y, 182) : y <= 9 ? under[f == Face.FRONT ? 2 : 1] : flesh(sk, f, x, y);
+            s.leg = (f, x, y, w, h) -> y >= 10 ? gold[1] : cloth(under, f, x, y, 183);
+            s.save("entity/race/kai.png");
+        }
+
+        /** Crimson skin, black clawed garb with a burning red emblem, yellow eyes. */
+        static void raceCoreDemon() throws IOException {
+            int[] sk = ramp(0xFFC83030, 5), garb = ramp(0xFF181418, 5), ember = ramp(0xFFFF6A20, 3), gold = ramp(0xFFE8C040, 3);
+            Skin s = new Skin();
+            s.head = (f, x, y, w, h) -> {
+                if (f == Face.FRONT) {
+                    if (y == 2 && x >= 2 && x <= 5) return 0xFF6A0A10;                        // heavy brow ridge
+                    return face(sk, x, y, 0xFFFFD040, 0xFF6A0A10, false);
+                }
+                if (f == Face.TOP || y <= 1) return ramp(0xFF141010, 3)[1];                 // short black hair
+                return flesh(sk, f, x, y);
+            };
+            s.body = (f, x, y, w, h) -> {
+                if (f == Face.FRONT && (x == 3 || x == 4) && y >= 2 && y <= 4) return ember[y == 3 ? 2 : 1];   // emblem
+                if (y == 9) return gold[1];
+                return cloth(garb, f, x, y, 191);
+            };
+            s.arm = (f, x, y, w, h) -> y >= 11 ? 0xFF101010 : y >= 6 ? flesh(sk, f, x, y) : cloth(garb, f, x, y, 192);
+            s.leg = (f, x, y, w, h) -> cloth(garb, f, x, y, 193);
+            s.save("entity/race/core_demon.png");
+        }
+
+        /** The Frost Demon look in a different metal or palette: skin, shell plates and eye colour. */
+        static void variantFrostDemon(String name, int skin, int shellColour, int eyes) throws IOException {
+            int[] white = ramp(skin, 5), shell = ramp(shellColour, 5);
+            Skin s = new Skin();
+            s.head = (f, x, y, w, h) -> {
+                if (f == Face.TOP || (f != Face.BOTTOM && y <= 1)) return shell[f == Face.TOP ? 3 : 2];
+                if (f == Face.FRONT) {
+                    if (y == 6 && (x == 3 || x == 4)) return shell[0];
+                    if ((x == 0 || x == 7) && y >= 2 && y <= 3) return shell[1];
+                    return face(white, x, y, eyes, white[1], true);
+                }
+                if (f == Face.BACK && y <= 3) return shell[1];
+                return flesh(white, f, x, y);
+            };
+            s.body = (f, x, y, w, h) -> {
+                if (f == Face.FRONT && y >= 1 && y <= 6 && x >= 1 && x <= 6) return shell[y == 6 ? 1 : x < 4 ? 3 : 2];
+                if (f == Face.BACK && y >= 1 && y <= 4) return shell[1];
+                return flesh(white, f, x, y);
+            };
+            s.arm = (f, x, y, w, h) -> f == Face.TOP || y <= 2 || (y >= 6 && y <= 9) ? shell[f == Face.FRONT ? 3 : 2] : flesh(white, f, x, y);
+            s.leg = (f, x, y, w, h) -> y >= 5 && y <= 9 ? shell[f == Face.FRONT ? 3 : 2] : flesh(white, f, x, y);
+            s.save("entity/race/" + name + ".png");
+        }
+
+        /** Grey, gaunt Majin with a cracked purple vest and black sclera. */
+        static void raceCorruptedMajin() throws IOException {
+            int[] sk = ramp(0xFF9A90A8, 5), vest = ramp(0xFF3A1A4A, 4), pants = ramp(0xFF4A4458, 4), belt = ramp(0xFFB070FF, 3);
+            Skin s = new Skin();
+            s.head = (f, x, y, w, h) -> {
+                if (f == Face.FRONT) {
+                    if (y == 4 && (x == 1 || x == 6)) return 0xFF101010;                         // black sclera
+                    return face(sk, x, y, 0xFFFF2040, sk[0], false);
+                }
+                return flesh(sk, f, x, y);
+            };
+            s.body = (f, x, y, w, h) -> {
+                if (y == 9) return belt[1];
+                if (y >= 10) return cloth(pants, f, x, y, 201);
+                if (f == Face.FRONT && x >= 2 && x <= 5) return noise(x, y, 202) > 0.85 ? sk[0] : flesh(sk, f, x, y);
+                return cloth(vest, f, x, y, 203);
+            };
+            s.arm = (f, x, y, w, h) -> y >= 9 ? vest[f == Face.FRONT ? 2 : 1] : flesh(sk, f, x, y);
+            s.leg = (f, x, y, w, h) -> y >= 9 ? belt[1] : cloth(pants, f, x, y, 204);
+            s.save("entity/race/corrupted_majin.png");
+        }
+
+        /** Demon-clan Namekian: a darker, bluish green with a black and red gi. */
+        static void raceDemonNamekian() throws IOException {
+            int[] sk = ramp(0xFF3A8A6A, 5), pink = ramp(0xFFB070A0, 3), gi = ramp(0xFF1A1420, 5), sash = ramp(0xFFC01830, 3), pants = ramp(0xFF3A2A44, 4);
+            Skin s = new Skin();
+            s.head = (f, x, y, w, h) -> {
+                if (f == Face.FRONT) return face(sk, x, y, 0xFFFF2040, sk[0], true);
+                if ((f == Face.RIGHT || f == Face.LEFT) && y >= 2 && y <= 4 && x >= 2 && x <= 3) return sk[0];
+                if (f == Face.TOP && (x + y) % 4 == 0) return sk[1];
+                return flesh(sk, f, x, y);
+            };
+            s.body = (f, x, y, w, h) -> y >= 9 && y <= 10 ? sash[y == 9 ? 2 : 1] : cloth(gi, f, x, y, 211);
+            s.arm = (f, x, y, w, h) -> {
+                if (y < 4) return cloth(gi, f, x, y, 212);
+                if ((f == Face.FRONT || f == Face.RIGHT) && y >= 5 && y <= 7) return pink[1];
+                return flesh(sk, f, x, y);
+            };
+            s.leg = (f, x, y, w, h) -> y >= 10 ? 0xFF2A1A10 : cloth(pants, f, x, y, 213);
+            s.save("entity/race/demon_namekian.png");
         }
 
         // ---- generated bodies (V2-D): greyscale flesh with muscle definition, tinted by skin tone at render time

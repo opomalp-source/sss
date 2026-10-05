@@ -25,6 +25,9 @@ public class RaceFeatureModel {
     private final ModelPart antennae;
     private final ModelPart horns;
     private final ModelPart tentacle;
+    private final ModelPart ears;
+    private final ModelPart demonHorns;
+    private final ModelPart wings;
     private final ModelPart body;
     private final ModelPart tailBase;
     private final ModelPart tailMid;
@@ -35,7 +38,10 @@ public class RaceFeatureModel {
         antennae = head.getChild("antennae");
         horns = head.getChild("horns");
         tentacle = head.getChild("tentacle");
+        ears = head.getChild("ears");
+        demonHorns = head.getChild("demon_horns");
         body = root.getChild("body");
+        wings = body.getChild("wings");
         tailBase = body.getChild("tail_base");
         tailMid = tailBase.getChild("tail_mid");
         tailTip = tailMid.getChild("tail_tip");
@@ -72,6 +78,24 @@ public class RaceFeatureModel {
         tentacle.getChild("mid").addOrReplaceChild("tip", CubeListBuilder.create().texOffs(0, 0)
                 .addBox(-0.75f, -3, -0.75f, 1.5f, 3, 1.5f), PartPose.offsetAndRotation(0, -3.5f, 0, 0.9f, 0, 0));
 
+        // Long pointed ears swept back from the sides of the head.
+        PartDefinition ears = head.addOrReplaceChild("ears", CubeListBuilder.create(), PartPose.ZERO);
+        ears.addOrReplaceChild("left", CubeListBuilder.create().texOffs(0, 0)
+                        .addBox(-0.5f, -1.5f, 0, 1, 3, 2).addBox(-0.4f, -2.6f, 1.6f, 0.8f, 2, 1.6f).addBox(-0.3f, -3.4f, 3, 0.6f, 1.2f, 1),
+                PartPose.offsetAndRotation(-4.3f, -4, -0.5f, 0.35f, -0.35f, -0.1f));
+        ears.addOrReplaceChild("right", CubeListBuilder.create().texOffs(0, 0)
+                        .addBox(-0.5f, -1.5f, 0, 1, 3, 2).addBox(-0.4f, -2.6f, 1.6f, 0.8f, 2, 1.6f).addBox(-0.3f, -3.4f, 3, 0.6f, 1.2f, 1),
+                PartPose.offsetAndRotation(4.3f, -4, -0.5f, 0.35f, 0.35f, 0.1f));
+
+        // Two short horns curling up from the forehead.
+        PartDefinition demonHorns = head.addOrReplaceChild("demon_horns", CubeListBuilder.create(), PartPose.ZERO);
+        demonHorns.addOrReplaceChild("left", CubeListBuilder.create().texOffs(0, 0)
+                        .addBox(-0.75f, -2, -0.75f, 1.5f, 2, 1.5f).addBox(-0.5f, -3.6f, -0.2f, 1, 1.8f, 1).addBox(-0.3f, -4.6f, 0.5f, 0.6f, 1.2f, 0.6f),
+                PartPose.offsetAndRotation(-2.2f, -7.6f, -2.8f, -0.2f, 0, -0.35f));
+        demonHorns.addOrReplaceChild("right", CubeListBuilder.create().texOffs(0, 0)
+                        .addBox(-0.75f, -2, -0.75f, 1.5f, 2, 1.5f).addBox(-0.5f, -3.6f, -0.2f, 1, 1.8f, 1).addBox(-0.3f, -4.6f, 0.5f, 0.6f, 1.2f, 0.6f),
+                PartPose.offsetAndRotation(2.2f, -7.6f, -2.8f, -0.2f, 0, 0.35f));
+
         // Tail: three segments from the lower back, hanging down and curling.
         PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.ZERO);
         PartDefinition base = body.addOrReplaceChild("tail_base", CubeListBuilder.create().texOffs(0, 0)
@@ -80,6 +104,14 @@ public class RaceFeatureModel {
                 .addBox(-1, 0, -1, 2, 5, 2), PartPose.offsetAndRotation(0, 5, 0, 0.5f, 0, 0));
         mid.addOrReplaceChild("tail_tip", CubeListBuilder.create().texOffs(0, 0)
                 .addBox(-1.25f, 0, -1.25f, 2.5f, 4, 2.5f), PartPose.offsetAndRotation(0, 5, 0, 0.6f, 0, 0));
+        // Bio-Android wings: two folded carapace blades on the upper back.
+        PartDefinition wings = body.addOrReplaceChild("wings", CubeListBuilder.create(), PartPose.ZERO);
+        wings.addOrReplaceChild("left", CubeListBuilder.create().texOffs(0, 0)
+                        .addBox(-1, 0, 0, 2, 9, 0.8f).addBox(-0.7f, 9, 0, 1.4f, 3, 0.8f),
+                PartPose.offsetAndRotation(-1.6f, 0.5f, 2.2f, 0.18f, 0, 0.22f));
+        wings.addOrReplaceChild("right", CubeListBuilder.create().texOffs(0, 0)
+                        .addBox(-1, 0, 0, 2, 9, 0.8f).addBox(-0.7f, 9, 0, 1.4f, 3, 0.8f),
+                PartPose.offsetAndRotation(1.6f, 0.5f, 2.2f, 0.18f, 0, -0.22f));
         return LayerDefinition.create(mesh, 16, 16);
     }
 
@@ -92,10 +124,20 @@ public class RaceFeatureModel {
         antennae.visible = feature == RaceTraits.Feature.ANTENNAE;
         horns.visible = feature == RaceTraits.Feature.HORNS;
         tentacle.visible = feature == RaceTraits.Feature.TENTACLE;
+        ears.visible = feature == RaceTraits.Feature.EARS;
+        demonHorns.visible = feature == RaceTraits.Feature.DEMON_HORNS;
+        if (feature == RaceTraits.Feature.WINGS) {
+            tailBase.visible = false;                            // the body tree carries the tail too
+            wings.visible = true;
+            body.render(pose, vc, light, overlay, r, g, b, 1f);
+            tailBase.visible = true;
+            return;
+        }
         if (feature != RaceTraits.Feature.NONE) head.render(pose, vc, light, overlay, r, g, b, 1f);
     }
 
     public void renderTail(PoseStack pose, VertexConsumer vc, int light, int overlay, float ageInTicks, float r, float g, float b) {
+        wings.visible = false;
         float sway = Mth.sin(ageInTicks * 0.12f);
         tailBase.yRot = sway * 0.35f;
         tailMid.zRot = sway * 0.25f;

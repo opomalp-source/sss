@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public final class RaceTraits {
     /** Head/body feature drawn for the race (placeholder geometry). */
-    public enum Feature { NONE, ANTENNAE, HORNS, TENTACLE }
+    public enum Feature { NONE, ANTENNAE, HORNS, TENTACLE, EARS, WINGS, DEMON_HORNS }
 
     private final Race race;
     private final Map<Attribute, Double> costWeights;

@@ -38,7 +38,8 @@ public class RaceFeatureLayer extends RenderLayer<AbstractClientPlayer, PlayerMo
         if (player.isInvisible()) return;
         PublicStatePacket state = ClientPublicStates.get(player.getId());
         if (state == null) return;
-        RaceTraits.Feature feature = Races.of(state.raceEnum()).feature();
+        com.dbzenith.race.Variant variant = state.variantEnum();
+        RaceTraits.Feature feature = variant.feature() != null ? variant.feature() : Races.of(state.raceEnum()).feature();
         boolean tail = state.has(PublicStatePacket.TAIL);
         if (feature == RaceTraits.Feature.NONE && !tail) return;
 
@@ -50,6 +51,9 @@ public class RaceFeatureLayer extends RenderLayer<AbstractClientPlayer, PlayerMo
                 case ANTENNAE -> ANTENNAE;
                 case HORNS -> HORNS;
                 case TENTACLE -> TENTACLE;
+                case EARS -> state.skinTone() >= 0 ? state.skinTone() : variant == com.dbzenith.race.Variant.KAI ? 0xD8B8EC : 0xE6E0EA;
+                case WINGS -> 0x4A8A3A;
+                case DEMON_HORNS -> 0x2A1418;
                 default -> 0xFFFFFF;
             };
             model.renderFeature(pose, vc, light, overlay, feature, r(c), g(c), b(c));

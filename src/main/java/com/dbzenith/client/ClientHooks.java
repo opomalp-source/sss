@@ -40,6 +40,12 @@ public final class ClientHooks {
         Minecraft.getInstance().setScreen(new com.dbzenith.client.screen.WishScreen(dragonId));
     }
 
+    /** The first milestone: choose a path (only if nothing else is open; the Training screen offers it too). */
+    public static void openPathChoice() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen == null && mc.player != null) mc.setScreen(new com.dbzenith.client.screen.PathChoiceScreen(null));
+    }
+
     /** A player changed form: recompute their hitbox and eye height (giant forms). */
     public static void refreshDimensions(int entityId) {
         Minecraft mc = Minecraft.getInstance();

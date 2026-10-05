@@ -25,12 +25,13 @@ public record CreateCharacterPacket(CharacterCreation.Choices choices) {
         buf.writeVarInt(c.alignment());
         buf.writeInt(c.skinTone());
         buf.writeByte(c.heightPercent());
+        buf.writeUtf(c.variant(), 64);
     }
 
     public static CreateCharacterPacket decode(FriendlyByteBuf buf) {
         return new CreateCharacterPacket(new CharacterCreation.Choices(buf.readEnum(Race.class), buf.readEnum(FightingPath.class),
                 buf.readEnum(PlayerData.BodyType.class), buf.readUtf(com.dbzenith.appearance.HairCode.MAX_CODE_LENGTH), buf.readInt(), buf.readInt(),
-                buf.readVarInt(), buf.readInt(), buf.readUnsignedByte()));
+                buf.readVarInt(), buf.readInt(), buf.readUnsignedByte(), buf.readUtf(64)));
     }
 
     public static void handle(CreateCharacterPacket msg, Supplier<NetworkEvent.Context> ctx) {

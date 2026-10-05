@@ -57,6 +57,32 @@ public final class Races {
                 .bonus(STRENGTH, 2).bonus(CONSTITUTION, 2).aura(0xD0D8E0)
                 .slowHunger().kiAbsorb(0.15).staminaRegen(2.0)
                 .racial("arm_cannon"));
+
+        // ---- content expansion races
+        add(RaceTraits.builder(Race.VAMPIRE).costs(0.95, 0.85, 1.05, 0.95, 1.0, 1.0, 1.05)
+                .bonus(DEXTERITY, 3).bonus(STRENGTH, 2).aura(0xC01030)
+                .regen(1.6, 0.6).feature(RaceTraits.Feature.EARS)
+                .racial("blood_drain"));
+
+        add(RaceTraits.builder(Race.BIO_ANDROID).costs(0.95, 1.0, 0.9, 0.95, 1.0, 1.05, 0.95)
+                .bonus(CONSTITUTION, 2).bonus(KI_POWER, 2).bonus(STRENGTH, 1).aura(0x9AFF70)
+                .regen(2.5, 0.4).kiAbsorb(0.1).noHunger().breathless().feature(RaceTraits.Feature.WINGS)
+                .racial("perfect_barrier"));
+
+        add(RaceTraits.builder(Race.TUFFLE).costs(1.05, 1.0, 1.0, 0.9, 0.95, 0.75, 1.0)
+                .bonus(MIND, 4).bonus(KI_POWER, 1).aura(0xD0FF90)
+                .tpGain(0.1).kiCostReduction(0.1)
+                .racial("tuffle_cannon"));
+
+        add(RaceTraits.builder(Race.GEN_ALIEN).costs(0.95, 0.95, 0.95, 0.95, 0.95, 1.0, 1.0)
+                .bonus(STRENGTH, 1).bonus(DEXTERITY, 1).bonus(CONSTITUTION, 1).bonus(KI_POWER, 1).aura(0x8AE0FF)
+                .feature(RaceTraits.Feature.ANTENNAE)
+                .racial("chaos_barrage"));
+
+        add(RaceTraits.builder(Race.CORE_PERSON).costs(1.05, 1.0, 1.0, 0.9, 0.85, 0.9, 0.85)
+                .bonus(SPIRIT, 3).bonus(WILLPOWER, 2).aura(0xFFF2C8)
+                .kiRegen(1.3).feature(RaceTraits.Feature.EARS)
+                .racial("divine_restore", "dark_seal"));
     }
 
     private Races() {}

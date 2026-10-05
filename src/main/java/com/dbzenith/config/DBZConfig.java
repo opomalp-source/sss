@@ -132,6 +132,8 @@ public final class DBZConfig {
 
         // --- transformations ---
         public final ForgeConfigSpec.DoubleValue unlockLevelScale;
+        public final ForgeConfigSpec.DoubleValue rareVariantChance;
+        public final ForgeConfigSpec.IntValue milestoneLevel;
         public final ForgeConfigSpec.DoubleValue transformKiCostPercent;
         public final ForgeConfigSpec.DoubleValue masteryGainPerSecond;
         public final ForgeConfigSpec.DoubleValue masteryMaxMultiplierBonus;
@@ -410,6 +412,10 @@ public final class DBZConfig {
             b.comment("Forms and the Overdrive buff (see transform package)").push("transformations");
             unlockLevelScale = b.comment("Multiplies every form's unlock level (0.5 = forms unlock twice as early)")
                     .defineInRange("unlockLevelScale", 1.0, 0.0, 100.0);
+            rareVariantChance = b.comment("Chance a new character carries a rare destiny (Legendary Saiyan, Mutant Frost Demon, Corrupted Majin...)")
+                    .defineInRange("rareVariantChance", 0.05, 0.0, 1.0);
+            milestoneLevel = b.comment("Level of the first milestone: rare destinies awaken and paths (Half-Saiyan, Human) are chosen")
+                    .defineInRange("milestoneLevel", 150, 1, 100000);
             transformKiCostPercent = b.comment("Ki spent to transform, % of max ki")
                     .defineInRange("transformKiCostPercent", 5.0, 0.0, 100.0);
             masteryGainPerSecond = b.comment("Form mastery (0-100) gained per second in a form, before spirit and tier scaling")

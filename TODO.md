@@ -127,8 +127,8 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 
 # Content expansion (CX) — see docs/CONTENT_EXPANSION.md
 - [x] CX-1 Settings menu (pause menu, mod list Config, wheel; HUD / effects / camera / controls)
-- [ ] CX-2 Races v2: variants, sub-races, new races, appearance variants
-- [ ] CX-3 Forms v2: full form trees on the mapped scale, 75% instant, transform time, rising multipliers
+- [x] CX-2 Races v2: variants (clans, rare destinies, paths), 5 new races, race and variant skins, 3 new head and back features
+- [x] CX-3 Forms v2: 70 new forms on the mapped DBV scale, ranged (mastery-grown) and rising (combat) multipliers. Still to do: 75% instant transformation with transform time, God Ki levels
 - [ ] CX-4 Racial skills (actives on a Racial key and wheel ring, passives)
 - [ ] CX-5 Universal skills: Kaioken, Limit Break, Ki Sense, Instant Transmission, Ki Barrier, Echo Strike...
 - [ ] CX-6 Combat v3: Z-hits, sweeps, directionals, revenge counter, breaker wave, vanish / chase, dodges, recovery, clashes, downed state

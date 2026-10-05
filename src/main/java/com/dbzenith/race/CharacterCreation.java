@@ -14,7 +14,7 @@ public final class CharacterCreation {
 
     /** The full set of first-join choices. Validated and clamped in {@link #create}. */
     public record Choices(Race race, FightingPath path, PlayerData.BodyType body, String hairCode, int hairColor,
-                          int eyeColor, int alignment, int skinTone, int heightPercent) {}
+                          int eyeColor, int alignment, int skinTone, int heightPercent, String variant) {}
 
     /**
      * Sets the race: tail per race, racial techniques learned (and slotted if there is room), and a form the new
@@ -22,7 +22,12 @@ public final class CharacterCreation {
      */
     public static void applyRace(PlayerData data, Race race) {
         RaceTraits t = Races.of(race);
+        boolean changed = data.getRace() != race;
         data.setRace(race);
+        if (changed) {                                          // a new race starts as its default variant, with no destiny
+            data.setVariant(Variant.defaultFor(race));
+            data.setDestiny("");
+        }
         data.setTail(t.tail());
         for (String id : java.util.List.copyOf(data.learnedView())) { // drop the old race's racial techniques
             com.dbzenith.skill.Technique known = com.dbzenith.skill.Techniques.byId(id);
@@ -37,7 +42,7 @@ public final class CharacterCreation {
             }
         }
         Form form = Forms.byId(data.getFormId());
-        if (!form.isBase() && !form.races().contains(race)) data.setFormId(PlayerData.BASE_FORM);
+        if (!form.isBase() && (!form.races().contains(race) || !form.allows(data.getVariant()))) data.setFormId(PlayerData.BASE_FORM);
         data.recomputeIfStale();
     }
 
@@ -59,10 +64,24 @@ public final class CharacterCreation {
         data.setHairColor(c.hairColor());
         data.setEyeColor(c.eyeColor());
         data.setAlignment(c.alignment());
+        chooseVariant(data, c.variant(), new java.util.Random());
         data.setCharacterCreated(true);
         data.recomputeIfStale();
         data.refill();
         return true;
+    }
+
+    /**
+     * The clan or lineage picked at creation (anything else falls back to the race's default), then the destiny roll: a
+     * small chance ({@code races.rareVariantChance}) that the character carries a rare variant, hidden until the first
+     * milestone.
+     */
+    public static void chooseVariant(PlayerData data, String requested, java.util.Random random) {
+        Variant chosen = Variant.byId(requested == null ? "" : requested, data.getRace());
+        if (!Variant.creationChoices(data.getRace()).contains(chosen)) chosen = Variant.defaultFor(data.getRace());
+        data.setVariant(chosen);
+        Variant rare = Variant.rareFor(chosen);
+        data.setDestiny(rare != null && random.nextDouble() < DBZConfig.SERVER.rareVariantChance.get() ? rare.id() : "");
     }
 
     /** Small stat flavor for body type. */

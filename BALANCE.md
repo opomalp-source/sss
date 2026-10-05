@@ -86,3 +86,11 @@ Android ki absorption, Majin kill-heal) tip close duels; whether the pacing targ
 - **Parry**: raising the guard at most 5 ticks before a blow lands (`parryWindowTicks`) cancels it, staggers the attacker for 1.25 s and returns 10 meter. One parry per raise. **Deflect**: 8 ticks before a ki blast sends it back where you look, and it becomes yours.
 - **Ki Creator**: costs are not chosen by the player. Ki cost and cooldown come from the median of the built-in damaging techniques (ki per point of damage, cooldown per point of damage), times a tax per modifier (×1.05-1.2). A design is therefore never more efficient than the typical built-in technique. `CombatDepth2Tests.kiCreatorDesignsStayInBalance` builds every legal design at level 1000 and asserts the pass-2 targets: 0.6-1.6× the median damage per ki, and at most 4× punching when spammed. Creating costs 100 + 80·power² + 150 per modifier TP. Three slots, plus one per 300 levels (max 8), from level 10.
 - **Beam struggles**: the clash moves 0.014 × (power difference / total) of the gap per tick. Power is the beam's damage per pulse × (1 + mash); a mash adds 0.5 (max 3) for 1% max ki and decays 8% a tick. The winner hits the loser for 6× both beams' per-pulse damage; after 10 s it all explodes where the beams meet.
+
+## Races v2 and forms v2 (CX-2 / CX-3)
+- **DBV multipliers are mapped**, not copied: `FormScale.fromDbv(m) = 1 + 1.1 ln m` (2x 1.76, 6x 2.97, 16x 4.05, 22x 4.40, 32x 4.81, 56x 5.43, 76x 5.76). The existing lines already sat on this curve.
+- **Ranged forms** (DBV "2x to 6x") grow from the bottom to the top of their range with mastery, instead of taking the generic mastery bonus. The balance model counts them at the middle of the range.
+- **Rising forms** (Legendary lines) add up to 20% (Legendary Primal 10%) of their multiplier over 3 minutes of continuous combat (a blow dealt or taken in the last 10 seconds).
+- New races have a 1.25x starter form at level 100, so the level-100 race median stays where the pass-2 targets put it.
+- New tier-4 forms (Crimson Sovereign, Ultimate Perfect, Tuffle King, Apex Mutation) unlock at 1500, alongside the other races' late tiers.
+- `Races2Tests.everyVariantStaysInBalance`: at levels 500, 1000, 1500 and 2000, every variant's best form is within 0.65-1.45x the median variant, and at least x4.5 by level 2000.

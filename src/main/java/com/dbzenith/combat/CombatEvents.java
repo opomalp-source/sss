@@ -147,6 +147,9 @@ public final class CombatEvents {
             ImpactPacket.melee(source.getEntity(), victim, impact).send(level);
         }
 
+        if (attackerData != null && dealt > 0) attackerData.markCombat(victim.level().getGameTime());
+        if (victimData != null && source.getEntity() != null) victimData.markCombat(victim.level().getGameTime());
+
         // 3) training points for the attacker
         if (attackerData != null && attacker != victim && dealt > 0) {
             attackerData.addTrainingProgress(StatCalculator.scaleTpGain(attackerData,

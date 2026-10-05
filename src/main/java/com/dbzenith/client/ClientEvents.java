@@ -92,6 +92,14 @@ public final class ClientEvents {
             mc.setScreen(new com.dbzenith.client.screen.KiCreatorScreen(null));
             delayTicks = Math.max(delayTicks, 6);
         }
+        if (name.startsWith("settings_") && !(mc.screen instanceof com.dbzenith.client.screen.SettingsScreen)) {
+            mc.setScreen(new com.dbzenith.client.screen.SettingsScreen(null));
+            delayTicks = Math.max(delayTicks, 6);
+        }
+        if (name.startsWith("pathchoice_") && !(mc.screen instanceof com.dbzenith.client.screen.PathChoiceScreen)) {
+            mc.setScreen(new com.dbzenith.client.screen.PathChoiceScreen(null));
+            delayTicks = Math.max(delayTicks, 6);
+        }
         if (name.contains("cutin_")) com.dbzenith.client.ui.CutInOverlay.play(net.minecraft.network.chat.Component.translatable("form.dbzenith.super_saiyan"), 0xFFD040);
         int impact = name.indexOf("impact_");
         if (impact >= 0 && mc.player != null) {

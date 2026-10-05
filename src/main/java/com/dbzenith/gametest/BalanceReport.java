@@ -110,9 +110,14 @@ public final class BalanceReport {
 
     /** The strongest form a race reaches by {@code level} without flags or a moon, parents assumed mastered. */
     static com.dbzenith.transform.Form bestForm(com.dbzenith.stats.Race race, int level) {
+        return bestForm(race, com.dbzenith.race.Variant.defaultFor(race), level);
+    }
+
+    /** As above, for one variant (sub-race, clan or path). */
+    static com.dbzenith.transform.Form bestForm(com.dbzenith.stats.Race race, com.dbzenith.race.Variant variant, int level) {
         com.dbzenith.transform.Form best = com.dbzenith.transform.Forms.BASE;
         for (com.dbzenith.transform.Form f : com.dbzenith.transform.Forms.all()) {
-            if (f.isBase() || !f.races().contains(race) || needsFlag(f)) continue;
+            if (f.isBase() || !f.races().contains(race) || !f.allows(variant) || needsFlag(f)) continue;
             if (f == com.dbzenith.transform.Forms.GREAT_APE) continue;
             if (com.dbzenith.transform.FormMath.unlockLevel(f) > level) continue;
             if (avgMultiplier(f) > avgMultiplier(best)) best = f;
@@ -128,8 +133,11 @@ public final class BalanceReport {
         return false;
     }
 
+    /** Average combat multiplier; a ranged form (grows with mastery) counts at the middle of its range. */
     static double avgMultiplier(com.dbzenith.transform.Form f) {
-        return (f.multiplier(Attribute.STRENGTH) + f.multiplier(Attribute.DEXTERITY) + f.multiplier(Attribute.KI_POWER)) / 3.0;
+        double avg = (f.multiplier(Attribute.STRENGTH) + f.multiplier(Attribute.DEXTERITY) + f.multiplier(Attribute.KI_POWER)) / 3.0;
+        double primary = f.multiplier(Attribute.KI_POWER);
+        return f.growTo() > primary ? avg * (1 + f.growTo() / primary) / 2 : avg;
     }
 
     /** TP a Saiyan Zenkai saves (the points it adds, priced at current costs). */

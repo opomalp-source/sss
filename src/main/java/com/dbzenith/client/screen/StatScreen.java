@@ -50,6 +50,10 @@ public class StatScreen extends Screen {
                 .bounds(left + 116, top + H - 24, 44, 18).build());
         addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.techniques_button"), b -> minecraft.setScreen(new DeckScreen(this)))
                 .bounds(left + W - 156, top + H - 24, 82, 18).build());
+        if (com.dbzenith.race.Milestones.pathPending(ClientPlayerData.get())) {
+            addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.path_button"), b -> minecraft.setScreen(new PathChoiceScreen(this)))
+                    .bounds(left + W - 100, top + H - 68, 92, 18).build().selected(true));
+        }
         if (com.dbzenith.stats.Prestige.eligible(ClientPlayerData.get())) {
             addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.prestige_button"), b -> minecraft.setScreen(
                     new net.minecraft.client.gui.screens.ConfirmScreen(yes -> {
@@ -79,7 +83,8 @@ public class StatScreen extends Screen {
 
         DbzTheme.header(g, font, title, left + W / 2, top - 6);
         g.drawString(font, Component.translatable(d.getPrestige() > 0 ? "screen.dbzenith.identity_prestige" : "screen.dbzenith.identity_age",
-                Component.translatable(d.getRace().translationKey()), Component.translatable(d.getPath().translationKey()),
+                Component.translatable(d.getVariant().kind() == com.dbzenith.race.Variant.Kind.DEFAULT ? d.getRace().translationKey()
+                        : d.getVariant().translationKey()), Component.translatable(d.getPath().translationKey()),
                 (int) d.getPhysicalAge(), d.getPrestige()), left + 8, top + 20, DIM);
         g.drawString(font, Component.translatable("screen.dbzenith.tp", String.format("%,d", d.getTrainingPoints())), left + W - 110, top + 8, 0xFF7CFF7C);
         com.dbzenith.race.Alignment.Standing standing = com.dbzenith.race.Alignment.of(d);

@@ -40,6 +40,10 @@ public final class Form {
     private final boolean allowsFlight;
     private final float scale;
     private final Trigger trigger;
+    private final Set<com.dbzenith.race.Variant> onlyVariants;
+    private final Set<com.dbzenith.race.Variant> exceptVariants;
+    private final double growTo;
+    private final double rising;
 
     private Form(Builder b) {
         id = b.id;
@@ -66,6 +70,10 @@ public final class Form {
         allowsFlight = b.allowsFlight;
         scale = b.scale;
         trigger = b.trigger;
+        onlyVariants = b.onlyVariants;
+        exceptVariants = b.exceptVariants;
+        growTo = b.growTo;
+        rising = b.rising;
     }
 
     public static Builder builder(String id) {
@@ -94,6 +102,18 @@ public final class Form {
     public boolean allowsFlight() { return allowsFlight; }
     public float scale() { return scale; }
     public Trigger trigger() { return trigger; }
+
+    /** Whether a character of this variant may take the form (races are checked separately). */
+    public boolean allows(com.dbzenith.race.Variant v) {
+        if (!onlyVariants.isEmpty() && !onlyVariants.contains(v)) return false;
+        return !exceptVariants.contains(v);
+    }
+
+    /** Multiplier the form grows to with mastery (DBV-style ranges such as 2x to 6x), or 0 for a fixed form. */
+    public double growTo() { return growTo; }
+
+    /** Extra fraction of the multiplier that builds over three minutes of combat (Legendary forms), or 0. */
+    public double rising() { return rising; }
 
     public boolean isBase() {
         return parent == null;
@@ -136,6 +156,10 @@ public final class Form {
         private boolean allowsFlight = true;
         private float scale = 1f;
         private Trigger trigger = Trigger.MANUAL;
+        private final Set<com.dbzenith.race.Variant> onlyVariants = EnumSet.noneOf(com.dbzenith.race.Variant.class);
+        private final Set<com.dbzenith.race.Variant> exceptVariants = EnumSet.noneOf(com.dbzenith.race.Variant.class);
+        private double growTo;
+        private double rising;
 
         private Builder(String id) {
             this.id = id;
@@ -162,6 +186,13 @@ public final class Form {
         public Builder noFlight() { allowsFlight = false; return this; }
         public Builder scale(float s) { scale = s; return this; }
         public Builder trigger(Trigger t) { trigger = t; return this; }
+        public Builder only(com.dbzenith.race.Variant... v) { onlyVariants.addAll(java.util.List.of(v)); return this; }
+        public Builder except(com.dbzenith.race.Variant... v) { exceptVariants.addAll(java.util.List.of(v)); return this; }
+        /** A fixed DBV multiplier, mapped onto this mod's scale ({@link FormScale}). */
+        public Builder dbv(double m) { return multiplier(FormScale.fromDbv(m)); }
+        /** A DBV range: starts at {@code min}, grows to {@code max} with mastery. */
+        public Builder dbv(double min, double max) { growTo = FormScale.fromDbv(max); return multiplier(FormScale.fromDbv(min)); }
+        public Builder rising(double fraction) { rising = fraction; return this; }
 
         public Form build() {
             return new Form(this);

@@ -13,7 +13,7 @@ public final class Technique {
     public enum Style { BALL, DISK, BEAM, SELF }
 
     /** Special behavior. NONE = plain damage. */
-    public enum Effect { NONE, HEAL_SELF, HEAL_ALLY, BLIND_AREA, EXPLOSIVE_WAVE, TELEPORT, KI_SENSE, ENERGY_ABSORB, CANDY, KI_TRANSFER, STUN_AREA, KI_SEAL, GRAB, FUSE, ABSORB }
+    public enum Effect { NONE, HEAL_SELF, HEAL_ALLY, BLIND_AREA, EXPLOSIVE_WAVE, TELEPORT, KI_SENSE, ENERGY_ABSORB, CANDY, KI_TRANSFER, STUN_AREA, KI_SEAL, GRAB, FUSE, ABSORB, LIFE_DRAIN }
 
     private final String id;
     private final double kiCost;

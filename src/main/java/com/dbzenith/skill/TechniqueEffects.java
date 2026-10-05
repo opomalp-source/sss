@@ -66,6 +66,21 @@ public final class TechniqueEffects {
                 level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 0.4f, 2.0f);
                 return true;
             }
+            case LIFE_DRAIN -> {                                    // a bite: the closest foe in front loses life, half comes back as body
+                Vec3 look = player.getLookAngle();
+                LivingEntity prey = around(player, power).stream()
+                        .filter(e -> e.position().subtract(player.position()).normalize().dot(look) > 0.4)
+                        .min(java.util.Comparator.comparingDouble(e -> e.distanceToSqr(player))).orElse(null);
+                if (prey == null) return false;
+                double damage = DamageCalculator.kiOutgoing(data, t.damageMult());
+                prey.invulnerableTime = 0;
+                prey.hurt(ModDamageTypes.kiBlast(level, player, player), (float) damage);
+                data.setBody(data.getBody() + damage * 0.5);
+                level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(0.75f, 0.05f, 0.1f), 1.3f),
+                        prey.getX(), prey.getY() + prey.getBbHeight() * 0.7, prey.getZ(), 24, 0.3, 0.4, 0.3, 0.05);
+                level.playSound(null, prey.getX(), prey.getY(), prey.getZ(), SoundEvents.PLAYER_HURT_SWEET_BERRY_BUSH, SoundSource.PLAYERS, 1f, 0.6f);
+                return true;
+            }
             case EXPLOSIVE_WAVE -> {
                 double damage = DamageCalculator.kiOutgoing(data, t.damageMult());
                 for (LivingEntity e : around(player, power)) {

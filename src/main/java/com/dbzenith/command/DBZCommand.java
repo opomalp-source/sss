@@ -318,6 +318,30 @@ public final class DBZCommand {
                                             }
                                             return n;
                                         }))))
+                .then(Commands.literal("variant")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("variant", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(
+                                                java.util.Arrays.stream(com.dbzenith.race.Variant.values()).map(com.dbzenith.race.Variant::id), b))
+                                        .executes(ctx -> {
+                                            String id = StringArgumentType.getString(ctx, "variant");
+                                            int n = 0;
+                                            for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
+                                                PlayerData d = ModCapabilities.get(p).orElse(null);
+                                                if (d == null) continue;
+                                                com.dbzenith.race.Variant v = com.dbzenith.race.Variant.byId(id, d.getRace());
+                                                if (!v.id().equals(id)) continue;                  // not a variant of this race
+                                                d.setVariant(v);
+                                                d.setDestiny("");
+                                                if (!com.dbzenith.transform.Forms.byId(d.getFormId()).allows(v)) d.setFormId(PlayerData.BASE_FORM);
+                                                d.invalidateDerived();
+                                                com.dbzenith.data.PlayerDataEvents.sync(p);
+                                                n++;
+                                            }
+                                            int count = n;
+                                            ctx.getSource().sendSuccess(() -> Component.literal("Set variant " + id + " for " + count + " player(s)"), true);
+                                            return n;
+                                        }))))
                 .then(Commands.literal("look")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("hair", StringArgumentType.word())

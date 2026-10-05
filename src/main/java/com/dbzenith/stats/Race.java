@@ -14,7 +14,12 @@ public enum Race {
     FROST_DEMON,
     MAJIN,
     ANDROID,
-    CYBORG;
+    CYBORG,
+    VAMPIRE,
+    BIO_ANDROID,
+    TUFFLE,
+    GEN_ALIEN,
+    CORE_PERSON;
 
     public String id() {
         return name().toLowerCase(Locale.ROOT);

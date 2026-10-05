@@ -69,6 +69,11 @@ public final class KiTicker {
         }
 
         com.dbzenith.combat.GuardRules.tick(data, now);
+        if (now % 20 == 0) com.dbzenith.race.Milestones.tick(player, data);
+        boolean fighting = now - data.getLastCombatTick() < 200;                      // ten seconds since the last blow
+        int before = data.getCombatTicks();
+        data.setCombatTicks(fighting ? before + 1 : 0);
+        if (com.dbzenith.transform.Forms.byId(data.getFormId()).rising() > 0 && (fighting ? before % 20 == 0 : before > 0)) data.invalidateDerived();
         if (!data.isCharging() && !data.isGuarding()) {
             data.setStamina(data.getStamina() + perTick(s.maxStamina(), c.staminaRegenPercentPerSecond.get()) * race.staminaRegenMultiplier()
                     * com.dbzenith.world.Needs.staminaRegenMultiplier(data));

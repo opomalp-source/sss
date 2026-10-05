@@ -14,12 +14,29 @@ import java.util.List;
 public final class FormMath {
     private FormMath() {}
 
-    /** Form multiplier with mastery bonus: 1 + (m - 1) * (1 + bonus * mastery/100). */
+    /**
+     * Form multiplier. Fixed forms: 1 + (m - 1) * (1 + bonus * mastery/100). Ranged forms ({@link Form#growTo()}) grow
+     * from their base to the top of the range with mastery instead. Rising forms add up to {@link Form#rising()} of the
+     * multiplier over three minutes of continuous combat.
+     */
     public static double formMultiplier(PlayerData data, Form form, Attribute attribute) {
         double m = form.multiplier(attribute);
         if (m == 1.0) return 1.0;
         double masteryFrac = data.getMastery(form.id()) / 100.0;
-        return 1.0 + (m - 1.0) * (1.0 + DBZConfig.SERVER.masteryMaxMultiplierBonus.get() * masteryFrac);
+        double out;
+        double primary = form.multiplier(Attribute.KI_POWER);
+        if (form.growTo() > primary && primary > 0) {
+            out = m * (1.0 + (form.growTo() / primary - 1.0) * masteryFrac);
+        } else {
+            out = 1.0 + (m - 1.0) * (1.0 + DBZConfig.SERVER.masteryMaxMultiplierBonus.get() * masteryFrac);
+        }
+        if (form.rising() > 0) out = 1.0 + (out - 1.0) * (1.0 + form.rising() * risingFraction(data));
+        return out;
+    }
+
+    /** 0 out of combat, building to 1 over three minutes of it. */
+    public static double risingFraction(PlayerData data) {
+        return Math.min(1.0, data.getCombatTicks() / 3600.0);
     }
 
     /** Everything that multiplies an attribute: current form and overdrive. */
