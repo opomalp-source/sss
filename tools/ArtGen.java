@@ -29,6 +29,7 @@ public class ArtGen {
         FormFx.all();
         GuiHd.all();
         Painted.all();
+        RaceParts.all();
         HudHd.all();
         System.out.println("ArtGen done");
     }
@@ -438,6 +439,35 @@ public class ArtGen {
     }
 
 
+
+    // ================================================================== race parts (CX-14d)
+
+    /**
+     * Greyscale materials for the 3D race parts (client.render.RaceFeatureModel), tinted at render time, painted in
+     * flat cel bands: skin (antennae, ears, the Majin tentacle), ridged bone (horns), veined carapace (wings, Frost
+     * Demon ear plates) and streaked fur (the Saiyan tail). 128x128 for a 64x64-unit model sheet.
+     */
+    static final class RaceParts {
+        static void all() throws IOException {
+            Canvas c = new Canvas(128, 128);
+            for (int y = 0; y < 32; y++) for (int x = 0; x < 32; x++) {
+                double l = y < 9 ? 1.0 : y < 19 ? 0.9 : 0.8;                                    // skin: light from above, in bands
+                c.set(x, y, Hd.lum(l));
+                double b = (y % 5 == 4) ? 0.7 : y % 5 == 0 ? 1.0 : 0.9;                          // bone: ridged rings
+                c.set(32 + x, y, Hd.lum(b - (y > 22 ? 0.06 : 0)));
+                double s = Math.abs(Math.sin(x * 0.55 + y * 0.28)) < 0.13 || Math.abs(Math.sin(x * 0.2 - y * 0.6)) < 0.08 ? 0.66 : 0.92;
+                c.set(64 + x, y, Hd.lum(s - (y > 24 ? 0.08 : 0)));                               // carapace: veins
+            }
+            for (int y = 32; y < 64; y++) for (int x = 0; x < 72; x++) {                            // fur: strands along the tail
+                double strand = noise(x / 2, 0, 911);
+                double l = 0.8 + 0.16 * strand - 0.12 * ((y - 32) / 32.0);
+                if ((x + (y - 32) / 7) % 4 == 0) l = 0.64;                                        // the gaps between tufts
+                if (noise(x, y / 3, 913) > 0.92) l = 1.0;                                         // stray light hairs
+                c.set(x, y, Hd.lum(l));
+            }
+            c.save("entity/race_parts.png");
+        }
+    }
     // ================================================================== painted art (CX-14a)
 
     /**

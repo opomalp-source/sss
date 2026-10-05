@@ -754,3 +754,27 @@ The user sent reference pictures for the art direction they want: chunky anime-s
 
 ### Verified
 - Three-quarter screenshots: the lean and bulky builds, a Frost Demon and a Namekian with the chest block; the spiky, prince, wild, teen and mane hair from the front and back; SSJ and SSJ3.
+
+## 2026-10-06 — Session 3 (cont.): 14d 3D body parts (v0.31.0)
+- **`RaceFeatureModel` rebuilt:** the placeholder boxes are gone. Parts are chains of tapering links, each child bent from the last.
+  - **Namekian antennae:** lean forward from the forehead, sweep back and end in bulbs.
+  - **Pointed ears:** a three-link leaf sweeping up and back. Namekians now always have them, and anyone can pick them in the Face screen.
+  - **Frost Demon horns:** thick roots on the sides of the skull curving out and up to a point, with carapace ear plates below.
+  - **Majin tentacle:** five links, tall at the crown, then curling back and down.
+  - **Demon horns:** four ridged links curling back.
+  - **Bio-Android wings:** carapace blades hanging from the upper back and flaring at the tips.
+  - **Saiyan tail:** five furry links.
+- **Tail physics (`RaceFeatureLayer.lift`):**
+  - It hangs with a lazy curl and lifts behind a runner, with speed along the body. Falling lifts it, and it streams out in flight.
+  - The lift eases in. A wave runs down the links, swinging less as the tail lifts.
+  - It wraps round the waist like a belt, tip tucked at the back, while its owner crouches.
+- **Colours follow the skin worn now:**
+  - Orange Namekians get orange antennae and ears; the Demon King's are crimson.
+  - Golden, metal and mutant Frost Demons get gold, steel and dark horns.
+  - Evil, pure and corrupted Majins get their own tentacle tones.
+  - Perfect and Zenith Bio-Androids get their own wing tones.
+  - The tail is red in SSJ4, silver for the Limit Breaker forms and gold for the golden forms.
+- **Art (`ArtGen.RaceParts` → `race_parts.png`):** greyscale cel materials tinted at render time: skin in light bands, ridged bone, veined carapace and streaked fur.
+
+### Verified
+- Three-quarter and back screenshots: Namekian (base and orange), Frost Demon, Majin, Bio-Android and the Saiyan tail.

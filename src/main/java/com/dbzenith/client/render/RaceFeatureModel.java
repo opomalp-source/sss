@@ -15,11 +15,16 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 /**
- * Racial features built in code (placeholder geometry): Namekian antennae, Frost Demon horns, Majin head
- * tentacle (head-anchored) and the Saiyan tail (body-anchored, swaying).
+ * Racial body parts in 3D (CX-14d): Namekian antennae and pointed ears, Frost Demon horns and ear plates, the Majin
+ * head tentacle, demon horns, Bio-Android wings and the Saiyan tail (five furry segments that hang and curl, lift
+ * behind a runner, stream behind a flier, sway, and wrap round the waist while crouching). Parts are greyscale
+ * materials from textures/entity/race_parts.png (skin, fur, bone, carapace), tinted per race and form.
  */
 public class RaceFeatureModel {
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(new ResourceLocation(DBZenith.MOD_ID, "race_features"), "main");
+    /** Material tiles in race_parts.png (texture units of a 64x64 sheet): skin, bone and shell on the top row (16 wide). */
+    static final int SKIN_U = 0, BONE_U = 16, SHELL_U = 32;              // fur is the wide row at v 16
+    static final int TAIL_SEGMENTS = 5;
 
     private final ModelPart head;
     private final ModelPart antennae;
@@ -29,9 +34,8 @@ public class RaceFeatureModel {
     private final ModelPart demonHorns;
     private final ModelPart wings;
     private final ModelPart body;
-    private final ModelPart tailBase;
-    private final ModelPart tailMid;
-    private final ModelPart tailTip;
+    private final ModelPart wrap;
+    private final ModelPart[] tail = new ModelPart[TAIL_SEGMENTS];
 
     public RaceFeatureModel(ModelPart root) {
         head = root.getChild("head");
@@ -42,9 +46,25 @@ public class RaceFeatureModel {
         demonHorns = head.getChild("demon_horns");
         body = root.getChild("body");
         wings = body.getChild("wings");
-        tailBase = body.getChild("tail_base");
-        tailMid = tailBase.getChild("tail_mid");
-        tailTip = tailMid.getChild("tail_tip");
+        wrap = body.getChild("tail_wrap");
+        ModelPart p = body;
+        for (int i = 0; i < TAIL_SEGMENTS; i++) {
+            p = p.getChild("tail_" + i);
+            tail[i] = p;
+        }
+    }
+
+    /** A chain of tapering boxes, each child bent from the last: for antennae, horns, tentacles, ears. */
+    private static PartDefinition chain(PartDefinition parent, String name, int u, PartPose rootPose, float[][] links) {
+        PartDefinition p = parent;
+        for (int i = 0; i < links.length; i++) {
+            float[] l = links[i];                                                  // width, length, depth, xRot, yRot, zRot
+            float w = l[0], len = l[1], d = l[2];
+            PartPose pose = i == 0 ? rootPose : PartPose.offsetAndRotation(0, -links[i - 1][1] + 0.15f, 0, l[3], l[4], l[5]);
+            p = p.addOrReplaceChild(i == 0 ? name : name + "_" + i, CubeListBuilder.create().texOffs(u, 0)
+                    .addBox(-w / 2, -len, -d / 2, w, len, d), pose);
+        }
+        return p;
     }
 
     public static LayerDefinition createLayer() {
@@ -52,67 +72,73 @@ public class RaceFeatureModel {
         PartDefinition root = mesh.getRoot();
         PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create(), PartPose.ZERO);
 
-        // Two thin stalks rising from the forehead, bending back, with small bulbs.
+        // Namekian antennae: thin stalks from the top of the forehead, leaning forward then sweeping back, bulbed.
         PartDefinition antennae = head.addOrReplaceChild("antennae", CubeListBuilder.create(), PartPose.ZERO);
-        antennae.addOrReplaceChild("left", CubeListBuilder.create().texOffs(0, 0)
-                        .addBox(-0.5f, -6, -0.5f, 1, 6, 1).addBox(-0.75f, -7, -0.75f, 1.5f, 1.2f, 1.5f),
-                PartPose.offsetAndRotation(-1.5f, -8, -3.5f, 0.5f, 0, -0.15f));
-        antennae.addOrReplaceChild("right", CubeListBuilder.create().texOffs(0, 0)
-                        .addBox(-0.5f, -6, -0.5f, 1, 6, 1).addBox(-0.75f, -7, -0.75f, 1.5f, 1.2f, 1.5f),
-                PartPose.offsetAndRotation(1.5f, -8, -3.5f, 0.5f, 0, 0.15f));
+        for (int s = -1; s <= 1; s += 2) {
+            PartDefinition tip = chain(antennae, s < 0 ? "left" : "right", SKIN_U, PartPose.offsetAndRotation(s * 1.4f, -7.8f, -3.2f, 0.35f, 0, s * 0.12f),
+                    new float[][]{{1.1f, 3f, 1.1f}, {0.9f, 2.6f, 0.9f, -0.75f, 0, s * 0.1f}, {0.8f, 1.8f, 0.8f, -0.6f, 0, 0}});
+            tip.addOrReplaceChild("bulb", CubeListBuilder.create().texOffs(SKIN_U, 0).addBox(-0.75f, -1.3f, -0.75f, 1.5f, 1.3f, 1.5f),
+                    PartPose.offset(0, -1.6f, 0));
+        }
 
-        // Horns on both sides of the head, angled out and up.
-        PartDefinition horns = head.addOrReplaceChild("horns", CubeListBuilder.create(), PartPose.ZERO);
-        horns.addOrReplaceChild("left", CubeListBuilder.create().texOffs(0, 0)
-                        .addBox(-1, -1, -1, 3, 2, 2).addBox(1.5f, -4, -0.75f, 1.5f, 3.5f, 1.5f).addBox(2, -6, -0.5f, 1, 2.2f, 1),
-                PartPose.offsetAndRotation(-5, -6, 0, 0, 0, -0.6f));
-        horns.addOrReplaceChild("right", CubeListBuilder.create().texOffs(0, 0).mirror()
-                        .addBox(-2, -1, -1, 3, 2, 2).addBox(-3, -4, -0.75f, 1.5f, 3.5f, 1.5f).addBox(-3, -6, -0.5f, 1, 2.2f, 1),
-                PartPose.offsetAndRotation(5, -6, 0, 0, 0, 0.6f));
-
-        // One thick, curling tentacle from the crown.
-        PartDefinition tentacle = head.addOrReplaceChild("tentacle", CubeListBuilder.create().texOffs(0, 0)
-                .addBox(-1.25f, -4, -1.25f, 2.5f, 4, 2.5f), PartPose.offsetAndRotation(0, -8, -0.5f, -0.2f, 0, 0));
-        tentacle.addOrReplaceChild("mid", CubeListBuilder.create().texOffs(0, 0)
-                .addBox(-1, -3.5f, -1, 2, 3.5f, 2), PartPose.offsetAndRotation(0, -4, 0, 0.9f, 0, 0));
-        tentacle.getChild("mid").addOrReplaceChild("tip", CubeListBuilder.create().texOffs(0, 0)
-                .addBox(-0.75f, -3, -0.75f, 1.5f, 3, 1.5f), PartPose.offsetAndRotation(0, -3.5f, 0, 0.9f, 0, 0));
-
-        // Long pointed ears swept back from the sides of the head.
+        // Pointed ears: a leaf sweeping up and back from each side of the head (Namekians, and anyone who picks them).
         PartDefinition ears = head.addOrReplaceChild("ears", CubeListBuilder.create(), PartPose.ZERO);
-        ears.addOrReplaceChild("left", CubeListBuilder.create().texOffs(0, 0)
-                        .addBox(-0.5f, -1.5f, 0, 1, 3, 2).addBox(-0.4f, -2.6f, 1.6f, 0.8f, 2, 1.6f).addBox(-0.3f, -3.4f, 3, 0.6f, 1.2f, 1),
-                PartPose.offsetAndRotation(-4.3f, -4, -0.5f, 0.35f, -0.35f, -0.1f));
-        ears.addOrReplaceChild("right", CubeListBuilder.create().texOffs(0, 0)
-                        .addBox(-0.5f, -1.5f, 0, 1, 3, 2).addBox(-0.4f, -2.6f, 1.6f, 0.8f, 2, 1.6f).addBox(-0.3f, -3.4f, 3, 0.6f, 1.2f, 1),
-                PartPose.offsetAndRotation(4.3f, -4, -0.5f, 0.35f, 0.35f, 0.1f));
+        for (int s = -1; s <= 1; s += 2) {
+            PartDefinition e = ears.addOrReplaceChild(s < 0 ? "left" : "right", CubeListBuilder.create().texOffs(SKIN_U, 0)
+                    .addBox(-0.5f, -2f, -1.5f, 1, 4f, 3.2f), PartPose.offsetAndRotation(s * 4.4f, -3.4f, 0.2f, -0.3f, s * -0.3f, s * 0.4f));
+            PartDefinition m = e.addOrReplaceChild("mid", CubeListBuilder.create().texOffs(SKIN_U, 0)
+                    .addBox(-0.4f, -3.4f, -1.1f, 0.8f, 3.4f, 2.4f), PartPose.offsetAndRotation(0, -1.8f, 0.6f, -0.4f, 0, 0));
+            m.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(SKIN_U, 0)
+                    .addBox(-0.3f, -3f, -0.7f, 0.6f, 3f, 1.4f), PartPose.offsetAndRotation(0, -3.2f, 0.4f, -0.45f, 0, 0));
+        }
 
-        // Two short horns curling up from the forehead.
+        // Frost Demon horns: thick at the root on the sides of the skull, curving out and up to a point; ear plates below.
+        PartDefinition horns = head.addOrReplaceChild("horns", CubeListBuilder.create(), PartPose.ZERO);
+        for (int s = -1; s <= 1; s += 2) {
+            PartDefinition h = horns.addOrReplaceChild(s < 0 ? "left" : "right", CubeListBuilder.create().texOffs(BONE_U, 0)
+                    .addBox(-1.3f, -1.3f, -1.3f, 2.6f, 2.6f, 2.6f), PartPose.offsetAndRotation(s * 4.6f, -6.6f, 0.4f, 0, 0, s * 1.25f));
+            PartDefinition m = h.addOrReplaceChild("mid", CubeListBuilder.create().texOffs(BONE_U, 0)
+                    .addBox(-1f, -3f, -1f, 2f, 3f, 2f), PartPose.offsetAndRotation(0, -1f, 0, 0.1f, 0, s * -0.7f));
+            PartDefinition t = m.addOrReplaceChild("upper", CubeListBuilder.create().texOffs(BONE_U, 0)
+                    .addBox(-0.7f, -2.6f, -0.7f, 1.4f, 2.6f, 1.4f), PartPose.offsetAndRotation(0, -2.9f, 0, 0.15f, 0, s * -0.45f));
+            t.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(BONE_U, 0)
+                    .addBox(-0.4f, -1.8f, -0.4f, 0.8f, 1.8f, 0.8f), PartPose.offsetAndRotation(0, -2.5f, 0, 0.2f, 0, s * -0.3f));
+            horns.addOrReplaceChild(s < 0 ? "plate_left" : "plate_right", CubeListBuilder.create().texOffs(SHELL_U, 0)
+                    .addBox(-0.4f, -1.4f, -1.6f, 0.8f, 2.8f, 3.2f), PartPose.offset(s * 4.25f, -3.4f, 0.6f));
+        }
+
+        // Majin tentacle: thick at the crown, curling back and down in four tapering links.
+        chain(head, "tentacle", SKIN_U, PartPose.offsetAndRotation(0, -7.7f, 0.4f, 0.05f, 0, 0),
+                new float[][]{{3.2f, 3.2f, 3.2f}, {2.6f, 3f, 2.6f, -0.35f, 0, 0}, {2.1f, 2.8f, 2.1f, -0.9f, 0, 0}, {1.6f, 2.6f, 1.6f, -1.0f, 0, 0}, {1.1f, 1.8f, 1.1f, -0.7f, 0, 0}});
+
+        // Demon horns: two from the forehead, ridged, curling back.
         PartDefinition demonHorns = head.addOrReplaceChild("demon_horns", CubeListBuilder.create(), PartPose.ZERO);
-        demonHorns.addOrReplaceChild("left", CubeListBuilder.create().texOffs(0, 0)
-                        .addBox(-0.75f, -2, -0.75f, 1.5f, 2, 1.5f).addBox(-0.5f, -3.6f, -0.2f, 1, 1.8f, 1).addBox(-0.3f, -4.6f, 0.5f, 0.6f, 1.2f, 0.6f),
-                PartPose.offsetAndRotation(-2.2f, -7.6f, -2.8f, -0.2f, 0, -0.35f));
-        demonHorns.addOrReplaceChild("right", CubeListBuilder.create().texOffs(0, 0)
-                        .addBox(-0.75f, -2, -0.75f, 1.5f, 2, 1.5f).addBox(-0.5f, -3.6f, -0.2f, 1, 1.8f, 1).addBox(-0.3f, -4.6f, 0.5f, 0.6f, 1.2f, 0.6f),
-                PartPose.offsetAndRotation(2.2f, -7.6f, -2.8f, -0.2f, 0, 0.35f));
+        for (int s = -1; s <= 1; s += 2) {
+            chain(demonHorns, s < 0 ? "left" : "right", BONE_U, PartPose.offsetAndRotation(s * 2.3f, -7.7f, -2.6f, 0.2f, 0, s * 0.35f),
+                    new float[][]{{1.9f, 2f, 1.9f}, {1.4f, 1.9f, 1.4f, -0.55f, 0, s * -0.1f}, {0.9f, 1.7f, 0.9f, -0.6f, 0, 0}, {0.5f, 1.2f, 0.5f, -0.5f, 0, 0}});
+        }
 
-        // Tail: three segments from the lower back, hanging down and curling.
         PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.ZERO);
-        PartDefinition base = body.addOrReplaceChild("tail_base", CubeListBuilder.create().texOffs(0, 0)
-                .addBox(-1, 0, -1, 2, 5, 2), PartPose.offsetAndRotation(0, 10.5f, 2, 0.6f, 0, 0));
-        PartDefinition mid = base.addOrReplaceChild("tail_mid", CubeListBuilder.create().texOffs(0, 0)
-                .addBox(-1, 0, -1, 2, 5, 2), PartPose.offsetAndRotation(0, 5, 0, 0.5f, 0, 0));
-        mid.addOrReplaceChild("tail_tip", CubeListBuilder.create().texOffs(0, 0)
-                .addBox(-1.25f, 0, -1.25f, 2.5f, 4, 2.5f), PartPose.offsetAndRotation(0, 5, 0, 0.6f, 0, 0));
-        // Bio-Android wings: two folded carapace blades on the upper back.
+        // Saiyan tail: five furry links from the base of the spine.
+        PartDefinition p = body;
+        float[] w = {2.3f, 2.2f, 2.1f, 2.0f, 2.2f};
+        for (int i = 0; i < TAIL_SEGMENTS; i++) {
+            PartPose pose = i == 0 ? PartPose.offsetAndRotation(0, 10.6f, 2.2f, 0.5f, 0, 0) : PartPose.offsetAndRotation(0, 2.9f, 0, 0.2f, 0, 0);
+            p = p.addOrReplaceChild("tail_" + i, CubeListBuilder.create().texOffs(0, 16)
+                    .addBox(-w[i] / 2, 0, -w[i] / 2, w[i], 3.2f, w[i]), pose);
+        }
+        // The tail wrapped round the waist like a belt, its tip tucked at the back.
+        body.addOrReplaceChild("tail_wrap", CubeListBuilder.create().texOffs(0, 16)
+                .addBox(-4.7f, 9.7f, -2.7f, 9.4f, 1.9f, 5.4f)
+                .addBox(1.2f, 10.9f, 2.5f, 1.8f, 2.6f, 1.8f), PartPose.ZERO);
+
+        // Bio-Android wings: two carapace blades folded on the upper back, flaring out at the tips.
         PartDefinition wings = body.addOrReplaceChild("wings", CubeListBuilder.create(), PartPose.ZERO);
-        wings.addOrReplaceChild("left", CubeListBuilder.create().texOffs(0, 0)
-                        .addBox(-1, 0, 0, 2, 9, 0.8f).addBox(-0.7f, 9, 0, 1.4f, 3, 0.8f),
-                PartPose.offsetAndRotation(-1.6f, 0.5f, 2.2f, 0.18f, 0, 0.22f));
-        wings.addOrReplaceChild("right", CubeListBuilder.create().texOffs(0, 0)
-                        .addBox(-1, 0, 0, 2, 9, 0.8f).addBox(-0.7f, 9, 0, 1.4f, 3, 0.8f),
-                PartPose.offsetAndRotation(1.6f, 0.5f, 2.2f, 0.18f, 0, -0.22f));
-        return LayerDefinition.create(mesh, 16, 16);
+        for (int s = -1; s <= 1; s += 2) {
+            chain(wings, s < 0 ? "left" : "right", SHELL_U, PartPose.offsetAndRotation(s * 1.7f, 1.2f, 2.3f, 0.2f + (float) Math.PI, 0, s * -0.22f),
+                    new float[][]{{3f, 6f, 0.7f}, {2.4f, 4.5f, 0.6f, -0.12f, 0, s * -0.12f}, {1.4f, 2.5f, 0.5f, -0.1f, 0, s * -0.1f}});
+        }
+        return LayerDefinition.create(mesh, 64, 64);
     }
 
     public void follow(ModelPart parentHead, ModelPart parentBody) {
@@ -120,28 +146,43 @@ public class RaceFeatureModel {
         body.copyFrom(parentBody);
     }
 
-    public void renderFeature(PoseStack pose, VertexConsumer vc, int light, int overlay, RaceTraits.Feature feature, float r, float g, float b) {
+    public void renderFeature(PoseStack pose, VertexConsumer vc, int light, int overlay, RaceTraits.Feature feature, boolean withEars,
+                              float r, float g, float b) {
         antennae.visible = feature == RaceTraits.Feature.ANTENNAE;
         horns.visible = feature == RaceTraits.Feature.HORNS;
         tentacle.visible = feature == RaceTraits.Feature.TENTACLE;
-        ears.visible = feature == RaceTraits.Feature.EARS;
+        ears.visible = feature == RaceTraits.Feature.EARS || withEars;
         demonHorns.visible = feature == RaceTraits.Feature.DEMON_HORNS;
         if (feature == RaceTraits.Feature.WINGS) {
-            tailBase.visible = false;                            // the body tree carries the tail too
+            tail[0].visible = false;                              // the body tree carries the tail too
+            wrap.visible = false;
             wings.visible = true;
             body.render(pose, vc, light, overlay, r, g, b, 1f);
-            tailBase.visible = true;
+            tail[0].visible = true;
             return;
         }
-        if (feature != RaceTraits.Feature.NONE) head.render(pose, vc, light, overlay, r, g, b, 1f);
+        if (feature != RaceTraits.Feature.NONE || withEars) head.render(pose, vc, light, overlay, r, g, b, 1f);
     }
 
-    public void renderTail(PoseStack pose, VertexConsumer vc, int light, int overlay, float ageInTicks, float r, float g, float b) {
+    /**
+     * @param lift   0 hanging .. 1 straight out behind (running, falling, flying)
+     * @param wrapped wound round the waist instead
+     */
+    public void renderTail(PoseStack pose, VertexConsumer vc, int light, int overlay, float ageInTicks, float lift, boolean wrapped,
+                           float r, float g, float b) {
         wings.visible = false;
-        float sway = Mth.sin(ageInTicks * 0.12f);
-        tailBase.yRot = sway * 0.35f;
-        tailMid.zRot = sway * 0.25f;
-        tailTip.zRot = sway * 0.35f;
+        wrap.visible = wrapped;
+        tail[0].visible = !wrapped;
+        if (!wrapped) {
+            float calm = 1 - Mth.clamp(lift, 0, 1);
+            tail[0].xRot = 0.45f + 1.05f * lift;
+            for (int i = 0; i < TAIL_SEGMENTS; i++) {
+                float wave = Mth.sin(ageInTicks * (0.11f + 0.05f * lift) - i * 0.7f);
+                if (i > 0) tail[i].xRot = 0.32f * calm - 0.05f * lift + 0.08f * Mth.sin(ageInTicks * 0.07f - i);   // a lazy curl when hanging
+                tail[i].zRot = wave * (0.12f + 0.08f * i) * (0.6f + 0.4f * calm);
+                if (i == 0) tail[i].yRot = wave * 0.25f;
+            }
+        }
         body.render(pose, vc, light, overlay, r, g, b, 1f);
     }
 }

@@ -5,6 +5,7 @@ import com.dbzenith.client.ClientPublicStates;
 import com.dbzenith.network.PublicStatePacket;
 import com.dbzenith.race.RaceTraits;
 import com.dbzenith.race.Races;
+import com.dbzenith.race.Variant;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.PlayerModel;
@@ -16,14 +17,24 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 
-/** Draws racial features and the Saiyan tail on any player, from their public state. */
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Draws racial body parts and the Saiyan tail on any player, from their public state, coloured to match the skin
+ * they wear now (an Orange Namekian's antennae turn orange, an evil Majin's tentacle grey, a golden Frost Demon's
+ * horns gold). The tail lifts behind a runner, streams behind a flier, swings and settles, and wraps round the waist
+ * while its owner crouches.
+ */
 public class RaceFeatureLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/form_hair.png");
-    private static final int ANTENNAE = 0x5FA83A;
-    private static final int HORNS = 0xEDE6D6;
-    private static final int TENTACLE = 0xF07FB0;
+    private static final ResourceLocation TEXTURE = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/race_parts.png");
     private static final int TAIL = 0x6B3E1E;
+
+    /** Each player's eased tail lift (0 hanging .. 1 straight out). */
+    private static final Map<Integer, float[]> LIFT = new HashMap<>();
 
     private final RaceFeatureModel model;
 
@@ -32,13 +43,44 @@ public class RaceFeatureLayer extends RenderLayer<AbstractClientPlayer, PlayerMo
         this.model = new RaceFeatureModel(models.bakeLayer(RaceFeatureModel.LAYER));
     }
 
+    /** The colour of a feature, from the skin the player wears now. */
+    static int tint(PublicStatePacket state, RaceTraits.Feature feature, Variant variant) {
+        String skin = state.raceLook() ? com.dbzenith.transform.FormLooks.skin(state.form(), RaceSkinLayer.skinName(state.raceEnum(), variant)) : null;
+        String s = skin == null ? "" : skin;
+        return switch (feature) {
+            case ANTENNAE -> s.equals("namekian_orange") ? 0xE8902A : s.equals("demon_namekian_king") ? 0x8A2A36
+                    : s.startsWith("demon_namekian") ? 0x3A8A6A : 0x62B444;
+            case HORNS -> s.equals("frost_demon_golden") ? 0xE8C050 : s.startsWith("metal_frost_demon") ? (s.endsWith("core") ? 0xE0B050 : 0xB8C4D0)
+                    : s.startsWith("mutant_frost_demon") ? 0x3A3040 : 0xEDE6D6;
+            case TENTACLE -> switch (s) {
+                case "majin_evil" -> 0x8C8C94;
+                case "majin_pure" -> 0xF6A8C8;
+                case "corrupted_majin" -> 0x9A90A8;
+                case "corrupted_majin_pure" -> 0x6A3A8A;
+                default -> 0xF59AC0;
+            };
+            case EARS -> state.skinTone() >= 0 ? state.skinTone() : variant == Variant.KAI ? 0xD8B8EC : 0xE6E0EA;
+            case WINGS -> s.equals("bio_android_zenith") ? 0xD0A040 : s.equals("bio_android_perfect") ? 0x3AA07A : 0x5AB04A;
+            case DEMON_HORNS -> 0x2A1418;
+            default -> 0xFFFFFF;
+        };
+    }
+
+    static int tailColor(PublicStatePacket state) {
+        String form = state.form();
+        if (form.contains("limit_breaker")) return 0xD8DCE6;
+        if (form.contains("super_saiyan_4") || form.contains("ssj4") || form.contains("lssj4")) return 0xC0283A;
+        if (form.contains("golden")) return 0xE8B840;
+        return TAIL;
+    }
+
     @Override
     public void render(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player, float limbSwing,
                        float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
         if (player.isInvisible()) return;
         PublicStatePacket state = ClientPublicStates.get(player.getId());
         if (state == null) return;
-        com.dbzenith.race.Variant variant = state.variantEnum();
+        Variant variant = state.variantEnum();
         RaceTraits.Feature feature = variant.feature() != null ? variant.feature() : Races.of(state.raceEnum()).feature();
         if (feature == RaceTraits.Feature.NONE && state.skinTone() >= 0
                 && com.dbzenith.appearance.FaceParts.get(state.face(), com.dbzenith.appearance.FaceParts.Part.EARS) == com.dbzenith.appearance.FaceParts.EARS_POINTED) {
@@ -51,18 +93,29 @@ public class RaceFeatureLayer extends RenderLayer<AbstractClientPlayer, PlayerMo
         VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
         int overlay = OverlayTexture.NO_OVERLAY;
         if (feature != RaceTraits.Feature.NONE) {
-            int c = switch (feature) {
-                case ANTENNAE -> ANTENNAE;
-                case HORNS -> HORNS;
-                case TENTACLE -> TENTACLE;
-                case EARS -> state.skinTone() >= 0 ? state.skinTone() : variant == com.dbzenith.race.Variant.KAI ? 0xD8B8EC : 0xE6E0EA;
-                case WINGS -> 0x4A8A3A;
-                case DEMON_HORNS -> 0x2A1418;
-                default -> 0xFFFFFF;
-            };
-            model.renderFeature(pose, vc, light, overlay, feature, r(c), g(c), b(c));
+            int c = tint(state, feature, variant);
+            boolean namekEars = feature == RaceTraits.Feature.ANTENNAE;           // Namekians have the long ears too
+            model.renderFeature(pose, vc, light, overlay, feature, namekEars, r(c), g(c), b(c));
         }
-        if (tail) model.renderTail(pose, vc, light, overlay, ageInTicks, r(TAIL), g(TAIL), b(TAIL));
+        if (tail) {
+            int c = tailColor(state);
+            model.renderTail(pose, vc, light, overlay, ageInTicks, lift(player, state), player.isCrouching(), r(c), g(c), b(c));
+        }
+    }
+
+    /** How far the tail streams out: with speed along the body, with falling, and fully in flight; eased. */
+    static float lift(AbstractClientPlayer player, PublicStatePacket state) {
+        Vec3 v = player.getDeltaMovement();
+        double yaw = Math.toRadians(player.yBodyRot);
+        double forward = -v.x * Math.sin(yaw) + v.z * Math.cos(yaw);
+        float want = (float) Mth.clamp(forward * 4.5, -0.2, 0.9);
+        if (!player.onGround()) want += (float) Mth.clamp(-v.y * 1.5, 0, 0.5);
+        if (state.has(PublicStatePacket.FLYING)) want = Math.max(want, 0.55f + (float) Mth.clamp(v.horizontalDistance() * 2, 0, 0.45));
+        float target = Mth.clamp(want, 0, 1);
+        float[] l = LIFT.computeIfAbsent(player.getId(), k -> new float[]{target});
+        l[0] += (target - l[0]) * 0.08f;
+        if (LIFT.size() > 256) LIFT.clear();
+        return l[0];
     }
 
     private static float r(int c) { return ((c >> 16) & 0xFF) / 255f; }
