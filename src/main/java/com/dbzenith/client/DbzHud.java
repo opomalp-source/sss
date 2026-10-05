@@ -56,6 +56,9 @@ public final class DbzHud implements IGuiOverlay {
         int aura = 0xFF000000 | (pub != null ? pub.auraColor() : com.dbzenith.ki.Aura.DEFAULT_COLOR);
         int accent = held ? aura : GOLD;
         RenderSystem.enableBlend();
+        float hudScale = (float) (double) com.dbzenith.config.DBZConfig.CLIENT.hudScale.get();
+        g.pose().pushPose();
+        g.pose().scale(hudScale, hudScale, 1);
 
         // ---------------------------------------------------------- portrait
         int px = 6, py = 4, cx = px + 28, cy = py + 28;
@@ -64,7 +67,8 @@ public final class DbzHud implements IGuiOverlay {
             float pulse = 0.75f + 0.25f * Mth.sin(t * (d.isCharging() ? 0.8f : 0.25f));
             DbzTheme.arc(g, cx, cy, 0, 22, 0, 360, DbzTheme.withAlpha(aura, 0), DbzTheme.withAlpha(aura, (int) (170 * pulse)));
         }
-        PortraitRenderer.draw(g, mc.player, cx, cy + 5, 44f, 14f, new int[]{cx - 19, cy - 19, cx + 19, cy + 19});
+        int c0 = (int) ((cx - 19) * hudScale), c1 = (int) ((cy - 19) * hudScale), c2 = (int) ((cx + 19) * hudScale), c3 = (int) ((cy + 19) * hudScale);
+        PortraitRenderer.draw(g, mc.player, cx, cy + 5, 44f, 14f, new int[]{c0, c1, c2, c3});   // the clip is in screen space
         g.setColor(((accent >> 16) & 255) / 255f, ((accent >> 8) & 255) / 255f, (accent & 255) / 255f, 1f);
         g.blit(DbzTheme.UI, px, py, 0, 0, 56, 56, 256, 256);                              // ring, tinted
         g.setColor(1, 1, 1, 1);
@@ -132,6 +136,8 @@ public final class DbzHud implements IGuiOverlay {
         else if (d.getHeavyArmedMultiplier() > 0) {
             chip(g, font, chipX, ly, Component.translatable("hud.dbzenith.heavy_ready", String.format("%.1f", d.getHeavyArmedMultiplier())), 0xFFFF6040);
         }
+
+        g.pose().popPose();
 
         // ---------------------------------------------------------- combo
         int combo = d.getComboHits();

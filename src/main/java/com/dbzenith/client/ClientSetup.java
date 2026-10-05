@@ -28,6 +28,7 @@ public final class ClientSetup {
     @SubscribeEvent
     public static void clientSetup(net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent event) {
         event.enqueueWork(com.dbzenith.client.anim.AnimController::registerLayers);
+        event.enqueueWork(com.dbzenith.client.ui.SettingsEntry::registerConfigScreen);
     }
 
     @SubscribeEvent

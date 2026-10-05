@@ -1518,7 +1518,7 @@ public class ArtGen {
         static void icons(Canvas c, int[] gold) {
             int ink = 0xFFF4F0E6;
             int[] red = ramp(0xFFE8402A, 5), blue = ramp(0xFF5AB8FF, 5), cl = ramp(0xFFF2CE5A, 5);
-            Canvas[] ic = new Canvas[11];
+            Canvas[] ic = new Canvas[12];
             for (int i = 0; i < ic.length; i++) ic[i] = new Canvas(16, 16);
             // 0 transform up: spiky crown of hair over an up arrow
             for (int i = 0; i < 3; i++) ic[0].line(2 + i * 4, 7, 4 + i * 4, 1, gold[4]).line(4 + i * 4, 1, 6 + i * 4, 7, gold[3]);
@@ -1552,6 +1552,12 @@ public class ArtGen {
             ic[9].line(3, 3, 12, 12, red[3]).line(4, 3, 13, 12, red[3]).line(12, 3, 3, 12, red[3]).line(13, 3, 4, 12, red[3]);
             // 10 ki orb (white: tinted per technique)
             ic[10].sphere(8, 8, 5.5, 5.5, ramp(0xFFE0E0E0, 5), true);
+            // 11 settings: a gear
+            for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) {
+                double dx = x + 0.5 - 8, dy = y + 0.5 - 8, r = Math.sqrt(dx * dx + dy * dy), a = Math.atan2(dy, dx);
+                boolean tooth = Math.cos(a * 8) > 0.3 && r < 7.2;
+                if ((r < 5.2 || tooth) && r > 2.2) ic[11].set(x, y, mix(0xFFB8C0D0, 0xFF6A7488, (dx + dy + 10) / 20.0));
+            }
             for (int i = 0; i < ic.length; i++) {
                 ic[i].outline();
                 blitInto(c, ic[i], i * 16, 64);

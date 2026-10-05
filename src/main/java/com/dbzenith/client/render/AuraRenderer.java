@@ -91,16 +91,18 @@ public final class AuraRenderer {
         }
 
         float speed = calm ? 0.22f : powering ? 0.65f : 0.4f;
+        int detail = com.dbzenith.config.DBZConfig.CLIENT.auraDetail.get();   // 0 low, 1 normal, 2 high
+        float more = detail == 0 ? 0.6f : detail == 2 ? 1.4f : 1f;
         // outer body: ordinary blending keeps the colour saturated in daylight
         VertexConsumer outer = buffers.getBuffer(FxRenderTypes.soft(FLAME));
-        tongues(pose, outer, calm ? 12 : 14, calm ? 0.42f : 0.56f, calm ? 1.05f : 1.3f, height, -0.25f, t, speed, seed,
+        tongues(pose, outer, Math.round((calm ? 12 : 14) * more), calm ? 0.42f : 0.56f, calm ? 1.05f : 1.3f, height, -0.25f, t, speed, seed,
                 right, up, color, (int) ((calm ? 150 : 175) * strength), calm ? 0.05f : 0.14f);
         // white-hot core
         VertexConsumer inner = buffers.getBuffer(FxRenderTypes.additive(FLAME));
-        tongues(pose, inner, 9, 0.3f, 0.95f, height * 0.82f, -0.15f, t, speed * 1.2f, seed + 7, right, up, core,
+        tongues(pose, inner, Math.round(9 * more), 0.3f, 0.95f, height * 0.82f, -0.15f, t, speed * 1.2f, seed + 7, right, up, core,
                 (int) ((calm ? 170 : 150) * strength), 0.08f);
         // tall licks breaking off the top while powering up
-        if (powering && !calm) {
+        if (powering && !calm && detail > 0) {
             tongues(pose, inner, 6, 0.45f, 0.6f, height * 1.3f, 0.1f, t, speed * 1.5f, seed + 13, right, up, color, 160, 0.25f);
         }
 

@@ -90,7 +90,7 @@ public final class CameraFx {
         float p = (float) event.getPartialTick();
         float k = Mth.lerp(p, kickO, kick);
         float r = Mth.lerp(p, rushO, rush);
-        if (k < 0.01f && r < 0.01f) return;
+        if ((k < 0.01f && r < 0.01f) || !DBZConfig.CLIENT.fovEffects.get()) return;
         event.setFOV(event.getFOV() * (1 - 0.08f * k + 0.09f * r));
     }
 

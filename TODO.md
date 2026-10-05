@@ -124,3 +124,17 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [ ] Home-world plateau pillars, a sky lookout hub, more planets (a cold tyrant's world, a sacred realm), dungeons
 - [ ] Original weapons with 3D item models; GeckoLib bosses with animations
 - [ ] Bloom / post-processing for energy (custom post chain)
+
+# Content expansion (CX) — see docs/CONTENT_EXPANSION.md
+- [x] CX-1 Settings menu (pause menu, mod list Config, wheel; HUD / effects / camera / controls)
+- [ ] CX-2 Races v2: variants, sub-races, new races, appearance variants
+- [ ] CX-3 Forms v2: full form trees on the mapped scale, 75% instant, transform time, rising multipliers
+- [ ] CX-4 Racial skills (actives on a Racial key and wheel ring, passives)
+- [ ] CX-5 Universal skills: Kaioken, Limit Break, Ki Sense, Instant Transmission, Ki Barrier, Echo Strike...
+- [ ] CX-6 Combat v3: Z-hits, sweeps, directionals, revenge counter, breaker wave, vanish / chase, dodges, recovery, clashes, downed state
+- [ ] CX-7 Ki Creator v2 (methods, origins, shapes, types, 14 modifiers)
+- [ ] CX-8 Character creator v2 + better hair presets + hair physics
+- [ ] CX-9 Animation v3
+- [ ] CX-10 Sound
+- [ ] CX-11 VFX v3
+- [ ] CX-12 World (Otherworld, God Ki pools, fusion v2, wishes, metals)

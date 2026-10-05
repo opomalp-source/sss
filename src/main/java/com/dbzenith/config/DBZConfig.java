@@ -592,6 +592,9 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue hitstop;
         public final ForgeConfigSpec.BooleanValue afterimages;
         public final ForgeConfigSpec.BooleanValue firstPersonAura;
+        public final ForgeConfigSpec.DoubleValue hudScale;
+        public final ForgeConfigSpec.IntValue auraDetail;
+        public final ForgeConfigSpec.BooleanValue fovEffects;
 
         Client(ForgeConfigSpec.Builder b) {
             b.push("hud");
@@ -603,6 +606,8 @@ public final class DBZConfig {
                     .define("hideVanillaHearts", true);
             transformCutIn = b.comment("Play a cut-in (portrait slash and form name) when you transform")
                     .define("transformCutIn", true);
+            hudScale = b.comment("Size of the portrait HUD (0.6 - 1.4)")
+                    .defineInRange("hudScale", 1.0, 0.6, 1.4);
             b.pop();
             b.push("effects");
             screenShake = b.comment("Camera shake strength from hits, explosions and landings (0 = off)")
@@ -613,6 +618,10 @@ public final class DBZConfig {
                     .define("afterimages", true);
             firstPersonAura = b.comment("Show your own aura and transformation flashes around the screen edge in first person")
                     .define("firstPersonAura", true);
+            auraDetail = b.comment("Aura detail: 0 low (fewer flame tongues, no licks), 1 normal, 2 high")
+                    .defineInRange("auraDetail", 1, 0, 2);
+            fovEffects = b.comment("Zoom punch on heavy blows and the widening rush on dashes")
+                    .define("fovEffects", true);
             b.pop();
         }
     }
