@@ -21,7 +21,7 @@ import java.util.List;
 public class SettingsScreen extends Screen {
     private static final int W = 360, H = 222, ROW = 22;
 
-    private enum Tab { HUD, EFFECTS, CAMERA, CONTROLS }
+    private enum Tab { HUD, STYLE, EFFECTS, CAMERA, CONTROLS }
 
     /** One setting: what it is, how it is shown and changed. */
     private record Option(String key, ForgeConfigSpec.ConfigValue<?> value, double min, double max, String[] choices) {}
@@ -58,6 +58,7 @@ public class SettingsScreen extends Screen {
                 o.add(new Option("screen_shake", c.screenShake, 0, 2, null));
                 o.add(new Option("fov_effects", c.fovEffects, 0, 0, null));
             }
+            case STYLE -> o.add(new Option("hd_art", c.hdArt, 0, 0, null));
             case CONTROLS -> { }
         }
         return o;

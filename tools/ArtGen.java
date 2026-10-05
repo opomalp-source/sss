@@ -24,6 +24,7 @@ public class ArtGen {
         Gui.all();
         Fx.all();
         Faces.all();
+        Hd.all();
         System.out.println("ArtGen done");
     }
 
@@ -111,6 +112,311 @@ public class ArtGen {
             b.append("}\n");
             java.nio.file.Files.writeString(java.nio.file.Path.of("src/main/resources/assets/dbzenith/face_defaults.json"), b.toString());
             System.out.println("face defaults for " + FACE_DEFAULTS.size() + " race skins");
+        }
+    }
+
+    // ================================================================== HD art (CX-13a): 128x128 skins, same model UVs
+
+    /**
+     * High-detail versions of the generated bodies, their outfit and the face parts, painted at twice the resolution
+     * (Minecraft maps skins by fractions, so a 128x128 skin sits on the same model). Painters work in continuous
+     * face coordinates (u, v in 0..1) with soft shapes, so anatomy reads as forms rather than pixels.
+     */
+    static final class Hd {
+        static final int S = 2;
+
+        static final class HdSkin {
+            FaceFn head, body, arm, leg;
+
+            void save(String path) throws IOException {
+                Canvas c = new Canvas(64 * S, 64 * S);
+                if (head != null) box(c, 0, 0, 8 * S, 8 * S, 8 * S, head);
+                if (body != null) box(c, 16 * S, 16 * S, 8 * S, 12 * S, 4 * S, body);
+                if (arm != null) { box(c, 40 * S, 16 * S, 4 * S, 12 * S, 4 * S, arm); box(c, 32 * S, 48 * S, 4 * S, 12 * S, 4 * S, Skin.mirror(arm)); }
+                if (leg != null) { box(c, 0, 16 * S, 4 * S, 12 * S, 4 * S, leg); box(c, 16 * S, 48 * S, 4 * S, 12 * S, 4 * S, Skin.mirror(leg)); }
+                c.save(path);
+            }
+        }
+
+        static void all() throws IOException {
+            body("lean", 0.6);
+            body("athletic", 1.0);
+            body("bulky", 1.45);
+            outfit();
+            HdFaces.all();
+        }
+
+        // ---------------------------------------------------------- helpers
+
+        static double g(double u, double v, double cu, double cv, double su, double sv) {
+            double a = (u - cu) / su, b = (v - cv) / sv;
+            return Math.exp(-0.5 * (a * a + b * b));
+        }
+
+        /** A soft line from (u0,v0) to (u1,v1) of half-width w. */
+        static double line(double u, double v, double u0, double v0, double u1, double v1, double w) {
+            double dx = u1 - u0, dy = v1 - v0, t = Math.max(0, Math.min(1, ((u - u0) * dx + (v - v0) * dy) / (dx * dx + dy * dy)));
+            double px = u0 + t * dx - u, py = v0 + t * dy - v;
+            return Math.exp(-0.5 * (px * px + py * py) / (w * w));
+        }
+
+        /** Smooth value noise in 0..1 with feature size {@code size} pixels. */
+        static double smooth(double x, double y, double size, int seed) {
+            double fx = x / size, fy = y / size;
+            int ix = (int) Math.floor(fx), iy = (int) Math.floor(fy);
+            double tx = fx - ix, ty = fy - iy;
+            tx = tx * tx * (3 - 2 * tx);
+            ty = ty * ty * (3 - 2 * ty);
+            double a = noise(ix, iy, seed), b = noise(ix + 1, iy, seed), c = noise(ix, iy + 1, seed), d = noise(ix + 1, iy + 1, seed);
+            return (a * (1 - tx) + b * tx) * (1 - ty) + (c * (1 - tx) + d * tx) * ty;
+        }
+
+        static double uOf(int x, int w) { return (x + 0.5) / w; }
+        static double vOf(int y, int h) { return (y + 0.5) / h; }
+
+        /** Ambient occlusion towards the edges of a face (the creases where faces of the model meet). */
+        static double edgeAo(double u, double v, double strength) {
+            double e = Math.min(Math.min(u, 1 - u), Math.min(v, 1 - v));
+            return -strength * Math.exp(-e / 0.06);
+        }
+
+        static int lum(double v) {
+            int g = (int) Math.round(Math.max(0, Math.min(1, v)) * 255);
+            return 0xFF000000 | g << 16 | g << 8 | g;
+        }
+
+        // ---------------------------------------------------------- bodies (greyscale, tinted by skin tone at render)
+
+        static void body(String name, double k) throws IOException {
+            HdSkin s = new HdSkin();
+            int seed = name.hashCode();
+            s.head = (f, x, y, w, h) -> {
+                double u = uOf(x, w), v = vOf(y, h), l = Skins.faceLight(f);
+                if (f == Face.FRONT) {
+                    l += 0.03 * g(u, v, 0.22, 0.62, 0.12, 0.08) + 0.03 * g(u, v, 0.78, 0.62, 0.12, 0.08);   // cheekbones
+                    l -= 0.04 * g(u, v, 0.28, 0.55, 0.12, 0.05) + 0.04 * g(u, v, 0.72, 0.55, 0.12, 0.05);   // eye sockets
+                    l -= 0.05 * g(u, v, 0.5, 0.97, 0.3, 0.05);                                              // under the chin
+                    l -= 0.04 * (g(u, v, 0.03, 0.8, 0.04, 0.2) + g(u, v, 0.97, 0.8, 0.04, 0.2));            // jaw
+                    l += 0.02 * g(u, v, 0.5, 0.18, 0.3, 0.12);                                              // forehead
+                }
+                if (f == Face.RIGHT || f == Face.LEFT) {                                                     // ears
+                    double ear = g(u, v, 0.5, 0.55, 0.12, 0.16);
+                    l += 0.05 * ear - 0.08 * g(u, v, 0.5, 0.58, 0.05, 0.08) * (ear > 0.3 ? 1 : 0);
+                }
+                if (f == Face.BOTTOM) l -= 0.04;
+                l += edgeAo(u, v, 0.05) + 0.02 * (smooth(x, y, 3, seed) - 0.5);
+                return lum(l);
+            };
+            s.body = (f, x, y, w, h) -> {
+                double u = uOf(x, w), v = vOf(y, h), l = Skins.faceLight(f);
+                if (f == Face.FRONT) {
+                    l += 0.08 * k * (g(u, v, 0.3, 0.15, 0.17, 0.09) + g(u, v, 0.7, 0.15, 0.17, 0.09));     // pecs
+                    l -= 0.13 * k * Math.exp(-0.5 * Math.pow((v - 0.26 - 0.03 * Math.cos((u - 0.5) * 6)) / 0.018, 2)) * (u > 0.1 && u < 0.9 ? 1 : 0);
+                    l -= 0.06 * k * Math.exp(-0.5 * Math.pow((u - 0.5) / 0.014, 2)) * (v < 0.82 ? 1 : 0); // sternum, linea alba
+                    for (int r = 0; r < 3; r++) {                                                            // a six pack
+                        double cv = 0.38 + r * 0.135;
+                        l += 0.06 * k * (g(u, v, 0.41, cv, 0.065, 0.045) + g(u, v, 0.59, cv, 0.065, 0.045));
+                    }
+                    l -= 0.07 * k * (g(u, v, 0.13, 0.58, 0.05, 0.2) + g(u, v, 0.87, 0.58, 0.05, 0.2));     // obliques
+                    l -= 0.05 * k * (line(u, v, 0.12, 0.04, 0.42, 0.07, 0.015) + line(u, v, 0.58, 0.07, 0.88, 0.04, 0.015)); // collarbones
+                    l += 0.03 * k * g(u, v, 0.5, 0.88, 0.12, 0.05);                                         // lower abs
+                }
+                if (f == Face.BACK) {
+                    l += 0.07 * k * (g(u, v, 0.27, 0.2, 0.13, 0.13) + g(u, v, 0.73, 0.2, 0.13, 0.13));      // shoulder blades
+                    l -= 0.07 * k * Math.exp(-0.5 * Math.pow((u - 0.5) / 0.03, 2));                          // spine
+                    l += 0.05 * k * (g(u, v, 0.12, 0.52, 0.08, 0.2) + g(u, v, 0.88, 0.52, 0.08, 0.2));      // lats
+                    l -= 0.04 * k * g(u, v, 0.5, 0.92, 0.25, 0.05);
+                }
+                if (f == Face.RIGHT || f == Face.LEFT) l += 0.04 * k * g(u, v, 0.5, 0.45, 0.25, 0.25);
+                l += edgeAo(u, v, 0.06) + 0.02 * (smooth(x, y, 3, seed + 1) - 0.5);
+                return lum(l);
+            };
+            s.arm = (f, x, y, w, h) -> {
+                double u = uOf(x, w), v = vOf(y, h), l = Skins.faceLight(f);
+                if (f != Face.TOP && f != Face.BOTTOM) {
+                    l += 0.07 * k * g(u, v, 0.5, 0.1, 0.35, 0.1);                                             // deltoid cap
+                    l -= 0.07 * k * Math.exp(-0.5 * Math.pow((v - 0.24) / 0.02, 2));                       // its edge
+                    if (f == Face.FRONT) l += 0.08 * k * g(u, v, 0.5, 0.38, 0.28, 0.1);                       // biceps
+                    if (f == Face.BACK) l += 0.06 * k * g(u, v, 0.5, 0.36, 0.3, 0.11);                        // triceps
+                    l -= 0.07 * k * Math.exp(-0.5 * Math.pow((v - 0.56) / 0.025, 2));                      // elbow crease
+                    l += 0.05 * k * g(u, v, 0.4, 0.7, 0.25, 0.1);                                             // forearm
+                    if (v > 0.88) l -= 0.03 + 0.03 * (smooth(x, y, 1.2, seed + 7) > 0.6 ? 1 : 0);              // hands, knuckles
+                }
+                l += edgeAo(u, v, 0.06) + 0.02 * (smooth(x, y, 3, seed + 2) - 0.5);
+                return lum(l);
+            };
+            s.leg = (f, x, y, w, h) -> {
+                double u = uOf(x, w), v = vOf(y, h), l = Skins.faceLight(f);
+                if (f == Face.FRONT) {
+                    l += 0.07 * k * g(u, v, 0.5, 0.25, 0.3, 0.16);                                            // quads
+                    l += 0.04 * k * g(u, v, 0.3, 0.42, 0.12, 0.06);                                           // teardrop
+                    l -= 0.06 * k * Math.exp(-0.5 * Math.pow((v - 0.52) / 0.025, 2));                      // knee
+                    l += 0.03 * g(u, v, 0.5, 0.56, 0.2, 0.04);
+                    l += 0.03 * k * g(u, v, 0.45, 0.75, 0.15, 0.12);                                          // shin
+                }
+                if (f == Face.BACK) l += 0.07 * k * g(u, v, 0.5, 0.68, 0.3, 0.12);                            // calves
+                l += edgeAo(u, v, 0.06) + 0.02 * (smooth(x, y, 3, seed + 3) - 0.5);
+                return lum(l);
+            };
+            s.save("entity/body_hd/" + name + ".png");
+        }
+
+        // ---------------------------------------------------------- the outfit (untinted)
+
+        static void outfit() throws IOException {
+            int[] pants = ramp(0xFF26346E, 6), boots = ramp(0xFF7A4424, 5), band = ramp(0xFF26346E, 5), sash = ramp(0xFF1A1A22, 4);
+            HdSkin s = new HdSkin();
+            s.head = (f, x, y, w, h) -> 0;
+            s.body = (f, x, y, w, h) -> {                                    // the belt and its knot
+                double u = uOf(x, w), v = vOf(y, h);
+                if (v < 0.79 || v > 0.92) return v > 0.92 ? pantsAt(pants, f, x, y, w, h, 77) : 0;
+                int i = 2 + (v < 0.83 ? 1 : 0) - (v > 0.89 ? 1 : 0);
+                if (f == Face.FRONT && Math.abs(u - 0.5) < 0.12) i = Math.min(sash.length - 1, i + 1);   // the knot
+                if (noise(x, y, 41) > 0.9) i = Math.max(0, i - 1);
+                return sash[Math.max(0, Math.min(sash.length - 1, i))];
+            };
+            s.arm = (f, x, y, w, h) -> {
+                double v = vOf(y, h), u = uOf(x, w);
+                if (f == Face.TOP || f == Face.BOTTOM || v < 0.72 || v > 0.87) return 0;            // wristbands
+                if (Math.abs(v - 0.795) < 0.015) return band[1];                                    // stitching
+                return band[f == Face.FRONT ? 3 : 2];
+            };
+            s.leg = (f, x, y, w, h) -> {
+                double v = vOf(y, h), u = uOf(x, w);
+                if (v > 0.74 || f == Face.BOTTOM) {                                                   // boots
+                    if (f == Face.BOTTOM || v > 0.95) return boots[0];                                // the sole
+                    int i = f == Face.FRONT ? 3 : f == Face.BACK ? 1 : 2;
+                    if (v < 0.78) i = Math.min(boots.length - 1, i + 1);                              // the cuff
+                    if (f == Face.FRONT && v > 0.79 && v < 0.92 && Math.abs(u - 0.5) < 0.18 && ((int) (v * h)) % 2 == 0) return 0xFFE8D8B0;   // laces
+                    if (noise(x, y, 51) > 0.92) i = Math.max(0, i - 1);
+                    return boots[i];
+                }
+                return pantsAt(pants, f, x, y, w, h, 61);
+            };
+            s.save("entity/body_hd/outfit.png");
+        }
+
+        /** Gi trousers: soft vertical folds, creases bunching at the knee and over the boots. */
+        static int pantsAt(int[] p, Face f, int x, int y, int w, int h, int seed) {
+            if (f == Face.TOP) return 0;
+            double u = uOf(x, w), v = vOf(y, h);
+            double l = switch (f) { case FRONT -> 3.0; case BACK -> 1.8; default -> 2.4; };
+            l += 0.7 * Math.sin(u * 9 + smooth(x, y, 4, seed) * 3) * 0.5;                          // long folds
+            l -= 1.0 * g(u, v, 0.5, 0.52, 0.4, 0.03);                                               // the knee crease
+            l -= 0.8 * Math.max(0, Math.sin(v * 40 + u * 3)) * (v > 0.66 ? 1 : 0);                   // bunching over the boot
+            l += 0.6 * (smooth(x, y, 2, seed + 9) - 0.5);
+            return p[(int) Math.max(0, Math.min(p.length - 1, Math.round(l)))];
+        }
+    }
+
+    /**
+     * HD face parts: 16x16 faces at u 16, v 16 of a 128x128 skin. Eyes have lashes, whites, a tinted iris, a dark pupil
+     * and a highlight (the pupil layer, drawn over the iris); brows are tinted by hair colour.
+     */
+    static final class HdFaces {
+        static final int WHITE = 0xFFF6F4F0, LASH = 0xFF161012, TINT = 0xFFFFFFFF, PUPIL = 0xFF0C0A10, SHINE = 0xFFFFFFFF;
+
+        static void all() throws IOException {
+            String[][] eyes = {
+                    // normal                          wide                             narrow
+                    {".LLLLL.", "LWIIHW.", ".WIPIW.", "..SSS.."}, {".LLLLL.", "LWIIHW.", ".WIPIW.", ".WIIIW.", "..SSS.."}, {"LLLLLL.", ".LIPIL.", "..SSS.."},
+                    // sharp                           gentle                           tired
+                    {"...LLLL", ".LWIIHL", "..WIPIW", "....SS."}, {"..LLL..", ".LWIHW.", ".WIPIW.", ".TTTTT."}, {".LLLLL.", "LLLLLL.", ".WIPIW.", ".SSSSS."},
+                    // closed                          cat
+                    {".......", "L.....L", ".LLLLL.", "......."}, {".LLLLL.", "LIIHII.", ".IIPII.", ".IIPII.", "..SSS.."}};
+            for (int i = 0; i < eyes.length; i++) {
+                Canvas whites = new Canvas(128, 128), iris = new Canvas(128, 128), pupils = new Canvas(128, 128);
+                String[] grid = eyes[i];
+                for (int row = 0; row < grid.length; row++) {
+                    for (int col = 0; col < grid[row].length(); col++) {
+                        char ch = grid[row].charAt(col);
+                        for (int side = 0; side < 2; side++) {
+                            int x = side == 0 ? 1 + col : 14 - col, y = 7 + row;
+                            switch (ch) {
+                                case 'W' -> px(whites, x, y, WHITE);
+                                case 'L' -> px(whites, x, y, LASH);
+                                case 'S' -> px(whites, x, y, 0x48301820);
+                                case 'T' -> px(whites, x, y, 0x40FFFFFF);
+                                case 'I' -> px(iris, x, y, TINT);
+                                case 'P' -> { px(iris, x, y, TINT); px(pupils, x, y, PUPIL); }
+                                case 'H' -> { px(iris, x, y, TINT); px(pupils, x, y, SHINE); }
+                                default -> { }
+                            }
+                        }
+                    }
+                }
+                whites.save("entity/face_hd/eyes_" + i + ".png");
+                iris.save("entity/face_hd/iris_" + i + ".png");
+                pupils.save("entity/face_hd/pupil_" + i + ".png");
+            }
+            String[][] brows = {
+                    {"..TTTT.", ".TTTTTT"},                                   // normal arc
+                    {".TTTTTT", "TTTTTTT", ".TTTT.."},                       // thick
+                    {"TT.....", ".TTTT..", "...TTTT"},                       // fierce: low at the inner end
+                    {"...TTTT", ".TTTT..", "TT....."},                       // worried
+                    {".TTTTTTT", ".TTTTTTT"},                                 // joined (runs to the middle)
+                    {}};
+            for (int i = 0; i < brows.length; i++) {
+                Canvas c = new Canvas(128, 128);
+                for (int row = 0; row < brows[i].length; row++) for (int col = 0; col < brows[i][row].length(); col++) {
+                    if (brows[i][row].charAt(col) != 'T') continue;
+                    px(c, 1 + col, 4 + row, TINT);
+                    px(c, 14 - col, 4 + row, TINT);
+                }
+                c.save("entity/face_hd/brows_" + i + ".png");
+            }
+            int line = 0xFF5A2620, teeth = 0xFFF4F0E6, tongue = 0xFFC05058, deep = 0xFF3A1014;
+            String[][] mouths = {
+                    {"..LLLL..", "...pp..."},                                 // neutral
+                    {"L......L", ".LLLLLL.", "..pppp.."},                     // smile
+                    {"LLLLLLLL", "LTTTTTTL", ".DDDDDD.", "..pppp.."},         // grin
+                    {"..pppp..", ".LLLLLL.", "L......L"},                     // frown
+                    {"......LL", "..LLLL..", "....pp.."},                     // smirk
+                    {"..LLLL..", ".LDDDDL.", ".LDggDL.", "..LLLL.."}};        // shout
+            for (int i = 0; i < mouths.length; i++) {
+                Canvas c = new Canvas(128, 128);
+                for (int row = 0; row < mouths[i].length; row++) for (int col = 0; col < 8; col++) {
+                    char ch = col < mouths[i][row].length() ? mouths[i][row].charAt(col) : '.';
+                    int color = switch (ch) {
+                        case 'L' -> line;
+                        case 'p' -> 0x50A04A40;                                    // the lower lip, soft
+                        case 'T' -> teeth;
+                        case 'D' -> deep;
+                        case 'g' -> tongue;
+                        default -> 0;
+                    };
+                    if (color != 0) px(c, 4 + col, 12 + row, color);
+                }
+                c.save("entity/face_hd/mouth_" + i + ".png");
+            }
+            for (int i = 0; i < 4; i++) {
+                Canvas c = new Canvas(128, 128);
+                switch (i) {
+                    case 0 -> { px(c, 7, 11, 0x30000000); px(c, 6, 11, 0x40000000); px(c, 9, 11, 0x40000000); px(c, 8, 11, 0x20000000); px(c, 7, 10, 0x18000000); }
+                    case 1 -> { }
+                    case 2 -> { px(c, 7, 11, 0x50000000); px(c, 8, 11, 0x50000000); }
+                    default -> { for (int y = 7; y <= 10; y++) px(c, 7, y, 0x30FFFFFF); px(c, 8, 10, 0x30000000); px(c, 6, 11, 0x50000000); px(c, 9, 11, 0x50000000); }
+                }
+                c.save("entity/face_hd/nose_" + i + ".png");
+            }
+            for (int i = 0; i < 8; i++) {
+                Canvas c = new Canvas(128, 128);
+                switch (i) {
+                    case 1 -> { for (int x = 1; x <= 4; x++) for (int y = 11; y <= 12; y++) { px(c, x, y, 0x60FF6080); px(c, 15 - x, y, 0x60FF6080); } }
+                    case 2 -> { int[][] dots = {{2, 11}, {4, 10}, {3, 12}, {5, 11}, {1, 10}}; for (int[] d : dots) { px(c, d[0], d[1], 0x90804A28); px(c, 15 - d[0], d[1], 0x90804A28); } }
+                    case 3 -> { for (int k = 0; k < 3; k++) for (int x = 0; x <= 3; x++) { px(c, x, 10 + k * 2 - (x == 0 ? 1 : 0) * (k - 1), 0xB0201818); px(c, 15 - x, 10 + k * 2 - (x == 0 ? 1 : 0) * (k - 1), 0xB0201818); } }
+                    case 4 -> { for (int y = 10; y <= 13; y++) { px(c, 2, y, 0xFFC02020); px(c, 3, y, 0xFFC02020); px(c, 13, y, 0xFFC02020); px(c, 12, y, 0xFFC02020); } }
+                    case 5 -> { px(c, 7, 1, LASH); px(c, 8, 1, LASH); px(c, 6, 2, LASH); px(c, 9, 2, LASH); px(c, 7, 2, WHITE); px(c, 8, 2, 0xFFC01830); px(c, 7, 3, LASH); px(c, 8, 3, LASH); }
+                    case 6 -> { for (int x = 2; x <= 13; x++) for (int y = 12; y <= 15; y++) if (noise(x, y, 66) > 0.45 && !(y <= 13 && x >= 5 && x <= 10)) px(c, x, y, 0x40201010); }
+                    case 7 -> { px(c, 7, 1, 0xFFFF80A0); px(c, 8, 1, 0xFFE03050); px(c, 6, 2, 0xFFE03050); px(c, 7, 2, 0xFFFF90B0); px(c, 8, 2, 0xFFC02040); px(c, 9, 2, 0xFFA01030); px(c, 7, 3, 0xFFA01030); px(c, 8, 3, 0xFF801028); }
+                    default -> { }
+                }
+                c.save("entity/face_hd/extra_" + i + ".png");
+            }
+        }
+
+        static void px(Canvas c, int x, int y, int color) {
+            if (x >= 0 && x < 16 && y >= 0 && y < 16) c.set(16 + x, 16 + y, color);
         }
     }
     // ================================================================== faces

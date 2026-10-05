@@ -22,6 +22,11 @@ public class BodySkinLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
             new ResourceLocation(DBZenith.MOD_ID, "textures/entity/body/athletic.png"),
             new ResourceLocation(DBZenith.MOD_ID, "textures/entity/body/bulky.png")};
     private static final ResourceLocation OUTFIT = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/body/outfit.png");
+    private static final ResourceLocation[] BODIES_HD = {
+            new ResourceLocation(DBZenith.MOD_ID, "textures/entity/body_hd/lean.png"),
+            new ResourceLocation(DBZenith.MOD_ID, "textures/entity/body_hd/athletic.png"),
+            new ResourceLocation(DBZenith.MOD_ID, "textures/entity/body_hd/bulky.png")};
+    private static final ResourceLocation OUTFIT_HD = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/body_hd/outfit.png");
 
     public BodySkinLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> parent) {
         super(parent);
@@ -41,9 +46,10 @@ public class BodySkinLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         if (!active(state)) return;
         int tint = com.dbzenith.transform.FormLooks.of(state.form()).tint();
         int c = tint >= 0 ? tint : state.skinTone();                     // some forms recolour the body
-        ResourceLocation body = BODIES[Math.max(0, Math.min(BODIES.length - 1, state.bodyType()))];
+        boolean hd = com.dbzenith.config.DBZConfig.CLIENT.hdArt.get();
+        ResourceLocation body = (hd ? BODIES_HD : BODIES)[Math.max(0, Math.min(BODIES.length - 1, state.bodyType()))];
         renderColoredCutoutModel(getParentModel(), body, pose, buffers, light, player,
                 ((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f);
-        renderColoredCutoutModel(getParentModel(), OUTFIT, pose, buffers, light, player, 1f, 1f, 1f);
+        renderColoredCutoutModel(getParentModel(), hd ? OUTFIT_HD : OUTFIT, pose, buffers, light, player, 1f, 1f, 1f);
     }
 }

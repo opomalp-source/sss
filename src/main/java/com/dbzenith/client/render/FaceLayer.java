@@ -23,16 +23,24 @@ import net.minecraft.resources.ResourceLocation;
  * Drawn over the body skin, translucent so the soft parts sit on any skin tone. Pointed ears are 3D (RaceFeatureLayer).
  */
 public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
-    private static final ResourceLocation[][] TEXTURES = new ResourceLocation[Part.values().length + 1][];
-    private static final int IRIS = Part.values().length;
+    private static final int IRIS = Part.values().length, PUPIL = IRIS + 1;
+    /** Classic (64x64) and HD (128x128, with a pupil-and-shine layer) part textures. */
+    private static final ResourceLocation[][] TEXTURES = textures("face"), TEXTURES_HD = textures("face_hd");
+    private static ResourceLocation[][] textures;
 
-    static {
+    private static ResourceLocation[][] textures(String folder) {
+        ResourceLocation[][] t = new ResourceLocation[Part.values().length + 2][];
         for (Part p : Part.values()) {
-            TEXTURES[p.ordinal()] = new ResourceLocation[p.options];
-            for (int i = 0; i < p.options; i++) TEXTURES[p.ordinal()][i] = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/face/" + p.key() + "_" + i + ".png");
+            t[p.ordinal()] = new ResourceLocation[p.options];
+            for (int i = 0; i < p.options; i++) t[p.ordinal()][i] = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/" + folder + "/" + p.key() + "_" + i + ".png");
         }
-        TEXTURES[IRIS] = new ResourceLocation[Part.EYES.options];
-        for (int i = 0; i < Part.EYES.options; i++) TEXTURES[IRIS][i] = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/face/iris_" + i + ".png");
+        t[IRIS] = new ResourceLocation[Part.EYES.options];
+        t[PUPIL] = new ResourceLocation[Part.EYES.options];
+        for (int i = 0; i < Part.EYES.options; i++) {
+            t[IRIS][i] = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/" + folder + "/iris_" + i + ".png");
+            t[PUPIL][i] = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/" + folder + "/pupil_" + i + ".png");
+        }
+        return t;
     }
 
     public FaceLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> parent) {
@@ -55,6 +63,8 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         PublicStatePacket state = ClientPublicStates.get(player.getId());
         if (!active(state)) return;
         Form form = FormHairLayer.flicker(player, state, ageInTicks);
+        boolean hd = com.dbzenith.config.DBZConfig.CLIENT.hdArt.get();
+        textures = hd ? TEXTURES_HD : TEXTURES;
         int face = state.face();
         int eyes = FaceParts.get(face, Part.EYES);
         int overlay = LivingEntityRenderer.getOverlayCoords(player, 0);
@@ -66,6 +76,7 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         boolean whites = race == null || race.whites() || state.eyeColor() >= 0;
         draw(pose, buffers, Part.EYES.ordinal(), eyes, light, overlay, whites ? 0xFFFFFF : iris);     // no whites: the whole eye is dark
         draw(pose, buffers, IRIS, eyes, glowing ? LightTexture.FULL_BRIGHT : light, overlay, iris);
+        if (hd) draw(pose, buffers, PUPIL, eyes, glowing ? LightTexture.FULL_BRIGHT : light, overlay, 0xFFFFFF);   // pupils and the shine
         int hair = form.hairColor() >= 0 ? form.hairColor() : race != null ? race.brow() : state.hairColor() >= 0 ? state.hairColor() : 0x3A2414;
         draw(pose, buffers, Part.BROWS.ordinal(), FaceParts.get(face, Part.BROWS), light, overlay, race != null && form.hairColor() < 0 ? hair : darken(hair, 0.8f));
         draw(pose, buffers, Part.NOSE.ordinal(), FaceParts.get(face, Part.NOSE), light, overlay, 0xFFFFFF);
@@ -75,7 +86,7 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
     }
 
     private void draw(PoseStack pose, MultiBufferSource buffers, int part, int option, int light, int overlay, int tint) {
-        ResourceLocation tex = TEXTURES[part][Math.max(0, Math.min(TEXTURES[part].length - 1, option))];
+        ResourceLocation tex = textures[part][Math.max(0, Math.min(textures[part].length - 1, option))];
         getParentModel().renderToBuffer(pose, buffers.getBuffer(RenderType.entityTranslucent(tex)), light, overlay,
                 ((tint >> 16) & 255) / 255f, ((tint >> 8) & 255) / 255f, (tint & 255) / 255f, 1f);
     }

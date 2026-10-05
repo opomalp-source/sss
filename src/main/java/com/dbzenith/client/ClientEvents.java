@@ -100,6 +100,8 @@ public final class ClientEvents {
             mc.setScreen(new com.dbzenith.client.screen.PathChoiceScreen(null));
             delayTicks = Math.max(delayTicks, 6);
         }
+        if (name.contains("hdoff")) com.dbzenith.config.DBZConfig.CLIENT.hdArt.set(false);
+        if (name.contains("hdon")) com.dbzenith.config.DBZConfig.CLIENT.hdArt.set(true);
         if (name.startsWith("face_") && !(mc.screen instanceof com.dbzenith.client.screen.FaceScreen)) {
             mc.setScreen(new com.dbzenith.client.screen.FaceScreen(null));
             delayTicks = Math.max(delayTicks, 6);

@@ -139,5 +139,12 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [x] CX-8c Transformation looks (user request): forms change the body, not just hair and eyes. Done: recoloured race skins (Orange Namekian, Demon King, Golden Frost Demon, Metal God Core, Mutant God, evil and pure Majin, Pure Corruption, crimson Vampires, Perfect and Zenith Bio-Androids, Golden Tuffle, Apex Gen Alien, Demon God, Supreme Kai), generated-body tints, SSJ4 red and silver fur (v0.22.0)
 - [ ] CX-8d Transformation shapes (user request, follow-up): bigger frames for Buffed, Legendary and Giant forms (model scale per part), Frost Demon form shapes (second-form horns, third-form crest, final-form smooth head), Super Saiyan 3 brow ridge, Golden Great Ape fur, Primal tails, Bio-Android wings, Majin size changes
 - [x] CX-8e Face customization in first-time character creation (user request): Body / Face tabs with a zoomed head preview; race skins now wear the face parts too (v0.22.0)
+- [ ] CX-13 Art and design overhaul (user request: "way too simplistic"; more detailed forms, body art, UI and HUD, switchable in the settings; the user's reference pictures are style inspiration only, nothing copied)
+  - [x] 13a HD bodies (v0.23.0): 128x128 generated bodies (muscle definition, rim light, ambient occlusion), detailed outfits (gi folds, belts, wristbands, boots), HD face parts (16x16 faces: eye highlights, iris gradients, lashes)
+  - [ ] 13b HD race skins: every race and lineage repainted at 128x128 (scales, plates, spots, markings), their transformation recolours regenerated
+  - [ ] 13c Form detail: HD hair texture (strand gradients, rim highlights), glowing eye highlights, form body markings (god-ki sheen, kaioken flush, silver Ultra-style sheen), lightning on the body
+  - [ ] 13d UI v2: ornate themed panels, buttons and frames; a "UI style" setting (Zenith / Classic)
+  - [ ] 13e HUD v2: detailed portrait frames per form, animated bars, new layouts; a "HUD style" setting (Zenith / Classic / Minimal)
+  - [x] 13f Art detail setting (v0.23.0): Zenith Settings > Style > HD art
 - [ ] CX-11 VFX v3
 - [ ] CX-12 World (Otherworld, God Ki pools, fusion v2, wishes, metals)

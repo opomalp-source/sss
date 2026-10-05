@@ -585,3 +585,24 @@ User requests: transformations should change the character (an orange Namekian i
 
 ### Verified
 - Screenshots: a Namekian face drawn on the race skin, then orange in Orange form; a golden Frost Demon; a grey Evil Majin; Perfect; SSJ4 fur; and the creation Face page. The tabs were moved off the subtitle and Surprise me out from under the preview after review.
+
+## 2026-10-05 — Session 3 (cont.): CX-13 plan and 13a HD bodies and faces (v0.23.0)
+- **CX-13 on the list (user request):** "the art and design is way too simplistic". Stages:
+  - 13a HD bodies and faces;
+  - 13b HD race skins;
+  - 13c form detail;
+  - 13d UI v2 (with a style setting);
+  - 13e HUD v2 (with a style setting);
+  - 13f art detail setting.
+  - The user's reference pictures are inspiration only; nothing is copied.
+- **HD textures (`ArtGen.Hd`):** Minecraft maps skins by fractions, so 128x128 textures sit on the same model at twice the detail.
+  - Painters work in continuous face coordinates: Gaussian muscle forms, soft grooves and lines, ambient occlusion at the edges, and value-noise skin texture.
+  - Bodies (lean, athletic, bulky): pecs with a curved underline, a sternum and linea alba, a six-pack, obliques, collarbones, shoulder blades, spine, lats, deltoids, biceps and triceps, elbow creases, forearms, knuckles, quads, kneecaps, calves; on the head, cheekbones, eye sockets and jaw.
+  - Outfit: gi trousers with long folds, a knee crease and bunching over the boots; a knotted sash; stitched wristbands; boots with cuffs, laces and soles.
+- **HD faces (`ArtGen.HdFaces`):** 16x16 faces.
+  - Eyes (8 shapes): lashes, whites, a tinted iris, and a new pupil layer with a dark pupil and a white highlight; soft under-eye shadow and lids.
+  - Brows (6), mouths (6, with teeth, an open mouth and tongue, and a soft lower lip), noses (4), extras (8).
+- **Runtime:** `BodySkinLayer` and `FaceLayer` pick HD or classic textures; `FaceLayer` draws the pupil layer in HD, glowing with the iris in forms. The new Settings tab "Style" has the "HD art" option (on by default).
+
+### Verified
+- HD and classic face close-ups side by side (normal, wide + grin, cat + blush + smirk), and HD and classic bodies front and back.
