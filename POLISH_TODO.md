@@ -1,0 +1,34 @@
+# POLISH TODO
+
+Everything still below the brief v2 quality bar (Part 18: real model + animation + VFX + sound + UI). A feature leaves
+this list only when it reaches the bar. Grouped by what is missing.
+
+## Animation (no keyframed animation yet)
+- Player: charging, flight, dashing, melee, blocking, ki firing, transforming, hit reactions all use vanilla poses
+- NPC fighters and bosses: vanilla humanoid walk/attack only
+- Great Ape: walk + swipe only; Eternal Dragon: static coil drift
+
+## VFX
+- Aura: glow billboards, not a flame-shaped layered aura; no charge dust or rising sparks
+- No hitstop, screen shake, impact flashes, shockwave rings or craters
+- Beams and blasts: glow quads only, no trails or bloom
+- No afterimages
+
+## Sound
+- Every sound is a vanilla placeholder (anvil, beacon, firework, explosion)
+
+## UI
+- HUD panel is a styled box, not the portrait HUD; no animated fills or form colour shifts
+- Screens (stats, techniques, life, quests, radar, planets, creation) use vanilla buttons
+- No radial menu, no transformation cut-in
+
+## Appearance
+- Hair: preset spike styles only; no editor
+- No skin tone, height or body-shape options; no muscle-shaded bodies
+
+## Combat depth
+- Guard is hold-to-reduce only (no meter, break or parry); no beam struggles; no Ki Creator
+
+## World
+- Home world is vanilla terrain; no lookout hub; three planets only; no dungeons
+- No story mode (brief v2 Phase 5)

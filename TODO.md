@@ -89,3 +89,37 @@ Resume from the first unchecked item. Each phase ends with a git tag.
 - [x] Art pass (v0.8.0, tools/ArtGen.java): items, blocks and models, gi/armor, NPC skins, race looks, Great Ape model, Eternal Dragon model
 - [x] Remaining art (v0.8.1): tiered hair, textured HUD, Namek trees and dome houses, Space Pod entity with launch and landing
 - [ ] More content: more bosses and questlines, more planets, a space dimension (Frost Demon vacuum survival), children for partners
+
+# Brief v2 roadmap (BRIEF.md, 2026-10-05)
+Brief v2 raises the bar: every feature needs real models, animation, VFX, sound and UI (Part 18). The earlier
+"Phase 5 — Feature completion" above was this project's own phase; brief v2's **Phase 5 is Story mode** (milestone V2-G).
+
+## V2-A — Animation foundation
+- [ ] playerAnimator (KosmX, `1.0.2-rc1+1.20`) and GeckoLib (1.20.1) as real dependencies, build + runtime verified
+- [ ] Player animation set, keyframed in code: idle breathing, charge stance, flight (cruise / fast / hover / descend), dash, light combo 1-3, heavy, launcher, spike, block, ki fire (one hand / two-hand beam / volley / throw), transformation sequence, hit reactions (light / heavy / launched), power-down, victory
+- [ ] Animations synced to other players (server-driven state)
+## V2-B — VFX and game feel
+- [ ] Flame-shaped layered aura (per form colour/shape), charge dust ring, rising sparks, lightning for tier-2 forms
+- [ ] Hitstop, screen shake, camera kick on heavy hits, impact flashes and shockwave rings, landing craters
+- [ ] Afterimage trails on dashes and fast flight
+## V2-C — UI v2
+- [ ] HUD: portrait ring with the live player head, angled body / ki / stamina bars, BP and release readout, form badge, per-form colour shift, animated fills
+- [ ] Hotbar skin, radial action menu (forms, flight, techniques, menus)
+- [ ] Menu theme: stats, techniques, life, quests, radar, planets screens restyled to one look
+- [ ] Transformation cut-in (portrait slash, flash)
+## V2-D — Appearance
+- [ ] Voxel hair editor (strands placed on a head grid, saved as a hair code), presets, per-form hair from the base hair
+- [ ] Skin tone, height, body shape (lean / athletic / bulky), muscle-shaded body textures
+## V2-E — Combat depth
+- [ ] Guard meter, guard break, perfect-guard parry window, deflecting ki blasts
+- [ ] Beam struggles (beam-vs-beam contest)
+- [ ] Ki Creator: build techniques from method / shape / type / modifiers (DBV-style)
+## V2-F — Sound
+- [ ] Original synthesized sound set: charge hum, blasts, beams, impacts, whooshes, transformation burst, UI clicks, ambience
+## V2-G — Phase 5: Story mode
+- [ ] Story engine: chapters, dialogue boxes with portraits, cut-ins, objectives, rewards, `/dbz story` debug
+- [ ] Nine saga chapters with original characters and multi-phase bosses
+## V2-H — World and content
+- [ ] Home-world plateau pillars, a sky lookout hub, more planets (a cold tyrant's world, a sacred realm), dungeons
+- [ ] Original weapons with 3D item models; GeckoLib bosses with animations
+- [ ] Bloom / post-processing for energy (custom post chain)
