@@ -28,6 +28,7 @@ public class ArtGen {
         FormLooks.all();
         FormFx.all();
         GuiHd.all();
+        Painted.all();
         HudHd.all();
         System.out.println("ArtGen done");
     }
@@ -72,7 +73,7 @@ public class ArtGen {
         }
 
         static void recolor(String from, String to, Pick pick, Shift shift) throws IOException {
-            for (String folder : new String[]{"race", "race_hd"}) recolor(folder, from, to, pick, shift);
+            for (String folder : new String[]{"race", "race_hd", "race_painted"}) recolor(folder, from, to, pick, shift);
         }
 
         static void recolor(String folder, String from, String to, Pick pick, Shift shift) throws IOException {
@@ -434,6 +435,298 @@ public class ArtGen {
         }
     }
 
+
+    // ================================================================== painted art (CX-14a)
+
+    /**
+     * The painted style (the user's chosen direction): anime-styled skins at 128x128 with clean line art for the
+     * anatomy in a dark shade of the skin, over three or four flat cel tones (light from the top, shade at the
+     * edges and under each muscle). Lines are polylines in face coordinates, drawn one pixel wide; symmetric ones are
+     * given for the left half and mirrored. Luminance uses the same range as the HD anatomy (ink 0.5 ... light
+     * 1.0), so bodies are tinted by skin tone and race skins colour it through their ramps.
+     */
+    static final class Painted {
+        static final double HI = 1.0, BASE = 0.94, MID = 0.82, SHADE = 0.72, INK = 0.5;
+        static final double LINE = 0.62;
+
+        static void all() throws IOException {
+            anatomy(0.6).save("entity/body_painted/lean.png");
+            anatomy(1.0).save("entity/body_painted/athletic.png");
+            anatomy(1.45).save("entity/body_painted/bulky.png");
+            outfit();
+        }
+
+        static double face(Face f) {
+            return switch (f) { case FRONT -> 0; case TOP -> 0.03; case BACK -> -0.05; case BOTTOM -> -0.12; default -> -0.03; };
+        }
+
+        /** Pixel distance from a point to a polyline given in face coordinates (u0, v0, u1, v1, ...). */
+        static double dist(double px, double py, int w, int h, double[] p) {
+            double best = 1e9;
+            for (int i = 0; i + 3 < p.length; i += 2) {
+                double ax = p[i] * w, ay = p[i + 1] * h, bx = p[i + 2] * w, by = p[i + 3] * h;
+                double dx = bx - ax, dy = by - ay, len2 = dx * dx + dy * dy;
+                double t = len2 == 0 ? 0 : Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / len2));
+                best = Math.min(best, Math.hypot(ax + t * dx - px, ay + t * dy - py));
+            }
+            return best;
+        }
+
+        private static final java.util.Map<String, boolean[][]> STROKES = new java.util.HashMap<>();
+
+        /**
+         * A clean one-pixel line along a polyline in face coordinates: sampled finely, then thinned "pixel-perfect"
+         * (a pixel that only turns a corner between two diagonal neighbours is dropped), like a hand-drawn stroke.
+         */
+        static boolean[][] raster(int w, int h, double[] p) {
+            return STROKES.computeIfAbsent(w + "x" + h + java.util.Arrays.toString(p), k -> {
+                java.util.List<int[]> out = new java.util.ArrayList<>();
+                for (int i = 0; i + 3 < p.length; i += 2) {
+                    double ax = p[i] * w, ay = p[i + 1] * h, bx = p[i + 2] * w, by = p[i + 3] * h;
+                    int steps = (int) Math.ceil(Math.hypot(bx - ax, by - ay) * 4) + 1;
+                    for (int s = 0; s <= steps; s++) {
+                        double t = (double) s / steps;
+                        int x = Math.max(0, Math.min(w - 1, (int) Math.floor(ax + (bx - ax) * t)));
+                        int y = Math.max(0, Math.min(h - 1, (int) Math.floor(ay + (by - ay) * t)));
+                        int[] last = out.isEmpty() ? null : out.get(out.size() - 1);
+                        if (last != null && last[0] == x && last[1] == y) continue;
+                        if (out.size() >= 2) {
+                            int[] a = out.get(out.size() - 2);
+                            if (Math.abs(a[0] - x) == 1 && Math.abs(a[1] - y) == 1) out.remove(out.size() - 1);
+                        }
+                        out.add(new int[]{x, y});
+                    }
+                }
+                boolean[][] m = new boolean[h][w];
+                for (int[] q : out) m[q[1]][q[0]] = true;
+                return m;
+            });
+        }
+
+        /** 0 on the stroke, 9 off it (compared against LINE). */
+        static double one(int x, int y, int w, int h, double... p) {
+            return raster(w, h, p)[y][x] ? 0 : 9;
+        }
+
+        /** A stroke and its mirror image across the middle of the face. */
+        static double sym(int x, int y, int w, int h, double... p) {
+            boolean[][] m = raster(w, h, p);
+            return m[y][x] || m[y][w - 1 - x] ? 0 : 9;
+        }
+
+        static boolean ell(double u, double v, double cu, double cv, double ru, double rv) {
+            double a = (u - cu) / ru, b = (v - cv) / rv;
+            return a * a + b * b < 1;
+        }
+
+        /** A piecewise-linear profile through (m0, v0, m1, v1, ...), m ascending. */
+        static double curve(double m, double... p) {
+            if (m <= p[0]) return p[1];
+            for (int i = 0; i + 3 < p.length; i += 2) if (m <= p[i + 2]) return p[i + 1] + (p[i + 3] - p[i + 1]) * (m - p[i]) / (p[i + 2] - p[i]);
+            return p[p.length - 1];
+        }
+
+        static double u(int x, int w) { return (x + 0.5) / w; }
+        static double v(int y, int h) { return (y + 0.5) / h; }
+
+        /** Painted anatomy for a muscle definition k (lean 0.6, athletic 1.0, bulky 1.45): luminance per pixel. */
+        static Hd.HdSkin anatomy(double k) {
+            double ink = k >= 0.8 ? INK : (INK + MID) / 2, minor = k >= 1.2 ? INK + 0.08 : MID - 0.05;
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h), l = BASE + face(f);
+                if (f == Face.BOTTOM) return Hd.lum(SHADE);
+                if (f == Face.FRONT) {
+                    if (uu < 0.06 || uu > 0.94 || vv > 0.94) l = MID;                                   // the jaw turning away
+                }
+                if (f == Face.LEFT || f == Face.RIGHT) {
+                    if (uu < 0.07 || uu > 0.93) l = MID;
+                    if (ell(uu, vv, 0.53, 0.57, 0.08, 0.09)) l = MID;                                    // inside the ear
+                    if (one(x, y, w, h, 0.42, 0.44, 0.58, 0.42, 0.67, 0.54, 0.61, 0.69, 0.46, 0.71) < LINE) l = ink;
+                }
+                return Hd.lum(l);
+            };
+            s.body = (f, x, y, w, h) -> switch (f) {
+                case FRONT -> mapped(CHEST, f, x, y, w, h, k);
+                case BACK -> mapped(BACK, f, x, y, w, h, k);
+                case TOP -> Hd.lum(BASE + face(f));
+                case BOTTOM -> Hd.lum(MID);
+                default -> mapped(FLANK, f, x, y, w, h, k);
+            };
+            s.arm = (f, x, y, w, h) -> switch (f) {
+                case FRONT -> mapped(ARM_FRONT, f, x, y, w, h, k);
+                case BACK -> mapped(ARM_BACK, f, x, y, w, h, k);
+                case TOP -> Hd.lum(BASE + face(f));
+                case BOTTOM -> Hd.lum(MID);
+                default -> mapped(ARM_SIDE, f, x, y, w, h, k);
+            };
+            s.leg = (f, x, y, w, h) -> switch (f) {
+                case FRONT -> mapped(LEG_FRONT, f, x, y, w, h, k);
+                case BACK -> mapped(LEG_BACK, f, x, y, w, h, k);
+                case TOP -> Hd.lum(BASE + face(f));
+                case BOTTOM -> Hd.lum(SHADE);
+                default -> mapped(LEG_SIDE, f, x, y, w, h, k);
+            };
+            return s;
+        }
+
+        // ---------------------------------------------------------- hand-drawn muscle maps (left half of each face, mirrored)
+        // . base  h light  m mid tone  s shade  l soft line  k ink line
+
+        static final String[] CHEST = {
+                "m.......",
+                "m..llll.",
+                "m.hhh..m",
+                "m.hhhh.m",
+                "m..hhh.m",
+                "k......m",
+                "mk.....k",
+                "mmk...ks",
+                "m.skkks.",
+                "m..sss.m",
+                "ml.lhh.m",
+                "m.ll...m",
+                "m..llllm",
+                "ml.lhh.m",
+                "m.ll...m",
+                "m..llllm",
+                "m..lhh.m",
+                "m..l...m",
+                "m..llllm",
+                "m..l...k",
+                "m.l....m",
+                "m..l....",
+                "m...l...",
+                "m....l.."};
+        static final String[] BACK = {
+                "m.......",
+                "m...lll.",
+                "m.ll...m",
+                "ml.hhh.m",
+                "m.hhhhkm",
+                "m.hhh.km",
+                "m.k..k.m",
+                "m..kk..m",
+                "m......m",
+                "ml.....m",
+                "m.l....m",
+                "m..l...m",
+                "m..l...m",
+                "m...l..m",
+                "m...l..m",
+                "m....l.m",
+                "m......m",
+                "m......m",
+                "m......m",
+                "m....l.m",
+                "m......m",
+                "m......m",
+                "m......m",
+                "m......m"};
+        static final String[] FLANK = {
+                "m...", "m...", "m...", "m.h.", "m.hh", "m.hh", "m.h.", "m...", "m...", "m...", "ml..", "m.l.",
+                "ml..", "m.l.", "m...", "m...", "m...", "m...", "m...", "m...", "m...", "m...", "m...", "m..."};
+        static final String[] ARM_FRONT = {
+                "m...", "m.hh", "m.hh", "m...", "k...", "mkk.", "m..k", "m...", "m.hh", "m.hh", "m.h.", "m...",
+                "l...", "mlll", "m...", "m.h.", "m.h.", "m.h.", "m...", "m...", "m...", "mmmm", "m.m.", "m.m."};
+        static final String[] ARM_BACK = {
+                "m...", "m.hh", "m.hh", "m...", "k...", "mkk.", "m..k", "m...", "ml..", "ml.h", "ml.h", "ml..",
+                "m.l.", "m..l", "m...", "m.mm", "m...", "m.h.", "m.h.", "m...", "m...", "mmmm", "m...", "m..."};
+        static final String[] ARM_SIDE = {
+                "m...", "m.hh", "m.hh", "m...", "k...", "mkk.", "m..k", "m...", "m.h.", "m.h.", "m...", "m...",
+                "m...", "m...", "m.l.", "m...", "m.h.", "m.h.", "m...", "m...", "m...", "mmmm", "m...", "m..."};
+        static final String[] LEG_FRONT = {
+                "m...", "m.hh", "mhhh", "mhh.", "m.h.", "m...", "ml..", "m.l.", "m..l", "m...", "m...", "m.ll",
+                "ml..", "m.ll", "m...", "m.h.", "m.h.", "m.h.", "m.h.", "m...", "m...", "mmmm", "m.m.", "m.m."};
+        static final String[] LEG_BACK = {
+                "m...", "m..m", "m..m", "m..m", "m..m", "m..m", "m..m", "m..m", "m..m", "m...", "m...", "mlll",
+                "m...", "m.hh", "m.hh", "m.hh", "m.h.", "ml..", "m.l.", "m..l", "m...", "mmmm", "m...", "m..."};
+        static final String[] LEG_SIDE = {
+                "m...", "m.h.", "m.h.", "m.h.", "m...", "m...", "m...", "m...", "m...", "m...", "m...", "m.l.",
+                "m...", "m...", "m.h.", "m.h.", "m...", "m...", "m...", "m...", "m...", "mmmm", "m...", "m..."};
+
+        /** The map's symbol at a pixel: the left half as drawn, the right half mirrored, scaled to the face. */
+        static char at(String[] map, int x, int y, int w, int h) {
+            int half = map[0].length(), col = x < w / 2 ? x : w - 1 - x;
+            col = Math.min(half - 1, col * half * 2 / w);
+            int row = Math.min(map.length - 1, y * map.length / h);
+            return map[row].charAt(col);
+        }
+
+        /** A symbol's luminance for a build: lean builds soften every line, bulky ones darken them. */
+        static double lumFor(char c, double k) {
+            double ink = k >= 0.8 ? INK : MID - 0.06, line = k >= 1.2 ? INK + 0.08 : k >= 0.8 ? MID - 0.08 : MID;
+            return switch (c) {
+                case 'k' -> ink;
+                case 'l' -> line;
+                case 'm' -> MID;
+                case 's' -> k >= 0.8 ? SHADE : MID;
+                case 'h' -> HI;
+                default -> BASE;
+            };
+        }
+
+        static int mapped(String[] map, Face f, int x, int y, int w, int h, double k) {
+            return Hd.lum(Math.min(lumFor(at(map, x, y, w, h), k), lumFor(at(map, x, y, w, h), k) + face(f)));
+        }
+        // ---------------------------------------------------------- the outfit (untinted): gi trousers, sash, wristbands, boots
+
+        static int at(int[] r, int i) {
+            return r[Math.max(0, Math.min(r.length - 1, i))];
+        }
+
+        static void outfit() throws IOException {
+            int[] pants = ramp(0xFF26346E, 6), boots = ramp(0xFF7A4424, 5), band = ramp(0xFF26346E, 5), sash = ramp(0xFF2A2A36, 5);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> 0;
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (vv < 0.79 || f == Face.TOP) return 0;
+                if (vv > 0.92) return trousers(pants, f, x, y, w, h, true);
+                if (Math.abs(vv - 0.795) * h < 0.7 || Math.abs(vv - 0.915) * h < 0.7) return sash[0];
+                if (f == Face.FRONT && Math.abs(uu - 0.5) < 0.11) {                                       // the knot
+                    if (Math.abs(uu - 0.5) > 0.085) return sash[0];
+                    return at(sash, vv < 0.85 ? 4 : 3);
+                }
+                return at(sash, (f == Face.FRONT ? 3 : 2) + (vv < 0.83 ? 1 : 0));
+            };
+            s.arm = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (f == Face.TOP || f == Face.BOTTOM || vv < 0.72 || vv > 0.87) return 0;
+                if (Math.abs(vv - 0.725) * h < 0.7 || Math.abs(vv - 0.865) * h < 0.7) return band[0];
+                if (Math.abs(vv - 0.795) * h < 0.5) return band[4];                                      // stitching
+                return at(band, f == Face.FRONT ? 3 : 2);
+            };
+            s.leg = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (vv > 0.74 || f == Face.BOTTOM) {
+                    if (f == Face.BOTTOM || vv > 0.955 || Math.abs(vv - 0.745) * h < 0.7) return boots[0];   // sole, top edge
+                    if (vv < 0.79) return at(boots, 4);                                                     // the cuff
+                    if (Math.abs(vv - 0.79) * h < 0.6) return boots[1];
+                    if (f == Face.FRONT && vv > 0.81 && vv < 0.92 && Math.abs(uu - 0.5) < 0.2 && y % 2 == 0) return 0xFFE8D8B0;   // laces
+                    int i = f == Face.FRONT ? 3 : f == Face.BACK ? 1 : 2;
+                    if (uu < 0.12 || uu > 0.88) i--;
+                    return at(boots, i);
+                }
+                return trousers(pants, f, x, y, w, h, false);
+            };
+            s.save("entity/body_painted/outfit.png");
+        }
+
+        /** Gi trousers: flat tones with a few clean fold lines, the knee crease and the bunching over the boots. */
+        static int trousers(int[] p, Face f, int x, int y, int w, int h, boolean waist) {
+            if (f == Face.TOP) return 0;
+            double uu = u(x, w);
+            int i = f == Face.FRONT ? 4 : f == Face.BACK ? 2 : 3;
+            if (uu < 0.1 || uu > 0.9) i--;
+            if (waist) return at(p, i);
+            double d = Math.min(one(x, y, w, h, 0.3, 0.04, 0.37, 0.4), one(x, y, w, h, 0.72, 0.12, 0.64, 0.38));
+            d = Math.min(d, one(x, y, w, h, 0.2, 0.5, 0.5, 0.55, 0.8, 0.5));
+            d = Math.min(d, Math.min(one(x, y, w, h, 0.12, 0.64, 0.5, 0.68, 0.88, 0.63), one(x, y, w, h, 0.2, 0.71, 0.55, 0.69, 0.8, 0.72)));
+            if (d < LINE) return at(p, i - 2);
+            return at(p, i);
+        }
+    }
     // ================================================================== HD race skins (CX-13b)
 
     /**
@@ -442,7 +735,26 @@ public class ArtGen {
      * Faces are left plain (FaceLayer draws them); the designs follow the classic skins with far more detail.
      */
     static final class HdRaces {
+        /** Painted mode (CX-14a): the same designs in clean line art and flat cel tones, written to race_painted/. */
+        static boolean painted;
+
+        static String dir() {
+            return painted ? "race_painted" : "race_hd";
+        }
+
+        static Hd.HdSkin anat(double k, int seed) {
+            return painted ? Painted.anatomy(k) : Hd.anatomy(k, seed);
+        }
+
         static void all() throws IOException {
+            painted = false;
+            designs();
+            painted = true;
+            designs();
+            painted = false;
+        }
+
+        static void designs() throws IOException {
             namekian("namekian", 0xFF62B444, 0xFFE09A9A, 0xFF6A3A9A, 0xFF40B0E0, 0xFFE8E4F0, 0xFF5A3418, 1.0);
             namekian("demon_namekian", 0xFF3A8A6A, 0xFFB070A0, 0xFF1A1420, 0xFFC01830, 0xFF3A2A44, 0xFF2A1A10, 1.1);
             frostDemon("frost_demon", 0xFFF0EEF4, 0xFF8A4AC8, false);
@@ -476,6 +788,7 @@ public class ArtGen {
 
         /** Cloth: face light, long soft folds, fine weave noise, darker at the creases. */
         static int cloth(int[] r, Face f, int x, int y, int w, int h, int seed, double folds) {
+            if (painted) return paintedCloth(r, f, x, y, w, h, seed, folds);
             double uu = u(x, w), vv = v(y, h);
             double l = Skins.faceLight(f) + folds * 0.035 * Math.sin(uu * 7 + Hd.smooth(x, y, 6, seed) * 5)
                     + 0.05 * (Hd.smooth(x, y, 2.2, seed + 1) - 0.5) + Hd.edgeAo(uu, vv, 0.07);
@@ -484,6 +797,7 @@ public class ArtGen {
 
         /** A shell plate between (u0,v0) and (u1,v1): bevelled (bright top edge, dark lower edge) with a gloss spot. */
         static int plate(int[] r, Face f, double uu, double vv, double u0, double v0, double u1, double v1) {
+            if (painted) return paintedPlate(r, f, uu, vv, u0, v0, u1, v1);
             double top = (vv - v0) / (v1 - v0), side = Math.min(uu - u0, u1 - uu) / (u1 - u0);
             double l = Skins.faceLight(f) + 0.04;
             if (top < 0.08) l += 0.12;
@@ -497,6 +811,28 @@ public class ArtGen {
             return uu >= u0 && uu <= u1 && vv >= v0 && vv <= v1;
         }
 
+        /** Painted cloth: flat tones by face, a few clean fold lines along long contours, shade at the edges. */
+        static int paintedCloth(int[] r, Face f, int x, int y, int w, int h, int seed, double folds) {
+            double uu = u(x, w);
+            double l = Painted.BASE + Painted.face(f);
+            if (f == Face.BOTTOM) l = Painted.MID;
+            if (uu < 0.08 || uu > 0.92) l -= 0.1;
+            double n = Hd.smooth(x * 1.6, y * 0.45, 5, seed);                                         // long, mostly vertical folds
+            if (folds > 0 && Math.abs(n - 0.5) < 0.022 * folds) l -= 0.15;
+            else if (folds > 0 && n > 0.5 && n < 0.5 + 0.06 * folds) l -= 0.06;                       // soft shade beside each fold
+            return tone(r, l);
+        }
+
+        /** A painted shell plate: outlined, a shaded lower part and a hard gloss highlight. */
+        static int paintedPlate(int[] r, Face f, double uu, double vv, double u0, double v0, double u1, double v1) {
+            double top = (vv - v0) / (v1 - v0), side = Math.min(uu - u0, u1 - uu) / (u1 - u0);
+            double l = Painted.BASE + Painted.face(f) + 0.02;
+            if (top < 0.05 || top > 0.95 || side < 0.035) l = Painted.INK;
+            else if (top > 0.75) l = Painted.MID;
+            else if (Painted.ell(uu, vv, u0 + 0.3 * (u1 - u0), v0 + 0.25 * (v1 - v0), 0.12 * (u1 - u0) + 0.02, 0.1 * (v1 - v0) + 0.02)) l = 1.08;
+            return tone(r, l);
+        }
+
         static int skin(int[] r, FaceFn anat, Face f, int x, int y, int w, int h) {
             return tone(r, lumOf(anat, f, x, y, w, h));
         }
@@ -505,7 +841,7 @@ public class ArtGen {
 
         static void namekian(String name, int skinC, int pinkC, int giC, int sashC, int pantsC, int shoeC, double k) throws IOException {
             int[] sk = ramp(skinC, 6), pink = ramp(pinkC, 4), gi = ramp(giC, 6), sash = ramp(sashC, 4), pants = ramp(pantsC, 5), shoe = ramp(shoeC, 4);
-            Hd.HdSkin a = Hd.anatomy(k, name.hashCode()), s = new Hd.HdSkin();
+            Hd.HdSkin a = anat(k, name.hashCode()), s = new Hd.HdSkin();
             s.head = (f, x, y, w, h) -> {
                 double l = lumOf(a.head, f, x, y, w, h), uu = u(x, w), vv = v(y, h);
                 if (f == Face.TOP) l -= 0.1 * Math.exp(-Math.pow(((vv * 4) % 1) - 0.5, 2) / 0.012);     // the ridged crown
@@ -530,6 +866,10 @@ public class ArtGen {
                 double uu = u(x, w), vv = v(y, h);
                 if (vv < 0.3) return vv > 0.27 ? gi[1] : cloth(gi, f, x, y, w, h, 34, 0.8);
                 if ((f == Face.FRONT || f == Face.RIGHT) && vv > 0.42 && vv < 0.64) {                   // pink muscle bands, striated
+                    if (painted) {                                                                       // outlined in deep red
+                        if (Math.abs(vv - 0.425) * h < 0.7 || Math.abs(vv - 0.635) * h < 0.7) return 0xFF8A1E24;
+                        return tone(pink, lumOf(a.arm, f, x, y, w, h));
+                    }
                     double l = lumOf(a.arm, f, x, y, w, h) + 0.07 * Math.sin(vv * 90 + uu * 3);
                     return tone(pink, l);
                 }
@@ -540,12 +880,12 @@ public class ArtGen {
                 if (vv > 0.84 || f == Face.BOTTOM) return tone(shoe, Skins.faceLight(f) + (f == Face.FRONT ? 0.15 * Hd.g(uu, vv, 0.5, 0.95, 0.3, 0.05) : 0));
                 return cloth(pants, f, x, y, w, h, 35, 1.3);
             };
-            s.save("entity/race_hd/" + name + ".png");
+            s.save("entity/" + dir() + "/" + name + ".png");
         }
 
         static void frostDemon(String name, int skinC, int shellC, boolean metal) throws IOException {
             int[] sk = ramp(skinC, 6), shell = ramp(shellC, 6);
-            Hd.HdSkin a = Hd.anatomy(0.8, name.hashCode()), s = new Hd.HdSkin();
+            Hd.HdSkin a = anat(0.8, name.hashCode()), s = new Hd.HdSkin();
             s.head = (f, x, y, w, h) -> {
                 double uu = u(x, w), vv = v(y, h);
                 if (f == Face.TOP) return plate(shell, f, uu, vv, 0, 0, 1, 1);
@@ -560,6 +900,13 @@ public class ArtGen {
             };
             s.body = (f, x, y, w, h) -> {
                 double uu = u(x, w), vv = v(y, h);
+                if (painted) {                                                                           // bare and lined, with one chest gem
+                    if (f == Face.FRONT && Painted.ell(uu, vv, 0.5, 0.3, 0.2, 0.11)) {
+                        if (!Painted.ell(uu, vv, 0.5, 0.3, 0.17, 0.085)) return tone(shell, Painted.INK);
+                        return tone(shell, Painted.ell(uu, vv, 0.45, 0.26, 0.06, 0.035) ? 1.08 : vv > 0.33 ? Painted.MID : Painted.BASE);
+                    }
+                    return skin(sk, a.body, f, x, y, w, h);
+                }
                 if (f == Face.FRONT && in(uu, vv, 0.08, 0.05, 0.92, 0.58)) {
                     if (Math.abs(uu - 0.5) < 0.012) return shell[0];                                  // the seam down the chest
                     return plate(shell, f, uu, vv, uu < 0.5 ? 0.08 : 0.5, 0.05, uu < 0.5 ? 0.5 : 0.92, 0.58);
@@ -570,21 +917,21 @@ public class ArtGen {
             s.arm = (f, x, y, w, h) -> {
                 double uu = u(x, w), vv = v(y, h);
                 if (f == Face.TOP || vv < 0.26) return plate(shell, f, uu, vv, 0, 0, 1, 0.26);
-                if (vv > 0.52 && vv < 0.8 && f != Face.BOTTOM) return plate(shell, f, uu, vv, 0, 0.52, 1, 0.8);
+                if (vv > 0.52 && vv < 0.8 && f != Face.BOTTOM && !painted) return plate(shell, f, uu, vv, 0, 0.52, 1, 0.8);
                 return skin(sk, a.arm, f, x, y, w, h);
             };
             s.leg = (f, x, y, w, h) -> {
                 double uu = u(x, w), vv = v(y, h);
-                if (vv > 0.42 && vv < 0.8 && f != Face.BOTTOM && f != Face.TOP) return plate(shell, f, uu, vv, 0, 0.42, 1, 0.8);
+                if (vv > 0.42 && vv < 0.8 && f != Face.BOTTOM && f != Face.TOP && !painted) return plate(shell, f, uu, vv, 0, 0.42, 1, 0.8);
                 int c = skin(sk, a.leg, f, x, y, w, h);
                 return metal && ((int) (vv * h)) % 6 == 0 ? darker(c, 0.92) : c;                     // a metal body shows its panel lines
             };
-            s.save("entity/race_hd/" + name + ".png");
+            s.save("entity/" + dir() + "/" + name + ".png");
         }
 
         static void majin(String name, int skinC, int vestC, int pantsC, int beltC, double k, boolean corrupted) throws IOException {
             int[] sk = ramp(skinC, 6), vest = ramp(vestC, 5), pants = ramp(pantsC, 5), belt = ramp(beltC, 4);
-            Hd.HdSkin a = Hd.anatomy(k, name.hashCode()), s = new Hd.HdSkin();
+            Hd.HdSkin a = anat(k, name.hashCode()), s = new Hd.HdSkin();
             FaceFn cracks = (f, x, y, w, h) -> corrupted && Math.abs(Hd.smooth(x, y, 6, name.hashCode() + f.ordinal()) - 0.5) < 0.018 ? 1 : 0;
             s.head = (f, x, y, w, h) -> {
                 double l = lumOf(a.head, f, x, y, w, h);
@@ -616,13 +963,18 @@ public class ArtGen {
                 if (vv > 0.74 || f == Face.BOTTOM) return tone(belt, Skins.faceLight(f) + (vv < 0.78 ? 0.1 : 0) + 0.12 * Hd.g(uu, vv, 0.4, 0.86, 0.15, 0.05));
                 return cloth(pants, f, x, y, w, h, 44, 1.8);
             };
-            s.save("entity/race_hd/" + name + ".png");
+            if (painted) {                                                                               // the rows of little holes
+                FaceFn body = s.body, arm = s.arm;
+                s.body = (f, x, y, w, h) -> f == Face.FRONT && y == 2 && x % 3 == 1 && Math.abs(u(x, w) - 0.5) < 0.26 ? sk[0] : body.at(f, x, y, w, h);
+                s.arm = (f, x, y, w, h) -> (f == Face.LEFT || f == Face.RIGHT) && x == w / 2 && y % 4 == 1 && v(y, h) > 0.08 && v(y, h) < 0.68 ? sk[0] : arm.at(f, x, y, w, h);
+            }
+            s.save("entity/" + dir() + "/" + name + ".png");
         }
 
         static void vampire() throws IOException {
             int[] sk = ramp(0xFFE6E0EA, 6), coat = ramp(0xFF1A1420, 6), lining = ramp(0xFFA01028, 5), vest = ramp(0xFF5A1020, 5),
                     hair = ramp(0xFF1C1418, 5), boot = ramp(0xFF2A1A16, 4), trousers = ramp(0xFF24202A, 5), gold = ramp(0xFFE8C040, 3);
-            Hd.HdSkin a = Hd.anatomy(0.6, 61), s = new Hd.HdSkin();
+            Hd.HdSkin a = anat(0.6, 61), s = new Hd.HdSkin();
             s.head = (f, x, y, w, h) -> {
                 double uu = u(x, w), vv = v(y, h);
                 boolean hairHere = f == Face.TOP || (f != Face.FRONT && f != Face.BOTTOM && vv < (f == Face.BACK ? 0.45 : 0.22))
@@ -655,15 +1007,16 @@ public class ArtGen {
                 if (vv > 0.76 || f == Face.BOTTOM) return tone(boot, Skins.faceLight(f) + 0.14 * Hd.g(uu, vv, 0.35, 0.82, 0.12, 0.05));
                 return cloth(trousers, f, x, y, w, h, 55, 1.1);
             };
-            s.save("entity/race_hd/vampire.png");
+            s.save("entity/" + dir() + "/vampire.png");
         }
 
         static void bioAndroid() throws IOException {
             int[] shell = ramp(0xFF5AB04A, 6), joint = ramp(0xFF20242A, 5), mask = ramp(0xFFE8E4D8, 5), spot = ramp(0xFF1E3A1A, 4);
-            Hd.HdSkin a = Hd.anatomy(1.1, 71), s = new Hd.HdSkin();
+            Hd.HdSkin a = anat(1.1, 71), s = new Hd.HdSkin();
             FaceFn spotted = (f, x, y, w, h) -> {
                 double sp = Hd.smooth(x * 1.0, y * 1.0, 3.2, 71 + f.ordinal() * 13);
                 double l = 0;
+                if (painted && sp > 0.66) return sp > 0.685 ? tone(spot, 0.86) : tone(spot, Painted.INK);          // flat spots, inked rims
                 if (sp > 0.7) return tone(spot, 0.8 + (sp - 0.7) * 0.6);
                 if (sp > 0.66) l -= 0.08;                                                              // a soft rim around each spot
                 return tone(shell, l + Skins.faceLight(f) + 0.04);
@@ -681,12 +1034,12 @@ public class ArtGen {
             s.body = (f, x, y, w, h) -> f == Face.FRONT && Math.abs(u(x, w) - 0.5) < 0.25 && v(y, h) > 0.5 ? ribbed.at(f, x, y, w, h) : spotted.at(f, x, y, w, h);
             s.arm = (f, x, y, w, h) -> v(y, h) > 0.33 && v(y, h) < 0.6 ? ribbed.at(f, x, y, w, h) : spotted.at(f, x, y, w, h);
             s.leg = (f, x, y, w, h) -> v(y, h) > 0.33 && v(y, h) < 0.7 ? ribbed.at(f, x, y, w, h) : spotted.at(f, x, y, w, h);
-            s.save("entity/race_hd/bio_android.png");
+            s.save("entity/" + dir() + "/bio_android.png");
         }
 
         static void tuffle() throws IOException {
             int[] sk = ramp(0xFFEDE0D6, 6), suit = ramp(0xFFE8ECF2, 6), trim = ramp(0xFF3A6AB0, 5), hair = ramp(0xFFC8CCD8, 5);
-            Hd.HdSkin a = Hd.anatomy(0.5, 81), s = new Hd.HdSkin();
+            Hd.HdSkin a = anat(0.5, 81), s = new Hd.HdSkin();
             s.head = (f, x, y, w, h) -> {
                 double uu = u(x, w), vv = v(y, h);
                 boolean hairHere = f == Face.TOP || (f != Face.FRONT && f != Face.BOTTOM && vv < 0.32)
@@ -707,12 +1060,12 @@ public class ArtGen {
             };
             s.arm = (f, x, y, w, h) -> v(y, h) > 0.76 ? cloth(trim, f, x, y, w, h, 62, 0.3) : cloth(suit, f, x, y, w, h, 63, 0.5);
             s.leg = (f, x, y, w, h) -> v(y, h) > 0.76 || f == Face.BOTTOM ? cloth(trim, f, x, y, w, h, 64, 0.3) : cloth(suit, f, x, y, w, h, 65, 0.6);
-            s.save("entity/race_hd/tuffle.png");
+            s.save("entity/" + dir() + "/tuffle.png");
         }
 
         static void genAlien() throws IOException {
             int[] sk = ramp(0xFF7A9AC0, 6), harness = ramp(0xFF4A3424, 5), metal = ramp(0xFFC8C8D0, 4), pants = ramp(0xFF3A3A4A, 5);
-            Hd.HdSkin a = Hd.anatomy(0.9, 91), s = new Hd.HdSkin();
+            Hd.HdSkin a = anat(0.9, 91), s = new Hd.HdSkin();
             s.head = (f, x, y, w, h) -> {
                 double l = lumOf(a.head, f, x, y, w, h), vv = v(y, h);
                 if (f == Face.BACK) l -= 0.12 * Math.exp(-Math.pow(((vv * 5) % 1) - 0.5, 2) / 0.01);    // ridges down the skull
@@ -742,12 +1095,12 @@ public class ArtGen {
                 if (f == Face.FRONT && in(uu, vv, 0.2, 0.55, 0.8, 0.68)) return plate(metal, f, uu, vv, 0.2, 0.55, 0.8, 0.68);   // knee pads
                 return cloth(pants, f, x, y, w, h, 71, 1.0);
             };
-            s.save("entity/race_hd/gen_alien.png");
+            s.save("entity/" + dir() + "/gen_alien.png");
         }
 
         static void kai() throws IOException {
             int[] sk = ramp(0xFFD8B8EC, 6), robe = ramp(0xFF2C3A8A, 6), under = ramp(0xFFF4F2F8, 5), gold = ramp(0xFFE8C040, 4), sash = ramp(0xFF5AB0E8, 4);
-            Hd.HdSkin a = Hd.anatomy(0.5, 101), s = new Hd.HdSkin();
+            Hd.HdSkin a = anat(0.5, 101), s = new Hd.HdSkin();
             s.head = (f, x, y, w, h) -> {
                 double uu = u(x, w), vv = v(y, h);
                 if (f == Face.TOP && Math.abs(uu - 0.5) < 0.16) return tone(ramp(0xFFF8F8FF, 4), 0.95 + 0.1 * Math.sin(uu * 60 + vv * 20));   // the white tuft
@@ -772,12 +1125,12 @@ public class ArtGen {
                 return skin(sk, a.arm, f, x, y, w, h);
             };
             s.leg = (f, x, y, w, h) -> v(y, h) > 0.86 || f == Face.BOTTOM ? tone(gold, Skins.faceLight(f) + 0.05) : cloth(under, f, x, y, w, h, 86, 1.1);
-            s.save("entity/race_hd/kai.png");
+            s.save("entity/" + dir() + "/kai.png");
         }
 
         static void coreDemon() throws IOException {
             int[] sk = ramp(0xFFC83030, 6), garb = ramp(0xFF181418, 6), gold = ramp(0xFFE8C040, 4), hair = ramp(0xFF141010, 4);
-            Hd.HdSkin a = Hd.anatomy(1.25, 111), s = new Hd.HdSkin();
+            Hd.HdSkin a = anat(1.25, 111), s = new Hd.HdSkin();
             s.head = (f, x, y, w, h) -> {
                 double uu = u(x, w), vv = v(y, h);
                 if (f == Face.TOP || (f != Face.BOTTOM && vv < (f == Face.FRONT ? 0.1 : 0.2) + 0.04 * Math.abs(Math.sin(uu * 20)))) {
@@ -801,7 +1154,7 @@ public class ArtGen {
                 return skin(sk, a.arm, f, x, y, w, h);
             };
             s.leg = (f, x, y, w, h) -> v(y, h) > 0.85 || f == Face.BOTTOM ? tone(garb, Skins.faceLight(f) - 0.1) : cloth(garb, f, x, y, w, h, 93, 1.1);
-            s.save("entity/race_hd/core_demon.png");
+            s.save("entity/" + dir() + "/core_demon.png");
         }
     }
 

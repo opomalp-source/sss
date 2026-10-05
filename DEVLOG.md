@@ -700,3 +700,26 @@ User request: "delete the overdrive feature altogether because it's the same as 
 
 ### Verified
 - Screenshots of Zenith in base, SSJ, SSJ God, SSJ Blue, SSJ4, LSSJ, Final Form and Overclock; Classic; and Minimal.
+
+## 2026-10-06 — Session 3 (cont.): 14a Painted skins (v0.28.0)
+The user sent reference pictures for the art direction they want: chunky anime-styled Minecraft characters with clean line art, cel shading, voxel hair, 3D ears and tails, and real outfits. The pictures are kept locally in `reference/`, which is git-ignored and used as inspiration only. Added CX-14 (art direction v2), CX-15 (animations v4) and CX-11a (aura v3) to the TODO; CX-8d moves into CX-14f.
+
+- **`ArtGen.Painted`:** the new default character art, at 128x128.
+  - **Muscle maps:** the muscles are hand-drawn as pixel grids: the left half of each face, mirrored. The grids cover the chest (rounded pecs with a shaded underside, collarbones, a six-pack in boxes, serratus, hip lines, navel), back (traps, shoulder blades, lats, lower-back dimples), flanks, arms (deltoid caps and lines, biceps, triceps, elbow, wrist, fingers) and legs (quads, teardrop, kneecap, shin, hamstrings, calves, ankles, toes).
+  - **Symbols:** ink, soft line, mid tone, shade and highlight. Each build maps them differently: lean softens every line, athletic inks the major ones, bulky darkens them all. The luminance stays in the HD range, so bodies are still tinted by skin tone.
+  - **Strokes:** where a stroke is needed (the ears), it is rasterised along the polyline and thinned "pixel-perfect" to a clean one-pixel line. The first pass, which marked every pixel within a distance of the curve, gave doubled, jagged lines.
+  - **Outfit:** a cel-shaded version of the gi trousers (clean fold lines, a knee crease, bunching at the boots), the sash with its knot, the wristbands and the laced boots.
+- **Race skins (`HdRaces` painted mode):** the same designs are rendered a second time into `race_painted/`:
+  - cloth in flat tones with clean fold lines;
+  - plates with an outline, a shaded lower half and a hard gloss;
+  - Frost Demons bare and lined, with one chest gem and the shoulder plates;
+  - Namekian arm patches outlined in deep red;
+  - Majin rows of little holes;
+  - Bio-Android spots flat, with inked rims.
+
+  The transformation recolours cover the new folder too.
+- **Setting:** Settings > Style > "Art style" (Painted / HD / Classic) replaces the HD on/off toggle. `ArtStyle` picks the body and race folders and the hi-res face and hair textures.
+- **Dev:** a `zoom` flag in devshot names narrows the field of view for close-ups. The name flags `artpainted`, `arthd` and `artclassic` switch the art style.
+
+### Verified
+- Close-up screenshots: the Saiyan front and back, Namekian, Frost Demon, Majin, Vampire, Bio-Android, Tuffle and Gen Alien.

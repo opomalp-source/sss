@@ -61,7 +61,7 @@ public class SettingsScreen extends Screen {
             }
             case STYLE -> {
                 o.add(new Option("ui_style", c.uiStyle, 0, 1, new String[]{"zenith", "classic"}));
-                o.add(new Option("hd_art", c.hdArt, 0, 0, null));
+                o.add(new Option("art_style", c.artStyle, 0, 2, new String[]{"painted", "hd", "classic"}));
             }
             case CONTROLS -> { }
         }

@@ -147,7 +147,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - [x] 13e HUD v2 (v0.27.0): detailed portrait frames per form, animated bars, new layouts; a "HUD style" setting (Zenith / Classic / Minimal)
   - [x] 13f Art detail setting (v0.23.0): Zenith Settings > Style > HD art
 - [ ] CX-14 Art direction v2 (user request with reference pictures, saved locally in reference/ (git-ignored, inspiration only, nothing copied): chunky anime-styled Minecraft characters). This comes next and replaces the noisy HD look as the default.
-  - [ ] 14a Painted skins: every race skin and generated body repainted in the reference direction:
+  - [x] 14a Painted skins (v0.28.0): every race skin and generated body repainted in the reference direction:
     - clean dark line art for the anatomy (pecs, abs, obliques, biceps, deltoids, back muscles, knees);
     - 2-3 tone cel shading with soft highlights, readable at 64x64;
     - race markings drawn as clean shapes (Namekian arm and leg muscle patches, Frost Demon plates and gems, Majin dots).

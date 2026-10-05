@@ -83,7 +83,7 @@ public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         int eyeColor = form.eyeColor() >= 0 ? form.eyeColor() : state.eyeColor();
         if (code.isEmpty() && eyeColor < 0) return;
 
-        VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(com.dbzenith.config.DBZConfig.CLIENT.hdArt.get() ? TEXTURE_HD : TEXTURE));
+        VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(ArtStyle.hiRes() ? TEXTURE_HD : TEXTURE));
         int hairLight = formHair ? LightTexture.FULL_BRIGHT : light;              // transformed hair glows
         float r = ((hairColor >> 16) & 0xFF) / 255f, g = ((hairColor >> 8) & 0xFF) / 255f, b = (hairColor & 0xFF) / 255f;
         if (!code.isEmpty()) {

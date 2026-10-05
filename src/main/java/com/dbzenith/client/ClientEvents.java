@@ -100,13 +100,15 @@ public final class ClientEvents {
             mc.setScreen(new com.dbzenith.client.screen.PathChoiceScreen(null));
             delayTicks = Math.max(delayTicks, 6);
         }
+        com.dbzenith.client.fx.CameraFx.devZoom = name.contains("zoom") ? 42f : 0f;
         if (name.contains("hudzenith")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(0);
         if (name.contains("hudclassic")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(1);
         if (name.contains("hudminimal")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(2);
         if (name.contains("uiclassic")) com.dbzenith.config.DBZConfig.CLIENT.uiStyle.set(1);
         if (name.contains("uizenith")) com.dbzenith.config.DBZConfig.CLIENT.uiStyle.set(0);
-        if (name.contains("hdoff")) com.dbzenith.config.DBZConfig.CLIENT.hdArt.set(false);
-        if (name.contains("hdon")) com.dbzenith.config.DBZConfig.CLIENT.hdArt.set(true);
+        if (name.contains("hdoff") || name.contains("artclassic")) com.dbzenith.config.DBZConfig.CLIENT.artStyle.set(2);
+        if (name.contains("hdon") || name.contains("arthd")) com.dbzenith.config.DBZConfig.CLIENT.artStyle.set(1);
+        if (name.contains("artpainted")) com.dbzenith.config.DBZConfig.CLIENT.artStyle.set(0);
         if (name.startsWith("face_") && !(mc.screen instanceof com.dbzenith.client.screen.FaceScreen)) {
             mc.setScreen(new com.dbzenith.client.screen.FaceScreen(null));
             delayTicks = Math.max(delayTicks, 6);

@@ -597,7 +597,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue fovEffects;
         public final ForgeConfigSpec.BooleanValue hairPhysics;
         public final ForgeConfigSpec.BooleanValue proceduralMotion;
-        public final ForgeConfigSpec.BooleanValue hdArt;
+        public final ForgeConfigSpec.IntValue artStyle;
         public final ForgeConfigSpec.IntValue uiStyle;
         public final ForgeConfigSpec.IntValue hudStyle;
 
@@ -633,8 +633,8 @@ public final class DBZConfig {
                     .define("hairPhysics", true);
             uiStyle = b.comment("Screens: 0 Zenith (ornate frames, animated backdrop), 1 Classic")
                     .defineInRange("uiStyle", 0, 0, 1);
-            hdArt = b.comment("High-detail textures for bodies and faces (off: the classic pixel look)")
-                    .define("hdArt", true);
+            artStyle = b.comment("Character art: 0 Painted (line-art anime skins), 1 HD (soft high-detail shading), 2 Classic (the original pixels)")
+                    .defineInRange("artStyle", 0, 0, 2);
             proceduralMotion = b.comment("Bodies bank into flying turns, lean into climbs, dives and fast runs, and squash on hard landings")
                     .define("proceduralMotion", true);
             b.pop();

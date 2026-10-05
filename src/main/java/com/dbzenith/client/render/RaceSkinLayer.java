@@ -52,7 +52,7 @@ public class RaceSkinLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
     /** A race skin texture, HD or classic as the Style settings say. */
     static ResourceLocation path(String name) {
         if (name == null) return null;
-        String folder = com.dbzenith.config.DBZConfig.CLIENT.hdArt.get() ? "race_hd" : "race";
+        String folder = ArtStyle.raceFolder();
         return PATHS.computeIfAbsent(folder + "/" + name, k -> new ResourceLocation(DBZenith.MOD_ID, "textures/entity/" + k + ".png"));
     }
 

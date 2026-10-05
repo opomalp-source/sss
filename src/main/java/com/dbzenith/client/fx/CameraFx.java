@@ -85,8 +85,12 @@ public final class CameraFx {
         event.setRoll(event.getRoll() + 5.0f * s * wave(t, 3.1f));
     }
 
+    /** Dev automation: a fixed narrow field of view for close-up screenshots (0 = off). */
+    public static float devZoom;
+
     @SubscribeEvent
     public static void onFov(ViewportEvent.ComputeFov event) {
+        if (devZoom > 0) event.setFOV(devZoom);
         float p = (float) event.getPartialTick();
         float k = Mth.lerp(p, kickO, kick);
         float r = Mth.lerp(p, rushO, rush);

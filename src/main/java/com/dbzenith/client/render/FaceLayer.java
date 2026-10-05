@@ -63,7 +63,7 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         PublicStatePacket state = ClientPublicStates.get(player.getId());
         if (!active(state)) return;
         Form form = FormHairLayer.flicker(player, state, ageInTicks);
-        boolean hd = com.dbzenith.config.DBZConfig.CLIENT.hdArt.get();
+        boolean hd = ArtStyle.hiRes();
         textures = hd ? TEXTURES_HD : TEXTURES;
         int face = state.face();
         int eyes = FaceParts.get(face, Part.EYES);
