@@ -77,5 +77,6 @@ public final class ClientInput {
             ModNetwork.sendToServer(new InputPacket(Screen.hasShiftDown() ? InputPacket.Action.OVERDRIVE_OFF : InputPacket.Action.OVERDRIVE_UP));
         }
         while (ModKeys.STATS.consumeClick()) mc.setScreen(new StatScreen());
+        while (ModKeys.RADIAL.consumeClick()) com.dbzenith.client.ui.RadialMenuScreen.open();
     }
 }

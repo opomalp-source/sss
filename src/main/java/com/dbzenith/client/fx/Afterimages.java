@@ -85,6 +85,7 @@ public final class Afterimages {
 
     @SubscribeEvent
     public static void onRenderPlayer(RenderPlayerEvent.Post event) {
+        if (com.dbzenith.client.ui.PortraitRenderer.isDrawing()) return;
         Trail trail = TRAILS.get(event.getEntity().getId());
         if (trail == null || trail.ghosts.isEmpty() || !DBZConfig.CLIENT.afterimages.get()) return;
         if (!(event.getEntity() instanceof AbstractClientPlayer player)) return;

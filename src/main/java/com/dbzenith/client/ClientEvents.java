@@ -79,6 +79,11 @@ public final class ClientEvents {
             mc.options.setCameraType(wanted);
             delayTicks = Math.max(delayTicks, 4);
         }
+        if (name.startsWith("radial_") && !(mc.screen instanceof com.dbzenith.client.ui.RadialMenuScreen)) {
+            mc.setScreen(com.dbzenith.client.ui.RadialMenuScreen.dev(Integer.parseInt(name.substring(7).replaceAll("\\D.*", ""))));
+            delayTicks = Math.max(delayTicks, 6);
+        }
+        if (name.contains("cutin_")) com.dbzenith.client.ui.CutInOverlay.play(net.minecraft.network.chat.Component.translatable("form.dbzenith.super_saiyan"), 0xFFD040);
         int impact = name.indexOf("impact_");
         if (impact >= 0 && mc.player != null) {
             String kind = name.substring(impact + 7).replaceAll("_\\d+$", "");

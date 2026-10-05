@@ -561,6 +561,9 @@ public final class DBZConfig {
 
     public static final class Client {
         public final ForgeConfigSpec.BooleanValue showDebugOverlay;
+        public final ForgeConfigSpec.BooleanValue customHotbar;
+        public final ForgeConfigSpec.BooleanValue hideVanillaHearts;
+        public final ForgeConfigSpec.BooleanValue transformCutIn;
         public final ForgeConfigSpec.DoubleValue screenShake;
         public final ForgeConfigSpec.BooleanValue hitstop;
         public final ForgeConfigSpec.BooleanValue afterimages;
@@ -570,6 +573,12 @@ public final class DBZConfig {
             b.push("hud");
             showDebugOverlay = b.comment("Show the raw stat debug overlay (developer aid, drawn under the HUD position)")
                     .define("showDebugStats", false);
+            customHotbar = b.comment("Draw the hotbar in the mod's style (cloud-trimmed glass slots)")
+                    .define("customHotbar", true);
+            hideVanillaHearts = b.comment("Hide vanilla hearts and armour: the Body bar already shows your health")
+                    .define("hideVanillaHearts", true);
+            transformCutIn = b.comment("Play a cut-in (portrait slash and form name) when you transform")
+                    .define("transformCutIn", true);
             b.pop();
             b.push("effects");
             screenShake = b.comment("Camera shake strength from hits, explosions and landings (0 = off)")

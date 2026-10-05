@@ -1,5 +1,7 @@
 package com.dbzenith.client.screen;
 
+import com.dbzenith.client.ui.DbzTheme;
+import com.dbzenith.client.ui.ThemedButton;
 import com.dbzenith.network.ModNetwork;
 import com.dbzenith.network.TravelPacket;
 import com.dbzenith.world.Planet;
@@ -22,7 +24,7 @@ public class PlanetScreen extends Screen {
         int top = height / 2 - planets.length * 12;
         for (int i = 0; i < planets.length; i++) {
             Planet p = planets[i];
-            Button b = Button.builder(Component.translatable(p.translationKey()), x -> {
+            Button b = ThemedButton.of(Component.translatable(p.translationKey()), x -> {
                         ModNetwork.sendToServer(new TravelPacket(p));
                         onClose();
                     })
@@ -36,8 +38,9 @@ public class PlanetScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
-        g.drawCenteredString(font, title, width / 2, height / 2 - Planet.values().length * 12 - 18, 0xFFFFD040);
+        DbzTheme.screenBackground(g, width, height);
+        int top = height / 2 - Planet.values().length * 12;
+        DbzTheme.window(g, font, title, width / 2 - 112, top - 18, 224, Planet.values().length * 24 + 26);
         super.render(g, mouseX, mouseY, partialTick);
     }
 

@@ -40,6 +40,14 @@ public final class ClientCombatState {
         return selected();
     }
 
+    /** Select a deck slot directly (radial menu). */
+    public static Technique select(int slot) {
+        List<String> deck = deck();
+        if (deck.isEmpty()) return null;
+        selected = Math.floorMod(slot, deck.size());
+        return selected();
+    }
+
     public static boolean onCooldown(Technique t, long now) {
         long[] cd = cooldowns.get(t.id());
         return cd != null && now < cd[1];

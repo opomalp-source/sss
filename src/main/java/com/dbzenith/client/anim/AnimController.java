@@ -140,6 +140,10 @@ public final class AnimController {
             else {
                 play(player, t, Anims.TRANSFORM, now, 30);
                 com.dbzenith.client.fx.ImpactFx.transformBurst(player, state.auraColor());
+                if (player == Minecraft.getInstance().player) {
+                    com.dbzenith.client.ui.CutInOverlay.play(net.minecraft.network.chat.Component.translatable(
+                            com.dbzenith.transform.Forms.byId(form).translationKey()), state.auraColor());
+                }
             }
         }
         t.form = form;

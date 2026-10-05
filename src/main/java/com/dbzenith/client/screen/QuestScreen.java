@@ -1,5 +1,7 @@
 package com.dbzenith.client.screen;
 
+import com.dbzenith.client.ui.DbzTheme;
+import com.dbzenith.client.ui.ThemedButton;
 import com.dbzenith.client.ClientPlayerData;
 import com.dbzenith.data.PlayerData;
 import com.dbzenith.network.ModNetwork;
@@ -24,7 +26,6 @@ public class QuestScreen extends Screen {
     private static final int W = 400;
     private static final int H = 236;
     private static final int ROW = 26;
-    private static final int PANEL = 0xE8101018;
     private static final int HEADER = 0xFFFFB330;
     private static final int TEXT = 0xFFF0F0F0;
     private static final int DIM = 0xFFA0A0B0;
@@ -58,22 +59,22 @@ public class QuestScreen extends Screen {
             String why = QuestManager.unavailableReason(d, q);
             Button b;
             if (complete) {
-                b = Button.builder(Component.translatable("screen.dbzenith.quest_turn_in"),
+                b = ThemedButton.of(Component.translatable("screen.dbzenith.quest_turn_in"),
                         x -> ModNetwork.sendToServer(new QuestPackets.Action(true, q.id()))).bounds(left + W - 92, y, 84, 18).build();
             } else if (active) {
-                b = Button.builder(Component.translatable("screen.dbzenith.quest_in_progress"), x -> {}).bounds(left + W - 92, y, 84, 18).build();
+                b = ThemedButton.of(Component.translatable("screen.dbzenith.quest_in_progress"), x -> {}).bounds(left + W - 92, y, 84, 18).build();
                 b.active = false;
             } else if (why == null) {
-                b = Button.builder(Component.translatable("screen.dbzenith.quest_accept"),
+                b = ThemedButton.of(Component.translatable("screen.dbzenith.quest_accept"),
                         x -> ModNetwork.sendToServer(new QuestPackets.Action(false, q.id()))).bounds(left + W - 92, y, 84, 18).build();
             } else {
-                b = Button.builder(Component.translatable(why.equals("quest.dbzenith.why.done") ? "screen.dbzenith.quest_done" : "screen.dbzenith.quest_locked"),
+                b = ThemedButton.of(Component.translatable(why.equals("quest.dbzenith.why.done") ? "screen.dbzenith.quest_done" : "screen.dbzenith.quest_locked"),
                         x -> {}).bounds(left + W - 92, y, 84, 18).build();
                 b.active = false;
             }
             addRenderableWidget(b);
         }
-        addRenderableWidget(Button.builder(Component.translatable("gui.done"), x -> onClose()).bounds(left + W - 70, top + H - 24, 62, 18).build());
+        addRenderableWidget(ThemedButton.of(Component.translatable("gui.done"), x -> onClose()).bounds(left + W - 70, top + H - 24, 62, 18).build());
     }
 
     @Override
@@ -83,10 +84,10 @@ public class QuestScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
-        g.fill(left, top, left + W, top + H, PANEL);
+        DbzTheme.screenBackground(g, width, height);
+        DbzTheme.panel(g, left, top, W, H);
         PlayerData d = ClientPlayerData.get();
-        g.drawString(font, title, left + 8, top + 8, HEADER);
+        DbzTheme.header(g, font, title, left + W / 2, top - 6);
         if (giver == Quest.Giver.PATROL) {
             int rank = QuestManager.patrolRank(d);
             g.drawString(font, Component.translatable("screen.dbzenith.patrol_rank",

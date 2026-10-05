@@ -1,5 +1,7 @@
 package com.dbzenith.client.screen;
 
+import com.dbzenith.client.ui.DbzTheme;
+import com.dbzenith.client.ui.ThemedButton;
 import com.dbzenith.client.ClientPlayerData;
 import com.dbzenith.data.PlayerData;
 import com.dbzenith.network.ModNetwork;
@@ -19,7 +21,6 @@ import net.minecraft.network.chat.Component;
 public class StatScreen extends Screen {
     private static final int W = 320;
     private static final int H = 196;
-    private static final int PANEL = 0xE0101018;
     private static final int HEADER = 0xFFFFB330;
     private static final int TEXT = 0xFFF0F0F0;
     private static final int DIM = 0xFFA0A0B0;
@@ -35,9 +36,9 @@ public class StatScreen extends Screen {
     protected void init() {
         left = (width - W) / 2;
         top = (height - H) / 2;
-        addRenderableWidget(Button.builder(Component.translatable("screen.dbzenith.forms_button"), b -> minecraft.setScreen(new FormScreen(this)))
+        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.forms_button"), b -> minecraft.setScreen(new FormScreen(this)))
                 .bounds(left + W - 70, top + H - 24, 62, 18).build());
-        addRenderableWidget(Button.builder(titleLabel(), b -> {
+        addRenderableWidget(ThemedButton.of(titleLabel(), b -> {
             java.util.List<com.dbzenith.world.LifeSim.Title> earned = com.dbzenith.world.LifeSim.earnedTitles(ClientPlayerData.get());
             String current = ClientPlayerData.get().getTitle();
             int idx = -1;
@@ -45,12 +46,12 @@ public class StatScreen extends Screen {
             String next = idx + 1 < earned.size() ? earned.get(idx + 1).id() : "";
             ModNetwork.sendToServer(new com.dbzenith.network.SelectTitlePacket(next));
         }).bounds(left + 8, top + H - 24, 104, 18).build());
-        addRenderableWidget(Button.builder(Component.translatable("screen.dbzenith.life_button"), b -> minecraft.setScreen(new LifeScreen(this)))
+        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.life_button"), b -> minecraft.setScreen(new LifeScreen(this)))
                 .bounds(left + 116, top + H - 24, 44, 18).build());
-        addRenderableWidget(Button.builder(Component.translatable("screen.dbzenith.techniques_button"), b -> minecraft.setScreen(new DeckScreen(this)))
+        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.techniques_button"), b -> minecraft.setScreen(new DeckScreen(this)))
                 .bounds(left + W - 156, top + H - 24, 82, 18).build());
         if (com.dbzenith.stats.Prestige.eligible(ClientPlayerData.get())) {
-            addRenderableWidget(Button.builder(Component.translatable("screen.dbzenith.prestige_button"), b -> minecraft.setScreen(
+            addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.prestige_button"), b -> minecraft.setScreen(
                     new net.minecraft.client.gui.screens.ConfirmScreen(yes -> {
                         if (yes) ModNetwork.sendToServer(new com.dbzenith.stats.Prestige.Packet());
                         minecraft.setScreen(this);
@@ -61,7 +62,7 @@ public class StatScreen extends Screen {
         Attribute[] attrs = Attribute.values();
         for (int i = 0; i < attrs.length; i++) {
             Attribute a = attrs[i];
-            addRenderableWidget(Button.builder(Component.literal("+"),
+            addRenderableWidget(ThemedButton.of(Component.literal("+"),
                             b -> ModNetwork.sendToServer(new UpgradeAttributePacket(a, hasShiftDown() ? 10 : 1)))
                     .bounds(left + 140, top + 42 + i * 18, 18, 16)
                     .tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("screen.dbzenith.upgrade_tooltip")))
@@ -71,12 +72,12 @@ public class StatScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
-        g.fill(left, top, left + W, top + H, PANEL);
+        DbzTheme.screenBackground(g, width, height);
+        DbzTheme.panel(g, left, top, W, H);
         PlayerData d = ClientPlayerData.get();
         DerivedStats s = d.getDerived();
 
-        g.drawString(font, title, left + 8, top + 8, HEADER);
+        DbzTheme.header(g, font, title, left + W / 2, top - 6);
         g.drawString(font, Component.translatable(d.getPrestige() > 0 ? "screen.dbzenith.identity_prestige" : "screen.dbzenith.identity_age",
                 Component.translatable(d.getRace().translationKey()), Component.translatable(d.getPath().translationKey()),
                 (int) d.getPhysicalAge(), d.getPrestige()), left + 8, top + 20, DIM);

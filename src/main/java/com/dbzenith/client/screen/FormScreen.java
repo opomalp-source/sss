@@ -1,5 +1,7 @@
 package com.dbzenith.client.screen;
 
+import com.dbzenith.client.ui.DbzTheme;
+import com.dbzenith.client.ui.ThemedButton;
 import com.dbzenith.client.ClientPlayerData;
 import com.dbzenith.data.PlayerData;
 import com.dbzenith.network.ModNetwork;
@@ -25,7 +27,6 @@ public class FormScreen extends Screen {
     private static final int W = 360;
     private static final int H = 220;
     private static final int ROW = 18;
-    private static final int PANEL = 0xE0101018;
     private static final int HEADER = 0xFFFFB330;
     private static final int TEXT = 0xFFF0F0F0;
     private static final int DIM = 0xFFA0A0B0;
@@ -50,9 +51,9 @@ public class FormScreen extends Screen {
         top = (height - H) / 2;
         entries.clear();
         collect(Forms.BASE.id(), 0, ClientPlayerData.get());
-        addRenderableWidget(Button.builder(Component.translatable("screen.dbzenith.clear_target"),
+        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.clear_target"),
                 b -> ModNetwork.sendToServer(new SelectFormPacket(""))).bounds(left + W - 170, top + H - 26, 80, 18).build());
-        addRenderableWidget(Button.builder(Component.translatable("gui.back"), b -> onClose())
+        addRenderableWidget(ThemedButton.of(Component.translatable("gui.back"), b -> onClose())
                 .bounds(left + W - 86, top + H - 26, 78, 18).build());
     }
 
@@ -85,10 +86,10 @@ public class FormScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
-        g.fill(left, top, left + W, top + H, PANEL);
+        DbzTheme.screenBackground(g, width, height);
+        DbzTheme.panel(g, left, top, W, H);
         PlayerData d = ClientPlayerData.get();
-        g.drawString(font, title, left + 8, top + 8, HEADER);
+        DbzTheme.header(g, font, title, left + W / 2, top - 6);
         Form current = Forms.byId(d.getFormId());
         g.drawString(font, Component.translatable("screen.dbzenith.current_form", Component.translatable(current.translationKey())),
                 left + 8, top + 20, DIM);
@@ -103,8 +104,8 @@ public class FormScreen extends Screen {
             Form f = e.form();
             int y = top + 34 + i * ROW;
             boolean selected = f.id().equals(d.getTargetForm());
-            if (selected) g.fill(left + 4, y - 3, left + W - 4, y + ROW - 4, 0x60FFB330);
-            else if (i == hover) g.fill(left + 4, y - 3, left + W - 4, y + ROW - 4, 0x30FFFFFF);
+            if (selected) DbzTheme.row(g, left + 4, y - 3, W - 12, ROW - 1, true, false);
+            else if (i == hover) DbzTheme.row(g, left + 4, y - 3, W - 12, ROW - 1, false, true);
             if (f.id().equals(d.getFormId())) g.drawString(font, ">", left + 6, y, GOOD);
 
             int x = left + 14 + e.depth() * 10;

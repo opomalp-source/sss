@@ -254,3 +254,25 @@
 
 ### Verified
 - Three screenshot passes reviewed: base, SSJ, SSJ2 and Blue auras, charging and held, front, back and first person; transformation burst; every impact kind; a real 25-block fall crater; a beam and a supernova orb seen from the side via an armour-stand caster; dash ghosts. Shake and hitstop are motion and were checked in code (SpeedModifier only multiplies by speed, so 0 is a clean freeze). 102 GameTests green.
+
+## 2026-10-05 — Session 2 (cont.): V2-C UI v2 (v0.11.0)
+
+### Built
+- `client.ui` package:
+  - `DbzTheme`: shared palette and drawing: panels, slanted gradient shapes (custom POSITION_COLOR quads and ring arcs), title ribbons, dividers, row highlights, button skins, icons.
+  - `ThemedButton` (`ThemedButton.of(...)` mirrors `Button.builder`; a static `builder` cannot hide Button's with another return type) and `ThemedSlider`.
+  - `PortraitRenderer`: the live player model drawn into a GUI rectangle, held upright by pre-multiplying the inverse of playerAnimator's body transform (yaw · T⁻¹ · yaw⁻¹). Auras and afterimages skip it.
+  - `HotbarSkin`: replaces the vanilla hotbar (same slot positions, pick-up pop, offhand) with gold-framed glass slots between golden clouds. It also hides vanilla hearts and armour, which the Body bar covers.
+  - `RadialMenuScreen`: hold X. Inner ring: transform, power down, flight, overdrive, ease off, Training, Forms, Techniques, Appearance. Outer ring: the deck's techniques. Release or click to act; Esc cancels.
+  - `CutInOverlay`: own transformations get a tilted slash band in the aura colour, with speed lines, the live portrait and the form name.
+- `DbzHud` rewritten:
+  - Portrait with a form-tinted ring and an aura glow, and a release arc that laps red past 100%.
+  - Body, ki and stamina bars: slanted, eased, showing a ghost of recent damage, a sweeping shine and a low-body pulse.
+  - BP readout, form badge with mastery, compact chips, a popping combo counter, and a technique panel with a cooldown sweep.
+- Every screen moved to the theme: Training, Forms, Techniques, Appearance, Quests, Planets, Wish, Character creation (selected options now show the gold "selected" skin instead of greyed-out buttons).
+- ArtGen `Gui.ui()` adds `gui/ui.png`: portrait ring and backplate, panel, four button states, hotbar slots, cloud caps, eleven icons.
+- Client config: `customHotbar`, `hideVanillaHearts`, `transformCutIn`. New key: `key.dbzenith.radial` (X).
+- Dev automation: `devshot ... radial_<n>` (wheel held open, inner slice n pointed) and `cutin_`.
+
+### Verified
+- Two screenshot passes: HUD in base and Super Saiyan, the wheel, the cut-in, and the Training, Forms, Techniques, Appearance, Quests, Planets and Creation screens. Fixed: head too small in the portrait, oversized bars, the ki tint too close to stamina, the wheel hint off-screen at GUI scale 2, ribbons off the top of full-height windows, low-contrast selected labels. 102 GameTests green.

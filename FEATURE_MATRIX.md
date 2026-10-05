@@ -106,11 +106,12 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Debug stat overlay | — | done | Config `hud.showDebugOverlay` |
 | DBZ HUD (bars, release, status, combo, technique) | B | done | Seen in-client. Form display Phase 2 |
 | Aura visuals (seen by others) | B | done | Layered flame aura (outer, white-hot core, licks), halo, ground glow, lightning bolts, calm god-ki style, first-person screen-edge flames; screenshotted |
+| UI v2 (V2-C) | B | done | Portrait HUD (live head, form-tinted ring, release arc, eased bars with damage ghosts), cloud-trim hotbar, radial action wheel, themed screens, transformation cut-in; screenshotted |
 | Impact feel (V2-B) | B | done | Hit flashes, shockwave rings, debris, landing craters, trauma screen shake, FOV kick, hitstop, transformation burst + flash, afterimages; ImpactPacket GameTest; screenshotted |
 | Stat screen | B | done | Seen in-client (opened via dev hook) |
 | Skill/deck screen | V | done | Techniques screen |
 | Dragon Ball radar screen | B | done | HUD radar while holding the Dragon Radar; seen in-client |
 | Quest / planet / wish / title UI | B | done | Quest screen (NPC), planet screen (Space Pod), wish screen (dragon), Title button on the stat screen |
-| Keybinds | B | done | Real presses observed in the test client (Y, R, H, F5). G charge, Z lower release, V fly, LAlt guard, R fire, Y next, K stats |
+| Keybinds | B | done | Real presses observed in the test client (Y, R, H, F5). G charge, Z lower release, V fly, LAlt guard, R fire, Y next, K stats, X action wheel (hold) |
 | Config for every tunable | B | done | `serverconfig/dbzenith-server.toml`: combat, techniques, forms, races, training, Dragon Balls, gear, enemies, life sim (Phase 5 audit moved the last constants: pod recharge, dragon wait, false moon, scouter range, enemy scaling, boss enrage) |
 | Admin/debug command `/dbz` | — | done | GameTest `commandSetsStats` |

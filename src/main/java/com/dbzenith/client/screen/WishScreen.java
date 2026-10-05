@@ -1,5 +1,7 @@
 package com.dbzenith.client.screen;
 
+import com.dbzenith.client.ui.DbzTheme;
+import com.dbzenith.client.ui.ThemedButton;
 import com.dbzenith.dragonball.Wish;
 import com.dbzenith.network.MakeWishPacket;
 import com.dbzenith.network.ModNetwork;
@@ -26,7 +28,7 @@ public class WishScreen extends Screen {
         int top = (height - (wishes.length * 24 + 40)) / 2;
         for (int i = 0; i < wishes.length; i++) {
             Wish w = wishes[i];
-            addRenderableWidget(Button.builder(Component.translatable(w.translationKey()), b -> {
+            addRenderableWidget(ThemedButton.of(Component.translatable(w.translationKey()), b -> {
                         ModNetwork.sendToServer(new MakeWishPacket(dragonId, w));
                         onClose();
                     })
@@ -38,9 +40,9 @@ public class WishScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
+        DbzTheme.screenBackground(g, width, height);
         int top = (height - (Wish.values().length * 24 + 40)) / 2;
-        g.drawCenteredString(font, title, width / 2, top + 8, 0xFFFFD040);
+        DbzTheme.window(g, font, title, (width - W) / 2 - 12, top, W + 24, Wish.values().length * 24 + 44);
         g.drawCenteredString(font, Component.translatable("screen.dbzenith.wish_sub"), width / 2, top + 18, 0xFFB0FFB0);
         super.render(g, mouseX, mouseY, partialTick);
     }

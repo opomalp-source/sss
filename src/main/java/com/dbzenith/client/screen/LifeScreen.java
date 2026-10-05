@@ -1,5 +1,7 @@
 package com.dbzenith.client.screen;
 
+import com.dbzenith.client.ui.DbzTheme;
+import com.dbzenith.client.ui.ThemedButton;
 import com.dbzenith.client.ClientPlayerData;
 import com.dbzenith.client.ClientPublicStates;
 import com.dbzenith.data.PlayerData;
@@ -17,7 +19,6 @@ import net.minecraft.network.chat.Component;
 public class LifeScreen extends Screen {
     private static final int W = 300;
     private static final int H = 180;
-    private static final int PANEL = 0xE0101018;
     private static final int HEADER = 0xFFFFB330;
     private static final int TEXT = 0xFFF0F0F0;
     private static final int DIM = 0xFFA0A0B0;
@@ -43,23 +44,23 @@ public class LifeScreen extends Screen {
         tattoo = Math.min(d.getTattoo(), Cosmetics.TATTOOS.size() - 1);
         raceLook = d.isRaceLook();
         if (com.dbzenith.client.render.RaceSkinLayer.texture(d.getRace()) != null) {
-            addRenderableWidget(Button.builder(raceLookLabel(), b -> {
+            addRenderableWidget(ThemedButton.of(raceLookLabel(), b -> {
                 raceLook = !raceLook;
                 b.setMessage(raceLookLabel());
                 send();
             }).bounds(left + 8, top + H - 70, 130, 18).build());
         }
-        addRenderableWidget(Button.builder(scarLabel(), b -> {
+        addRenderableWidget(ThemedButton.of(scarLabel(), b -> {
             scar = (scar + 1) % Cosmetics.SCARS.size();
             b.setMessage(scarLabel());
             send();
         }).bounds(left + 8, top + H - 48, 130, 18).build());
-        addRenderableWidget(Button.builder(tattooLabel(), b -> {
+        addRenderableWidget(ThemedButton.of(tattooLabel(), b -> {
             tattoo = (tattoo + 1) % Cosmetics.TATTOOS.size();
             b.setMessage(tattooLabel());
             send();
         }).bounds(left + 8, top + H - 26, 130, 18).build());
-        addRenderableWidget(Button.builder(Component.translatable("gui.back"), b -> onClose())
+        addRenderableWidget(ThemedButton.of(Component.translatable("gui.back"), b -> onClose())
                 .bounds(left + W - 70, top + H - 24, 62, 18).build());
     }
 
@@ -88,10 +89,10 @@ public class LifeScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
-        g.fill(left, top, left + W, top + H, PANEL);
+        DbzTheme.screenBackground(g, width, height);
+        DbzTheme.panel(g, left, top, W, H);
         PlayerData d = ClientPlayerData.get();
-        g.drawString(font, title, left + 8, top + 8, HEADER);
+        DbzTheme.header(g, font, title, left + W / 2, top - 6);
         int y = top + 24;
         g.drawString(font, Component.translatable("screen.dbzenith.life_age", (int) d.getPhysicalAge(), (int) d.getMentalAge()), left + 8, y, TEXT);
         y += 12;

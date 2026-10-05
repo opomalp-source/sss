@@ -1341,6 +1341,125 @@ public class ArtGen {
     static final class Gui {
         static void all() throws IOException {
             hud();
+            ui();
+        }
+
+        /**
+         * UI v2 sheet (256x256) for client.ui.DbzTheme and the HUD. Portrait ring (0,0) 56x56 (white: tinted per form) and
+         * backplate (56,0) 56x56; panel nine-slice (112,0) 32x32 slice 8; buttons 32x16 slice 4 at (144,0) normal,
+         * (144,16) hover, (144,32) disabled, (144,48) selected; hotbar slot (176,0) 22x22, selected slot (176,24) 24x24;
+         * cloud end caps (200,0) 28x22 left, (200,24) right; radial icons 16x16 from (0,64): transform up, power down,
+         * fly, overdrive, overdrive off, stats, forms, techniques, life, close, ki orb (white).
+         */
+        static void ui() throws IOException {
+            Canvas c = new Canvas(256, 256);
+            int[] gold = ramp(0xFFD8A040, 5);
+            // portrait ring: bevelled band, light from the top left, eight notches
+            for (int y = 0; y < 56; y++) for (int x = 0; x < 56; x++) {
+                double dx = x + 0.5 - 28, dy = y + 0.5 - 28, r = Math.sqrt(dx * dx + dy * dy);
+                if (r < 21.5 || r > 27.5) continue;
+                double light = 0.72 + 0.28 * (-(dx + dy) / (r * 1.414));
+                double ang = Math.atan2(dy, dx);
+                boolean notch = Math.abs(Math.sin(ang * 4)) < 0.06 && r > 23 && r < 26.5;
+                boolean rim = r < 22.5 || r > 26.5;
+                int l = (int) (255 * Math.max(0, Math.min(1, rim ? light * 0.45 : notch ? light * 0.6 : light)));
+                c.set(x, y, 0xFF000000 | l << 16 | l << 8 | l);
+            }
+            for (int y = 0; y < 56; y++) for (int x = 0; x < 56; x++) {           // backplate
+                double dx = x + 0.5 - 28, dy = y + 0.5 - 28, r = Math.sqrt(dx * dx + dy * dy);
+                if (r > 22.5) continue;
+                c.set(56 + x, y, mix(0xFF22305A, 0xFF070A14, Math.min(1, r / 22.5)));
+            }
+            // panel: dark glass, double gold trim, a diamond in each corner
+            for (int y = 0; y < 32; y++) for (int x = 0; x < 32; x++) {
+                int e = Math.min(Math.min(x, y), Math.min(31 - x, 31 - y));
+                int col = e == 0 ? 0xFF07070C : e == 1 ? gold[3] : e == 2 ? gold[0] : e == 3 ? 0xFF0C1020 : 0xE6111A2E;
+                int cx = x < 16 ? 4 : 27, cy = y < 16 ? 4 : 27;
+                if (Math.abs(x - cx) + Math.abs(y - cy) <= 2 && e >= 2) col = Math.abs(x - cx) + Math.abs(y - cy) == 0 ? gold[4] : gold[2];
+                c.set(112 + x, y, col);
+            }
+            button(c, 144, 0, 0xF0182238, gold[1], 0xFF34507A);
+            button(c, 144, 16, 0xF0284068, gold[4], 0xFF6C9CD8);
+            button(c, 144, 32, 0xC0101018, 0xFF4A4A55, 0xFF22222A);
+            button(c, 144, 48, 0xF07A4A10, gold[4], 0xFFFFD27A);
+            // hotbar slots
+            for (int y = 0; y < 22; y++) for (int x = 0; x < 22; x++) {
+                int e = Math.min(Math.min(x, y), Math.min(21 - x, 21 - y));
+                boolean corner = (x == 0 || x == 21) && (y == 0 || y == 21);
+                if (corner) continue;
+                c.set(176 + x, y, e == 0 ? 0xFF07070C : e == 1 ? gold[1] : e == 2 ? 0xFF0C1020 : mix(0xC0223252, 0xC0101828, y / 21.0));
+            }
+            for (int y = 0; y < 24; y++) for (int x = 0; x < 24; x++) {
+                int e = Math.min(Math.min(x, y), Math.min(23 - x, 23 - y));
+                boolean corner = (x <= 1 || x >= 22) && (y <= 1 || y >= 22) && e == 0;
+                if (corner || e > 3) continue;
+                c.set(176 + x, 24 + y, e == 0 ? 0xFF2A1404 : e == 1 ? 0xFFFFB040 : e == 2 ? 0xFFFFE6A0 : 0x80FF9A2A);
+            }
+            // cloud caps: a puffy golden cloud, outlined
+            Canvas cloud = new Canvas(28, 22);
+            int[] cl = ramp(0xFFF2CE5A, 5);
+            double[][] puffs = {{9, 13, 7}, {16, 10, 7.5}, {22, 13, 5.5}, {5, 15, 4.5}, {13, 15, 6}};
+            for (double[] p : puffs) cloud.sphere(p[0], p[1], p[2], p[2] * 0.85, cl, false);
+            cloud.outline();
+            blitInto(c, cloud, 200, 0);
+            for (int y = 0; y < 22; y++) for (int x = 0; x < 28; x++) c.set(200 + x, 24 + y, cloud.get(27 - x, y));
+            icons(c, gold);
+            c.save("gui/ui.png");
+        }
+
+        /** A 32x16 button skin: dark edge, a trim colour, a bright top line, the fill. */
+        static void button(Canvas c, int x0, int y0, int fill, int trim, int shine) {
+            for (int y = 0; y < 16; y++) for (int x = 0; x < 32; x++) {
+                int e = Math.min(Math.min(x, y), Math.min(31 - x, 15 - y));
+                boolean corner = (x == 0 || x == 31) && (y == 0 || y == 15);
+                if (corner) continue;
+                int col = e == 0 ? 0xFF07070C : e == 1 ? trim : y == 2 ? shine : mix(fill, 0xFF000000, y > 9 ? 0.18 : 0);
+                c.set(x0 + x, y0 + y, col);
+            }
+        }
+
+        /** Radial menu icons, 16x16, outlined. */
+        static void icons(Canvas c, int[] gold) {
+            int ink = 0xFFF4F0E6;
+            int[] red = ramp(0xFFE8402A, 5), blue = ramp(0xFF5AB8FF, 5), cl = ramp(0xFFF2CE5A, 5);
+            Canvas[] ic = new Canvas[11];
+            for (int i = 0; i < ic.length; i++) ic[i] = new Canvas(16, 16);
+            // 0 transform up: spiky crown of hair over an up arrow
+            for (int i = 0; i < 3; i++) ic[0].line(2 + i * 4, 7, 4 + i * 4, 1, gold[4]).line(4 + i * 4, 1, 6 + i * 4, 7, gold[3]);
+            ic[0].rect(2, 7, 14, 8, gold[2]).rect(7, 10, 8, 15, ink).line(4, 13, 7, 10, ink).line(11, 13, 8, 10, ink);
+            // 1 power down: down arrow
+            ic[1].rect(7, 1, 8, 9, blue[3]).line(3, 8, 7, 13, blue[4]).line(12, 8, 8, 13, blue[4]).line(4, 8, 7, 12, blue[2]).line(11, 8, 8, 12, blue[2]);
+            // 2 fly: a cloud
+            for (double[] p : new double[][]{{5, 10, 3.5}, {9, 8, 4.5}, {12.5, 10, 3}}) ic[2].sphere(p[0], p[1], p[2], p[2] * 0.9, cl, false);
+            // 3 overdrive: red burst
+            for (int a = 0; a < 8; a++) {
+                double ang = a * Math.PI / 4;
+                ic[3].line(8, 8, (int) Math.round(8 + Math.cos(ang) * 7), (int) Math.round(8 + Math.sin(ang) * 7), red[a % 2 == 0 ? 4 : 2]);
+            }
+            ic[3].sphere(8, 8, 3, 3, red, true);
+            // 4 overdrive off: the burst greyed and crossed out
+            for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) ic[4].set(x, y, ic[3].get(x, y) == 0 ? 0 : mix(ic[3].get(x, y), 0xFF505058, 0.6));
+            ic[4].line(2, 2, 13, 13, ink).line(3, 2, 14, 13, ink);
+            // 5 stats: bar chart
+            ic[5].rect(2, 9, 4, 13, blue[3]).rect(6, 5, 8, 13, gold[3]).rect(10, 2, 12, 13, red[3]).rect(1, 14, 14, 14, ink);
+            // 6 forms: lightning bolt
+            ic[6].paint(0, 0, java.util.Map.of('#', gold[4], 'd', gold[1]),
+                    "........##......", ".......##d......", "......##d.......", ".....##d........", "....######d.....", "......##d.......",
+                    ".....##d........", "....##d.........", "...######d......", ".....##d........", "....##d.........", "...##d..........",
+                    "..##d...........", "..#d............", "................", "................");
+            // 7 techniques: a rolled scroll
+            ic[7].rect(3, 3, 12, 12, 0xFFE8DCB8).rect(2, 2, 13, 3, 0xFFB08A50).rect(2, 12, 13, 13, 0xFFB08A50);
+            for (int y = 5; y <= 10; y += 2) ic[7].hline(5, 10, y, 0xFF806A48);
+            // 8 life: head and shoulders
+            ic[8].sphere(8, 5, 3.5, 3.5, ramp(0xFFE8B888, 5), false).sphere(8, 14, 6, 4, blue, false);
+            // 9 close: X
+            ic[9].line(3, 3, 12, 12, red[3]).line(4, 3, 13, 12, red[3]).line(12, 3, 3, 12, red[3]).line(13, 3, 4, 12, red[3]);
+            // 10 ki orb (white: tinted per technique)
+            ic[10].sphere(8, 8, 5.5, 5.5, ramp(0xFFE0E0E0, 5), true);
+            for (int i = 0; i < ic.length; i++) {
+                ic[i].outline();
+                blitInto(c, ic[i], i * 16, 64);
+            }
         }
 
         /**

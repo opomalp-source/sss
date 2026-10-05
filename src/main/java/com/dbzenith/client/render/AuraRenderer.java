@@ -42,6 +42,7 @@ public final class AuraRenderer {
 
     @SubscribeEvent
     public static void onRenderPlayer(RenderPlayerEvent.Post event) {
+        if (com.dbzenith.client.ui.PortraitRenderer.isDrawing()) return;
         Player player = event.getEntity();
         if (player.isInvisible() || player.isSpectator()) return;
         PublicStatePacket state = ClientPublicStates.get(player.getId());

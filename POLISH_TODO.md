@@ -15,9 +15,7 @@ this list only when it reaches the bar. Grouped by what is missing.
 - Every sound is a vanilla placeholder (anvil, beacon, firework, explosion)
 
 ## UI
-- HUD panel is a styled box, not the portrait HUD; no animated fills or form colour shifts
-- Screens (stats, techniques, life, quests, radar, planets, creation) use vanilla buttons
-- No radial menu, no transformation cut-in
+- V2-C done (portrait HUD, hotbar skin, radial wheel, one theme across every screen, transformation cut-in). Still missing: icons per technique (all share a tinted orb), a portrait for other fighters (boss bars), a scouter-style BP font, screen open/close transitions, gamepad support for the wheel; some long texts still overflow (Forms requirements, Life partner line)
 
 ## Appearance
 - Hair: preset spike styles only; no editor

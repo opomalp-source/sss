@@ -1,5 +1,7 @@
 package com.dbzenith.client.screen;
 
+import com.dbzenith.client.ui.DbzTheme;
+import com.dbzenith.client.ui.ThemedButton;
 import com.dbzenith.client.ClientPlayerData;
 import com.dbzenith.data.PlayerData;
 import com.dbzenith.network.ModNetwork;
@@ -23,7 +25,6 @@ public class DeckScreen extends Screen {
     private static final int W = 380;
     private static final int H = 232;
     private static final int ROW = 15;
-    private static final int PANEL = 0xE0101018;
     private static final int HEADER = 0xFFFFB330;
     private static final int TEXT = 0xFFF0F0F0;
     private static final int DIM = 0xFFA0A0B0;
@@ -47,7 +48,7 @@ public class DeckScreen extends Screen {
     protected void init() {
         left = (width - W) / 2;
         top = (height - H) / 2;
-        addRenderableWidget(Button.builder(Component.translatable("gui.back"), b -> onClose())
+        addRenderableWidget(ThemedButton.of(Component.translatable("gui.back"), b -> onClose())
                 .bounds(left + W - 70, top + H - 24, 62, 18).build());
     }
 
@@ -104,10 +105,10 @@ public class DeckScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
-        g.fill(left, top, left + W, top + H, PANEL);
+        DbzTheme.screenBackground(g, width, height);
+        DbzTheme.panel(g, left, top, W, H);
         PlayerData d = ClientPlayerData.get();
-        g.drawString(font, title, left + 8, top + 8, HEADER);
+        DbzTheme.header(g, font, title, left + W / 2, top - 6);
         g.drawString(font, Component.translatable("screen.dbzenith.tp", String.format("%,d", d.getTrainingPoints())), left + 8, top + 20, GOOD);
         g.drawString(font, Component.translatable("screen.dbzenith.techniques_help"), left + 110, top + 20, DIM);
 
@@ -119,7 +120,7 @@ public class DeckScreen extends Screen {
             Technique t = lib.get(i);
             int y = top + 34 + (i - scroll) * ROW;
             if (i == hover) {
-                g.fill(left + 4, y - 3, left + 238, y + ROW - 4, 0x30FFFFFF);
+                DbzTheme.row(g, left + 4, y - 3, 230, ROW - 1, false, true);
                 tooltipFor = t;
             }
             g.drawString(font, Component.translatable(t.translationKey()), left + 10, y, 0xFF000000 | t.color());
@@ -138,7 +139,7 @@ public class DeckScreen extends Screen {
         }
 
         int dx = left + 248;
-        g.fill(dx - 4, top + 32, left + W - 4, top + H - 30, 0x40000000);
+        g.fill(dx - 4, top + 32, left + W - 4, top + H - 30, 0x50060A14);
         g.drawString(font, Component.translatable("screen.dbzenith.deck", d.deckView().size(), slots(d)), dx, top + 34, HEADER);
         int dh = deckRow(mouseX, mouseY);
         for (int i = 0; i < d.deckView().size(); i++) {

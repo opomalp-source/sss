@@ -104,10 +104,10 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [x] Hitstop, screen shake, camera kick on heavy hits, impact flashes and shockwave rings, landing craters
 - [x] Afterimage trails on dashes and fast flight
 ## V2-C — UI v2
-- [ ] HUD: portrait ring with the live player head, angled body / ki / stamina bars, BP and release readout, form badge, per-form colour shift, animated fills
-- [ ] Hotbar skin, radial action menu (forms, flight, techniques, menus)
-- [ ] Menu theme: stats, techniques, life, quests, radar, planets screens restyled to one look
-- [ ] Transformation cut-in (portrait slash, flash)
+- [x] HUD: portrait ring with the live player head, angled body / ki / stamina bars, BP and release readout, form badge, per-form colour shift, animated fills
+- [x] Hotbar skin, radial action menu (forms, flight, techniques, menus)
+- [x] Menu theme: stats, techniques, life, quests, radar, planets screens restyled to one look
+- [x] Transformation cut-in (portrait slash, flash)
 ## V2-D — Appearance
 - [ ] Voxel hair editor (strands placed on a head grid, saved as a hair code), presets, per-form hair from the base hair
 - [ ] Skin tone, height, body shape (lean / athletic / bulky), muscle-shaded body textures

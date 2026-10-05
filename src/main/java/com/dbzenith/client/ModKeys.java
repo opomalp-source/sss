@@ -20,8 +20,9 @@ public final class ModKeys {
     public static final KeyMapping TRANSFORM = key("transform", GLFW.GLFW_KEY_J);
     public static final KeyMapping OVERDRIVE = key("overdrive", GLFW.GLFW_KEY_N);
     public static final KeyMapping STATS = key("stats", GLFW.GLFW_KEY_K);
+    public static final KeyMapping RADIAL = key("radial", GLFW.GLFW_KEY_X);
 
-    public static final KeyMapping[] ALL = {CHARGE, LOWER_RELEASE, FLY, GUARD, KI_ATTACK, NEXT_TECHNIQUE, HEAVY, DASH, TRANSFORM, OVERDRIVE, STATS};
+    public static final KeyMapping[] ALL = {CHARGE, LOWER_RELEASE, FLY, GUARD, KI_ATTACK, NEXT_TECHNIQUE, HEAVY, DASH, TRANSFORM, OVERDRIVE, STATS, RADIAL};
 
     private ModKeys() {}
 

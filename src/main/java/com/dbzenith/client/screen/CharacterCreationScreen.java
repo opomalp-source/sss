@@ -1,5 +1,7 @@
 package com.dbzenith.client.screen;
 
+import com.dbzenith.client.ui.DbzTheme;
+import com.dbzenith.client.ui.ThemedButton;
 import com.dbzenith.client.ClientPlayerData;
 import com.dbzenith.client.ClientPublicStates;
 import com.dbzenith.data.PlayerData;
@@ -30,7 +32,6 @@ import java.util.List;
 public class CharacterCreationScreen extends Screen {
     private static final int W = 400;
     private static final int H = 244;
-    private static final int PANEL = 0xE8101018;
     private static final int HEADER = 0xFFFFB330;
     private static final int TEXT = 0xFFF0F0F0;
     private static final int DIM = 0xFFA0A0B0;
@@ -64,10 +65,10 @@ public class CharacterCreationScreen extends Screen {
         Race[] races = Race.values();
         for (int i = 0; i < races.length; i++) {
             Race r = races[i];
-            addRenderableWidget(Button.builder(Component.translatable(r.translationKey()), b -> {
+            addRenderableWidget(ThemedButton.of(Component.translatable(r.translationKey()), b -> {
                 race = r;
                 rebuild();
-            }).bounds(left + 8, top + 30 + i * 21, 96, 18).build()).active = r != race;
+            }).bounds(left + 8, top + 30 + i * 21, 96, 18).build().selected(r == race));
         }
 
         int mx = left + 112;
@@ -75,29 +76,29 @@ public class CharacterCreationScreen extends Screen {
         FightingPath[] paths = FightingPath.values();
         for (int i = 0; i < paths.length; i++) {
             FightingPath p = paths[i];
-            addRenderableWidget(Button.builder(Component.translatable(p.translationKey()), b -> {
+            addRenderableWidget(ThemedButton.of(Component.translatable(p.translationKey()), b -> {
                 path = p;
                 rebuild();
-            }).bounds(mx + 44 + i * 58, y, 56, 16).build()).active = p != path;
+            }).bounds(mx + 44 + i * 58, y, 56, 16).build().selected(p == path));
         }
         y += 20;
         PlayerData.BodyType[] bodies = PlayerData.BodyType.values();
         for (int i = 0; i < bodies.length; i++) {
             PlayerData.BodyType bt = bodies[i];
-            addRenderableWidget(Button.builder(Component.translatable("screen.dbzenith.body." + bt.name().toLowerCase()), b -> {
+            addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.body." + bt.name().toLowerCase()), b -> {
                 body = bt;
                 rebuild();
-            }).bounds(mx + 44 + i * 58, y, 56, 16).build()).active = bt != body;
+            }).bounds(mx + 44 + i * 58, y, 56, 16).build().selected(bt == body));
         }
         y += 20;
-        addRenderableWidget(Button.builder(Component.literal("<"), b -> cycleHair(-1)).bounds(mx + 44, y, 16, 16).build());
-        addRenderableWidget(Button.builder(Component.literal(">"), b -> cycleHair(1)).bounds(mx + 146, y, 16, 16).build());
+        addRenderableWidget(ThemedButton.of(Component.literal("<"), b -> cycleHair(-1)).bounds(mx + 44, y, 16, 16).build());
+        addRenderableWidget(ThemedButton.of(Component.literal(">"), b -> cycleHair(1)).bounds(mx + 146, y, 16, 16).build());
         y += 54;
         addRenderableWidget(new AlignmentSlider(mx + 44, y, 174, 16));
 
-        addRenderableWidget(Button.builder(Component.translatable("screen.dbzenith.create_confirm"), b -> confirm())
+        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.create_confirm"), b -> confirm())
                 .bounds(left + W - 150, top + H - 24, 142, 18).build());
-        addRenderableWidget(Button.builder(Component.translatable("screen.dbzenith.create_later"), b -> onClose())
+        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.create_later"), b -> onClose())
                 .bounds(left + W - 246, top + H - 24, 92, 18).build());
         updatePreview();
     }
@@ -154,9 +155,9 @@ public class CharacterCreationScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
-        g.fill(left, top, left + W, top + H, PANEL);
-        g.drawString(font, title, left + 8, top + 8, HEADER);
+        DbzTheme.screenBackground(g, width, height);
+        DbzTheme.panel(g, left, top, W, H);
+        DbzTheme.header(g, font, title, left + W / 2, top - 6);
         g.drawString(font, Component.translatable("screen.dbzenith.create_sub"), left + 8, top + 18, DIM);
 
         int mx = left + 112;
@@ -181,7 +182,7 @@ public class CharacterCreationScreen extends Screen {
         // live preview
         int px = left + W - 50;
         int py = top + 170;
-        g.fill(left + W - 100, top + 28, left + W - 6, top + H - 30, 0x40000000);
+        g.fill(left + W - 100, top + 28, left + W - 6, top + H - 30, 0x50060A14);
         if (minecraft.player != null) {
             InventoryScreen.renderEntityInInventoryFollowsMouse(g, px, py, 45, px - mouseX, py - 70 - mouseY, minecraft.player);
         }
@@ -210,7 +211,7 @@ public class CharacterCreationScreen extends Screen {
         return false;
     }
 
-    private class AlignmentSlider extends AbstractSliderButton {
+    private class AlignmentSlider extends com.dbzenith.client.ui.ThemedSlider {
         AlignmentSlider(int x, int y, int w, int h) {
             super(x, y, w, h, Component.empty(), (alignment + 100) / 200.0);
             updateMessage();
