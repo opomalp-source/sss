@@ -100,24 +100,30 @@ public final class DbzTheme {
      * {@code border} is in sheet pixels; {@code middle} draws the centre too.
      */
     public static void nine(GuiGraphics g, int x, int y, int w, int h, int u, int v, int uw, int vh, int border, boolean middle) {
+        nine(g, UI_HD, 512, 512, x, y, w, h, u, v, uw, vh, border, middle);
+    }
+
+    /** A nine-slice from any quarter-scale sheet. */
+    public static void nine(GuiGraphics g, ResourceLocation tex, int texW, int texH, int x, int y, int w, int h, int u, int v, int uw, int vh,
+                            int border, boolean middle) {
         g.pose().pushPose();
         g.pose().translate(x, y, 0);
         g.pose().scale(1f / HD, 1f / HD, 1);
         int W = w * HD, H = h * HD, b = border, cw = uw - 2 * b, ch = vh - 2 * b;
         int bw = Math.min(b, W / 2), bh = Math.min(b, H / 2);
-        g.blit(UI_HD, 0, 0, bw, bh, u, v, bw, bh, 512, 512);
-        g.blit(UI_HD, W - bw, 0, bw, bh, u + uw - bw, v, bw, bh, 512, 512);
-        g.blit(UI_HD, 0, H - bh, bw, bh, u, v + vh - bh, bw, bh, 512, 512);
-        g.blit(UI_HD, W - bw, H - bh, bw, bh, u + uw - bw, v + vh - bh, bw, bh, 512, 512);
+        g.blit(tex, 0, 0, bw, bh, u, v, bw, bh, texW, texH);
+        g.blit(tex, W - bw, 0, bw, bh, u + uw - bw, v, bw, bh, texW, texH);
+        g.blit(tex, 0, H - bh, bw, bh, u, v + vh - bh, bw, bh, texW, texH);
+        g.blit(tex, W - bw, H - bh, bw, bh, u + uw - bw, v + vh - bh, bw, bh, texW, texH);
         if (W > 2 * bw) {
-            g.blit(UI_HD, bw, 0, W - 2 * bw, bh, u + b, v, cw, bh, 512, 512);
-            g.blit(UI_HD, bw, H - bh, W - 2 * bw, bh, u + b, v + vh - bh, cw, bh, 512, 512);
+            g.blit(tex, bw, 0, W - 2 * bw, bh, u + b, v, cw, bh, texW, texH);
+            g.blit(tex, bw, H - bh, W - 2 * bw, bh, u + b, v + vh - bh, cw, bh, texW, texH);
         }
         if (H > 2 * bh) {
-            g.blit(UI_HD, 0, bh, bw, H - 2 * bh, u, v + b, bw, ch, 512, 512);
-            g.blit(UI_HD, W - bw, bh, bw, H - 2 * bh, u + uw - bw, v + b, bw, ch, 512, 512);
+            g.blit(tex, 0, bh, bw, H - 2 * bh, u, v + b, bw, ch, texW, texH);
+            g.blit(tex, W - bw, bh, bw, H - 2 * bh, u + uw - bw, v + b, bw, ch, texW, texH);
         }
-        if (middle && W > 2 * bw && H > 2 * bh) g.blit(UI_HD, bw, bh, W - 2 * bw, H - 2 * bh, u + b, v + b, cw, ch, 512, 512);
+        if (middle && W > 2 * bw && H > 2 * bh) g.blit(tex, bw, bh, W - 2 * bw, H - 2 * bh, u + b, v + b, cw, ch, texW, texH);
         g.pose().popPose();
     }
 

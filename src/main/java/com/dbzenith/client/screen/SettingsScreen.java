@@ -40,6 +40,7 @@ public class SettingsScreen extends Screen {
         List<Option> o = new ArrayList<>();
         switch (tab) {
             case HUD -> {
+                o.add(new Option("hud_style", c.hudStyle, 0, 2, new String[]{"zenith", "classic", "minimal"}));
                 o.add(new Option("hud_scale", c.hudScale, 0.6, 1.4, null));
                 o.add(new Option("custom_hotbar", c.customHotbar, 0, 0, null));
                 o.add(new Option("hide_hearts", c.hideVanillaHearts, 0, 0, null));

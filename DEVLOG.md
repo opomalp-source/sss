@@ -671,3 +671,32 @@ User request: "delete the overdrive feature altogether because it's the same as 
 
 ### Verified
 - Screenshots of Settings, Training (stats), Racial Skills, Ki Creator and character creation in the Zenith style, and Settings in Classic.
+
+## 2026-10-06 — Session 3 (cont.): 13e HUD v2 (v0.27.0)
+- **HUD art (`ArtGen.HudHd`, at a quarter scale):**
+  - `gui/hud_frames.png` has six portrait frames, one per family of forms, each a coloured metal layer plus a white glow layer that the HUD tints with the aura:
+    - Standard: gold with diamond points and domed studs.
+    - Flame: fins, plus flames rising from the rim.
+    - Divine: platinum with a halo ring on struts, plus rays and a soft halo.
+    - Savage: iron with hooked thorns, plus claw slashes.
+    - Regal: a crown with jewelled tips and swept wings.
+    - Tech: steel with notched brackets, plus circuit traces and a segmented light ring.
+
+    Every frame has a gauge track inside the rims and a gem at the bottom.
+  - `gui/hud_bars.png` holds a bar housing with an icon socket and an arrow tip, heart, ki and lightning icons, and a chamfered plate.
+  - `gui/hud_energy.png` is a seamless flowing strip used for the fills.
+- **`DbzHud` styles:**
+  - **Zenith** (new default):
+    - The live portrait sits inside the form's frame (picked by `frameStyle`: calm god ki gives Divine, wild forms Savage, machine forms Tech, Frost Demon and Cell style forms Regal, any other form Flame, base Standard, and Kaioken Flame). The glow pulses in the aura colour, a glint runs round the rim while a form is held, and the release gauge sits in the frame's track.
+    - The bars plug into the frame. The energy scrolls under a tint, faster while charging or in a form, with a hot leading edge, a passing highlight and the ghost of recent loss.
+    - The battle power and release share one plate, and the form name and mastery sit on a plate tinted with the aura.
+    - The technique and skill chips by the hotbar use the plate as well.
+  - **Classic:** the previous HUD, unchanged.
+  - **Minimal:** thin bars with numbers, the battle power and the form name, with no portrait.
+- **Setting:** Settings > HUD > "HUD style". Dev name flags: `hudzenith`, `hudclassic`, `hudminimal`.
+- **Fixed after review:**
+  - The first energy strip read as a crosshatch; it now uses soft horizontal waves.
+  - The flames, rays, claw slashes and crown jewels were enlarged.
+
+### Verified
+- Screenshots of Zenith in base, SSJ, SSJ God, SSJ Blue, SSJ4, LSSJ, Final Form and Overclock; Classic; and Minimal.

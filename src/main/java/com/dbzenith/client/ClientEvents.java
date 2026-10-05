@@ -100,6 +100,9 @@ public final class ClientEvents {
             mc.setScreen(new com.dbzenith.client.screen.PathChoiceScreen(null));
             delayTicks = Math.max(delayTicks, 6);
         }
+        if (name.contains("hudzenith")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(0);
+        if (name.contains("hudclassic")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(1);
+        if (name.contains("hudminimal")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(2);
         if (name.contains("uiclassic")) com.dbzenith.config.DBZConfig.CLIENT.uiStyle.set(1);
         if (name.contains("uizenith")) com.dbzenith.config.DBZConfig.CLIENT.uiStyle.set(0);
         if (name.contains("hdoff")) com.dbzenith.config.DBZConfig.CLIENT.hdArt.set(false);

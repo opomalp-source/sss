@@ -1257,5 +1257,11 @@
   "subtitles.dbzenith.ui_open": "Menu opens",
   "subtitles.dbzenith.stun": "Stunned",
   "subtitles.dbzenith.land": "Heavy landing"
+,
+  "settings.dbzenith.hud_style": "HUD style",
+  "settings.dbzenith.hud_style.desc": "Zenith: an ornate portrait frame that changes with your form, and animated energy bars. Classic: the original slanted bars. Minimal: thin bars and numbers, no portrait.",
+  "settings.dbzenith.hud_style.zenith": "Zenith",
+  "settings.dbzenith.hud_style.classic": "Classic",
+  "settings.dbzenith.hud_style.minimal": "Minimal"
 
 }

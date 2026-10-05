@@ -37,6 +37,7 @@ public final class DbzHud implements IGuiOverlay {
     private static float lastT = -1;
     private static int lastCombo;
     private static float comboAt;
+    private static int chipLeft = 54;
 
     @Override
     public void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
@@ -60,61 +61,13 @@ public final class DbzHud implements IGuiOverlay {
         g.pose().pushPose();
         g.pose().scale(hudScale, hudScale, 1);
 
-        // ---------------------------------------------------------- portrait
-        int px = 6, py = 4, cx = px + 28, cy = py + 28;
-        g.blit(DbzTheme.UI, px, py, 56, 0, 56, 56, 256, 256);                            // backplate
-        if (held || d.isCharging()) {
-            float pulse = 0.75f + 0.25f * Mth.sin(t * (d.isCharging() ? 0.8f : 0.25f));
-            DbzTheme.arc(g, cx, cy, 0, 22, 0, 360, DbzTheme.withAlpha(aura, 0), DbzTheme.withAlpha(aura, (int) (170 * pulse)));
-        }
-        int c0 = (int) ((cx - 19) * hudScale), c1 = (int) ((cy - 19) * hudScale), c2 = (int) ((cx + 19) * hudScale), c3 = (int) ((cy + 19) * hudScale);
-        PortraitRenderer.draw(g, mc.player, cx, cy + 5, 44f, 14f, new int[]{c0, c1, c2, c3});   // the clip is in screen space
-        g.setColor(((accent >> 16) & 255) / 255f, ((accent >> 8) & 255) / 255f, (accent & 255) / 255f, 1f);
-        g.blit(DbzTheme.UI, px, py, 0, 0, 56, 56, 256, 256);                              // ring, tinted
-        g.setColor(1, 1, 1, 1);
-        // release gauge around the ring; past 100% it laps again in red
-        float release = d.getReleasePercent() / 100f;
-        DbzTheme.arc(g, cx, cy, 28.5f, 31f, -90, 360, 0xC0101018, 0xC0101018);
-        DbzTheme.arc(g, cx, cy, 28.5f, 31f, -90, 360 * Math.min(1f, release), 0xFFB0500E, DbzTheme.ACCENT);
-        if (release > 1f) DbzTheme.arc(g, cx, cy, 28.5f, 31f, -90, 360 * Math.min(1f, release - 1f), 0xFF901010, 0xFFFF4030);
-        DbzTheme.text(g, font, d.getReleasePercent() + "%", cx - font.width(d.getReleasePercent() + "%") * 0.6f / 2, py + 52, DbzTheme.ACCENT, 0.6f);
-
-        // ---------------------------------------------------------- bars
-        int bx = px + 54, by = py + 5;
-        int bodyColor = DbzTheme.BODY;
-        float bodyFrac = frac(d.getBody(), s.maxBody());
-        if (bodyFrac < 0.25f) bodyColor = DbzTheme.mix(DbzTheme.BODY, 0xFFFFD0C0, 0.5f + 0.5f * Mth.sin(t * 0.6f));
-        int kiColor = held ? DbzTheme.mix(DbzTheme.KI, aura, 0.25f) : DbzTheme.KI;
-        by = bar(g, font, 0, bx, by, 112, 8, bodyFrac, d.getBody(), bodyColor, t, dt);
-        by = bar(g, font, 1, bx - 2, by, 102, 7, frac(d.getKi(), s.maxKi()), d.getKi(), kiColor, t, dt);
-        by = bar(g, font, 2, bx - 4, by, 92, 6, frac(d.getStamina(), s.maxStamina()), d.getStamina(), DbzTheme.STAMINA, t, dt);
-        if (d.isGuarding() || d.getGuardMeter() < 100) {                                 // guard meter, only when it matters
-            float gf = (float) (d.getGuardMeter() / 100);
-            int gc = gf < 0.3f ? DbzTheme.mix(0xFFAEE6FF, 0xFFFF6A5A, 0.5f + 0.5f * Mth.sin(t * 0.8f)) : 0xFFAEE6FF;
-            DbzTheme.slant(g, bx - 7, by - 1, 82, 5, 3, 0xF0040508, 0xF0040508);
-            DbzTheme.slantBar(g, bx - 6, by, 80, 3, 2, gf, gc);
-            for (int i = 0; i < 2; i++) {                                                  // Breaker Wave charges
-                int pc = i < d.combat().breakerCharges ? 0xFFFFD27A : 0x60FFFFFF;
-                DbzTheme.quad(g, bx + 80 + i * 6, by - 1, bx + 83 + i * 6, by + 1.5f, bx + 80 + i * 6, by + 4, bx + 77 + i * 6, by + 1.5f, pc, pc, pc, pc);
-            }
-            by += 6;
-        }
-
-        // ---------------------------------------------------------- battle power and the form badge
-        long bp = StatCalculator.battlePower(d);
-        int ly = by + 1;
-        DbzTheme.text(g, font, Component.translatable("hud.dbzenith.bp"), bx + 5, ly + 2, DbzTheme.DIM, 0.7f);
-        g.drawString(font, String.format("%,d", bp), bx + 18, ly, held ? DbzTheme.brighten(aura, 1.1f) : DbzTheme.TITLE, true);
-        ly += 11;
-        if (!form.isBase()) {
-            Component name = Component.translatable(form.translationKey());
-            int nw = font.width(name);
-            DbzTheme.slant(g, bx - 6, ly, nw + 44, 11, 4, DbzTheme.withAlpha(DbzTheme.darken(aura, 0.75f), 230), DbzTheme.withAlpha(DbzTheme.darken(aura, 0.35f), 230));
-            g.drawString(font, name, bx, ly + 2, 0xFFFFFFFF, true);
-            DbzTheme.text(g, font, String.format("M%.0f%%", d.getMastery(form.id())), bx + nw + 6, ly + 3, 0xE0FFFFFF, 0.7f);
-            ly += 13;
-        }
-        int chipX = bx - 6;
+        int style = hudStyle();
+        int ly = switch (style) {
+            case 1 -> classic(g, font, mc, d, s, form, held, aura, accent, t, dt, hudScale);
+            case 2 -> minimal(g, font, d, s, form, held, aura, t, dt);
+            default -> zenith(g, font, mc, d, s, form, held, aura, accent, t, dt, hudScale);
+        };
+        int chipX = chipLeft;
 
         // ---------------------------------------------------------- status chips
         if (d.isCharging()) {
@@ -199,15 +152,7 @@ public final class DbzHud implements IGuiOverlay {
     /** One slanted bar with its eased fill, ghost of recent loss, shimmer and value. Returns the next row's y. */
     private static int bar(GuiGraphics g, Font font, int i, int x, int y, int w, int h, float frac, double value, int color, float t, float dt) {
         float skew = h * 0.6f;
-        if (frac < SHOWN[i]) {                                 // loss: drop at once, hold the ghost, then drain it
-            if (GHOST[i] < SHOWN[i]) GHOST[i] = SHOWN[i];
-            SHOWN[i] = frac;
-            HOLD_UNTIL[i] = t + 12;
-        } else {
-            SHOWN[i] += (frac - SHOWN[i]) * Math.min(1f, dt * 0.35f);
-        }
-        if (t > HOLD_UNTIL[i]) GHOST[i] = Math.max(SHOWN[i], GHOST[i] - dt * 0.025f);
-        if (GHOST[i] < SHOWN[i]) GHOST[i] = SHOWN[i];
+        ease(i, frac, t, dt);
 
         DbzTheme.slant(g, x - 1, y - 1, w + 2, h + 2, skew, 0xF0040508, 0xF0040508);
         DbzTheme.slant(g, x, y, w, h, skew, 0xE0161C2C, 0xE00A0E18);
@@ -248,8 +193,7 @@ public final class DbzHud implements IGuiOverlay {
 
     private static void skillChip(GuiGraphics g, Font font, PlayerData d, com.dbzenith.race.RacialSkill s, int x, int y, long time, float t, String readyKey) {
         int w = 86, h = 22, color = s.color();
-        DbzTheme.slant(g, x - 1, y - 1, w + 2, h + 2, 6, 0xF0040508, 0xF0040508);
-        DbzTheme.slant(g, x, y, w, h, 6, 0xE0182238, 0xE00A0E18);
+        chipBack(g, x, y, w, h);
         long ready = d.getRacialCooldown(s.id());
         float cd = time < ready ? (ready - time) / (float) Math.max(1, s.cooldownTicks()) : 0;
         Long began = d.getRacialBuffs().get(s.id());
@@ -269,8 +213,7 @@ public final class DbzHud implements IGuiOverlay {
     private static void technique(GuiGraphics g, Font font, PlayerData d, int x, int y, long time, float t) {
         Technique tech = ClientCombatState.selected();
         int w = 94, h = 22;
-        DbzTheme.slant(g, x - 1, y - 1, w + 2, h + 2, 6, 0xF0040508, 0xF0040508);
-        DbzTheme.slant(g, x, y, w, h, 6, 0xE0182238, 0xE00A0E18);
+        chipBack(g, x, y, w, h);
         if (tech == null) {
             DbzTheme.text(g, font, Component.translatable("hud.dbzenith.empty_deck"), x + 6, y + 8, DbzTheme.DIM, 0.6f);
             return;
@@ -285,6 +228,276 @@ public final class DbzHud implements IGuiOverlay {
         DbzTheme.text(g, font, name, x + 25, y + 3, color, font.width(name) > 70 ? 70f / font.width(name) : 1f);
         DbzTheme.text(g, font, Component.translatable("hud.dbzenith.technique_keys", ClientCombatState.selectedSlot() + 1, d.deckView().size()),
                 x + 25, y + 13, DbzTheme.DIM, 0.6f);
+    }
+
+
+    /** The original HUD: a tinted ring portrait and slanted bars. Returns the y of the status chip row. */
+    private static int classic(GuiGraphics g, Font font, Minecraft mc, PlayerData d, DerivedStats s, Form form, boolean held, int aura, int accent,
+                               float t, float dt, float hudScale) {
+        // ---------------------------------------------------------- portrait
+        int px = 6, py = 4, cx = px + 28, cy = py + 28;
+        g.blit(DbzTheme.UI, px, py, 56, 0, 56, 56, 256, 256);                            // backplate
+        if (held || d.isCharging()) {
+            float pulse = 0.75f + 0.25f * Mth.sin(t * (d.isCharging() ? 0.8f : 0.25f));
+            DbzTheme.arc(g, cx, cy, 0, 22, 0, 360, DbzTheme.withAlpha(aura, 0), DbzTheme.withAlpha(aura, (int) (170 * pulse)));
+        }
+        int c0 = (int) ((cx - 19) * hudScale), c1 = (int) ((cy - 19) * hudScale), c2 = (int) ((cx + 19) * hudScale), c3 = (int) ((cy + 19) * hudScale);
+        PortraitRenderer.draw(g, mc.player, cx, cy + 5, 44f, 14f, new int[]{c0, c1, c2, c3});   // the clip is in screen space
+        g.setColor(((accent >> 16) & 255) / 255f, ((accent >> 8) & 255) / 255f, (accent & 255) / 255f, 1f);
+        g.blit(DbzTheme.UI, px, py, 0, 0, 56, 56, 256, 256);                              // ring, tinted
+        g.setColor(1, 1, 1, 1);
+        // release gauge around the ring; past 100% it laps again in red
+        float release = d.getReleasePercent() / 100f;
+        DbzTheme.arc(g, cx, cy, 28.5f, 31f, -90, 360, 0xC0101018, 0xC0101018);
+        DbzTheme.arc(g, cx, cy, 28.5f, 31f, -90, 360 * Math.min(1f, release), 0xFFB0500E, DbzTheme.ACCENT);
+        if (release > 1f) DbzTheme.arc(g, cx, cy, 28.5f, 31f, -90, 360 * Math.min(1f, release - 1f), 0xFF901010, 0xFFFF4030);
+        DbzTheme.text(g, font, d.getReleasePercent() + "%", cx - font.width(d.getReleasePercent() + "%") * 0.6f / 2, py + 52, DbzTheme.ACCENT, 0.6f);
+
+        // ---------------------------------------------------------- bars
+        int bx = px + 54, by = py + 5;
+        int bodyColor = DbzTheme.BODY;
+        float bodyFrac = frac(d.getBody(), s.maxBody());
+        if (bodyFrac < 0.25f) bodyColor = DbzTheme.mix(DbzTheme.BODY, 0xFFFFD0C0, 0.5f + 0.5f * Mth.sin(t * 0.6f));
+        int kiColor = held ? DbzTheme.mix(DbzTheme.KI, aura, 0.25f) : DbzTheme.KI;
+        by = bar(g, font, 0, bx, by, 112, 8, bodyFrac, d.getBody(), bodyColor, t, dt);
+        by = bar(g, font, 1, bx - 2, by, 102, 7, frac(d.getKi(), s.maxKi()), d.getKi(), kiColor, t, dt);
+        by = bar(g, font, 2, bx - 4, by, 92, 6, frac(d.getStamina(), s.maxStamina()), d.getStamina(), DbzTheme.STAMINA, t, dt);
+        if (d.isGuarding() || d.getGuardMeter() < 100) {                                 // guard meter, only when it matters
+            float gf = (float) (d.getGuardMeter() / 100);
+            int gc = gf < 0.3f ? DbzTheme.mix(0xFFAEE6FF, 0xFFFF6A5A, 0.5f + 0.5f * Mth.sin(t * 0.8f)) : 0xFFAEE6FF;
+            DbzTheme.slant(g, bx - 7, by - 1, 82, 5, 3, 0xF0040508, 0xF0040508);
+            DbzTheme.slantBar(g, bx - 6, by, 80, 3, 2, gf, gc);
+            for (int i = 0; i < 2; i++) {                                                  // Breaker Wave charges
+                int pc = i < d.combat().breakerCharges ? 0xFFFFD27A : 0x60FFFFFF;
+                DbzTheme.quad(g, bx + 80 + i * 6, by - 1, bx + 83 + i * 6, by + 1.5f, bx + 80 + i * 6, by + 4, bx + 77 + i * 6, by + 1.5f, pc, pc, pc, pc);
+            }
+            by += 6;
+        }
+
+        // ---------------------------------------------------------- battle power and the form badge
+        long bp = StatCalculator.battlePower(d);
+        int ly = by + 1;
+        DbzTheme.text(g, font, Component.translatable("hud.dbzenith.bp"), bx + 5, ly + 2, DbzTheme.DIM, 0.7f);
+        g.drawString(font, String.format("%,d", bp), bx + 18, ly, held ? DbzTheme.brighten(aura, 1.1f) : DbzTheme.TITLE, true);
+        ly += 11;
+        if (!form.isBase()) {
+            Component name = Component.translatable(form.translationKey());
+            int nw = font.width(name);
+            DbzTheme.slant(g, bx - 6, ly, nw + 44, 11, 4, DbzTheme.withAlpha(DbzTheme.darken(aura, 0.75f), 230), DbzTheme.withAlpha(DbzTheme.darken(aura, 0.35f), 230));
+            g.drawString(font, name, bx, ly + 2, 0xFFFFFFFF, true);
+            DbzTheme.text(g, font, String.format("M%.0f%%", d.getMastery(form.id())), bx + nw + 6, ly + 3, 0xE0FFFFFF, 0.7f);
+            ly += 13;
+        }
+        chipLeft = bx - 6;
+        return ly;
+    }
+
+    // ================================================================== Zenith (CX-13e)
+
+    private static final ResourceLocation FRAMES = new ResourceLocation(com.dbzenith.DBZenith.MOD_ID, "textures/gui/hud_frames.png");
+    private static final ResourceLocation BARS = new ResourceLocation(com.dbzenith.DBZenith.MOD_ID, "textures/gui/hud_bars.png");
+    private static final ResourceLocation ENERGY = new ResourceLocation(com.dbzenith.DBZenith.MOD_ID, "textures/gui/hud_energy.png");
+    public static final int FRAME_STANDARD = 0, FRAME_FLAME = 1, FRAME_DIVINE = 2, FRAME_SAVAGE = 3, FRAME_REGAL = 4, FRAME_TECH = 5;
+    private static final String[] SAVAGE = {"ape", "lssj", "super_saiyan_4", "ssj4", "berserk", "wrath", "rage", "evil", "demon", "blood", "corruption",
+            "mutant", "mutation", "beast", "primordial", "thirst", "nightborn", "monarch", "crimson", "revenge", "dark_evolution", "apex"};
+    private static final String[] TECH = {"machine", "metal", "overclock", "upgrade", "omega", "core", "android", "protocol", "neural", "conversion", "tuffle"};
+    private static final String[] REGAL = {"form", "perfect", "king", "sovereign", "warlord", "dragon", "elder", "ultimate"};
+
+    /** 0 Zenith, 1 Classic, 2 Minimal. */
+    public static int hudStyle() {
+        try {
+            return com.dbzenith.config.DBZConfig.CLIENT.hudStyle.get();
+        } catch (RuntimeException e) {
+            return 0;
+        }
+    }
+
+    /** Which portrait frame a form wears: god ki gets the divine halo, wild forms the thorns, machines the brackets... */
+    public static int frameStyle(Form f, boolean kaioken) {
+        if (f.isBase()) return kaioken ? FRAME_FLAME : FRAME_STANDARD;
+        if (f.calmAura()) return FRAME_DIVINE;
+        String id = f.id();
+        for (String k : SAVAGE) if (id.contains(k)) return FRAME_SAVAGE;
+        for (String k : TECH) if (id.contains(k)) return FRAME_TECH;
+        for (String k : REGAL) if (id.contains(k)) return FRAME_REGAL;
+        return FRAME_FLAME;
+    }
+
+    /** Blits a region of a quarter-scale sheet at true size. */
+    private static void hd(GuiGraphics g, ResourceLocation tex, float x, float y, int u, int v, int w, int h, int texW, int texH) {
+        g.pose().pushPose();
+        g.pose().translate(x, y, 0);
+        g.pose().scale(0.25f, 0.25f, 1);
+        g.blit(tex, 0, 0, u, v, w, h, texW, texH);
+        g.pose().popPose();
+    }
+
+    private static void tint(GuiGraphics g, int argb, float alpha) {
+        g.setColor(((argb >> 16) & 255) / 255f, ((argb >> 8) & 255) / 255f, (argb & 255) / 255f, alpha);
+    }
+
+    /**
+     * An ornate frame that changes with the form round your live portrait, the release gauge set into its track, and
+     * energy bars plugged into it. Returns the y of the status chip row.
+     */
+    private static int zenith(GuiGraphics g, Font font, Minecraft mc, PlayerData d, DerivedStats s, Form form, boolean held, int aura, int accent,
+                              float t, float dt, float hudScale) {
+        int px = 4, py = 4, cx = px + 32, cy = py + 32;
+        int frame = frameStyle(form, d.getKaiokenStage() > 0);
+
+        if (held || d.isCharging()) {                                                     // the aura flaring behind the frame
+            float pulse = 0.7f + 0.3f * Mth.sin(t * (d.isCharging() ? 0.8f : 0.25f));
+            DbzTheme.arc(g, cx, cy, 24, 40, 0, 360, DbzTheme.withAlpha(aura, (int) (160 * pulse)), DbzTheme.withAlpha(aura, 0));
+        }
+        DbzTheme.arc(g, cx, cy, 0, 20, 0, 360, DbzTheme.withAlpha(DbzTheme.darken(accent, 0.35f), 255), 0xFF06070C);
+        int c0 = (int) ((cx - 19) * hudScale), c1 = (int) ((cy - 19) * hudScale), c2 = (int) ((cx + 19) * hudScale), c3 = (int) ((cy + 19) * hudScale);
+        PortraitRenderer.draw(g, mc.player, cx, cy + 5, 44f, 14f, new int[]{c0, c1, c2, c3});
+        RenderSystem.enableBlend();
+        hd(g, FRAMES, px, py, frame * 256, 0, 256, 256, 1536, 512);                      // metal
+        tint(g, accent, held ? 0.8f + 0.2f * Mth.sin(t * 0.3f) : 0.9f);
+        hd(g, FRAMES, px, py, frame * 256, 256, 256, 256, 1536, 512);                    // glow, in the aura colour
+        g.setColor(1, 1, 1, 1);
+        if (held) {                                                                        // a glint running round the rim
+            float a = (t * 4) % 360;
+            DbzTheme.arc(g, cx, cy, 25.2f, 27.8f, a, 40, 0x00FFFFFF, 0x00FFFFFF);
+            DbzTheme.arc(g, cx, cy, 25.2f, 27.8f, a + 40, 14, 0x90FFFFFF, 0x90FFFFFF);
+        }
+        float release = d.getReleasePercent() / 100f;                                     // the gauge in the track
+        DbzTheme.arc(g, cx, cy, 22.2f, 24.8f, -90, 360 * Math.min(1f, release), 0xFFB0500E, DbzTheme.ACCENT);
+        if (release > 1f) DbzTheme.arc(g, cx, cy, 22.2f, 24.8f, -90, 360 * Math.min(1f, release - 1f), 0xFF901010, 0xFFFF4030);
+
+        // ---------------------------------------------------------- bars, plugged into the frame
+        int bx = px + 56, by = py + 9;
+        float bodyFrac = frac(d.getBody(), s.maxBody());
+        int bodyColor = bodyFrac < 0.25f ? DbzTheme.mix(DbzTheme.BODY, 0xFFFFD0C0, 0.5f + 0.5f * Mth.sin(t * 0.6f)) : DbzTheme.BODY;
+        int kiColor = held ? DbzTheme.mix(DbzTheme.KI, aura, 0.25f) : DbzTheme.KI;
+        float flow = d.isCharging() ? 3.5f : held ? 1.8f : 1f;
+        by = zbar(g, font, 0, bx, by, 132, bodyFrac, d.getBody(), bodyColor, t, dt, 0.8f);
+        by = zbar(g, font, 1, bx + 2, by, 120, frac(d.getKi(), s.maxKi()), d.getKi(), kiColor, t, dt, flow);
+        by = zbar(g, font, 2, bx + 4, by, 108, frac(d.getStamina(), s.maxStamina()), d.getStamina(), DbzTheme.STAMINA, t, dt, 1.2f);
+        if (d.isGuarding() || d.getGuardMeter() < 100) {
+            float gf = (float) (d.getGuardMeter() / 100);
+            int gc = gf < 0.3f ? DbzTheme.mix(0xFFAEE6FF, 0xFFFF6A5A, 0.5f + 0.5f * Mth.sin(t * 0.8f)) : 0xFFAEE6FF;
+            int gx = bx + 16, gw = 84;
+            g.fill(gx - 1, by, gx + gw + 1, by + 4, 0xF0040508);
+            g.fill(gx, by + 1, gx + (int) (gw * gf), by + 3, gc);
+            for (int i = 0; i < 2; i++) {
+                int pc = i < d.combat().breakerCharges ? 0xFFFFD27A : 0x60FFFFFF;
+                DbzTheme.quad(g, gx + gw + 5 + i * 6, by - 1, gx + gw + 8 + i * 6, by + 2, gx + gw + 5 + i * 6, by + 5, gx + gw + 2 + i * 6, by + 2, pc, pc, pc, pc);
+            }
+            by += 6;
+        }
+
+        // ---------------------------------------------------------- battle power and the form plate
+        int ly = Math.max(by + 1, py + 46);
+        int lx = bx + 14;
+        long bp = StatCalculator.battlePower(d);
+        String bps = String.format("%,d", bp), rel = d.getReleasePercent() + "%";
+        int bw = 16 + font.width(bps) + 8 + (int) (font.width(rel) * 0.7f) + 6;
+        DbzTheme.nine(g, BARS, 512, 256, lx, ly, bw, 13, 0, 128, 192, 40, 12, true);
+        DbzTheme.text(g, font, Component.translatable("hud.dbzenith.bp"), lx + 5, ly + 4, DbzTheme.DIM, 0.7f);
+        g.drawString(font, bps, lx + 16, ly + 3, held ? DbzTheme.brighten(aura, 1.1f) : DbzTheme.TITLE, true);
+        DbzTheme.text(g, font, rel, lx + 16 + font.width(bps) + 8, ly + 4, release > 1f ? 0xFFFF6040 : DbzTheme.ACCENT, 0.7f);
+        ly += 15;
+        if (!form.isBase()) {
+            Component name = Component.translatable(form.translationKey());
+            String mastery = String.format("M%.0f%%", d.getMastery(form.id()));
+            int nw = font.width(name), fw = nw + (int) (font.width(mastery) * 0.7f) + 18;
+            DbzTheme.nine(g, BARS, 512, 256, lx, ly, fw, 13, 0, 128, 192, 40, 12, true);
+            DbzTheme.hGradient(g, lx + 2, ly + 2, lx + fw - 2, ly + 11, DbzTheme.withAlpha(aura, 150), DbzTheme.withAlpha(aura, 20));
+            g.drawString(font, name, lx + 6, ly + 3, 0xFFFFFFFF, true);
+            DbzTheme.text(g, font, mastery, lx + 10 + nw, ly + 4, 0xE0FFFFFF, 0.7f);
+            ly += 15;
+        }
+        chipLeft = lx;
+        return Math.max(ly + 1, py + 70);
+    }
+
+    /** One energy bar: an ornate housing with an icon socket, a flowing fill, the ghost of recent loss and a hot leading edge. */
+    private static int zbar(GuiGraphics g, Font font, int i, int x, int y, int w, float frac, double value, int color, float t, float dt, float flow) {
+        ease(i, frac, t, dt);
+        float fx0 = x + 11, fw = w - 21, fy = y + 3, fh = 6;
+        g.fill(x + 11, y + 3, x + w - 8, y + 9, 0xF0080A12);
+        if (GHOST[i] > SHOWN[i] + 0.002f) DbzTheme.hGradient(g, fx0, fy, fx0 + fw * GHOST[i], fy + fh, 0xFFF4E8E0, 0xFFE8D0C8);
+        float ww = fw * SHOWN[i];
+        if (ww > 0.5f) {
+            DbzTheme.hGradient(g, fx0, fy, fx0 + ww, fy + fh, DbzTheme.darken(color, 0.55f), color);
+            tint(g, color, 0.8f);
+            g.pose().pushPose();
+            g.pose().translate(fx0, fy, 0);
+            g.pose().scale(0.25f, 0.25f, 1);
+            g.blit(ENERGY, 0, 0, -(t * 1.6f * flow + i * 37) % 128 + 128, 0, (int) (ww * 4), 24, 128, 24);
+            g.pose().popPose();
+            g.setColor(1, 1, 1, 1);
+            float head = Math.min(6, ww);
+            DbzTheme.hGradient(g, fx0 + ww - head, fy, fx0 + ww, fy + fh, 0x00FFFFFF, 0xB0FFFFFF);
+            float sweep = ((t * 2.2f + i * 40) % 260) - 30;                                   // a highlight passing along
+            if (sweep > 0 && sweep < ww - 6) DbzTheme.hGradient(g, fx0 + sweep, fy, fx0 + sweep + 6, fy + fh, 0x00FFFFFF, 0x50FFFFFF);
+        }
+        for (int k = 1; k < 4; k++) g.fill((int) (fx0 + fw * k / 4f), y + 4, (int) (fx0 + fw * k / 4f) + 1, y + 8, 0x40000000);
+        g.pose().pushPose();                                                                  // the housing, three-sliced
+        g.pose().translate(x, y, 0);
+        g.pose().scale(0.25f, 0.25f, 1);
+        int W = w * 4;
+        g.blit(BARS, 0, 0, 0, 0, 56, 48, 512, 256);
+        g.blit(BARS, 56, 0, W - 120, 48, 56, 0, 392, 48, 512, 256);
+        g.blit(BARS, W - 64, 0, 64, 48, 448, 0, 64, 48, 512, 256);
+        g.pose().popPose();
+        tint(g, frac > 0 ? color : 0xFF606060, 1f);
+        hd(g, BARS, x + 2, y + 2, i * 32, 64, 32, 32, 512, 256);
+        g.setColor(1, 1, 1, 1);
+        DbzTheme.text(g, font, compact(value), x + w + 2, y + 3, DbzTheme.TEXT, 0.75f);
+        return y + 11;
+    }
+
+    /** Thin bars and numbers in a corner, no portrait. Returns the y of the status chip row. */
+    private static int minimal(GuiGraphics g, Font font, PlayerData d, DerivedStats s, Form form, boolean held, int aura, float t, float dt) {
+        int x = 6, y = 6, w = 92;
+        float[] fr = {frac(d.getBody(), s.maxBody()), frac(d.getKi(), s.maxKi()), frac(d.getStamina(), s.maxStamina())};
+        double[] val = {d.getBody(), d.getKi(), d.getStamina()};
+        int[] col = {fr[0] < 0.25f ? DbzTheme.mix(DbzTheme.BODY, 0xFFFFD0C0, 0.5f + 0.5f * Mth.sin(t * 0.6f)) : DbzTheme.BODY,
+                held ? DbzTheme.mix(DbzTheme.KI, aura, 0.25f) : DbzTheme.KI, DbzTheme.STAMINA};
+        for (int i = 0; i < 3; i++) {
+            ease(i, fr[i], t, dt);
+            g.fill(x - 1, y - 1, x + w + 1, y + 3, 0x90000000);
+            if (GHOST[i] > SHOWN[i] + 0.002f) g.fill(x, y, x + (int) (w * GHOST[i]), y + 2, 0xC0F4E8E0);
+            g.fill(x, y, x + (int) (w * SHOWN[i]), y + 2, col[i]);
+            DbzTheme.text(g, font, compact(val[i]), x + w + 3, y - 1, DbzTheme.TEXT, 0.6f);
+            y += 5;
+        }
+        y += 1;
+        String bp = String.format("%,d", StatCalculator.battlePower(d)) + "  " + d.getReleasePercent() + "%";
+        DbzTheme.text(g, font, bp, x, y, held ? DbzTheme.brighten(aura, 1.1f) : DbzTheme.TITLE, 0.7f);
+        y += 7;
+        if (!form.isBase()) {
+            DbzTheme.text(g, font, Component.translatable(form.translationKey()), x, y, DbzTheme.brighten(0xFF000000 | aura, 1.1f), 0.7f);
+            y += 7;
+        }
+        chipLeft = x;
+        return y + 2;
+    }
+
+    /** Eases a bar: drops at once on loss and leaves a ghost that drains after a moment; rises smoothly. */
+    private static void ease(int i, float frac, float t, float dt) {
+        if (frac < SHOWN[i]) {
+            if (GHOST[i] < SHOWN[i]) GHOST[i] = SHOWN[i];
+            SHOWN[i] = frac;
+            HOLD_UNTIL[i] = t + 12;
+        } else {
+            SHOWN[i] += (frac - SHOWN[i]) * Math.min(1f, dt * 0.35f);
+        }
+        if (t > HOLD_UNTIL[i]) GHOST[i] = Math.max(SHOWN[i], GHOST[i] - dt * 0.025f);
+        if (GHOST[i] < SHOWN[i]) GHOST[i] = SHOWN[i];
+    }
+
+    /** The backing of the technique and skill chips by the hotbar. */
+    private static void chipBack(GuiGraphics g, int x, int y, int w, int h) {
+        if (hudStyle() == 0) {
+            DbzTheme.nine(g, BARS, 512, 256, x - 1, y - 1, w + 2, h + 2, 0, 128, 192, 40, 12, true);
+            return;
+        }
+        DbzTheme.slant(g, x - 1, y - 1, w + 2, h + 2, 6, 0xF0040508, 0xF0040508);
+        DbzTheme.slant(g, x, y, w, h, 6, 0xE0182238, 0xE00A0E18);
     }
 
     private static int chip(GuiGraphics g, Font font, int x, int y, Component text, int color) {

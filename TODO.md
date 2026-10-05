@@ -144,7 +144,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - [x] 13b HD race skins (v0.24.0): every race and lineage repainted at 128x128 (scales, plates, spots, markings), their transformation recolours regenerated
   - [x] 13c Form detail (v0.25.0): HD hair texture (strand gradients, rim highlights), glowing eye highlights, form body markings (god-ki sheen, kaioken flush, silver Ultra-style sheen), lightning on the body
   - [x] 13d UI v2 (v0.26.0): ornate themed panels, buttons and frames; a "UI style" setting (Zenith / Classic)
-  - [ ] 13e HUD v2: detailed portrait frames per form, animated bars, new layouts; a "HUD style" setting (Zenith / Classic / Minimal)
+  - [x] 13e HUD v2 (v0.27.0): detailed portrait frames per form, animated bars, new layouts; a "HUD style" setting (Zenith / Classic / Minimal)
   - [x] 13f Art detail setting (v0.23.0): Zenith Settings > Style > HD art
 - [ ] CX-11 VFX v3
 - [ ] CX-12 World (Otherworld, God Ki pools, fusion v2, wishes, metals)

@@ -28,6 +28,7 @@ public class ArtGen {
         FormLooks.all();
         FormFx.all();
         GuiHd.all();
+        HudHd.all();
         System.out.println("ArtGen done");
     }
 
@@ -906,6 +907,326 @@ public class ArtGen {
             s.arm = bolt;
             s.leg = bolt;
             s.save("entity/form/sparks_" + frame + ".png");
+        }
+    }
+
+    // ================================================================== HUD v2 (CX-13e)
+
+    /**
+     * The Zenith HUD (drawn at a quarter scale): six portrait frames, one per family of forms (standard, flame,
+     * divine, savage, regal, tech), each a coloured metal layer plus a white glow layer the HUD tints with the aura;
+     * an ornate bar housing with an icon socket, the three bar icons and a chamfered plate; and a tileable energy
+     * strip for the animated bar fills.
+     * hud_frames.png (1536x512): metal of style s at (s*256, 0), glow at (s*256, 256); frame centre (128,128),
+     * head window r<76, inner rim 76-86, gauge track 86-100, outer rim 100-112, ornaments beyond, gem at the bottom.
+     * hud_bars.png (512x256): housing (0,0,512,48); icons (k*32, 64, 32, 32): body, ki, stamina; plate (0,128,192,40).
+     */
+    static final class HudHd {
+        static final int[] METALS = {0xFFD8A040, 0xFFE0A838, 0xFFC8D4E8, 0xFF7A5A4A, 0xFFE8B850, 0xFF8EA0B4};
+        static final double CX = 127.5, CY = 127.5;
+
+        static void all() throws IOException {
+            Canvas c = new Canvas(1536, 512);
+            for (int s = 0; s < 6; s++) {
+                metal(c, s);
+                glow(c, s);
+            }
+            c.save("gui/hud_frames.png");
+            bars();
+            energy();
+        }
+
+        /** Degrees, 0 at the top, clockwise. */
+        static double ang(double dx, double dy) {
+            return Math.toDegrees(Math.atan2(dx, -dy));
+        }
+
+        static double diff(double a, double b) {
+            double d = ((a - b) % 360 + 540) % 360 - 180;
+            return Math.abs(d);
+        }
+
+        /** Whether a style's metal ornaments cover this point past the outer rim. */
+        static boolean ornament(int style, double a, double r) {
+            if (r < 111 || r >= 127) return false;
+            double d = r - 112;
+            switch (style) {
+                case 0 -> {                                                                         // four diamond points
+                    for (int k = 0; k < 4; k++) if (diff(a, k * 90) < 11 * (1 - d / 15)) return true;
+                }
+                case 1 -> {                                                                         // short fins between the flames
+                    for (int k = 0; k < 8; k++) if (diff(a, 22.5 + k * 45) < 7 * (1 - d / 8)) return true;
+                }
+                case 2 -> {                                                                         // a halo ring on four struts
+                    if (r >= 117 && r < 122) return true;
+                    for (int k = 0; k < 4; k++) if (diff(a, 45 + k * 90) < 2.4 && r < 118) return true;
+                }
+                case 3 -> {                                                                         // hooked thorns
+                    for (int k = 0; k < 9; k++) {
+                        double ak = k * 40 + (noise(k, 1, 77) - 0.5) * 16, len = 8 + noise(k, 2, 77) * 6;
+                        if (d < len && diff(a - d * 0.9, ak) < 8 * (1 - d / len)) return true;
+                    }
+                }
+                case 4 -> {                                                                         // a crown on top, swept wings at the sides
+                    double[] at = {-36, -18, 0, 18, 36}, len = {11, 8, 14, 8, 11};
+                    for (int k = 0; k < 5; k++) if (d < len[k] && diff(a, at[k]) < 6 * (1 - d / len[k])) return true;
+                    double side = Math.abs(a);
+                    if (side > 65 && side < 115) {
+                        double l = 9 * Math.sin(Math.PI * (side - 65) / 50) * (0.7 + 0.3 * Math.cos((side - 65) * 0.45));
+                        if (d < l) return true;
+                    }
+                }
+                case 5 -> {                                                                         // notched brackets
+                    for (int k = 0; k < 6; k++) {
+                        double dd = diff(a, 30 + k * 60);
+                        if (dd < 7 && r < 121 && !(dd < 2.5 && r > 116)) return true;
+                    }
+                }
+                default -> { }
+            }
+            return false;
+        }
+
+        static boolean gemSetting(double x, double y) {
+            return Math.hypot(x - CX, y - (CY + 106)) < 12;
+        }
+
+        static void metal(Canvas c, int style) {
+            int[] ramp = ramp(METALS[style], 9);
+            boolean[][] m = new boolean[256][256];
+            boolean[][] track = new boolean[256][256];
+            for (int y = 0; y < 256; y++) for (int x = 0; x < 256; x++) {
+                double dx = x + 0.5 - CX, dy = y + 0.5 - CY, r = Math.hypot(dx, dy);
+                track[y][x] = r >= 86 && r < 100;
+                m[y][x] = (r >= 76 && r < 86) || (r >= 100 && r < 112) || ornament(style, ang(dx, dy), r) || gemSetting(x + 0.5, y + 0.5);
+                if (gemSetting(x + 0.5, y + 0.5)) track[y][x] = false;
+            }
+            int x0 = style * 256;
+            for (int y = 0; y < 256; y++) for (int x = 0; x < 256; x++) {
+                double dx = x + 0.5 - CX, dy = y + 0.5 - CY, r = Math.hypot(dx, dy);
+                int col = 0;
+                if (track[y][x]) {
+                    col = 0xFF0B0D16;
+                    double edge = Math.min(r - 86, 100 - r);
+                    if (edge < 2) col = 0xFF05060A;
+                    if (diff(ang(dx, dy), Math.round(ang(dx, dy) / 30) * 30) < 0.6) col = 0xFF1C2232;     // ticks
+                } else if (m[y][x]) {
+                    double gx = x + 0.5 - CX, gy = y + 0.5 - (CY + 106), gr = Math.hypot(gx, gy);
+                    if (gr < 9) col = 0xFF140C06;                                                   // under the gem
+                    else {
+                        double v = 0.52 + 0.14 * (-dx - dy) / (r * 1.414);
+                        for (int k = 1; k <= 3; k++) {                                              // bevel from the shape's own edges
+                            if (!has(m, x - k, y - k)) v += 0.3 / k;
+                            if (!has(m, x + k, y + k)) v -= 0.3 / k;
+                        }
+                        if (r >= 100 && r < 112 && Math.abs(r - 106) < 0.8 && gr >= 12) v -= 0.35;  // groove on the outer rim
+                        if (gr < 12) v = 0.75 - (gr - 9) * 0.12;                                    // the gem's bezel
+                        if (style == 0) for (int k = 0; k < 4; k++) {                               // domed studs
+                            double sa = Math.toRadians(45 + k * 90), sx = CX + Math.sin(sa) * 106, sy = CY - Math.cos(sa) * 106;
+                            double sd = Math.hypot(x + 0.5 - sx, y + 0.5 - sy);
+                            if (sd < 4.5) v = 0.3 + 0.7 * Math.max(0, 1 - Math.hypot(x + 0.5 - sx + 1.3, y + 0.5 - sy + 1.3) / 4.5);
+                        }
+                        if (style == 5 && r >= 100 && r < 112 && (int) ((ang(dx, dy) + 360) / 6) % 2 == 0 && Math.abs(r - 106) < 2) v -= 0.12;   // knurling
+                        v += (noise(x, y, 811 + style) - 0.5) * 0.08;
+                        col = ramp[(int) Math.max(0, Math.min(ramp.length - 1, Math.round(v * (ramp.length - 1))))];
+                    }
+                } else if (near(m, x, y, 2) || (near(track, x, y, 2) && r < 86)) col = 0xFF05060A;      // outline
+                c.set(x0 + x, y, col);
+            }
+        }
+
+        static boolean has(boolean[][] m, int x, int y) {
+            return x >= 0 && y >= 0 && x < m.length && y < m.length && m[y][x];
+        }
+
+        static boolean near(boolean[][] m, int x, int y, int d) {
+            for (int j = -d; j <= d; j++) for (int i = -d; i <= d; i++) if (i * i + j * j <= d * d && has(m, x + i, y + j)) return true;
+            return false;
+        }
+
+        static void glow(Canvas c, int style) {
+            int x0 = style * 256, y0 = 256;
+            for (int y = 0; y < 256; y++) for (int x = 0; x < 256; x++) {
+                double dx = x + 0.5 - CX, dy = y + 0.5 - CY, r = Math.hypot(dx, dy), a = ang(dx, dy);
+                double v = 0, al = 0;
+                if (r >= 86 && r < 87.6) { v = 1; al = 0.45; }                                     // the track's inner light
+                double d = r - 112;
+                switch (style) {
+                    case 0 -> {
+                        if (r >= 112 && r < 114.5) { v = 1; al = Math.max(al, 0.3); }
+                    }
+                    case 1 -> {                                                                     // flames, tallest at the top
+                        if (d >= -6) {
+                            double hgt = 9 + 12 * Math.pow((1 + Math.cos(Math.toRadians(a))) / 2, 1.3);
+                            double phase = Math.toRadians(a) * 16 + d * 0.11 * (a < 0 ? -1 : 1);
+                            double tongue = Math.pow(0.5 + 0.5 * Math.cos(phase), 2.2);
+                            double lim = hgt * (0.35 + 0.65 * tongue) - 6;
+                            if (d < lim) {
+                                double in = 1 - (d + 6) / (lim + 6);
+                                v = 0.55 + 0.45 * in;
+                                al = Math.min(d < 0 ? 0.55 : 1, Math.pow(in, 0.7) * 1.4);
+                            }
+                        }
+                    }
+                    case 2 -> {                                                                     // rays and a soft halo
+                        if (d >= 1) {
+                            int k = (int) Math.round(a / 15);
+                            double len = k % 2 == 0 ? 15 : 9, w = 2.6 * (1 - (d - 1) / len);
+                            if (d - 1 < len && diff(a, k * 15) < w) { v = 1; al = 0.95 * (1 - (d - 1) / len) + 0.05; }
+                            double halo = 0.5 * Math.exp(-Math.pow((r - 119.5) / 4.5, 2));
+                            if (halo > al * 0.5) { v = 1; al = Math.max(al, halo); }
+                        }
+                    }
+                    case 3 -> {                                                                     // three claw slashes across the top right
+                        double px = 203, py = 53, ux = -0.5, uy = 0.866, nx = 0.866, ny = 0.5;
+                        for (int k = -1; k <= 1; k++) {
+                            double qx = x + 0.5 - (px + nx * k * 8), qy = y + 0.5 - (py + ny * k * 8);
+                            double t = qx * ux + qy * uy, n = Math.abs(qx * nx + qy * ny), half = 32 - Math.abs(k) * 6;
+                            double w = 3 * (1 - Math.abs(t) / half);
+                            if (Math.abs(t) < half && n < w) { v = 1; al = Math.max(al, 0.9); }
+                            else if (Math.abs(t) < half && n < w + 2) { v = 0.8; al = Math.max(al, 0.3); }
+                        }
+                    }
+                    case 4 -> {                                                                     // jewels on the crown tips, lit wing edges
+                        double[] at = {-36, -18, 0, 18, 36}, len = {11, 8, 14, 8, 11};
+                        for (int k = 0; k < 5; k++) {
+                            double ta = Math.toRadians(at[k]), tr = 112 + len[k];
+                            double jx = CX + Math.sin(ta) * tr, jy = CY - Math.cos(ta) * tr, jd = Math.hypot(x + 0.5 - jx, y + 0.5 - jy);
+                            if (jd < 4.8) { v = 0.5 + 0.5 * Math.max(0, 1 - Math.hypot(x + 0.5 - jx + 1.2, y + 0.5 - jy + 1.2) / 4.8); al = 1; }
+                        }
+                        double side = Math.abs(a);
+                        if (side > 65 && side < 115 && d > 0) {
+                            double l = 9 * Math.sin(Math.PI * (side - 65) / 50) * (0.7 + 0.3 * Math.cos((side - 65) * 0.45));
+                            if (Math.abs(d - l - 1.5) < 1.3) { v = 1; al = Math.max(al, 0.55); }
+                        }
+                    }
+                    case 5 -> {                                                                     // circuit traces and a segmented light ring
+                        if (d >= 1 && d < 3 && ((a + 360) % 10) < 7) { v = 1; al = Math.max(al, 0.5); }
+                        for (int k = 0; k < 6; k++) for (int s = -1; s <= 1; s += 2) {
+                            double base = k * 60 + s * 12;
+                            if (d >= 3 && d < 9 && diff(a, base) < 0.9) { v = 1; al = 0.85; }
+                            double end = base + s * 6;
+                            if (Math.abs(r - 121) < 1 && diff(a, (base + end) / 2) < 3) { v = 1; al = 0.85; }
+                            double ea = Math.toRadians(end), ex = CX + Math.sin(ea) * 121, ey = CY - Math.cos(ea) * 121;
+                            if (Math.hypot(x + 0.5 - ex, y + 0.5 - ey) < 2.4) { v = 1; al = 1; }
+                        }
+                    }
+                    default -> { }
+                }
+                double gx = x + 0.5 - CX, gy = y + 0.5 - (CY + 106), gr = Math.hypot(gx, gy);
+                if (gr < 9) {                                                                       // the gem, cut and shining
+                    double l = 1 - Math.hypot(gx + 2.5, gy + 2.5) / 11;
+                    v = 0.3 + 0.7 * Math.max(0, l);
+                    if (Math.abs(gx) + Math.abs(gy) > 9) v *= 0.75;
+                    if (Math.hypot(gx + 3, gy + 3) < 1.8) v = 1.3;
+                    al = 1;
+                }
+                if (al <= 0) continue;
+                int g = (int) Math.round(Math.max(0, Math.min(1, v)) * 255);
+                c.set(x0 + x, y0 + y, (int) Math.round(Math.min(1, al) * 255) << 24 | g << 16 | g << 8 | g);
+            }
+        }
+
+        static void bars() throws IOException {
+            Canvas c = new Canvas(512, 256);
+            int[] gold = ramp(0xFFD8A040, 9);
+            boolean[][] m = new boolean[48][512];
+            boolean[][] hole = new boolean[48][512];
+            for (int y = 0; y < 48; y++) for (int x = 0; x < 512; x++) {
+                double px = x + 0.5, py = y + 0.5, sr = Math.hypot(px - 24, py - 24);
+                double top = px < 476 ? 4 : 4 + (px - 476) * 0.55, bottom = px < 476 ? 44 : 44 - (px - 476) * 0.55;
+                boolean rail = px >= 24 && py >= top && py < bottom;
+                boolean window = py >= 12 && py < 36 && px >= 46 && px < 470 - (py - 12) * 0.35;
+                m[y][x] = (sr < 22 || rail) && !window;
+                hole[y][x] = sr < 15;
+            }
+            for (int y = 0; y < 48; y++) for (int x = 0; x < 512; x++) {
+                int col = 0;
+                if (hole[y][x]) {
+                    double l = Math.hypot(x + 0.5 - 24, y + 0.5 - 24) / 15;
+                    col = mix(0xFF141A2A, 0xFF05060A, l);
+                } else if (m[y][x]) {
+                    double v = 0.5 + 0.18 * (24 - y) / 24.0;
+                    for (int k = 1; k <= 3; k++) {
+                        if (!has(m, x - k, y - k) || has(hole, x - k, y - k)) v += 0.3 / k;
+                        if (!has(m, x + k, y + k) || has(hole, x + k, y + k)) v -= 0.3 / k;
+                    }
+                    if (x > 50 && (y == 7 || y == 40)) v -= 0.25;                                   // engraved lines along the rail
+                    v += (noise(x, y, 821) - 0.5) * 0.08;
+                    col = gold[(int) Math.max(0, Math.min(8, Math.round(v * 8)))];
+                } else if (near(m, x, y, 2) && !(y >= 13 && y < 35 && x >= 48 && x < 466 - (y - 12) * 0.35)) col = 0xFF05060A;
+                c.set(x, y, col);
+            }
+            for (int k = 0; k < 3; k++) icon(c, k);
+            plate(c);
+            c.save("gui/hud_bars.png");
+        }
+
+        static void icon(Canvas c, int kind) {
+            java.awt.geom.Path2D.Double p = new java.awt.geom.Path2D.Double();
+            switch (kind) {
+                case 0 -> { }
+                case 1 -> {                                                                         // a ki flame
+                    p.moveTo(16, 3);
+                    p.curveTo(19, 10, 26, 14, 25, 21);
+                    p.curveTo(24, 28, 8, 28, 7, 21);
+                    p.curveTo(6, 15, 12, 13, 16, 3);
+                    p.closePath();
+                }
+                default -> {                                                                        // a lightning bolt
+                    p.moveTo(19, 3);
+                    p.lineTo(8, 18);
+                    p.lineTo(15, 18);
+                    p.lineTo(12, 29);
+                    p.lineTo(24, 13);
+                    p.lineTo(17, 13);
+                    p.lineTo(21, 3);
+                    p.closePath();
+                }
+            }
+            for (int y = 0; y < 32; y++) for (int x = 0; x < 32; x++) {
+                double px = x + 0.5, py = y + 0.5;
+                boolean in;
+                if (kind == 0) {                                                                    // a heart
+                    double hx = (px - 16) / 11, hy = -(py - 15) / 11;
+                    double q = hx * hx + hy * hy - 1;
+                    in = q * q * q - hx * hx * hy * hy * hy < 0;
+                } else in = p.contains(px, py);
+                if (!in) continue;
+                double v = 0.65 + 0.35 * (1 - Math.hypot(px - 11, py - 9) / 20);
+                c.set(kind * 32 + x, 64 + y, Creatures.grey(v));
+            }
+        }
+
+        /** A chamfered glass plate with a gold trim, for nine-slicing (border 12). */
+        static void plate(Canvas c) {
+            int[] gold = ramp(0xFFD8A040, 9);
+            for (int y = 0; y < 40; y++) for (int x = 0; x < 192; x++) {
+                int ex = Math.min(x, 191 - x), ey = Math.min(y, 39 - y);
+                int e = Math.min(ex, ey), cut = ex + ey;                                            // distance in, and along the chamfer
+                if (cut < 8) continue;
+                int col;
+                if (e < 2 || cut < 10) col = 0xFF05060A;
+                else if (e < 4 || cut < 13) col = gold[y < 20 ? 7 : 4];
+                else if (e < 5 || cut < 14) col = 0xFF05060A;
+                else col = mix(0xE81C2640, 0xE80A0E18, y / 39.0);
+                c.set(x, 128 + y, col);
+            }
+        }
+
+        /** Flowing light for the bar fills, seamless left to right. */
+        static void energy() throws IOException {
+            Canvas c = new Canvas(128, 24);
+            double TAU = Math.PI * 2;
+            for (int y = 0; y < 24; y++) for (int x = 0; x < 128; x++) {
+                double u = x / 128.0;
+                double wave = 1.2 * Math.sin(TAU * u * 2 + 0.7) + 0.6 * Math.sin(TAU * u * 3);                 // streaks that drift up and down
+                double v = 0.74 + 0.09 * Math.sin(y * 0.55 + wave) + 0.05 * Math.sin(TAU * u * 5 + y * 0.08);
+                if (y < 6) v += 0.3 * (1 - y / 6.0);
+                if (y > 17) v -= 0.22 * (y - 17) / 6.0;
+                c.set(x, y, Creatures.grey(v));
+            }
+            c.save("gui/hud_energy.png");
         }
     }
 

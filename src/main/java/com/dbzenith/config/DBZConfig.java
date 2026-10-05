@@ -599,6 +599,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue proceduralMotion;
         public final ForgeConfigSpec.BooleanValue hdArt;
         public final ForgeConfigSpec.IntValue uiStyle;
+        public final ForgeConfigSpec.IntValue hudStyle;
 
         Client(ForgeConfigSpec.Builder b) {
             b.push("hud");
@@ -612,6 +613,8 @@ public final class DBZConfig {
                     .define("transformCutIn", true);
             hudScale = b.comment("Size of the portrait HUD (0.6 - 1.4)")
                     .defineInRange("hudScale", 1.0, 0.6, 1.4);
+            hudStyle = b.comment("HUD: 0 Zenith (ornate portrait frame per form, animated bars), 1 Classic, 2 Minimal (thin bars, no portrait)")
+                    .defineInRange("hudStyle", 0, 0, 2);
             b.pop();
             b.push("effects");
             screenShake = b.comment("Camera shake strength from hits, explosions and landings (0 = off)")
