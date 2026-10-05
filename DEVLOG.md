@@ -548,3 +548,20 @@
 
 ### Verified
 - Screenshots of all ten new poses. No pose-stack errors in the client log after flights and landings.
+
+## 2026-10-05 — Session 3 (cont.): CX-10 Sound (v0.21.0)
+- **`tools/SfxGen.java`:** every sound is synthesized from scratch, with no samples.
+  - Building blocks: oscillators (sine, band-limited saw), white and brown noise, sparse crackle, two-pole low-pass and high-pass, band-pass biquads with moving centres, attack/decay envelopes, tanh saturation, a Schroeder room (four combs, two all-passes), and crossfaded seamless loops.
+  - Output: 29 events, 60 variants. Mono 44.1 kHz WAVs are encoded to Ogg Vorbis (q5) with ffmpeg/libvorbis, using the copy bundled with ClipGrab on this machine (pass the path, or set `FFMPEG`), and `sounds.json` is written automatically.
+  - Sounds: punches (light, heavy), swings, ki fire, hits, explosions (two sizes), beam fire, guard block, parry, guard break, deflect, dash, vanish, teleport, power-up, transformation, power-down, three aura loops (charge, hum, calm), Kaioken, Zenkai, flight, skill, UI click and open, stun, landing.
+  - Levels checked with volumedetect (all peak around -1 dB) and spectrograms. That found and fixed a click where ringing sounds were cut before the reverb tail.
+- **`ModSounds`:** a registry with subtitles for every sound.
+- **`ClientSounds`:**
+  - impacts (from the impact packets every client receives), bare-hand swings and hard landings;
+  - UI clicks (`ThemedButton`) and the wheel opening;
+  - looping aura sounds that follow each fighter and fade in and out: a roar while powering up, a hum while a form or Kaioken is held, a pure tone for calm god ki.
+- **Server side:** the vanilla placeholders were replaced across techniques, dashes, transformations (power-up rumble, burst, power-down, interruption), Kaioken, God Ki, Zenkai, learning, racial and universal skills, Combat v3 moves, flight, and stuns (on the effect-added event). The old beacon charging tick and the server's heavy-hit crit sound were removed (now client loops and impacts).
+- **Tests (136):** `SoundTests.everySoundHasItsFiles` checks that every registered event is in `sounds.json` and that every variant is a real Ogg stream.
+
+### Verified
+- The client loaded and played the new sounds during a scripted run. Only vanilla's usual dev warnings appeared.

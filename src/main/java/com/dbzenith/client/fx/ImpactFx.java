@@ -72,6 +72,7 @@ public final class ImpactFx {
         RandomSource rnd = level.random;
         boolean mine = mc.player != null && (m.attackerId() == mc.player.getId() || m.victimId() == mc.player.getId());
         int tint = FxDraw.mix(m.color(), 0xFFFFFF, 0.55f);
+        com.dbzenith.client.ClientSounds.impact(level, pos, m.kind(), s);
         switch (m.kind()) {
             case ImpactPacket.PUNCH -> {
                 add(Kind.FLASH, pos, dir, 0xFFFFFF, 0, 0.9f * s, 3, 230);

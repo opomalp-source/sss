@@ -15,6 +15,11 @@ public class ThemedButton extends Button {
     }
 
     /** Draw in the gold "selected" skin (a toggle that is on, the chosen option of a group). */
+    @Override
+    public void playDownSound(net.minecraft.client.sounds.SoundManager sounds) {
+        com.dbzenith.client.ClientSounds.uiClick();
+    }
+
     public ThemedButton selected(boolean selected) {
         this.selected = selected;
         return this;

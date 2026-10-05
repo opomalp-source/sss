@@ -37,6 +37,8 @@ public final class FlightHandler {
         a.flying = true;
         a.setFlyingSpeed(speed(data));
         player.onUpdateAbilities();
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.FLIGHT.get(),
+                net.minecraft.sounds.SoundSource.PLAYERS, 0.7f, 1f);
         return true;
     }
 

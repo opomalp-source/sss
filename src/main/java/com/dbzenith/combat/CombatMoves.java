@@ -124,7 +124,7 @@ public final class CombatMoves {
         }
         ModNetwork.sendToTrackingAndSelf(player, new AnimEventPacket(player.getId(), AnimEventPacket.SWEEP, 0));
         ImpactPacket.at(player.position().add(look.scale(1.5)).add(0, 0.3, 0), look, ImpactPacket.SPIKE, 0.9f, 0xE0D0B0, player.getId()).send(level);
-        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1f, 0.7f);
+        level.playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.WHOOSH.get(), SoundSource.PLAYERS, 1f, 0.7f);
         return hits;
     }
 
@@ -167,7 +167,7 @@ public final class CombatMoves {
             if (!armoured) victim.addEffect(new MobEffectInstance(ModEffects.STUN.get(), ZHIT_STUN, 0));
             if (victim.level() instanceof ServerLevel level) {
                 ImpactPacket.melee(attacker, victim, ImpactPacket.HEAVY).send(level);
-                level.playSound(null, victim.getX(), victim.getY(), victim.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1f, 0.5f);
+                level.playSound(null, victim.getX(), victim.getY(), victim.getZ(), com.dbzenith.registry.ModSounds.PUNCH_HEAVY.get(), SoundSource.PLAYERS, 1f, 0.5f);
             }
             if (attacker instanceof ServerPlayer sp) ModNetwork.sendToTrackingAndSelf(sp, new AnimEventPacket(sp.getId(), AnimEventPacket.ZHIT, 0));
         }
@@ -191,8 +191,8 @@ public final class CombatMoves {
         AerialCombat.queue(b, apart.scale(0.9).add(0, 0.25, 0));
         if (a.level() instanceof ServerLevel level) {
             ImpactPacket.at(mid, apart, ImpactPacket.PARRY, 1.3f, 0xFFFFFF, a.getId()).send(level);
-            level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.6f, 1.5f);
-            level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 0.4f, 1.8f);
+            level.playSound(null, mid.x, mid.y, mid.z, com.dbzenith.registry.ModSounds.PARRY.get(), SoundSource.PLAYERS, 0.6f, 1.5f);
+            level.playSound(null, mid.x, mid.y, mid.z, com.dbzenith.registry.ModSounds.EXPLOSION.get(), SoundSource.PLAYERS, 0.4f, 1.8f);
         }
     }
 
@@ -260,7 +260,7 @@ public final class CombatMoves {
             d.setDashEvadeUntil(now + 8);
             anim(player, AnimEventPacket.RECOVER, 0);
             player.serverLevel().sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + 1, player.getZ(), 12, 0.4, 0.4, 0.4, 0.05);
-            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PHANTOM_FLAP, SoundSource.PLAYERS, 0.8f, 1.4f);
+            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.DASH.get(), SoundSource.PLAYERS, 0.8f, 1.4f);
             return true;
         }
         if (d.isGuarding()) {                                              // spot dodge or side step
@@ -316,7 +316,7 @@ public final class CombatMoves {
             v.chaserId = player.getId();
         }
         anim(player, AnimEventPacket.DASH, 0);
-        level.playSound(null, dest.x, dest.y, dest.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.5f, 1.9f);
+        level.playSound(null, dest.x, dest.y, dest.z, com.dbzenith.registry.ModSounds.VANISH.get(), SoundSource.PLAYERS, 0.5f, 1.9f);
         return true;
     }
 
@@ -338,7 +338,7 @@ public final class CombatMoves {
         if (cs != null) cs.chaseReadyUntil = Long.MIN_VALUE / 2;
         ImpactPacket.at(chaser.position().add(0, 1, 0), player.getLookAngle(), ImpactPacket.PARRY, 1.1f, 0xC0E0FF, player.getId()).send(player.serverLevel());
         player.displayClientMessage(Component.translatable("message.dbzenith.chase_counter"), true);
-        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.6f, 1.5f);
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.VANISH.get(), SoundSource.PLAYERS, 0.6f, 1.5f);
     }
 
     static boolean revenge(ServerPlayer player, PlayerData d, long now) {
@@ -365,7 +365,7 @@ public final class CombatMoves {
         }
         anim(player, AnimEventPacket.ZHIT, 1);
         player.displayClientMessage(Component.translatable("message.dbzenith.revenge"), true);
-        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1f, 0.6f);
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.PUNCH_HEAVY.get(), SoundSource.PLAYERS, 1f, 0.6f);
         return true;
     }
 
@@ -392,7 +392,7 @@ public final class CombatMoves {
         int aura = com.dbzenith.ki.Aura.color(d);
         ImpactPacket.at(player.position().add(0, 1, 0), new Vec3(0, 1, 0), ImpactPacket.EXPLOSION, 1.3f, aura, player.getId()).send(level);
         anim(player, AnimEventPacket.BREAKER, 0);
-        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 0.9f, 1.3f);
+        level.playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.EXPLOSION.get(), SoundSource.PLAYERS, 0.9f, 1.3f);
         return true;
     }
 

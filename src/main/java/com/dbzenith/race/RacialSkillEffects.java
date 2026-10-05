@@ -146,7 +146,7 @@ public final class RacialSkillEffects {
                 }
                 d.setStamina(d.getStamina() + d.getDerived().maxStamina() * 0.3);
                 ImpactPacket.at(player.position().add(0, 1, 0), new Vec3(0, 1, 0), ImpactPacket.EXPLOSION, 1.4f, s.color() & 0xFFFFFF, player.getId()).send(level);
-                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 1f, 0.6f);
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.EXPLOSION.get(), SoundSource.PLAYERS, 1f, 0.6f);
             }
             case "roaring_evolution" -> {                        // a roar that staggers everything near
                 for (LivingEntity e : TechniqueEffects.around(player, 8)) {
@@ -179,7 +179,7 @@ public final class RacialSkillEffects {
                     level.sendParticles(new DustParticleOptions(new Vector3f(0.4f, 0.9f, 0.5f), 1.2f), e.getX(), e.getY() + 1, e.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
                 }
                 if (!any) return false;
-                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 1f, 0.9f);
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.SKILL.get(), SoundSource.PLAYERS, 1f, 0.9f);
             }
             case "dragon_blessing" -> {                          // the clan's healing: allies near, and a little yourself
                 heal(player, d, 0.10);
@@ -190,7 +190,7 @@ public final class RacialSkillEffects {
                     });
                     level.sendParticles(ParticleTypes.HAPPY_VILLAGER, p.getX(), p.getY() + 1, p.getZ(), 12, 0.4, 0.6, 0.4, 0);
                 }
-                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.2f, 0.8f);
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.SKILL.get(), SoundSource.PLAYERS, 1.2f, 0.8f);
             }
             case "remote_absorb" -> {                            // pull ki out of whatever you look at
                 LivingEntity target = TechniqueEffects.lookedAtLiving(player, 16);
@@ -215,7 +215,7 @@ public final class RacialSkillEffects {
                 heal(player, d, s.id().equals("self_repair") ? 0.25 : 0.20);
                 if (s.id().equals("nano_repair")) clearHarmful(player);
                 level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1, player.getZ(), 30, 0.4, 0.7, 0.4, 0.1);
-                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1f, 1.6f);
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.SKILL.get(), SoundSource.PLAYERS, 1f, 1.6f);
             }
             case "bat_swarm" -> {                                // burst into bats, through everything in front
                 Vec3 eye = player.getEyePosition();
@@ -231,7 +231,7 @@ public final class RacialSkillEffects {
                 }
                 level.sendParticles(ParticleTypes.LARGE_SMOKE, player.getX(), player.getY() + 1, player.getZ(), 30, 0.4, 0.6, 0.4, 0.05);
                 player.teleportTo(dest.x, dest.y - player.getEyeHeight(), dest.z);
-                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BAT_TAKEOFF, SoundSource.PLAYERS, 1.2f, 0.8f);
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.VANISH.get(), SoundSource.PLAYERS, 1.2f, 0.8f);
             }
             case "cellular_absorption" -> {                      // grab the nearest foe and drink its body
                 LivingEntity prey = TechniqueEffects.around(player, 3.5).stream()
@@ -248,7 +248,7 @@ public final class RacialSkillEffects {
             }
             case "system_scan" -> {                              // mark everyone near: they glow and take more
                 for (LivingEntity e : TechniqueEffects.around(player, 24)) e.addEffect(new MobEffectInstance(MobEffects.GLOWING, s.durationTicks(), 0));
-                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8f, 1.8f);
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.SKILL.get(), SoundSource.PLAYERS, 0.8f, 1.8f);
             }
             case "void_step" -> {                                // fold space: ten blocks where you look
                 Vec3 eye = player.getEyePosition();
@@ -259,7 +259,7 @@ public final class RacialSkillEffects {
                 player.teleportTo(dest.x, dest.y - player.getEyeHeight(), dest.z);
                 player.fallDistance = 0;
                 level.sendParticles(ParticleTypes.REVERSE_PORTAL, dest.x, dest.y - 0.5, dest.z, 40, 0.3, 0.6, 0.3, 0.1);
-                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8f, 1.4f);
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.VANISH.get(), SoundSource.PLAYERS, 0.8f, 1.4f);
             }
             case "seismic_stomp" -> {                            // the ground jumps: everything near is thrown up
                 double damage = DamageCalculator.kiOutgoing(d, 0.5);
@@ -270,7 +270,7 @@ public final class RacialSkillEffects {
                     e.push(0, 0.9, 0);
                 }
                 ImpactPacket.at(player.position(), new Vec3(0, 1, 0), ImpactPacket.SPIKE, 1.5f, 0xC0A060, player.getId()).send(level);
-                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 1f, 0.5f);
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.EXPLOSION.get(), SoundSource.PLAYERS, 1f, 0.5f);
             }
             case "kaioken" -> {
                 return com.dbzenith.transform.Kaioken.raise(player, d);
@@ -280,7 +280,7 @@ public final class RacialSkillEffects {
                     player.displayClientMessage(Component.translatable("message.dbzenith.ki_sense_scan_locked"), true);
                     return false;
                 }
-                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1f, 1.4f);
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.SKILL.get(), SoundSource.PLAYERS, 1f, 1.4f);
             }
             case "spirit_shock" -> {                             // a point-blank shock: stuns, and breaks guards
                 boolean any = false;
@@ -295,7 +295,7 @@ public final class RacialSkillEffects {
                 }
                 if (!any) return false;
                 ImpactPacket.at(player.position().add(0, 1, 0), player.getLookAngle(), ImpactPacket.GUARD_BREAK, 1.2f, s.color() & 0xFFFFFF, player.getId()).send(level);
-                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_THUNDER, SoundSource.PLAYERS, 0.6f, 1.6f);
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.STUN.get(), SoundSource.PLAYERS, 0.6f, 1.6f);
             }
             case "desperate_gambit" -> {
                 if (d.getBody() > d.getDerived().maxBody() * 0.25) {
@@ -310,15 +310,15 @@ public final class RacialSkillEffects {
                 Vec3 dest = TRANSMISSION.get(player.getUUID());
                 if (dest == null) return false;
                 level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1, player.getZ(), 24, 0.3, 0.6, 0.3, 0.05);
-                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 1f, 1.4f);
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.TELEPORT.get(), SoundSource.PLAYERS, 1f, 1.4f);
                 player.teleportTo(dest.x, dest.y, dest.z);
                 player.fallDistance = 0;
                 level.sendParticles(ParticleTypes.END_ROD, dest.x, dest.y + 1, dest.z, 24, 0.3, 0.6, 0.3, 0.05);
-                level.playSound(null, dest.x, dest.y, dest.z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 1f, 1.6f);
+                level.playSound(null, dest.x, dest.y, dest.z, com.dbzenith.registry.ModSounds.TELEPORT.get(), SoundSource.PLAYERS, 1f, 1.6f);
             }
             case "sheer_willpower", "saiyans_resolve", "shattering_the_limit", "blazing_spirit", "mindless_gambit", "overclock",
                     "blur", "sacred_barrier", "dark_aura", "limit_break", "ki_barrier" -> level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                    SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1f, 0.9f);   // timed buffs: the buff is the effect
+                    com.dbzenith.registry.ModSounds.SKILL.get(), SoundSource.PLAYERS, 1f, 0.9f);   // timed buffs: the buff is the effect
             default -> { }
         }
         return true;
@@ -391,7 +391,7 @@ public final class RacialSkillEffects {
         heal(player, d, 0.35);
         d.setStamina(d.getStamina() + d.getDerived().maxStamina() * 0.35);
         player.displayClientMessage(Component.translatable("message.dbzenith.second_wind"), true);
-        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1f, 1.4f);
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.ZENKAI.get(), SoundSource.PLAYERS, 1f, 1.4f);
     }
 
     /** Zenkai strength factor: Primal Zenkai makes it half again as strong. */
@@ -486,7 +486,7 @@ public final class RacialSkillEffects {
         attacker.invulnerableTime = 0;
         attacker.hurt(ModDamageTypes.thrown(lvl, player), (float) damage);
         ImpactPacket.melee(player, attacker, ImpactPacket.HEAVY).send(lvl);
-        lvl.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1f, 1.3f);
+        lvl.playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.PUNCH_HEAVY.get(), SoundSource.PLAYERS, 1f, 1.3f);
     }
 
     /** Rising Charge: a technique fired within two seconds of letting go of a charge gains up to +50% (at five seconds held). */

@@ -92,7 +92,7 @@ public final class RacialPackets {
                 if (d.getSkillSelected().isEmpty() && s.isActive()) d.setSkillSelected(s.id());
                 player.displayClientMessage(Component.translatable("message.dbzenith.skill_learned",
                         Component.translatable(s.translationKey()), d.getSkillLevel(s.id())), true);
-                player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8f, 1.2f);
+                player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.ZENKAI.get(), SoundSource.PLAYERS, 0.8f, 1.2f);
                 PlayerDataEvents.sync(player);
             });
         }

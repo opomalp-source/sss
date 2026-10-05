@@ -71,7 +71,7 @@ public final class RacePassives {
             data.recordZenkai(now);
             data.recomputeIfStale();
             player.serverLevel().sendParticles(ParticleTypes.TOTEM_OF_UNDYING, player.getX(), player.getY() + 1, player.getZ(), 40, 0.5, 1, 0.5, 0.3);
-            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1f, 0.7f);
+            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.ZENKAI.get(), SoundSource.PLAYERS, 1f, 1f);
             player.displayClientMessage(Component.translatable("message.dbzenith.zenkai"), true);
         }
     }

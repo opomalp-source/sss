@@ -56,10 +56,6 @@ public final class KiTicker {
                 if (t % c.tpChargeTrainingInterval.get() == 0) {
                     data.addTrainingProgress(StatCalculator.scaleTpGain(data, c.tpPerChargeInterval.get()));
                 }
-                if (t % 20 == 1) {
-                    level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_AMBIENT,
-                            SoundSource.PLAYERS, 0.8f, 1.6f);
-                }
             }
         } else if (!(data.isFlying() && player.getAbilities().flying) && !data.isTransformed()
                 && !com.dbzenith.registry.ModEffects.isKiSealed(player)) {

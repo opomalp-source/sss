@@ -57,7 +57,7 @@ public final class TechniqueHandler {
         TechniqueMastery.gain(data, technique);
         com.dbzenith.network.ModNetwork.sendToTrackingAndSelf(player, com.dbzenith.network.AnimEventPacket.forTechnique(player, technique));
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                technique.explosionPower() > 0 ? SoundEvents.BEACON_POWER_SELECT : SoundEvents.FIRECHARGE_USE,
+                technique.style() == Technique.Style.BEAM ? com.dbzenith.registry.ModSounds.BEAM_FIRE.get() : com.dbzenith.registry.ModSounds.KI_FIRE.get(),
                 SoundSource.PLAYERS, 0.6f, 1.4f + level.random.nextFloat() * 0.3f);
         return Result.FIRED;
     }

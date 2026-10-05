@@ -1,0 +1,118 @@
+{
+  "punch_light": {
+    "subtitle": "subtitles.dbzenith.punch_light",
+    "sounds": ["dbzenith:punch_light_1", "dbzenith:punch_light_2", "dbzenith:punch_light_3", "dbzenith:punch_light_4"]
+  },
+  "punch_heavy": {
+    "subtitle": "subtitles.dbzenith.punch_heavy",
+    "sounds": ["dbzenith:punch_heavy_1", "dbzenith:punch_heavy_2", "dbzenith:punch_heavy_3"]
+  },
+  "whoosh": {
+    "subtitle": "subtitles.dbzenith.whoosh",
+    "sounds": ["dbzenith:whoosh_1", "dbzenith:whoosh_2", "dbzenith:whoosh_3", "dbzenith:whoosh_4"]
+  },
+  "ki_fire": {
+    "subtitle": "subtitles.dbzenith.ki_fire",
+    "sounds": ["dbzenith:ki_fire_1", "dbzenith:ki_fire_2", "dbzenith:ki_fire_3"]
+  },
+  "ki_hit": {
+    "subtitle": "subtitles.dbzenith.ki_hit",
+    "sounds": ["dbzenith:ki_hit_1", "dbzenith:ki_hit_2", "dbzenith:ki_hit_3"]
+  },
+  "explosion": {
+    "subtitle": "subtitles.dbzenith.explosion",
+    "sounds": ["dbzenith:explosion_1", "dbzenith:explosion_2", "dbzenith:explosion_3"]
+  },
+  "explosion_big": {
+    "subtitle": "subtitles.dbzenith.explosion_big",
+    "sounds": ["dbzenith:explosion_big_1", "dbzenith:explosion_big_2"]
+  },
+  "beam_fire": {
+    "subtitle": "subtitles.dbzenith.beam_fire",
+    "sounds": ["dbzenith:beam_fire_1", "dbzenith:beam_fire_2"]
+  },
+  "guard_block": {
+    "subtitle": "subtitles.dbzenith.guard_block",
+    "sounds": ["dbzenith:guard_block_1", "dbzenith:guard_block_2", "dbzenith:guard_block_3"]
+  },
+  "parry": {
+    "subtitle": "subtitles.dbzenith.parry",
+    "sounds": ["dbzenith:parry_1", "dbzenith:parry_2"]
+  },
+  "guard_break": {
+    "subtitle": "subtitles.dbzenith.guard_break",
+    "sounds": ["dbzenith:guard_break_1", "dbzenith:guard_break_2"]
+  },
+  "deflect": {
+    "subtitle": "subtitles.dbzenith.deflect",
+    "sounds": ["dbzenith:deflect_1", "dbzenith:deflect_2"]
+  },
+  "dash": {
+    "subtitle": "subtitles.dbzenith.dash",
+    "sounds": ["dbzenith:dash_1", "dbzenith:dash_2", "dbzenith:dash_3"]
+  },
+  "vanish": {
+    "subtitle": "subtitles.dbzenith.vanish",
+    "sounds": ["dbzenith:vanish_1", "dbzenith:vanish_2"]
+  },
+  "teleport": {
+    "subtitle": "subtitles.dbzenith.teleport",
+    "sounds": ["dbzenith:teleport"]
+  },
+  "powerup": {
+    "subtitle": "subtitles.dbzenith.powerup",
+    "sounds": ["dbzenith:powerup_1", "dbzenith:powerup_2"]
+  },
+  "transform": {
+    "subtitle": "subtitles.dbzenith.transform",
+    "sounds": ["dbzenith:transform_1", "dbzenith:transform_2"]
+  },
+  "power_down": {
+    "subtitle": "subtitles.dbzenith.power_down",
+    "sounds": ["dbzenith:power_down"]
+  },
+  "aura_charge": {
+    "subtitle": "subtitles.dbzenith.aura_charge",
+    "sounds": ["dbzenith:aura_charge"]
+  },
+  "aura_hum": {
+    "subtitle": "subtitles.dbzenith.aura_hum",
+    "sounds": ["dbzenith:aura_hum"]
+  },
+  "aura_calm": {
+    "subtitle": "subtitles.dbzenith.aura_calm",
+    "sounds": ["dbzenith:aura_calm"]
+  },
+  "kaioken": {
+    "subtitle": "subtitles.dbzenith.kaioken",
+    "sounds": ["dbzenith:kaioken"]
+  },
+  "zenkai": {
+    "subtitle": "subtitles.dbzenith.zenkai",
+    "sounds": ["dbzenith:zenkai"]
+  },
+  "flight": {
+    "subtitle": "subtitles.dbzenith.flight",
+    "sounds": ["dbzenith:flight_1", "dbzenith:flight_2"]
+  },
+  "skill": {
+    "subtitle": "subtitles.dbzenith.skill",
+    "sounds": ["dbzenith:skill_1", "dbzenith:skill_2"]
+  },
+  "ui_click": {
+    "subtitle": "subtitles.dbzenith.ui_click",
+    "sounds": ["dbzenith:ui_click_1", "dbzenith:ui_click_2"]
+  },
+  "ui_open": {
+    "subtitle": "subtitles.dbzenith.ui_open",
+    "sounds": ["dbzenith:ui_open"]
+  },
+  "stun": {
+    "subtitle": "subtitles.dbzenith.stun",
+    "sounds": ["dbzenith:stun_1", "dbzenith:stun_2"]
+  },
+  "land": {
+    "subtitle": "subtitles.dbzenith.land",
+    "sounds": ["dbzenith:land_1", "dbzenith:land_2"]
+  }
+}

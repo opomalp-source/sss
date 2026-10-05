@@ -57,7 +57,7 @@ public final class DashHandler {
         data.setDashEvadeUntil(now + c.dashEvadeTicks.get());
         data.combat().lastDashTick = now;                                  // a blow right after lands as a Z-hit
         player.serverLevel().sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + 1, player.getZ(), 10, 0.3, 0.6, 0.3, 0.05);
-        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PHANTOM_FLAP,
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.DASH.get(),
                 SoundSource.PLAYERS, 0.8f, 1.8f);
         return true;
     }

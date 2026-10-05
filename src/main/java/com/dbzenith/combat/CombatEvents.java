@@ -75,8 +75,6 @@ public final class CombatEvents {
             double extraKnockback = attackerData.getAttribute(com.dbzenith.stats.Attribute.STRENGTH) * c.meleeKnockbackPerStrength.get();
             if (heavy > 1.0) {
                 extraKnockback += c.heavyKnockback.get();
-                victim.level().playSound(null, victim.getX(), victim.getY(), victim.getZ(),
-                        net.minecraft.sounds.SoundEvents.PLAYER_ATTACK_CRIT, net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, 0.6f);
             }
             boolean aerial = AerialCombat.isAirborne(victim);
             if (aerial) raw *= 1.0 + c.airComboBonus.get();

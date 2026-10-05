@@ -65,7 +65,7 @@ public final class Kaioken {
         int stage = d.getKaiokenStage() + 1;
         d.setKaiokenStage(stage);
         player.displayClientMessage(Component.translatable("message.dbzenith.kaioken", stage), true);
-        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS,
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.KAIOKEN.get(), SoundSource.PLAYERS,
                 0.8f, 0.6f + stage * 0.03f);
         ImpactPacket.at(player.position().add(0, 1, 0), new Vec3(0, 1, 0), ImpactPacket.KI_HIT, 0.5f + stage * 0.04f, RED, player.getId())
                 .send(player.serverLevel());
@@ -75,7 +75,7 @@ public final class Kaioken {
     public static void stop(ServerPlayer player, PlayerData d, boolean quiet) {
         if (d.getKaiokenStage() == 0) return;
         d.setKaiokenStage(0);
-        if (!quiet) player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH,
+        if (!quiet) player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.POWER_DOWN.get(),
                 SoundSource.PLAYERS, 0.7f, 0.8f);
     }
 

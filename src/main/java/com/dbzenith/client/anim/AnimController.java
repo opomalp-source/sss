@@ -174,6 +174,7 @@ public final class AnimController {
         // bare-handed swings become a combo; a weapon or tool keeps vanilla's swing
         boolean swinging = player.swinging;
         if (swinging && !t.wasSwinging && now >= t.suppressSwingUntil && player.getMainHandItem().isEmpty()) {
+            com.dbzenith.client.ClientSounds.swing(player);
             float pitch = player.getXRot();
             if (pitch < -35) play(player, t, Anims.LAUNCHER, now, 0);
             else if (!player.onGround() && pitch > 40) play(player, t, Anims.SPIKE, now, 0);

@@ -90,7 +90,7 @@ public final class FormHandler {
             enter(player, data, next);
         } else {
             data.startTransforming(next.id(), time);
-            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8f, 0.6f);
+            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.POWERUP.get(), SoundSource.PLAYERS, 0.9f, 0.9f);
         }
         return true;
     }
@@ -132,7 +132,7 @@ public final class FormHandler {
                 level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, below), player.getX(), player.getY() + 0.1,
                         player.getZ(), 6 + (int) (progress * 10), 1.2 + progress, 0.05, 1.2 + progress, 0.25);
             }
-            level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS,
+            level.playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.POWERUP.get(), SoundSource.PLAYERS,
                     0.25f + progress * 0.35f, 0.5f + progress);
         }
         if (t % 20 == 10 && target.lightning()) {
@@ -152,7 +152,7 @@ public final class FormHandler {
     public static void interrupt(ServerPlayer player, PlayerData data) {
         if (!data.isTransforming()) return;
         data.stopTransforming();
-        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.8f, 0.8f);
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.GUARD_BREAK.get(), SoundSource.PLAYERS, 0.8f, 0.8f);
         player.displayClientMessage(Component.translatable("message.dbzenith.transform_interrupted"), true);
     }
 
@@ -174,7 +174,7 @@ public final class FormHandler {
         if (!form.allowsFlight() && data.isFlying()) com.dbzenith.ki.FlightHandler.stop(player, data);
         burst(player.serverLevel(), player, form.auraColor(), form.isBase() ? 12 : 40);
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
-                form.isBase() ? SoundEvents.BEACON_DEACTIVATE : SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.7f, form.isBase() ? 1.2f : 1.5f);
+                form.isBase() ? com.dbzenith.registry.ModSounds.POWER_DOWN.get() : com.dbzenith.registry.ModSounds.TRANSFORM.get(), SoundSource.PLAYERS, form.isBase() ? 0.8f : 1.3f, 1f);
         player.refreshDimensions();
         com.dbzenith.race.RacialSkillEffects.onFormEntered(player, data, form.isBase());
         if (!form.isBase()) {

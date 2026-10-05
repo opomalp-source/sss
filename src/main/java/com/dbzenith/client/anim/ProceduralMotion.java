@@ -67,7 +67,10 @@ public final class ProceduralMotion {
             boolean airborne = !p.onGround();
             if (airborne) m.fallSpeed = Math.max(m.fallSpeed, -dy);
             else if (m.wasAirborne) {
-                if (m.fallSpeed > 0.55) m.squash = (float) Math.min(1, (m.fallSpeed - 0.4) * 1.2);
+                if (m.fallSpeed > 0.55) {
+                    m.squash = (float) Math.min(1, (m.fallSpeed - 0.4) * 1.2);
+                    com.dbzenith.client.ClientSounds.land(p, m.squash);
+                }
                 m.fallSpeed = 0;
             }
             m.wasAirborne = airborne;

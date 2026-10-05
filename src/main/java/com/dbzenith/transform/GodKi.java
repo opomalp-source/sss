@@ -78,7 +78,7 @@ public final class GodKi {
         int after = level(d);
         if (after > before) {
             player.displayClientMessage(Component.translatable("message.dbzenith.god_ki_level", after), false);
-            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT,
+            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.ZENKAI.get(),
                     SoundSource.PLAYERS, 1f, 0.6f + after * 0.08f);
             ModNetwork.sendToTrackingAndSelf(player, ImpactPacket.at(player.position().add(0, 1, 0), new net.minecraft.world.phys.Vec3(0, 1, 0),
                     ImpactPacket.EXPLOSION, 0.8f, Forms.byId(d.getFormId()).auraColor(), player.getId()));

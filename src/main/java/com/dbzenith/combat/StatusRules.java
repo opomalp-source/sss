@@ -33,4 +33,12 @@ public final class StatusRules {
             e.setDeltaMovement(v.x, Math.min(0, v.y), v.z);
         }
     }
+
+    /** A stun crackles as it lands (not when it is merely refreshed). */
+    @SubscribeEvent
+    public static void onEffect(net.minecraftforge.event.entity.living.MobEffectEvent.Added event) {
+        LivingEntity e = event.getEntity();
+        if (e.level().isClientSide || event.getOldEffectInstance() != null || event.getEffectInstance().getEffect() != ModEffects.STUN.get()) return;
+        e.level().playSound(null, e.getX(), e.getY() + 1, e.getZ(), com.dbzenith.registry.ModSounds.STUN.get(), net.minecraft.sounds.SoundSource.PLAYERS, 0.6f, 1f);
+    }
 }

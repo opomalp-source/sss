@@ -168,7 +168,10 @@ public class RadialMenuScreen extends Screen {
     /** Opens on the key press; it closes itself when the key comes up. */
     public static void open() {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.screen == null && mc.player != null) mc.setScreen(new RadialMenuScreen());
+        if (mc.screen == null && mc.player != null) {
+            mc.setScreen(new RadialMenuScreen());
+            com.dbzenith.client.ClientSounds.uiOpen();
+        }
     }
 
     @Override
