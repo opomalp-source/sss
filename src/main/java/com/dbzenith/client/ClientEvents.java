@@ -144,7 +144,8 @@ public final class ClientEvents {
             delayTicks = Math.max(delayTicks, 5);
         }
         if (name.startsWith("create_") && !(mc.screen instanceof com.dbzenith.client.screen.CharacterCreationScreen)) {
-            mc.setScreen(new com.dbzenith.client.screen.CharacterCreationScreen());
+            var screen = new com.dbzenith.client.screen.CharacterCreationScreen();
+            mc.setScreen(name.contains("face") ? screen.face() : screen);
             delayTicks = Math.max(delayTicks, 6);
         }
         if (name.startsWith("deck_") && !(mc.screen instanceof com.dbzenith.client.screen.DeckScreen)) {

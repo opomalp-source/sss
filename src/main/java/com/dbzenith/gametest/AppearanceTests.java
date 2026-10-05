@@ -87,6 +87,32 @@ public final class AppearanceTests {
     }
 
     @GameTest(template = EMPTY)
+    public static void transformationLooksAreComplete(GameTestHelper helper) {
+        for (String id : com.dbzenith.transform.FormLooks.forms()) {
+            helper.assertTrue(com.dbzenith.transform.Forms.exists(id), "the look belongs to a real form: " + id);
+            com.dbzenith.transform.FormLooks.Look look = com.dbzenith.transform.FormLooks.of(id);
+            for (var swap : look.skins().entrySet()) {
+                helper.assertTrue(resource("textures/entity/race/" + swap.getKey() + ".png"), id + ": base skin " + swap.getKey() + " exists");
+                helper.assertTrue(resource("textures/entity/race/" + swap.getValue() + ".png"), id + ": its skin " + swap.getValue() + " exists");
+            }
+            if (look.overlay() != null) helper.assertTrue(resource("textures/entity/form/" + look.overlay() + ".png"), id + ": overlay exists");
+        }
+        helper.assertTrue(com.dbzenith.transform.FormLooks.skin("orange_namekian", "namekian").equals("namekian_orange"), "Orange: an orange Namekian");
+        helper.assertTrue(com.dbzenith.transform.FormLooks.skin("orange_namekian", "demon_namekian").equals("demon_namekian"), "only the skins it lists change");
+        helper.assertTrue(com.dbzenith.transform.FormLooks.skin("super_saiyan", "namekian").equals("namekian"), "forms without a look change nothing");
+        helper.assertTrue(resource("face_defaults.json"), "race faces are described");
+        helper.succeed();
+    }
+
+    private static boolean resource(String path) {
+        try (java.io.InputStream in = AppearanceTests.class.getResourceAsStream("/assets/dbzenith/" + path)) {
+            return in != null;
+        } catch (java.io.IOException e) {
+            return false;
+        }
+    }
+
+    @GameTest(template = EMPTY)
     public static void facesPackPersistAndColour(GameTestHelper helper) {
         int face = 0;
         for (com.dbzenith.appearance.FaceParts.Part p : com.dbzenith.appearance.FaceParts.Part.values()) {

@@ -1,0 +1,15 @@
+{
+  "namekian": {"iris": 1052688, "brow": 3568425, "whites": true},
+  "frost_demon": {"iris": 12589104, "brow": 10066076, "whites": true},
+  "majin": {"iris": 1052688, "brow": 10248319, "whites": true},
+  "vampire": {"iris": 14684208, "brow": 9605013, "whites": true},
+  "bio_android": {"iris": 12591200, "brow": 1448221, "whites": true},
+  "tuffle": {"iris": 2756640, "brow": 9211543, "whites": true},
+  "gen_alien": {"iris": 1052696, "brow": 3358556, "whites": false},
+  "kai": {"iris": 1052696, "brow": 8811670, "whites": true},
+  "core_demon": {"iris": 16764992, "brow": 6949392, "whites": false},
+  "metal_frost_demon": {"iris": 4251903, "brow": 9015190, "whites": true},
+  "mutant_frost_demon": {"iris": 16719952, "brow": 1709343, "whites": true},
+  "corrupted_majin": {"iris": 16719936, "brow": 4341580, "whites": false},
+  "demon_namekian": {"iris": 16719936, "brow": 1392181, "whites": true}
+}

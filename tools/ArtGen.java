@@ -19,6 +19,7 @@ public class ArtGen {
         Blocks.all();
         Armor.all();
         Skins.all();
+        FormLooks.all();
         Creatures.all();
         Gui.all();
         Fx.all();
@@ -27,6 +28,91 @@ public class ArtGen {
     }
 
 
+
+    // ================================================================== transformation looks
+
+    /**
+     * How transformations change the body (transform.FormLooks): recoloured race skins (an orange Namekian, a golden
+     * Frost Demon, a grey evil Majin...) made from the race skins by shifting chosen colours, and the SSJ4 fur overlays.
+     * Also writes face_defaults.json: each race skin's eye, brow and sclera colours, for FaceLayer.
+     */
+    static final class FormLooks {
+        interface Pick { boolean test(float h, float s, float b); }
+        interface Shift { float[] apply(float h, float s, float b); }
+
+        static void all() throws IOException {
+            Pick green = (h, s, b) -> s > 0.2f && h > 0.2f && h < 0.45f;
+            Pick pale = (h, s, b) -> s < 0.28f && b > 0.45f;
+            Pick pink = (h, s, b) -> s > 0.15f && (h > 0.85f || h < 0.03f);
+            Pick saturated = (h, s, b) -> s > 0.25f;
+            Pick flesh = (h, s, b) -> s > 0.12f && h > 0.0f && h < 0.13f;
+            recolor("namekian", "namekian_orange", green, (h, s, b) -> new float[]{0.075f, Math.min(1, s * 1.15f), Math.min(1, b * 1.05f)});
+            recolor("demon_namekian", "demon_namekian_king", saturated, (h, s, b) -> new float[]{0.97f, Math.min(1, s * 1.1f), b * 0.75f});
+            recolor("frost_demon", "frost_demon_golden", pale, (h, s, b) -> new float[]{0.125f, 0.72f, Math.min(1, b * 1.02f)});
+            recolor("metal_frost_demon", "metal_frost_demon_core", (h, s, b) -> s < 0.3f, (h, s, b) -> new float[]{0.12f, 0.55f, Math.min(1, b * 1.05f)});
+            recolor("mutant_frost_demon", "mutant_frost_demon_god", saturated, (h, s, b) -> new float[]{(h + 0.05f) % 1, s, b * 0.85f});
+            recolor("majin", "majin_pure", pink, (h, s, b) -> new float[]{h, s * 0.75f, Math.min(1, b * 1.08f)});
+            recolor("majin", "majin_evil", pink, (h, s, b) -> new float[]{h, s * 0.12f, b * 0.82f});
+            recolor("corrupted_majin", "corrupted_majin_pure", saturated, (h, s, b) -> new float[]{0.78f, Math.min(1, s * 1.1f), b * 0.7f});
+            recolor("vampire", "vampire_crimson", pale, (h, s, b) -> new float[]{0.985f, 0.32f, b * 0.95f});
+            recolor("bio_android", "bio_android_perfect", green, (h, s, b) -> new float[]{0.42f, Math.min(1, s * 1.1f), b});
+            recolor("bio_android", "bio_android_zenith", green, (h, s, b) -> new float[]{0.13f, Math.min(1, s * 1.2f), Math.min(1, b * 1.08f)});
+            recolor("tuffle", "tuffle_golden", pale, (h, s, b) -> new float[]{0.12f, 0.62f, Math.min(1, b * 1.04f)});
+            recolor("gen_alien", "gen_alien_apex", saturated, (h, s, b) -> new float[]{(h + 0.33f) % 1, s, b});
+            recolor("core_demon", "core_demon_god", saturated, (h, s, b) -> new float[]{0.99f, Math.min(1, s * 1.15f), b * 0.72f});
+            recolor("kai", "kai_supreme", (h, s, b) -> b > 0.3f, (h, s, b) -> new float[]{h, s * 0.85f, Math.min(1, b * 1.1f)});
+            fur("ssj4_fur", 0xFFC0283A);
+            fur("ssj4_fur_silver", 0xFFD8DCE6);
+            faceDefaults();
+        }
+
+        static void recolor(String from, String to, Pick pick, Shift shift) throws IOException {
+            java.awt.image.BufferedImage src = javax.imageio.ImageIO.read(new File(RES + "entity/race/" + from + ".png"));
+            Canvas c = new Canvas(src.getWidth(), src.getHeight());
+            float[] hsb = new float[3];
+            for (int y = 0; y < src.getHeight(); y++) for (int x = 0; x < src.getWidth(); x++) {
+                int argb = src.getRGB(x, y);
+                if ((argb >>> 24) == 0) continue;
+                java.awt.Color.RGBtoHSB(argb >> 16 & 255, argb >> 8 & 255, argb & 255, hsb);
+                if (pick.test(hsb[0], hsb[1], hsb[2])) {
+                    float[] n = shift.apply(hsb[0], hsb[1], hsb[2]);
+                    argb = argb & 0xFF000000 | java.awt.Color.HSBtoRGB(n[0], Math.max(0, Math.min(1, n[1])), Math.max(0, Math.min(1, n[2]))) & 0xFFFFFF;
+                }
+                c.set(x, y, argb);
+            }
+            c.save("entity/race/" + to + ".png");
+        }
+
+        /** Fur over the torso, upper arms and shoulders (skin layout, base layer: outer layers may be hidden), leaving the chest and the hands bare. */
+        static void fur(String name, int base) throws IOException {
+            int[] fur = ramp(base, 5);
+            Random r = new Random(name.hashCode());
+            Skin s = new Skin();
+            s.body = (f, x, y, w, h) -> {
+                if (f == Face.FRONT && x >= 2 && x <= 5 && y <= 8) return 0;                          // bare chest and stomach
+                if (f == Face.BOTTOM) return 0;
+                int i = 1 + r.nextInt(3) - (f == Face.BACK ? 1 : 0);
+                return fur[Math.max(0, Math.min(fur.length - 1, i + (y < 3 ? 1 : 0)))];
+            };
+            s.arm = (f, x, y, w, h) -> {
+                if (y > 6 || f == Face.BOTTOM) return 0;                                                 // forearms bare
+                if (y == 6 && r.nextBoolean()) return 0;                                        // a ragged edge
+                return fur[Math.max(0, Math.min(fur.length - 1, 1 + r.nextInt(3)))];
+            };
+            s.save("entity/form/" + name + ".png");
+        }
+
+        static void faceDefaults() throws IOException {
+            StringBuilder b = new StringBuilder("{\n");
+            int i = 0;
+            for (var e : FACE_DEFAULTS.entrySet()) {
+                b.append("  \"").append(e.getKey()).append("\": ").append(e.getValue()).append(++i < FACE_DEFAULTS.size() ? "," : "").append("\n");
+            }
+            b.append("}\n");
+            java.nio.file.Files.writeString(java.nio.file.Path.of("src/main/resources/assets/dbzenith/face_defaults.json"), b.toString());
+            System.out.println("face defaults for " + FACE_DEFAULTS.size() + " race skins");
+        }
+    }
     // ================================================================== faces
 
     /**
@@ -950,6 +1036,8 @@ public class ArtGen {
 
         void save(String path) throws IOException {
             Canvas c = new Canvas(64, 64);
+            facelessPaint = path.startsWith("entity/race/");
+            faceSeen = false;
             if (head != null) box(c, 0, 0, 8, 8, 8, head);
             if (body != null) box(c, 16, 16, 8, 12, 4, body);
             if (arm != null) { box(c, 40, 16, 4, 12, 4, arm); box(c, 32, 48, 4, 12, 4, mirror(arm)); }
@@ -959,6 +1047,11 @@ public class ArtGen {
             if (sleeve != null) { box(c, 40, 32, 4, 12, 4, sleeve); box(c, 48, 48, 4, 12, 4, mirror(sleeve)); }
             if (pants != null) { box(c, 0, 32, 4, 12, 4, pants); box(c, 0, 48, 4, 12, 4, mirror(pants)); }
             c.save(path);
+            if (facelessPaint && faceSeen) {
+                String name = path.substring("entity/race/".length(), path.length() - 4);
+                FACE_DEFAULTS.put(name, String.format("{\"iris\": %d, \"brow\": %d, \"whites\": %b}", faceEye & 0xFFFFFF, faceBrow & 0xFFFFFF, faceWhites));
+            }
+            facelessPaint = false;
         }
 
         /** The left limb: right and left faces swap, front and back read mirrored. */
@@ -980,7 +1073,17 @@ public class ArtGen {
     }
 
     /** A face: brows on row 3, eyes on row 4 (whites at the outer pixels), nose shade, mouth. */
+    // race skins leave the face to FaceLayer; what their face looked like goes to face_defaults.json
+    static boolean facelessPaint, faceSeen, faceWhites;
+    static int faceEye, faceBrow;
+    static final java.util.Map<String, String> FACE_DEFAULTS = new java.util.LinkedHashMap<>();
+
     static int face(int[] sk, int x, int y, int eye, int brow, boolean whites) {
+        faceSeen = true;
+        faceEye = eye;
+        faceBrow = brow;
+        faceWhites = whites;
+        if (facelessPaint) return sk[3];
         if (y == 3 && (x == 1 || x == 2 || x == 5 || x == 6)) return brow;
         if (y == 4) {
             if (x == 2 || x == 5) return eye;

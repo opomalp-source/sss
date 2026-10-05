@@ -23,7 +23,13 @@ public class RaceSkinLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
 
     /** The race's (or variant's) skin, or null if it has none (they look like the player's own skin). */
     public static ResourceLocation texture(Race race, com.dbzenith.race.Variant variant) {
-        String name = switch (variant) {
+        String name = skinName(race, variant);
+        return name == null ? null : new ResourceLocation(DBZenith.MOD_ID, "textures/entity/race/" + name + ".png");
+    }
+
+    /** The race skin a race and lineage wear (before any transformation), or null for races drawn on other bodies. */
+    public static String skinName(Race race, com.dbzenith.race.Variant variant) {
+        return switch (variant) {
             case METAL -> "metal_frost_demon";
             case MUTANT -> "mutant_frost_demon";
             case CORRUPTED -> "corrupted_majin";
@@ -35,11 +41,12 @@ public class RaceSkinLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
                 default -> null;
             };
         };
-        return name == null ? null : new ResourceLocation(DBZenith.MOD_ID, "textures/entity/race/" + name + ".png");
     }
 
+    /** The skin a player wears now: their race skin, recoloured by their form if it changes the body (transform.FormLooks). */
     public static ResourceLocation texture(PublicStatePacket state) {
-        return texture(state.raceEnum(), state.variantEnum());
+        String name = com.dbzenith.transform.FormLooks.skin(state.form(), skinName(state.raceEnum(), state.variantEnum()));
+        return name == null ? null : new ResourceLocation(DBZenith.MOD_ID, "textures/entity/race/" + name + ".png");
     }
 
     /**

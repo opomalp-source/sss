@@ -39,7 +39,8 @@ public class BodySkinLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         if (player.isInvisible()) return;
         PublicStatePacket state = ClientPublicStates.get(player.getId());
         if (!active(state)) return;
-        int c = state.skinTone();
+        int tint = com.dbzenith.transform.FormLooks.of(state.form()).tint();
+        int c = tint >= 0 ? tint : state.skinTone();                     // some forms recolour the body
         ResourceLocation body = BODIES[Math.max(0, Math.min(BODIES.length - 1, state.bodyType()))];
         renderColoredCutoutModel(getParentModel(), body, pose, buffers, light, player,
                 ((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f);

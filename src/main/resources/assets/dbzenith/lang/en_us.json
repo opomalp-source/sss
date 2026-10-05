@@ -1180,6 +1180,8 @@
   "kicreator.dbzenith.mod.efficient.desc": "Costs a quarter less ki, hits a little softer."
 ,
   "screen.dbzenith.face": "Face",
+  "screen.dbzenith.create_tab_body": "Body",
+  "screen.dbzenith.create_tab_face": "Face",
   "screen.dbzenith.face_button": "Face",
   "screen.dbzenith.face_random": "Surprise me",
   "screen.dbzenith.face_highlight": "Hair tips",
@@ -1187,7 +1189,7 @@
   "screen.dbzenith.face_none": "none",
   "screen.dbzenith.face_race": "your race",
   "screen.dbzenith.face_hint": "Faces show on the generated bodies (pick a skin tone). Forms with eyes of their own make your irises glow; golden forms turn your brows gold too.",
-  "screen.dbzenith.face_needs_body": "Pick a skin tone to see your face (a full race skin keeps its own).",
+  "screen.dbzenith.face_needs_body": "Pick a skin tone (or your race look) to see your face.",
   "face.dbzenith.part.eyes": "Eyes",
   "face.dbzenith.part.brows": "Brows",
   "face.dbzenith.part.mouth": "Mouth",

@@ -565,3 +565,23 @@
 
 ### Verified
 - The client loaded and played the new sounds during a scripted run. Only vanilla's usual dev warnings appeared.
+
+## 2026-10-05 — Session 3 (cont.): Transformation looks and faces in creation (v0.22.0)
+User requests: transformations should change the character (an orange Namekian in Orange form, and so on), and face customization should be part of first-time character creation.
+- **`transform.FormLooks`:** per form, the race skins it swaps, a tint for generated bodies, and an overlay.
+  - Recoloured skins: Orange Namekian, Demon King, Golden Form, Metal God Core, Mutant God, Evil and Super Majin (grey), Pure and Primordial Majin, Pure Corruption, Crimson Sovereign and Blood Moon Monarch, Perfect, Super Perfect, Ultimate Perfect and Zenith Perfect, Golden Tuffle, Apex and Cosmic Apex, Demon Lord and Demon God, Supreme Kai and Grand Kai Mantle.
+  - Overlays: SSJ4 (and LSSJ4) red fur; limit breakers get silver fur.
+- **Art (`ArtGen.FormLooks`):** recolours the race skins by hue, saturation and brightness rules, paints the fur on the base layer (outer layers can be hidden), and writes `face_defaults.json`.
+- **Rendering:**
+  - `RaceSkinLayer` wears the form's skin.
+  - `BodySkinLayer` takes the form's tint.
+  - The new `FormOverlayLayer` draws fur over any body, following the power-up flicker.
+- **Faces on race skins:** race skins are now painted without a face, and their eye, brow and sclera colours are recorded in `face_defaults.json`. `FaceLayer` draws face parts on race skins with those colours (no whites means fully dark eyes) unless the player chose an eye colour. It now renders after the race skin.
+- **Creation:**
+  - The character creation screen has Body and Face tabs. The Face page has arrows per part, Surprise me, hair-tip and aura swatches, and a zoomed head preview.
+  - Changing the face on a race without a skin picks a skin tone so the face shows.
+  - Confirming also sends the face (`FacePacket`).
+- **Tests (137):** `transformationLooksAreComplete` checks that every look belongs to a real form, every swapped and base skin and overlay texture exists, and lookups behave.
+
+### Verified
+- Screenshots: a Namekian face drawn on the race skin, then orange in Orange form; a golden Frost Demon; a grey Evil Majin; Perfect; SSJ4 fur; and the creation Face page. The tabs were moved off the subtitle and Surprise me out from under the preview after review.

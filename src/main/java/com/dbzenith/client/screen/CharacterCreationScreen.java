@@ -48,6 +48,13 @@ public class CharacterCreationScreen extends Screen {
     private int skinTone = -1;
     private int stature = 100;            // height percent
     private int alignment;
+    private boolean faceTab;              // the Face page instead of the Body page
+    private int face = com.dbzenith.client.ClientPlayerData.get().getFace();
+    private int highlight = com.dbzenith.client.ClientPlayerData.get().getHighlightColor();
+    private int aura = com.dbzenith.client.ClientPlayerData.get().getAuraColor();
+    private static final int[] COLORS = {0xFFFFFF, 0xFFD040, 0xFF9A2A, 0xFF4040, 0xFF70D0, 0xB070FF, 0x5A6AFF, 0x3CC8FF, 0x40D0A0,
+            0x7CFF7C, 0xC0C0C8, 0x202028};
+    private static final int FACE_ROW = 86, ROW_TIPS = 182, ROW_AURA = 196;
 
     private PublicStatePacket originalState;
     private boolean confirmed;
@@ -57,6 +64,12 @@ public class CharacterCreationScreen extends Screen {
 
     public CharacterCreationScreen() {
         super(Component.translatable("screen.dbzenith.create"));
+    }
+
+    /** Open on the Face page. */
+    public CharacterCreationScreen face() {
+        faceTab = true;
+        return this;
     }
 
     @Override
@@ -72,6 +85,24 @@ public class CharacterCreationScreen extends Screen {
                 race = r;
                 rebuild();
             }).bounds(left + 8, top + 28 + i * 15, 96, 14).build().selected(r == race));
+        }
+
+        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.create_tab_body"), b -> {
+            faceTab = false;
+            rebuild();
+        }).bounds(left + W - 97, top + 31, 44, 12).build().selected(!faceTab));
+        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.create_tab_face"), b -> {
+            faceTab = true;
+            rebuild();
+        }).bounds(left + W - 51, top + 31, 44, 12).build().selected(faceTab));
+        if (faceTab) {
+            initFace();
+            addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.create_confirm"), b -> confirm())
+                    .bounds(left + W - 150, top + H - 24, 142, 18).build());
+            addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.create_later"), b -> onClose())
+                    .bounds(left + W - 246, top + H - 24, 92, 18).build());
+            updatePreview();
+            return;
         }
 
         int vx = left + 112;
@@ -117,10 +148,6 @@ public class CharacterCreationScreen extends Screen {
                 hairColor = color;
             }));
         }).bounds(mx + 142, y, 72, 15).build());
-        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.face_button"), b -> {
-            toBarber = true;
-            minecraft.setScreen(new FaceScreen(this));
-        }).bounds(mx + 218, y, 44, 15).build());
 
         int sy = top + 197;
         addRenderableWidget(new HeightSlider(mx + 40, sy, 84, 15));
@@ -130,6 +157,36 @@ public class CharacterCreationScreen extends Screen {
                 .bounds(left + W - 150, top + H - 24, 142, 18).build());
         addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.create_later"), b -> onClose())
                 .bounds(left + W - 246, top + H - 24, 92, 18).build());
+        updatePreview();
+    }
+
+    /** The Face page: a row of arrows for each part, under the race description. */
+    private void initFace() {
+        int mx = left + 112;
+        com.dbzenith.appearance.FaceParts.Part[] parts = com.dbzenith.appearance.FaceParts.Part.values();
+        for (int i = 0; i < parts.length; i++) {
+            com.dbzenith.appearance.FaceParts.Part p = parts[i];
+            int y = top + FACE_ROW + i * 15;
+            addRenderableWidget(ThemedButton.of(Component.literal("<"), b -> changeFace(p, -1)).bounds(mx + 40, y, 14, 13).build());
+            addRenderableWidget(ThemedButton.of(Component.literal(">"), b -> changeFace(p, 1)).bounds(mx + 160, y, 14, 13).build());
+        }
+        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.face_random"), b -> {
+            java.util.Random r = new java.util.Random();
+            for (com.dbzenith.appearance.FaceParts.Part p : parts) {
+                if (p != com.dbzenith.appearance.FaceParts.Part.EXTRA || r.nextInt(3) == 0) face = com.dbzenith.appearance.FaceParts.with(face, p, r.nextInt(p.options));
+            }
+            showFace();
+        }).bounds(mx + 40, top + 208, 90, 11).build());
+    }
+
+    private void changeFace(com.dbzenith.appearance.FaceParts.Part p, int step) {
+        face = com.dbzenith.appearance.FaceParts.with(face, p, com.dbzenith.appearance.FaceParts.get(face, p) + step);
+        showFace();
+    }
+
+    /** Faces are drawn on generated bodies and race skins: a race without a skin of its own gets a skin tone to show it. */
+    private void showFace() {
+        if (skinTone < 0 && com.dbzenith.client.render.RaceSkinLayer.texture(race, variant) == null) skinTone = Palettes.SKIN[3];
         updatePreview();
     }
 
@@ -151,7 +208,7 @@ public class CharacterCreationScreen extends Screen {
         int flags = Races.of(race).tail() ? PublicStatePacket.TAIL : 0;
         ClientPublicStates.put(new PublicStatePacket(minecraft.player.getId(), flags, 50, Races.of(race).auraColor(),
                 PlayerData.BASE_FORM, 0, race.ordinal(), body.ordinal(), 0, hairColor, eyeColor, 0L, PublicStatePacket.RACE_LOOK,
-                hairCode, skinTone, stature, variant.ordinal(), "", com.dbzenith.client.ClientPlayerData.get().getFace(), com.dbzenith.client.ClientPlayerData.get().getHighlightColor()));
+                hairCode, skinTone, stature, variant.ordinal(), "", face, highlight).withFace(face, highlight, aura >= 0 ? aura : Races.of(race).auraColor()));
         minecraft.player.refreshDimensions();
     }
 
@@ -159,11 +216,30 @@ public class CharacterCreationScreen extends Screen {
         confirmed = true;
         ModNetwork.sendToServer(new CreateCharacterPacket(new CharacterCreation.Choices(race, path, body, hairCode, hairColor, eyeColor,
                 alignment, skinTone, stature, variant.id())));
+        ModNetwork.sendToServer(new com.dbzenith.network.FacePacket(face, highlight, aura));
         minecraft.setScreen(null);
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (faceTab) {
+            int fx = left + 112 + 40;
+            for (int row = 0; row < 2; row++) {
+                int sy = top + (row == 0 ? ROW_TIPS : ROW_AURA);
+                if (mouseY < sy || mouseY >= sy + SWATCH) continue;
+                for (int i = 0; i <= COLORS.length; i++) {
+                    int sx = fx + i * (SWATCH + 2);
+                    if (mouseX >= sx && mouseX < sx + SWATCH) {
+                        int c = i == 0 ? -1 : COLORS[i - 1];
+                        if (row == 0) highlight = c;
+                        else aura = c;
+                        updatePreview();
+                        return true;
+                    }
+                }
+            }
+            return super.mouseClicked(mouseX, mouseY, button);
+        }
         int sx = left + 112 + 40;
         int pick = swatchAt(mouseX, mouseY, sx, top + ROW_COLOR, Palettes.HAIR.length);
         if (pick >= 0) {
@@ -205,6 +281,35 @@ public class CharacterCreationScreen extends Screen {
         g.drawString(font, Component.translatable(race.translationKey()), mx, top + 30, HEADER);
         List<FormattedCharSequence> lines = font.split(Component.translatable(Races.of(race).descriptionKey()), 170);
         for (int i = 0; i < Math.min(lines.size(), 4); i++) g.drawString(font, lines.get(i), mx, top + 41 + i * 10, TEXT);
+        if (faceTab) {
+            com.dbzenith.appearance.FaceParts.Part[] parts = com.dbzenith.appearance.FaceParts.Part.values();
+            for (int i = 0; i < parts.length; i++) {
+                int y = top + FACE_ROW + i * 15;
+                label(g, "face.dbzenith.part." + parts[i].key(), mx, y + 3);
+                Component v = Component.translatable(parts[i].optionKey(com.dbzenith.appearance.FaceParts.get(face, parts[i])));
+                g.drawCenteredString(font, v, mx + 107, y + 3, TEXT);
+            }
+            label(g, "screen.dbzenith.face_highlight", mx, top + ROW_TIPS + 1);
+            label(g, "screen.dbzenith.face_aura", mx, top + ROW_AURA + 1);
+            int fx = mx + 40;
+            swatch(g, fx, top + ROW_TIPS, -1, highlight < 0);
+            swatch(g, fx, top + ROW_AURA, -1, aura < 0);
+            for (int i = 0; i < COLORS.length; i++) {
+                swatch(g, fx + (i + 1) * (SWATCH + 2), top + ROW_TIPS, COLORS[i], COLORS[i] == highlight);
+                swatch(g, fx + (i + 1) * (SWATCH + 2), top + ROW_AURA, COLORS[i], COLORS[i] == aura);
+            }
+            // the preview zooms in on the face
+            int bx = left + W - 100, by = top + 28, bw = 94, bh = H - 58;
+            g.fill(bx, by, bx + bw, by + bh, 0x50060A14);
+            if (minecraft.player != null) {
+                g.enableScissor(bx, by, bx + bw, by + bh);
+                int cx = bx + bw / 2;
+                InventoryScreen.renderEntityInInventoryFollowsMouse(g, cx, by + 250, 125, (cx - mouseX) * 0.15f, (by + 40 - mouseY) * 0.15f, minecraft.player);
+                g.disableScissor();
+            }
+            super.render(g, mouseX, mouseY, partialTick);
+            return;
+        }
         if (com.dbzenith.race.Variant.creationChoices(race).size() > 1) label(g, "screen.dbzenith.lineage", mx, top + 86);
 
         label(g, "screen.dbzenith.path", mx, top + 104);
