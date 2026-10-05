@@ -210,6 +210,10 @@ public final class CombatEvents {
                 double heal = RacePassives.traits(data).killHeal(); // Majin: absorb the fallen
                 if (heal > 0) data.setBody(data.getBody() + data.getDerived().maxBody() * heal);
             });
+            LivingEntity fallen = event.getEntity();
+            if (killer instanceof net.minecraft.server.level.ServerPlayer sp && (fallen instanceof Player || fallen instanceof com.dbzenith.npc.KiFighter)) {
+                com.dbzenith.network.ModNetwork.sendToTrackingAndSelf(sp, new com.dbzenith.network.AnimEventPacket(sp.getId(), com.dbzenith.network.AnimEventPacket.VICTORY, 0));   // a worthy foe: a victory pose
+            }
         }
     }
 }

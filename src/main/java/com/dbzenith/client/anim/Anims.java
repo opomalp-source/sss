@@ -368,6 +368,117 @@ public final class Anims {
         a.rot("leftLeg", 0, 0, 0, -6, Ease.LINEAR);
         a.rot("head", 0, -15, 20, 0, Ease.LINEAR);
     });
+
+    // ------------------------------------------------------------------ animation v3: living stances
+
+    /** Standing still: a slow breath through the chest and shoulders. */
+    public static final KeyframeAnimation IDLE_BREATHE = loop(60, a -> {
+        a.rot("torso", 0, 0, 0, 0, Ease.INOUTSINE).rot("torso", 30, 2.5f, 0, 0, Ease.INOUTSINE).rot("torso", 60, 0, 0, 0, Ease.INOUTSINE);
+        a.rot("rightArm", 0, 0, 0, 3, Ease.INOUTSINE).rot("rightArm", 30, -3, 0, 6, Ease.INOUTSINE).rot("rightArm", 60, 0, 0, 3, Ease.INOUTSINE);
+        a.rot("leftArm", 0, 0, 0, -3, Ease.INOUTSINE).rot("leftArm", 30, -3, 0, -6, Ease.INOUTSINE).rot("leftArm", 60, 0, 0, -3, Ease.INOUTSINE);
+        a.pos("body", 0, 0, 0, 0, Ease.INOUTSINE).pos("body", 30, 0, -0.25f, 0, Ease.INOUTSINE).pos("body", 60, 0, 0, 0, Ease.INOUTSINE);
+    });
+
+    /** Just fought: fists up, body bladed, a light bounce on the balls of the feet. The head stays free to look. */
+    public static final KeyframeAnimation COMBAT_STANCE = loop(24, a -> {
+        a.rot("rightArm", 0, -62, -18, 12, Ease.INOUTSINE).rot("rightArm", 12, -58, -18, 14, Ease.INOUTSINE).rot("rightArm", 24, -62, -18, 12, Ease.INOUTSINE);
+        a.rot("leftArm", 0, -78, 22, -8, Ease.INOUTSINE).rot("leftArm", 12, -74, 22, -10, Ease.INOUTSINE).rot("leftArm", 24, -78, 22, -8, Ease.INOUTSINE);
+        a.bend("rightArm", 0, 95, Ease.LINEAR).bend("leftArm", 0, 105, Ease.LINEAR);
+        a.rot("torso", 0, 4, -14, 0, Ease.INOUTSINE).rot("torso", 12, 6, -14, 0, Ease.INOUTSINE).rot("torso", 24, 4, -14, 0, Ease.INOUTSINE);
+        a.pos("body", 0, 0, 0.5f, 0, Ease.INOUTSINE).pos("body", 12, 0, 0.9f, 0, Ease.INOUTSINE).pos("body", 24, 0, 0.5f, 0, Ease.INOUTSINE);
+    });
+
+    /** Sprinting flat out: leaning in, arms trailing straight back. The legs keep vanilla's stride. */
+    public static final KeyframeAnimation SPRINT = loop(12, a -> {
+        a.rot("torso", 0, 20, 0, 0, Ease.INOUTSINE).rot("torso", 6, 23, 0, 0, Ease.INOUTSINE).rot("torso", 12, 20, 0, 0, Ease.INOUTSINE);
+        a.rot("rightArm", 0, 58, 0, 14, Ease.INOUTSINE).rot("rightArm", 6, 64, 0, 16, Ease.INOUTSINE).rot("rightArm", 12, 58, 0, 14, Ease.INOUTSINE);
+        a.rot("leftArm", 0, 58, 0, -14, Ease.INOUTSINE).rot("leftArm", 6, 64, 0, -16, Ease.INOUTSINE).rot("leftArm", 12, 58, 0, -14, Ease.INOUTSINE);
+        a.bend("rightArm", 0, 8, Ease.LINEAR).bend("leftArm", 0, 8, Ease.LINEAR);
+        a.rot("head", 0, -16, 0, 0, Ease.LINEAR);
+    });
+
+    /** Flying straight up: arms down at the sides, legs together, looking up at where you are going. */
+    public static final KeyframeAnimation FLY_ASCEND = loop(20, a -> {
+        a.rot("rightArm", 0, 12, 0, 14, Ease.INOUTSINE).rot("rightArm", 10, 16, 0, 18, Ease.INOUTSINE).rot("rightArm", 20, 12, 0, 14, Ease.INOUTSINE);
+        a.rot("leftArm", 0, 12, 0, -14, Ease.INOUTSINE).rot("leftArm", 10, 16, 0, -18, Ease.INOUTSINE).rot("leftArm", 20, 12, 0, -14, Ease.INOUTSINE);
+        a.rot("rightLeg", 0, 6, 0, -2, Ease.LINEAR).rot("leftLeg", 0, 6, 0, 2, Ease.LINEAR);
+        a.rot("torso", 0, -6, 0, 0, Ease.LINEAR);
+        a.rot("head", 0, -22, 0, 0, Ease.LINEAR);
+    });
+
+    /** Dropping down: knees drawn up to land, arms out for balance. */
+    public static final KeyframeAnimation FLY_DESCEND = loop(20, a -> {
+        a.rot("rightArm", 0, -20, 0, 38, Ease.INOUTSINE).rot("rightArm", 10, -24, 0, 44, Ease.INOUTSINE).rot("rightArm", 20, -20, 0, 38, Ease.INOUTSINE);
+        a.rot("leftArm", 0, -20, 0, -38, Ease.INOUTSINE).rot("leftArm", 10, -24, 0, -44, Ease.INOUTSINE).rot("leftArm", 20, -20, 0, -38, Ease.INOUTSINE);
+        a.rot("rightLeg", 0, -24, 0, 4, Ease.LINEAR).bend("rightLeg", 0, 40, Ease.LINEAR);
+        a.rot("leftLeg", 0, -10, 0, -4, Ease.LINEAR).bend("leftLeg", 0, 30, Ease.LINEAR);
+        a.rot("torso", 0, 8, 0, 0, Ease.LINEAR);
+        a.rot("head", 0, 18, 0, 0, Ease.LINEAR);
+    });
+
+    // ------------------------------------------------------------------ animation v3: moments
+
+    /** Getting up off the floor: sit up on one hand, knee under, stand. */
+    public static final KeyframeAnimation GET_UP = once(16, a -> {
+        a.tilt(0, -88, 9.5f, Ease.LINEAR).tilt(5, -45, 7.5f, Ease.OUTQUAD).tilt(10, 25, 5f, Ease.INOUTQUAD).tilt(16, 0, 0, Ease.INOUTQUAD);
+        a.rot("rightArm", 0, -10, 0, 40, Ease.LINEAR).rot("rightArm", 5, 30, 0, 30, Ease.OUTQUAD).rot("rightArm", 16, 0, 0, 5, Ease.INOUTQUAD);
+        a.bend("rightLeg", 0, 30, Ease.LINEAR).bend("rightLeg", 8, 110, Ease.OUTQUAD).bend("rightLeg", 16, 0, Ease.INOUTQUAD);
+        a.bend("leftLeg", 0, 0, Ease.LINEAR).bend("leftLeg", 8, 70, Ease.OUTQUAD).bend("leftLeg", 16, 0, Ease.INOUTQUAD);
+    });
+
+    /** Victory: a fist thrust at the sky, the other on the hip, a small hop. */
+    public static final KeyframeAnimation VICTORY = once(40, a -> {
+        a.rot("rightArm", 0, 0, 0, 5, Ease.LINEAR).rot("rightArm", 6, -172, -10, -6, Ease.OUTEXPO).rot("rightArm", 30, -168, -10, -6, Ease.LINEAR).rot("rightArm", 40, 0, 0, 5, Ease.INOUTQUAD);
+        a.bend("rightArm", 0, 0, Ease.LINEAR).bend("rightArm", 6, 15, Ease.OUTEXPO).bend("rightArm", 40, 0, Ease.INOUTQUAD);
+        a.rot("leftArm", 0, 0, 0, -5, Ease.LINEAR).rot("leftArm", 6, 15, 0, -42, Ease.OUTQUAD).rot("leftArm", 34, 15, 0, -42, Ease.LINEAR).rot("leftArm", 40, 0, 0, -5, Ease.INOUTQUAD);
+        a.bend("leftArm", 6, 80, Ease.OUTQUAD).bend("leftArm", 34, 80, Ease.LINEAR).bend("leftArm", 40, 0, Ease.INOUTQUAD);
+        a.rot("head", 0, 0, 0, 0, Ease.LINEAR).rot("head", 6, -20, 0, 0, Ease.OUTQUAD).rot("head", 34, -18, 0, 0, Ease.LINEAR).rot("head", 40, 0, 0, 0, Ease.INOUTQUAD);
+        a.rot("torso", 0, 0, 0, 0, Ease.LINEAR).rot("torso", 6, -8, 0, 0, Ease.OUTQUAD).rot("torso", 40, 0, 0, 0, Ease.INOUTQUAD);
+        a.pos("body", 0, 0, 0, 0, Ease.LINEAR).pos("body", 4, 0, 1.5f, 0, Ease.OUTQUAD).pos("body", 8, 0, -3f, 0, Ease.OUTQUAD)
+                .pos("body", 13, 0, 0, 0, Ease.INQUAD).pos("body", 40, 0, 0, 0, Ease.LINEAR);
+    });
+
+    /** A regal transformation (Frost Demons, Core People, machines): rising calmly, arms opening wide, chin up. */
+    public static final KeyframeAnimation TRANSFORM_REGAL = once(40, a -> {
+        a.pos("body", 0, 0, 0, 0, Ease.LINEAR).pos("body", 20, 0, -2.5f, 0, Ease.INOUTSINE).pos("body", 34, 0, -3f, 0, Ease.LINEAR).pos("body", 40, 0, 0, 0, Ease.INOUTQUAD);
+        a.rot("rightArm", 0, 0, 0, 5, Ease.LINEAR).rot("rightArm", 20, -30, 0, 80, Ease.INOUTSINE).rot("rightArm", 34, -30, 0, 85, Ease.LINEAR).rot("rightArm", 40, 0, 0, 5, Ease.INOUTQUAD);
+        a.rot("leftArm", 0, 0, 0, -5, Ease.LINEAR).rot("leftArm", 20, -30, 0, -80, Ease.INOUTSINE).rot("leftArm", 34, -30, 0, -85, Ease.LINEAR).rot("leftArm", 40, 0, 0, -5, Ease.INOUTQUAD);
+        a.rot("head", 0, 0, 0, 0, Ease.LINEAR).rot("head", 20, -20, 0, 0, Ease.INOUTSINE).rot("head", 34, -22, 0, 0, Ease.LINEAR).rot("head", 40, 0, 0, 0, Ease.INOUTQUAD);
+        a.rot("rightLeg", 20, 0, 0, 6, Ease.INOUTSINE).rot("rightLeg", 40, 0, 0, 0, Ease.INOUTQUAD);
+        a.rot("leftLeg", 20, 0, 0, -6, Ease.INOUTSINE).rot("leftLeg", 40, 0, 0, 0, Ease.INOUTQUAD);
+    });
+
+    /** A calm transformation (Namekians): arms crossed, head bowed, then the eyes come up. */
+    public static final KeyframeAnimation TRANSFORM_CALM = once(40, a -> {
+        a.rot("rightArm", 0, 0, 0, 5, Ease.LINEAR).rot("rightArm", 8, -70, 40, 0, Ease.OUTQUAD).rot("rightArm", 32, -70, 40, 0, Ease.LINEAR).rot("rightArm", 40, 0, 0, 5, Ease.INOUTQUAD);
+        a.rot("leftArm", 0, 0, 0, -5, Ease.LINEAR).rot("leftArm", 8, -76, -40, 0, Ease.OUTQUAD).rot("leftArm", 32, -76, -40, 0, Ease.LINEAR).rot("leftArm", 40, 0, 0, -5, Ease.INOUTQUAD);
+        a.bend("rightArm", 8, 90, Ease.OUTQUAD).bend("rightArm", 40, 0, Ease.INOUTQUAD).bend("leftArm", 8, 90, Ease.OUTQUAD).bend("leftArm", 40, 0, Ease.INOUTQUAD);
+        a.rot("head", 0, 0, 0, 0, Ease.LINEAR).rot("head", 8, 28, 0, 0, Ease.OUTQUAD).rot("head", 26, 28, 0, 0, Ease.LINEAR)
+                .rot("head", 30, -6, 0, 0, Ease.OUTEXPO).rot("head", 40, 0, 0, 0, Ease.INOUTQUAD);
+        for (int t = 10; t <= 26; t += 4) a.pos("body", t, (t % 8 == 2 ? 0.15f : -0.15f), 0.3f, 0, Ease.LINEAR);
+        a.pos("body", 0, 0, 0, 0, Ease.LINEAR).pos("body", 40, 0, 0, 0, Ease.INOUTQUAD);
+    });
+
+    /** A feral transformation (Majin, Vampires, Bio-Androids, Gen Aliens): hunched low, clawed hands, the head thrashing. */
+    public static final KeyframeAnimation TRANSFORM_FERAL = once(40, a -> {
+        a.tilt(0, 0, 0, Ease.LINEAR).tilt(8, 32, 2.5f, Ease.OUTQUAD).tilt(28, 34, 2.5f, Ease.LINEAR).tilt(34, -12, 0, Ease.OUTEXPO).tilt(40, 0, 0, Ease.INOUTQUAD);
+        a.rot("rightArm", 0, 0, 0, 5, Ease.LINEAR).rot("rightArm", 8, -50, 0, 40, Ease.OUTQUAD).rot("rightArm", 28, -55, 0, 45, Ease.LINEAR).rot("rightArm", 34, -10, 0, 75, Ease.OUTEXPO).rot("rightArm", 40, 0, 0, 5, Ease.INOUTQUAD);
+        a.rot("leftArm", 0, 0, 0, -5, Ease.LINEAR).rot("leftArm", 8, -50, 0, -40, Ease.OUTQUAD).rot("leftArm", 28, -55, 0, -45, Ease.LINEAR).rot("leftArm", 34, -10, 0, -75, Ease.OUTEXPO).rot("leftArm", 40, 0, 0, -5, Ease.INOUTQUAD);
+        a.bend("rightArm", 8, 70, Ease.OUTQUAD).bend("rightArm", 40, 0, Ease.INOUTQUAD).bend("leftArm", 8, 70, Ease.OUTQUAD).bend("leftArm", 40, 0, Ease.INOUTQUAD);
+        for (int t = 10; t <= 28; t += 3) a.rot("head", t, 10, (t % 6 == 1 ? 25 : -25), 0, Ease.LINEAR);   // thrashing
+        a.rot("head", 0, 0, 0, 0, Ease.LINEAR).rot("head", 34, -30, 0, 0, Ease.OUTEXPO).rot("head", 40, 0, 0, 0, Ease.INOUTQUAD);
+        a.bend("rightLeg", 8, 45, Ease.OUTQUAD).bend("rightLeg", 40, 0, Ease.INOUTQUAD).bend("leftLeg", 8, 45, Ease.OUTQUAD).bend("leftLeg", 40, 0, Ease.INOUTQUAD);
+    });
+
+    /** The transformation flourish that fits a race. */
+    public static KeyframeAnimation transformFor(com.dbzenith.stats.Race race) {
+        return switch (race) {
+            case FROST_DEMON, CORE_PERSON, ANDROID, CYBORG, TUFFLE -> TRANSFORM_REGAL;
+            case NAMEKIAN -> TRANSFORM_CALM;
+            case MAJIN, VAMPIRE, BIO_ANDROID, GEN_ALIEN -> TRANSFORM_FERAL;
+            default -> TRANSFORM;
+        };
+    }
     // ------------------------------------------------------------------ builder
 
     private static KeyframeAnimation loop(int length, Consumer<Keys> body) {

@@ -52,6 +52,7 @@ public class SettingsScreen extends Screen {
                 o.add(new Option("afterimages", c.afterimages, 0, 0, null));
                 o.add(new Option("hitstop", c.hitstop, 0, 0, null));
                 o.add(new Option("hair_physics", c.hairPhysics, 0, 0, null));
+                o.add(new Option("procedural_motion", c.proceduralMotion, 0, 0, null));
             }
             case CAMERA -> {
                 o.add(new Option("screen_shake", c.screenShake, 0, 2, null));

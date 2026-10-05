@@ -523,3 +523,28 @@
 
 ### Verified
 - Close-up screenshots of seven face combinations, the Face screen layout (the hint text was removed after it overlapped the buttons), and pointed ears.
+
+## 2026-10-05 — Session 3 (cont.): CX-9 Animation v3 (v0.20.0)
+- **Stances** (`AnimController.chooseStance`):
+  - **Idle breathing:** standing still with bare hands; a slow breath through the chest and shoulders.
+  - **Combat stance:** within 5 s of a blow thrown or taken, standing nearly still. Fists up, body bladed, a bounce; the head stays free to look around.
+  - **Sprint:** sprinting fast. Leaning in with the arms trailing straight back; the legs keep vanilla's stride.
+  - **Flight:** ascend (arms down, legs together, looking up) and descend (knees drawn up, arms out).
+  - Items in hand keep vanilla's arms.
+- **Moments:**
+  - **Get-up:** sitting up off the floor when the downed state ends.
+  - **Victory:** a fist at the sky with a hop, sent by the server when a player or a ki fighter falls to you (`AnimEventPacket.VICTORY`).
+  - **Transformation flourishes per race:**
+    - the Saiyan roar (Saiyans, Half-Saiyans, Humans);
+    - a regal rise with arms spread (Frost Demons, Core People, machines, Tuffles);
+    - calm, with crossed arms and a bowed head that comes up (Namekians);
+    - feral, hunched with clawed hands and a thrashing head (Majin, Vampires, Bio-Androids, Gen Aliens).
+- **Procedural motion (`ProceduralMotion`):** applied to the whole figure in `RenderPlayerEvent`, smoothed per tick and interpolated per frame.
+  - Banking into flying turns, by yaw rate and speed (up to 38°).
+  - Pitching into climbs and dives (±20°).
+  - A lean into fast runs (up to 14°).
+  - A squash and spring-back on hard landings.
+  - Setting: "Body motion" under Effects.
+
+### Verified
+- Screenshots of all ten new poses. No pose-stack errors in the client log after flights and landings.

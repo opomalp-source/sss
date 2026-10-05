@@ -617,6 +617,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.IntValue auraDetail;
         public final ForgeConfigSpec.BooleanValue fovEffects;
         public final ForgeConfigSpec.BooleanValue hairPhysics;
+        public final ForgeConfigSpec.BooleanValue proceduralMotion;
 
         Client(ForgeConfigSpec.Builder b) {
             b.push("hud");
@@ -646,6 +647,8 @@ public final class DBZConfig {
                     .define("fovEffects", true);
             hairPhysics = b.comment("Hair sways with movement, falling, turning and auras")
                     .define("hairPhysics", true);
+            proceduralMotion = b.comment("Bodies bank into flying turns, lean into climbs, dives and fast runs, and squash on hard landings")
+                    .define("proceduralMotion", true);
             b.pop();
         }
     }

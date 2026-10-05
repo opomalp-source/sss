@@ -65,6 +65,8 @@ public final class AnimController {
         boolean wasSwinging;
         boolean wasHeavy;
         long lastEventTick = Long.MIN_VALUE / 2;
+        long lastHurtTick = Long.MIN_VALUE / 2;
+        boolean wasDowned;
         int lastHurtTime;
         String form;
         int combo;
@@ -85,15 +87,15 @@ public final class AnimController {
             PublicStatePacket state = ClientPublicStates.get(player.getId());
             tickHitstop(player, t, now);
             tickHitstop(player, t, now);
-            tickStance(player, t, state);
+            tickStance(player, t, state, now);
             tickActions(player, t, state, now);
         }
     }
 
     // ------------------------------------------------------------------ stance loops
 
-    private static void tickStance(AbstractClientPlayer player, Track t, PublicStatePacket state) {
-        KeyframeAnimation want = chooseStance(player, state);
+    private static void tickStance(AbstractClientPlayer player, Track t, PublicStatePacket state, long now) {
+        KeyframeAnimation want = chooseStance(player, state, t, now);
         if (want == t.loop) {
             t.candidate = null;
             return;
@@ -111,7 +113,7 @@ public final class AnimController {
         t.candidate = null;
     }
 
-    private static KeyframeAnimation chooseStance(AbstractClientPlayer player, PublicStatePacket state) {
+    private static KeyframeAnimation chooseStance(AbstractClientPlayer player, PublicStatePacket state, Track t, long now) {
         if (state == null || player.isPassenger() || player.isSleeping() || player.isFallFlying() || player.isSwimming()
                 || player.getPose() == Pose.SWIMMING || isApe(state.form())) return null;
         if (state.has(PublicStatePacket.DOWNED)) return Anims.DOWNED;
@@ -122,6 +124,9 @@ public final class AnimController {
         if (state.has(PublicStatePacket.FLYING) && !player.onGround()) {
             double dx = player.getX() - player.xo, dz = player.getZ() - player.zo;
             double horizontal = Math.sqrt(dx * dx + dz * dz);
+            double dy = player.getY() - player.yo;
+            if (dy > 0.25 && horizontal < 0.4) return Anims.FLY_ASCEND;              // straight up
+            if (dy < -0.35 && horizontal < 0.4) return Anims.FLY_DESCEND;            // dropping to land
             if (horizontal > 0.9) {
                 com.dbzenith.client.fx.Afterimages.keepAlive(player, 3);
                 return Anims.FLY_FAST;
@@ -129,6 +134,14 @@ public final class AnimController {
             if (horizontal > 0.12) return Anims.FLY_FORWARD;
             return Anims.FLY_HOVER;
         }
+        double dx = player.getX() - player.xo, dz = player.getZ() - player.zo;
+        double horizontal = Math.sqrt(dx * dx + dz * dz);
+        if (!player.onGround() || player.isCrouching()) return null;
+        if (player.isSprinting() && horizontal > 0.24) return Anims.SPRINT;
+        boolean bareHands = player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty();
+        if (!bareHands) return null;                                                   // items keep vanilla's arms
+        if ((now - t.lastPunch < 100 || now - t.lastHurtTick < 100) && horizontal < 0.15) return Anims.COMBAT_STANCE;
+        if (horizontal < 0.01) return Anims.IDLE_BREATHE;
         return null;
     }
 
@@ -140,7 +153,7 @@ public final class AnimController {
         if (form != null && t.form != null && !form.equals(t.form) && !isApe(form)) {
             if (PlayerData.BASE_FORM.equals(form)) play(player, t, Anims.POWER_DOWN, now, 0);
             else {
-                play(player, t, Anims.TRANSFORM, now, 30);
+                play(player, t, Anims.transformFor(state.raceEnum()), now, 30);
                 com.dbzenith.client.fx.ImpactFx.transformBurst(player, state.auraColor());
                 if (player == Minecraft.getInstance().player) {
                     com.dbzenith.client.ui.CutInOverlay.play(net.minecraft.network.chat.Component.translatable(
@@ -176,11 +189,17 @@ public final class AnimController {
 
         // hit reactions
         if (player.hurtTime > t.lastHurtTime && player.isAlive()) {
+            t.lastHurtTick = now;
             double dx = player.getX() - player.xo, dz = player.getZ() - player.zo;
             boolean big = dx * dx + dz * dz > 0.25;
             play(player, t, big ? Anims.HIT_HEAVY : Anims.HIT_LIGHT, now, 0);
         }
         t.lastHurtTime = player.hurtTime;
+
+        // back on your feet after being floored
+        boolean downed = state != null && state.has(PublicStatePacket.DOWNED);
+        if (t.wasDowned && !downed && now - t.lastEventTick > 2 && player.isAlive()) play(player, t, Anims.GET_UP, now, 0);
+        t.wasDowned = downed;
     }
 
     /** From the server: a technique was cast or a dash taken. */
@@ -212,6 +231,7 @@ public final class AnimController {
             case AnimEventPacket.DODGE -> msg.data() == 1 ? Anims.SIDE_LEFT : msg.data() == 2 ? Anims.SIDE_RIGHT : Anims.SPOT_DODGE;
             case AnimEventPacket.RECOVER -> msg.data() == 1 ? Anims.ROLL_UP : Anims.AIR_RECOVER;
             case AnimEventPacket.ZHIT -> Anims.ZHIT;
+            case AnimEventPacket.VICTORY -> Anims.VICTORY;
             default -> Anims.KI_BLAST;
         };
         play(player, t, anim, now, 0);

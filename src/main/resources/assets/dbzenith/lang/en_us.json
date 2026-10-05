@@ -609,6 +609,8 @@
   "settings.dbzenith.hitstop.desc": "Fighters freeze for a few frames when a blow connects, so hits land with weight.",
   "settings.dbzenith.screen_shake": "Screen shake",
   "settings.dbzenith.screen_shake.desc": "How hard the camera shakes from hits, explosions and landings. 0% turns it off.",
+  "settings.dbzenith.procedural_motion": "Body motion",
+  "settings.dbzenith.procedural_motion.desc": "Bodies bank into flying turns, lean into climbs, dives and fast runs, and squash on hard landings.",
   "settings.dbzenith.hair_physics": "Hair physics",
   "settings.dbzenith.hair_physics.desc": "Hair streams behind you as you run and fly, lifts as you fall, swings as you turn and flickers in an aura.",
   "settings.dbzenith.fov_effects": "Camera punches",

@@ -134,7 +134,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [x] CX-6 Combat v3: Z-hits, directional heavies (rush/uppercut/hook), sweep, chase and chase counter, Revenge Counter, Breaker Wave, snap recovery and ground slide, spot dodge and side step, clashes, downed state; moves guide in Settings > Controls (v0.17.0)
 - [x] CX-7 Ki Creator v2: 9 shapes (+laser, wave, nova, rain), methods (fired, charged, placed mines), origins, 7 ki types, 14 modifiers (third slot at level 800) (v0.18.0)
 - [x] CX-8 Character creator v2 + better hair presets + hair physics. Done: 19 presets rebuilt on a volume layer (9 new: Prince flame, Rebel lock, Legend mane, Sage, Curtains, Buzz cut, Cloud puff, Twin tails, Side cut), spring-damped hair physics (movement, falling, turning, idle, aura updraft, gravity on head tilt; setting "Hair physics"). Done since: face parts (eyes 8, brows 6, mouths 6, noses 4, pointed ears, 8 extras), hair-tip highlight, own aura colour, height 80-125% (v0.19.0)
-- [ ] CX-9 Animation v3
+- [x] CX-9 Animation v3: idle breathing, combat stance, sprint, flight ascend/descend, get-up, victory, racial transformation flourishes (regal/calm/feral), procedural banking/pitch/run lean/landing squash (v0.20.0)
 - [ ] CX-10 Sound
 - [ ] CX-11 VFX v3
 - [ ] CX-12 World (Otherworld, God Ki pools, fusion v2, wishes, metals)
