@@ -20,7 +20,7 @@ public final class Forms {
     private static final int GOLD_HAIR = 0xFFE15A;
     private static final int TEAL_EYES = 0x2FD6B5;
 
-    public static final Form BASE = add(Form.builder(PlayerData.BASE_FORM).allowsOverdrive().build());
+    public static final Form BASE = add(Form.builder(PlayerData.BASE_FORM).build());
 
     public static final Form SUPER_SAIYAN = add(Form.builder("super_saiyan").parent("base", 1)
             .races(Race.SAIYAN, Race.HALF_SAIYAN).except(Variant.LEGENDARY, Variant.LEGENDARY_PRIMAL).multiplier(2.0).drain(1.5, 0)
@@ -47,7 +47,7 @@ public final class Forms {
             .colors(0xFF3B3B, 0xC8283C, 0xD0263E).calmAura().hair(Form.HairStyle.SLIM).unlock(1200, 0).requiresFlag("god_ki").build());
 
     public static final Form SUPER_SAIYAN_BLUE = add(Form.builder("super_saiyan_blue").parent("super_saiyan_god", 5)
-            .races(Race.SAIYAN, Race.HALF_SAIYAN).except(Variant.LEGENDARY, Variant.LEGENDARY_PRIMAL, Variant.PRIMAL, Variant.AWAKENED_EVOLUTION, Variant.FUTURE_LINEAGE).multiplier(6.0).drain(3.0, 0).allowsOverdrive()
+            .races(Race.SAIYAN, Race.HALF_SAIYAN).except(Variant.LEGENDARY, Variant.LEGENDARY_PRIMAL, Variant.PRIMAL, Variant.AWAKENED_EVOLUTION, Variant.FUTURE_LINEAGE).multiplier(6.0).drain(3.0, 0)
             .colors(0x36B8FF, 0x4FC3FF, 0x2E7DFF).calmAura().hair(Form.HairStyle.SPIKY).unlock(1800, 50).build());
 
     public static final Form GREAT_APE = add(Form.builder("great_ape").parent("base", 1)
@@ -85,7 +85,7 @@ public final class Forms {
     public static final Form FINAL_FORM = add(Form.builder("final_form").parent("third_form", 3)
             .races(Race.FROST_DEMON).except(Variant.METAL).multiplier(3.2).drain(1.0, 0).colors(0xC890FF, -1, 0xFF3050).unlock(500, 30).build());
     public static final Form GOLDEN_FORM = add(Form.builder("golden_form").parent("final_form", 4)
-            .races(Race.FROST_DEMON).only(Variant.FROST_DEMON).multiplier(5.0).drain(3.0, 0).allowsOverdrive()
+            .races(Race.FROST_DEMON).only(Variant.FROST_DEMON).multiplier(5.0).drain(3.0, 0)
             .colors(0xFFD23C, -1, 0xFF3050).unlock(1100, 50).build());
 
     // --- Majin ---
@@ -142,7 +142,7 @@ public final class Forms {
             .scale(1.18f).unlock(900, 50).build());
     public static final Form LSSJ_CONTROLLED = add(Form.builder("lssj_controlled").parent("lssj_full_power", 4).races(Race.SAIYAN).only(Variant.LEGENDARY)
             .dbv(50).rising(0.2).drain(2.0, 0).lightning().colors(LEGEND_AURA, LEGEND_HAIR, TEAL_EYES).hair(Form.HairStyle.SPIKY_TALL)
-            .scale(1.1f).allowsOverdrive().unlock(1500, 60).build());
+            .scale(1.1f).unlock(1500, 60).build());
 
     // --- Primal Saiyan (and the Half-Saiyan Awakened Evolution path): the Golden Ape and the Super Saiyan 4 line ---
     public static final Form GOLDEN_APE = add(Form.builder("golden_ape").parent("super_saiyan_3", 4).races(Race.SAIYAN, Race.HALF_SAIYAN)
@@ -155,7 +155,7 @@ public final class Forms {
             .only(Variant.PRIMAL, Variant.AWAKENED_EVOLUTION).dbv(32, 50).drain(3.0, 0.5).lightning().colors(0xFF5A3A, SSJ4_HAIR, SSJ4_EYES)
             .hair(Form.HairStyle.SPIKY_TALL).unlock(1500, 50).build());
     public static final Form SSJ4_LIMIT_BREAKER = add(Form.builder("ssj4_limit_breaker").parent("ssj4_full_power", 7).races(Race.SAIYAN, Race.HALF_SAIYAN)
-            .only(Variant.PRIMAL, Variant.AWAKENED_EVOLUTION).dbv(56).drain(3.0, 0).lightning().allowsOverdrive()
+            .only(Variant.PRIMAL, Variant.AWAKENED_EVOLUTION).dbv(56).drain(3.0, 0).lightning()
             .colors(0xFF8AE0, 0xE8E8F0, 0xFFD040).calmAura().hair(Form.HairStyle.SPIKY_TALL).unlock(1800, 60).requiresFlag("god_ki").build());
 
     // --- Legendary Primal Saiyan ---
@@ -178,15 +178,15 @@ public final class Forms {
             .dbv(34, 52).rising(0.1).drain(3.2, 0.5).lightning().colors(0xFF5A3A, SSJ4_HAIR, SSJ4_EYES).hair(Form.HairStyle.SPIKY_TALL)
             .scale(1.15f).unlock(1600, 50).build());
     public static final Form LSSJ4_LIMIT_BREAKER = add(Form.builder("lssj4_limit_breaker").parent("lssj4_full_power", 7).races(Race.SAIYAN)
-            .only(Variant.LEGENDARY_PRIMAL).dbv(60).drain(3.0, 0).lightning().allowsOverdrive().colors(0xFF8AE0, 0xE8E8F0, 0xFFD040).calmAura()
+            .only(Variant.LEGENDARY_PRIMAL).dbv(60).drain(3.0, 0).lightning().colors(0xFF8AE0, 0xE8E8F0, 0xFFD040).calmAura()
             .hair(Form.HairStyle.SPIKY_TALL).scale(1.15f).unlock(1900, 60).requiresFlag("god_ki").build());
 
     // --- Half-Saiyan paths ---
     public static final Form SUPER_SAIYAN_RAGE = add(Form.builder("super_saiyan_rage").parent("super_saiyan_god", 5).races(Race.HALF_SAIYAN)
-            .only(Variant.FUTURE_LINEAGE).dbv(32, 56).drain(3.2, 0).lightning().allowsOverdrive().colors(0x9AD8FF, 0xC8E8FF, 0x2E7DFF)
+            .only(Variant.FUTURE_LINEAGE).dbv(32, 56).drain(3.2, 0).lightning().colors(0x9AD8FF, 0xC8E8FF, 0x2E7DFF)
             .hair(Form.HairStyle.SPIKY_TALL).unlock(1600, 50).build());
     public static final Form BEAST_AWAKENING = add(Form.builder("beast_awakening").parent("ultimate", 5).races(Race.HALF_SAIYAN)
-            .only(Variant.NEW_GENERATION).dbv(56).drain(2.8, 0.5).lightning().allowsOverdrive().colors(0xD070FF, 0xF2F2F8, 0xFF3050)
+            .only(Variant.NEW_GENERATION).dbv(56).drain(2.8, 0.5).lightning().colors(0xD070FF, 0xF2F2F8, 0xFF3050)
             .hair(Form.HairStyle.SPIKY_TALL).scale(1.05f).unlock(1700, 50).build());
 
     // --- Human paths ---
@@ -228,7 +228,7 @@ public final class Forms {
     public static final Form METAL_OVERCLOCK = add(Form.builder("metal_overclock").parent("metal_shell", 2).races(Race.FROST_DEMON).only(Variant.METAL)
             .dbv(8, 14).drain(1.4, 0).lightning().colors(0xA8C0E0, -1, 0xFF3050).unlock(500, 30).build());
     public static final Form METAL_GOD_CORE = add(Form.builder("metal_god_core").parent("metal_overclock", 3).races(Race.FROST_DEMON).only(Variant.METAL)
-            .dbv(22, 40).drain(2.0, 0).lightning().allowsOverdrive().colors(0xE8F0FF, -1, 0x40E0FF).calmAura().unlock(1300, 50).build());
+            .dbv(22, 40).drain(2.0, 0).lightning().colors(0xE8F0FF, -1, 0x40E0FF).calmAura().unlock(1300, 50).build());
 
     // --- Corrupted Majin: the Pure form that eats its own sanity ---
     public static final Form PURE_CORRUPTION = add(Form.builder("pure_corruption").parent("super_majin", 3).races(Race.MAJIN)
@@ -246,7 +246,7 @@ public final class Forms {
     public static final Form CRIMSON_SOVEREIGN = add(Form.builder("crimson_sovereign").parent("elder_blood", 4).races(Race.VAMPIRE)
             .dbv(22, 32).drain(2.0, 0).calmAura().colors(0xFF1838, 0xF8F0F0, 0xFF0020).unlock(1500, 40).requiresFlag("god_ki").build());
     public static final Form BLOOD_MOON_MONARCH = add(Form.builder("blood_moon_monarch").parent("crimson_sovereign", 5).races(Race.VAMPIRE)
-            .dbv(56).drain(2.8, 0).lightning().allowsOverdrive().colors(0xFF0030, 0xFFE0E8, 0xFFD040).scale(1.08f).unlock(1800, 50).build());
+            .dbv(56).drain(2.8, 0).lightning().colors(0xFF0030, 0xFFE0E8, 0xFFD040).scale(1.08f).unlock(1800, 50).build());
 
     // --- Bio-Android: evolving towards perfection ---
     public static final Form CELL_SURGE = add(Form.builder("cell_surge").parent("base", 1).races(Race.BIO_ANDROID)
@@ -260,7 +260,7 @@ public final class Forms {
     public static final Form ULTIMATE_PERFECT = add(Form.builder("ultimate_perfect").parent("super_perfect", 4).races(Race.BIO_ANDROID)
             .dbv(32).drain(2.2, 0).calmAura().colors(0xE8FFC0, -1, 0xFF3060).unlock(1500, 40).build());
     public static final Form ZENITH_PERFECT = add(Form.builder("zenith_perfect").parent("ultimate_perfect", 5).races(Race.BIO_ANDROID)
-            .dbv(56).drain(2.8, 0).lightning().allowsOverdrive().colors(0x60FFE0, -1, 0xFFD040).unlock(1800, 50).requiresFlag("god_ki").build());
+            .dbv(56).drain(2.8, 0).lightning().colors(0x60FFE0, -1, 0xFFD040).unlock(1800, 50).requiresFlag("god_ki").build());
 
     // --- Tuffle: science and revenge ---
     public static final Form FOCUS_PROTOCOL = add(Form.builder("focus_protocol").parent("base", 1).races(Race.TUFFLE)
@@ -274,7 +274,7 @@ public final class Forms {
     public static final Form TUFFLE_KING = add(Form.builder("tuffle_king").parent("revenge_engine", 4).races(Race.TUFFLE)
             .dbv(22, 32).drain(2.0, 0).calmAura().colors(0xFFE08A, -1, 0xFFD040).unlock(1500, 40).build());
     public static final Form GOLDEN_TUFFLE = add(Form.builder("golden_tuffle").parent("tuffle_king", 5).races(Race.TUFFLE)
-            .dbv(56).drain(2.8, 0).lightning().allowsOverdrive().colors(0xFFC23C, 0xF0F0F0, 0xFF2020).unlock(1800, 50).requiresFlag("god_ki").build());
+            .dbv(56).drain(2.8, 0).lightning().colors(0xFFC23C, 0xF0F0F0, 0xFF2020).unlock(1800, 50).requiresFlag("god_ki").build());
 
     // --- Gen Alien: mutation without limit ---
     public static final Form ADRENAL_RUSH = add(Form.builder("adrenal_rush").parent("base", 1).races(Race.GEN_ALIEN)
@@ -288,7 +288,7 @@ public final class Forms {
     public static final Form APEX_MUTATION = add(Form.builder("apex_mutation").parent("berserker", 4).races(Race.GEN_ALIEN)
             .dbv(22, 32).drain(2.0, 0).scale(1.1f).colors(0xFFD0FF, -1, 0xC040FF).unlock(1500, 40).build());
     public static final Form COSMIC_APEX = add(Form.builder("cosmic_apex").parent("apex_mutation", 5).races(Race.GEN_ALIEN)
-            .dbv(56).drain(2.8, 0).lightning().calmAura().allowsOverdrive().colors(0x9A8AFF, -1, 0xFFFFFF).unlock(1800, 50).requiresFlag("god_ki").build());
+            .dbv(56).drain(2.8, 0).lightning().calmAura().colors(0x9A8AFF, -1, 0xFFFFFF).unlock(1800, 50).requiresFlag("god_ki").build());
 
     // --- Core Person: Kai divinity and Demon darkness ---
     public static final Form SERENE_MIND = add(Form.builder("serene_mind").parent("base", 1).races(Race.CORE_PERSON).only(Variant.KAI)
@@ -300,7 +300,7 @@ public final class Forms {
     public static final Form SUPREME_KAI = add(Form.builder("supreme_kai").parent("kai_awakening", 3).races(Race.CORE_PERSON).only(Variant.KAI)
             .dbv(22).drain(1.4, 0).calmAura().colors(0xFFF8E0, -1, 0x60B0FF).unlock(1000, 40).build());
     public static final Form GRAND_KAI_MANTLE = add(Form.builder("grand_kai_mantle").parent("supreme_kai", 4).races(Race.CORE_PERSON).only(Variant.KAI)
-            .dbv(32, 56).drain(1.8, 0).calmAura().allowsOverdrive().colors(0xFFFFFF, -1, 0x40A0FF).unlock(1500, 50).requiresFlag("god_ki").build());
+            .dbv(32, 56).drain(1.8, 0).calmAura().colors(0xFFFFFF, -1, 0x40A0FF).unlock(1500, 50).requiresFlag("god_ki").build());
     public static final Form DEMON_BLOOD = add(Form.builder("demon_blood").parent("base", 1).races(Race.CORE_PERSON).only(Variant.DEMON)
             .dbv(1.25).drain(0.4, 0).colors(0xD04040, -1, 0xFFD040).unlock(100, 0).build());
     public static final Form DEMON_MARK = add(Form.builder("demon_mark").parent("demon_blood", 2).races(Race.CORE_PERSON).only(Variant.DEMON)
@@ -310,7 +310,7 @@ public final class Forms {
     public static final Form DEMON_LORD = add(Form.builder("demon_lord").parent("dark_evolution", 3).races(Race.CORE_PERSON).only(Variant.DEMON)
             .dbv(22).drain(2.0, 0.4).lightning().scale(1.1f).colors(0xA01030, -1, 0xFF8000).unlock(1000, 40).build());
     public static final Form DEMON_GOD = add(Form.builder("demon_god").parent("demon_lord", 4).races(Race.CORE_PERSON).only(Variant.DEMON)
-            .dbv(32, 56).drain(2.4, 0).lightning().allowsOverdrive().colors(0x6A0A20, -1, 0xFF4000).unlock(1500, 50).requiresFlag("god_ki").build());
+            .dbv(32, 56).drain(2.4, 0).lightning().colors(0x6A0A20, -1, 0xFF4000).unlock(1500, 50).requiresFlag("god_ki").build());
 
     private Forms() {}
 

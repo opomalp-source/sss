@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Balance pass 2: ki techniques against punching, Overdrive bursts, races against each other, gear against vanilla
+ * Balance pass 2: ki techniques against punching, races against each other, gear against vanilla
  * armour. Writes {@code balance-report-2.md} next to the first report and asserts the pass-2 targets (BALANCE.md).
  */
 @GameTestHolder(DBZenith.MOD_ID)
@@ -76,20 +76,6 @@ public final class BalanceReport2 {
         List<Double> s = new ArrayList<>(v);
         s.sort(Double::compare);
         return s.isEmpty() ? 0 : s.size() % 2 == 1 ? s.get(s.size() / 2) : (s.get(s.size() / 2 - 1) + s.get(s.size() / 2)) / 2;
-    }
-
-    // ------------------------------------------------------------------ overdrive
-
-    /** Seconds Overdrive level {@code lvl} lasts from full body and stamina (mastery 0..100), and its extra output. */
-    static double[] overdrive(PlayerData d, int lvl, double mastery) {
-        DBZConfig.Server c = DBZConfig.SERVER;
-        double mult = c.overdriveLevels.get().get(lvl - 1);
-        double over = mult - 1;
-        double factor = 1.0 - 0.6 * mastery / 100.0;
-        double bodySecs = (100 - c.overdriveMinBodyPercent.get()) / (c.overdriveBodyDrainPercent.get() * over * factor);
-        double staSecs = 100 / (c.overdriveStaminaDrainPercent.get() * over * factor);
-        double secs = Math.min(bodySecs, staSecs);
-        return new double[]{mult, secs, over * secs};
     }
 
     // ------------------------------------------------------------------ races
@@ -144,12 +130,6 @@ public final class BalanceReport2 {
             sb.append(String.format(Locale.ROOT, "| %s | %.0f | %.0f | %.1f | %.2f | x%.2f | %.1f |\n", s.t().id(), s.cost(), s.damage(),
                     s.cooldownSeconds(), s.perKi(), s.dps() / punch, d.getDerived().maxKi() / Math.max(1, s.cost())));
         }
-        sb.append("\n## Overdrive (from full body and stamina)\n\n| Level | x | Seconds (mastery 0) | Extra output (mastery 0) | Seconds (mastery 100) | Extra output (mastery 100) |\n|---|---|---|---|---|---|\n");
-        for (int lvl = 1; lvl <= DBZConfig.SERVER.overdriveLevels.get().size(); lvl++) {
-            double[] a = overdrive(d, lvl, 0), b = overdrive(d, lvl, 100);
-            sb.append(String.format(Locale.ROOT, "| %d | %.0f | %.1f | %.0f mult-s | %.1f | %.0f mult-s |\n", lvl, a[0], a[1], a[2], b[1], b[2]));
-        }
-        sb.append("\n\"Extra output\" = (multiplier - 1) x seconds: what one full burst adds. A 100-second boss fight at x1 is 100 mult-s.\n");
         sb.append("\n## Races: best form multiplier by level, as a share of the median race (story forms count; wishes and the moon do not)\n\n| Race |");
         for (int lvl : GRID) sb.append(" L").append(lvl).append(" |");
         sb.append("\n|---|");
@@ -216,10 +196,6 @@ public final class BalanceReport2 {
             helper.assertTrue(s.perKi() >= mid * 0.6 && s.perKi() <= mid * 1.6,
                     s.t().id() + ": damage per ki " + s.perKi() + " is outside 0.6-1.6x the median " + mid);
             helper.assertTrue(s.dps() <= punch * 4.0, s.t().id() + ": spammed it out-damages punching x" + s.dps() / punch);
-        }
-        for (int lvl = 1; lvl <= DBZConfig.SERVER.overdriveLevels.get().size(); lvl++) {
-            double extra = overdrive(d, lvl, 0)[2];
-            helper.assertTrue(extra >= 30 && extra <= 75, "Overdrive level " + lvl + " adds " + extra + " mult-s (target 30-75)");
         }
         for (int lvl : GRID) {
             double m = raceMedian(lvl);

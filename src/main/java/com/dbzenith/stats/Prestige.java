@@ -6,7 +6,6 @@ import com.dbzenith.data.PlayerData;
 import com.dbzenith.race.CharacterCreation;
 import com.dbzenith.race.Races;
 import com.dbzenith.transform.FormHandler;
-import com.dbzenith.transform.Overdrive;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.FriendlyByteBuf;
@@ -31,7 +30,6 @@ public final class Prestige {
     public static boolean prestige(ServerPlayer player) {
         PlayerData d = ModCapabilities.get(player).orElse(null);
         if (d == null || !eligible(d)) return false;
-        Overdrive.stop(player, d, false);
         FormHandler.revertToBase(player, d);
         int start = DBZConfig.SERVER.startingAttribute.get();
         for (Attribute a : Attribute.values()) {

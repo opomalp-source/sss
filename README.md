@@ -28,7 +28,7 @@ Install **NeoForge 1.20.1-47.1.106** into a dedicated game directory, then put `
 | H (hold, release) | Charge a heavy strike: your next punch hits 1.5x-3x harder |
 | B | Dash in your movement direction (brief afterimage: attacks miss) |
 | J | Transform to your next form (or your chosen target). Shift+J: drop one form |
-| N | Overdrive: stackable power multiplier that burns your body. Shift+N: end |
+| O | Kaioken: one stage up per press (learn it first, Shift+I). Shift+O: release |
 | K | Training screen: spend TP on attributes (Shift+click = +10). **Forms >** shows your form tree; **Techniques >** lets you learn techniques with TP and equip your deck (4 slots, up to 8 with level) |
 
 ## In-game

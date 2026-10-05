@@ -14,7 +14,6 @@ import com.dbzenith.transform.GodKi;
 import com.dbzenith.transform.GreatApe;
 import com.dbzenith.transform.FormMath;
 import com.dbzenith.transform.Forms;
-import com.dbzenith.transform.Overdrive;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,7 +21,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
-/** Phase 2: forms, mastery, overdrive. */
+/** Phase 2: forms and mastery. */
 @GameTestHolder(DBZenith.MOD_ID)
 @PrefixGameTestTemplate(false)
 public final class FormTests {
@@ -189,34 +188,6 @@ public final class FormTests {
         helper.assertTrue("super_saiyan_2".equals(d.getFormId()), "target form should be entered directly, got " + d.getFormId());
         FormHandler.revertOne(p);
         helper.assertTrue("super_saiyan".equals(d.getFormId()), "revert drops one tier, got " + d.getFormId());
-        TestPlayers.remove(helper, p);
-        helper.succeed();
-    }
-
-    @GameTest(template = EMPTY)
-    public static void overdriveMultipliesDrainsAndBacklashes(GameTestHelper helper) {
-        ServerPlayer p = saiyan(helper, 0);
-        PlayerData d = ModCapabilities.getOrThrow(p);
-        helper.assertTrue(!Overdrive.raise(p), "overdrive is locked at low level");
-        d.setFlag("overdrive", true);
-        double melee = d.getDerived().meleeDamage();
-        helper.assertTrue(Overdrive.raise(p), "overdrive unlocked by flag");
-        helper.assertTrue(!Overdrive.raise(p), "level 2 needs mastery");
-        d.recomputeIfStale();
-        double ratio = d.getDerived().meleeDamage() / melee;
-        helper.assertTrue(Math.abs(ratio - 2.0) < 1e-6, "overdrive x2 doubles melee, got " + ratio);
-        double body = d.getBody();
-        for (int t = 1; t <= 20; t++) Overdrive.tick(p, d, t);
-        helper.assertTrue(d.getBody() < body, "overdrive drains body");
-        double beforeStop = d.getBody();
-        Overdrive.stop(p, d, true);
-        helper.assertTrue(d.getBody() < beforeStop && d.getOverdriveLevel() == 0, "ending overdrive costs body");
-
-        d.setMastery("super_saiyan", 0);
-        d.setAttribute(Attribute.STRENGTH, 700);
-        d.recomputeIfStale();
-        FormHandler.transformUp(p, true);
-        helper.assertTrue(!Overdrive.raise(p), "overdrive does not stack with Super Saiyan");
         TestPlayers.remove(helper, p);
         helper.succeed();
     }

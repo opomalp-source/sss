@@ -32,7 +32,7 @@ public final class AuraEdgeOverlay implements IGuiOverlay {
             if (state != null) {
                 boolean powering = state.powering();
                 Form form = Forms.byId(state.form());
-                boolean held = !form.isBase() || state.overdrive() > 0;
+                boolean held = !form.isBase() || state.has(PublicStatePacket.KAIOKEN);
                 if ((powering || held) && form != Forms.GREAT_APE) {
                     float t = mc.player.tickCount + partial;
                     float base = powering ? 0.8f : 0.28f;

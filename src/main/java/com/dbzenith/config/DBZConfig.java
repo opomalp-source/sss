@@ -151,13 +151,6 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue prestigeTpBonus;
         public final ForgeConfigSpec.DoubleValue prestigePowerBonus;
         public final ForgeConfigSpec.DoubleValue godKiEdge;
-        public final ForgeConfigSpec.ConfigValue<java.util.List<? extends Double>> overdriveLevels;
-        public final ForgeConfigSpec.IntValue overdriveUnlockLevel;
-        public final ForgeConfigSpec.DoubleValue overdriveMasteryPerLevel;
-        public final ForgeConfigSpec.DoubleValue overdriveBodyDrainPercent;
-        public final ForgeConfigSpec.DoubleValue overdriveStaminaDrainPercent;
-        public final ForgeConfigSpec.DoubleValue overdriveBacklashPercent;
-        public final ForgeConfigSpec.DoubleValue overdriveMinBodyPercent;
 
         // --- races ---
         public final ForgeConfigSpec.DoubleValue zenkaiTriggerPercent;
@@ -414,7 +407,7 @@ public final class DBZConfig {
             tpPerChargeInterval = b.defineInRange("tpPerChargeInterval", 2, 0, 1_000_000);
             b.pop();
 
-            b.comment("Forms and the Overdrive buff (see transform package)").push("transformations");
+            b.comment("Forms (see transform package)").push("transformations");
             unlockLevelScale = b.comment("Multiplies every form's unlock level (0.5 = forms unlock twice as early)")
                     .defineInRange("unlockLevelScale", 1.0, 0.0, 100.0);
             rareVariantChance = b.comment("Chance a new character carries a rare destiny (Legendary Saiyan, Mutant Frost Demon, Corrupted Majin...)")
@@ -453,20 +446,6 @@ public final class DBZConfig {
             prestigePowerBonus = b.comment("STR/DEX/KI_POWER multiplier bonus per prestige").defineInRange("prestigePowerBonus", 0.05, 0.0, 10.0);
             godKiEdge = b.comment("God ki against ordinary ki: damage dealt up and taken down by this fraction")
                     .defineInRange("godKiEdge", 0.25, 0.0, 0.95);
-            overdriveLevels = b.comment("Overdrive multipliers per level, lowest first")
-                    .defineList("overdriveLevels", java.util.List.of(2.0, 3.0, 4.0, 10.0, 20.0), o -> o instanceof Double d && d >= 1.0);
-            overdriveUnlockLevel = b.comment("Character level needed to use Overdrive (or the 'overdrive' flag)")
-                    .defineInRange("overdriveUnlockLevel", 100, 0, 1_000_000);
-            overdriveMasteryPerLevel = b.comment("Overdrive mastery needed per extra level (level 1 always allowed)")
-                    .defineInRange("overdriveMasteryPerLevel", 20.0, 0.0, 100.0);
-            overdriveBodyDrainPercent = b.comment("Body drained per second, % of max, per point of multiplier above 1")
-                    .defineInRange("overdriveBodyDrainPercent", 0.4, 0.0, 100.0);
-            overdriveStaminaDrainPercent = b.comment("Stamina drained per second, % of max, per point of multiplier above 1")
-                    .defineInRange("overdriveStaminaDrainPercent", 2.0, 0.0, 100.0);
-            overdriveBacklashPercent = b.comment("On ending Overdrive: body lost, % of max, per point of multiplier above 1")
-                    .defineInRange("overdriveBacklashPercent", 0.5, 0.0, 100.0);
-            overdriveMinBodyPercent = b.comment("Overdrive switches off below this body %")
-                    .defineInRange("overdriveMinBodyPercent", 10.0, 0.0, 100.0);
             b.pop();
 
             b.comment("Racial mechanics and the technique deck").push("races");

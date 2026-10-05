@@ -14,7 +14,7 @@ import java.util.function.Supplier;
  * Server to every client tracking a player (and the player): the visible subset of their state, used for
  * auras, forms, racial features and appearance. Sent only when it changes.
  */
-public record PublicStatePacket(int entityId, int flags, int release, int auraColor, String form, int overdrive,
+public record PublicStatePacket(int entityId, int flags, int release, int auraColor, String form,
                                 int race, int bodyType, int hairStyle, int hairColor, int eyeColor, long battlePower,
                                 int looks, String hairCode, int skinTone, int height, int variant, String transformTarget, int face, int highlight) {
     public static final int CHARGING = 1;
@@ -39,7 +39,7 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
                 | (Races.of(d.getRace()).tail() && d.hasTail() ? TAIL : 0) | (d.isMeditating() ? MEDITATING : 0) | (d.isTransforming() ? TRANSFORMING : 0)
                 | (d.getKaiokenStage() > 0 ? KAIOKEN : 0) | (d.getRacialActive().contains("ki_barrier") ? BARRIER : 0)
                 | (d.combat().downedFlag ? DOWNED : 0);
-        return new PublicStatePacket(entityId, flags, d.getReleasePercent(), Aura.color(d), d.getFormId(), d.getOverdriveLevel(),
+        return new PublicStatePacket(entityId, flags, d.getReleasePercent(), Aura.color(d), d.getFormId(),
                 d.getRace().ordinal(), d.getBodyType().ordinal(), d.getHairStyle(), d.getHairColor(), d.getEyeColor(),
                 d.hasFlag("god_ki") ? -1 : com.dbzenith.stats.StatCalculator.battlePower(d), // -1: god ki cannot be read
                 d.getScar() | d.getTattoo() << 4 | (d.isRaceLook() ? RACE_LOOK : 0),
@@ -47,7 +47,7 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
     }
 
     public int stateHash() {
-        int h = (((flags * 31 + release) * 31 + auraColor) * 31 + form.hashCode()) * 31 + overdrive;
+        int h = (((flags * 31 + release) * 31 + auraColor) * 31 + form.hashCode());
         h = ((h * 31 + race) * 31 + bodyType) * 31 + hairStyle;
         h = (((h * 31 + hairColor) * 31 + eyeColor) * 31 + Long.hashCode(battlePower)) * 31 + looks;
         return ((((((h * 31 + hairCode.hashCode()) * 31 + skinTone) * 31 + height) * 31 + variant) * 31 + transformTarget.hashCode()) * 31 + face) * 31 + highlight;
@@ -55,13 +55,13 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
 
     /** A copy with a different look (client previews in the creation, barber and Life screens). */
     public PublicStatePacket withAppearance(String hairCode, int hairColor, int eyeColor, int skinTone) {
-        return new PublicStatePacket(entityId, flags, release, auraColor, form, overdrive, race, bodyType, hairStyle, hairColor,
+        return new PublicStatePacket(entityId, flags, release, auraColor, form, race, bodyType, hairStyle, hairColor,
                 eyeColor, battlePower, looks, hairCode, skinTone, height, variant, transformTarget, face, highlight);
     }
 
     /** A copy with a different face, highlight and aura (Face screen preview). */
     public PublicStatePacket withFace(int face, int highlight, int aura) {
-        return new PublicStatePacket(entityId, flags, release, aura, form, overdrive, race, bodyType, hairStyle, hairColor,
+        return new PublicStatePacket(entityId, flags, release, aura, form, race, bodyType, hairStyle, hairColor,
                 eyeColor, battlePower, looks, hairCode, skinTone, height, variant, transformTarget, face, highlight);
     }
 
@@ -102,7 +102,6 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
         buf.writeByte(msg.release);
         buf.writeInt(msg.auraColor);
         buf.writeUtf(msg.form, 64);
-        buf.writeByte(msg.overdrive);
         buf.writeByte(msg.race);
         buf.writeByte(msg.bodyType);
         buf.writeByte(msg.hairStyle);
@@ -120,7 +119,7 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
     }
 
     public static PublicStatePacket decode(FriendlyByteBuf buf) {
-        return new PublicStatePacket(buf.readVarInt(), buf.readVarInt(), buf.readByte(), buf.readInt(), buf.readUtf(64), buf.readByte(),
+        return new PublicStatePacket(buf.readVarInt(), buf.readVarInt(), buf.readByte(), buf.readInt(), buf.readUtf(64),
                 buf.readByte(), buf.readByte(), buf.readByte(), buf.readInt(), buf.readInt(), buf.readVarLong(),
                 buf.readUnsignedShort(), buf.readUtf(com.dbzenith.appearance.HairCode.MAX_CODE_LENGTH), buf.readInt(), buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUtf(64), buf.readInt(), buf.readInt());
     }

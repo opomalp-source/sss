@@ -136,9 +136,9 @@ public class FormScreen extends Screen {
 
         int fy = top + H - 46;
         g.drawString(font, Component.translatable("screen.dbzenith.form_keys"), left + 8, fy, DIM);
-        int odMax = safeMaxOverdrive(d);
-        g.drawString(font, Component.translatable("screen.dbzenith.overdrive_info", odMax,
-                String.format("%.0f", d.getMastery(FormMath.OVERDRIVE_MASTERY))), left + 8, fy + 11, DIM);
+        int kk = com.dbzenith.transform.Kaioken.maxStage(d);
+        g.drawString(font, kk > 0 ? Component.translatable("screen.dbzenith.kaioken_info", kk) : Component.translatable("screen.dbzenith.kaioken_unlearned"),
+                left + 8, fy + 11, DIM);
         super.render(g, mouseX, mouseY, partialTick);
         if (tooltip != null) g.renderTooltip(font, tooltip, mouseX, mouseY);
     }
@@ -148,14 +148,6 @@ public class FormScreen extends Screen {
             return FormHandler.problem(d, f);
         } catch (IllegalStateException e) { // server config not synced yet
             return Component.literal("?");
-        }
-    }
-
-    private static int safeMaxOverdrive(PlayerData d) {
-        try {
-            return FormMath.maxOverdriveLevel(d);
-        } catch (IllegalStateException e) {
-            return 0;
         }
     }
 

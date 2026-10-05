@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Hold the radial key: an inner ring of actions (transform, power down, flight, overdrive, menus) and an outer ring
+ * Hold the radial key: an inner ring of actions (transform, power down, flight, menus) and an outer ring
  * of your deck's techniques. Point with the mouse; release the key (or click) to use the slice under the pointer.
  * The game keeps running underneath.
  */
@@ -48,8 +48,6 @@ public class RadialMenuScreen extends Screen {
         inner.add(new Slice(tr("transform"), tr("transform.hint"), DbzTheme.ICON_TRANSFORM, -1, () -> send(InputPacket.Action.TRANSFORM_UP)));
         inner.add(new Slice(tr("power_down"), tr("power_down.hint"), DbzTheme.ICON_POWER_DOWN, -1, () -> send(InputPacket.Action.TRANSFORM_DOWN)));
         inner.add(new Slice(tr("fly"), tr("fly.hint"), DbzTheme.ICON_FLY, -1, () -> send(InputPacket.Action.TOGGLE_FLIGHT)));
-        inner.add(new Slice(tr("overdrive"), tr("overdrive.hint"), DbzTheme.ICON_OVERDRIVE, -1, () -> send(InputPacket.Action.OVERDRIVE_UP)));
-        inner.add(new Slice(tr("overdrive_off"), tr("overdrive_off.hint"), DbzTheme.ICON_OVERDRIVE_OFF, -1, () -> send(InputPacket.Action.OVERDRIVE_OFF)));
         inner.add(new Slice(tr("stats"), tr("stats.hint"), DbzTheme.ICON_STATS, -1, () -> minecraft.setScreen(new StatScreen())));
         inner.add(new Slice(tr("forms"), tr("forms.hint"), DbzTheme.ICON_FORMS, -1, () -> minecraft.setScreen(new FormScreen(null))));
         inner.add(new Slice(tr("techniques"), tr("techniques.hint"), DbzTheme.ICON_TECHNIQUES, -1, () -> minecraft.setScreen(new DeckScreen(null))));

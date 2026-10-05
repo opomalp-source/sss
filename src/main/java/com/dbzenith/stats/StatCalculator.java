@@ -45,7 +45,7 @@ public final class StatCalculator {
                 Math.max(-0.9, Math.min(c.moveSpeedCap.get(), baseDex * c.moveSpeedPerDexterity.get()) + speedBonus));
     }
 
-    /** Attribute value after form and overdrive multipliers (combat attributes only). */
+    /** Attribute value after form multipliers (combat attributes only). */
     public static double effective(PlayerData data, Attribute attribute) {
         return data.getAttribute(attribute) * FormMath.attributeMultiplier(data, attribute);
     }

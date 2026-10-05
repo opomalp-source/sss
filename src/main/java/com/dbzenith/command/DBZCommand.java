@@ -19,7 +19,6 @@ import com.dbzenith.transform.FormHandler;
 import com.dbzenith.transform.FormMath;
 import com.dbzenith.transform.Forms;
 import com.dbzenith.transform.GreatApe;
-import com.dbzenith.transform.Overdrive;
 import com.dbzenith.stats.DerivedStats;
 import com.dbzenith.stats.FightingPath;
 import com.dbzenith.stats.Race;
@@ -210,7 +209,7 @@ public final class DBZCommand {
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("form", StringArgumentType.word())
                                         .suggests((ctx, b) -> SharedSuggestionProvider.suggest(
-                                                java.util.stream.Stream.concat(Forms.all().stream().map(Form::id), java.util.stream.Stream.of(FormMath.OVERDRIVE_MASTERY)), b))
+                                                Forms.all().stream().map(Form::id), b))
                                         .then(Commands.argument("value", DoubleArgumentType.doubleArg(0, 100))
                                                 .executes(ctx -> {
                                                     String id = StringArgumentType.getString(ctx, "form");
@@ -312,22 +311,13 @@ public final class DBZCommand {
                 .then(Commands.literal("flag")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("flag", StringArgumentType.word())
-                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.List.of("god_ki", "overdrive"), b))
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.List.of("god_ki"), b))
                                         .then(Commands.argument("on", BoolArgumentType.bool())
                                                 .executes(ctx -> {
                                                     String flag = StringArgumentType.getString(ctx, "flag");
                                                     boolean on = BoolArgumentType.getBool(ctx, "on");
                                                     return apply(ctx, "Set flag " + flag + "=" + on + " for", d -> d.setFlag(flag, on));
                                                 })))))
-                .then(Commands.literal("overdrive")
-                        .then(Commands.argument("targets", EntityArgument.players())
-                                .executes(ctx -> {
-                                    int n = 0;
-                                    for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) if (Overdrive.raise(p)) n++;
-                                    int count = n;
-                                    ctx.getSource().sendSuccess(() -> Component.literal("Raised overdrive for " + count + " player(s)"), true);
-                                    return n;
-                                })))
                 .then(Commands.literal("learn")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("technique", StringArgumentType.word())

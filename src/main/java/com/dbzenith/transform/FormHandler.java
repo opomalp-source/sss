@@ -169,7 +169,6 @@ public final class FormHandler {
         data.setFormId(form.id());
         if (!form.isBase()) data.setFlag("has_transformed", true);
         data.recomputeIfStale();
-        if (!form.allowsOverdrive()) Overdrive.stop(player, data, false);
         if (!Kaioken.formAllows(form)) Kaioken.stop(player, data, true);
         if (!form.allowsFlight() && data.isFlying()) com.dbzenith.ki.FlightHandler.stop(player, data);
         burst(player.serverLevel(), player, form.auraColor(), form.isBase() ? 12 : 40);

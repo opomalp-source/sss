@@ -13,7 +13,6 @@ import com.dbzenith.stats.SpeedModifiers;
 import com.dbzenith.stats.StatCalculator;
 import com.dbzenith.transform.FormHandler;
 import com.dbzenith.transform.GreatApe;
-import com.dbzenith.transform.Overdrive;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -97,7 +96,6 @@ public final class KiTicker {
         if (now % 20 == 0) com.dbzenith.world.Family.tick(player, data);
         if (now % 20 == 0) GreatApe.tick(player, data);
         FormHandler.tick(player, data, now);
-        Overdrive.tick(player, data, now);
         FlightHandler.tick(player, data);
         BodyHealth.mirror(player, data);
     }

@@ -109,7 +109,7 @@ public final class ClientSounds {
         if (s.powering()) return Loop.CHARGE;
         Form f = Forms.byId(s.form());
         if (f == Forms.GREAT_APE) return Loop.NONE;
-        boolean held = !f.isBase() || s.overdrive() > 0 || s.has(PublicStatePacket.KAIOKEN);
+        boolean held = !f.isBase() || s.has(PublicStatePacket.KAIOKEN);
         if (!held) return Loop.NONE;
         return f.calmAura() && !s.has(PublicStatePacket.KAIOKEN) ? Loop.CALM : Loop.HUM;
     }

@@ -44,7 +44,7 @@ Resume from the first unchecked item. Each phase ends with a git tag.
 - [x] Mastery per form (time in form x spirit / tier; up to -75% drain, +20% bonus)
 - [x] J transform / Shift+J revert; Forms screen (from K) with target selection; hair (4 styles), eye color, form aura, lightning sparks
 - [ ] Real art: hair model/textures, Great Ape model (GeckoLib) instead of a scaled player
-- [x] Overdrive (N / Shift+N): x2-x20 levels gated by mastery, body+stamina drain, backlash; stacks with base and Blue only
+- [x] ~~Overdrive~~ (removed in v0.25.1 at the user's request: Kaioken covers it, and does it better) (N / Shift+N): x2-x20 levels gated by mastery, body+stamina drain, backlash; stacks with base and Blue only
 - [x] Tag `phase-2-transformations`
 
 ## Phase 3 — Races & character creation

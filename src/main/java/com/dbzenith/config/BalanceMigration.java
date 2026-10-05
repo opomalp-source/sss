@@ -23,7 +23,7 @@ public final class BalanceMigration {
 
     /** Values whose defaults changed in balance revision 3 (pass 2). */
     static List<ForgeConfigSpec.ConfigValue<?>> revision3(DBZConfig.Server c) {
-        return List.of(c.overdriveStaminaDrainPercent);
+        return List.of();                                                  // it only touched Overdrive, since removed
     }
 
     public static void onLoad(ModConfigEvent event) {

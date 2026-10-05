@@ -642,3 +642,13 @@ User requests: transformations should change the character (an orange Namekian i
 
 ### Verified
 - Screenshots: HD and classic hair side by side, glowing Super Saiyan eyes, SSJ2 bolts across three frames, Blue, and the Kaioken flush.
+
+## 2026-10-06 — Session 3 (cont.): Overdrive removed (v0.25.1)
+User request: "delete the overdrive feature altogether because it's the same as kaioken and kaioken is the better version".
+- **Removed:**
+  - `transform.Overdrive`, the N key and its input actions, the wheel slices, the HUD chip, the `/dbz overdrive` command, and the `overdrive` flag suggestion;
+  - `Form.allowsOverdrive` (from every form), the Overdrive multiplier in `FormMath`, and `PlayerData`'s Overdrive level;
+  - the public state's `overdrive` field (protocol 27), the Overdrive config block, its balance-report section and assertion, and its GameTest;
+  - its language strings.
+- **Kept, for the ones Overdrive used to drive:** Kaioken now drives the held aura, the aura sound and the screen-edge aura. The Forms screen shows your Kaioken limit. The controls help, the README and the feature matrix point at Kaioken.
+- **Old data:** balance revision 3, which only reset an Overdrive value, is now empty. Overdrive was never saved, so worlds need no migration.

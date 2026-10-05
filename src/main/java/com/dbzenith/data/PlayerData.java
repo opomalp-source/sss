@@ -883,7 +883,6 @@ public class PlayerData {
     private final java.util.Set<String> flags = new java.util.HashSet<>();
     private boolean hasTail = true;
     private String targetForm = "";
-    private int overdriveLevel; // runtime only: 0 = off
 
     public String getFormId() {
         return formId;
@@ -963,19 +962,6 @@ public class PlayerData {
         String v = id == null ? "" : id;
         if (!v.equals(targetForm)) {
             targetForm = v;
-            markDirty();
-        }
-    }
-
-    public int getOverdriveLevel() {
-        return overdriveLevel;
-    }
-
-    public void setOverdriveLevel(int level) {
-        int v = Math.max(0, level);
-        if (v != overdriveLevel) {
-            overdriveLevel = v;
-            derivedStale = true;
             markDirty();
         }
     }
@@ -1689,7 +1675,6 @@ public class PlayerData {
         tag.putBoolean("charging", charging);
         tag.putBoolean("guarding", guarding);
         tag.putInt("combo", comboHits);
-        tag.putInt("overdrive", overdriveLevel);
         tag.putDouble("gravity", envGravity);
         tag.putBoolean("meditating", meditating);
         tag.putInt("temperature", temperature);
@@ -1718,7 +1703,6 @@ public class PlayerData {
         charging = tag.getBoolean("charging");
         guarding = tag.getBoolean("guarding");
         comboHits = tag.getInt("combo");
-        overdriveLevel = tag.getInt("overdrive");
         envGravity = tag.contains("gravity") ? tag.getDouble("gravity") : 1.0;
         meditating = tag.getBoolean("meditating");
         temperature = tag.getInt("temperature");

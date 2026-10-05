@@ -52,7 +52,7 @@ public final class DbzHud implements IGuiOverlay {
 
         PublicStatePacket pub = ClientPublicStates.get(mc.player.getId());
         Form form = Forms.byId(d.getFormId());
-        boolean held = !form.isBase() || d.getOverdriveLevel() > 0;
+        boolean held = !form.isBase() || d.getKaiokenStage() > 0;
         int aura = 0xFF000000 | (pub != null ? pub.auraColor() : com.dbzenith.ki.Aura.DEFAULT_COLOR);
         int accent = held ? aura : GOLD;
         RenderSystem.enableBlend();
@@ -100,7 +100,7 @@ public final class DbzHud implements IGuiOverlay {
             by += 6;
         }
 
-        // ---------------------------------------------------------- battle power, form badge, overdrive
+        // ---------------------------------------------------------- battle power and the form badge
         long bp = StatCalculator.battlePower(d);
         int ly = by + 1;
         DbzTheme.text(g, font, Component.translatable("hud.dbzenith.bp"), bx + 5, ly + 2, DbzTheme.DIM, 0.7f);
@@ -115,9 +115,6 @@ public final class DbzHud implements IGuiOverlay {
             ly += 13;
         }
         int chipX = bx - 6;
-        if (d.getOverdriveLevel() > 0) {
-            chipX = chip(g, font, chipX, ly, Component.translatable("hud.dbzenith.overdrive", String.format("%.0f", FormMath.overdriveMultiplier(d))), 0xFFFF4030);
-        }
 
         // ---------------------------------------------------------- status chips
         if (d.isCharging()) {

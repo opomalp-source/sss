@@ -12,7 +12,7 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Derived: body, ki, stamina max | B | done | `StatCalculator` |
 | Derived: defense, evasion, ki control, melee/ki damage | B | done | Applied in DamageCalculator; GameTests |
 | Derived: attack/move speed | B | done | Vanilla attribute modifiers; GameTest |
-| Derived: spirit modifier | B | done | Scales form + Overdrive mastery gain |
+| Derived: spirit modifier | B | done | Scales form mastery gain |
 | Derived: ki transfer | B | done | SPI sets the rate; Ki Transfer technique gives ki to the player you look at. GameTest |
 | Release % | B | done | Scales ki damage + ki cost; charging raises, key lowers; GameTests |
 | Physical / mental age | V | done | Body ages by race (STR/DEX fade past 60); the mind ages for all, x3 meditating; a Time Chamber day is a year; wisdom: +1% TP per mental year past 20 (max +40%). GameTests |
@@ -49,7 +49,7 @@ Source: **C** = Dragon Block C mechanic, **V** = Dragon Block V design spec, **B
 | Great Ape + false moon | C | done | Moon Orb item + full moon; tail; 3x size; GameTest + seen in-client. Placeholder look (scaled player) |
 | Hair/eye/aura visual swap | B | done | Code-built placeholder hair (4 styles), pupils, form aura, lightning; seen in-client |
 | Form mastery | B | done | Drain reduction + multiplier bonus; GameTest |
-| Kaio-style stackable buff (Overdrive) | B | done | Levels, drain, backlash, form gating; GameTest; seen in-client |
+| Kaio-style stackable buff | B | done | Kaioken (universal skill, CX-5); the older Overdrive was removed in v0.25.1; seen in-client |
 
 ## 3.4 Races & character creation
 | Feature | Src | Status | Notes |

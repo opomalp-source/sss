@@ -50,7 +50,7 @@ public final class AuraRenderer {
         boolean powering = state.powering();
         Form form = Forms.byId(state.form());
         boolean kaioken = state.has(PublicStatePacket.KAIOKEN);
-        boolean held = !form.isBase() || state.overdrive() > 0 || kaioken;
+        boolean held = !form.isBase() || kaioken;
         if (!powering && !held) return;
         if (form == Forms.GREAT_APE) return; // the ape has no ki aura, only its size
 

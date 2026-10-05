@@ -35,7 +35,6 @@ public final class Form {
     private final int unlockLevel;
     private final double parentMasteryRequired;
     private final String requiredFlag;
-    private final boolean allowsOverdrive;
     private final boolean allowsTechniques;
     private final boolean allowsFlight;
     private final float scale;
@@ -65,7 +64,6 @@ public final class Form {
         unlockLevel = b.unlockLevel;
         parentMasteryRequired = b.parentMasteryRequired;
         requiredFlag = b.requiredFlag;
-        allowsOverdrive = b.allowsOverdrive;
         allowsTechniques = b.allowsTechniques;
         allowsFlight = b.allowsFlight;
         scale = b.scale;
@@ -97,7 +95,6 @@ public final class Form {
     public int unlockLevel() { return unlockLevel; }
     public double parentMasteryRequired() { return parentMasteryRequired; }
     public String requiredFlag() { return requiredFlag; }
-    public boolean allowsOverdrive() { return allowsOverdrive; }
     public boolean allowsTechniques() { return allowsTechniques; }
     public boolean allowsFlight() { return allowsFlight; }
     public float scale() { return scale; }
@@ -151,7 +148,6 @@ public final class Form {
         private int unlockLevel;
         private double parentMasteryRequired;
         private String requiredFlag;
-        private boolean allowsOverdrive;
         private boolean allowsTechniques = true;
         private boolean allowsFlight = true;
         private float scale = 1f;
@@ -181,7 +177,6 @@ public final class Form {
         public Builder calmAura() { calmAura = true; return this; }
         public Builder unlock(int level, double parentMastery) { unlockLevel = level; parentMasteryRequired = parentMastery; return this; }
         public Builder requiresFlag(String flag) { requiredFlag = flag; return this; }
-        public Builder allowsOverdrive() { allowsOverdrive = true; return this; }
         public Builder noTechniques() { allowsTechniques = false; return this; }
         public Builder noFlight() { allowsFlight = false; return this; }
         public Builder scale(float s) { scale = s; return this; }
