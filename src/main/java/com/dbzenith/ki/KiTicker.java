@@ -73,6 +73,7 @@ public final class KiTicker {
         if (now % 20 == 0) com.dbzenith.transform.GodKi.tickSecond(player, data);
         com.dbzenith.race.RacialSkillEffects.tick(player, data, now);
         com.dbzenith.transform.Kaioken.tick(player, data, now);
+        com.dbzenith.combat.CombatMoves.tick(player, data, now);
         data.tickRisingCharge();
         boolean fighting = now - data.getLastCombatTick() < 200;                      // ten seconds since the last blow
         int before = data.getCombatTicks();

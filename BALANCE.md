@@ -135,3 +135,22 @@ Android ki absorption, Majin kill-heal) tip close duels; whether the pacing targ
 - **Rising Charge:** a technique fired within 2 s of releasing a charge held at least 2 s gets +10% per second held, up to +50%.
 - **Spirit Shock:** a 1.5 s stun in 4.5 blocks that also breaks guards; 10% ki, every 25 s.
 - **Instant Transmission:** 25% ki, every 30 s.
+
+## Combat v3 (CX-6, v0.17.0)
+Constants are in `CombatMoves`.
+- **Z-hit:** a blow within 10 ticks of a dash. x1.5 damage and a 20-tick stun (the longest), once per dash.
+- **Directional heavies:** they keep the heavy's charge multiplier.
+  - Back (uppercut): a knock-up 1.6x as high.
+  - Forward (rush): driven 2.6 blocks/tick along the ground.
+  - Sideways (hook): thrown sideways plus a 12-tick stun.
+- **Sweep:** guard + heavy, for the heavy's stamina cost. Melee x1.2 in a 3-block frontal arc, unblockable (it lowers the guard). Floors the target for 30 ticks.
+- **Chase:** within 30 ticks of a heavy launch; costs a dash. At most 3 per combo (a new target, or 60 ticks without a launch, resets it). The next blow within 20 ticks gets x1.15.
+- **Chase counter:** raising the guard within 8 ticks of being chased. The chaser is stunned for 15 ticks.
+- **Revenge Counter:** a dash while stunned. Costs 10% of max stamina; every 4 s. 12 ticks of hyper armour (no knockback or stun) and a Z-hit on the last attacker within 10 blocks.
+- **Breaker Wave:** Shift + dash while hit within the last second, or while stunned. 2 charges, each back after 30 s. Ki damage x0.3 in 5 blocks, a strong push, and clears your stun and downed state.
+- **Snap recovery:** a dash within 30 ticks of being launched, for 15 stamina. Stops your momentum, with 8 ticks of evasion.
+- **Ground slide:** a dash while downed. A roll at 0.7x dash strength.
+- **Spot dodge:** guard + dash, for half a dash's stamina. 10 ticks of evasion.
+- **Side step:** guard + dash with A or D. A 0.55x dash sideways, 8 ticks of evasion.
+- **Clash:** two players hitting each other within 3 ticks. The second blow is cancelled and both are pushed apart.
+- **Downed:** 30 ticks. Half damage, no knockback, no launches.

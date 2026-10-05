@@ -36,12 +36,23 @@ public final class AerialCombat {
         return !attacker.onGround() && attacker.getXRot() > 30f;
     }
 
-    static void afterHit(Player attacker, LivingEntity victim, boolean heavy, boolean victimAirborne) {
+    static void afterHit(Player attacker, LivingEntity victim, boolean heavy, boolean victimAirborne, int dir) {
         DBZConfig.Server c = DBZConfig.SERVER;
         Vec3 look = attacker.getLookAngle();
         Vec3 flat = new Vec3(look.x, 0, look.z).normalize();
+        long now = victim.level().getGameTime();
+        if (CombatMoves.isDowned(victim, now)) return;                  // the floored stay on the floor
         if (heavy && isSpike(attacker)) {
             queue(victim, new Vec3(flat.x * 0.3, -c.spikeVelocity.get(), flat.z * 0.3));
+            CombatMoves.spiked(victim, now);
+        } else if (heavy && dir == CombatMoves.DIR_BACK) {                // uppercut: straight up, high
+            queue(victim, new Vec3(flat.x * 0.1, c.knockUpVelocity.get() * 1.6, flat.z * 0.1));
+        } else if (heavy && dir == CombatMoves.DIR_FORWARD) {             // rush: driven far away, low
+            queue(victim, flat.scale(2.6).add(0, 0.25, 0));
+        } else if (heavy && (dir == CombatMoves.DIR_LEFT || dir == CombatMoves.DIR_RIGHT)) {   // hook: thrown sideways, dazed
+            Vec3 side = new Vec3(flat.z, 0, -flat.x).scale(dir == CombatMoves.DIR_LEFT ? -1 : 1);
+            queue(victim, side.scale(1.5).add(flat.scale(0.4)).add(0, 0.35, 0));
+            victim.addEffect(new net.minecraft.world.effect.MobEffectInstance(com.dbzenith.registry.ModEffects.STUN.get(), 12, 0));
         } else if (heavy && !victimAirborne) {
             queue(victim, new Vec3(flat.x * 0.2, c.knockUpVelocity.get(), flat.z * 0.2));
         } else if (heavy) {

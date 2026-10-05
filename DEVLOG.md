@@ -461,3 +461,19 @@
 
 ### Verified
 - Screenshots: the Universal tab, the Kaioken aura, the Ki Barrier sphere over Kaioken, and Ki Sense scan markers over mobs.
+
+## 2026-10-05 — Session 3 (cont.): CX-6 Combat v3 (v0.17.0)
+- **`combat.CombatMoves`:** the moves from DBV's combat page, mapped onto the existing keys (attack, Heavy, Dash, Guard, Shift). The dash key is read in context: downed → ground slide; Shift while under attack → Breaker Wave; stunned → Revenge Counter; recently launched and airborne → snap recovery; guarding → spot dodge or side step; a chase on offer → chase; otherwise an ordinary dash, which records the tick for a Z-hit. Releasing Heavy sends the movement held (`HeavyReleasePacket`) and picks a directional heavy, or a sweep while guarding.
+- **Hooks:**
+  - `CombatEvents`: Z-hit, chase bonus, half damage on the downed, and clashes that cancel the blow; the sweep breaks the guard.
+  - `AerialCombat`: directional launches; spiked fighters are floored when they land; the downed are not launched.
+  - The guard key starts the chase counter.
+  - Knockback is cancelled for hyper armour and the downed.
+- **State (`data.CombatState`):** per-fighter. Breaker charges, the downed state and the chase window are synced. A new public DOWNED flag (512) lets everyone see the pose. Protocol 24.
+- **Animations:** Uppercut, Rush, Sweep (a low spin), Z-hit (flying knee), Breaker (curl then fling), Spot Dodge, side steps, Air Recover (flip), Roll Up, and Downed (a loop lying on the back). A directional heavy's own move replaces the default heavy punch.
+- **HUD:** DOWNED and a pulsing CHASE chip, and Breaker Wave charge pips by the guard meter. Settings > Controls now lists every move and how to do it.
+- **Commands:** `/dbz move <targets> <move>` for scripted scenes and testing.
+- **Tests (132):** `CombatV3Tests` (4) covers multipliers (Z-hit, clash, downed), launches and chases, sweep / Breaker / Revenge, and recoveries and dodges. `CombatDepthTests.stunStopsEverything` now expects a stunned dash to try a Revenge Counter.
+
+### Verified
+- Screenshots of every new animation. Downed lies flat on the back; the sweep crouch and side step were deepened after review.

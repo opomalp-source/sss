@@ -64,6 +64,7 @@ public final class AnimController {
         int candidateTicks;
         boolean wasSwinging;
         boolean wasHeavy;
+        long lastEventTick = Long.MIN_VALUE / 2;
         int lastHurtTime;
         String form;
         int combo;
@@ -113,6 +114,7 @@ public final class AnimController {
     private static KeyframeAnimation chooseStance(AbstractClientPlayer player, PublicStatePacket state) {
         if (state == null || player.isPassenger() || player.isSleeping() || player.isFallFlying() || player.isSwimming()
                 || player.getPose() == Pose.SWIMMING || isApe(state.form())) return null;
+        if (state.has(PublicStatePacket.DOWNED)) return Anims.DOWNED;
         if (state.has(PublicStatePacket.MEDITATING)) return Anims.MEDITATE;
         if (state.has(PublicStatePacket.GUARDING)) return Anims.GUARD;
         if (state.has(PublicStatePacket.HEAVY)) return Anims.HEAVY_WINDUP;
@@ -150,7 +152,7 @@ public final class AnimController {
 
         // a heavy strike lands when the wind-up is released
         boolean heavy = state != null && state.has(PublicStatePacket.HEAVY);
-        if (t.wasHeavy && !heavy) {
+        if (t.wasHeavy && !heavy && now - t.lastEventTick > 1) {      // a directional heavy brings its own move
             play(player, t, Anims.HEAVY_PUNCH, now, 0);
             t.suppressSwingUntil = now + 4;
         }
@@ -202,10 +204,19 @@ public final class AnimController {
             case AnimEventPacket.WAVE -> Anims.KI_WAVE;
             case AnimEventPacket.FOCUS -> Anims.KI_FOCUS;
             case AnimEventPacket.DASH -> Anims.DASH;
+            case AnimEventPacket.SWEEP -> Anims.SWEEP;
+            case AnimEventPacket.UPPERCUT -> Anims.UPPERCUT;
+            case AnimEventPacket.RUSH -> Anims.RUSH;
+            case AnimEventPacket.HOOK -> Anims.HOOK;
+            case AnimEventPacket.BREAKER -> Anims.BREAKER;
+            case AnimEventPacket.DODGE -> msg.data() == 1 ? Anims.SIDE_LEFT : msg.data() == 2 ? Anims.SIDE_RIGHT : Anims.SPOT_DODGE;
+            case AnimEventPacket.RECOVER -> msg.data() == 1 ? Anims.ROLL_UP : Anims.AIR_RECOVER;
+            case AnimEventPacket.ZHIT -> Anims.ZHIT;
             default -> Anims.KI_BLAST;
         };
         play(player, t, anim, now, 0);
         t.suppressSwingUntil = now + 3;
+        t.lastEventTick = now;
         if (msg.kind() == AnimEventPacket.DASH) {
             com.dbzenith.client.fx.Afterimages.keepAlive(player, 8);
             if (player == mc.player) com.dbzenith.client.fx.CameraFx.rush();

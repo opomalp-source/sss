@@ -25,6 +25,7 @@ public final class DashHandler {
         if (data == null || !player.isAlive() || player.isSpectator()) return false;
         DBZConfig.Server c = DBZConfig.SERVER;
         long now = player.level().getGameTime();
+        if (com.dbzenith.combat.CombatMoves.dashKey(player, data, forward, strafe)) return true;   // the dash key in context
         if (data.isOnCooldown(COOLDOWN_ID, now)) return false;
         if (com.dbzenith.registry.ModEffects.isStunned(player)) return false;
         boolean free = player.getAbilities().instabuild;
@@ -54,6 +55,7 @@ public final class DashHandler {
         }
         data.setCooldown(COOLDOWN_ID, now + c.dashCooldownTicks.get());
         data.setDashEvadeUntil(now + c.dashEvadeTicks.get());
+        data.combat().lastDashTick = now;                                  // a blow right after lands as a Z-hit
         player.serverLevel().sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + 1, player.getZ(), 10, 0.3, 0.6, 0.3, 0.05);
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PHANTOM_FLAP,
                 SoundSource.PLAYERS, 0.8f, 1.8f);

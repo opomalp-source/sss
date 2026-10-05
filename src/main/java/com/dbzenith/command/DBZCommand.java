@@ -217,6 +217,36 @@ public final class DBZCommand {
                                                     double v = DoubleArgumentType.getDouble(ctx, "value");
                                                     return apply(ctx, "Set " + id + " mastery " + v + " for", d -> d.setMastery(id, v));
                                                 })))))
+                .then(Commands.literal("move")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("move", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.List.of("sweep", "breaker", "knockdown", "uppercut", "rush", "zhit", "dodge", "recover"), b))
+                                        .executes(ctx -> {
+                                            String move = StringArgumentType.getString(ctx, "move");
+                                            int n = 0;
+                                            for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
+                                                PlayerData d = ModCapabilities.getOrThrow(p);
+                                                long now = p.level().getGameTime();
+                                                int anim = switch (move) {
+                                                    case "sweep" -> { com.dbzenith.combat.CombatMoves.sweep(p, d); yield -1; }
+                                                    case "breaker" -> { d.setLastFoeHitTick(now); p.setShiftKeyDown(true);
+                                                        com.dbzenith.combat.CombatMoves.dashKey(p, d, 0, 0); p.setShiftKeyDown(false); yield -1; }
+                                                    case "knockdown" -> { com.dbzenith.combat.CombatMoves.knockDown(p, now); yield -1; }
+                                                    case "uppercut" -> com.dbzenith.network.AnimEventPacket.UPPERCUT;
+                                                    case "rush" -> com.dbzenith.network.AnimEventPacket.RUSH;
+                                                    case "zhit" -> com.dbzenith.network.AnimEventPacket.ZHIT;
+                                                    case "dodge" -> com.dbzenith.network.AnimEventPacket.DODGE;
+                                                    case "recover" -> com.dbzenith.network.AnimEventPacket.RECOVER;
+                                                    default -> -2;
+                                                };
+                                                if (anim == -2) continue;
+                                                if (anim >= 0) com.dbzenith.network.ModNetwork.sendToTrackingAndSelf(p, new com.dbzenith.network.AnimEventPacket(p.getId(), anim, 0));
+                                                n++;
+                                            }
+                                            int count = n;
+                                            ctx.getSource().sendSuccess(() -> Component.literal("Move " + move + " for " + count + " player(s)"), true);
+                                            return n;
+                                        }))))
                 .then(Commands.literal("skill")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("skill", StringArgumentType.word())

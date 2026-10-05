@@ -1058,6 +1058,13 @@ public class PlayerData {
         invalidateDerived();
     }
 
+    /** Combat v3 state (runtime; partly synced). */
+    private final CombatState combat = new CombatState();
+
+    public CombatState combat() {
+        return combat;
+    }
+
     // universal skills: learned levels and the active on the Skill key (saved); Kaioken's stage and Rising Charge
     // (synced, not saved)
     private final java.util.Map<String, Integer> skillLevels = new java.util.HashMap<>();
@@ -1648,6 +1655,9 @@ public class PlayerData {
         tag.putInt("transformTotal", transformTotal);
         tag.putInt("racialMask", racialMask);
         tag.putInt("kaioken", kaiokenStage);
+        CompoundTag cs = new CompoundTag();
+        combat.save(cs);
+        tag.put("combat", cs);
         tag.putInt("risingCharge", risingCharge);
         tag.putString("racialActive", String.join(",", racialActive));
         tag.putString("racialAfter", String.join(",", racialAfter));
@@ -1674,6 +1684,7 @@ public class PlayerData {
         transformTotal = tag.getInt("transformTotal");
         racialMask = tag.getInt("racialMask");
         kaiokenStage = tag.getInt("kaioken");
+        combat.load(tag.getCompound("combat"));
         risingCharge = tag.getInt("risingCharge");
         racialActive.clear();
         for (String s : tag.getString("racialActive").split(",")) if (!s.isEmpty()) racialActive.add(s);

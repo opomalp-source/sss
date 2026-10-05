@@ -93,6 +93,10 @@ public final class DbzHud implements IGuiOverlay {
             int gc = gf < 0.3f ? DbzTheme.mix(0xFFAEE6FF, 0xFFFF6A5A, 0.5f + 0.5f * Mth.sin(t * 0.8f)) : 0xFFAEE6FF;
             DbzTheme.slant(g, bx - 7, by - 1, 82, 5, 3, 0xF0040508, 0xF0040508);
             DbzTheme.slantBar(g, bx - 6, by, 80, 3, 2, gf, gc);
+            for (int i = 0; i < 2; i++) {                                                  // Breaker Wave charges
+                int pc = i < d.combat().breakerCharges ? 0xFFFFD27A : 0x60FFFFFF;
+                DbzTheme.quad(g, bx + 80 + i * 6, by - 1, bx + 83 + i * 6, by + 1.5f, bx + 80 + i * 6, by + 4, bx + 77 + i * 6, by + 1.5f, pc, pc, pc, pc);
+            }
             by += 6;
         }
 
@@ -119,6 +123,11 @@ public final class DbzHud implements IGuiOverlay {
         if (d.isCharging()) {
             int pulse = 0xFF000000 | (int) (180 + 75 * Mth.sin(t * 0.6f)) << 8 | 0xFF;
             chipX = chip(g, font, chipX, ly, Component.translatable("hud.dbzenith.charging"), pulse);
+        }
+        if (d.combat().downedFlag) chipX = chip(g, font, chipX, ly, Component.translatable("hud.dbzenith.downed"), 0xFFC0A070);
+        if (time < d.combat().chaseReadyUntil) {
+            int pulse = DbzTheme.mix(0xFFFFFFFF, 0xFF7CE0FF, 0.5f + 0.5f * Mth.sin(t * 1.2f));
+            chipX = chip(g, font, chipX, ly, Component.translatable("hud.dbzenith.chase"), pulse);
         }
         if (d.getKaiokenStage() > 0) {
             int pulse = DbzTheme.mix(0xFFFF2A1E, 0xFFFFC0A0, 0.5f + 0.5f * Mth.sin(t * 0.5f));

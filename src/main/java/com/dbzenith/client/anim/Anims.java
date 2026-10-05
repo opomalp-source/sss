@@ -273,6 +273,101 @@ public final class Anims {
         a.rot("leftArm", 0, 45, 0, -18, Ease.OUTEXPO).rot("leftArm", 8, 0, 0, -5, Ease.INOUTQUAD);
     });
 
+
+    // ------------------------------------------------------------------ combat v3 (CombatMoves)
+
+    /** Uppercut: dropped low, then the whole body rising behind a right that ends overhead. */
+    public static final KeyframeAnimation UPPERCUT = once(12, a -> {
+        a.pos("body", 0, 0, 3.0f, 0, Ease.OUTQUAD).pos("body", 4, 0, -2.0f, 0, Ease.OUTEXPO).pos("body", 12, 0, 0, 0, Ease.INOUTQUAD);
+        a.rot("rightArm", 0, 35, 0, 18, Ease.OUTQUAD).rot("rightArm", 4, -178, -10, -4, Ease.OUTEXPO).rot("rightArm", 12, -30, 0, 8, Ease.INOUTQUAD);
+        a.bend("rightArm", 0, 100, Ease.OUTQUAD).bend("rightArm", 4, 25, Ease.OUTEXPO).bend("rightArm", 12, 40, Ease.INOUTQUAD);
+        a.rot("torso", 0, 18, 15, 0, Ease.OUTQUAD).rot("torso", 4, -18, -12, 0, Ease.OUTEXPO).rot("torso", 12, 0, 0, 0, Ease.INOUTQUAD);
+        a.bend("rightLeg", 0, 55, Ease.OUTQUAD).bend("rightLeg", 4, 0, Ease.OUTEXPO).bend("leftLeg", 0, 55, Ease.OUTQUAD).bend("leftLeg", 4, 0, Ease.OUTEXPO);
+        a.rot("leftArm", 0, -30, 0, -30, Ease.OUTQUAD).rot("leftArm", 12, 0, 0, -5, Ease.INOUTQUAD);
+    });
+
+    /** Rush: a shoulder-first charge, both fists driven forward. */
+    public static final KeyframeAnimation RUSH = once(12, a -> {
+        a.tilt(0, 0, 0, Ease.LINEAR).tilt(3, 28, 0, Ease.OUTEXPO).tilt(12, 0, 0, Ease.INOUTQUAD);
+        a.pos("body", 0, 0, 0, 0, Ease.LINEAR).pos("body", 3, 0, 0.5f, -4.0f, Ease.OUTEXPO).pos("body", 12, 0, 0, 0, Ease.INOUTQUAD);
+        a.rot("rightArm", 0, 40, 0, 15, Ease.LINEAR).rot("rightArm", 3, -95, 8, -6, Ease.OUTEXPO).rot("rightArm", 12, -20, 0, 6, Ease.INOUTQUAD);
+        a.rot("leftArm", 0, 40, 0, -15, Ease.LINEAR).rot("leftArm", 3, -90, -8, 6, Ease.OUTEXPO).rot("leftArm", 12, -20, 0, -6, Ease.INOUTQUAD);
+        a.rot("rightLeg", 0, 0, 0, 0, Ease.LINEAR).rot("rightLeg", 3, 35, 0, 0, Ease.OUTEXPO).rot("rightLeg", 12, 0, 0, 0, Ease.INOUTQUAD);
+    });
+
+    /** Sweep: dropped into a crouch, the leg swept round low across the ground. */
+    public static final KeyframeAnimation SWEEP = once(14, a -> {
+        a.pos("body", 0, 0, 0, 0, Ease.LINEAR).pos("body", 3, 0, 8.5f, 0, Ease.OUTEXPO).pos("body", 10, 0, 8.5f, 0, Ease.LINEAR).pos("body", 14, 0, 0, 0, Ease.INOUTQUAD);
+        a.rot("body", 0, 0, 0, 0, Ease.LINEAR).rot("body", 3, 0, -40, 0, Ease.OUTQUAD).rot("body", 9, 0, 120, 0, Ease.OUTEXPO).rot("body", 14, 0, 0, 0, Ease.INOUTQUAD);
+        a.rot("rightLeg", 0, 0, 0, 0, Ease.LINEAR).rot("rightLeg", 3, -80, 0, 55, Ease.OUTQUAD).rot("rightLeg", 9, -80, 0, 70, Ease.LINEAR).rot("rightLeg", 14, 0, 0, 0, Ease.INOUTQUAD);
+        a.bend("leftLeg", 0, 0, Ease.LINEAR).bend("leftLeg", 3, 110, Ease.OUTQUAD).bend("leftLeg", 10, 110, Ease.LINEAR).bend("leftLeg", 14, 0, Ease.INOUTQUAD);
+        a.rot("rightArm", 3, -20, 0, 70, Ease.OUTQUAD).rot("rightArm", 14, 0, 0, 5, Ease.INOUTQUAD);
+        a.rot("leftArm", 3, -60, 0, -20, Ease.OUTQUAD).rot("leftArm", 14, 0, 0, -5, Ease.INOUTQUAD);
+    });
+
+    /** Z-hit: a flying knee off the dash, fists pulled back. */
+    public static final KeyframeAnimation ZHIT = once(12, a -> {
+        a.rot("rightLeg", 0, 0, 0, 0, Ease.LINEAR).rot("rightLeg", 3, -110, 0, 6, Ease.OUTEXPO).rot("rightLeg", 12, 0, 0, 0, Ease.INOUTQUAD);
+        a.bend("rightLeg", 0, 0, Ease.LINEAR).bend("rightLeg", 3, 120, Ease.OUTEXPO).bend("rightLeg", 12, 0, Ease.INOUTQUAD);
+        a.rot("rightArm", 0, 0, 0, 10, Ease.LINEAR).rot("rightArm", 3, 50, 0, 25, Ease.OUTEXPO).rot("rightArm", 12, 0, 0, 5, Ease.INOUTQUAD);
+        a.rot("leftArm", 0, 0, 0, -10, Ease.LINEAR).rot("leftArm", 3, 50, 0, -25, Ease.OUTEXPO).rot("leftArm", 12, 0, 0, -5, Ease.INOUTQUAD);
+        a.rot("torso", 0, 0, 0, 0, Ease.LINEAR).rot("torso", 3, -12, 0, 0, Ease.OUTEXPO).rot("torso", 12, 0, 0, 0, Ease.INOUTQUAD);
+        a.pos("body", 0, 0, 0, 0, Ease.LINEAR).pos("body", 3, 0, -1.5f, -2.5f, Ease.OUTEXPO).pos("body", 12, 0, 0, 0, Ease.INOUTQUAD);
+    });
+
+    /** Breaker Wave: curled tight, then everything flung outward at once. */
+    public static final KeyframeAnimation BREAKER = once(14, a -> {
+        a.rot("rightArm", 0, -40, 0, -20, Ease.OUTQUAD).rot("rightArm", 3, -20, 0, 120, Ease.OUTEXPO).rot("rightArm", 14, 0, 0, 5, Ease.INOUTQUAD);
+        a.rot("leftArm", 0, -40, 0, 20, Ease.OUTQUAD).rot("leftArm", 3, -20, 0, -120, Ease.OUTEXPO).rot("leftArm", 14, 0, 0, -5, Ease.INOUTQUAD);
+        a.bend("rightArm", 0, 100, Ease.OUTQUAD).bend("rightArm", 3, 0, Ease.OUTEXPO).bend("leftArm", 0, 100, Ease.OUTQUAD).bend("leftArm", 3, 0, Ease.OUTEXPO);
+        a.rot("torso", 0, 20, 0, 0, Ease.OUTQUAD).rot("torso", 3, -15, 0, 0, Ease.OUTEXPO).rot("torso", 14, 0, 0, 0, Ease.INOUTQUAD);
+        a.rot("head", 0, 25, 0, 0, Ease.OUTQUAD).rot("head", 3, -30, 0, 0, Ease.OUTEXPO).rot("head", 14, 0, 0, 0, Ease.INOUTQUAD);
+        a.rot("rightLeg", 3, 0, 0, 18, Ease.OUTEXPO).rot("rightLeg", 14, 0, 0, 0, Ease.INOUTQUAD);
+        a.rot("leftLeg", 3, 0, 0, -18, Ease.OUTEXPO).rot("leftLeg", 14, 0, 0, 0, Ease.INOUTQUAD);
+    });
+
+    /** Spot dodge: a quick lean away from the blow, guard still up. */
+    public static final KeyframeAnimation SPOT_DODGE = once(10, a -> {
+        a.tilt(0, 0, 0, Ease.LINEAR).tilt(2, -22, 1.5f, Ease.OUTEXPO).tilt(7, -22, 1.5f, Ease.LINEAR).tilt(10, 0, 0, Ease.INOUTQUAD);
+        a.rot("rightArm", 0, -70, 0, -25, Ease.OUTEXPO).rot("rightArm", 10, 0, 0, 5, Ease.INOUTQUAD);
+        a.rot("leftArm", 0, -70, 0, 25, Ease.OUTEXPO).rot("leftArm", 10, 0, 0, -5, Ease.INOUTQUAD);
+        a.bend("rightLeg", 2, 35, Ease.OUTEXPO).bend("rightLeg", 10, 0, Ease.INOUTQUAD).bend("leftLeg", 2, 35, Ease.OUTEXPO).bend("leftLeg", 10, 0, Ease.INOUTQUAD);
+    });
+
+    public static final KeyframeAnimation SIDE_LEFT = sideStep(-1), SIDE_RIGHT = sideStep(1);
+
+    /** Side step: a hop to one side ({@code side} -1 left, 1 right), the body leaning into it. */
+    private static KeyframeAnimation sideStep(int side) {
+        return once(8, a -> {
+            a.rot("body", 0, 0, 0, 0, Ease.LINEAR).rot("body", 2, 0, 0, 28 * side, Ease.OUTEXPO).rot("body", 8, 0, 0, 0, Ease.INOUTQUAD);
+            a.pos("body", 0, 0, 0, 0, Ease.LINEAR).pos("body", 2, -3.0f * side, 1.0f, 0, Ease.OUTEXPO).pos("body", 8, 0, 0, 0, Ease.INOUTQUAD);
+            a.rot("rightArm", 2, -40, 0, 25, Ease.OUTEXPO).rot("rightArm", 8, 0, 0, 5, Ease.INOUTQUAD);
+            a.rot("leftArm", 2, -40, 0, -25, Ease.OUTEXPO).rot("leftArm", 8, 0, 0, -5, Ease.INOUTQUAD);
+        });
+    }
+
+    /** Snap recovery in the air: a tight flip back to upright. */
+    public static final KeyframeAnimation AIR_RECOVER = once(10, a -> {
+        a.tilt(0, 0, 0, Ease.LINEAR).tilt(5, -180, 0, Ease.LINEAR).tilt(10, -360, 0, Ease.OUTQUAD);
+        a.bend("rightLeg", 0, 90, Ease.OUTQUAD).bend("rightLeg", 10, 0, Ease.INOUTQUAD).bend("leftLeg", 0, 90, Ease.OUTQUAD).bend("leftLeg", 10, 0, Ease.INOUTQUAD);
+        a.rot("rightArm", 0, -30, 0, 10, Ease.OUTQUAD).rot("leftArm", 0, -30, 0, -10, Ease.OUTQUAD);
+    });
+
+    /** Ground slide: rolling up off the floor into a crouch. */
+    public static final KeyframeAnimation ROLL_UP = once(12, a -> {
+        a.tilt(0, -80, 9, Ease.LINEAR).tilt(6, 40, 4, Ease.OUTQUAD).tilt(12, 0, 0, Ease.INOUTQUAD);
+        a.bend("rightLeg", 0, 100, Ease.LINEAR).bend("rightLeg", 12, 0, Ease.INOUTQUAD).bend("leftLeg", 0, 100, Ease.LINEAR).bend("leftLeg", 12, 0, Ease.INOUTQUAD);
+    });
+
+    /** Downed: flat on the back, a hand clutching at nothing. */
+    public static final KeyframeAnimation DOWNED = loop(40, a -> {
+        a.tilt(0, -90, 9.5f, Ease.INOUTSINE).tilt(20, -88, 9.3f, Ease.INOUTSINE).tilt(40, -90, 9.5f, Ease.INOUTSINE);
+        a.rot("rightArm", 0, -10, 0, 40, Ease.INOUTSINE).rot("rightArm", 20, -25, 0, 35, Ease.INOUTSINE).rot("rightArm", 40, -10, 0, 40, Ease.INOUTSINE);
+        a.rot("leftArm", 0, 0, 0, -25, Ease.LINEAR);
+        a.rot("rightLeg", 0, -10, 0, 8, Ease.LINEAR).bend("rightLeg", 0, 30, Ease.LINEAR);
+        a.rot("leftLeg", 0, 0, 0, -6, Ease.LINEAR);
+        a.rot("head", 0, -15, 20, 0, Ease.LINEAR);
+    });
     // ------------------------------------------------------------------ builder
 
     private static KeyframeAnimation loop(int length, Consumer<Keys> body) {

@@ -161,7 +161,13 @@ public class SettingsScreen extends Screen {
             y += ROW;
         }
         if (tab == Tab.CONTROLS) {
-            DbzTheme.wrapped(g, font, Component.translatable("settings.dbzenith.controls_help"), left + 12, top + 78, W - 24, DbzTheme.DIM);
+            DbzTheme.text(g, font, Component.translatable("settings.dbzenith.moves"), left + 12, top + 74, DbzTheme.TITLE, 0.8f);
+            String[] moves = {"zhit", "directional", "sweep", "chase", "chase_counter", "revenge", "breaker", "recover", "dodge", "clash", "downed"};
+            for (int i = 0; i < moves.length; i++) {                     // the combat moves, how to do each
+                int my = top + 84 + i * 9;
+                DbzTheme.text(g, font, Component.translatable("settings.dbzenith.move." + moves[i]), left + 14, my, DbzTheme.ACCENT, 0.7f);
+                DbzTheme.text(g, font, Component.translatable("settings.dbzenith.move." + moves[i] + ".how"), left + 96, my, DbzTheme.TEXT, 0.7f);
+            }
         }
         DbzTheme.divider(g, left + 8, top + 38, W - 16);
         super.render(g, mouseX, mouseY, partial);

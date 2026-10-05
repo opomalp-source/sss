@@ -58,9 +58,17 @@ public final class CombatEvents {
             raw = event.getAmount(); // ki blasts and throws deal raw DBZ damage
         } else if (isMelee && attackerData != null) {
             attackerData.recomputeIfStale();
+            long nowTick = victim.level().getGameTime();
+            double moves = CombatMoves.beforeMelee(attacker, attackerData, victim, nowTick);   // Z-hit, chase, downed, clash
+            if (moves == 0) {
+                event.setCanceled(true);
+                return;
+            }
             DBZConfig.Server c = DBZConfig.SERVER;
             int combo = attackerData.registerHit(victim.level().getGameTime(), c.comboWindowTicks.get(), c.comboMaxHits.get());
             raw = DamageCalculator.meleeOutgoing(attackerData, event.getAmount(), combo);
+            raw *= moves;
+            int heavyDir = attackerData.combat().heavyDir;
             double heavy = attackerData.consumeHeavy(victim.level().getGameTime());
             raw *= heavy;
             attackerData.setStamina(attackerData.getStamina() - c.meleeStaminaCost.get());
@@ -77,7 +85,8 @@ public final class CombatEvents {
                 float yaw = attacker.getYRot() * Mth.DEG_TO_RAD;
                 victim.knockback(Math.min(3.0, extraKnockback), Mth.sin(yaw), -Mth.cos(yaw));
             }
-            AerialCombat.afterHit(attacker, victim, heavy > 1.0, aerial);
+            AerialCombat.afterHit(attacker, victim, heavy > 1.0, aerial, heavy > 1.0 ? heavyDir : CombatMoves.DIR_NEUTRAL);
+            CombatMoves.afterMelee(attacker, attackerData, victim, heavy > 1.0, nowTick);
             impact = heavy <= 1.0 ? ImpactPacket.PUNCH : AerialCombat.isSpike(attacker) ? ImpactPacket.SPIKE : ImpactPacket.HEAVY;
         } else {
             raw = DamageCalculator.fromVanilla(event.getAmount());
@@ -101,6 +110,7 @@ public final class CombatEvents {
         if (victimData != null) {
             Player player = (Player) victim;
             victimData.recomputeIfStale();
+            if (CombatMoves.unblockable == victim && victimData.isGuarding()) GuardRules.lower(victimData);   // the sweep takes your legs
             if (!isKi && !isThrow && !isMelee && !source.is(DamageTypeTags.BYPASSES_ARMOR) && event.getAmount() > 0) {
                 // Vanilla armor still matters against mobs and the environment.
                 float afterArmor = CombatRules.getDamageAfterAbsorb(event.getAmount(), player.getArmorValue(),

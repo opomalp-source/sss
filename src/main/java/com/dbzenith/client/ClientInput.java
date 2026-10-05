@@ -46,7 +46,8 @@ public final class ClientInput {
 
         boolean heavy = ModKeys.HEAVY.isDown() && mc.screen == null;
         if (heavy != wasHeavy) {
-            ModNetwork.sendToServer(new InputPacket(heavy ? InputPacket.Action.HEAVY_START : InputPacket.Action.HEAVY_STOP));
+            if (heavy) ModNetwork.sendToServer(new InputPacket(InputPacket.Action.HEAVY_START));
+            else ModNetwork.sendToServer(new com.dbzenith.network.HeavyReleasePacket(mc.player.input.forwardImpulse, mc.player.input.leftImpulse));
             wasHeavy = heavy;
         }
         while (ModKeys.DASH.consumeClick()) {
