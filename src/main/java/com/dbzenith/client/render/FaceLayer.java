@@ -77,6 +77,11 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         draw(pose, buffers, Part.EYES.ordinal(), eyes, light, overlay, whites ? 0xFFFFFF : iris);     // no whites: the whole eye is dark
         draw(pose, buffers, IRIS, eyes, glowing ? LightTexture.FULL_BRIGHT : light, overlay, iris);
         if (hd) draw(pose, buffers, PUPIL, eyes, glowing ? LightTexture.FULL_BRIGHT : light, overlay, 0xFFFFFF);   // pupils and the shine
+        if (glowing) {                                                         // eyes that burn: an emissive pass over the iris
+            ResourceLocation glow = textures[IRIS][Math.max(0, Math.min(textures[IRIS].length - 1, eyes))];
+            getParentModel().renderToBuffer(pose, buffers.getBuffer(RenderType.eyes(glow)), LightTexture.FULL_BRIGHT, overlay,
+                    ((iris >> 16) & 255) / 255f * 0.8f, ((iris >> 8) & 255) / 255f * 0.8f, (iris & 255) / 255f * 0.8f, 1f);
+        }
         int hair = form.hairColor() >= 0 ? form.hairColor() : race != null ? race.brow() : state.hairColor() >= 0 ? state.hairColor() : 0x3A2414;
         draw(pose, buffers, Part.BROWS.ordinal(), FaceParts.get(face, Part.BROWS), light, overlay, race != null && form.hairColor() < 0 ? hair : darken(hair, 0.8f));
         draw(pose, buffers, Part.NOSE.ordinal(), FaceParts.get(face, Part.NOSE), light, overlay, 0xFFFFFF);

@@ -132,6 +132,35 @@ public final class HairMesh {
     private static final int[] FACE_SIGN = {1, -1, 1, -1, 1, -1};
 
     /**
+     * Texture corners per face vertex, so that on the four long faces v always runs root to tip (strands in the hair
+     * texture follow the spike) and u across; the two end caps keep a plain quad mapping. [face][vertex] = {u1?, v1?}.
+     */
+    private static final boolean[][][] UV = new boolean[6][4][];
+
+    static {
+        for (int f = 0; f < 6; f++) {
+            int[] q = FACES[f];
+            boolean cap = ((q[0] ^ q[1]) & 4) == 0 && ((q[0] ^ q[2]) & 4) == 0;
+            int firstBase = -1;
+            for (int k = 0; k < 4; k++) {
+                if (cap) {
+                    UV[f][k] = new boolean[]{k == 1 || k == 2, k >= 2};
+                    continue;
+                }
+                int c = q[k], base = c & ~4;
+                if (firstBase < 0 && (c & 4) == 0) firstBase = base;
+                UV[f][k] = new boolean[]{false, (c & 4) != 0};
+            }
+            if (cap) continue;
+            for (int k = 0; k < 4; k++) {                                      // the first root corner takes u0, its partner too
+                int fb = -1;
+                for (int j = 0; j < 4; j++) if ((q[j] & 4) == 0) { fb = q[j]; break; }
+                UV[f][k][0] = (q[k] & ~4) != fb;
+            }
+        }
+    }
+
+    /**
      * Draw in head space: the pose must already carry the head's transform (ModelPart.translateAndRotate);
      * coordinates are in model pixels.
      */
@@ -196,10 +225,10 @@ public final class HairMesh {
                 Vec3 axis = FACE_AXIS[f] == 0 ? s.side : FACE_AXIS[f] == 1 ? s.side2 : s.axis;
                 float nx = (float) axis.x * FACE_SIGN[f], ny = (float) axis.y * FACE_SIGN[f], nz = (float) axis.z * FACE_SIGN[f];
                 int[] q = FACES[f];
-                vertex(vc, m, n, corners[q[0]], u0, v0, sr, sg, sb, light, overlay, nx, ny, nz);
-                vertex(vc, m, n, corners[q[1]], u1, v0, sr, sg, sb, light, overlay, nx, ny, nz);
-                vertex(vc, m, n, corners[q[2]], u1, v1, sr, sg, sb, light, overlay, nx, ny, nz);
-                vertex(vc, m, n, corners[q[3]], u0, v1, sr, sg, sb, light, overlay, nx, ny, nz);
+                for (int k = 0; k < 4; k++) {
+                    boolean[] uv = UV[f][k];
+                    vertex(vc, m, n, corners[q[k]], uv[0] ? u1 : u0, uv[1] ? v1 : v0, sr, sg, sb, light, overlay, nx, ny, nz);
+                }
             }
         }
         pose.popPose();

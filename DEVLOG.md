@@ -629,3 +629,16 @@ User requests: transformations should change the character (an orange Namekian i
 
 ### Verified
 - Screenshots of all nine race looks plus the Demon lineage, front and back, with HD faces.
+
+## 2026-10-05 — Session 3 (cont.): 13c Form detail (v0.25.0)
+- **HD hair (`form_hair_hd.png`, 256x256, same regions):** strands along every spike, cylinder shading, a jagged anime shine band on the middles and tips, roots darkening into the scalp, a denser cap and falling long hair with shine.
+- **`HairMesh`:** the texture coordinates are remapped per face, so on the four long faces v always runs root to tip. Before, streaks ran across the spike on two of the faces.
+- **Glowing eyes:** forms with eyes of their own draw an emissive (`RenderType.eyes`) pass over the iris.
+- **`BodyFxLayer`:**
+  - god ki (any calm-aura form) glows along the body's edges in the aura colour (`body_glow.png`, additive, pulsing), which also gives silver forms a silver sheen;
+  - Kaioken flushes the whole body red with each heartbeat (`body_mask.png`, translucent);
+  - lightning forms flash bolts over the body (four `sparks_*` frames, flickering, tinted between the aura colour and white).
+- **Art:** made by `ArtGen.FormFx`.
+
+### Verified
+- Screenshots: HD and classic hair side by side, glowing Super Saiyan eyes, SSJ2 bolts across three frames, Blue, and the Kaioken flush.

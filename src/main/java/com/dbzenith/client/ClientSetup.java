@@ -65,6 +65,7 @@ public final class ClientSetup {
                 renderer.addLayer(new com.dbzenith.client.render.RaceSkinLayer(renderer));
                 renderer.addLayer(new com.dbzenith.client.render.FormOverlayLayer(renderer));
                 renderer.addLayer(new com.dbzenith.client.render.FaceLayer(renderer));
+                renderer.addLayer(new com.dbzenith.client.render.BodyFxLayer(renderer));
                 renderer.addLayer(new com.dbzenith.client.render.CosmeticsLayer(renderer));
                 renderer.addLayer(new FormHairLayer(renderer, event.getEntityModels()));
                 renderer.addLayer(new RaceFeatureLayer(renderer, event.getEntityModels()));

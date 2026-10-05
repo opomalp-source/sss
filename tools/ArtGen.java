@@ -26,6 +26,7 @@ public class ArtGen {
         Hd.all();
         HdRaces.all();
         FormLooks.all();
+        FormFx.all();
         System.out.println("ArtGen done");
     }
 
@@ -799,6 +800,111 @@ public class ArtGen {
             };
             s.leg = (f, x, y, w, h) -> v(y, h) > 0.85 || f == Face.BOTTOM ? tone(garb, Skins.faceLight(f) - 0.1) : cloth(garb, f, x, y, w, h, 93, 1.1);
             s.save("entity/race_hd/core_demon.png");
+        }
+    }
+
+    // ================================================================== form detail (CX-13c)
+
+    /**
+     * Form detail textures: HD hair (strands along each spike, cylinder shading, an anime shine band), a body glow
+     * rim for god ki (drawn additively in the aura colour), a flat body mask (the Kaioken flush) and four frames of
+     * lightning crawling over the body.
+     */
+    static final class FormFx {
+        static void all() throws IOException {
+            hairHd();
+            bodyGlow();
+            bodyMask();
+            for (int i = 0; i < 4; i++) sparks(i);
+        }
+
+        /** 256x256, the same regions as form_hair.png at four times the resolution. */
+        static void hairHd() throws IOException {
+            int S = 4;
+            Canvas c = new Canvas(64 * S, 64 * S);
+            for (int y = 0; y < 12 * S; y++) for (int x = 0; x < 32 * S; x++) {                        // cap: dense strands
+                double v = 0.8 + (Hd.smooth(x, 0, 1.5, 301) - 0.5) * 0.25 - (y > 7 * S ? 0.08 : 0) + 0.05 * Math.sin(x * 0.9);
+                c.set(x, y, Creatures.grey(v));
+            }
+            for (int y = 16 * S; y < 44 * S; y++) for (int x = 0; x < 24 * S; x++) {                    // long hair: falling strands
+                double v = 0.92 - (y - 16 * S) * 0.0015 + (Hd.smooth(x, 0, 1.4, 302) - 0.5) * 0.28;
+                if (Math.abs(((y - 16 * S) % 40) - 12) < 2 && Hd.smooth(x, 3, 3, 309) > 0.45) v += 0.12;  // shine
+                c.set(x, y, Creatures.grey(v));
+            }
+            c.rect(40 * S, 0, 42 * S, S, 0xFFFFFFFF);                                                     // eyes
+            double[] tier = {0.66, 0.84, 0.98};
+            for (int t = 0; t < 3; t++) {
+                int x0 = t * 16 * S;
+                for (int y = 48 * S; y < 60 * S; y++) for (int x = x0; x < x0 + 16 * S; x++) {
+                    // the mesh samples u 3..9 and v 50..56 of each tier (x0+12..x0+36, 200..224): v runs root -> tip
+                    double uu = (x - (x0 + 12)) / 24.0, vv = (y - 200) / 24.0;
+                    double v = tier[t];
+                    v += (Hd.smooth(x, 0, 1.6, 303 + t) - 0.5) * 0.3;                                    // strands along the spike
+                    v -= 0.16 * Math.pow(Math.abs(uu - 0.5) * 2, 2);                                       // round: darker at the sides
+                    if (t > 0) {                                                                            // the shine band, jagged
+                        double band = 0.35 + 0.08 * Math.sin(uu * 20);
+                        if (Math.abs(vv - band) < 0.07) v = Math.max(v, 1.0);
+                    }
+                    if (t == 0) v -= 0.12 * (1 - vv);                                                      // roots darken into the scalp
+                    if (t == 2) v += 0.06 * vv;                                                            // tips catch the light
+                    c.set(x, y, Creatures.grey(v));
+                }
+            }
+            c.save("entity/form_hair_hd.png");
+        }
+
+        /** The god-ki rim: bright along every edge of the body, a faint glow across it. */
+        static void bodyGlow() throws IOException {
+            Hd.HdSkin s = new Hd.HdSkin();
+            FaceFn rim = (f, x, y, w, h) -> {
+                double u = (x + 0.5) / w, v = (y + 0.5) / h;
+                double e = Math.min(Math.min(u, 1 - u), Math.min(v, 1 - v));
+                double val = 0.75 * Math.exp(-e / 0.07) + 0.1 + 0.08 * Hd.smooth(x, y, 3, f.ordinal() + 501);
+                if (f == Face.TOP || f == Face.BOTTOM) val *= 0.5;
+                return Creatures.grey(val);
+            };
+            s.head = rim;
+            s.body = rim;
+            s.arm = rim;
+            s.leg = rim;
+            s.save("entity/form/body_glow.png");
+        }
+
+        static void bodyMask() throws IOException {
+            Hd.HdSkin s = new Hd.HdSkin();
+            FaceFn white = (f, x, y, w, h) -> 0xFFFFFFFF;
+            s.head = white;
+            s.body = white;
+            s.arm = white;
+            s.leg = white;
+            s.save("entity/form/body_mask.png");
+        }
+
+        /** Lightning: on some faces, a jagged bolt running down the face (a bright core, a softer halo). */
+        static void sparks(int frame) throws IOException {
+            Hd.HdSkin s = new Hd.HdSkin();
+            int[] part = {0};
+            FaceFn bolt = (f, x, y, w, h) -> {
+                int seed = 900 + frame * 97 + f.ordinal() * 13 + w * 7 + h;
+                if (noise(seed, 1, 5) > 0.55 || f == Face.TOP || f == Face.BOTTOM) return 0;
+                double u = (x + 0.5) / w, v = (y + 0.5) / h;
+                double v0 = noise(seed, 2, 5) * 0.4, v1 = v0 + 0.35 + noise(seed, 3, 5) * 0.25;
+                if (v < v0 || v > v1) return 0;
+                int steps = 6;
+                double t = (v - v0) / (v1 - v0) * steps;
+                int i = (int) t;
+                double a = 0.2 + 0.6 * noise(seed, 10 + i, 5), b = 0.2 + 0.6 * noise(seed, 11 + i, 5);
+                double cu = a + (b - a) * (t - i);
+                double d = Math.abs(u - cu) * w;
+                if (d < 0.7) return 0xFFFFFFFF;
+                if (d < 2.0) return Creatures.grey(0.45);
+                return 0;
+            };
+            s.head = bolt;
+            s.body = bolt;
+            s.arm = bolt;
+            s.leg = bolt;
+            s.save("entity/form/sparks_" + frame + ".png");
         }
     }
     // ================================================================== faces
