@@ -29,3 +29,6 @@ run-gametest
 *.log
 run-server
 run-clienttest
+
+# the user's style references (inspiration only, never shipped)
+reference/

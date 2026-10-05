@@ -137,7 +137,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [x] CX-9 Animation v3: idle breathing, combat stance, sprint, flight ascend/descend, get-up, victory, racial transformation flourishes (regal/calm/feral), procedural banking/pitch/run lean/landing squash (v0.20.0)
 - [x] CX-10 Sound: 29 synthesized sound events / 60 variants (tools/SfxGen.java + ffmpeg libvorbis), impacts, swings, landings, aura loops, transformations, skills, UI (v0.21.0)
 - [x] CX-8c Transformation looks (user request): forms change the body, not just hair and eyes. Done: recoloured race skins (Orange Namekian, Demon King, Golden Frost Demon, Metal God Core, Mutant God, evil and pure Majin, Pure Corruption, crimson Vampires, Perfect and Zenith Bio-Androids, Golden Tuffle, Apex Gen Alien, Demon God, Supreme Kai), generated-body tints, SSJ4 red and silver fur (v0.22.0)
-- [ ] CX-8d Transformation shapes (user request, follow-up): bigger frames for Buffed, Legendary and Giant forms (model scale per part), Frost Demon form shapes (second-form horns, third-form crest, final-form smooth head), Super Saiyan 3 brow ridge, Golden Great Ape fur, Primal tails, Bio-Android wings, Majin size changes
+- [>] CX-8d Transformation shapes (moved into CX-14f): bigger frames for Buffed, Legendary and Giant forms (model scale per part), Frost Demon form shapes (second-form horns, third-form crest, final-form smooth head), Super Saiyan 3 brow ridge, Golden Great Ape fur, Primal tails, Bio-Android wings, Majin size changes
 - [x] CX-8e Face customization in first-time character creation (user request): Body / Face tabs with a zoomed head preview; race skins now wear the face parts too (v0.22.0)
 - [x] CX-13 Art and design overhaul (v0.23.0 - v0.27.0) (user request: "way too simplistic"; more detailed forms, body art, UI and HUD, switchable in the settings; the user's reference pictures are style inspiration only, nothing copied)
   - [x] 13a HD bodies (v0.23.0): 128x128 generated bodies (muscle definition, rim light, ambient occlusion), detailed outfits (gi folds, belts, wristbands, boots), HD face parts (16x16 faces: eye highlights, iris gradients, lashes)
@@ -146,5 +146,41 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - [x] 13d UI v2 (v0.26.0): ornate themed panels, buttons and frames; a "UI style" setting (Zenith / Classic)
   - [x] 13e HUD v2 (v0.27.0): detailed portrait frames per form, animated bars, new layouts; a "HUD style" setting (Zenith / Classic / Minimal)
   - [x] 13f Art detail setting (v0.23.0): Zenith Settings > Style > HD art
+- [ ] CX-14 Art direction v2 (user request with reference pictures, saved locally in reference/ (git-ignored, inspiration only, nothing copied): chunky anime-styled Minecraft characters). This comes next and replaces the noisy HD look as the default.
+  - [ ] 14a Painted skins: every race skin and generated body repainted in the reference direction:
+    - clean dark line art for the anatomy (pecs, abs, obliques, biceps, deltoids, back muscles, knees);
+    - 2-3 tone cel shading with soft highlights, readable at 64x64;
+    - race markings drawn as clean shapes (Namekian arm and leg muscle patches, Frost Demon plates and gems, Majin dots).
+  - [ ] 14b Anime faces v2: a bold upper lid line, white sclera, coloured irises with pupils and a highlight, sharp angled brows, a nose hook line and a small mouth; expressions (calm, angry, shouting, hurt); every race default reworked.
+  - [ ] 14c Hair v3: chunky voxel clumps (stacked, tapering cuboids per spike, wrapping the back and sides, darker roots to lighter tips). All presets and every form's hair (SSJ, SSJ2, SSJ3 long, SSJ4 mane, God, Blue, LSSJ) rebuilt.
+  - [ ] 14d 3D body parts:
+    - Namekian pointed ears and curved antennae;
+    - Majin head tentacle and ear holes;
+    - Frost Demon horns, head dome, shoulder domes and ear pieces;
+    - a segmented furry Saiyan tail with physics (swings, wraps round the waist);
+    - other race tails, Demon horns, Bio-Android wings and crest.
+  - [ ] 14e Clothes v2, all original designs with 3D parts:
+    - Saiyan battle armour (chest plate, shoulder pads, undersuit);
+    - a gi with undershirt, sash and wristbands;
+    - weighted boots, hoodie and jacket;
+    - a Namekian cape and turban;
+    - a Majin vest, baggy pants and an emblem belt (an original emblem);
+    - Frost Demon armour.
+  - [ ] 14f Transformation shapes (was CX-8d): bigger frames for Buffed, Legendary and Giant forms (model scale per part), Frost Demon form shapes (second-form horns, third-form crest, final-form smooth head), Super Saiyan 3 brow ridge, Golden Great Ape fur, Primal tails, Bio-Android wings, Majin size changes.
+- [ ] CX-15 Animations v4 (user request: "serious animations that are actually fitting and look amazing"): rework every animation with anticipation, follow-through and weight, and review each frame by frame in game:
+  - jab, cross, hook and kick combo strings;
+  - heavy wind-ups;
+  - beam charge and fire (cupped hands, two-handed pushes);
+  - ki volleys;
+  - guard, parry, dodge and vanish;
+  - flight poses (cruise, dash, hover);
+  - a tensed powering-up scream;
+  - per-race transformation sequences;
+  - hit reactions, knockback tumbles and the get-up;
+  - per-race idle stances.
+- [ ] CX-11a Aura v3 (user: "the auras don't look finished"):
+  - layered flame-shaped shells (a bright core, outer tongues licking up from the feet, flicker and turbulence);
+  - a burst on starting a charge, ground dust and lifting rocks;
+  - looks per form: SSJ spiky gold, SSJ2 crackling, God calm flame, Blue glow, silver wisps, red Kaioken, dark evil.
 - [ ] CX-11 VFX v3
 - [ ] CX-12 World (Otherworld, God Ki pools, fusion v2, wishes, metals)
