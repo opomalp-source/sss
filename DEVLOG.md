@@ -1164,3 +1164,25 @@ User: race customization was far too little; not every Frost Demon looks like Fr
   - The Race Look screen.
 - **GameTest:** the race look is clamped, saved and shown, Frost Demons get their options, and Humans have none.
 - 146 required tests pass.
+
+## 2026-10-07 — Session 3 (cont.): CX-16c HUD v3 (v0.43.0)
+
+User: the health, ki and stamina bars looked too bland and "robloxy"; make them cleaner and better designed.
+
+### Added
+- **The Clean HUD, now the default (`DbzHud.clean`):**
+  - **Portrait card:** a 32 px rounded card with a soft gradient and a hairline rim. The rim turns the aura colour when transformed and pulses while charging. A thin gold line under it shows the release (red past 100%).
+  - **One line of status:** BP and the value (white, or the aura colour when transformed), the release in gold, and the form name in capitals.
+  - **Three slim bars:**
+    - Health 7 px, ki 5 px, stamina 3 px, set in glass tracks with a hairline outline.
+    - Each fill is a crisp vertical gradient with a gloss line on top and a bright leading edge.
+    - Damage just taken lingers as a pale trail. Health and ki have quarter ticks.
+    - Low health pulses with a red rim. Charging sends a band of light along the ki bar.
+    - The value sits beside each bar.
+  - **Guard meter and breaker charges:** a slim line with gold pips.
+  - A soft shade under the cluster so it reads on any sky.
+  - Status pills and the technique and skill chips by the hotbar are glass to match.
+- **HUD styles:** 0 Clean (default), 1 Classic, 2 Minimal, 3 Ornate (the old Zenith frame). Existing setting values of 0 get the new look.
+
+### Verified
+- Screenshots: at rest, just hit (the trail), charging (the band of light) and in Super Saiyan (the gold rim, the form name, aura-tinted ki), plus the chips by the hotbar.

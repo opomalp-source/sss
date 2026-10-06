@@ -1,6 +1,7 @@
 package com.dbzenith.client;
 
 import com.dbzenith.client.ui.DbzTheme;
+import com.dbzenith.client.ui.Ui;
 import com.dbzenith.client.ui.PortraitRenderer;
 import com.dbzenith.data.PlayerData;
 import com.dbzenith.network.PublicStatePacket;
@@ -65,7 +66,8 @@ public final class DbzHud implements IGuiOverlay {
         int ly = switch (style) {
             case 1 -> classic(g, font, mc, d, s, form, held, aura, accent, t, dt, hudScale);
             case 2 -> minimal(g, font, d, s, form, held, aura, t, dt);
-            default -> zenith(g, font, mc, d, s, form, held, aura, accent, t, dt, hudScale);
+            case 3 -> zenith(g, font, mc, d, s, form, held, aura, accent, t, dt, hudScale);
+            default -> clean(g, font, mc, d, s, form, held, aura, t, dt, hudScale);
         };
         int chipX = chipLeft;
 
@@ -303,7 +305,7 @@ public final class DbzHud implements IGuiOverlay {
     private static final String[] TECH = {"machine", "metal", "overclock", "upgrade", "omega", "core", "android", "protocol", "neural", "conversion", "tuffle"};
     private static final String[] REGAL = {"form", "perfect", "king", "sovereign", "warlord", "dragon", "elder", "ultimate"};
 
-    /** 0 Zenith, 1 Classic, 2 Minimal. */
+    /** 0 Clean (CX-16c, the default), 1 Classic, 2 Minimal, 3 Ornate (the old Zenith frame). */
     public static int hudStyle() {
         try {
             return com.dbzenith.config.DBZConfig.CLIENT.hudStyle.get();
@@ -450,6 +452,91 @@ public final class DbzHud implements IGuiOverlay {
         return y + 11;
     }
 
+    /**
+     * HUD v3, the default (CX-16c): clean and quiet. A rounded portrait card, a battle-power line over three slim bars
+     * (crisp vertical gradients with a gloss line, a bright leading edge, quarter ticks, a pale trail of recent loss and
+     * the value beside each), all over a soft shade so it reads on any sky. Returns the y of the status chip row.
+     */
+    private static int clean(GuiGraphics g, Font font, Minecraft mc, PlayerData d, DerivedStats s, Form form, boolean held, int aura,
+                             float t, float dt, float hudScale) {
+        int px = 6, py = 6, ps = 32;
+        DbzTheme.hGradient(g, 0, 0, 210, 52, 0x60000000, 0x00000000);                    // a soft shade under the cluster
+
+        // the portrait card
+        if (held || d.isCharging()) {
+            float pulse = 0.55f + 0.45f * Mth.sin(t * (d.isCharging() ? 0.8f : 0.25f));
+            Ui.round(g, px - 2, py - 2, ps + 4, ps + 4, 2, DbzTheme.withAlpha(aura, (int) (150 * pulse)));
+        }
+        Ui.round(g, px, py, ps, ps, 2, 0xE00C111C);
+        g.fillGradient(px + 1, py + ps / 2, px + ps - 1, py + ps - 1, 0x00000000, DbzTheme.withAlpha(held ? aura : 0x3A5A9A, 90));
+        int c0 = (int) ((px + 1) * hudScale), c1 = (int) ((py + 1) * hudScale), c2 = (int) ((px + ps - 1) * hudScale), c3 = (int) ((py + ps - 1) * hudScale);
+        PortraitRenderer.draw(g, mc.player, px + ps / 2, py + ps / 2 + 3, 36f, 14f, new int[]{c0, c1, c2, c3});
+        RenderSystem.enableBlend();
+        Ui.outline(g, px, py, ps, ps, 2, held ? DbzTheme.withAlpha(aura, 230) : 0x50FFFFFF);
+        float release = d.getReleasePercent() / 100f;                                     // the release, as a thin line under the card
+        g.fill(px + 1, py + ps + 2, px + ps - 1, py + ps + 4, 0x90000000);
+        g.fill(px + 1, py + ps + 2, px + 1 + (int) ((ps - 2) * Math.min(1, release)), py + ps + 4, release > 1f ? 0xFFFF4030 : Ui.GOLD);
+
+        // battle power, release and the form, in one line
+        int bx = px + ps + 6;
+        long bp = StatCalculator.battlePower(d);
+        String bps = bp < 0 ? "???" : String.format("%,d", bp);
+        DbzTheme.text(g, font, "BP", bx, py, Ui.MUTED, 0.65f);
+        float tx = bx + font.width("BP") * 0.65f + 3;
+        DbzTheme.text(g, font, bps, tx, py - 0.5f, held ? DbzTheme.brighten(aura, 1.15f) : 0xFFFFFFFF, 0.85f);
+        tx += font.width(bps) * 0.85f + 4;
+        DbzTheme.text(g, font, d.getReleasePercent() + "%", tx, py, release > 1f ? 0xFFFF6040 : Ui.GOLD, 0.65f);
+        tx += font.width(d.getReleasePercent() + "%") * 0.65f + 5;
+        if (!form.isBase()) {
+            Component name = Component.translatable(form.translationKey());
+            DbzTheme.text(g, font, Component.literal(name.getString().toUpperCase()), tx, py, DbzTheme.brighten(aura, 1.2f), 0.65f);
+        }
+
+        // the three bars
+        float bodyFrac = frac(d.getBody(), s.maxBody());
+        boolean low = bodyFrac < 0.25f;
+        int hp = low ? DbzTheme.mix(0xFFE84A3C, 0xFFFFC0B0, 0.5f + 0.5f * Mth.sin(t * 0.6f)) : 0xFFE84A3C;
+        int ki = held ? DbzTheme.mix(0xFF39C6FF, aura, 0.35f) : 0xFF39C6FF;
+        int y = py + 9;
+        y = cbar(g, font, 0, bx, y, 124, 7, bodyFrac, d.getBody(), hp, t, dt, low, false);
+        y = cbar(g, font, 1, bx, y, 112, 5, frac(d.getKi(), s.maxKi()), d.getKi(), ki, t, dt, false, d.isCharging());
+        y = cbar(g, font, 2, bx, y, 98, 3, frac(d.getStamina(), s.maxStamina()), d.getStamina(), 0xFFF2B33A, t, dt, false, false);
+        if (d.isGuarding() || d.getGuardMeter() < 100) {                                  // the guard, and the breaker charges
+            float gf = (float) (d.getGuardMeter() / 100);
+            int gc = gf < 0.3f ? DbzTheme.mix(0xFFAEE6FF, 0xFFFF6A5A, 0.5f + 0.5f * Mth.sin(t * 0.8f)) : 0xFFAEE6FF;
+            Ui.round(g, bx, y, 84, 3, 1, 0xA0080B12);
+            g.fill(bx, y, bx + (int) (84 * gf), y + 3, gc);
+            for (int i = 0; i < 2; i++) Ui.round(g, bx + 88 + i * 5, y - 1, 4, 4, 1, i < d.combat().breakerCharges ? Ui.GOLD : 0x40FFFFFF);
+            y += 6;
+        }
+        chipLeft = bx;
+        return Math.max(y + 2, py + ps + 7);
+    }
+
+    /** A clean bar: glass track, vertical-gradient fill with a gloss line and a bright edge, a pale trail of loss, quarter ticks, the value. */
+    private static int cbar(GuiGraphics g, Font font, int i, int x, int y, int w, int h, float frac, double value, int color, float t, float dt,
+                            boolean alarm, boolean charging) {
+        ease(i, frac, t, dt);
+        if (alarm) Ui.outline(g, x - 1, y - 1, w + 2, h + 2, 1, DbzTheme.withAlpha(color, (int) (120 + 100 * Mth.sin(t * 0.6f))));
+        Ui.round(g, x, y, w, h, 1, 0xB0080B12);
+        float shown = w * SHOWN[i], ghost = w * GHOST[i];
+        if (ghost > shown + 0.5f) g.fill(x + (int) shown, y, x + (int) ghost, y + h, DbzTheme.withAlpha(DbzTheme.mix(color, 0xFFFFFFFF, 0.55f), 200));
+        if (shown >= 1) {
+            g.fillGradient(x, y, x + (int) shown, y + h, DbzTheme.brighten(color, 1.18f), DbzTheme.darken(color, 0.72f));
+            g.fill(x, y, x + (int) shown, y + 1, 0x55FFFFFF);                              // gloss
+            g.fill(x + (int) shown - 1, y, x + (int) shown, y + h, 0xB0FFFFFF);           // the leading edge
+            if (charging) {                                                                // light running along while charging
+                float band = (t * 4 + i * 30) % (shown + 24) - 12;
+                DbzTheme.hGradient(g, x + Math.max(0, band - 10), y, x + Math.min(shown, band), y + h, 0x00FFFFFF, 0x70FFFFFF);
+                DbzTheme.hGradient(g, x + Math.max(0, band), y, x + Math.min(shown, band + 10), y + h, 0x70FFFFFF, 0x00FFFFFF);
+            }
+        }
+        if (h >= 5) for (int k = 1; k < 4; k++) g.fill(x + w * k / 4, y + 1, x + w * k / 4 + 1, y + h - 1, 0x38000000);   // quarter ticks
+        Ui.outline(g, x, y, w, h, 1, 0x30FFFFFF);
+        DbzTheme.text(g, font, compact(value), x + w + 3, y + h / 2f - 3f, 0xFFF0F2F6, 0.65f);
+        return y + h + 3;
+    }
+
     /** Thin bars and numbers in a corner, no portrait. Returns the y of the status chip row. */
     private static int minimal(GuiGraphics g, Font font, PlayerData d, DerivedStats s, Form form, boolean held, int aura, float t, float dt) {
         int x = 6, y = 6, w = 92;
@@ -492,7 +579,12 @@ public final class DbzHud implements IGuiOverlay {
 
     /** The backing of the technique and skill chips by the hotbar. */
     private static void chipBack(GuiGraphics g, int x, int y, int w, int h) {
-        if (hudStyle() == 0) {
+        if (hudStyle() == 0) {                                                            // glass, like the rest of the clean HUD
+            Ui.round(g, x - 1, y - 1, w + 2, h + 2, 2, 0xC80B101A);
+            Ui.outline(g, x - 1, y - 1, w + 2, h + 2, 2, 0x30FFFFFF);
+            return;
+        }
+        if (hudStyle() == 3) {
             DbzTheme.nine(g, BARS, 512, 256, x - 1, y - 1, w + 2, h + 2, 0, 128, 192, 40, 12, true);
             return;
         }
@@ -502,6 +594,12 @@ public final class DbzHud implements IGuiOverlay {
 
     private static int chip(GuiGraphics g, Font font, int x, int y, Component text, int color) {
         int w = (int) (font.width(text) * 0.75f) + 6;
+        if (hudStyle() == 0) {                                                            // a glass pill
+            Ui.round(g, x, y - 1, w, 9, 2, 0xB80B101A);
+            Ui.outline(g, x, y - 1, w, 9, 2, DbzTheme.withAlpha(color, 110));
+            DbzTheme.text(g, font, text, x + 3, y + 1, color, 0.75f);
+            return x + w + 2;
+        }
         g.blitNineSliced(CHIPS, x, y - 1, w, 9, 3, 3, 16, 16, 16, 0);
         DbzTheme.text(g, font, text, x + 3, y + 1, color, 0.75f);
         return x + w + 2;

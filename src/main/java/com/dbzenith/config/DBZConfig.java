@@ -656,8 +656,8 @@ public final class DBZConfig {
                     .define("transformCutIn", true);
             hudScale = b.comment("Size of the portrait HUD (0.6 - 1.4)")
                     .defineInRange("hudScale", 1.0, 0.6, 1.4);
-            hudStyle = b.comment("HUD: 0 Zenith (ornate portrait frame per form, animated bars), 1 Classic, 2 Minimal (thin bars, no portrait)")
-                    .defineInRange("hudStyle", 0, 0, 2);
+            hudStyle = b.comment("HUD: 0 Clean (a portrait card and slim gradient bars), 1 Classic, 2 Minimal (thin bars, no portrait), 3 Ornate (a portrait frame per form)")
+                    .defineInRange("hudStyle", 0, 0, 3);
             b.pop();
             b.push("effects");
             screenShake = b.comment("Camera shake strength from hits, explosions and landings (0 = off)")

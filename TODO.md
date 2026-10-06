@@ -193,5 +193,5 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [ ] CX-16 Design overhaul (user: "the character creation design is ugly and cramped... I want a design overhaul")
   - [x] 16a (v0.41.0) UI v3 foundation and character creation rebuilt: full-screen layout, a large rotatable preview, tabs (Race, Body, Face, Hair, Path), roomy cards; new characters start in shorts only; better body proportions (thicker arms, sturdier limbs)
   - [x] 16b (v0.42.0) Race customization: per-race colours and body parts (Frost Demon horns, shell and skin colours; Namekian antennae and markings; Majin antenna and skin; Saiyan tail colour; Kai and demon ears and horns; Bio-Android spots and crest; and more), editable later too
-  - [ ] 16c HUD v3: cleaner, better-designed health, ki and stamina bars (not flat or "robloxy")
+  - [x] 16c (v0.43.0) HUD v3: cleaner, better-designed health, ki and stamina bars (not flat or "robloxy")
   - [ ] 16d The other screens in the new style, with tabs: stats, techniques, racial and universal skills, forms, quests
