@@ -87,6 +87,10 @@ public final class Ui {
         DbzTheme.text(g, font, text, x, y, color, scale);
     }
 
+    public static void text(GuiGraphics g, Font font, String text, float x, float y, int color, float scale) {
+        DbzTheme.text(g, font, text, x, y, color, scale);
+    }
+
     public static void centered(GuiGraphics g, Font font, Component text, float cx, float y, int color, float scale) {
         DbzTheme.text(g, font, text, cx - font.width(text) * scale / 2f, y, color, scale);
     }

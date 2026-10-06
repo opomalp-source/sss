@@ -183,6 +183,10 @@ public final class ClientEvents {
             mc.setScreen(new com.dbzenith.client.screen.DeckScreen(null));
             delayTicks = Math.max(delayTicks, 5);
         }
+        if (name.startsWith("stats_") && !(mc.screen instanceof com.dbzenith.client.screen.StatScreen)) {
+            mc.setScreen(new com.dbzenith.client.screen.StatScreen());
+            delayTicks = Math.max(delayTicks, 5);
+        }
         if (name.startsWith("forms_") && !(mc.screen instanceof com.dbzenith.client.screen.FormScreen)) {
             mc.setScreen(new com.dbzenith.client.screen.FormScreen(null));
             delayTicks = Math.max(delayTicks, 5);
@@ -190,12 +194,6 @@ public final class ClientEvents {
         if (delayTicks > 0) {
             pendingShot = name;
             pendingShotTicks = delayTicks;
-            return;
-        }
-        if (name.startsWith("stats_") && !(mc.screen instanceof com.dbzenith.client.screen.StatScreen)) {
-            mc.setScreen(new com.dbzenith.client.screen.StatScreen());
-            pendingShot = name;
-            pendingShotTicks = 5; // let the screen render first
             return;
         }
         String safe = name.replaceAll("[^a-zA-Z0-9_-]", "_");

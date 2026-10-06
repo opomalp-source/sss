@@ -1,8 +1,8 @@
 package com.dbzenith.client.screen;
 
-import com.dbzenith.client.ui.DbzTheme;
-import com.dbzenith.client.ui.ThemedButton;
 import com.dbzenith.client.ClientPlayerData;
+import com.dbzenith.client.ui.Ui;
+import com.dbzenith.client.ui.UiButton;
 import com.dbzenith.data.PlayerData;
 import com.dbzenith.network.ModNetwork;
 import com.dbzenith.network.UpgradeAttributePacket;
@@ -10,123 +10,121 @@ import com.dbzenith.stats.Attribute;
 import com.dbzenith.stats.DerivedStats;
 import com.dbzenith.stats.StatCalculator;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 /**
- * Training screen: attributes, TP cost per point and "+" buttons (shift = +10), plus derived stats.
- * Reads live from {@link ClientPlayerData}; upgrades are requested from and validated by the server.
+ * The Stats page of the character menu (UI v3): who you are, your seven attributes with their training cost and a
+ * "+" each (shift: +10), and what they add up to. Upgrades are requested from and checked by the server.
  */
-public class StatScreen extends Screen {
-    private static final int W = 320;
-    private static final int H = 218;
-    private static final int HEADER = 0xFFFFB330;
-    private static final int TEXT = 0xFFF0F0F0;
-    private static final int DIM = 0xFFA0A0B0;
-
-    private int left;
-    private int top;
+public class StatScreen extends MenuScreen {
+    private static final int ROW = 17;
 
     public StatScreen() {
-        super(Component.translatable("screen.dbzenith.stats"));
+        super(Component.translatable("screen.dbzenith.stats"), Page.STATS, null);
+    }
+
+    private int leftW() {
+        return (int) (cardW * 0.54f);
     }
 
     @Override
-    protected void init() {
-        left = (width - W) / 2;
-        top = (height - H) / 2;
-        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.forms_button"), b -> minecraft.setScreen(new FormScreen(this)))
-                .bounds(left + W - 70, top + H - 24, 62, 18).build());
-        addRenderableWidget(ThemedButton.of(titleLabel(), b -> {
+    protected void initPage() {
+        int x = cardX + 10, y = cardY + 26, lw = leftW() - 20;
+        Attribute[] attrs = Attribute.values();
+        for (int i = 0; i < attrs.length; i++) {
+            Attribute a = attrs[i];
+            addRenderableWidget(UiButton.of(UiButton.Style.CHIP, Component.literal("+"), x + lw - 16, y + i * ROW + 1, 16, 13,
+                    b -> ModNetwork.sendToServer(new UpgradeAttributePacket(a, hasShiftDown() ? 10 : 1)))
+                    .tip(Component.translatable("screen.dbzenith.upgrade_tooltip")));
+        }
+        int by = cardY + cardH - 20, bx = cardX + 10;
+        UiButton title = UiButton.of(UiButton.Style.SECONDARY, titleLabel(), bx, by, 120, 14, b -> {
             java.util.List<com.dbzenith.world.LifeSim.Title> earned = com.dbzenith.world.LifeSim.earnedTitles(ClientPlayerData.get());
             String current = ClientPlayerData.get().getTitle();
             int idx = -1;
             for (int i = 0; i < earned.size(); i++) if (earned.get(i).id().equals(current)) idx = i;
             String next = idx + 1 < earned.size() ? earned.get(idx + 1).id() : "";
             ModNetwork.sendToServer(new com.dbzenith.network.SelectTitlePacket(next));
-        }).bounds(left + 8, top + H - 24, 104, 18).build());
-        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.racial_button"), b -> minecraft.setScreen(new RacialScreen(this)))
-                .bounds(left + 8, top + H - 46, 104, 18).build());
-        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.life_button"), b -> minecraft.setScreen(new LifeScreen(this)))
-                .bounds(left + 116, top + H - 24, 44, 18).build());
-        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.techniques_button"), b -> minecraft.setScreen(new DeckScreen(this)))
-                .bounds(left + W - 156, top + H - 24, 82, 18).build());
+        }).textScale(0.8f);
+        addRenderableWidget(title);
+        bx += 124;
+        addRenderableWidget(UiButton.of(UiButton.Style.SECONDARY, Component.translatable("screen.dbzenith.life_button"), bx, by, 48, 14,
+                b -> minecraft.setScreen(new LifeScreen(this))).textScale(0.8f));
+        bx += 52;
         if (com.dbzenith.race.Milestones.pathPending(ClientPlayerData.get())) {
-            addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.path_button"), b -> minecraft.setScreen(new PathChoiceScreen(this)))
-                    .bounds(left + W - 100, top + H - 68, 92, 18).build().selected(true));
+            addRenderableWidget(UiButton.of(UiButton.Style.PRIMARY, Component.translatable("screen.dbzenith.path_button"), bx, by, 96, 14,
+                    b -> minecraft.setScreen(new PathChoiceScreen(this))).textScale(0.8f));
+            bx += 100;
         }
         if (com.dbzenith.stats.Prestige.eligible(ClientPlayerData.get())) {
-            addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.prestige_button"), b -> minecraft.setScreen(
-                    new net.minecraft.client.gui.screens.ConfirmScreen(yes -> {
+            addRenderableWidget(UiButton.of(UiButton.Style.PRIMARY, Component.translatable("screen.dbzenith.prestige_button"), bx, by, 80, 14,
+                    b -> minecraft.setScreen(new net.minecraft.client.gui.screens.ConfirmScreen(yes -> {
                         if (yes) ModNetwork.sendToServer(new com.dbzenith.stats.Prestige.Packet());
                         minecraft.setScreen(this);
                     }, Component.translatable("screen.dbzenith.prestige_title"),
-                            Component.translatable("screen.dbzenith.prestige_confirm", ClientPlayerData.get().getPrestige() + 1))))
-                    .bounds(left + W - 80, top + H - 46, 72, 18).build());
-        }
-        Attribute[] attrs = Attribute.values();
-        for (int i = 0; i < attrs.length; i++) {
-            Attribute a = attrs[i];
-            addRenderableWidget(ThemedButton.of(Component.literal("+"),
-                            b -> ModNetwork.sendToServer(new UpgradeAttributePacket(a, hasShiftDown() ? 10 : 1)))
-                    .bounds(left + 140, top + 42 + i * 18, 18, 16)
-                    .tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("screen.dbzenith.upgrade_tooltip")))
-                    .build());
+                            Component.translatable("screen.dbzenith.prestige_confirm", ClientPlayerData.get().getPrestige() + 1)))).textScale(0.8f));
         }
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        DbzTheme.screenBackground(g, width, height);
-        DbzTheme.panel(g, left, top, W, H);
+    protected void renderPage(GuiGraphics g, int mouseX, int mouseY, float partial) {
         PlayerData d = ClientPlayerData.get();
         DerivedStats s = d.getDerived();
+        int x = cardX + 10, lw = leftW() - 20;
 
-        DbzTheme.header(g, font, title, left + W / 2, top - 6);
-        g.drawString(font, Component.translatable(d.getPrestige() > 0 ? "screen.dbzenith.identity_prestige" : "screen.dbzenith.identity_age",
+        // who you are
+        Component who = Component.translatable(d.getPrestige() > 0 ? "screen.dbzenith.identity_prestige" : "screen.dbzenith.identity_age",
                 Component.translatable(d.getVariant().kind() == com.dbzenith.race.Variant.Kind.DEFAULT ? d.getRace().translationKey()
                         : d.getVariant().translationKey()), Component.translatable(d.getPath().translationKey()),
-                (int) d.getPhysicalAge(), d.getPrestige()), left + 8, top + 20, DIM);
-        g.drawString(font, Component.translatable("screen.dbzenith.tp", String.format("%,d", d.getTrainingPoints())), left + W - 110, top + 8, 0xFF7CFF7C);
+                (int) d.getPhysicalAge(), d.getPrestige());
+        Ui.text(g, font, who, x, cardY + 8, 0xFFC8CEDC, 0.8f);
         com.dbzenith.race.Alignment.Standing standing = com.dbzenith.race.Alignment.of(d);
-        g.drawString(font, Component.translatable("screen.dbzenith.alignment", Component.translatable(standing.translationKey()), d.getAlignment())
-                .withStyle(standing.color), left + W - 110, top + 20, 0xFFFFFFFF);
+        Component al = Component.translatable("screen.dbzenith.alignment", Component.translatable(standing.translationKey()), d.getAlignment())
+                .withStyle(standing.color);
+        Ui.text(g, font, al, cardX + cardW - 10 - font.width(al) * 0.8f, cardY + 8, 0xFFFFFFFF, 0.8f);
 
+        // the attributes
+        Ui.section(g, font, Component.translatable("screen.dbzenith.attributes"), x, cardY + 18, lw);
         Attribute[] attrs = Attribute.values();
-        g.drawString(font, Component.translatable("screen.dbzenith.cost"), left + 104, top + 32, DIM);
+        int y = cardY + 26;
         for (int i = 0; i < attrs.length; i++) {
             Attribute a = attrs[i];
-            int y = top + 46 + i * 18;
-            g.drawString(font, Component.translatable(a.translationKey()), left + 10, y, TEXT);
-            g.drawString(font, String.valueOf(d.getAttribute(a)), left + 76, y, 0xFFFFFFFF);
-            g.drawString(font, costText(d, a), left + 104, y, DIM);
+            int ry = y + i * ROW;
+            boolean hot = mouseX >= x && mouseX < x + lw && mouseY >= ry && mouseY < ry + ROW - 2;
+            Ui.round(g, x, ry, lw, ROW - 2, 2, hot ? 0x1CFFFFFF : 0x0CFFFFFF);
+            Ui.text(g, font, Component.translatable(a.translationKey()), x + 6, ry + 3.5f, Ui.TEXT, 0.85f);
+            String v = String.valueOf(d.getAttribute(a));
+            Ui.text(g, font, v, x + lw * 0.5f - font.width(v) * 0.9f, ry + 3, 0xFFFFFFFF, 0.9f);
+            String cost = costText(d, a);
+            Ui.text(g, font, cost, x + lw - 22 - font.width(cost) * 0.7f, ry + 4, Ui.MUTED, 0.7f);
         }
 
-        int rx = left + 172;
-        int ry = top + 34;
+        // what they add up to
+        int rx = cardX + leftW() + 4, rw = cardX + cardW - 10 - rx;
+        Ui.section(g, font, Component.translatable("screen.dbzenith.power"), rx, cardY + 18, rw);
         String[][] rows = {
-                {"Body", num(s.maxBody())}, {"Ki", num(s.maxKi())}, {"Stamina", num(s.maxStamina())},
-                {"Melee dmg", num(s.meleeDamage())}, {"Ki dmg", num(s.kiDamage())}, {"Defense", num(s.defense())},
-                {"Evasion", pct(s.evasion())}, {"Ki control", pct(s.kiControl())},
-                {"Spirit", String.format("x%.2f", s.spiritModifier())}, {"Atk speed", pct(s.attackSpeed())},
-                {"Move speed", pct(s.moveSpeed())}, {"Power", num(StatCalculator.battlePower(d))}
+                {"stat.dbzenith.body", num(s.maxBody())}, {"stat.dbzenith.ki", num(s.maxKi())}, {"stat.dbzenith.stamina", num(s.maxStamina())},
+                {"stat.dbzenith.melee", num(s.meleeDamage())}, {"stat.dbzenith.ki_damage", num(s.kiDamage())}, {"stat.dbzenith.defense", num(s.defense())},
+                {"stat.dbzenith.evasion", pct(s.evasion())}, {"stat.dbzenith.ki_control", pct(s.kiControl())},
+                {"stat.dbzenith.spirit", String.format("x%.2f", s.spiritModifier())}, {"stat.dbzenith.attack_speed", pct(s.attackSpeed())},
+                {"stat.dbzenith.move_speed", pct(s.moveSpeed())}, {"stat.dbzenith.battle_power", num(StatCalculator.battlePower(d))}
         };
-        for (String[] row : rows) {
-            g.drawString(font, row[0], rx, ry, DIM);
-            g.drawString(font, row[1], rx + 120 - font.width(row[1]), ry, TEXT);
-            ry += 12;
+        int ry = cardY + 28;
+        for (int i = 0; i < rows.length; i++) {
+            if (i % 2 == 0) Ui.round(g, rx, ry - 2, rw, 10, 1, 0x0AFFFFFF);
+            Ui.text(g, font, Component.translatable(rows[i][0]), rx + 4, ry, Ui.MUTED, 0.75f);
+            Ui.text(g, font, rows[i][1], rx + rw - 4 - font.width(rows[i][1]) * 0.8f, ry - 0.5f, i == rows.length - 1 ? Ui.GOLD : Ui.TEXT, 0.8f);
+            ry += 10;
         }
         int godKi = com.dbzenith.transform.GodKi.level(d);
         if (godKi > 0) {                                        // divine ki: level and the way to the next
-            int gold = 0xFFFFE08A;
-            g.drawString(font, Component.translatable("screen.dbzenith.god_ki"), rx, ry, gold);
+            ry += 4;
+            Ui.text(g, font, Component.translatable("screen.dbzenith.god_ki"), rx + 4, ry, 0xFFFFE08A, 0.75f);
             String lv = Component.translatable("screen.dbzenith.god_ki_level", godKi, com.dbzenith.transform.GodKi.MAX).getString();
-            g.drawString(font, lv, rx + 120 - font.width(lv), ry, gold);
-            DbzTheme.slant(g, rx, ry + 10, 120, 3, 1, 0xC0101018, 0xC0101018);
-            DbzTheme.slantBar(g, rx, ry + 10, 120, 3, 1, (float) com.dbzenith.transform.GodKi.progress(d), gold);
+            Ui.text(g, font, lv, rx + rw - 4 - font.width(lv) * 0.75f, ry, 0xFFFFE08A, 0.75f);
+            Ui.round(g, rx + 4, ry + 9, rw - 8, 3, 1, 0x50000000);
+            Ui.round(g, rx + 4, ry + 9, (int) ((rw - 8) * com.dbzenith.transform.GodKi.progress(d)), 3, 1, 0xFFFFE08A);
         }
-        super.render(g, mouseX, mouseY, partialTick);
     }
 
     private static Component titleLabel() {
@@ -154,10 +152,5 @@ public class StatScreen extends Screen {
 
     private static String pct(double v) {
         return String.format("%.1f%%", v * 100);
-    }
-
-    @Override
-    public boolean isPauseScreen() {
-        return false;
     }
 }

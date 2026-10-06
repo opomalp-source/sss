@@ -1,60 +1,48 @@
 package com.dbzenith.client.screen;
 
-import com.dbzenith.client.ui.DbzTheme;
-import com.dbzenith.client.ui.ThemedButton;
 import com.dbzenith.client.ClientPlayerData;
+import com.dbzenith.client.ui.Ui;
+import com.dbzenith.client.ui.UiButton;
 import com.dbzenith.data.PlayerData;
 import com.dbzenith.network.ModNetwork;
 import com.dbzenith.network.SelectFormPacket;
 import com.dbzenith.stats.Attribute;
 import com.dbzenith.transform.Form;
 import com.dbzenith.transform.FormHandler;
-import com.dbzenith.transform.FormMath;
 import com.dbzenith.transform.Forms;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The form tree for your race: status, requirements, mastery, multiplier and drain.
- * Click a form to make it the transform key's target; the server validates everything.
+ * The Forms page of the character menu (UI v3): your race's form tree, each with a colour chip, whether it is ready
+ * (or what it still needs), its mastery and its multiplier. Click a form to make it the transform key's target; the
+ * server checks everything.
  */
-public class FormScreen extends Screen {
-    private static final int W = 360;
-    private static final int H = 220;
-    private static final int ROW = 18;
-    private static final int HEADER = 0xFFFFB330;
-    private static final int TEXT = 0xFFF0F0F0;
-    private static final int DIM = 0xFFA0A0B0;
-    private static final int BAD = 0xFFFF7070;
-    private static final int GOOD = 0xFF7CFF7C;
-
-    private final Screen parent;
+public class FormScreen extends MenuScreen {
+    private static final int ROW = 16;
     private final List<Entry> entries = new ArrayList<>();
-    private int left;
-    private int top;
+    private int scroll;
 
     private record Entry(Form form, int depth) {}
 
     public FormScreen(Screen parent) {
-        super(Component.translatable("screen.dbzenith.forms"));
-        this.parent = parent;
+        super(Component.translatable("screen.dbzenith.forms"), Page.FORMS, parent);
     }
 
+    private int listY() { return cardY + 22; }
+    private int visible() { return Math.max(3, (cardH - 22 - 30) / ROW); }
+
     @Override
-    protected void init() {
-        left = (width - W) / 2;
-        top = (height - H) / 2;
+    protected void initPage() {
         entries.clear();
         collect(Forms.BASE.id(), 0, ClientPlayerData.get());
-        addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.clear_target"),
-                b -> ModNetwork.sendToServer(new SelectFormPacket(""))).bounds(left + W - 170, top + H - 26, 80, 18).build());
-        addRenderableWidget(ThemedButton.of(Component.translatable("gui.back"), b -> onClose())
-                .bounds(left + W - 86, top + H - 26, 78, 18).build());
+        addRenderableWidget(UiButton.of(UiButton.Style.SECONDARY, Component.translatable("screen.dbzenith.clear_target"),
+                cardX + cardW - 8 - 90, cardY + 5, 90, 13, b -> ModNetwork.sendToServer(new SelectFormPacket(""))).textScale(0.75f));
     }
 
     private void collect(String parentId, int depth, PlayerData d) {
@@ -64,6 +52,20 @@ public class FormScreen extends Screen {
         }
     }
 
+    private int rowAt(double mx, double my) {
+        if (mx < cardX + 8 || mx > cardX + cardW - 8 || my < listY()) return -1;
+        int i = (int) ((my - listY()) / ROW);
+        if (i >= visible()) return -1;
+        i += scroll;
+        return i < entries.size() ? i : -1;
+    }
+
+    @Override
+    public boolean mouseScrolled(double mx, double my, double delta) {
+        scroll = Mth.clamp(scroll - (int) Math.signum(delta), 0, Math.max(0, entries.size() - visible()));
+        return true;
+    }
+
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         int i = rowAt(mouseX, mouseY);
@@ -71,75 +73,60 @@ public class FormScreen extends Screen {
             Form f = entries.get(i).form();
             if (f.trigger() == Form.Trigger.MANUAL) {
                 ModNetwork.sendToServer(new SelectFormPacket(f.id()));
+                com.dbzenith.client.ClientSounds.uiClick();
                 return true;
             }
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    private int rowAt(double mx, double my) {
-        int y0 = top + 34;
-        if (mx < left + 6 || mx > left + W - 6 || my < y0) return -1;
-        int i = (int) ((my - y0) / ROW);
-        return i < entries.size() ? i : -1;
-    }
-
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        DbzTheme.screenBackground(g, width, height);
-        DbzTheme.panel(g, left, top, W, H);
+    protected void renderPage(GuiGraphics g, int mouseX, int mouseY, float partial) {
         PlayerData d = ClientPlayerData.get();
-        DbzTheme.header(g, font, title, left + W / 2, top - 6);
         Form current = Forms.byId(d.getFormId());
-        g.drawString(font, Component.translatable("screen.dbzenith.current_form", Component.translatable(current.translationKey())),
-                left + 8, top + 20, DIM);
-
-        if (entries.isEmpty()) {
-            g.drawString(font, Component.translatable("screen.dbzenith.no_forms"), left + 10, top + 40, DIM);
-        }
+        Ui.section(g, font, Component.translatable("screen.dbzenith.current_form", Component.translatable(current.translationKey())),
+                cardX + 8, cardY + 8, cardW - 16 - 96);
+        int x = cardX + 8, w = cardW - 16;
+        if (entries.isEmpty()) Ui.paragraph(g, font, Component.translatable("screen.dbzenith.no_forms"), x, listY() + 4, w, Ui.MUTED, 0.8f, 3);
         int hover = rowAt(mouseX, mouseY);
         Component tooltip = null;
-        for (int i = 0; i < entries.size(); i++) {
+        int statusX = x + (int) (w * 0.44f), masteryX = x + w - 74;
+        for (int i = scroll; i < Math.min(entries.size(), scroll + visible()); i++) {
             Entry e = entries.get(i);
             Form f = e.form();
-            int y = top + 34 + i * ROW;
-            boolean selected = f.id().equals(d.getTargetForm());
-            if (selected) DbzTheme.row(g, left + 4, y - 3, W - 12, ROW - 1, true, false);
-            else if (i == hover) DbzTheme.row(g, left + 4, y - 3, W - 12, ROW - 1, false, true);
-            if (f.id().equals(d.getFormId())) g.drawString(font, ">", left + 6, y, GOOD);
-
-            int x = left + 14 + e.depth() * 10;
+            int y = listY() + (i - scroll) * ROW;
+            boolean target = f.id().equals(d.getTargetForm()), now = f.id().equals(d.getFormId());
+            Ui.tile(g, x, y, w, ROW - 2, target, i == hover);
+            int nx = x + 6 + e.depth() * 9;
+            if (e.depth() > 0) g.fill(nx - 6, y + 6, nx - 2, y + 7, 0x40FFFFFF);          // a twig of the tree
             int color = 0xFF000000 | (f.hairColor() >= 0 ? f.hairColor() : f.auraColor());
-            g.drawString(font, Component.translatable(f.translationKey()), x, y, color);
-
+            Ui.round(g, nx, y + 4, 6, 6, 1, color);
+            Ui.text(g, font, Component.translatable(f.translationKey()), nx + 9, y + 3.5f, now ? 0xFFFFFFFF : Ui.TEXT, 0.8f);
+            if (now) Ui.text(g, font, Component.translatable("screen.dbzenith.form_now"), nx + 11 + font.width(Component.translatable(f.translationKey())) * 0.8f,
+                    y + 4, 0xFF8CE08C, 0.6f);
             Component problem = problem(d, f);
-            int sx = left + 170;
-            if (f.trigger() == Form.Trigger.MOON) g.drawString(font, Component.translatable("screen.dbzenith.moon_only"), sx, y, DIM);
-            else if (problem == null) g.drawString(font, Component.translatable("screen.dbzenith.ready"), sx, y, GOOD);
+            if (f.trigger() == Form.Trigger.MOON) Ui.text(g, font, Component.translatable("screen.dbzenith.moon_only"), statusX, y + 4, Ui.MUTED, 0.7f);
+            else if (problem == null) Ui.text(g, font, Component.translatable("screen.dbzenith.ready"), statusX, y + 4, 0xFF8CE08C, 0.7f);
             else {
-                int maxW = left + W - 98 - sx;
-                String text = problem.getString();
-                String clipped = font.plainSubstrByWidth(text, maxW);
+                int maxW = (int) ((masteryX - 8 - statusX) / 0.7f);
+                String text = problem.getString(), clipped = font.plainSubstrByWidth(text, maxW);
                 if (!clipped.equals(text)) {
                     clipped = font.plainSubstrByWidth(text, maxW - font.width("...")) + "...";
                     if (i == hover) tooltip = problem;
                 }
-                g.drawString(font, clipped, sx, y, BAD);
+                Ui.text(g, font, clipped, statusX, y + 4, 0xFFE07068, 0.7f);
             }
-
             double mastery = d.getMastery(f.id());
-            int mx = left + W - 92;
-            g.fill(mx, y + 2, mx + 40, y + 6, 0xFF2A2A33);
-            g.fill(mx, y + 2, mx + (int) (40 * mastery / 100), y + 6, 0xFFFFD040);
-            g.drawString(font, String.format("x%.1f", f.multiplier(Attribute.STRENGTH)), mx + 46, y, TEXT);
+            Ui.round(g, masteryX, y + 5, 40, 3, 1, 0x50000000);
+            Ui.round(g, masteryX, y + 5, (int) (40 * mastery / 100), 3, 1, Ui.GOLD);
+            Ui.text(g, font, String.format("x%.1f", f.multiplier(Attribute.STRENGTH)), masteryX + 46, y + 3.5f, Ui.TEXT, 0.75f);
         }
-
-        int fy = top + H - 46;
-        g.drawString(font, Component.translatable("screen.dbzenith.form_keys"), left + 8, fy, DIM);
+        int fy = cardY + cardH - 22;
+        g.fill(x, fy - 3, x + w, fy - 2, Ui.LINE_SOFT);
+        Ui.text(g, font, Component.translatable("screen.dbzenith.form_keys"), x, fy, Ui.MUTED, 0.7f);
         int kk = com.dbzenith.transform.Kaioken.maxStage(d);
-        g.drawString(font, kk > 0 ? Component.translatable("screen.dbzenith.kaioken_info", kk) : Component.translatable("screen.dbzenith.kaioken_unlearned"),
-                left + 8, fy + 11, DIM);
-        super.render(g, mouseX, mouseY, partialTick);
+        Ui.text(g, font, kk > 0 ? Component.translatable("screen.dbzenith.kaioken_info", kk) : Component.translatable("screen.dbzenith.kaioken_unlearned"),
+                x, fy + 9, Ui.MUTED, 0.7f);
         if (tooltip != null) g.renderTooltip(font, tooltip, mouseX, mouseY);
     }
 
@@ -149,15 +136,5 @@ public class FormScreen extends Screen {
         } catch (IllegalStateException e) { // server config not synced yet
             return Component.literal("?");
         }
-    }
-
-    @Override
-    public void onClose() {
-        minecraft.setScreen(parent);
-    }
-
-    @Override
-    public boolean isPauseScreen() {
-        return false;
     }
 }

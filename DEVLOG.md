@@ -1186,3 +1186,39 @@ User: the health, ki and stamina bars looked too bland and "robloxy"; make them 
 
 ### Verified
 - Screenshots: at rest, just hit (the trail), charging (the band of light) and in Super Saiyan (the gold rim, the form name, aura-tinted ki), plus the chips by the hotbar.
+
+## 2026-10-07 — Session 3 (cont.): CX-16d The character menu and every screen in UI v3 (v0.44.0)
+
+User: overhaul the techniques screen "and so on", with tabs where useful; a design overhaul overall.
+
+### Added
+- **The character menu (`MenuScreen`):** one look and one row of tabs (Stats, Techniques, Skills, Forms), the calm backdrop, the gold title, the training points, and a card per page. The composition is capped at 600 x 340 and centred.
+  - **Stats:**
+    - Who you are and your alignment.
+    - Seven attribute rows: name, value, cost, and a "+" chip with a tooltip (shift: +10).
+    - A striped Power table, battle power in gold, and the God Ki bar.
+    - Title, Life, Path and Prestige buttons.
+  - **Techniques:**
+    - The library: rows with the technique's colour, a gold bar on equipped ones, and a status (Equipped, Learned, Learn N TP, or the level needed). Scrolls.
+    - The deck: numbered slots with outlines for empty ones; hover shows a red cross to remove.
+    - The hovered technique's details in a strip below, and the Ki Creator.
+  - **Skills:**
+    - Racial and universal as chips.
+    - Skill cards with the emblem (ringed for actives, the cooldown sweeping over it), active or passive, and the unlock or level state.
+    - Details and effects below; the learn button for universal skills.
+  - **Forms:** the form tree with twigs, colour chips, NOW on the current form, ready or what it needs, a slim mastery bar and the multiplier. Clear target; the keys and the Kaioken below.
+- **Every other screen in the new style:** the shared theme primitives were rebuilt for the default UI style, so Life, Settings, Quests, the Ki Creator, the barber, wishes, planets and the rest follow automatically:
+  - the backdrop;
+  - panels are glass cards;
+  - titles are a dark pill with a gold title in capitals;
+  - buttons are flat, rounded and hairlined, gold when selected;
+  - rows are tiles; dividers are hairlines.
+  The Classic UI style keeps the old look.
+- **Kit:** `Ui.text` for strings.
+
+### Fixed
+- The `stats_` dev shot never fired: the screen was reopened and closed in a loop.
+- A duplicate lang key (`stat.dbzenith.spirit`) was avoided; the lang file has no duplicate keys.
+
+### Verified
+- Screenshots of all four menu pages, and of Life, Settings, Quests and the Ki Creator in the default style.

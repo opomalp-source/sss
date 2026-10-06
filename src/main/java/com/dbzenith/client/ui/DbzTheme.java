@@ -54,29 +54,13 @@ public final class DbzTheme {
         }
     }
 
-    /** Darkened world behind a screen, a little heavier at the bottom; in Zenith, a glow and drifting ki motes. */
+    /** Behind a screen: a darkened world (Classic), or the calm UI v3 backdrop. */
     public static void screenBackground(GuiGraphics g, int width, int height) {
         if (!zenith()) {
             g.fillGradient(0, 0, width, height, 0xB0060812, 0xD8020308);
             return;
         }
-        g.fillGradient(0, 0, width, height, 0xC8050812, 0xE8010206);
-        RenderSystem.enableBlend();
-        int gw = (int) (width * 1.1), gh = (int) (height * 1.2);
-        g.setColor(0.25f, 0.42f, 0.85f, 0.32f);                                  // a deep blue glow behind the window
-        g.blit(UI_HD, (width - gw) / 2, (height - gh) / 2, gw, gh, 256, 0, 256, 256, 512, 512);
-        g.setColor(1, 1, 1, 1);
-        double t = System.currentTimeMillis() / 1000.0;
-        for (int i = 0; i < 46; i++) {                                           // ki motes drifting up
-            double seed = i * 12.9898;
-            double fx = (Math.sin(seed) * 43758.5453) % 1, speed = 6 + 10 * Math.abs((Math.sin(seed * 1.7) * 9631.1) % 1);
-            double x = Math.abs(fx) * width + Math.sin(t * 0.6 + i) * 6;
-            double y = height - ((t * speed + i * 37) % (height + 20));
-            float a = (float) (0.25 + 0.35 * Math.abs(Math.sin(t * 1.3 + i)));
-            int col = i % 3 == 0 ? 0xFFD27A : 0x7CC8FF;
-            int s = i % 5 == 0 ? 2 : 1;
-            g.fill((int) x, (int) y, (int) x + s, (int) y + s, (int) (a * 255) << 24 | col);
-        }
+        Ui.backdrop(g, width, height, width / 2f, height * 0.45f, 0x3A5A9A);    // UI v3 (CX-16d): the calm backdrop every screen shares
     }
 
     public static void panel(GuiGraphics g, int x, int y, int w, int h) {
@@ -85,14 +69,7 @@ public final class DbzTheme {
             g.blitNineSliced(UI, x, y, w, h, 8, 8, 32, 32, 112, 0);
             return;
         }
-        g.fillGradient(x + 3, y + 3, x + w - 3, y + h - 3, 0xEE141C34, 0xF2060A14);  // dark glass
-        g.enableScissor(x + 3, y + 3, x + w - 3, y + h - 3);
-        for (int ty = y; ty < y + h; ty += 40) for (int tx = x; tx < x + w; tx += 40) {   // the hex lattice, faint
-            g.blit(UI_HD, tx, ty, 40, 40, 0, 128, 64, 64, 512, 512);
-        }
-        g.disableScissor();
-        g.fillGradient(x + 3, y + 3, x + w - 3, y + 3 + Math.min(40, h / 3), 0x302A4A8A, 0x002A4A8A);   // light from above
-        nine(g, x, y, w, h, 0, 0, 128, 128, 32, false);
+        Ui.card(g, x, y, w, h);                                                // UI v3: a glass card
     }
 
     /**
@@ -136,6 +113,14 @@ public final class DbzTheme {
     /** A slanted orange ribbon, centred on {@code cx}, carrying a title. */
     public static void header(GuiGraphics g, Font font, Component title, int cx, int y) {
         y = Math.max(1, y);                                     // a full-height window keeps its ribbon on screen
+        if (zenith()) {                                                        // UI v3: a dark pill with a gold title in capitals
+            String s = title.getString().toUpperCase(java.util.Locale.ROOT);
+            int pw = (int) (font.width(s) * 0.85f) + 20;
+            Ui.round(g, cx - pw / 2, y, pw, 14, 2, 0xF0121826);
+            Ui.outline(g, cx - pw / 2, y, pw, 14, 2, 0x90FFB547);
+            text(g, font, s, cx - font.width(s) * 0.85f / 2f, y + 3.5f, Ui.GOLD, 0.85f);
+            return;
+        }
         int tw = font.width(title);
         int w = tw + 34, h = 14;
         int x = cx - w / 2;
@@ -155,6 +140,10 @@ public final class DbzTheme {
 
     /** A thin gold rule with fading ends. */
     public static void divider(GuiGraphics g, int x, int y, int w) {
+        if (zenith()) {
+            g.fill(x, y, x + w, y + 1, Ui.LINE_SOFT);
+            return;
+        }
         int mid = x + w / 2;
         hGradient(g, x, y, mid, y + 1, 0x00D8A040, 0xFFD8A040);
         hGradient(g, mid, y, x + w, y + 1, 0xFFD8A040, 0x00D8A040);
@@ -167,6 +156,10 @@ public final class DbzTheme {
 
     /** Row highlight: a slanted glass strip, gold when selected. */
     public static void row(GuiGraphics g, int x, int y, int w, int h, boolean selected, boolean hovered) {
+        if (zenith()) {
+            if (selected || hovered) Ui.tile(g, x, y, w, h, selected, hovered);
+            return;
+        }
         if (selected) slant(g, x, y, w, h, 4, 0x70FFB040, 0x40B0400E);
         else if (hovered) slant(g, x, y, w, h, 4, 0x40FFFFFF, 0x18FFFFFF);
     }
@@ -174,8 +167,11 @@ public final class DbzTheme {
     /** A button skin: 0 normal, 1 hover, 2 disabled, 3 selected. */
     public static void button(GuiGraphics g, int x, int y, int w, int h, int state) {
         RenderSystem.enableBlend();
-        if (zenith() && h >= 8) {
-            nine(g, x, y, w, h, 128, state * 48, 96, 48, 12, true);
+        if (zenith()) {                                                        // UI v3: flat, rounded, a hairline; gold when selected
+            int fill = switch (state) { case 1 -> 0x34FFFFFF; case 2 -> 0x0CFFFFFF; case 3 -> 0x40FFB547; default -> 0x1CFFFFFF; };
+            int line = switch (state) { case 1 -> Ui.LINE; case 2 -> 0x10FFFFFF; case 3 -> Ui.GOLD; default -> Ui.LINE_SOFT; };
+            Ui.round(g, x, y, w, h, 2, fill);
+            Ui.outline(g, x, y, w, h, 2, line);
             return;
         }
         g.blitNineSliced(UI, x, y, w, h, 4, 4, 32, 16, 144, state * 16);
