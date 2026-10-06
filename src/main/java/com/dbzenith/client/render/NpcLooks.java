@@ -1,0 +1,62 @@
+package com.dbzenith.client.render;
+
+import com.dbzenith.appearance.HairCode;
+import com.dbzenith.race.RaceTraits;
+
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * How each NPC looks beyond its painted skin (CX-12): its 3D hair, race parts, tail and the things it wears, so NPCs
+ * are built from the same parts as players. Keyed by the skin name its renderer uses.
+ */
+public final class NpcLooks {
+    /** Pieces an NPC can wear (see {@link NpcExtrasModel}). */
+    public enum Extra { SHELL, CAP, HAT, SCOUTER, EARRINGS, DOME, HALO, PADS, FROST_PADS, NAMEK_PADS, CAPE }
+
+    /**
+     * @param hair        a hair preset, or null for none
+     * @param feature     race parts on the head (antennae, horns...) and whether pointed ears come with them
+     * @param tailColor   a tail's colour, or -1 for none; {@code wrapped} winds it round the waist
+     */
+    public record Look(HairCode.Preset hair, int hairColor, RaceTraits.Feature feature, boolean ears, int featureColor,
+                       int tailColor, boolean wrapped, Set<Extra> extras) {
+        public String hairCode() {
+            return hair == null ? "" : hair.code();
+        }
+    }
+
+    private static Look look(HairCode.Preset hair, int hairColor, RaceTraits.Feature feature, boolean ears, int featureColor,
+                             int tailColor, boolean wrapped, Extra... extras) {
+        Set<Extra> set = EnumSet.noneOf(Extra.class);
+        set.addAll(java.util.List.of(extras));
+        return new Look(hair, hairColor, feature, ears, featureColor, tailColor, wrapped, set);
+    }
+
+    private static final Look PLAIN = look(null, 0, RaceTraits.Feature.NONE, false, 0, -1, false);
+
+    private static final Map<String, Look> LOOKS = Map.ofEntries(
+            Map.entry("martial_arts_master", look(null, 0, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.SHELL)),
+            Map.entry("patrol_officer", look(HairCode.Preset.BUZZ, 0x3A2414, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.CAP)),
+            Map.entry("ki_soldier", look(null, 0, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.SCOUTER, Extra.FROST_PADS)),
+            Map.entry("android_unit", look(HairCode.Preset.SLICK, 0x141418, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("sproutling", look(null, 0, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.DOME)),
+            Map.entry("tyrant_lord", look(null, 0, RaceTraits.Feature.NONE, false, 0, 0xF0EEF4, false)),
+            Map.entry("rampage_brute", look(null, 0, RaceTraits.Feature.NONE, false, 0, 0x6B3E1E, true, Extra.PADS)),
+            Map.entry("namekian_warrior", look(null, 0, RaceTraits.Feature.ANTENNAE, true, 0x62B444, -1, false, Extra.NAMEK_PADS, Extra.CAPE)),
+            Map.entry("enma", look(HairCode.Preset.WILD, 0x181216, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.HAT)),
+            Map.entry("ogre_clerk_red", look(HairCode.Preset.PUFF, 0x141010, RaceTraits.Feature.DEMON_HORNS, false, 0xF0E0C0, -1, false)),
+            Map.entry("ogre_clerk_blue", look(HairCode.Preset.PUFF, 0x141010, RaceTraits.Feature.DEMON_HORNS, false, 0xF0E0C0, -1, false)),
+            Map.entry("ogre_guard", look(HairCode.Preset.WILD, 0x141010, RaceTraits.Feature.DEMON_HORNS, false, 0xF0E0C0, -1, false)),
+            Map.entry("north_kai", look(null, 0, RaceTraits.Feature.ANTENNAE, false, 0x2A2A3A, -1, false)),
+            Map.entry("grand_kai", look(HairCode.Preset.SWEPT, 0xF4F2F0, RaceTraits.Feature.NONE, true, 0xC8A6E0, -1, false, Extra.EARRINGS)),
+            Map.entry("training_monkey", look(null, 0, RaceTraits.Feature.NONE, false, 0, 0x8A5A30, false)),
+            Map.entry("damned_warrior", look(HairCode.Preset.WILD, 0x2A2430, RaceTraits.Feature.NONE, false, 0, -1, false)));
+
+    private NpcLooks() {}
+
+    public static Look of(String skin) {
+        return LOOKS.getOrDefault(skin, PLAIN);
+    }
+}

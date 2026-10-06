@@ -20,7 +20,9 @@ public enum Wish {
     HIDDEN_POTENTIAL,
     GODLY_KI,
     ETERNAL_YOUTH,
-    RICHES;
+    RICHES,
+    /** Bring back the fallen: every soul in the other world returns to the living (CX-12). */
+    REVIVE;
 
     public String id() {
         return name().toLowerCase(Locale.ROOT);
@@ -51,6 +53,10 @@ public enum Wish {
                 d.recomputeIfStale();
             }
             case RICHES -> give(player, new ItemStack(Items.DIAMOND, c.wishDiamonds.get()));
+            case REVIVE -> {
+                int n = com.dbzenith.world.Otherworld.reviveAll(player.server);
+                player.server.getPlayerList().broadcastSystemMessage(net.minecraft.network.chat.Component.translatable("message.dbzenith.wish_revived", n), false);
+            }
         }
     }
 

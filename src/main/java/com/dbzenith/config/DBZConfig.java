@@ -210,6 +210,8 @@ public final class DBZConfig {
         public final ForgeConfigSpec.LongValue scouterLimit;
         public final ForgeConfigSpec.IntValue scouterRange;
         public final ForgeConfigSpec.IntValue spacePodRechargeTicks;
+        public final ForgeConfigSpec.BooleanValue otherworldEnabled;
+        public final ForgeConfigSpec.IntValue otherworldDeathSeconds;
         public final ForgeConfigSpec.IntValue falseMoonTicks;
 
         // --- enemies ---
@@ -540,6 +542,11 @@ public final class DBZConfig {
             scouterRange = b.comment("How far a scouter reads, in blocks").defineInRange("scouterRange", 64, 4, 512);
             spacePodRechargeTicks = b.comment("Space Pod recharge time between flights (1200 = 1 minute)")
                     .defineInRange("spacePodRechargeTicks", 1200, 0, 10_000_000);
+            otherworldEnabled = b.comment("Dying sends your soul to the other world (the check-in station, or Limbo if you were evil) with a halo,"
+                            + " until Enma sends you back or a wish revives you. Off: ordinary respawning.")
+                    .define("otherworldEnabled", true);
+            otherworldDeathSeconds = b.comment("Seconds a soul must spend in the other world before Enma may send it back (Limbo holds evil souls half as long again)")
+                    .defineInRange("otherworldDeathSeconds", 180, 0, 86_400);
             falseMoonTicks = b.comment("How long a Moon Orb's false moon shines (1200 = 1 minute)")
                     .defineInRange("falseMoonTicks", 1200, 20, 1_000_000);
             b.pop();

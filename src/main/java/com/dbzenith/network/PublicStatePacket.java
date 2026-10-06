@@ -30,6 +30,8 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
     public static final int BARRIER = 256;
     /** Knocked down (Combat v3). */
     public static final int DOWNED = 512;
+    /** Dead, in the other world: a halo (CX-12). */
+    public static final int DEAD = 1024;
     /** Bit in {@code looks}: show the full race skin. */
     public static final int RACE_LOOK = 256;
 
@@ -38,7 +40,7 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
                 | (d.isGuarding() ? GUARDING : 0) | (d.isChargingHeavy() ? HEAVY : 0)
                 | (Races.of(d.getRace()).tail() && d.hasTail() ? TAIL : 0) | (d.isMeditating() ? MEDITATING : 0) | (d.isTransforming() ? TRANSFORMING : 0)
                 | (d.getKaiokenStage() > 0 ? KAIOKEN : 0) | (d.getRacialActive().contains("ki_barrier") ? BARRIER : 0)
-                | (d.combat().downedFlag ? DOWNED : 0);
+                | (d.combat().downedFlag ? DOWNED : 0) | (d.isDead() ? DEAD : 0);
         return new PublicStatePacket(entityId, flags, d.getReleasePercent(), Aura.color(d), d.getFormId(),
                 d.getRace().ordinal(), d.getBodyType().ordinal(), d.getHairStyle(), d.getHairColor(), d.getEyeColor(),
                 d.hasFlag("god_ki") ? -1 : com.dbzenith.stats.StatCalculator.battlePower(d), // -1: god ki cannot be read

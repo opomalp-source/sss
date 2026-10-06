@@ -44,6 +44,24 @@ public final class Quests {
                 Reward.tp(1500).with("dbzenith:capsule", 1).rep(100, 10)));
     }
 
+    // ---------------------------------------------------------------- the Kai of the north, at the end of Snake Way
+    static {
+        add(new Quest("catch_the_monkey", Quest.Giver.NORTH_KAI, List.of(Objective.kill(com.dbzenith.npc.TrainingMonkey.CAUGHT, 1)), List.of(), 0, false,
+                Reward.tp(800).flag("skill:kaioken:1")));
+        add(new Quest("strike_the_cricket", Quest.Giver.NORTH_KAI, List.of(Objective.kill(com.dbzenith.npc.TrainingCricket.STRUCK, 1)),
+                List.of("catch_the_monkey"), 0, false, Reward.tp(1200).teach("gathering_sphere")));
+        add(new Quest("kaioken_times_three", Quest.Giver.NORTH_KAI, List.of(Objective.level(400), Objective.kill("dbzenith:damned_warrior", 5)),
+                List.of("strike_the_cricket"), 0, false, Reward.tp(2000).flag("skill:kaioken:3")));
+    }
+
+    // ---------------------------------------------------------------- the Grand Kai, in his paradise
+    static {
+        add(new Quest("springs_of_paradise", Quest.Giver.GRAND_KAI, List.of(Objective.flag("spring_soaked")), List.of(), 0, false,
+                Reward.tp(1500).flag("godki:300")));
+        add(new Quest("tournament_of_the_dead", Quest.Giver.GRAND_KAI, List.of(Objective.kill("dbzenith:damned_warrior", 12)),
+                List.of("springs_of_paradise"), 0, false, Reward.tp(3000).with("dbzenith:senzu_bean", 6)));
+    }
+
     private Quests() {}
 
     private static void add(Quest q) {

@@ -910,3 +910,63 @@ The user sent reference pictures for the art direction they want: chunky anime-s
 
 ### Verified
 - Screenshots: cracks after a charge seen from above, a sideways vanish (ghost, streak, ring), beam scorch marks, speed lines in first person, SSJ2 lightning.
+
+## 2026-10-06 — Session 3 (cont.): CX-12a The other world, and every NPC repainted (v0.38.0)
+The user asked for this to be "REALLY GOOD (npc designs and authentic)". Designs are original; names come from shared mythology (Enma, judge of the dead; oni, the ogres).
+
+- **NPC art (`ArtGen.NpcArt`):** NPC skins are composed from the parts players wear:
+  - a painted race skin, or painted anatomy in a skin tone;
+  - painted clothes (the gear textures, or outfits painted for the NPC);
+  - touches of their own (beards, glasses, robes, ties, loincloths, veins);
+  - the anime face parts baked in.
+
+  `Hd.HdSkin.paint` lets a skin of touches be laid over a canvas.
+- **NPC 3D looks (`NpcLooks`, `NpcPartsLayer`, `NpcExtrasModel`):** NPCs carry chunky hair on its mass, race parts (antennae, ears, horns), tails, gear pieces (pads, cape) and extras: a turtle shell, a police cap, Enma's tall judge hat, a scouter with a glowing lens, Kai earrings, a sproutling's bulbous crown, and the halo.
+- **The eight older NPCs, redrawn:**
+  - **Martial arts master:** bald, a long white beard and moustache, dark glasses, the school's gi, a turtle shell.
+  - **Patrol officer:** navy uniform, gold badge, duty belt, cap.
+  - **Ki soldier:** green-skinned alien in white armour with purple pads and a scouter.
+  - **Android unit:** pale, black hair, a grey jumpsuit with red stripes and a ringed bolt.
+  - **Sproutling:** veined green body, red eyes, a toothy grin, a bulbous crown.
+  - **Tyrant lord:** a Frost Demon in his final shape, crimson eyes, a white tail.
+  - **Rampage brute:** bald and moustached, in battle armour, his tail wound round his waist.
+  - **Namekian warrior:** antennae and ears, cape and pads.
+- **The other world (`Otherworld`, `OtherworldBuilder`, `dimension/otherworld`, `dimension/limbo`):**
+  - **Death:** with the new setting on, a fighter who dies is judged. Their soul wakes at the check-in station with a halo (new `DEAD` public-state bit, `HaloLayer`), or in Limbo if their alignment was evil.
+  - **Returning:** souls keep their bodies and may train. Enma (3.2x, facing his court) sends a soul back once its time is served (`otherworldDeathSeconds`, 180), through the new judgement screen. Living visitors are shown the way home.
+  - **Falling and Limbo:** sinking through the cloud sea drops you into Limbo. The ogres haul a soul that has served its time half again up to the station.
+  - **The cloud sea:** golden clouds you sink through slowly, with soft puffs heaped on them.
+  - **Check-In Station:**
+    - a floating quartz and gold oval;
+    - a vermilion gate with a dark, upturned top beam;
+    - a pillared hall under a two-tier orange roof, lit softly from hidden light blocks;
+    - a gold-edged red carpet up to Enma's great desk and red-and-gold throne;
+    - four ogre clerks with eight lines of dialogue.
+  - **Snake Way:** 640 blocks of scaled serpent road winding from a great red-eyed head behind the hall to a narrowing tail.
+  - **The Kai of the north's little planet:** floating above the tail, a sphere with his domed house and a tree, and ten-times gravity within 26 blocks.
+    - **Catch the monkey:** a fleeing training monkey; touch it to catch it. Reward: Kaioken level 1.
+    - **Strike the cricket:** a hopping cricket with its own model; one hit counts. Reward: the Gathering Sphere.
+    - **Kaioken times three:** level 400 and five damned warriors. Reward: Kaioken level 3.
+  - **The Grand Kai's paradise:** a floating island of cherry trees, a white temple and three springs of godly ki (new animated `sacred_spring` block), reached by a white road from the station.
+    - Meditating in a spring for a minute awakens godly ki, and grows it further for those who have it.
+    - Quests: the springs (300 God Ki XP), then a tournament of twelve damned warriors.
+  - **Limbo:** a crimson waste under a dark sky, with black spires, lava pools, a black gate kept by ogre guards, and damned warriors spawning.
+  - **Residents stay home:** a resident that drops 12 blocks below its home is set back (`HomeKeeper`), so the monkey cannot be chased off the planet into the void.
+- **Rewards and wishes:** quest rewards can teach a skill (`skill:<id>:<level>`) or grant God Ki (`godki:<xp>`). Event objectives (`QuestManager.event`) count catches and strikes, shown as "Catch the Kai's monkey: 0/1". New wish: bring back the fallen, which revives every soul.
+- **Commands:** `/dbz otherworld|limbo <player>`, `/dbz soul <player>`, `/dbz revive <player>`. Dev name flags: `respawn`, `judgement_`.
+- **Network:** protocol 28.
+
+### Verified
+- **Screenshots:**
+  - the eight repainted NPCs side by side;
+  - the station from the arrival point and from afar;
+  - Enma behind his desk;
+  - waking dead with a halo, and the judgement screen;
+  - Snake Way and the serpent's head;
+  - the Kai planet from afar and the Kai of the north close up, under 10G;
+  - the paradise island and the Grand Kai;
+  - Limbo and the fall into it.
+- **GameTests:** the Kai's training (wrong events don't count, Kaioken and the Gathering Sphere taught), souls serving their time and the revive wish, and the springs awakening God Ki. 139 required tests pass.
+- **Fixed after review:**
+  - Enma hidden behind a five-high desk, and dark under the roof: a lower desk, a bigger judge, hidden lights, and his body pinned to face the hall.
+  - The cloud sea read as a desert: paler and more translucent.

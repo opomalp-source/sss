@@ -32,6 +32,7 @@ public class ArtGen {
         RaceParts.all();
         Gear.all();
         AuraV3.all();
+        NpcArt.all();
         HudHd.all();
         System.out.println("ArtGen done");
     }
@@ -144,11 +145,16 @@ public class ArtGen {
 
             void save(String path) throws IOException {
                 Canvas c = new Canvas(64 * S, 64 * S);
+                paint(c);
+                c.save(path);
+            }
+
+            /** Paints this skin onto a 128x128 canvas (transparent pixels left as they are). */
+            void paint(Canvas c) {
                 if (head != null) box(c, 0, 0, 8 * S, 8 * S, 8 * S, head);
                 if (body != null) box(c, 16 * S, 16 * S, 8 * S, 12 * S, 4 * S, body);
                 if (arm != null) { box(c, 40 * S, 16 * S, 4 * S, 12 * S, 4 * S, arm); box(c, 32 * S, 48 * S, 4 * S, 12 * S, 4 * S, Skin.mirror(arm)); }
                 if (leg != null) { box(c, 0, 16 * S, 4 * S, 12 * S, 4 * S, leg); box(c, 16 * S, 48 * S, 4 * S, 12 * S, 4 * S, Skin.mirror(leg)); }
-                c.save(path);
             }
         }
 
@@ -444,6 +450,426 @@ public class ArtGen {
 
 
 
+
+    // ================================================================== NPC art (CX-12)
+
+    /**
+     * NPC skins in the painted style, composed from the same parts players wear: a painted race skin or painted anatomy
+     * in a skin tone, painted clothes (the gear textures, or outfits painted here), touches of their own (beards,
+     * glasses, robes, ties, loincloths) and the anime face parts baked in. Hair, horns, antennae, tails, shells, hats
+     * and halos are 3D, drawn by the client (client.render.NpcLooks). All designs original.
+     */
+    static final class NpcArt {
+        static void all() throws IOException {
+            master();
+            patrolOfficer();
+            kiSoldier();
+            androidUnit();
+            sproutling();
+            tyrantLord();
+            rampageBrute();
+            namekianWarrior();
+            enma();
+            ogre("ogre_clerk_red", 0xFFD84A3A, false);
+            ogre("ogre_clerk_blue", 0xFF4A78D8, false);
+            ogre("ogre_guard", 0xFFC8402E, true);
+            northKai();
+            grandKai();
+            trainingMonkey();
+            damnedWarrior();
+            trainingCricket();
+        }
+
+
+        /** The Kai's cricket (32x32 for its own model): green-brown body, darker wing cases, pale legs. */
+        static void trainingCricket() throws IOException {
+            int[] body = ramp(0xFF6A7A2A, 5), wing = ramp(0xFF4A3A1A, 4), leg = ramp(0xFF9AA060, 4);
+            Canvas c = new Canvas(32, 32);
+            for (int y = 0; y < 32; y++) for (int x = 0; x < 32; x++) {
+                int col;
+                if (y < 9 && x < 16) col = body[2 + (int) Math.round(Math.sin(x * 0.9) * 0.6) + (y < 3 ? 1 : 0)];
+                else if (y < 9) col = wing[(x + y) % 3 == 0 ? 1 : 2];
+                else if (y < 15) col = x < 12 ? body[y < 11 ? 3 : 2] : leg[1];
+                else col = leg[(x + y) % 2 == 0 ? 2 : 1];
+                c.set(x, y, col);
+            }
+            c.save("entity/training_cricket.png");
+        }
+        /** A skin under construction: layers stacked bottom to top, then saved as a fighter texture. */
+        static final class Npc {
+            final Canvas c = new Canvas(128, 128);
+
+            static java.awt.image.BufferedImage read(String path) throws IOException {
+                return ImageIO.read(new File(RES + path));
+            }
+
+            /** A painted race skin as the base. */
+            Npc race(String skin) throws IOException {
+                return layer("entity/race_painted/" + skin + ".png");
+            }
+
+            /** Painted anatomy in a skin tone. */
+            Npc body(String build, int tone) throws IOException {
+                java.awt.image.BufferedImage b = read("entity/body_painted/" + build + ".png");
+                for (int y = 0; y < 128; y++) for (int x = 0; x < 128; x++) {
+                    int p = b.getRGB(x, y);
+                    if ((p >>> 24) == 0) continue;
+                    double l = (p & 255) / 255.0;
+                    int r = (int) (((tone >> 16) & 255) * l), g = (int) (((tone >> 8) & 255) * l), bl = (int) ((tone & 255) * l);
+                    c.set(x, y, 0xFF000000 | r << 16 | g << 8 | bl);
+                }
+                return this;
+            }
+
+            /** Lays an image over what is there (by its alpha), optionally tinted (multiplied). */
+            Npc layer(String path, int tint) throws IOException {
+                java.awt.image.BufferedImage b = read(path);
+                for (int y = 0; y < 128; y++) for (int x = 0; x < 128; x++) {
+                    int p = b.getRGB(x * b.getWidth() / 128, y * b.getHeight() / 128);
+                    if (tint != 0xFFFFFF) p = (p & 0xFF000000) | (((p >> 16) & 255) * ((tint >> 16) & 255) / 255) << 16
+                            | (((p >> 8) & 255) * ((tint >> 8) & 255) / 255) << 8 | ((p & 255) * (tint & 255) / 255);
+                    over(x, y, p);
+                }
+                return this;
+            }
+
+            Npc layer(String path) throws IOException {
+                return layer(path, 0xFFFFFF);
+            }
+
+            /** Paints a skin of touches (transparent where it returns 0) over what is there. */
+            Npc paint(Hd.HdSkin s) {
+                Canvas t = new Canvas(128, 128);
+                s.paint(t);
+                for (int y = 0; y < 128; y++) for (int x = 0; x < 128; x++) over(x, y, t.get(x, y));
+                return this;
+            }
+
+            void over(int x, int y, int p) {
+                int a = p >>> 24;
+                if (a == 0) return;
+                if (a == 255) {
+                    c.set(x, y, p);
+                    return;
+                }
+                int d = c.get(x, y);
+                double t = a / 255.0;
+                c.set(x, y, mix(d | 0xFF000000, p | 0xFF000000, t) | (Math.max(a, d >>> 24) << 24));
+            }
+
+            /** The anime face parts: eyes (whites or not), iris, pupils, brows, nose, mouth. */
+            Npc face(int eyes, int iris, boolean whites, int brows, int browColor, int mouth, int nose) throws IOException {
+                layer("entity/face_hd/eyes_" + eyes + ".png", whites ? 0xFFFFFF : iris & 0xFFFFFF);
+                layer("entity/face_hd/iris_" + eyes + ".png", iris & 0xFFFFFF);
+                layer("entity/face_hd/pupil_" + eyes + ".png");
+                if (brows < 5) layer("entity/face_hd/brows_" + brows + ".png", browColor & 0xFFFFFF);
+                layer("entity/face_hd/nose_" + nose + ".png");
+                return layer("entity/face_hd/mouth_" + mouth + ".png");
+            }
+
+            void save(String name) throws IOException {
+                c.save("entity/fighter/" + name + ".png");
+            }
+        }
+
+        // ---------------------------------------------------------- shared painting helpers
+
+        static double u(int x, int w) { return (x + 0.5) / w; }
+        static double v(int y, int h) { return (y + 0.5) / h; }
+
+        static int cloth(int[] r, Face f, int x, int y, int w, int h, int seed) {
+            return HdRaces.paintedCloth(r, f, x, y, w, h, seed, 1.0);
+        }
+
+        static int flat(int[] r, Face f, double extra) {
+            return HdRaces.tone(r, Painted.BASE + Painted.face(f) + extra);
+        }
+
+        static int ink(int[] r) {
+            return HdRaces.tone(r, Painted.INK);
+        }
+
+        static boolean row(double vv, double at, int h) {
+            return Math.abs(vv - at) * h < 0.6;
+        }
+
+        /** Dark round glasses over both eyes (the head's front face), with a bridge. */
+        static int glasses(Face f, int x, int y, int w, int h, int lens, int frame) {
+            if (f != Face.FRONT) return f == Face.LEFT || f == Face.RIGHT ? (v(y, h) > 0.47 && v(y, h) < 0.53 && u(x, w) < 0.55 ? frame : 0) : 0;
+            double uu = u(x, w), vv = v(y, h);
+            for (double cx : new double[]{0.28, 0.72}) {
+                double d = Math.hypot((uu - cx) / 0.2, (vv - 0.52) / 0.12);
+                if (d < 0.8) return lens;
+                if (d < 1.05) return frame;
+            }
+            if (vv > 0.47 && vv < 0.53 && uu > 0.45 && uu < 0.55) return frame;
+            return 0;
+        }
+
+        // ---------------------------------------------------------- the people of the world
+
+        /** The old master of the turtle school: bald, a long white beard and moustache, dark glasses, the school's gi. */
+        static void master() throws IOException {
+            int[] beard = ramp(0xFFF2F0EA, 5);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                int g = glasses(f, x, y, w, h, 0xFF141418, 0xFF2A2A30);
+                if (g != 0) return g;
+                if (f == Face.FRONT) {
+                    if (vv > 0.66 && vv < 0.78 && Math.abs(uu - 0.5) < 0.34 - (vv - 0.66)) return flat(beard, f, vv < 0.69 ? 0.04 : 0);   // moustache
+                    if (vv > 0.76) return flat(beard, f, (x + y) % 3 == 0 ? -0.06 : 0);                                   // beard
+                }
+                if ((f == Face.LEFT || f == Face.RIGHT) && vv > 0.62 && uu < 0.4) return flat(beard, f, -0.04);
+                return 0;
+            };
+            s.body = (f, x, y, w, h) -> {                                                                                  // the beard falls to the chest
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.FRONT && vv < 0.42 - Math.abs(uu - 0.5) * 0.9) return flat(beard, f, (x + y) % 3 == 0 ? -0.06 : 0);
+                return 0;
+            };
+            new Npc().body("lean", 0xFFE6C29C).layer("entity/gear/turtle_top.png").layer("entity/gear/turtle_pants.png")
+                    .layer("entity/gear/turtle_boots.png").face(0, 0xFF241A12, true, 1, 0xFFF2F0EA, 0, 0).paint(s).save("martial_arts_master");
+        }
+
+        /** An Earth patrol officer: navy uniform with a gold badge, a duty belt, boots (the cap is 3D). */
+        static void patrolOfficer() throws IOException {
+            int[] navy = ramp(0xFF24346A, 6), gold = ramp(0xFFE0B040, 4), black = ramp(0xFF1E1E24, 5);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                if (vv > 0.78 && vv < 0.88) return row(vv, 0.785, h) || row(vv, 0.875, h) ? ink(black) : (f == Face.FRONT && Math.abs(uu - 0.5) < 0.08 ? flat(gold, f, 0) : flat(black, f, 0));
+                if (vv >= 0.88) return cloth(navy, f, x, y, w, h, 611);
+                if (f == Face.FRONT) {
+                    if (Math.abs(uu - 0.5) < 0.025) return ink(navy);                                                     // the button line
+                    if (Math.hypot(uu - 0.3, (vv - 0.24) * 0.7) < 0.07) return flat(gold, f, 0.05);                        // the badge
+                    if (vv < 0.12 && Math.abs(uu - 0.5) < 0.2 - vv) return flat(ramp(0xFFE8ECF4, 4), f, 0);               // the collar
+                }
+                return cloth(navy, f, x, y, w, h, 612);
+            };
+            s.arm = (f, x, y, w, h) -> v(y, h) > 0.86 ? 0 : v(y, h) > 0.82 ? ink(navy) : cloth(navy, f, x, y, w, h, 613);
+            s.leg = (f, x, y, w, h) -> v(y, h) > 0.8 || f == Face.BOTTOM ? (row(v(y, h), 0.805, h) ? ink(black) : flat(black, f, 0)) : cloth(navy, f, x, y, w, h, 614);
+            new Npc().body("athletic", 0xFFEEC6A0).paint(s).face(3, 0xFF3A2A1A, true, 0, 0xFF3A2414, 0, 0).save("patrol_officer");
+        }
+
+        /** A soldier of the tyrant's army: a green-skinned alien in white armour with purple pads (3D) and a scouter. */
+        static void kiSoldier() throws IOException {
+            new Npc().body("athletic", 0xFF7AB89A).layer("entity/gear/frost_armor_top.png").layer("entity/gear/frost_armor_pants.png")
+                    .layer("entity/gear/frost_armor_boots.png").face(3, 0xFFB01828, true, 2, 0xFF2A5A3A, 4, 0).save("ki_soldier");
+        }
+
+        /** A combat android: pale, black hair, a grey jumpsuit with red shoulder stripes and a red-ringed bolt on the chest. */
+        static void androidUnit() throws IOException {
+            int[] grey = ramp(0xFF6A7080, 6), red = ramp(0xFFC82828, 4), black = ramp(0xFF1C1C22, 5);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                if (f == Face.FRONT) {
+                    double d = Math.hypot((uu - 0.5) / 0.7, vv - 0.3);
+                    if (d < 0.16 && d > 0.12) return flat(red, f, 0);
+                    if (d <= 0.12 && Math.abs((uu - 0.5) * 1.6 + (vv - 0.3)) < 0.03) return flat(ramp(0xFFF0F0F0, 3), f, 0);   // the bolt
+                }
+                if (f == Face.TOP) return flat(red, f, 0);
+                return cloth(grey, f, x, y, w, h, 621);
+            };
+            s.arm = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (vv < 0.1) return flat(red, f, 0);                                                                     // shoulder stripes
+                if (vv > 0.82) return row(vv, 0.825, h) ? ink(black) : flat(black, f, 0);                                 // gloves
+                return cloth(grey, f, x, y, w, h, 622);
+            };
+            s.leg = (f, x, y, w, h) -> v(y, h) > 0.78 || f == Face.BOTTOM ? flat(black, f, 0) : cloth(grey, f, x, y, w, h, 623);
+            new Npc().body("athletic", 0xFFF2DCCA).paint(s).face(2, 0xFF5AA8E0, true, 0, 0xFF141418, 0, 2).save("android_unit");
+        }
+
+        /** A sproutling: a small green creature grown from a seed, its head ridged with dark veins, red eyes, a toothy grin. */
+        static void sproutling() throws IOException {
+            int[] green = ramp(0xFF5AA83A, 6);
+            Hd.HdSkin s = new Hd.HdSkin();
+            FaceFn veins = (f, x, y, w, h) -> {
+                double n = Hd.smooth(x * 1.4, y * 1.4, 4, 631 + f.ordinal());
+                return Math.abs(n - 0.5) < 0.03 ? ink(green) : 0;
+            };
+            s.head = (f, x, y, w, h) -> f == Face.FRONT && v(y, h) > 0.3 ? 0 : veins.at(f, x, y, w, h);
+            s.body = veins;
+            s.arm = veins;
+            s.leg = veins;
+            new Npc().body("lean", 0xFF6AB848).paint(s).face(7, 0xFFE01818, false, 5, 0, 2, 1).save("sproutling");
+        }
+
+        /** The tyrant lord: a Frost Demon in his final shape, cold crimson eyes and a smirk (his tail is 3D). */
+        static void tyrantLord() throws IOException {
+            new Npc().race("frost_demon").face(3, 0xFFC01830, true, 5, 0, 4, 0).save("tyrant_lord");
+        }
+
+        /** The rampaging brute: a towering, bald warrior with a heavy moustache in battle armour (his tail is 3D). */
+        static void rampageBrute() throws IOException {
+            int[] hair = ramp(0xFF1C1414, 4);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.FRONT && vv > 0.68 && vv < 0.76 && Math.abs(uu - 0.5) < 0.32) return flat(hair, f, 0);   // moustache
+                if (f == Face.FRONT && vv >= 0.76 && vv < 0.88 && (Math.abs(uu - 0.5) > 0.24 && Math.abs(uu - 0.5) < 0.32)) return flat(hair, f, -0.04);
+                return 0;
+            };
+            new Npc().body("bulky", 0xFFD8A878).layer("entity/gear/battle_armor_top.png").layer("entity/gear/battle_armor_pants.png")
+                    .layer("entity/gear/battle_armor_boots.png").face(3, 0xFF241A12, true, 2, 0xFF1C1414, 2, 0).paint(s).save("rampage_brute");
+        }
+
+        /** A Namekian warrior in his gi (the cape, pads, antennae and ears are 3D). */
+        static void namekianWarrior() throws IOException {
+            new Npc().race("namekian").face(3, 0xFF201418, true, 5, 0, 0, 0).save("namekian_warrior");
+        }
+
+        // ---------------------------------------------------------- the other world
+
+        /** Enma, judge of the dead: a giant red ogre, a great black beard, a deep purple robe with gold, his hat is 3D. */
+        static void enma() throws IOException {
+            int[] beard = ramp(0xFF181216, 5), robe = ramp(0xFF4A2468, 6), gold = ramp(0xFFE0B040, 5), sash = ramp(0xFFB82A2A, 5);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.FRONT && vv > 0.64) {
+                    if (vv < 0.72 && Math.abs(uu - 0.5) < 0.12) return 0;                                                  // the mouth shows
+                    return flat(beard, f, (x * 3 + y) % 5 == 0 ? 0.06 : 0);
+                }
+                if ((f == Face.LEFT || f == Face.RIGHT) && vv > 0.4) return flat(beard, f, (x + y) % 4 == 0 ? 0.05 : 0);    // whiskers into the beard
+                if (f == Face.BACK && vv > 0.5) return flat(beard, f, 0);
+                return 0;
+            };
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.FRONT) {
+                    if (vv < 0.36 - Math.abs(uu - 0.5) * 0.6) return flat(beard, f, (x + y) % 4 == 0 ? 0.05 : 0);          // the beard spills on the chest
+                    if (Math.abs(uu - 0.5) < 0.05) return flat(gold, f, 0);                                                 // the robe's gold edge
+                }
+                if (vv > 0.62 && vv < 0.74) return row(vv, 0.625, h) || row(vv, 0.735, h) ? ink(sash) : flat(sash, f, 0); // a red sash
+                return cloth(robe, f, x, y, w, h, 641);
+            };
+            s.arm = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (vv > 0.86) return 0;
+                if (vv > 0.78) return row(vv, 0.785, h) ? ink(gold) : flat(gold, f, 0);                                   // wide gold cuffs
+                return cloth(robe, f, x, y, w, h, 642);
+            };
+            s.leg = (f, x, y, w, h) -> v(y, h) > 0.86 || f == Face.BOTTOM ? flat(ramp(0xFF1A1A1E, 4), f, 0) : cloth(robe, f, x, y, w, h, 643);
+            new Npc().body("bulky", 0xFFC8382C).face(3, 0xFF141010, true, 1, 0xFF181216, 3, 0).paint(s).save("enma");
+        }
+
+        /** An ogre of the check-in station: red or blue skin, a white shirt and black tie; the guard wears a tiger-striped wrap. */
+        static void ogre(String name, int tone, boolean guard) throws IOException {
+            int[] shirt = ramp(0xFFF0EEEA, 5), tie = ramp(0xFF1E1E26, 5), slacks = ramp(0xFF2A2A34, 6), tiger = ramp(0xFFE8A82A, 5), iron = ramp(0xFF8A8E98, 4);
+            Hd.HdSkin s = new Hd.HdSkin();
+            if (guard) {
+                s.body = (f, x, y, w, h) -> v(y, h) > 0.82 && f != Face.TOP ? (Math.sin(u(x, w) * 18 + v(y, h) * 6) > 0.55 ? ink(tiger) : flat(tiger, f, 0)) : 0;
+                s.arm = (f, x, y, w, h) -> v(y, h) > 0.7 && v(y, h) < 0.84 && f != Face.BOTTOM ? (row(v(y, h), 0.705, h) || row(v(y, h), 0.835, h) ? ink(iron) : flat(iron, f, 0)) : 0;
+                s.leg = (f, x, y, w, h) -> {
+                    double vv = v(y, h);
+                    if (f == Face.BOTTOM || vv > 0.42) return 0;
+                    if (row(vv, 0.415, h)) return ink(tiger);                                                               // the wrap's ragged hem
+                    return Math.sin(u(x, w) * 14 + vv * 9) > 0.55 ? ink(tiger) : flat(tiger, f, 0);
+                };
+            } else {
+                s.body = (f, x, y, w, h) -> {
+                    double uu = u(x, w), vv = v(y, h);
+                    if (f == Face.BOTTOM) return 0;
+                    if (vv > 0.88) return cloth(slacks, f, x, y, w, h, 651);
+                    if (f == Face.FRONT && Math.abs(uu - 0.5) < 0.07 + (vv > 0.12 ? 0.02 : 0) && vv < 0.68) return Math.abs(uu - 0.5) > 0.06 ? ink(tie) : flat(tie, f, 0.04);
+                    if (f == Face.FRONT && vv < 0.1 && Math.abs(uu - 0.5) < 0.22) return flat(shirt, f, 0.05);           // the collar
+                    return cloth(shirt, f, x, y, w, h, 652);
+                };
+                s.arm = (f, x, y, w, h) -> v(y, h) > 0.86 ? 0 : v(y, h) > 0.83 ? ink(shirt) : cloth(shirt, f, x, y, w, h, 653);
+                s.leg = (f, x, y, w, h) -> v(y, h) > 0.86 || f == Face.BOTTOM ? flat(tie, f, 0) : cloth(slacks, f, x, y, w, h, 654);
+            }
+            new Npc().body(guard ? "bulky" : "athletic", tone).paint(s)
+                    .face(guard ? 3 : 0, 0xFF141010, true, guard ? 2 : 0, 0xFF141010, guard ? 2 : 0, 0).save(name);
+        }
+
+        /** The Kai of the north: short and round, pale blue, dark round glasses, whiskers, a navy robe with a gold sigil. */
+        static void northKai() throws IOException {
+            int[] robe = ramp(0xFF1E2A5A, 6), gold = ramp(0xFFE0B040, 5), white = ramp(0xFFF0F0F2, 4), skin = ramp(0xFF7AA0E0, 5);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                int g = glasses(f, x, y, w, h, 0xFF101014, 0xFF101014);
+                if (g != 0) return g;
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.FRONT && vv > 0.68 && vv < 0.74 && (uu < 0.22 || uu > 0.78) && x % 2 == 0) return ink(skin);  // whiskers
+                return 0;
+            };
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                if (f == Face.FRONT) {
+                    if (vv < 0.1 && Math.abs(uu - 0.5) < 0.24) return flat(white, f, 0);                                  // the collar
+                    double d = Math.hypot((uu - 0.5) / 0.8, vv - 0.36);
+                    if (d < 0.17) {                                                                                           // the sigil: a ring round three waves
+                        if (d > 0.13) return flat(gold, f, 0);
+                        if (Math.abs(Math.sin((uu - 0.5) * 40) * 0.025 - ((vv - 0.36) % 0.06)) < 0.008) return flat(gold, f, 0.05);
+                        return flat(white, f, 0);
+                    }
+                }
+                if (vv > 0.72 && vv < 0.8) return row(vv, 0.725, h) ? ink(gold) : flat(gold, f, 0);                       // the belt
+                return cloth(robe, f, x, y, w, h, 661);
+            };
+            s.arm = (f, x, y, w, h) -> v(y, h) > 0.8 ? 0 : v(y, h) > 0.76 ? ink(robe) : cloth(robe, f, x, y, w, h, 662);
+            s.leg = (f, x, y, w, h) -> v(y, h) > 0.86 || f == Face.BOTTOM ? flat(ramp(0xFF6A4424, 4), f, 0) : cloth(robe, f, x, y, w, h, 663);
+            new Npc().body("bulky", 0xFF7AA0E0).face(0, 0xFF101014, true, 5, 0, 1, 2).paint(s).save("north_kai");
+        }
+
+        /** The Grand Kai: tall and old, lavender skin, a white moustache, round glasses, a purple robe embroidered in gold. */
+        static void grandKai() throws IOException {
+            int[] robe = ramp(0xFF6A2A8A, 6), gold = ramp(0xFFE8C050, 5), white = ramp(0xFFF4F2F0, 5);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                int g = glasses(f, x, y, w, h, 0xC8D8F0FF, 0xFF2A1A10);
+                if (g != 0) return g;
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.FRONT && vv > 0.68 && vv < 0.76 && Math.abs(uu - 0.5) < 0.3 - (vv - 0.68) * 1.5) return flat(white, f, 0);
+                return 0;
+            };
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                if (f == Face.FRONT && Math.abs(uu - 0.5) < 0.08) return ((int) (vv * h)) % 3 == 0 ? flat(gold, f, 0.06) : flat(gold, f, 0);
+                if (vv < 0.08) return flat(gold, f, 0);
+                return cloth(robe, f, x, y, w, h, 671);
+            };
+            s.arm = (f, x, y, w, h) -> v(y, h) > 0.84 ? 0 : v(y, h) > 0.78 ? flat(gold, f, 0) : cloth(robe, f, x, y, w, h, 672);
+            s.leg = (f, x, y, w, h) -> v(y, h) > 0.88 || f == Face.BOTTOM ? flat(gold, f, -0.1) : cloth(white, f, x, y, w, h, 673);
+            new Npc().body("lean", 0xFFC8A6E0).face(4, 0xFF2A1A30, true, 0, 0xFFF4F2F0, 1, 2).paint(s).save("grand_kai");
+        }
+
+        /** The Kai's training monkey: brown fur, a tan face and belly, quick bright eyes (the tail is 3D). */
+        static void trainingMonkey() throws IOException {
+            int[] tan = ramp(0xFFE8C090, 5);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.FRONT && Math.hypot((uu - 0.5) / 0.42, (vv - 0.62) / 0.36) < 1) return flat(tan, f, 0);
+                return 0;
+            };
+            s.body = (f, x, y, w, h) -> f == Face.FRONT && Math.hypot((u(x, w) - 0.5) / 0.32, (v(y, h) - 0.55) / 0.35) < 1 ? flat(tan, f, 0) : 0;
+            new Npc().body("lean", 0xFF8A5A30).paint(s).face(1, 0xFF1A1208, true, 5, 0, 1, 1).save("training_monkey");
+        }
+
+        /** A damned warrior of Limbo: ash-pale skin, a torn dark gi, burning red eyes, teeth bared. */
+        static void damnedWarrior() throws IOException {
+            int[] gi = ramp(0xFF2A2230, 6), sash = ramp(0xFF8A1A22, 4);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.body = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                if (Hd.smooth(x * 1.3, y, 3, 681 + f.ordinal()) > 0.7) return 0;                                         // torn
+                if (vv > 0.76 && vv < 0.88) return flat(sash, f, 0);
+                return cloth(gi, f, x, y, w, h, 682);
+            };
+            s.arm = (f, x, y, w, h) -> v(y, h) < 0.3 + 0.08 * Math.sin(u(x, w) * 20) ? cloth(gi, f, x, y, w, h, 683) : 0;
+            s.leg = (f, x, y, w, h) -> v(y, h) < 0.7 + 0.06 * Math.sin(u(x, w) * 25) && f != Face.BOTTOM ? cloth(gi, f, x, y, w, h, 684) : 0;
+            new Npc().body("athletic", 0xFFB8B2C2).paint(s).face(2, 0xFFFF3020, true, 2, 0xFF2A2430, 2, 0).save("damned_warrior");
+        }
+    }
     // ================================================================== aura v3 (CX-11a)
 
     /**
@@ -2707,8 +3133,49 @@ public class ArtGen {
             gravityChamber();
             timeChamberDoor();
             namekTree();
+            otherworld();
         }
 
+
+        /** The other world: a golden cloud sea, the scales of Snake Way, and the shimmering springs of paradise (animated). */
+        static void otherworld() throws IOException {
+            Canvas cloud = new Canvas(16, 16);
+            for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) {
+                double puff = 0;
+                for (int k = 0; k < 5; k++) {
+                    double cx = (k * 7 + 3) % 16, cy = (k * 5 + 4) % 16, rr = 3.5 + (k % 3);
+                    double dx = Math.min(Math.abs(x + 0.5 - cx), 16 - Math.abs(x + 0.5 - cx)), dy = Math.min(Math.abs(y + 0.5 - cy), 16 - Math.abs(y + 0.5 - cy));
+                    puff = Math.max(puff, 1 - Math.hypot(dx, dy) / rr);
+                }
+                int c = mix(0xFFF2DCA0, 0xFFFFFBEC, Math.min(1, puff * 1.3));
+                cloud.set(x, y, (int) Math.round(170 + 50 * puff) << 24 | (c & 0xFFFFFF));
+            }
+            cloud.save("block/otherworld_cloud.png");
+
+            int[] sc = ramp(0xFFE8A030, 6);
+            Canvas scale = new Canvas(16, 16);
+            for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) {
+                int row = y / 4, ox = (row % 2) * 2;
+                int cx = ((x + ox) / 4) * 4 + 2 - ox;
+                double d = Math.hypot(x + 0.5 - cx, (y % 4) + 0.5 - 0.5);                     // overlapping half-round scales
+                int i = d > 2.4 ? 1 : 3 + (y % 4 == 0 ? 1 : 0) - (d > 1.8 ? 1 : 0);
+                if (noise(x, y, 907) > 0.9) i--;
+                scale.set(x, y, sc[Math.max(0, Math.min(5, i))]);
+            }
+            scale.save("block/snake_scale.png");
+
+            int frames = 8;
+            Canvas spring = new Canvas(16, 16 * frames);
+            for (int f = 0; f < frames; f++) for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) {
+                double t = f / (double) frames * Math.PI * 2;
+                double w = 0.5 + 0.25 * Math.sin(x * 0.8 + t) + 0.25 * Math.sin(y * 0.7 - t + x * 0.3);
+                int c = mix(0xFF2AC8C0, 0xFF9FF4E8, w);
+                if (Math.sin(x * 1.7 + y * 1.3 + t * 2) > 0.93) c = 0xFFFFF0A0;                  // glints of gold
+                spring.set(x, f * 16 + y, 0xD0000000 | (c & 0xFFFFFF));
+            }
+            spring.save("block/sacred_spring.png");
+            java.nio.file.Files.writeString(java.nio.file.Path.of(RES + "block/sacred_spring.png.mcmeta"), "{\"animation\": {\"frametime\": 3}}\n");
+        }
         /** Namek trees: smooth pale bark, ring-cut ends, round blue-green leaf clusters (cutout gaps). */
         static void namekTree() throws IOException {
             int[] bark = ramp(0xFFD8DCC8, 5), leaf = ramp(0xFF3AB89A, 5);

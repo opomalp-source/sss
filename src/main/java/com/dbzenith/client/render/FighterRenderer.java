@@ -17,6 +17,7 @@ public class FighterRenderer<T extends net.minecraft.world.entity.Mob> extends H
         super(ctx, new net.minecraft.client.model.PlayerModel<>(ctx.bakeLayer(ModelLayers.PLAYER), false), 0.5f * scale);
         this.texture = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/fighter/" + skin + ".png");
         this.scale = scale;
+        addLayer(new NpcPartsLayer<>(this, ctx.getModelSet(), skin));
     }
 
     @Override

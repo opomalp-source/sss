@@ -61,6 +61,32 @@ public final class ModNpcs {
             () -> EntityType.Builder.<QuestGiverEntity>of((t, l) -> new QuestGiverEntity(t, l, com.dbzenith.quest.Quest.Giver.PATROL), MobCategory.CREATURE)
                     .sized(0.6f, 1.9f).clientTrackingRange(10).build("patrol_officer"));
 
+    // ------------------------------------------------------------------ the other world (CX-12)
+
+    public static final KiFighter.Profile OGRE_PROFILE = new KiFighter.Profile("entity.dbzenith.ogre_guard", 0, List.of(), 0);
+    public static final KiFighter.Profile DAMNED_PROFILE = new KiFighter.Profile("entity.dbzenith.damned_warrior", 40, List.of(Techniques.KI_BLAST), 70);
+
+    private static RegistryObject<EntityType<OtherworldNpc>> otherworld(String id, OtherworldNpc.Role role, float w, float h) {
+        return TYPES.register(id, () -> EntityType.Builder.<OtherworldNpc>of((t, l) -> new OtherworldNpc(t, l, role), MobCategory.MISC)
+                .sized(w, h).clientTrackingRange(10).fireImmune().build(id));
+    }
+
+    public static final RegistryObject<EntityType<OtherworldNpc>> ENMA = otherworld("enma", OtherworldNpc.Role.ENMA, 1.9f, 5.8f);
+    public static final RegistryObject<EntityType<OtherworldNpc>> OGRE_CLERK_RED = otherworld("ogre_clerk_red", OtherworldNpc.Role.OGRE_CLERK, 0.7f, 2.1f);
+    public static final RegistryObject<EntityType<OtherworldNpc>> OGRE_CLERK_BLUE = otherworld("ogre_clerk_blue", OtherworldNpc.Role.OGRE_CLERK, 0.7f, 2.1f);
+    public static final RegistryObject<EntityType<OtherworldNpc>> NORTH_KAI = otherworld("north_kai", OtherworldNpc.Role.NORTH_KAI, 0.6f, 1.6f);
+    public static final RegistryObject<EntityType<OtherworldNpc>> GRAND_KAI = otherworld("grand_kai", OtherworldNpc.Role.GRAND_KAI, 0.6f, 2.0f);
+    public static final RegistryObject<EntityType<TrainingMonkey>> TRAINING_MONKEY = TYPES.register("training_monkey",
+            () -> EntityType.Builder.<TrainingMonkey>of(TrainingMonkey::new, MobCategory.MISC).sized(0.5f, 0.9f).clientTrackingRange(10).build("training_monkey"));
+    public static final RegistryObject<EntityType<TrainingCricket>> TRAINING_CRICKET = TYPES.register("training_cricket",
+            () -> EntityType.Builder.<TrainingCricket>of(TrainingCricket::new, MobCategory.MISC).sized(0.35f, 0.3f).clientTrackingRange(10).build("training_cricket"));
+    public static final RegistryObject<EntityType<KiFighter>> OGRE_GUARD = TYPES.register("ogre_guard",
+            () -> EntityType.Builder.<KiFighter>of((t, l) -> new NeutralFighter(t, l, OGRE_PROFILE), MobCategory.CREATURE)
+                    .sized(0.8f, 2.4f).clientTrackingRange(10).fireImmune().build("ogre_guard"));
+    public static final RegistryObject<EntityType<KiFighter>> DAMNED_WARRIOR = TYPES.register("damned_warrior",
+            () -> EntityType.Builder.<KiFighter>of((t, l) -> new KiFighter(t, l, DAMNED_PROFILE), MobCategory.MONSTER)
+                    .sized(0.6f, 1.9f).clientTrackingRange(8).fireImmune().build("damned_warrior"));
+
     private ModNpcs() {}
 
     public static void register(IEventBus modBus) {
@@ -77,6 +103,12 @@ public final class ModNpcs {
         event.put(NAMEKIAN_WARRIOR.get(), KiFighter.attributes(50, 5, 0.25).build());
         event.put(MASTER.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2).add(Attributes.MAX_HEALTH, 100).build());
         event.put(PATROL_OFFICER.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2).add(Attributes.MAX_HEALTH, 100).build());
+        var resident = net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2).add(Attributes.MAX_HEALTH, 200).build();
+        for (var t : List.of(ENMA, OGRE_CLERK_RED, OGRE_CLERK_BLUE, NORTH_KAI, GRAND_KAI)) event.put(t.get(), resident);
+        event.put(TRAINING_MONKEY.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.34).add(Attributes.MAX_HEALTH, 40).build());
+        event.put(TRAINING_CRICKET.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.3).add(Attributes.MAX_HEALTH, 10).build());
+        event.put(OGRE_GUARD.get(), KiFighter.attributes(220, 10, 0.25).add(Attributes.KNOCKBACK_RESISTANCE, 0.7).build());
+        event.put(DAMNED_WARRIOR.get(), KiFighter.attributes(90, 8, 0.29).build());
     }
 
     @SubscribeEvent
@@ -85,6 +117,8 @@ public final class ModNpcs {
             event.register(type.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                     Monster::checkMonsterSpawnRules, SpawnPlacementRegisterEvent.Operation.REPLACE);
         }
+        event.register(DAMNED_WARRIOR.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                (t, l, r, p, rnd) -> l.getBlockState(p.below()).isSolid(), SpawnPlacementRegisterEvent.Operation.REPLACE);
         event.register(NAMEKIAN_WARRIOR.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 net.minecraft.world.entity.Mob::checkMobSpawnRules, SpawnPlacementRegisterEvent.Operation.REPLACE);
     }

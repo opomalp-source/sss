@@ -443,6 +443,30 @@ public final class DBZCommand {
                                             ctx.getSource().sendSuccess(() -> Component.literal("Body type " + type + " for " + targets.size() + " player(s)"), true);
                                             return targets.size();
                                         }))))
+                .then(Commands.literal("otherworld")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .executes(ctx -> otherworld(ctx, com.dbzenith.world.Otherworld.OTHERWORLD))))
+                .then(Commands.literal("limbo")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .executes(ctx -> otherworld(ctx, com.dbzenith.world.Otherworld.LIMBO))))
+                .then(Commands.literal("soul")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .executes(ctx -> apply(ctx, "Marked as dead", d -> d.setDead(true, ctx.getSource().getLevel().getGameTime(), false)))))
+                .then(Commands.literal("revive")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .executes(ctx -> {
+                                    int n = 0;
+                                    for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
+                                        PlayerData d = ModCapabilities.getOrThrow(p);
+                                        d.setDead(true, -1_000_000_000L, false);
+                                        if (com.dbzenith.world.Otherworld.returnToLife(p) || d.isDead()) d.setDead(false, 0, false);
+                                        com.dbzenith.data.PlayerDataEvents.sync(p);
+                                        n++;
+                                    }
+                                    int count = n;
+                                    ctx.getSource().sendSuccess(() -> Component.literal("Revived " + count + " player(s)"), true);
+                                    return n;
+                                })))
                 .then(Commands.literal("devshot")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("name", StringArgumentType.word())
@@ -481,6 +505,18 @@ public final class DBZCommand {
             com.dbzenith.data.PlayerDataEvents.sync(p);
         }
         ctx.getSource().sendSuccess(() -> Component.literal("Restyled " + targets.size() + " player(s)"), true);
+        return targets.size();
+    }
+
+    /** Visits the other world (or Limbo), living or dead. */
+    private static int otherworld(CommandContext<CommandSourceStack> ctx, net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dim) throws CommandSyntaxException {
+        net.minecraft.server.level.ServerLevel level = ctx.getSource().getServer().getLevel(dim);
+        if (level == null) return 0;
+        com.dbzenith.world.OtherworldBuilder.ensureBuilt(level);
+        net.minecraft.world.phys.Vec3 at = dim == com.dbzenith.world.Otherworld.LIMBO ? com.dbzenith.world.Otherworld.LIMBO_ARRIVAL : com.dbzenith.world.Otherworld.ARRIVAL;
+        var targets = EntityArgument.getPlayers(ctx, "targets");
+        for (ServerPlayer p : targets) p.teleportTo(level, at.x, at.y, at.z, 0f, 0f);
+        ctx.getSource().sendSuccess(() -> Component.literal("Sent " + targets.size() + " player(s) to " + dim.location()), true);
         return targets.size();
     }
 

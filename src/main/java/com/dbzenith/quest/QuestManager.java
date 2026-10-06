@@ -114,7 +114,13 @@ public final class QuestManager {
             ItemStack stack = new ItemStack(item, ir.count());
             if (!player.getInventory().add(stack)) player.drop(stack, false);
         }
-        if (!r.flag().isEmpty()) d.setFlag(r.flag(), true);
+        if (r.flag().startsWith("skill:")) {                                    // "skill:<id>:<level>": teaches a skill up to that level
+            String[] p = r.flag().split(":");
+            d.setSkillLevel(p[1], Math.max(d.getSkillLevel(p[1]), Integer.parseInt(p[2])));
+        } else if (r.flag().startsWith("godki:")) {                             // "godki:<xp>": God Ki experience, and the gift itself
+            d.setFlag(com.dbzenith.transform.GodKi.FLAG, true);
+            d.setGodKiXp(d.getGodKiXp() + Double.parseDouble(r.flag().substring(6)));
+        } else if (!r.flag().isEmpty()) d.setFlag(r.flag(), true);
         if (!r.technique().isEmpty()) TechniqueLibrary.learnFree(d, Techniques.byId(r.technique()));
         if (r.alignment() != 0) d.setAlignment(d.getAlignment() + r.alignment());
         if (r.patrolRep() > 0) {
@@ -132,6 +138,20 @@ public final class QuestManager {
     }
 
     // ------------------------------------------------------------------ hooks
+
+    /** Counts an event (catching the monkey, striking the cricket...) towards kill-style objectives with that target. */
+    public static void event(ServerPlayer player, String target) {
+        PlayerData d = ModCapabilities.get(player).orElse(null);
+        if (d == null) return;
+        for (String id : java.util.List.copyOf(d.activeQuestsView().keySet())) {
+            Quest q = Quests.byId(id);
+            if (q == null) continue;
+            for (int i = 0; i < q.objectives().size(); i++) {
+                Quest.Objective o = q.objectives().get(i);
+                if (o.type() == Quest.Objective.Type.KILL && o.target().equals(target)) d.addQuestProgress(id, i, 1, o.amount());
+            }
+        }
+    }
 
     /** Kill objectives (alignment shifts live in race.Alignment). */
     @SubscribeEvent

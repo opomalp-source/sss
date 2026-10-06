@@ -104,6 +104,11 @@ public final class ClientEvents {
         com.dbzenith.client.fx.CameraFx.devTurn = name.contains("side") ? 90f : name.contains("turn") ? 45f : 0f;
         com.dbzenith.client.anim.AnimController.devFreeze = false;
         com.dbzenith.client.fx.VfxV3.devSpeedLines = name.contains("speedlines");
+        if (name.contains("respawn") && mc.player != null && mc.player.isDeadOrDying()) mc.player.respawn();
+        if (name.startsWith("judgement_") && !(mc.screen instanceof com.dbzenith.client.screen.JudgementScreen)) {
+            mc.setScreen(new com.dbzenith.client.screen.JudgementScreen(true, 97));
+            delayTicks = Math.max(delayTicks, 6);
+        }
         if (name.contains("hudzenith")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(0);
         if (name.contains("hudclassic")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(1);
         if (name.contains("hudminimal")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(2);

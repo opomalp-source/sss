@@ -26,6 +26,10 @@ public final class ClientHooks {
     }
 
     /** A quest giver was right-clicked. */
+    public static void openJudgement(boolean dead, int secondsLeft) {
+        Minecraft.getInstance().setScreen(new com.dbzenith.client.screen.JudgementScreen(dead, secondsLeft));
+    }
+
     public static void openQuestScreen(com.dbzenith.quest.Quest.Giver giver) {
         Minecraft.getInstance().setScreen(new com.dbzenith.client.screen.QuestScreen(giver));
     }

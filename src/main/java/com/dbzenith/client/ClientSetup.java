@@ -52,6 +52,8 @@ public final class ClientSetup {
         event.registerLayerDefinition(FormHairModel.LAYER, FormHairModel::createLayer);
         event.registerLayerDefinition(RaceFeatureModel.LAYER, RaceFeatureModel::createLayer);
         event.registerLayerDefinition(com.dbzenith.client.render.GearModel.LAYER, com.dbzenith.client.render.GearModel::createLayer);
+        event.registerLayerDefinition(com.dbzenith.client.render.NpcExtrasModel.LAYER, com.dbzenith.client.render.NpcExtrasModel::createLayer);
+        event.registerLayerDefinition(com.dbzenith.client.render.CricketRenderer.LAYER, com.dbzenith.client.render.CricketRenderer.Model::createLayer);
         event.registerLayerDefinition(com.dbzenith.client.render.GreatApeModel.LAYER, com.dbzenith.client.render.GreatApeModel::createLayer);
         event.registerLayerDefinition(com.dbzenith.client.render.DragonModel.LAYER, com.dbzenith.client.render.DragonModel::createLayer);
         event.registerLayerDefinition(com.dbzenith.client.render.SpacePodRenderer.LAYER, com.dbzenith.client.render.SpacePodRenderer::createLayer);
@@ -72,6 +74,7 @@ public final class ClientSetup {
                 renderer.addLayer(new com.dbzenith.client.render.GearLayer(renderer, event.getEntityModels()));
                 renderer.addLayer(new FormHairLayer(renderer, event.getEntityModels()));
                 renderer.addLayer(new RaceFeatureLayer(renderer, event.getEntityModels()));
+                renderer.addLayer(new com.dbzenith.client.render.HaloLayer(renderer, event.getEntityModels()));
             }
         }
     }
@@ -91,5 +94,14 @@ public final class ClientSetup {
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.MASTER.get(), ctx -> new FighterRenderer<>(ctx, "martial_arts_master", 0.95f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.PATROL_OFFICER.get(), ctx -> new FighterRenderer<>(ctx, "patrol_officer", 1f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.NAMEKIAN_WARRIOR.get(), ctx -> new FighterRenderer<>(ctx, "namekian_warrior", 1.05f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.ENMA.get(), ctx -> new FighterRenderer<>(ctx, "enma", 3.2f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.OGRE_CLERK_RED.get(), ctx -> new FighterRenderer<>(ctx, "ogre_clerk_red", 1.15f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.OGRE_CLERK_BLUE.get(), ctx -> new FighterRenderer<>(ctx, "ogre_clerk_blue", 1.15f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.NORTH_KAI.get(), ctx -> new FighterRenderer<>(ctx, "north_kai", 0.85f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.GRAND_KAI.get(), ctx -> new FighterRenderer<>(ctx, "grand_kai", 1.05f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.TRAINING_MONKEY.get(), ctx -> new FighterRenderer<>(ctx, "training_monkey", 0.48f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.TRAINING_CRICKET.get(), com.dbzenith.client.render.CricketRenderer::new);
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.OGRE_GUARD.get(), ctx -> new FighterRenderer<>(ctx, "ogre_guard", 1.3f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.DAMNED_WARRIOR.get(), ctx -> new FighterRenderer<>(ctx, "damned_warrior", 1f));
     }
 }

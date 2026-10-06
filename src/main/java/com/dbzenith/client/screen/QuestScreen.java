@@ -124,7 +124,8 @@ public class QuestScreen extends Screen {
             int have = minecraft.player == null ? 0 : QuestManager.progress(minecraft.player, d, q, i);
             if (i > 0) line.append("   ");
             boolean met = have >= o.amount();
-            line.append(Component.translatable("objective.dbzenith." + o.type().name().toLowerCase(), targetName(o), have, o.amount())
+            boolean event = o.type() == Quest.Objective.Type.KILL && !net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.containsKey(new ResourceLocation(o.target()));
+            line.append(Component.translatable(event ? "objective.dbzenith.event" : "objective.dbzenith." + o.type().name().toLowerCase(), targetName(o), have, o.amount())
                     .withStyle(s -> s.withColor(met ? GOOD : (d.isQuestActive(q.id()) ? TEXT : DIM))));
         }
         return line;

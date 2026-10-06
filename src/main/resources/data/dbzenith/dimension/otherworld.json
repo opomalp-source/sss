@@ -1,0 +1,14 @@
+{
+  "type": "dbzenith:otherworld",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "dbzenith:otherworld",
+      "layers": [
+        {"block": "minecraft:air", "height": 62},
+        {"block": "dbzenith:otherworld_cloud", "height": 2}
+      ],
+      "lakes": false, "features": false, "structure_overrides": []
+    }
+  }
+}

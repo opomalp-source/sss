@@ -755,6 +755,45 @@ public class PlayerData {
         markDirty();
     }
 
+    // ------------------------------------------------------------------ the other world (CX-12, saved)
+
+    private boolean dead;
+    private long deathTick;
+    private boolean evilSoul;
+
+    /** Dead and in the other world (a halo over the head) until sent back. */
+    public boolean isDead() {
+        return dead;
+    }
+
+    public long getDeathTick() {
+        return deathTick;
+    }
+
+    private int springSoak;
+
+    /** Seconds spent meditating in the springs of paradise. */
+    public int getSpringSoak() {
+        return springSoak;
+    }
+
+    public void setSpringSoak(int seconds) {
+        springSoak = seconds;
+        markDirty();
+    }
+
+    /** Sent to Limbo rather than the check-in station. */
+    public boolean isEvilSoul() {
+        return evilSoul;
+    }
+
+    public void setDead(boolean dead, long tick, boolean evil) {
+        this.dead = dead;
+        this.deathTick = tick;
+        this.evilSoul = dead && evil;
+        markDirty();
+    }
+
     // ------------------------------------------------------------------ Namekian fusion / Majin absorption (saved)
 
     private int fusions;
@@ -1517,6 +1556,10 @@ public class PlayerData {
         tag.putLong("chamberAt", chamberEnteredAt);
         tag.putLong("immortalUntil", immortalUntil);
         tag.putInt("fusions", fusions);
+        tag.putBoolean("dead", dead);
+        tag.putLong("deathTick", deathTick);
+        tag.putBoolean("evilSoul", evilSoul);
+        tag.putInt("springSoak", springSoak);
         tag.putInt("prestige", prestige);
         CompoundTag cds = new CompoundTag();
         cooldownUntil.forEach(cds::putLong); // game time is world-wide, so these stay valid across relogs
@@ -1634,6 +1677,10 @@ public class PlayerData {
         chamberEnteredAt = tag.contains("chamberAt") ? tag.getLong("chamberAt") : -1;
         immortalUntil = tag.contains("immortalUntil") ? tag.getLong("immortalUntil") : -1;
         fusions = tag.getInt("fusions");
+        dead = tag.getBoolean("dead");
+        deathTick = tag.getLong("deathTick");
+        evilSoul = tag.getBoolean("evilSoul");
+        springSoak = tag.getInt("springSoak");
         prestige = tag.getInt("prestige");
         cooldownUntil.clear();
         CompoundTag cds = tag.getCompound("cooldowns");

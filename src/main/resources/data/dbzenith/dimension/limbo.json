@@ -1,0 +1,15 @@
+{
+  "type": "dbzenith:limbo",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "dbzenith:limbo",
+      "layers": [
+        {"block": "minecraft:bedrock", "height": 1},
+        {"block": "minecraft:blackstone", "height": 59},
+        {"block": "minecraft:crimson_nylium", "height": 1}
+      ],
+      "lakes": false, "features": false, "structure_overrides": []
+    }
+  }
+}

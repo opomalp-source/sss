@@ -40,6 +40,7 @@ public final class TrainingTicker {
         if (chamber) data.applyGravity(c.chamberGravity.get(), now + 20);
         Planet planet = Planet.of(player.level());
         if (planet != null && planet.gravity() > 1) data.applyGravity(planet.gravity(), now + 20);
+        if (Otherworld.nearKaiPlanet(player)) data.applyGravity(Otherworld.KAI_GRAVITY, now + 20);   // the little planet at the end of Snake Way
         data.expireGravity(now);
         double g = data.getGravity(now);
         double excess = Math.max(0, g - tolerance(data));

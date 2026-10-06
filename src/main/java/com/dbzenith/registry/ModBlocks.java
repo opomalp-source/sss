@@ -42,6 +42,16 @@ public final class ModBlocks {
     public static final RegistryObject<Block> NAMEK_LEAVES = register("namek_leaves",
             () -> new net.minecraft.world.level.block.LeavesBlock(BlockBehaviour.Properties.copy(net.minecraft.world.level.block.Blocks.OAK_LEAVES)));
 
+    /** The other world (CX-12): the golden cloud sea, the scales of Snake Way, the springs of paradise. */
+    public static final RegistryObject<Block> OTHERWORLD_CLOUD = register("otherworld_cloud", () -> new com.dbzenith.world.OtherworldBlocks.Cloud(
+            BlockBehaviour.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_YELLOW).strength(0.3f).noOcclusion()
+                    .sound(net.minecraft.world.level.block.SoundType.WOOL).isViewBlocking((s, l, p) -> false).isSuffocating((s, l, p) -> false)));
+    public static final RegistryObject<Block> SNAKE_SCALE = register("snake_scale",
+            () -> new Block(BlockBehaviour.Properties.copy(net.minecraft.world.level.block.Blocks.ORANGE_TERRACOTTA)));
+    public static final RegistryObject<Block> SACRED_SPRING = register("sacred_spring", () -> new com.dbzenith.world.OtherworldBlocks.Spring(
+            BlockBehaviour.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_CYAN).strength(1.5f).noOcclusion()
+                    .lightLevel(s -> 12).sound(net.minecraft.world.level.block.SoundType.AMETHYST)));
+
     private ModBlocks() {}
 
     private static RegistryObject<Block> register(String name, Supplier<Block> block) {

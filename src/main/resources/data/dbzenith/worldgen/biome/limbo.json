@@ -1,0 +1,9 @@
+{
+  "has_precipitation": false,
+  "temperature": 2.0,
+  "downfall": 0.0,
+  "effects": {"sky_color": 3803658, "fog_color": 4853772, "water_color": 4159204, "water_fog_color": 329011, "grass_color": 6957594,
+              "particle": {"options": {"type": "minecraft:crimson_spore"}, "probability": 0.012}},
+  "spawners": {"monster": [{"type": "dbzenith:damned_warrior", "weight": 100, "minCount": 1, "maxCount": 2}]},
+  "spawn_costs": {}, "carvers": {}, "features": []
+}
