@@ -179,7 +179,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - per-race transformation sequences;
   - hit reactions, knockback tumbles and the get-up;
   - per-race idle stances.
-- [ ] CX-11a Aura v3 (user: "the auras don't look finished"):
+- [x] CX-11a Aura v3 (v0.35.0) (user: "the auras don't look finished"):
   - layered flame-shaped shells (a bright core, outer tongues licking up from the feet, flicker and turbulence);
   - a burst on starting a charge, ground dust and lifting rocks;
   - looks per form: SSJ spiky gold, SSJ2 crackling, God calm flame, Blue glow, silver wisps, red Kaioken, dark evil.

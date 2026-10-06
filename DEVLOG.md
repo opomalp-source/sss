@@ -849,3 +849,30 @@ The user sent reference pictures for the art direction they want: chunky anime-s
 
 ### Verified
 - Frame-by-frame sheets of every reworked move, the race idles, flight poses and the three race transformations.
+
+## 2026-10-06 — Session 3 (cont.): CX-11a Aura v3 (v0.35.0)
+- **Textures (`ArtGen.AuraV3`):**
+  - `aura_tongue.png`: 16 frames of a flame tongue at 48x96, about four times the old resolution. It has a jagged, flickering silhouette, a swaying tip and streaks of light running up through it. Everything is periodic in time, so the loop is seamless.
+  - `aura_spike.png`: a sharp lick.
+  - `aura_wisp.png`: a soft curl.
+- **The shell (`AuraRenderer`, rewritten):**
+  - Tongues are strips of four segments bent along a teardrop: narrow at the feet, widest at the chest, converging above the head. Each strip turns to face the camera about its own length, sways as a wave runs up it and flickers in height.
+  - Layers, outside in: a saturated outer body with ordinary blending, so the colour holds in daylight; a white-hot additive core; licks that shoot off the shoulders and fade.
+- **Styles per family of forms (`AuraRenderer.Style`, `styleOf`):**
+  - **Flame:** spiky gold, the default.
+  - **Roar:** Kaioken, Legendary, Berserker, Wrathful, rage and overflow forms; more and taller tongues, faster, more licks.
+  - **Calm:** god ki; tight and slow.
+  - **Sparkle:** Blue; calm with points of light rising and winking out.
+  - **Wisps:** pale and ego forms; soft curls spiralling up.
+  - **Dark:** evil, demon, blood and corruption forms; a near-black body with a thin lit rim and dark smoke wisps.
+- **Charging:**
+  - Starting a charge bursts: a flash, a shockwave racing out along the ground and a ring flung up round the body.
+  - `AuraDebris` blows dust out from the feet as block particles of the ground, plus an occasional cloud.
+  - Chunks of the ground lift off, textured from the block they came from, spinning slowly as they rise, then crumbling away (at most 160).
+  - Aura detail scales the debris.
+- **Fixed after review:**
+  - The first dark style read as bright pink, because the rim overpowered the body. The body is now much darker and the rim thin and faint.
+  - The smoke puffs were too big and frequent; there are now fewer, further out, as cloud particles.
+
+### Verified
+- Screenshots: a base charge (the burst, dust and rocks), SSJ held and charging, God, Blue, Evil Majin, LSSJ, No Ego Zone, and Kaioken held and charging.

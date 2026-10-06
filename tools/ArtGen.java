@@ -31,6 +31,7 @@ public class ArtGen {
         Painted.all();
         RaceParts.all();
         Gear.all();
+        AuraV3.all();
         HudHd.all();
         System.out.println("ArtGen done");
     }
@@ -442,6 +443,75 @@ public class ArtGen {
 
 
 
+
+    // ================================================================== aura v3 (CX-11a)
+
+    /**
+     * Aura textures, white with alpha (tinted at render time). aura_tongue.png: 16 frames (48x96 each) of one flame
+     * tongue, a jagged flickering silhouette with streaks of light running up through it; everything is periodic in
+     * time, so the frames loop seamlessly. aura_spike.png: a sharp lick. aura_wisp.png: a soft curling wisp.
+     */
+    static final class AuraV3 {
+        static void all() throws IOException {
+            tongue();
+            spike();
+            wisp();
+        }
+
+        static int px(double grey, double alpha) {
+            int g = (int) Math.round(Math.max(0, Math.min(1, grey)) * 255), a = (int) Math.round(Math.max(0, Math.min(1, alpha)) * 255);
+            return a == 0 ? 0 : a << 24 | g << 16 | g << 8 | g;
+        }
+
+        static void tongue() throws IOException {
+            int fw = 48, fh = 96, frames = 16;
+            Canvas c = new Canvas(fw * frames, fh);
+            double TAU = Math.PI * 2;
+            for (int k = 0; k < frames; k++) {
+                double t = k / (double) frames;
+                for (int y = 0; y < fh; y++) for (int x = 0; x < fw; x++) {
+                    double u = (x + 0.5) / fw - 0.5, v = (y + 0.5) / fh;                 // v: 0 the tip .. 1 the base
+                    double jag = 0.13 * Math.sin(v * 13 + TAU * t * 2 + 1.1) + 0.08 * Math.sin(v * 29 - TAU * t * 3)
+                            + 0.05 * Math.sin(v * 51 + TAU * t * 5 + 2.3);
+                    double hw = 0.46 * Math.pow(v, 0.62) * (1 + jag);
+                    double cx = 0.07 * (1 - v) * Math.sin(TAU * t + v * 5);              // the tip sways
+                    double d = Math.abs(u - cx) / Math.max(0.01, hw);
+                    if (d >= 1) continue;
+                    double flow = 0.5 + 0.5 * Math.sin(v * 9 + TAU * t * 2 + 2.5 * Math.sin(u * 8 + TAU * t));   // light running up
+                    double b = (1 - d * d) * (0.5 + 0.5 * Math.pow(v, 0.5)) + 0.4 * Math.exp(-Math.pow(d / 0.32, 2));
+                    b *= 0.82 + 0.18 * flow;
+                    double a = Math.min(1, (1 - d) * 3.2) * (0.45 + 0.55 * Math.pow(v, 0.35)) * (0.85 + 0.15 * flow);
+                    c.set(k * fw + x, y, px(0.55 + 0.45 * b, a));
+                }
+            }
+            c.save("entity/aura_tongue.png");
+        }
+
+        static void spike() throws IOException {
+            Canvas c = new Canvas(16, 64);
+            for (int y = 0; y < 64; y++) for (int x = 0; x < 16; x++) {
+                double u = (x + 0.5) / 16 - 0.5, v = (y + 0.5) / 64;
+                double hw = 0.46 * Math.pow(v, 1.5);
+                double d = Math.abs(u) / Math.max(0.005, hw);
+                if (d >= 1) continue;
+                c.set(x, y, px(0.75 + 0.25 * (1 - d), Math.min(1, (1 - d) * 2.5) * (0.4 + 0.6 * v)));
+            }
+            c.save("entity/aura_spike.png");
+        }
+
+        static void wisp() throws IOException {
+            Canvas c = new Canvas(32, 64);
+            for (int y = 0; y < 64; y++) for (int x = 0; x < 32; x++) {
+                double u = (x + 0.5) / 32 - 0.5, v = (y + 0.5) / 64;
+                double cx = 0.26 * Math.sin(v * Math.PI * 1.6);
+                double hw = 0.13 * Math.sin(Math.PI * v) + 0.01;
+                double d = Math.abs(u - cx) / hw;
+                if (d >= 1) continue;
+                c.set(x, y, px(1, (1 - d * d) * Math.sin(Math.PI * v)));
+            }
+            c.save("entity/aura_wisp.png");
+        }
+    }
     // ================================================================== fighting clothes, painted (CX-14e)
 
     /**
