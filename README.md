@@ -50,3 +50,8 @@ Install **NeoForge 1.20.1-47.1.106** into a dedicated game directory, then put `
 - **Prestige**: at level 2000 the stat screen offers to start your attributes over for a permanent bonus. **God ki** hits ordinary ki harder and cannot be read by scouters.
 - `/dbz stats`, `/dbz set <player> <field> <value>` (fields: strength, dexterity, constitution, ki_power, willpower, mind, spirit, tp, body, ki, stamina, release, alignment, physical_age, mental_age, prestige, thirst, scar, tattoo), `/dbz tp add`, `/dbz race`, `/dbz path`, `/dbz refill`, `/dbz reset`.
 - Balance numbers: `<world>/serverconfig/dbzenith-server.toml`. Too slow or too fast? Change `tpGainMultiplier` (2.0 = twice as fast). See [BALANCE.md](BALANCE.md) for the targets and what each value does.
+
+## Libraries
+Bundled inside the mod jar (Jar-in-Jar), so there is nothing extra to install:
+- [playerAnimator](https://github.com/KosmX/minecraftPlayerAnimator) (MIT): player animations.
+- [bendy-lib](https://github.com/KosmX/bendy-lib) (MIT): bending elbows and knees in those animations.

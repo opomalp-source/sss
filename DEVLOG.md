@@ -816,3 +816,36 @@ The user sent reference pictures for the art direction they want: chunky anime-s
 
 ### Verified
 - Screenshots: LSSJ bulk; SSJ3; Frost Demon base, second, third (front and back) and final forms; Pure and Super Majin.
+
+## 2026-10-06 — Session 3 (cont.): CX-15 Animations v4 (v0.34.0)
+- **Root cause of the stiffness:** elbow and knee bends had never been applied. playerAnimator only bends limbs when bendy-lib is present, and the key helper skipped bends silently. bendy-lib 4.0.0 (MIT, the 1.19.4+ Forge build) is now bundled with Jar-in-Jar, like playerAnimator.
+  - bendy-lib bends every limb backward for a positive angle. That is right for knees, so `Keys.bend` flips the sign for arms, and every elbow (old animations included) now folds forward as written.
+- **Whole-body poses (`Anims.Pose`, `Keys.pose`):** every key sets the head, torso, both arms, both legs, the body's offset and its tilt.
+  - Unless a pose turns the head itself, the head turns back against the torso so the eyes stay on the target.
+  - Stances can leave parts free (`freeing`), so the combat stance still looks around and walks.
+  - One-shots blend out over four ticks instead of two.
+- **`FIGHT` stance:** orthodox, left foot forward, knees soft, the rear fist at the chin and the lead fist up. Every strike starts from it and settles back into it.
+- **Reworked choreography:**
+  - **Straight, cross and hook:** a load, a snap with a half step, an overshoot hold, then back to guard.
+  - **Front kick:** chamber, snap at hip height with a lean back, re-chamber.
+  - **Heavy punch:** loaded deep on the back leg, then a lunge with the other arm torn back.
+  - **Launcher and uppercut:** a crouch, then a full-body rise.
+  - **Spike:** an arch overhead, then a smash.
+  - **Others:** Z-hit flying knee, Breaker Wave, spot dodge sway.
+  - **Ki moves:** a blast chambered at the hip with recoil; volleys alternating wide and low; a beam gathered at the hip with the body coiled, thrust out and held with a strain; a sphere raised, leaned back and hurled with a step; an explosive wave; a focus pose.
+  - **Power-up:** a wide, low stance, fists down and out, head thrown back, shaking.
+  - **Guard:** forearms crossed high, breathing.
+  - **Transformation:** a hunched strain that shakes harder as it builds, then the burst: arms torn down and out, chest open, head back, held.
+  - **Hits:** light hits snap the head; heavy ones blow the body back, then a stagger.
+- **Race idles (`Anims.idleFor`):**
+  - Namekians fold their arms.
+  - Frost Demons, Core People and machines stand regal, hands behind the back.
+  - Majin, Vampires, Bio-Androids and Gen Aliens slouch loose with a sway.
+  - Everyone else breathes.
+- **Review tooling:**
+  - `anim_<NAME>_f<N>` holds an animation at frame N, using a player that ticks up to the frame and stops. The first attempts, pausing the speed modifier and passing a start tick to the constructor, showed tick 0.
+  - A `side` flag turns the body 90° for profile views.
+  - Reviewed as contact sheets: front three-quarter for the punches, profile for kicks, uppercuts, spikes, beams and hits.
+
+### Verified
+- Frame-by-frame sheets of every reworked move, the race idles, flight poses and the three race transformations.

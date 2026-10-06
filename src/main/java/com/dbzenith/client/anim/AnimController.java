@@ -141,7 +141,7 @@ public final class AnimController {
         boolean bareHands = player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty();
         if (!bareHands) return null;                                                   // items keep vanilla's arms
         if ((now - t.lastPunch < 100 || now - t.lastHurtTick < 100) && horizontal < 0.15) return Anims.COMBAT_STANCE;
-        if (horizontal < 0.01) return Anims.IDLE_BREATHE;
+        if (horizontal < 0.01) return Anims.idleFor(state.raceEnum());
         return null;
     }
 
@@ -277,9 +277,20 @@ public final class AnimController {
     }
 
     /** Dev automation: play an animation from {@link Anims} by field name (BEAM / THROW for the timed ones) on the local player. */
+    /** Dev automation: animations held still (a frame picked with _f<N>). */
+    public static boolean devFreeze;
+    private static KeyframeAnimation devAnim;
+    private static int devFrame;
+
     public static void devPreview(String name) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
+        int frame = -1;
+        java.util.regex.Matcher fm = java.util.regex.Pattern.compile("(.*)_f([0-9]+)$").matcher(name);
+        if (fm.matches()) {
+            name = fm.group(1);
+            frame = Integer.parseInt(fm.group(2));
+        }
         KeyframeAnimation anim;
         if (name.equals("BEAM")) anim = Anims.kiBeam(40);
         else if (name.equals("THROW")) anim = Anims.kiThrow(30);
@@ -292,7 +303,19 @@ public final class AnimController {
             }
         }
         ModifierLayer<IAnimation> layer = layer(mc.player, ACTION_LAYER);
-        if (layer != null) layer.setAnimation(new KeyframeAnimationPlayer(anim));
+        int stopAt = frame;
+        KeyframeAnimationPlayer player = frame < 0 ? new KeyframeAnimationPlayer(anim) : new KeyframeAnimationPlayer(anim) {
+            int ticks;
+
+            @Override
+            public void tick() {                                                    // runs up to the chosen frame, then holds it
+                if (ticks++ < stopAt - 1) super.tick();
+            }
+        };
+        if (layer != null) layer.setAnimation(player);
+        devFreeze = frame >= 0;
+        devAnim = anim;
+        devFrame = frame;
     }
 
     /** The Great Ape replaces the whole player model, so the humanoid animations do not apply. */

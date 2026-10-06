@@ -92,10 +92,15 @@ repositories {
 
 dependencies {
     // Mod dependencies must use the mod* configurations so they are remapped (see ModDevGradle LEGACY.md).
-    // Both are MIT-licensed and bundled with Jar-in-Jar, so players install a single jar.
+    // All are MIT-licensed and bundled with Jar-in-Jar, so players install a single jar.
     modImplementation "dev.kosmx.player-anim:player-animation-lib-forge:${player_anim_version}"
     jarJar("dev.kosmx.player-anim:player-animation-lib-forge") {
         version { strictly "[${player_anim_version}]" }
+    }
+    // bendy-lib lets playerAnimator bend elbows and knees; without it every bend key is ignored (CX-15).
+    modImplementation "io.github.kosmx.bendy-lib:bendy-lib-forge:${bendy_lib_version}"
+    jarJar("io.github.kosmx.bendy-lib:bendy-lib-forge") {
+        version { strictly "[${bendy_lib_version}]" }
     }
 }
 
