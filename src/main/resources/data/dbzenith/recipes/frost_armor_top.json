@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["A A", "ABA", "AAA"],
+  "key": {"A": {"item": "minecraft:iron_ingot"}, "B": {"item": "minecraft:purple_wool"}},
+  "result": {"item": "dbzenith:frost_armor_top"}
+}

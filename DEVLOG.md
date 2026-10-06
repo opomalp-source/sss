@@ -876,3 +876,20 @@ The user sent reference pictures for the art direction they want: chunky anime-s
 
 ### Verified
 - Screenshots: a base charge (the burst, dust and rocks), SSJ held and charging, God, Blue, Evil Majin, LSSJ, No Ego Zone, and Kaioken held and charging.
+
+## 2026-10-06 — Session 3 (cont.): art leftovers (v0.36.0)
+- **Expressions (`FaceLayer`, 14b part 2):**
+  - Charging or transforming shouts: an open mouth and fierce brows.
+  - Guarding, winding up a heavy or taking a hit grits the teeth under fierce brows; a hit also narrows the eyes.
+  - Otherwise characters blink every four seconds or so, staggered per player.
+  - Brows chosen as "none" stay none, and cat eyes don't blink.
+- **Outfits (14e):**
+  - **Zip hoodie set:** a red hoodie with a zip, white drawstrings, a kangaroo pocket, a ribbed hem and cuffs, and a 3D hood lying on the neck; black joggers with a white side stripe and ribbed ankles; white sneakers with a red heel tab.
+  - **Frost Demon armour:** the battle-armour build in white plate with purple trim over a dark bodysuit, with purple 3D pads.
+  - The three battle-armour generators (painted, icon, classic layer) take a name and colours. Both new sets come with recipes, icons, classic layers and lang entries.
+- **Apes and tails (14f):**
+  - The golden and legendary apes now use the Great Ape model with their own fur: gold, and a green-gold with green eyes (`GreatApe.isApeForm`). Before, they were a scaled-up player.
+  - Primal (x1.3) and Legendary Primal (x1.45) Saiyans have a bigger tail.
+
+### Verified
+- Screenshots: the hoodie and Frost Demon armour (front and back), gritting under guard and the calm face, the Primal tail, and the golden ape.

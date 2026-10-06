@@ -23,7 +23,7 @@ public final class FormScaleRenderer {
     public static void greatApe(RenderPlayerEvent.Pre event) {
         net.minecraft.world.entity.player.Player player = event.getEntity();
         com.dbzenith.network.PublicStatePacket state = com.dbzenith.client.ClientPublicStates.get(player.getId());
-        if (state == null || !com.dbzenith.transform.Forms.GREAT_APE.id().equals(state.form()) || player.isInvisible()) return;
+        if (state == null || !GreatApe.isApeForm(state.form()) || player.isInvisible()) return;
         if (apeModel == null) {
             apeModel = new GreatApeModel(net.minecraft.client.Minecraft.getInstance().getEntityModels().bakeLayer(GreatApeModel.LAYER));
         }
@@ -43,7 +43,7 @@ public final class FormScaleRenderer {
         apeModel.setupAnim(player, player.walkAnimation.position(pt), Math.min(1f, player.walkAnimation.speed(pt)),
                 player.tickCount + pt, headYaw, pitch);
         int overlay = net.minecraft.client.renderer.entity.LivingEntityRenderer.getOverlayCoords(player, 0f);
-        apeModel.renderToBuffer(pose, event.getMultiBufferSource().getBuffer(apeModel.renderType(GreatApeModel.TEXTURE)),
+        apeModel.renderToBuffer(pose, event.getMultiBufferSource().getBuffer(apeModel.renderType(GreatApeModel.texture(state.form()))),
                 event.getPackedLight(), overlay, 1f, 1f, 1f, 1f);
         pose.popPose();
     }

@@ -320,7 +320,7 @@ public final class AnimController {
 
     /** The Great Ape replaces the whole player model, so the humanoid animations do not apply. */
     private static boolean isApe(String form) {
-        return com.dbzenith.transform.Forms.GREAT_APE.id().equals(form);
+        return com.dbzenith.transform.GreatApe.isApeForm(form);
     }
 
     @SuppressWarnings("unchecked")

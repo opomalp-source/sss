@@ -1257,5 +1257,11 @@
   "item.dbzenith.namekian_boots": "Namekian Shoes",
   "item.dbzenith.majin_top": "Majin Vest",
   "item.dbzenith.majin_pants": "Majin Trousers (with Belt)",
-  "item.dbzenith.majin_boots": "Majin Shoes"
+  "item.dbzenith.majin_boots": "Majin Shoes",
+  "item.dbzenith.hoodie_top": "Zip Hoodie",
+  "item.dbzenith.hoodie_pants": "Joggers",
+  "item.dbzenith.hoodie_boots": "Sneakers",
+  "item.dbzenith.frost_armor_top": "Frost Demon Armor",
+  "item.dbzenith.frost_armor_pants": "Frost Demon Bodysuit",
+  "item.dbzenith.frost_armor_boots": "Frost Demon Boots"
 }

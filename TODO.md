@@ -151,7 +151,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
     - clean dark line art for the anatomy (pecs, abs, obliques, biceps, deltoids, back muscles, knees);
     - 2-3 tone cel shading with soft highlights, readable at 64x64;
     - race markings drawn as clean shapes (Namekian arm and leg muscle patches, Frost Demon plates and gems, Majin dots).
-  - [x] 14b Anime faces v2 (v0.29.0, part 1: eyes, brows, nose, mouths redrawn; expressions in combat still to do): a bold upper lid line, white sclera, coloured irises with pupils and a highlight, sharp angled brows, a nose hook line and a small mouth; expressions (calm, angry, shouting, hurt); every race default reworked.
+  - [x] 14b Anime faces v2 (v0.29.0 eyes, brows, nose, mouths; v0.36.0 expressions: shouting, gritting, blinking): a bold upper lid line, white sclera, coloured irises with pupils and a highlight, sharp angled brows, a nose hook line and a small mouth; expressions (calm, angry, shouting, hurt); every race default reworked.
   - [x] 14c Hair v3 (v0.30.0): chunky voxel clumps (stacked, tapering cuboids per spike, wrapping the back and sides, darker roots to lighter tips). All presets and every form's hair (SSJ, SSJ2, SSJ3 long, SSJ4 mane, God, Blue, LSSJ) rebuilt.
   - [x] 14g Proportions (v0.30.0, user request: "the chest is a little bigger than the torso"): a chest block wider and deeper than the waist, per build
   - [x] 14d 3D body parts (v0.31.0):
@@ -160,14 +160,14 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
     - Frost Demon horns, head dome, shoulder domes and ear pieces;
     - a segmented furry Saiyan tail with physics (swings, wraps round the waist);
     - other race tails, Demon horns, Bio-Android wings and crest.
-  - [x] 14e Clothes v2 (v0.32.0; hoodie, jacket and Frost Demon armour still to add), all original designs with 3D parts:
+  - [x] 14e Clothes v2 (v0.32.0; v0.36.0 zip hoodie set and Frost Demon armour), all original designs with 3D parts:
     - Saiyan battle armour (chest plate, shoulder pads, undersuit);
     - a gi with undershirt, sash and wristbands;
     - weighted boots, hoodie and jacket;
     - a Namekian cape and turban;
     - a Majin vest, baggy pants and an emblem belt (an original emblem);
     - Frost Demon armour.
-  - [x] 14f Transformation shapes (v0.33.0; Golden Great Ape fur and Primal tails still to do) (was CX-8d): bigger frames for Buffed, Legendary and Giant forms (model scale per part), Frost Demon form shapes (second-form horns, third-form crest, final-form smooth head), Super Saiyan 3 brow ridge, Golden Great Ape fur, Primal tails, Bio-Android wings, Majin size changes.
+  - [x] 14f Transformation shapes (v0.33.0; v0.36.0 golden and legendary ape fur, Primal tails) (was CX-8d): bigger frames for Buffed, Legendary and Giant forms (model scale per part), Frost Demon form shapes (second-form horns, third-form crest, final-form smooth head), Super Saiyan 3 brow ridge, Golden Great Ape fur, Primal tails, Bio-Android wings, Majin size changes.
 - [x] CX-15 Animations v4 (v0.34.0) (user request: "serious animations that are actually fitting and look amazing"): rework every animation with anticipation, follow-through and weight, and review each frame by frame in game:
   - jab, cross, hook and kick combo strings;
   - heavy wind-ups;

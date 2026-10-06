@@ -528,6 +528,7 @@ public class ArtGen {
             gi("namekian", 0xFF5A3A8A, 0xFF40B0E0, 0xFF5A3418, 0xFF46306E, false);
             battleArmor();
             majin();
+            hoodie();
             parts();
         }
 
@@ -622,7 +623,12 @@ public class ArtGen {
         }
 
         static void battleArmor() throws IOException {
-            int[] plate = ramp(0xFFECEEF2, 6), gold = ramp(0xFFD8B040, 5), suit = ramp(0xFF2A2E48, 6);
+            battleArmor("battle_armor", 0xFFECEEF2, 0xFFD8B040, 0xFF2A2E48);
+            battleArmor("frost_armor", 0xFFF2F0F6, 0xFF8A4AC8, 0xFF1C1A24);                    // Frost Demon armour: white plate, purple trim
+        }
+
+        static void battleArmor(String name, int plateC, int trimC, int suitC) throws IOException {
+            int[] plate = ramp(plateC, 6), gold = ramp(trimC, 5), suit = ramp(suitC, 6);
             Hd.HdSkin top = new Hd.HdSkin();
             top.body = (f, x, y, w, h) -> {
                 double uu = u(x, w), vv = v(y, h);
@@ -643,12 +649,12 @@ public class ArtGen {
                 if (vv >= 0.82) return row(vv, 0.825, h) ? ink(plate) : flat(plate, f, 0);         // gloves
                 return cloth(suit, f, x, y, w, h, 302);
             };
-            top.save("entity/gear/battle_armor_top.png");
+            top.save("entity/gear/" + name + "_top.png");
 
             Hd.HdSkin pants = new Hd.HdSkin();
             pants.body = (f, x, y, w, h) -> v(y, h) > 0.88 && f != Face.TOP ? cloth(suit, f, x, y, w, h, 303) : 0;
             pants.leg = (f, x, y, w, h) -> v(y, h) > 0.72 || f == Face.BOTTOM ? 0 : cloth(suit, f, x, y, w, h, 304);
-            pants.save("entity/gear/battle_armor_pants.png");
+            pants.save("entity/gear/" + name + "_pants.png");
 
             Hd.HdSkin boots = new Hd.HdSkin();
             boots.leg = (f, x, y, w, h) -> {
@@ -659,7 +665,7 @@ public class ArtGen {
                 if (vv > 0.86 && f == Face.FRONT) return row(vv, 0.865, h) ? ink(gold) : flat(gold, f, 0);   // toe caps
                 return flat(plate, f, (u(x, w) < 0.12 || u(x, w) > 0.88) ? -0.1 : 0);
             };
-            boots.save("entity/gear/battle_armor_boots.png");
+            boots.save("entity/gear/" + name + "_boots.png");
         }
 
         static void majin() throws IOException {
@@ -720,6 +726,55 @@ public class ArtGen {
             boots.save("entity/gear/majin_boots.png");
         }
 
+
+        /** A zip hoodie (drawstrings, a kangaroo pocket, ribbed hem and cuffs), joggers with a side stripe, white sneakers. */
+        static void hoodie() throws IOException {
+            int[] red = ramp(0xFFC8283A, 6), white = ramp(0xFFF2F0F4, 5), black = ramp(0xFF24242C, 6), grey = ramp(0xFF9A9AA4, 4);
+            Hd.HdSkin top = new Hd.HdSkin();
+            top.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM || vv > 0.92) return 0;
+                if (vv > 0.86) return row(vv, 0.865, h) || x % 2 == 0 ? HdRaces.tone(red, Painted.MID) : flat(red, f, -0.04);   // ribbed hem
+                if (f == Face.FRONT) {
+                    if (Math.abs(uu - 0.5) < 0.035) return ink(red);                                 // the zip
+                    if ((Math.abs(uu - 0.4) < 0.03 || Math.abs(uu - 0.6) < 0.03) && vv > 0.04 && vv < 0.34) return flat(white, f, 0);   // drawstrings
+                    if (vv > 0.55 && vv < 0.8 && Math.abs(uu - 0.5) < 0.3) {                          // the pocket
+                        if (row(vv, 0.555, h) || Math.abs(Math.abs(uu - 0.5) - 0.3) * w < 0.7) return ink(red);
+                    }
+                }
+                return cloth(red, f, x, y, w, h, 501);
+            };
+            top.arm = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (vv > 0.86) return 0;
+                if (vv > 0.79) return row(vv, 0.795, h) ? ink(red) : flat(red, f, x % 2 == 0 ? -0.08 : 0);   // cuffs
+                return cloth(red, f, x, y, w, h, 502);
+            };
+            top.save("entity/gear/hoodie_top.png");
+
+            Hd.HdSkin pants = new Hd.HdSkin();
+            pants.body = (f, x, y, w, h) -> v(y, h) > 0.88 && f != Face.TOP ? cloth(black, f, x, y, w, h, 503) : 0;
+            pants.leg = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM || vv > 0.8) return 0;
+                if (vv > 0.72) return row(vv, 0.725, h) ? ink(black) : flat(black, f, x % 2 == 0 ? -0.06 : 0.02);   // ankle cuffs
+                if ((f == Face.LEFT || f == Face.RIGHT) && Math.abs(uu - 0.5) < 0.12) return flat(white, f, 0);   // the side stripe
+                return cloth(black, f, x, y, w, h, 504);
+            };
+            pants.save("entity/gear/hoodie_pants.png");
+
+            Hd.HdSkin boots = new Hd.HdSkin();
+            boots.leg = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM) return flat(grey, f, 0);
+                if (vv < 0.8) return 0;
+                if (vv > 0.93) return row(vv, 0.935, h) ? ink(grey) : flat(grey, f, 0.04);         // the sole
+                if (f == Face.BACK && vv < 0.88) return flat(red, f, 0);                             // a red heel tab
+                if (f == Face.FRONT && vv > 0.84 && vv < 0.91 && Math.abs(uu - 0.5) < 0.22 && y % 2 == 0) return ink(white);   // laces
+                return flat(white, f, (uu < 0.12 || uu > 0.88) ? -0.08 : 0);
+            };
+            boots.save("entity/gear/hoodie_boots.png");
+        }
         /** Greyscale materials for the 3D pieces: cloth with folds (0,0), plate (64,0), band (64,32); 128x128. */
         static void parts() throws IOException {
             Canvas c = new Canvas(128, 128);
@@ -2380,6 +2435,7 @@ public class ArtGen {
             gi("demon", 0xFF6A3A9A, 0xFFC02838, 0xFF2A1A2E);
             gi("namekian", 0xFF5A3A8A, 0xFF40B0E0, 0xFF5A3418);
             gi("majin", 0xFF26222E, 0xFFE0B040, 0xFFB8862A);
+            gi("hoodie", 0xFFC8283A, 0xFFF2F0F4, 0xFFF2F0F4);
             battleArmor();
         }
 
@@ -2575,20 +2631,25 @@ public class ArtGen {
         }
 
         static void battleArmor() throws IOException {
-            int[] w = ramp(0xFFE8ECF0, 5), y = ramp(0xFFD8B040, 4), d = ramp(0xFF2A2E48, 4);
+            battleArmor("battle_armor", 0xFFE8ECF0, 0xFFD8B040, 0xFF2A2E48);
+            battleArmor("frost_armor", 0xFFF2F0F6, 0xFF8A4AC8, 0xFF1C1A24);
+        }
+
+        static void battleArmor(String name, int plateC, int trimC, int suitC) throws IOException {
+            int[] w = ramp(plateC, 5), y = ramp(trimC, 4), d = ramp(suitC, 4);
             Canvas top = new Canvas(16, 16);
             top.rect(4, 4, 11, 13, d[2]);                                                    // undersuit
             top.sphere(8, 8, 4.6, 5, w, false);                                              // chest plate
             top.sphere(3, 4.5, 2.6, 2.2, y, false).sphere(13, 4.5, 2.6, 2.2, y, false);      // shoulder pads
             top.rect(6, 3, 9, 4, d[1]);                                                      // collar
             top.hline(4, 11, 12, w[1]).hline(5, 10, 13, d[1]);
-            top.outline().save("item/battle_armor_top.png");
+            top.outline().save("item/" + name + "_top.png");
 
             Canvas pants = new Canvas(16, 16);
             pants.rect(3, 2, 12, 5, d[2]).rect(3, 5, 7, 14, d[2]).rect(8, 5, 12, 14, d[2]);
             pants.rect(3, 2, 12, 3, w[3]).rect(3, 4, 5, 6, w[2]).rect(10, 4, 12, 6, w[2]);  // belt + hip guards
             pants.vline(7, 6, 14, d[1]).vline(8, 6, 14, d[3]);
-            pants.edgeShade(0.2).outline().save("item/battle_armor_pants.png");
+            pants.edgeShade(0.2).outline().save("item/" + name + "_pants.png");
 
             Canvas b = new Canvas(16, 16);
             for (int s = 0; s < 2; s++) {
@@ -2597,7 +2658,7 @@ public class ArtGen {
                 b.rect(x0, 3, x0 + 4, 5, y[2]).hline(x0, x0 + 4, 5, y[1]);                 // gold tops
                 b.vline(x0, 6, 12, w[3]);
             }
-            b.edgeShade(0.2).outline().save("item/battle_armor_boots.png");
+            b.edgeShade(0.2).outline().save("item/" + name + "_boots.png");
         }
     }
 
@@ -2805,6 +2866,7 @@ public class ArtGen {
             gi("demon", 0xFF6A3A9A, 0xFFC02838, 0xFF2A1A2E, 0xFF2A1A2E);
             gi("namekian", 0xFF5A3A8A, 0xFF40B0E0, 0xFF5A3418, 0xFF46306E);
             gi("majin", 0xFF26222E, 0xFFE0B040, 0xFFB8862A, 0xFFF2F0F4);
+            gi("hoodie", 0xFFC8283A, 0xFF24242C, 0xFFF2F0F4, 0xFF24242C);
             battleArmor();
             scouter();
             weights();
@@ -2865,7 +2927,12 @@ public class ArtGen {
         }
 
         static void battleArmor() throws IOException {
-            int[] w = ramp(0xFFE8ECF0, 5), gold = ramp(0xFFD8B040, 4), suit = ramp(0xFF2A2E48, 4);
+            battleArmor("battle_armor", 0xFFE8ECF0, 0xFFD8B040, 0xFF2A2E48);
+            battleArmor("frost_armor", 0xFFF2F0F6, 0xFF8A4AC8, 0xFF1C1A24);
+        }
+
+        static void battleArmor(String name, int plateC, int trimC, int suitC) throws IOException {
+            int[] w = ramp(plateC, 5), gold = ramp(trimC, 4), suit = ramp(suitC, 4);
             Canvas l1 = new Canvas(64, 32);
             box(l1, 16, 16, 8, 12, 4, (f, x, y, wd, h) -> {
                 if (f == Face.BOTTOM) return suit[1];
@@ -2893,7 +2960,7 @@ public class ArtGen {
                 if (y <= 6) return gold[y == 5 ? 3 : 1];
                 return f == Face.FRONT ? w[3] : w[2];
             });
-            l1.save("models/armor/battle_armor_layer_1.png");
+            l1.save("models/armor/" + name + "_layer_1.png");
 
             Canvas l2 = new Canvas(64, 32);
             box(l2, 0, 16, 4, 12, 4, (f, x, y, wd, h) -> f == Face.FRONT ? suit[2] : suit[1]);
@@ -2902,7 +2969,7 @@ public class ArtGen {
                 if (y >= 9) return y == 9 ? w[3] : w[2];
                 return 0;
             });
-            l2.save("models/armor/battle_armor_layer_2.png");
+            l2.save("models/armor/" + name + "_layer_2.png");
         }
 
         static void scouter() throws IOException {
@@ -3740,11 +3807,17 @@ public class ArtGen {
 
         /** Texture for client.render.GreatApeModel (128x64, same box layout as the model). */
         static void greatApe() throws IOException {
-            int[] fur = ramp(0xFF6A4224, 5), skin = ramp(0xFFC89A70, 4), dark = ramp(0xFF2A1A12, 3);
+            greatApe("great_ape", 0xFF6A4224, 0xFFFF2018);
+            greatApe("great_ape_golden", 0xFFE0A830, 0xFFFF2018);                              // the golden ape
+            greatApe("great_ape_legendary", 0xFFC8B83A, 0xFF7CFF4A);                           // the legendary ape, green-eyed
+        }
+
+        static void greatApe(String name, int furColor, int eyeColor) throws IOException {
+            int[] fur = ramp(furColor, 5), skin = ramp(0xFFC89A70, 4), dark = ramp(0xFF2A1A12, 3);
             Canvas c = new Canvas(128, 64);
             box(c, 0, 0, 9, 8, 8, (f, x, y, w, h) -> {                                          // skull
                 if (f == Face.FRONT) {
-                    if (y == 4 && (x == 2 || x == 6)) return 0xFFFF2018;                          // red eyes
+                    if (y == 4 && (x == 2 || x == 6)) return eyeColor;                            // the eyes
                     if (y == 4 && (x == 1 || x == 3 || x == 5 || x == 7)) return 0xFF801010;
                     if (y >= 3 && x >= 1 && x <= 7) return skin[y == 3 ? 1 : 2];                   // face mask
                 }
@@ -3770,7 +3843,7 @@ public class ArtGen {
             });
             box(c, 70, 16, 5, 10, 5, (f, x, y, w, h) -> y >= 8 ? dark[f == Face.FRONT ? 2 : 1] : fur(fur, f, x, y, 204)); // legs + feet
             box(c, 92, 16, 2, 2, 8, (f, x, y, w, h) -> fur(fur, f, x, y, 205));                 // tail
-            c.save("entity/great_ape.png");
+            c.save("entity/" + name + ".png");
         }
     }
 

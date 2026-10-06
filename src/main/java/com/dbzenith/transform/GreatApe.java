@@ -63,6 +63,11 @@ public final class GreatApe {
     }
 
     /** Size of a player's current form: from capability data on the server, from public state on clients. */
+    /** The forms drawn with the Great Ape model (the moon ape, the golden ape, the legendary ape). */
+    public static boolean isApeForm(String form) {
+        return "great_ape".equals(form) || "golden_ape".equals(form) || "legendary_great_ape".equals(form);
+    }
+
     public static float scaleOf(Player player) {
         String form;
         if (player.level().isClientSide) {

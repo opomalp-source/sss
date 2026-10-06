@@ -22,7 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 public class GearModel {
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(new ResourceLocation(DBZenith.MOD_ID, "gear"), "main");
 
-    public enum Piece { PADS, PAD_TRIM, NAMEK_PADS, CAPE, TURBAN, TURBAN_BAND, SASH_TAILS, BAGGY }
+    public enum Piece { PADS, PAD_TRIM, NAMEK_PADS, CAPE, TURBAN, TURBAN_BAND, SASH_TAILS, BAGGY, HOOD }
 
     private final ModelPart head, body, rightArm, leftArm, rightLeg, leftLeg;
 
@@ -73,6 +73,10 @@ public class GearModel {
         body.addOrReplaceChild("sash_tails", CubeListBuilder.create().texOffs(PLATE, BAND_V)
                 .addBox(0.9f, 0, 0, 1.3f, 4.2f, 0.45f).addBox(2.3f, 0, 0, 1.2f, 3.4f, 0.45f), PartPose.offsetAndRotation(0, 10.6f, -2.75f, -0.08f, 0, 0.05f));
 
+        // A hoodie's hood, down, lying on the back of the neck.
+        body.addOrReplaceChild("hood", CubeListBuilder.create().texOffs(CLOTH, 0).addBox(-3.6f, -2.4f, 0, 7.2f, 3.6f, 2.2f),
+                PartPose.offsetAndRotation(0, 0.4f, 2.0f, 0.32f, 0, 0));
+
         // Majin trousers: billowing out from hip to the ankle cuffs.
         rightLeg.addOrReplaceChild("baggy", CubeListBuilder.create().texOffs(CLOTH, 0).addBox(-2, 0, -2, 4, 9.2f, 4, new CubeDeformation(0.85f, 0.05f, 0.85f)),
                 PartPose.ZERO);
@@ -101,6 +105,7 @@ public class GearModel {
             case TURBAN_BAND -> "turban_band";
             case SASH_TAILS -> "sash_tails";
             case BAGGY -> "baggy";
+            case HOOD -> "hood";
         };
         for (ModelPart parent : new ModelPart[]{head, body, rightArm, leftArm, rightLeg, leftLeg}) {
             if (!parent.hasChild(name)) continue;

@@ -67,6 +67,21 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         textures = hd ? TEXTURES_HD : TEXTURES;
         int face = state.face();
         int eyes = FaceParts.get(face, Part.EYES);
+        int brows = FaceParts.get(face, Part.BROWS), mouth = FaceParts.get(face, Part.MOUTH);
+        // expressions (CX-14b): a shout while charging or transforming, gritted teeth under strain or a blow, a blink now and then
+        boolean shout = state.has(PublicStatePacket.CHARGING) || state.has(PublicStatePacket.TRANSFORMING);
+        boolean hurt = player.hurtTime > 0;
+        boolean grit = !shout && (hurt || state.has(PublicStatePacket.GUARDING) || state.has(PublicStatePacket.HEAVY));
+        if (shout) {
+            mouth = MOUTH_SHOUT;
+            if (brows != BROWS_NONE) brows = BROWS_FIERCE;
+        } else if (grit) {
+            mouth = MOUTH_GRIT;
+            if (brows != BROWS_NONE) brows = BROWS_FIERCE;
+            if (hurt && eyes != FaceParts.EYES_CLOSED) eyes = FaceParts.EYES_NARROW;
+        } else if ((ageInTicks + player.getId() * 37) % 84 < 2.5f && eyes != FaceParts.EYES_CAT) {
+            eyes = FaceParts.EYES_CLOSED;                                      // a blink
+        }
         int overlay = LivingEntityRenderer.getOverlayCoords(player, 0);
 
         // a race skin's own face colours, unless the player chose their own
@@ -83,12 +98,15 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
                     ((iris >> 16) & 255) / 255f * 0.8f, ((iris >> 8) & 255) / 255f * 0.8f, (iris & 255) / 255f * 0.8f, 1f);
         }
         int hair = form.hairColor() >= 0 ? form.hairColor() : race != null ? race.brow() : state.hairColor() >= 0 ? state.hairColor() : 0x3A2414;
-        if (!FormShape.browRidge(form.id())) draw(pose, buffers, Part.BROWS.ordinal(), FaceParts.get(face, Part.BROWS), light, overlay, race != null && form.hairColor() < 0 ? hair : darken(hair, 0.8f));
+        if (!FormShape.browRidge(form.id())) draw(pose, buffers, Part.BROWS.ordinal(), brows, light, overlay, race != null && form.hairColor() < 0 ? hair : darken(hair, 0.8f));
         draw(pose, buffers, Part.NOSE.ordinal(), FaceParts.get(face, Part.NOSE), light, overlay, 0xFFFFFF);
-        draw(pose, buffers, Part.MOUTH.ordinal(), FaceParts.get(face, Part.MOUTH), light, overlay, 0xFFFFFF);
+        draw(pose, buffers, Part.MOUTH.ordinal(), mouth, light, overlay, 0xFFFFFF);
         int extra = FaceParts.get(face, Part.EXTRA);
         if (extra > 0) draw(pose, buffers, Part.EXTRA.ordinal(), extra, light, overlay, 0xFFFFFF);
     }
+
+    /** Face part options the expressions use. */
+    private static final int MOUTH_GRIT = 2, MOUTH_SHOUT = 5, BROWS_FIERCE = 2, BROWS_NONE = 5;
 
     private void draw(PoseStack pose, MultiBufferSource buffers, int part, int option, int light, int overlay, int tint) {
         ResourceLocation tex = textures[part][Math.max(0, Math.min(textures[part].length - 1, option))];

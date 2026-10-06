@@ -22,6 +22,13 @@ import net.minecraft.world.entity.player.Player;
 public class GreatApeModel extends EntityModel<Player> {
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(new ResourceLocation(DBZenith.MOD_ID, "great_ape"), "main");
     public static final ResourceLocation TEXTURE = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/great_ape.png");
+    private static final ResourceLocation GOLDEN = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/great_ape_golden.png");
+    private static final ResourceLocation LEGENDARY = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/great_ape_legendary.png");
+
+    /** The fur for an ape form: brown under the moon, gold for the golden ape, a green-gold for the legendary one. */
+    public static ResourceLocation texture(String form) {
+        return "golden_ape".equals(form) ? GOLDEN : "legendary_great_ape".equals(form) ? LEGENDARY : TEXTURE;
+    }
 
     private final ModelPart body, head, rightArm, leftArm, rightLeg, leftLeg, tail;
 

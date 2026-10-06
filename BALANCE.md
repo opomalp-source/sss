@@ -77,6 +77,8 @@ Changes:
   it still counts fully against vanilla mobs). Full gi sets take damage off everything: Turtle and Demon gi 5%, Battle Armor 15%
   (shown in the tooltip). v0.32.0 adds two sets: Namekian garb (ki +12%, dexterity +4%, 8% off) for ki fighters, and Majin
   garb (strength +12%, dexterity +3%, 6% off) for brawlers, both between the gis and Battle Armor.
+  v0.36.0 adds the zip hoodie set (dexterity +8%, a little of the rest, 3% off: casual wear) and Frost Demon armour (ki +12%,
+  strength +4%, 14% off: the Frost Demon counterpart to Battle Armor).
 
 ## Still for real play
 Feel, not numbers: how fights read with knockback, flight and dashes; whether racial passives (Namekian regeneration,

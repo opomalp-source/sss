@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["BBB", "A A", "A A"],
+  "key": {"A": {"item": "minecraft:black_wool"}, "B": {"item": "minecraft:white_wool"}},
+  "result": {"item": "dbzenith:hoodie_pants"}
+}

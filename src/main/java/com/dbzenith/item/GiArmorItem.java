@@ -28,7 +28,9 @@ public class GiArmorItem extends ArmorItem {
         DEMON(1.00, 1.05, 1.15, 0.05, 2, Items.LEATHER),
         BATTLE_ARMOR(1.08, 1.00, 1.08, 0.15, 5, Items.IRON_INGOT),
         NAMEKIAN(1.00, 1.04, 1.12, 0.08, 3, Items.LEATHER),
-        MAJIN(1.12, 1.03, 1.00, 0.06, 2, Items.LEATHER);
+        MAJIN(1.12, 1.03, 1.00, 0.06, 2, Items.LEATHER),
+        HOODIE(1.02, 1.08, 1.02, 0.03, 1, Items.LEATHER),
+        FROST_ARMOR(1.04, 1.02, 1.12, 0.14, 5, Items.IRON_INGOT);
 
         private final double strMult;
         private final double dexMult;

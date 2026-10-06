@@ -90,7 +90,7 @@ public final class Afterimages {
         if (trail == null || trail.ghosts.isEmpty() || !DBZConfig.CLIENT.afterimages.get()) return;
         if (!(event.getEntity() instanceof AbstractClientPlayer player)) return;
         PublicStatePacket state = ClientPublicStates.get(player.getId());
-        if (state != null && com.dbzenith.transform.Forms.GREAT_APE.id().equals(state.form())) return;
+        if (state != null && com.dbzenith.transform.GreatApe.isApeForm(state.form())) return;
         int tint = FxDraw.mix(state == null ? 0xD9F2FF : state.auraColor(), 0xFFFFFF, 0.35f);
         float r = ((tint >> 16) & 255) / 255f, g = ((tint >> 8) & 255) / 255f, b = (tint & 255) / 255f;
 

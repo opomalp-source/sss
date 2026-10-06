@@ -215,6 +215,13 @@ public class RaceFeatureModel {
      */
     public void renderTail(PoseStack pose, VertexConsumer vc, int light, int overlay, float ageInTicks, float lift, boolean wrapped,
                            float r, float g, float b) {
+        renderTail(pose, vc, light, overlay, ageInTicks, lift, wrapped, 1f, r, g, b);
+    }
+
+    /** {@code size}: a bigger tail for the Primal clans (thicker and longer as one). */
+    public void renderTail(PoseStack pose, VertexConsumer vc, int light, int overlay, float ageInTicks, float lift, boolean wrapped, float size,
+                           float r, float g, float b) {
+        tail[0].xScale = tail[0].yScale = tail[0].zScale = size;
         wings.visible = false;
         wrap.visible = wrapped;
         tail[0].visible = !wrapped;

@@ -100,6 +100,11 @@ public class GearLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
                 piece(pose, vc, light, o, GearModel.Piece.TURBAN_BAND, 0, 0x6A3A9A);
             }
             case MAJIN -> { }
+            case HOODIE -> piece(pose, vc, light, o, GearModel.Piece.HOOD, 0, 0xC8283A);
+            case FROST_ARMOR -> {
+                piece(pose, vc, light, o, GearModel.Piece.PADS, 0, 0x8A4AC8);
+                piece(pose, vc, light, o, GearModel.Piece.PAD_TRIM, 0, 0xF2F0F6);
+            }
         }
     }
 
