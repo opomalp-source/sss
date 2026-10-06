@@ -64,6 +64,8 @@ public final class ModItems {
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.dbzenith.npc.ModNpcs.NAMEKIAN_WARRIOR, 0x5DB040, 0xF0F0F0, new Item.Properties()));
     public static final RegistryObject<Item> PROMISE_RING = ITEMS.register("promise_ring",
             () -> new com.dbzenith.item.PromiseRingItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> POTARA_EARRINGS = ITEMS.register("potara_earrings",
+            () -> new com.dbzenith.item.PotaraItem(new Item.Properties().stacksTo(16).rarity(Rarity.EPIC)));
     public static final RegistryObject<Item> TYRANT_SIGIL = ITEMS.register("tyrant_sigil",
             () -> new BossSummonItem(com.dbzenith.npc.ModNpcs.TYRANT_LORD, new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)));
     public static final RegistryObject<Item> RAGE_TOTEM = ITEMS.register("rage_totem",

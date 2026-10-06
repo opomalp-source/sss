@@ -13,7 +13,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
  * so mismatched client/server versions are refused at login instead of desyncing.
  */
 public final class ModNetwork {
-    private static final String PROTOCOL = "28";
+    private static final String PROTOCOL = "29";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(DBZenith.MOD_ID, "main"),
@@ -86,6 +86,12 @@ public final class ModNetwork {
                 .encoder(OtherworldPackets.Judgement::encode).decoder(OtherworldPackets.Judgement::decode).consumerMainThread(OtherworldPackets.Judgement::handle).add();
         CHANNEL.messageBuilder(OtherworldPackets.Return.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(OtherworldPackets.Return::encode).decoder(OtherworldPackets.Return::decode).consumerMainThread(OtherworldPackets.Return::handle).add();
+        CHANNEL.messageBuilder(FusionPackets.Show.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(FusionPackets.Show::encode).decoder(FusionPackets.Show::decode).consumerMainThread(FusionPackets.Show::handle).add();
+        CHANNEL.messageBuilder(FusionPackets.End.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(FusionPackets.End::encode).decoder(FusionPackets.End::decode).consumerMainThread(FusionPackets.End::handle).add();
+        CHANNEL.messageBuilder(FusionPackets.Press.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(FusionPackets.Press::encode).decoder(FusionPackets.Press::decode).consumerMainThread(FusionPackets.Press::handle).add();
         CHANNEL.messageBuilder(SelectTitlePacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(SelectTitlePacket::encode).decoder(SelectTitlePacket::decode).consumerMainThread(SelectTitlePacket::handle).add();
         CHANNEL.messageBuilder(com.dbzenith.world.Cosmetics.Packet.class, nextId++, NetworkDirection.PLAY_TO_SERVER)

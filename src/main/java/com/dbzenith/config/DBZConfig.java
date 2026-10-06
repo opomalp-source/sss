@@ -212,6 +212,11 @@ public final class DBZConfig {
         public final ForgeConfigSpec.IntValue spacePodRechargeTicks;
         public final ForgeConfigSpec.BooleanValue otherworldEnabled;
         public final ForgeConfigSpec.IntValue otherworldDeathSeconds;
+        public final ForgeConfigSpec.IntValue fusionDanceMinutes;
+        public final ForgeConfigSpec.IntValue potaraMinutes;
+        public final ForgeConfigSpec.DoubleValue fusionDanceBonus;
+        public final ForgeConfigSpec.DoubleValue potaraBonus;
+        public final ForgeConfigSpec.DoubleValue failedFusionPower;
         public final ForgeConfigSpec.IntValue falseMoonTicks;
 
         // --- enemies ---
@@ -547,6 +552,16 @@ public final class DBZConfig {
                     .define("otherworldEnabled", true);
             otherworldDeathSeconds = b.comment("Seconds a soul must spend in the other world before Enma may send it back (Limbo holds evil souls half as long again)")
                     .defineInRange("otherworldDeathSeconds", 180, 0, 86_400);
+            fusionDanceMinutes = b.comment("How long a fusion from the Fusion Dance (or a failed one) lasts, in minutes")
+                    .defineInRange("fusionDanceMinutes", 30, 1, 100_000);
+            potaraMinutes = b.comment("How long a Potara fusion lasts, in minutes")
+                    .defineInRange("potaraMinutes", 60, 1, 100_000);
+            fusionDanceBonus = b.comment("Fused power = bonus x (1 + the weaker share), the share being partner power / host power, capped at 1."
+                            + " Two equal fighters fused by the dance: 1.15 x 2 = 2.3 times their power")
+                    .defineInRange("fusionDanceBonus", 1.15, 0.1, 100.0);
+            potaraBonus = b.comment("As fusionDanceBonus, for the Potara earrings").defineInRange("potaraBonus", 1.2, 0.1, 100.0);
+            failedFusionPower = b.comment("A botched Fusion Dance: the fused body has this times the host's power")
+                    .defineInRange("failedFusionPower", 0.6, 0.0, 100.0);
             falseMoonTicks = b.comment("How long a Moon Orb's false moon shines (1200 = 1 minute)")
                     .defineInRange("falseMoonTicks", 1200, 20, 1_000_000);
             b.pop();

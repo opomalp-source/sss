@@ -187,6 +187,6 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [ ] CX-12 World (user: "make it REALLY GOOD (npc designs and authentic)")
   - [x] 12a The other world (v0.38.0): souls of the dead (halo), the check-in station and Enma, ogre clerks, Snake Way, the Kai of the north's planet (10x gravity; catch the monkey, strike the cricket: Kaioken, Gathering Sphere), Limbo for evil souls, the revive wish; every NPC repainted in the painted style with 3D hair, race parts and gear
   - [x] 12b God Ki pools (v0.38.0): the springs of the Grand Kai's paradise (meditate to awaken and grow godly ki)
-  - [ ] 12c Fusion v2: the fusion dance (timed duet) and the Kai earrings
+  - [x] 12c Fusion v2: the fusion dance (timed duet) and the Kai earrings (v0.39.0)
   - [ ] 12d Black Star and Super Dragon Ball wishes (variant reroll, true immortality)
   - [ ] 12e Metals and alloys tiers

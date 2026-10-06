@@ -50,6 +50,7 @@ public final class FormMath {
                     * com.dbzenith.race.RacialSkills.attributeFactor(data, attribute)
                     * Kaioken.multiplier(data.getKaiokenStage());
         }
+        m *= data.getFusionPower();                                   // a fused body (12c) is stronger in everything
         return m;
     }
 

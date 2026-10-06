@@ -30,7 +30,9 @@ public class GiArmorItem extends ArmorItem {
         NAMEKIAN(1.00, 1.04, 1.12, 0.08, 3, Items.LEATHER),
         MAJIN(1.12, 1.03, 1.00, 0.06, 2, Items.LEATHER),
         HOODIE(1.02, 1.08, 1.02, 0.03, 1, Items.LEATHER),
-        FROST_ARMOR(1.04, 1.02, 1.12, 0.14, 5, Items.IRON_INGOT);
+        FROST_ARMOR(1.04, 1.02, 1.12, 0.14, 5, Items.IRON_INGOT),
+        /** The fusion outfit (12c): what a fused warrior from the dance wears; it can be made and worn by anyone, too. */
+        FUSION(1.06, 1.06, 1.06, 0.05, 2, Items.LEATHER);
 
         private final double strMult;
         private final double dexMult;

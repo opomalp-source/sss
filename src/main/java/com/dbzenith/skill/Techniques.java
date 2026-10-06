@@ -83,6 +83,9 @@ public final class Techniques {
             .cost(50).cooldown(200).color(0x7CFF6A).race(Race.NAMEKIAN).learn(400, 60));
     public static final Technique MAJIN_ABSORB = add(Technique.builder("majin_absorb").style(Style.SELF).effect(Effect.ABSORB, 4)
             .cost(50).cooldown(200).color(0xFF80C0).race(Race.MAJIN).learn(400, 60));
+    /** The Fusion Dance (12c): any race; look at a willing partner. The Grand Kai teaches it, or learn it with training points. */
+    public static final Technique FUSION_DANCE = add(Technique.builder("fusion_dance").style(Style.SELF).effect(Effect.FUSION_DANCE, 8)
+            .cost(20).cooldown(400).color(0xFFE070).learn(2500, 150));
 
     private Techniques() {}
 

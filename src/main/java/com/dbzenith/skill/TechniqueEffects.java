@@ -170,6 +170,13 @@ public final class TechniqueEffects {
             case ABSORB -> {
                 return com.dbzenith.race.Absorption.absorb(player, data, lookedAtLiving(player, power));
             }
+            case FUSION_DANCE -> {
+                if (lookedAtLiving(player, power) instanceof ServerPlayer partner) {
+                    return com.dbzenith.fusion.FusionDance.request(player, partner, com.dbzenith.fusion.FusionDance.DANCE);
+                }
+                player.displayClientMessage(Component.translatable("message.dbzenith.fusion_no_partner"), true);
+                return false;
+            }
             default -> {
                 return false;
             }

@@ -794,6 +794,69 @@ public class PlayerData {
         markDirty();
     }
 
+    // ------------------------------------------------------------------ fusion dance / Potara (12c, saved)
+
+    private int fusionKind;
+    private boolean fusionHost;
+    private String fusedWith = "";
+    private String fusedName = "";
+    private long fusionUntil;
+    private double fusionPower = 1.0;
+    private int fusionPrevMode = -1;
+
+    /** {@link com.dbzenith.fusion.Fusion#DANCE}, {@code POTARA}, {@code FAILED_FAT}, {@code FAILED_THIN}, or 0 (not fused). */
+    public int getFusionKind() {
+        return fusionKind;
+    }
+
+    public boolean isFused() {
+        return fusionKind != 0;
+    }
+
+    /** The one whose body the fusion uses (the other rides along, watching). */
+    public boolean isFusionHost() {
+        return fusionHost;
+    }
+
+    /** The other half's UUID, as a string ("" when not fused). */
+    public String getFusedWith() {
+        return fusedWith;
+    }
+
+    public String getFusedName() {
+        return fusedName;
+    }
+
+    public long getFusionUntil() {
+        return fusionUntil;
+    }
+
+    /** The fused body's attribute multiplier (1 for the partner, who has no body of their own). */
+    public double getFusionPower() {
+        return fusionKind != 0 && fusionHost ? fusionPower : 1.0;
+    }
+
+    /** The partner's game mode before the fusion (-1: none saved). */
+    public int getFusionPrevMode() {
+        return fusionPrevMode;
+    }
+
+    public void setFusion(int kind, boolean host, String with, String name, long until, double power, int prevMode) {
+        fusionKind = kind;
+        fusionHost = host;
+        fusedWith = with;
+        fusedName = name;
+        fusionUntil = until;
+        fusionPower = power;
+        fusionPrevMode = prevMode;
+        derivedStale = true;
+        markDirty();
+    }
+
+    public void clearFusion() {
+        setFusion(0, false, "", "", 0, 1.0, -1);
+    }
+
     // ------------------------------------------------------------------ Namekian fusion / Majin absorption (saved)
 
     private int fusions;
@@ -1560,6 +1623,13 @@ public class PlayerData {
         tag.putLong("deathTick", deathTick);
         tag.putBoolean("evilSoul", evilSoul);
         tag.putInt("springSoak", springSoak);
+        tag.putInt("fusionKind", fusionKind);
+        tag.putBoolean("fusionHost", fusionHost);
+        tag.putString("fusedWith", fusedWith);
+        tag.putString("fusedName", fusedName);
+        tag.putLong("fusionUntil", fusionUntil);
+        tag.putDouble("fusionPower", fusionPower);
+        tag.putInt("fusionPrevMode", fusionPrevMode);
         tag.putInt("prestige", prestige);
         CompoundTag cds = new CompoundTag();
         cooldownUntil.forEach(cds::putLong); // game time is world-wide, so these stay valid across relogs
@@ -1681,6 +1751,13 @@ public class PlayerData {
         deathTick = tag.getLong("deathTick");
         evilSoul = tag.getBoolean("evilSoul");
         springSoak = tag.getInt("springSoak");
+        fusionKind = tag.getInt("fusionKind");
+        fusionHost = tag.getBoolean("fusionHost");
+        fusedWith = tag.getString("fusedWith");
+        fusedName = tag.getString("fusedName");
+        fusionUntil = tag.getLong("fusionUntil");
+        fusionPower = tag.contains("fusionPower") ? tag.getDouble("fusionPower") : 1.0;
+        fusionPrevMode = tag.contains("fusionPrevMode") ? tag.getInt("fusionPrevMode") : -1;
         prestige = tag.getInt("prestige");
         cooldownUntil.clear();
         CompoundTag cds = tag.getCompound("cooldowns");

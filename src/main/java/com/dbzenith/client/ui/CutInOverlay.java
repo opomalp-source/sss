@@ -17,14 +17,22 @@ public final class CutInOverlay implements IGuiOverlay {
     private static float startedAt = -1;
     private static Component name = Component.empty();
     private static int color = 0xFFFFFFFF;
+    private static String labelKey = "cutin.dbzenith.transform";
 
     /** Start a cut-in for your own transformation. */
+    /** A cut-in with another caption over the name (a fusion: "cutin.dbzenith.fusion"). */
+    public static void play(Component title, int auraColor, String caption) {
+        play(title, auraColor);
+        labelKey = caption;
+    }
+
     public static void play(Component formName, int auraColor) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || !DBZConfig.CLIENT.transformCutIn.get()) return;
         startedAt = mc.level.getGameTime();
         name = formName;
         color = 0xFF000000 | auraColor;
+        labelKey = "cutin.dbzenith.transform";
     }
 
     @Override
@@ -75,7 +83,7 @@ public final class CutInOverlay implements IGuiOverlay {
         float scale = Math.min(3f, (width * 0.5f) / Math.max(1, mc.font.width(name)));
         float tx = width * 0.46f + textIn * width * 0.6f + shift;
         float ty = top + bandH / 2 - 4 * scale;
-        Component label = Component.translatable("cutin.dbzenith.transform");
+        Component label = Component.translatable(labelKey);
         DbzTheme.text(g, mc.font, label, tx + 4, ty - 10, DbzTheme.withAlpha(0xFFE6A0, (int) (255 * alpha)), 0.9f);
         DbzTheme.text(g, mc.font, name, tx, ty, DbzTheme.withAlpha(0xFFFFFF, Math.max(5, (int) (255 * alpha))), scale);
         g.pose().popPose();

@@ -654,6 +654,215 @@ public final class Anims {
             default -> TRANSFORM;
         };
     }
+    // ------------------------------------------------------------------ fusion (12c)
+
+
+    /** Body offsets in pixels: the model's x for "to the figure's right" (playerAnimator body space). */
+    static final float RIGHT_X = 1f;
+    /** playerAnimator turns the whole figure about a point this many pixels above the feet. */
+    static final float BODY_PIVOT = 11.2f;
+
+    /**
+     * The whole figure leaning sideways ({@code lean} degrees, + tips the top to the figure's right) with the feet kept
+     * where they were, then shifted {@code right} and {@code down} pixels.
+     */
+    private static void body(Keys a, int t, float lean, float right, float down, Ease e) {
+        double r = Math.toRadians(lean);
+        float compRight = (float) (BODY_PIVOT * Math.sin(r)), compDown = (float) (BODY_PIVOT * (1 - Math.cos(r)));
+        a.rot("body", t, 0, 0, -lean, e);                                // playerAnimator's body roll tips the top to the left
+        a.pos("body", t, RIGHT_X * (right + compRight), down + compDown, 0, e);
+    }
+
+    private static void part(Keys a, String part, int t, float pitch, float yaw, float roll, float bend, Ease e) {
+        a.rot(part, t, pitch, yaw, roll, e);
+        if (!part.equals("head") && !part.equals("torso")) a.bend(part, t, bend, e);
+    }
+
+    /**
+     * The Fusion Dance, the half danced on the left (the partner on your right; the other half is this mirrored).
+     * Ticks follow {@link com.dbzenith.fusion.FusionDance}: the beats FU, SION and HA land on 30, 45 and 58.
+     * <ol>
+     * <li>Ready (0-7): standing three steps out, both arms swing out straight to the side away from the partner.</li>
+     * <li>FU (10-30): three shuffling side-steps in, the inside foot leading, while both arms sweep up over the head in
+     * one arc and come down pointing at the partner.</li>
+     * <li>SION (30-45): the arms sweep back over to the outside, and the inside knee comes up high.</li>
+     * <li>HA (45-58): a dip, then the lean in: the inside arm straight out so the fingertips meet the partner's, the
+     * outside arm arched over the head, the inside knee bent under the weight and the outside leg stretched out
+     * straight, one line from the outside foot to the fingertip. Held, trembling, until the light (66).</li>
+     * </ol>
+     */
+    private static void fusionDance(Keys a) {
+        int[] beat = com.dbzenith.fusion.FusionDance.BEATS;
+        int fu = beat[0], sion = beat[1], ha = beat[2], end = com.dbzenith.fusion.FusionDance.LENGTH;
+        float out = 24f;                                                   // three 8-pixel steps out from where they end
+        Ease io = Ease.INOUTSINE, oq = Ease.OUTQUAD;
+
+        // --- the body: steps in, then the lean
+        body(a, 0, 0, -out, 0, Ease.LINEAR);
+        body(a, 7, -3, -out, 0.4f, io);
+        body(a, 10, -3, -out, 0.4f, io);
+        int[] stepAt = {11, 17, 23};
+        for (int s = 0; s < 3; s++) {
+            int t0 = stepAt[s];
+            float o = -out + 8 * s;
+            body(a, t0 + 2, -1 + s * 1.5f, o + 2, 0.6f, oq);
+            body(a, t0 + 4, 0 + s * 1.5f, o + 4.5f, 0.9f, io);
+            body(a, t0 + 6, 1 + s * 1.5f, o + 8, 0.3f, io);
+        }
+        body(a, fu, 6, 0, 0.5f, oq);
+        body(a, sion - 6, -2, 0, 0.6f, io);
+        body(a, sion, -8, -0.5f, 0, oq);
+        body(a, ha - 9, -4, 0, 1.6f, io);                                 // the dip before the lean
+        body(a, ha - 3, 26, 1.5f, 0.6f, Ease.OUTBACK);
+        body(a, ha, 24, 1.2f, 0.6f, io);
+        for (int t = ha + 2; t <= end; t += 2) body(a, t, 24 + ((t / 2) % 2 == 0 ? 0.6f : -0.6f), 1.2f, 0.6f, Ease.LINEAR);
+
+        // --- the arms: out, the arc over to the partner, back over, then the touch
+        part(a, "leftArm", 0, 0, 0, -4, 0, Ease.LINEAR);
+        part(a, "rightArm", 0, 0, 0, 4, 0, Ease.LINEAR);
+        part(a, "leftArm", 7, 0, 0, -88, 0, oq);                          // out to the side, away from the partner
+        part(a, "rightArm", 7, -38, 0, -88, 10, oq);                      // across the chest, the same way
+        part(a, "leftArm", 10, 0, 0, -92, 0, io);
+        part(a, "rightArm", 10, -38, 0, -92, 10, io);
+        part(a, "leftArm", 20, -12, 0, -180, 0, io);                      // over the head...
+        part(a, "rightArm", 20, -12, 0, -180, 0, io);
+        part(a, "leftArm", fu, -38, 0, -268, 10, oq);                     // ...and down, pointing at the partner
+        part(a, "rightArm", fu, 0, 0, -268, 0, oq);
+        part(a, "leftArm", fu + 3, -38, 0, -264, 10, io);
+        part(a, "rightArm", fu + 3, 0, 0, -264, 0, io);
+        part(a, "leftArm", sion - 7, -10, 0, -180, 0, io);                // back over the head...
+        part(a, "rightArm", sion - 7, -10, 0, -180, 0, io);
+        part(a, "leftArm", sion, 0, 0, -102, 0, oq);                      // ...and out to the far side again
+        part(a, "rightArm", sion, -38, 0, -102, 12, oq);
+        part(a, "leftArm", sion + 2, 0, 0, -98, 0, io);
+        part(a, "rightArm", sion + 2, -38, 0, -98, 12, io);
+        part(a, "leftArm", ha - 9, -40, 0, 20, 40, io);                   // gathered in, crossed low, for the lean
+        part(a, "rightArm", ha - 9, -32, 0, -16, 36, io);
+        part(a, "leftArm", ha - 3, 0, -90, -150, 58, Ease.OUTBACK);       // arched over the head (turned so the elbow bends sideways)
+        part(a, "rightArm", ha - 3, 0, 0, 116, 0, Ease.OUTBACK);           // straight out to the fingertips
+        part(a, "leftArm", ha, 0, -90, -146, 55, io);
+        part(a, "rightArm", ha, 0, 0, 113, 0, io);
+        part(a, "leftArm", end, 0, -90, -146, 55, Ease.LINEAR);
+        part(a, "rightArm", end, 0, 0, 113, 0, Ease.LINEAR);
+
+        // --- the legs: three side-steps, the knee, the long line
+        part(a, "rightLeg", 0, 0, 0, 1, 0, Ease.LINEAR);
+        part(a, "leftLeg", 0, 0, 0, -1, 0, Ease.LINEAR);
+        part(a, "rightLeg", 7, 0, 0, 1, 8, io);
+        part(a, "leftLeg", 7, 0, 0, -1, 8, io);
+        for (int s = 0; s < 3; s++) {
+            int t0 = stepAt[s];
+            part(a, "rightLeg", t0, 0, 0, 1, 8, io);
+            part(a, "leftLeg", t0, 0, 0, -1, 8, io);
+            part(a, "rightLeg", t0 + 2, -14, 0, 20, 30, oq);              // the inside foot lifts and reaches
+            part(a, "leftLeg", t0 + 2, 0, 0, -4, 12, oq);
+            part(a, "rightLeg", t0 + 4, 0, 0, 15, 6, io);                 // planted wide
+            part(a, "leftLeg", t0 + 4, 0, 0, -15, 6, io);
+            part(a, "leftLeg", t0 + 5, -6, 0, -8, 18, io);                // the outside foot drawn in after it
+            part(a, "rightLeg", t0 + 6, 0, 0, 1, 8, io);
+            part(a, "leftLeg", t0 + 6, 0, 0, -1, 8, io);
+        }
+        part(a, "rightLeg", fu, 0, 0, 2, 10, io);
+        part(a, "leftLeg", fu, 0, 0, -2, 10, io);
+        part(a, "rightLeg", sion - 6, -20, 0, 8, 30, io);
+        part(a, "leftLeg", sion - 6, 0, 0, -3, 12, io);
+        part(a, "rightLeg", sion, -72, 0, 40, 100, Ease.OUTBACK);        // the inside knee up high
+        part(a, "leftLeg", sion, 0, 0, 4, 10, oq);
+        part(a, "rightLeg", sion + 3, -68, 0, 38, 96, io);
+        part(a, "leftLeg", sion + 3, 0, 0, 4, 10, io);
+        part(a, "rightLeg", ha - 9, -10, 0, 10, 40, io);                  // down for the dip
+        part(a, "leftLeg", ha - 9, 0, 0, -6, 34, io);
+        part(a, "rightLeg", ha - 3, -8, 0, 22, 34, Ease.OUTBACK);         // the inside knee takes the weight
+        part(a, "leftLeg", ha - 3, 0, 0, -14, 0, Ease.OUTBACK);           // the outside leg stretched out straight
+        part(a, "rightLeg", ha, -8, 0, 20, 32, io);
+        part(a, "leftLeg", ha, 0, 0, -12, 0, io);
+        part(a, "rightLeg", end, -8, 0, 20, 32, Ease.LINEAR);
+        part(a, "leftLeg", end, 0, 0, -12, 0, Ease.LINEAR);
+
+        // --- torso and head: following the arms, eyes front, then on the fingertips
+        part(a, "torso", 0, 0, 0, 0, 0, Ease.LINEAR);
+        part(a, "torso", 7, 0, -6, 0, 0, io);
+        part(a, "torso", fu, 0, 8, 0, 0, io);
+        part(a, "torso", sion, 4, -10, 0, 0, io);
+        part(a, "torso", ha - 9, 10, 0, 0, 0, io);
+        part(a, "torso", ha, 0, 4, 0, 0, io);
+        part(a, "torso", end, 0, 4, 0, 0, Ease.LINEAR);
+        part(a, "head", 0, 0, 0, 0, 0, Ease.LINEAR);
+        part(a, "head", 7, 0, 6, 2, 0, io);
+        part(a, "head", fu, -4, -10, -4, 0, io);
+        part(a, "head", sion, 0, 10, 6, 0, io);
+        part(a, "head", ha - 9, 8, 0, 0, 0, io);
+        part(a, "head", ha, -4, -14, 14, 0, io);
+        part(a, "head", end, -4, -14, 14, 0, Ease.LINEAR);
+    }
+
+    /** The Fusion Dance: the half on the left (the partner on your right). */
+    public static final KeyframeAnimation FUSION_DANCE_A = once(com.dbzenith.fusion.FusionDance.LENGTH, Anims::fusionDance);
+    /** The Fusion Dance: the half on the right, the mirror image. */
+    public static final KeyframeAnimation FUSION_DANCE_B = onceMirrored(com.dbzenith.fusion.FusionDance.LENGTH, Anims::fusionDance);
+
+    /**
+     * The Potara, the same for both (they face each other): a hand to the ear to clip the earring on, the jolt as it
+     * catches, then dragged forward by the ear, the head leading, arms and legs trailing and flailing, until they meet.
+     */
+    public static final KeyframeAnimation POTARA = once(com.dbzenith.fusion.FusionDance.POTARA_LENGTH, a -> {
+        int pull = com.dbzenith.fusion.FusionDance.POTARA_PULL, end = com.dbzenith.fusion.FusionDance.POTARA_LENGTH;
+        Ease io = Ease.INOUTSINE;
+        Pose stand = new Pose().r("head", 0, 0, 0).limb("rightArm", 0, 0, 5, 0).limb("leftArm", 0, 0, -5, 0)
+                .limb("rightLeg", 0, 0, 1, 0).limb("leftLeg", 0, 0, -1, 0);
+        Pose clip = stand.copy().r("head", 0, 0, -10).limb("rightArm", -150, 10, 38, 128).limb("leftArm", -10, 0, -12, 20);
+        Pose jolt = clip.copy().r("head", -14, 0, -18).limb("leftArm", -30, 0, -40, 20).move(0, -0.6f, 0.4f);
+        a.pose(0, stand, Ease.LINEAR).pose(4, clip, Ease.OUTQUAD).pose(6, clip, io).pose(pull - 1, jolt, Ease.OUTEXPO);
+        for (int t = pull + 2, i = 0; t <= end; t += 3, i++) {
+            float s = i % 2 == 0 ? 1 : -1;
+            Pose dragged = stand.copy().tilt(38).r("head", -40, 0, s * 4).r("torso", 0, s * 6, 0)
+                    .limb("rightArm", 40 + 14 * s, 0, 34, 30).limb("leftArm", 40 - 14 * s, 0, -34, 30)
+                    .limb("rightLeg", 42 + 12 * s, 0, 8, 34 + 12 * s).limb("leftLeg", 42 - 12 * s, 0, -8, 34 - 12 * s);
+            a.pose(t, dragged, i == 0 ? Ease.OUTQUAD : io);
+        }
+    });
+
+    /**
+     * The fused warrior steps out of the light: crouched behind crossed arms, then flung open (fists down and out,
+     * chest up, a shout) with the power shaking through, and settling into a cocky stance.
+     */
+    public static final KeyframeAnimation FUSED_ENTRANCE = once(34, a -> {
+        Pose crouch = new Pose().at(0, 4.5f, 0).r("torso", 18, 0, 0).r("head", 20, 0, 0)
+                .limb("rightArm", -100, -42, 0, 70).limb("leftArm", -100, 42, 0, 70)
+                .limb("rightLeg", -30, 0, 10, 70).limb("leftLeg", -30, 0, -10, 70);
+        Pose burst = new Pose().at(0, -0.6f, 0).r("torso", -14, 0, 0).r("head", -26, 0, 0)
+                .limb("rightArm", 14, 0, 56, 6).limb("leftArm", 14, 0, -56, 6)
+                .limb("rightLeg", 0, 0, 16, 4).limb("leftLeg", 0, 0, -16, 4);
+        Pose cocky = new Pose().at(0, 0.4f, 0).r("torso", 0, -12, 0).r("head", -4, 10, 4)
+                .limb("rightArm", -60, -10, 14, 120).limb("leftArm", -6, 0, -26, 82)
+                .limb("rightLeg", 6, 0, 6, 8).limb("leftLeg", -10, 0, -10, 12);
+        a.pose(0, crouch, Ease.LINEAR).pose(6, crouch.copy().move(0, 0.4f, 0), Ease.LINEAR).pose(9, burst, Ease.OUTEXPO);
+        for (int t = 11; t <= 21; t += 2) a.pose(t, burst.copy().move(t % 4 == 1 ? 0.25f : -0.25f, 0, 0), Ease.LINEAR);
+        a.pose(28, cocky, Ease.INOUTQUAD).pose(34, cocky, Ease.LINEAR);
+    });
+
+    /** A botched fusion, the fat way: plopped down wide-legged, belly out, hands patting it, a wobble. */
+    public static final KeyframeAnimation FUSED_FAT = once(36, a -> {
+        Pose plop = new Pose().at(0, 3.5f, 0).r("torso", -14, 0, 0).r("head", -6, 0, 0)
+                .limb("rightArm", -10, 0, 40, 30).limb("leftArm", -10, 0, -40, 30)
+                .limb("rightLeg", -10, 0, 22, 40).limb("leftLeg", -10, 0, -22, 40);
+        Pose pat = plop.copy().at(0, 1.5f, 0).limb("rightArm", -40, -30, 10, 70).limb("leftArm", -40, 30, -10, 70);
+        a.pose(0, plop.copy().move(0, -1.5f, 0), Ease.LINEAR).pose(4, plop, Ease.OUTBOUNCE);
+        for (int t = 10, i = 0; t <= 28; t += 3, i++) a.pose(t, pat.copy().move(0, i % 2 == 0 ? 0.6f : 0, 0).r("head", -6, 0, i % 2 == 0 ? 6 : -6), Ease.INOUTSINE);
+        a.pose(36, pat, Ease.INOUTSINE);
+    });
+
+    /** A botched fusion, the thin way: the knees buckle, hunched over, arms dangling, a hacking cough or two. */
+    public static final KeyframeAnimation FUSED_THIN = once(40, a -> {
+        Pose slump = new Pose().at(0, 2.2f, 0).tilt(6).r("torso", 26, 0, 0).r("head", 18, 0, 0)
+                .limb("rightArm", -14, 0, 4, 12).limb("leftArm", -14, 0, -4, 12)
+                .limb("rightLeg", -8, 0, -4, 30).limb("leftLeg", -8, 0, 4, 30);
+        Pose cough = slump.copy().r("torso", 36, 0, 0).r("head", 30, 0, 0).limb("rightArm", -70, -20, 0, 100).move(0, 0.6f, 0);
+        a.pose(0, new Pose().r("head", 0, 0, 0), Ease.LINEAR).pose(8, slump, Ease.OUTBOUNCE)
+                .pose(14, cough, Ease.OUTQUAD).pose(17, slump, Ease.INQUAD).pose(21, cough, Ease.OUTQUAD).pose(24, slump, Ease.INQUAD)
+                .pose(40, slump, Ease.LINEAR);
+    });
+
     // ------------------------------------------------------------------ builder
 
     private static KeyframeAnimation loop(int length, Consumer<Keys> body) {
@@ -665,19 +874,32 @@ public final class Anims {
     }
 
     private static KeyframeAnimation build(int length, boolean loop, Consumer<Keys> body) {
+        return build(length, loop, false, body);
+    }
+
+    /** The same choreography with left and right swapped (the partner's half of a duet). */
+    private static KeyframeAnimation onceMirrored(int length, Consumer<Keys> body) {
+        return build(length, false, true, body);
+    }
+
+    private static KeyframeAnimation build(int length, boolean loop, boolean mirror, Consumer<Keys> body) {
         KeyframeAnimation.AnimationBuilder b = new KeyframeAnimation.AnimationBuilder(AnimationFormat.JSON_EMOTECRAFT);
         b.beginTick = 0;
         b.endTick = length;
         b.stopTick = loop ? length : length + 4;                  // a short blend back to whatever lies underneath
         b.isLooped = loop;
         b.returnTick = 0;
-        body.accept(new Keys(b));
+        Keys k = new Keys(b);
+        k.mirror = mirror;
+        body.accept(k);
         return b.build();
     }
 
     /** Keyframe helper: degrees in, radians out; positions relative to each part's rest pivot; keyed states enabled. */
     public static final class Keys {
         private final KeyframeAnimation.AnimationBuilder b;
+        /** Swap left and right: each part keys its twin, yaw, roll and sideways offsets change sign. */
+        boolean mirror;
 
         Keys(KeyframeAnimation.AnimationBuilder b) {
             this.b = b;
@@ -711,6 +933,11 @@ public final class Anims {
         }
 
         public Keys rot(String part, int tick, float pitch, float yaw, float roll, Ease ease) {
+            if (mirror) {
+                part = twin(part);
+                yaw = -yaw;
+                roll = -roll;
+            }
             KeyframeAnimation.StateCollection p = b.getPart(part);
             key(p.pitch, tick, (float) Math.toRadians(pitch), ease);
             key(p.yaw, tick, (float) Math.toRadians(yaw), ease);
@@ -723,6 +950,10 @@ public final class Anims {
          * so its offsets are converted here and every animation can think in pixels.
          */
         public Keys pos(String part, int tick, float dx, float dy, float dz, Ease ease) {
+            if (mirror) {
+                part = twin(part);
+                dx = -dx;
+            }
             KeyframeAnimation.StateCollection p = b.getPart(part);
             if (part.equals("body")) {
                 dx /= 16f;
@@ -739,6 +970,12 @@ public final class Anims {
          * Tips the whole figure forward by {@code pitch} degrees about the middle of the figure. playerAnimator pivots the
          * body part 0.7 blocks (11.2 px) above the feet; the figure's middle sits a little higher, so this nudges for the gap.
          */
+        private static String twin(String part) {
+            if (part.startsWith("right")) return "left" + part.substring(5);
+            if (part.startsWith("left")) return "right" + part.substring(4);
+            return part;
+        }
+
         public Keys tilt(int tick, float pitch, float dy, Ease ease) {
             double r = Math.toRadians(pitch), mid = 3.2;  // pixels from the pivot up to the middle of the figure
             rot("body", tick, pitch, 0, 0, ease);
@@ -747,6 +984,7 @@ public final class Anims {
 
         /** Flex an elbow or knee. bendy-lib bends every limb backward for a positive angle: right for knees, so elbows are flipped to fold forward. */
         public Keys bend(String part, int tick, float degrees, Ease ease) {
+            if (mirror) part = twin(part);
             KeyframeAnimation.StateCollection p = b.getPart(part);
             if (part.endsWith("Arm")) degrees = -degrees;
             if (p.isBendable) key(p.bend, tick, (float) Math.toRadians(degrees), ease);

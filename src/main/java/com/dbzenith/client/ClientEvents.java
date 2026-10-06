@@ -143,7 +143,16 @@ public final class ClientEvents {
             com.dbzenith.client.fx.ImpactFx.crater(mc.level, mc.player.position().add(look.scale(3)), 2.5f, 30);
         }
         int anim = name.indexOf("anim_");
-        if (anim >= 0) com.dbzenith.client.anim.AnimController.devPreview(name.substring(anim + 5).replaceAll("_\\d+$", ""));
+        if (anim >= 0) com.dbzenith.client.anim.AnimController.devPreview(name.substring(anim + 5).replaceAll("_\\d+$", ""), name.contains("duet"));
+        else com.dbzenith.client.DevDuet.clear();
+        com.dbzenith.client.ClientFusion.devCamera(name.contains("dancecam"));
+        if (name.contains("fused") && mc.player != null && ClientPublicStates.get(mc.player.getId()) != null) {   // the fused looks (12c)
+            var st = ClientPublicStates.get(mc.player.getId());
+            int bit = name.contains("fusedpotara") ? com.dbzenith.network.PublicStatePacket.FUSED_POTARA : name.contains("fusedfat") ? com.dbzenith.network.PublicStatePacket.FUSED_FAT
+                    : name.contains("fusedthin") ? com.dbzenith.network.PublicStatePacket.FUSED_THIN : com.dbzenith.network.PublicStatePacket.FUSED_DANCE;
+            ClientPublicStates.put(st.withFlags((st.flags() & ~com.dbzenith.network.PublicStatePacket.FUSED) | bit, "Devtner"));
+            mc.player.refreshDisplayName();
+        }
         if (name.startsWith("noscreen_") && mc.screen != null) {
             mc.setScreen(null);
             delayTicks = Math.max(delayTicks, 3);

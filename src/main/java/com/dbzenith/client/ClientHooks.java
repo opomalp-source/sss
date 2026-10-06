@@ -62,4 +62,10 @@ public final class ClientHooks {
         Entity e = mc.level.getEntity(entityId);
         if (e != null) e.refreshDimensions();
     }
+
+    /** A player's fused name came or went: their name tag (12c). */
+    public static void refreshName(int entityId) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null && mc.level.getEntity(entityId) instanceof net.minecraft.world.entity.player.Player p) p.refreshDisplayName();
+    }
 }

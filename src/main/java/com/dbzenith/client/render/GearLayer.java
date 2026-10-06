@@ -73,6 +73,8 @@ public class GearLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
                        float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
         if (player.isInvisible() || ArtStyle.get() == ArtStyle.CLASSIC) return;
         GiArmorItem.Set top = worn(player, EquipmentSlot.CHEST), pants = worn(player, EquipmentSlot.LEGS), boots = worn(player, EquipmentSlot.FEET);
+        PublicStatePacket fused = ClientPublicStates.get(player.getId());
+        if (fused != null && fused.has(PublicStatePacket.FUSED_DANCE)) top = pants = boots = GiArmorItem.Set.FUSION;   // the dance's outfit (12c)
         if (top == null && pants == null && boots == null) return;
         if (pants != null) renderColoredCutoutModel(getParentModel(), texture(pants, "pants"), pose, buffers, light, player, 1f, 1f, 1f);
         if (boots != null) renderColoredCutoutModel(getParentModel(), texture(boots, "boots"), pose, buffers, light, player, 1f, 1f, 1f);
@@ -81,7 +83,7 @@ public class GearLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         model.follow(getParentModel());
         VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(PARTS));
         int o = OverlayTexture.NO_OVERLAY;
-        if (pants == GiArmorItem.Set.MAJIN) piece(pose, vc, light, o, GearModel.Piece.BAGGY, 0, 0xF2F0F4);
+        if (pants == GiArmorItem.Set.MAJIN || pants == GiArmorItem.Set.FUSION) piece(pose, vc, light, o, GearModel.Piece.BAGGY, 0, 0xF2F0F4);
         if (top == null) return;
         switch (top) {
             case TURTLE -> piece(pose, vc, light, o, GearModel.Piece.SASH_TAILS, 0, 0x2852C8);
@@ -104,6 +106,10 @@ public class GearLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
             case FROST_ARMOR -> {
                 piece(pose, vc, light, o, GearModel.Piece.PADS, 0, 0x8A4AC8);
                 piece(pose, vc, light, o, GearModel.Piece.PAD_TRIM, 0, 0xF2F0F6);
+            }
+            case FUSION -> {
+                piece(pose, vc, light, o, GearModel.Piece.PADS, 0, 0xEAB830);
+                piece(pose, vc, light, o, GearModel.Piece.PAD_TRIM, 0, 0x1F6F80);
             }
         }
     }

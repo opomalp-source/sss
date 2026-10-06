@@ -208,7 +208,7 @@ public class CharacterCreationScreen extends Screen {
         int flags = Races.of(race).tail() ? PublicStatePacket.TAIL : 0;
         ClientPublicStates.put(new PublicStatePacket(minecraft.player.getId(), flags, 50, Races.of(race).auraColor(),
                 PlayerData.BASE_FORM, race.ordinal(), body.ordinal(), 0, hairColor, eyeColor, 0L, PublicStatePacket.RACE_LOOK,
-                hairCode, skinTone, stature, variant.ordinal(), "", face, highlight).withFace(face, highlight, aura >= 0 ? aura : Races.of(race).auraColor()));
+                hairCode, skinTone, stature, variant.ordinal(), "", face, highlight, "").withFace(face, highlight, aura >= 0 ? aura : Races.of(race).auraColor()));
         minecraft.player.refreshDimensions();
     }
 

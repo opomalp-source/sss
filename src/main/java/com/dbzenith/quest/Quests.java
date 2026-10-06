@@ -59,7 +59,9 @@ public final class Quests {
         add(new Quest("springs_of_paradise", Quest.Giver.GRAND_KAI, List.of(Objective.flag("spring_soaked")), List.of(), 0, false,
                 Reward.tp(1500).flag("godki:300")));
         add(new Quest("tournament_of_the_dead", Quest.Giver.GRAND_KAI, List.of(Objective.kill("dbzenith:damned_warrior", 12)),
-                List.of("springs_of_paradise"), 0, false, Reward.tp(3000).with("dbzenith:senzu_bean", 6)));
+                List.of("springs_of_paradise"), 0, false, Reward.tp(3000).with("dbzenith:senzu_bean", 6).with("dbzenith:potara_earrings", 1)));
+        add(new Quest("the_fusion_dance", Quest.Giver.GRAND_KAI, List.of(Objective.level(150), Objective.kill("dbzenith:damned_warrior", 6)),
+                List.of("springs_of_paradise"), 0, false, Reward.tp(2000).teach("fusion_dance")));
     }
 
     private Quests() {}

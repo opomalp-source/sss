@@ -26,7 +26,7 @@ public class NpcExtrasModel {
         CAP("cap", 0x24346A), CAP_BADGE("cap_badge", 0xE0B040),
         HAT("hat", 0x2A1838), HAT_PLATE("hat_plate", 0xE0B040),
         SCOUTER("scouter", 0x2A2A30), SCOUTER_LENS("scouter_lens", 0x40E070),
-        EARRINGS("earrings", 0xF0C040), DOME("dome", 0x5AA83A), HALO("halo", 0xFFE070);
+        EARRINGS("earrings", 0xF0C040), POTARA_RING("potara_ring", 0xF2C23A), POTARA_BEAD("potara_bead", 0x3CD068), DOME("dome", 0x5AA83A), HALO("halo", 0xFFE070);
 
         final String part;
         final int color;
@@ -74,6 +74,11 @@ public class NpcExtrasModel {
         head.addOrReplaceChild("earrings", CubeListBuilder.create().texOffs(PLATE, BAND_V)
                 .addBox(-5.2f, -3.2f, -0.6f, 0.5f, 1.2f, 1.2f).addBox(-5.3f, -2f, -0.4f, 0.7f, 0.8f, 0.8f)
                 .addBox(4.7f, -3.2f, -0.6f, 0.5f, 1.2f, 1.2f).addBox(4.6f, -2f, -0.4f, 0.7f, 0.8f, 0.8f), PartPose.ZERO);
+        // Potara earrings (12c): a gold ring through each lobe and a round green bead hanging under it
+        head.addOrReplaceChild("potara_ring", CubeListBuilder.create().texOffs(PLATE, BAND_V)
+                .addBox(-4.75f, -3.3f, -0.8f, 0.55f, 1.6f, 1.6f).addBox(4.2f, -3.3f, -0.8f, 0.55f, 1.6f, 1.6f), PartPose.ZERO);
+        head.addOrReplaceChild("potara_bead", CubeListBuilder.create().texOffs(PLATE, BAND_V)
+                .addBox(-5.05f, -1.8f, -0.65f, 1.3f, 1.3f, 1.3f).addBox(3.75f, -1.8f, -0.65f, 1.3f, 1.3f, 1.3f), PartPose.ZERO);
         // a sproutling's bulbous crown
         head.addOrReplaceChild("dome", CubeListBuilder.create().texOffs(PLATE, 0)
                 .addBox(-4.6f, -10.4f, -4.6f, 9.2f, 2.8f, 9.2f).addBox(-3.4f, -11.8f, -3.4f, 6.8f, 1.6f, 6.8f), PartPose.ZERO);

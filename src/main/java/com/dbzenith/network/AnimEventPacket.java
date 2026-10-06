@@ -25,6 +25,8 @@ public record AnimEventPacket(int entityId, int kind, int data) {
     public static final int SWEEP = 8, UPPERCUT = 9, RUSH = 10, HOOK = 11, BREAKER = 12, DODGE = 13, RECOVER = 14, ZHIT = 15;
     /** A foe worth beating went down. */
     public static final int VICTORY = 16;
+    /** A fusion just formed (12c): data is the kind ({@link com.dbzenith.fusion.Fusion#DANCE} and so on). */
+    public static final int FUSED = 17;
 
     /** The animation that fits how a technique is cast. */
     public static AnimEventPacket forTechnique(Entity caster, Technique t) {

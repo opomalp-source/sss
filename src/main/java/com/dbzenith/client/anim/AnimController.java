@@ -217,6 +217,11 @@ public final class AnimController {
             t.actionLockUntil = 0;
             return;
         }
+        if (msg.kind() == AnimEventPacket.FUSED) {                    // the fused warrior steps out of the light (12c)
+            com.dbzenith.client.ClientFusion.fused(player, msg.data());
+            t.lastEventTick = now;
+            return;
+        }
         KeyframeAnimation anim = switch (msg.kind()) {
             case AnimEventPacket.VOLLEY -> Anims.KI_VOLLEY;
             case AnimEventPacket.BEAM -> Anims.kiBeam(msg.data());
@@ -251,6 +256,24 @@ public final class AnimController {
         play(player, TRACKS.computeIfAbsent(player, p -> new Track()), anim, mc.level.getGameTime(), 0);
     }
 
+    /** Play a one-shot that small actions (swings, hits) cannot cut short for {@code lockTicks} (a fusion dance). */
+    public static void playLocked(int entityId, KeyframeAnimation anim, int lockTicks) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null || entityId < 0 || !(mc.level.getEntity(entityId) instanceof AbstractClientPlayer player)) return;
+        Track t = TRACKS.computeIfAbsent(player, p -> new Track());
+        t.actionLockUntil = 0;
+        play(player, t, anim, mc.level.getGameTime(), lockTicks);
+    }
+
+    /** Clear a player's one-shot (a dance broken off). */
+    public static void stop(int entityId) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null || !(mc.level.getEntity(entityId) instanceof AbstractClientPlayer player)) return;
+        ModifierLayer<IAnimation> layer = layer(player, ACTION_LAYER);
+        if (layer != null) layer.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(4, Ease.INOUTSINE), null);
+        TRACKS.computeIfAbsent(player, p -> new Track()).actionLockUntil = 0;
+    }
+
     /** Freeze a player's animations for {@code ticks} (the moment a blow connects). Ignored for anyone not a player. */
     public static void hitstop(int entityId, int ticks) {
         Minecraft mc = Minecraft.getInstance();
@@ -283,6 +306,14 @@ public final class AnimController {
     private static int devFrame;
 
     public static void devPreview(String name) {
+        devPreview(name, false);
+    }
+
+    /**
+     * Dev automation: {@code duet} also stands a stand-in partner beside the local player (on the right for the fusion
+     * dance, facing them for the Potara) playing the other half (an {@code _A} animation's {@code _B}) on the same frame.
+     */
+    public static void devPreview(String name, boolean duet) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
         int frame = -1;
@@ -291,20 +322,35 @@ public final class AnimController {
             name = fm.group(1);
             frame = Integer.parseInt(fm.group(2));
         }
-        KeyframeAnimation anim;
-        if (name.equals("BEAM")) anim = Anims.kiBeam(40);
-        else if (name.equals("THROW")) anim = Anims.kiThrow(30);
-        else {
-            try {
-                anim = (KeyframeAnimation) Anims.class.getField(name).get(null);
-            } catch (ReflectiveOperationException e) {
-                DBZenith.LOGGER.warn("[dev] no animation {}", name);
-                return;
-            }
-        }
+        KeyframeAnimation anim = devAnimation(name);
+        if (anim == null) return;
         ModifierLayer<IAnimation> layer = layer(mc.player, ACTION_LAYER);
-        int stopAt = frame;
-        KeyframeAnimationPlayer player = frame < 0 ? new KeyframeAnimationPlayer(anim) : new KeyframeAnimationPlayer(anim) {
+        if (layer != null) layer.setAnimation(frozen(anim, frame));
+        devFreeze = frame >= 0;
+        devAnim = anim;
+        devFrame = frame;
+        com.dbzenith.client.DevDuet.clear();
+        if (duet) {
+            KeyframeAnimation other = name.endsWith("_A") ? devAnimation(name.substring(0, name.length() - 2) + "_B") : anim;
+            AbstractClientPlayer partner = com.dbzenith.client.DevDuet.spawn(name.startsWith("POTARA"));
+            ModifierLayer<IAnimation> pl = partner == null || other == null ? null : layer(partner, ACTION_LAYER);
+            if (pl != null) pl.setAnimation(frozen(other, frame));
+        }
+    }
+
+    private static KeyframeAnimation devAnimation(String name) {
+        if (name.equals("BEAM")) return Anims.kiBeam(40);
+        if (name.equals("THROW")) return Anims.kiThrow(30);
+        try {
+            return (KeyframeAnimation) Anims.class.getField(name).get(null);
+        } catch (ReflectiveOperationException e) {
+            DBZenith.LOGGER.warn("[dev] no animation {}", name);
+            return null;
+        }
+    }
+
+    private static KeyframeAnimationPlayer frozen(KeyframeAnimation anim, int stopAt) {
+        return stopAt < 0 ? new KeyframeAnimationPlayer(anim) : new KeyframeAnimationPlayer(anim) {
             int ticks;
 
             @Override
@@ -312,10 +358,6 @@ public final class AnimController {
                 if (ticks++ < stopAt - 1) super.tick();
             }
         };
-        if (layer != null) layer.setAnimation(player);
-        devFreeze = frame >= 0;
-        devAnim = anim;
-        devFrame = frame;
     }
 
     /** The Great Ape replaces the whole player model, so the humanoid animations do not apply. */

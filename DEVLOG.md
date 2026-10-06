@@ -970,3 +970,63 @@ The user asked for this to be "REALLY GOOD (npc designs and authentic)". Designs
 - **Fixed after review:**
   - Enma hidden behind a five-high desk, and dark under the roof: a lower desk, a bigger judge, hidden lights, and his body pinned to face the hall.
   - The cloud sea read as a desert: paler and more translucent.
+
+## 2026-10-06 — Session 3 (cont.): 12c Fusion v2, the Fusion Dance and the Potara (v0.39.0)
+
+### Added
+- **Fused players (`fusion.Fusion`):**
+  - The one who asked becomes the host and keeps control of the body. The partner becomes a spectator who watches through the host's eyes (camera locked on the host, following them across dimensions) and gets their own game mode back afterwards.
+  - The fused body gets a fused name (the front of one name and the back of the other; the dance and the Potara pair them differently), full pools, and a fused-power multiplier on every attribute. The fused name shows on the name tag and in chat.
+  - Fused power: bonus × (1 + the partner's share of the host's strength, capped at 1). Two equal fighters: 2.3 by the dance, 2.4 by the Potara; a botched dance gives 0.6.
+  - A fusion lasts 30 minutes (dance) or 60 (Potara). It ends early if the host falls (they split before death) or either half logs out. A fusion that outlives a restart is undone at the next login.
+  - Saved state on `PlayerData`; new public-state bits `FUSED_DANCE`, `FUSED_POTARA`, `FUSED_FAT`, `FUSED_THIN` and the fused name.
+- **The Fusion Dance (`fusion.FusionDance`, technique `fusion_dance`):**
+  - Any race. The Grand Kai teaches it (new quest: level 150 and six damned warriors), or it can be learned for 2500 TP at level 150.
+  - Look at a player to invite them; they accept from chat (`/dbzfusion dance`).
+  - The server lines the asker up on the left and the partner on the right, 2.75 blocks apart, facing the same way, and holds them there.
+  - Three beats, FU (tick 30), SION (45) and HA! (58): each dancer clicks on each one, from 6 ticks early to 7 late. Presses are judged on the server.
+  - The dance always plays to the end. All six presses on time give a true fusion; anything less gives a botched one, fat or thin at random.
+- **Potara earrings (new item):**
+  - Use them on a player to offer one; they accept from chat (`/dbzfusion potara`) and the pair is spent.
+  - The two turn to face each other, are pulled together by the ears, and fuse on contact.
+  - The Grand Kai's tournament quest now gives a pair as a reward.
+- **Animations (all keyed with whole-body poses):**
+  - **The dance,** written once and mirrored (bodies, offsets, yaw and roll swapped) for the partner:
+    - Ready: arms swing out away from the partner.
+    - FU: three shuffling side-steps in, the inside foot leading, while both arms sweep over the head in one arc to point at the partner.
+    - SION: the arms sweep back out, and the inside knee comes up high.
+    - HA: a dip with the arms crossed low, then the lean in. The inside arm is straight to the fingertips, touching the partner's; the outside arm is arched over the head (turned so its elbow bends sideways over the top); the inside knee is bent under the weight and the outside leg stretched out in one line. Held, trembling, until the light.
+  - New lean helper: the figure rolls sideways about its feet, so they stay planted.
+  - **The Potara:** a hand to the ear to clip the earring on, the jolt as it catches, then dragged forward head-first with arms and legs trailing and flailing.
+  - **The fused entrance:** crouched behind crossed arms in the light, flung open with a shout and shaking power, then a cocky stance.
+  - **Botched entrances:** fat (plopped down wide, patting the belly, wobbling) and thin (knees buckling, hunched, coughing).
+- **On screen (`ClientFusion`):**
+  - **Dance camera:** dancers see the dance from a camera in front of the pair that frames both, with no hand or crosshair. Movement is locked and clicks become beats.
+  - **Beat HUD:** FU · SION · HA! with a ring closing on each beat, the syllable popping as it lands, and a pip each for you and your partner (waiting, on time, missed).
+  - **The light:** a pillar, rings and a flash, then a cut-in with the fused name ("FUSION", or "FUSION...?" for a botch). A timer shows while fused.
+- **Looks:**
+  - **The fusion outfit** (new `fusion` gi set, also craftable): an open teal vest with lighter edges, gold padded shoulders, a wide blue sash, black wristbands, white baggy trousers and black boots. The dance's fused body wears it automatically.
+  - **Potara fusions** wear 3D gold rings with green beads on both ears.
+  - **Botched fusions** are round with a pot belly, or a bag of bones.
+- **Dev tools:**
+  - The `duet` flag stands a client-side partner next to the test player, playing the mirrored half on the same frozen frame.
+  - The `dancecam` flag turns on the dance camera (side-on for the Potara).
+  - The `fuseddance`, `fusedpotara`, `fusedfat` and `fusedthin` flags preview the fused looks.
+- **Network:** protocol 29 (`FusionPackets` Show/End/Press; the fused name in `PublicStatePacket`; anim event `FUSED`).
+
+### Verified
+- **Calibrated first:** a positive body offset moves the figure to its own right, and a positive body roll tips it to its left (`Anims.RIGHT_X`, `body()`).
+- **Contact sheets of both dancers from the dance camera,** frame by frame, at ticks 1, 7, 10, 13, 15, 17, 20, 25, 30, 38, 45, 49, 51, 53, 55, 58 and 64. Fixed after review:
+  - The HA bodies collided at 2.0 blocks; widened to 2.75.
+  - The outer arm hid behind the head; it is now turned and arched over the top.
+  - The gather before HA read as a T-pose; now the arms are crossed low.
+  - The SION knee now comes up more to the side.
+- **Other sheets:**
+  - The Potara from the side.
+  - The fused entrance and both botches.
+  - The fusion outfit, the earrings, and the fat and thin bodies.
+- **GameTests:**
+  - A dance on the beat fuses (power, name, duration, partner inside, unfusing gives the body and game mode back).
+  - A missed beat botches.
+  - The Potara spends the pair and fuses for an hour without a dance; fused names.
+  - 142 required tests pass. The tests place the partner beside the asker, because vanilla's spawn spread could leave two test players out of fusion range.

@@ -190,3 +190,12 @@ Constants are in `CombatMoves`.
   - Efficient: x0.85 damage, x0.75 cost.
 - **Totals:** the combined tax is capped at 1.55. A third modifier slot opens at level 800. TP cost: +200 for a non-pure type, +150 for a non-fired method.
 - **Checked:** `kiCreatorDesignsStayInBalance` covers every shape, power and modifier combination (up to three modifiers at p3), and every shape × method × origin × type at p1/p5 with risky modifier sets. All stay within 0.6-1.6x the median damage per ki of the built-in techniques, and below 4x punching DPS.
+
+## Fusion v2 (12c, v0.39.0)
+- **Fused power** (every attribute of the host, on top of forms, gear and Kaioken): bonus × (1 + share), where share = partner strength / host strength, capped at 1.
+  - Strength is the sum of effective attributes, whatever the release.
+  - Dance bonus 1.15, Potara 1.2: equal fighters fuse at 2.3x and 2.4x, about one Super Saiyan stage. A much weaker partner adds little, so the stronger should ask.
+  - A botched dance: 0.6x the host.
+- **Duration:** dance 30 min, Potara 60 min (config). Splits early when the host falls or either half leaves.
+- **Cost:** the dance is free but needs six presses in a 14-tick window per beat. The Potara costs a pair of earrings (a quest reward) and cannot fail.
+- **Config:** `fusionDanceMinutes`, `potaraMinutes`, `fusionDanceBonus`, `potaraBonus`, `failedFusionPower`.

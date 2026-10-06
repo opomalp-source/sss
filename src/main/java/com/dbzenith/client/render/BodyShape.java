@@ -28,6 +28,7 @@ import java.util.Map;
 @Mod.EventBusSubscriber(modid = DBZenith.MOD_ID, value = Dist.CLIENT)
 public final class BodyShape {
     static final String[] NAMES = {"dbz_chest_lean", "dbz_chest_athletic", "dbz_chest_bulky"};
+    static final String BELLY = "dbz_belly";
     /** How far each build's chest stands out from the body: sideways, up and down, front and back (pixels). */
     static final float[][] INFLATE = {{0.3f, 0.15f, 0.45f}, {0.55f, 0.25f, 0.8f}, {0.85f, 0.35f, 1.15f}};
 
@@ -42,6 +43,12 @@ public final class BodyShape {
             chest.visible = false;
             children.put(NAMES[i], chest);
         }
+        MeshDefinition mesh = new MeshDefinition();                              // a botched fusion's pot belly (12c)
+        mesh.getRoot().addOrReplaceChild("belly", CubeListBuilder.create().texOffs(15, 20)
+                .addBox(-4, 6, -3, 8, 6, 5, new CubeDeformation(0.9f, 0.4f, 0.9f)), PartPose.ZERO);
+        ModelPart belly = LayerDefinition.create(mesh, 64, 64).bakeRoot().getChild("belly");
+        belly.visible = false;
+        children.put(BELLY, belly);
     }
 
     static ModelPart bake(float[] d) {
@@ -96,12 +103,21 @@ public final class BodyShape {
         float bulk = build >= 0 ? FormShape.bulk(state.form()) : 0;
         shape(model, bulk);
         if (bulk >= 1) build = NAMES.length - 1;                                      // heavy forms wear the biggest chest
+        if (state != null && state.has(PublicStatePacket.FUSED_FAT)) {             // a botched fusion (12c): round as a barrel...
+            shape(model, 1.45f, 1.75f, 1.3f, 1.32f);
+            build = NAMES.length - 1;
+        } else if (state != null && state.has(PublicStatePacket.FUSED_THIN)) {    // ...or a bag of bones
+            shape(model, 0.8f, 0.78f, 0.7f, 0.74f);
+            build = 0;
+        }
         Map<String, ModelPart> children = childrenOf(model.body);
         if (children == null) return;
         for (int i = 0; i < NAMES.length; i++) {
             ModelPart chest = children.get(NAMES[i]);
             if (chest != null) chest.visible = i == build;
         }
+        ModelPart belly = children.get(BELLY);
+        if (belly != null) belly.visible = state != null && state.has(PublicStatePacket.FUSED_FAT);
     }
 
     @SubscribeEvent
@@ -111,7 +127,10 @@ public final class BodyShape {
 
     /** Swells (or pares down) the torso and limbs for a form's bulk: wider and deeper body, thicker arms, sturdier legs. */
     static void shape(PlayerModel<?> m, float bulk) {
-        float body = 1 + 0.1f * bulk, depth = 1 + 0.14f * bulk, arm = 1 + 0.2f * bulk, leg = 1 + 0.09f * bulk;
+        shape(m, 1 + 0.1f * bulk, 1 + 0.14f * bulk, 1 + 0.2f * bulk, 1 + 0.09f * bulk);
+    }
+
+    static void shape(PlayerModel<?> m, float body, float depth, float arm, float leg) {
         scale(m.body, body, depth);
         scale(m.jacket, body, depth);
         for (ModelPart p : new ModelPart[]{m.rightArm, m.leftArm, m.rightSleeve, m.leftSleeve}) scale(p, arm, arm);

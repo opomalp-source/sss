@@ -991,6 +991,7 @@ public class ArtGen {
             battleArmor();
             majin();
             hoodie();
+            fusion();
             parts();
         }
 
@@ -1188,6 +1189,64 @@ public class ArtGen {
             boots.save("entity/gear/majin_boots.png");
         }
 
+
+
+        /**
+         * The fusion outfit (12c, worn by a fused warrior from the dance): an open teal vest with lighter edges over the
+         * bare chest, a wide blue sash, black wristbands, white baggy trousers gathered at black ankle cuffs, black boots.
+         * The quilted gold shoulder pads are 3D (GearModel).
+         */
+        static void fusion() throws IOException {
+            int[] vest = ramp(0xFF1F6F80, 6), edge = ramp(0xFF58B8C4, 5), sash = ramp(0xFF3A62C8, 5), white = ramp(0xFFF2F0F4, 6),
+                    black = ramp(0xFF24242C, 5);
+            Hd.HdSkin top = new Hd.HdSkin();
+            top.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM || vv > 0.9) return 0;
+                if (vv >= 0.72) {                                                                   // the wide sash
+                    if (row(vv, 0.725, h) || row(vv, 0.895, h)) return ink(sash);
+                    if (row(vv, 0.81, h)) return HdRaces.tone(sash, Painted.SHADE);
+                    return flat(sash, f, 0);
+                }
+                if (f == Face.FRONT) {
+                    double d = Math.abs(uu - 0.5), open = 0.2 + vv * 0.08;
+                    if (d < open) return 0;                                                          // open over the chest
+                    if (d < open + 0.05) return d < open + 0.012 ? ink(edge) : flat(edge, f, 0.02);   // the lighter edge
+                }
+                if (f == Face.TOP) return flat(vest, f, 0);
+                return cloth(vest, f, x, y, w, h, 601);
+            };
+            top.arm = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (vv >= 0.74 && vv < 0.9 && f != Face.BOTTOM) {                                  // black wristbands
+                    if (row(vv, 0.745, h) || row(vv, 0.895, h)) return ink(black);
+                    return flat(black, f, row(vv, 0.82, h) ? 0.1 : 0);
+                }
+                return 0;
+            };
+            top.save("entity/gear/fusion_top.png");
+
+            Hd.HdSkin pants = new Hd.HdSkin();
+            pants.body = (f, x, y, w, h) -> v(y, h) > 0.88 && f != Face.TOP ? cloth(white, f, x, y, w, h, 602) : 0;
+            pants.leg = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (f == Face.BOTTOM || vv > 0.8) return 0;
+                if (vv > 0.72) return row(vv, 0.725, h) ? ink(black) : flat(black, f, x % 2 == 0 ? -0.05 : 0.02);   // ankle cuffs
+                return cloth(white, f, x, y, w, h, 603);
+            };
+            pants.save("entity/gear/fusion_pants.png");
+
+            Hd.HdSkin boots = new Hd.HdSkin();
+            boots.leg = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM) return ink(black);
+                if (vv < 0.8) return 0;
+                if (vv > 0.955) return ink(black);
+                if (f == Face.FRONT && vv > 0.87 && Math.abs(uu - 0.5) < 0.3) return flat(edge, f, -0.05);   // a teal toe cap
+                return flat(black, f, (uu < 0.12 || uu > 0.88) ? -0.1 : 0);
+            };
+            boots.save("entity/gear/fusion_boots.png");
+        }
 
         /** A zip hoodie (drawstrings, a kangaroo pocket, ribbed hem and cuffs), joggers with a side stripe, white sneakers. */
         static void hoodie() throws IOException {
@@ -2898,6 +2957,8 @@ public class ArtGen {
             gi("namekian", 0xFF5A3A8A, 0xFF40B0E0, 0xFF5A3418);
             gi("majin", 0xFF26222E, 0xFFE0B040, 0xFFB8862A);
             gi("hoodie", 0xFFC8283A, 0xFFF2F0F4, 0xFFF2F0F4);
+            gi("fusion", 0xFF1F6F80, 0xFF3A62C8, 0xFF24242C);
+            potara();
             battleArmor();
         }
 
@@ -3044,6 +3105,20 @@ public class ArtGen {
             }
             c.sphere(8, 3.5, 2.4, 2.2, ramp(0xFF70D8FF, 4), true);                    // gem
             c.outline().save("item/promise_ring.png");
+        }
+
+        /** Potara earrings: a pair, each a gold ring through the lobe with a round green bead hanging under it. */
+        static void potara() throws IOException {
+            Canvas c = new Canvas(16, 16);
+            int[] gold = ramp(0xFFE8B838, 5), bead = ramp(0xFF3CC860, 5);
+            for (int[] at : new int[][]{{4, 3}, {11, 5}}) {
+                for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) {
+                    double d = Math.hypot(x + 0.5 - at[0], (y + 0.5 - at[1]) / 1.1);
+                    if (d >= 1.4 && d <= 2.5) c.set(x, y, gold[(int) clamp((float) (2.5 - (y + 0.5 - at[1]) * 0.8), 0, 4)]);
+                }
+                c.sphere(at[0], at[1] + 6.2, 2.9, 2.9, bead, true);
+            }
+            c.outline().save("item/potara_earrings.png");
         }
 
         /** Gi set: top (with undershirt and belt), pants, boots (with wraps). */
@@ -3370,6 +3445,7 @@ public class ArtGen {
             gi("namekian", 0xFF5A3A8A, 0xFF40B0E0, 0xFF5A3418, 0xFF46306E);
             gi("majin", 0xFF26222E, 0xFFE0B040, 0xFFB8862A, 0xFFF2F0F4);
             gi("hoodie", 0xFFC8283A, 0xFF24242C, 0xFFF2F0F4, 0xFF24242C);
+            gi("fusion", 0xFF1F6F80, 0xFF3A62C8, 0xFF24242C, 0xFFF2F0F4);
             battleArmor();
             scouter();
             weights();
