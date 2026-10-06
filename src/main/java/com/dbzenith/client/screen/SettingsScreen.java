@@ -58,6 +58,7 @@ public class SettingsScreen extends Screen {
             case CAMERA -> {
                 o.add(new Option("screen_shake", c.screenShake, 0, 2, null));
                 o.add(new Option("fov_effects", c.fovEffects, 0, 0, null));
+                o.add(new Option("speed_lines", c.speedLines, 0, 0, null));
             }
             case STYLE -> {
                 o.add(new Option("ui_style", c.uiStyle, 0, 1, new String[]{"zenith", "classic"}));

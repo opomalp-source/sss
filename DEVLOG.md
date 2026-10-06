@@ -893,3 +893,20 @@ The user sent reference pictures for the art direction they want: chunky anime-s
 
 ### Verified
 - Screenshots: the hoodie and Frost Demon armour (front and back), gritting under guard and the calm face, the Primal tail, and the golden ape.
+
+## 2026-10-06 — Session 3 (cont.): CX-11 VFX v3 (v0.37.0)
+- **Vanishes (`VfxV3`):** any fighter who jumps between 2.5 and 96 blocks in one tick has vanished: a chase, a counter, Instant Transmission or a teleport. No new packets are needed.
+  - Where they stood: a ghost of flickering static bars the height of a body, thinning out over 18 ticks, over a pale glow drawn with ordinary blending so it reads in daylight.
+  - A bright streak runs to where they went, and a ring flashes as they appear.
+- **Ground cracks:** after 1.5 seconds of charging on the ground, cracks open under the fighter, and wider ones after 4 seconds. They are lasting decals in `ImpactFx` (new `CRACKS` kind, `ground_cracks.png`: eleven jagged fissures, forking, from a shattered middle), so the ground stays scarred for twenty seconds.
+- **Ground arcs:** lightning forms now and then throw a bolt from the body down into the ground, re-struck every other tick.
+- **Beam scorch:** a beam passing within 1.8 blocks of the ground burns marks into it every block and a half (`ImpactFx.scorch`: a decal only, with no ring or debris).
+- **Speed lines:** flying flat out or dashing in first person rakes white streaks in from the edges of the screen, eased in and out, re-drawn every tick. New setting: Settings > Effects > "Speed lines".
+- **Deferred:** real bloom and heat haze need post-processing shaders, which are risky across players' graphics setups. The additive halos stand in for bloom.
+- **Fixed after review:**
+  - Cracks drawn inside the aura were washed out by its glow and the charge ring; they became decals that stay after the charge.
+  - The vanish ghost was too thin and faint in daylight: thicker and wider bars, a soft glow behind them, and a longer, gentler fade.
+  - Reviews are easier now: a `speedlines` devshot flag, and a Human for charge tests, since a Saiyan auto-transforms during a long charge.
+
+### Verified
+- Screenshots: cracks after a charge seen from above, a sideways vanish (ghost, streak, ring), beam scorch marks, speed lines in first person, SSJ2 lightning.

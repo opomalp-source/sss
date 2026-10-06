@@ -595,6 +595,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue hudScale;
         public final ForgeConfigSpec.IntValue auraDetail;
         public final ForgeConfigSpec.BooleanValue fovEffects;
+        public final ForgeConfigSpec.BooleanValue speedLines;
         public final ForgeConfigSpec.BooleanValue hairPhysics;
         public final ForgeConfigSpec.BooleanValue proceduralMotion;
         public final ForgeConfigSpec.IntValue artStyle;
@@ -629,6 +630,8 @@ public final class DBZConfig {
                     .defineInRange("auraDetail", 1, 0, 2);
             fovEffects = b.comment("Zoom punch on heavy blows and the widening rush on dashes")
                     .define("fovEffects", true);
+            speedLines = b.comment("Anime speed lines at the edges of the screen when flying flat out or dashing (first person)")
+                    .define("speedLines", true);
             hairPhysics = b.comment("Hair sways with movement, falling, turning and auras")
                     .define("hairPhysics", true);
             uiStyle = b.comment("Screens: 0 Zenith (ornate frames, animated backdrop), 1 Classic")

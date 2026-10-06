@@ -103,6 +103,7 @@ public final class ClientEvents {
         com.dbzenith.client.fx.CameraFx.devZoom = name.contains("zoomface") ? 14f : name.contains("zoom") ? 42f : 0f;
         com.dbzenith.client.fx.CameraFx.devTurn = name.contains("side") ? 90f : name.contains("turn") ? 45f : 0f;
         com.dbzenith.client.anim.AnimController.devFreeze = false;
+        com.dbzenith.client.fx.VfxV3.devSpeedLines = name.contains("speedlines");
         if (name.contains("hudzenith")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(0);
         if (name.contains("hudclassic")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(1);
         if (name.contains("hudminimal")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(2);

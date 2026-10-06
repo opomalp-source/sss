@@ -49,6 +49,8 @@ public final class AuraDebris {
 
     private static final List<Rock> ROCKS = new ArrayList<>();
     private static final int MAX = 160;
+    /** How long each player has been charging on the ground (ticks), for the cracks. */
+    private static final java.util.Map<Integer, Integer> CHARGING = new java.util.HashMap<>();
 
     private AuraDebris() {}
 
@@ -65,7 +67,14 @@ public final class AuraDebris {
         RandomSource rnd = mc.level.random;
         for (Player p : mc.level.players()) {
             PublicStatePacket state = ClientPublicStates.get(p.getId());
-            if (state == null || !state.powering() || !p.onGround() || p.isInvisible()) continue;
+            if (state == null || !state.powering() || !p.onGround() || p.isInvisible()) {
+                CHARGING.remove(p.getId());
+                continue;
+            }
+            int held = CHARGING.merge(p.getId(), 1, Integer::sum);
+            if (held == 30 || held == 80) {                                         // a long charge cracks the ground, then cracks it wider
+                com.dbzenith.client.fx.ImpactFx.cracks(new Vec3(p.getX(), p.getY(), p.getZ()), held == 30 ? 1.6f : 3.2f);
+            }
             BlockPos under = p.blockPosition().below();
             BlockState ground = mc.level.getBlockState(under);
             if (!ground.isAir()) {                                                   // dust blown out from the feet

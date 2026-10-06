@@ -456,6 +456,7 @@ public class ArtGen {
             tongue();
             spike();
             wisp();
+            cracks();
         }
 
         static int px(double grey, double alpha) {
@@ -499,6 +500,41 @@ public class ArtGen {
             c.save("entity/aura_spike.png");
         }
 
+
+        /** Ground cracks: jagged dark fissures branching out from a broken centre, fading toward their ends (128x128). */
+        static void cracks() throws IOException {
+            int n = 128;
+            double[] a = new double[n * n];
+            Random rnd = new Random(1102);
+            for (int k = 0; k < 11; k++) {
+                double ang = k * Math.PI * 2 / 11 + rnd.nextDouble() * 0.4;
+                walk(a, n, n / 2.0, n / 2.0, ang, 18 + rnd.nextInt(26), 1.6, rnd, 2);
+            }
+            for (int y = 0; y < n; y++) for (int x = 0; x < n; x++) {                   // the shattered middle
+                double d = Math.hypot(x + 0.5 - n / 2.0, y + 0.5 - n / 2.0);
+                if (d < 9) a[y * n + x] = Math.max(a[y * n + x], 0.55 * (1 - d / 9) + (noise(x, y, 1103) > 0.7 ? 0.3 : 0));
+            }
+            Canvas c = new Canvas(n, n);
+            for (int i = 0; i < n * n; i++) if (a[i] > 0.02) c.set(i % n, i / n, (int) Math.round(Math.min(1, a[i]) * 235) << 24 | 0x1A1410);
+            c.save("entity/ground_cracks.png");
+        }
+
+        /** One crack: a jittering walk outward, thinning, sometimes forking. */
+        static void walk(double[] a, int n, double x, double y, double ang, int steps, double width, Random rnd, int forks) {
+            for (int s = 0; s < steps; s++) {
+                ang += (rnd.nextDouble() - 0.5) * 0.42;
+                x += Math.cos(ang) * 1.4;
+                y += Math.sin(ang) * 1.4;
+                double w = width * (1 - s / (double) steps) + 0.4, strength = 1 - 0.6 * s / steps;
+                for (int dy = -2; dy <= 2; dy++) for (int dx = -2; dx <= 2; dx++) {
+                    int px = (int) x + dx, py = (int) y + dy;
+                    if (px < 0 || py < 0 || px >= n || py >= n) continue;
+                    double d = Math.hypot(px + 0.5 - x, py + 0.5 - y);
+                    if (d < w) a[py * n + px] = Math.max(a[py * n + px], strength);
+                }
+                if (forks > 0 && rnd.nextDouble() < 0.06) walk(a, n, x, y, ang + (rnd.nextBoolean() ? 0.7 : -0.7), steps - s, width * 0.6, rnd, forks - 1);
+            }
+        }
         static void wisp() throws IOException {
             Canvas c = new Canvas(32, 64);
             for (int y = 0; y < 64; y++) for (int x = 0; x < 32; x++) {

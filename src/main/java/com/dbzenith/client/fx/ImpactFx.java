@@ -45,11 +45,12 @@ public final class ImpactFx {
     private static final ResourceLocation STAR = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/impact_star.png");
     private static final ResourceLocation RING = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/shock_ring.png");
     private static final ResourceLocation CRATER = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/crater.png");
+    private static final ResourceLocation CRACKS = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/ground_cracks.png");
     private static final Vec3 UP = new Vec3(0, 1, 0);
     private static final int MAX_EFFECTS = 256;
     private static final int MAX_DECALS = 48;
 
-    private enum Kind { FLASH, RING, FACING_RING, DECAL }
+    private enum Kind { FLASH, RING, FACING_RING, DECAL, CRACKS }
 
     /** One effect. RING grows from {@code size0} to {@code size}; everything fades over its life. */
     private record Fx(Kind kind, Vec3 pos, Vec3 normal, int color, float size0, float size, int born, int life, float spin, int alpha) {}
@@ -168,6 +169,23 @@ public final class ImpactFx {
     }
 
     /** A crater where something struck the ground: decal, a ring along the ground, debris and dust. */
+    /** A scorch mark and nothing else (beams burning the ground as they pass). */
+    public static void scorch(Vec3 ground, float radius) {
+        trimDecals();
+        add(Kind.DECAL, ground.add(0, 0.021, 0), UP, 0xFFFFFF, radius, radius, 260, 200, Minecraft.getInstance().level.random.nextFloat() * Mth.TWO_PI);
+    }
+
+    /** Cracks spreading through the ground (a long charge). */
+    public static void cracks(Vec3 ground, float radius) {
+        trimDecals();
+        add(Kind.CRACKS, ground.add(0, 0.022, 0), UP, 0xFFFFFF, radius, radius, 400, 230, Minecraft.getInstance().level.random.nextFloat() * Mth.TWO_PI);
+    }
+
+    private static void trimDecals() {
+        long decals = EFFECTS.stream().filter(f -> f.kind == Kind.DECAL || f.kind == Kind.CRACKS).count();
+        if (decals >= MAX_DECALS) EFFECTS.stream().filter(f -> f.kind == Kind.DECAL || f.kind == Kind.CRACKS).findFirst().ifPresent(EFFECTS::remove);
+    }
+
     public static void crater(ClientLevel level, Vec3 ground, float radius, int debris) {
         RandomSource rnd = level.random;
         long decals = EFFECTS.stream().filter(f -> f.kind == Kind.DECAL).count();
@@ -248,6 +266,16 @@ public final class ImpactFx {
             FxDraw.plane(pose, decals, f.pos, UP, f.size, f.spin, f.color, (int) (f.alpha * fade), light);
         }
         buffers.endBatch(RenderType.entityTranslucent(CRATER));
+
+        VertexConsumer cracks = buffers.getBuffer(RenderType.entityTranslucent(CRACKS));
+        for (Fx f : EFFECTS) {
+            if (f.kind != Kind.CRACKS) continue;
+            float age = ticks - f.born + partial;
+            float fade = Math.min(1f, (f.life - age) / 80f) * Math.min(1f, age / 8f);
+            int light = LevelRenderer.getLightColor(mc.level, BlockPos.containing(f.pos.x, f.pos.y + 0.3, f.pos.z));
+            FxDraw.plane(pose, cracks, f.pos, UP, f.size * Math.min(1f, 0.5f + age / 30f), f.spin, f.color, (int) (f.alpha * fade), light);
+        }
+        buffers.endBatch(RenderType.entityTranslucent(CRACKS));
 
         RenderType ringType = FxRenderTypes.additive(RING);
         VertexConsumer rings = buffers.getBuffer(ringType);

@@ -1263,5 +1263,7 @@
   "item.dbzenith.hoodie_boots": "Sneakers",
   "item.dbzenith.frost_armor_top": "Frost Demon Armor",
   "item.dbzenith.frost_armor_pants": "Frost Demon Bodysuit",
-  "item.dbzenith.frost_armor_boots": "Frost Demon Boots"
+  "item.dbzenith.frost_armor_boots": "Frost Demon Boots",
+  "settings.dbzenith.speed_lines": "Speed lines",
+  "settings.dbzenith.speed_lines.desc": "Anime speed lines rake in from the edges of the screen when you fly flat out or dash (first person)."
 }

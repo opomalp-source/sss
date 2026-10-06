@@ -9,7 +9,7 @@ this list only when it reaches the bar. Grouped by what is missing.
 - Great Ape: walk + swipe only; Eternal Dragon: static coil drift
 
 ## VFX
-- V2-B done (flame aura, impacts, shake, hitstop, craters, afterimages, beam/blast upgrade). Still missing: real bloom (post-processing), per-race aura shapes beyond flame/calm, ground-scarring beams, NPC fighters with auras and hit freezes (they use no playerAnimator)
+- V2-B done (flame aura, impacts, shake, hitstop, craters, afterimages, beam/blast upgrade); aura v3 with per-form styles, vanishes, ground cracks, ground arcs, beam scorch and speed lines (v0.35-0.37). Still missing: real bloom and heat haze (post-processing), NPC fighters with auras and hit freezes (they use no playerAnimator)
 
 ## Sound
 - Every sound is a vanilla placeholder (anvil, beacon, firework, explosion)

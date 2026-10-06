@@ -329,6 +329,20 @@ public final class AuraRenderer {
                 p = next;
             }
         }
+        for (int k = 0; k < 2; k++) {                                          // now and then a bolt arcs down into the ground
+            RandomSource rnd = RandomSource.create(player.getId() * 104729L + strike * 7L + k * 13L);
+            if (rnd.nextFloat() > 0.3f || !player.onGround()) continue;
+            double a = rnd.nextDouble() * Math.PI * 2, reach = 1.2 + rnd.nextDouble() * 1.4;
+            Vec3 from = new Vec3(Math.cos(a) * 0.35, 0.8 + rnd.nextDouble() * 0.7, Math.sin(a) * 0.35);
+            Vec3 to = new Vec3(Math.cos(a) * reach, 0.03, Math.sin(a) * reach), p = from;
+            for (int s = 1; s <= 6; s++) {
+                Vec3 next = from.lerp(to, s / 6.0).add(s < 6 ? (rnd.nextDouble() - 0.5) * 0.35 : 0, s < 6 ? (rnd.nextDouble() - 0.5) * 0.2 : 0,
+                        s < 6 ? (rnd.nextDouble() - 0.5) * 0.35 : 0);
+                FxDraw.ribbon(pose, vc, p, next, eye, 0.22f, glow, 150);
+                FxDraw.ribbon(pose, vc, p, next, eye, 0.07f, 0xFFFFFF, 255);
+                p = next;
+            }
+        }
     }
 
     private static void corner(VertexConsumer vc, Matrix4f m, Matrix3f n, Vec3 p, float u, float v, int rgb, int alpha, int light) {

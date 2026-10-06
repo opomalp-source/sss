@@ -183,5 +183,5 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - layered flame-shaped shells (a bright core, outer tongues licking up from the feet, flicker and turbulence);
   - a burst on starting a charge, ground dust and lifting rocks;
   - looks per form: SSJ spiky gold, SSJ2 crackling, God calm flame, Blue glow, silver wisps, red Kaioken, dark evil.
-- [ ] CX-11 VFX v3
+- [x] CX-11 VFX v3 (v0.35.0 aura, v0.37.0 vanishes, ground cracks, ground arcs, beam scorch, speed lines; real bloom and heat haze deferred: they need post-processing shaders)
 - [ ] CX-12 World (Otherworld, God Ki pools, fusion v2, wishes, metals)
