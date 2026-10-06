@@ -167,7 +167,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
     - a Namekian cape and turban;
     - a Majin vest, baggy pants and an emblem belt (an original emblem);
     - Frost Demon armour.
-  - [ ] 14f Transformation shapes (was CX-8d): bigger frames for Buffed, Legendary and Giant forms (model scale per part), Frost Demon form shapes (second-form horns, third-form crest, final-form smooth head), Super Saiyan 3 brow ridge, Golden Great Ape fur, Primal tails, Bio-Android wings, Majin size changes.
+  - [x] 14f Transformation shapes (v0.33.0; Golden Great Ape fur and Primal tails still to do) (was CX-8d): bigger frames for Buffed, Legendary and Giant forms (model scale per part), Frost Demon form shapes (second-form horns, third-form crest, final-form smooth head), Super Saiyan 3 brow ridge, Golden Great Ape fur, Primal tails, Bio-Android wings, Majin size changes.
 - [ ] CX-15 Animations v4 (user request: "serious animations that are actually fitting and look amazing"): rework every animation with anticipation, follow-through and weight, and review each frame by frame in game:
   - jab, cross, hook and kick combo strings;
   - heavy wind-ups;

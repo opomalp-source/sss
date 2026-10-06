@@ -66,6 +66,20 @@ public class RaceFeatureLayer extends RenderLayer<AbstractClientPlayer, PlayerMo
         };
     }
 
+    /** The race skin a player wears now, or "". */
+    static String s(PublicStatePacket state, Variant variant) {
+        return String.valueOf(com.dbzenith.transform.FormLooks.skin(state.form(), RaceSkinLayer.skinName(state.raceEnum(), variant)));
+    }
+
+    /** The colour of a Frost Demon's shell (dome, plates, the third form's crest). */
+    static int shellColor(PublicStatePacket state, Variant variant) {
+        String s = String.valueOf(com.dbzenith.transform.FormLooks.skin(state.form(), RaceSkinLayer.skinName(state.raceEnum(), variant)));
+        if (s.contains("golden") || s.endsWith("core")) return 0xE8C050;
+        if (s.startsWith("metal")) return 0x6A7A90;
+        if (s.startsWith("mutant")) return 0xE84AB0;
+        return 0x8A4AC8;
+    }
+
     static int tailColor(PublicStatePacket state) {
         String form = state.form();
         if (form.contains("limit_breaker")) return 0xD8DCE6;
@@ -87,7 +101,8 @@ public class RaceFeatureLayer extends RenderLayer<AbstractClientPlayer, PlayerMo
             feature = RaceTraits.Feature.EARS;                                     // chosen in the Face screen
         }
         boolean tail = state.has(PublicStatePacket.TAIL);
-        if (feature == RaceTraits.Feature.NONE && !tail) return;
+        boolean ridge = FormShape.browRidge(state.form()), crest = feature == RaceTraits.Feature.HORNS && FormShape.crest(state.form());
+        if (feature == RaceTraits.Feature.NONE && !tail && !ridge) return;
 
         model.follow(getParentModel().head, getParentModel().body);
         VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
@@ -96,7 +111,17 @@ public class RaceFeatureLayer extends RenderLayer<AbstractClientPlayer, PlayerMo
             int c = tint(state, feature, variant);
             boolean namekEars = feature == RaceTraits.Feature.ANTENNAE;           // Namekians have the long ears too
             RaceTraits.Feature shown = namekEars && GearLayer.turban(player) ? RaceTraits.Feature.NONE : feature;   // tucked under a turban
-            model.renderFeature(pose, vc, light, overlay, shown, namekEars, r(c), g(c), b(c));
+            model.renderFeature(pose, vc, light, overlay, shown, namekEars, FormShape.hornScale(state.form()), r(c), g(c), b(c));
+            if (crest) {
+                int sk = s(state, variant).startsWith("mutant") ? 0x2A2230 : s(state, variant).startsWith("metal") ? 0xD8E2EC : 0xF0EEF4;
+                model.renderHeadShape(pose, vc, light, overlay, "crest", r(sk), g(sk), b(sk));      // the long pale skull
+                int sc = shellColor(state, variant);
+                model.renderHeadShape(pose, vc, light, overlay, "crest_ridge", r(sc), g(sc), b(sc)); // its shell ridge
+            }
+        }
+        if (ridge) {                                                                // Super Saiyan 3's brow
+            int sc = state.skinTone() >= 0 ? state.skinTone() : 0xE8B890;
+            model.renderHeadShape(pose, vc, light, overlay, "brow_ridge", r(sc) * 0.92f, g(sc) * 0.92f, b(sc) * 0.92f);
         }
         if (tail) {
             int c = tailColor(state);

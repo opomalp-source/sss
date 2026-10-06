@@ -49,7 +49,8 @@ public final class HairMesh {
         return CACHE.computeIfAbsent((chunky ? "c" : "t") + code, k -> {
             List<Strand> strands = HairCode.decode(code);
             List<Segment> out = new ArrayList<>();
-            if (strands != null) for (Strand s : strands) build(s, out, chunky);
+            boolean mass = chunky && HairCode.hasVolume(code);                       // the solid mass stands in for the short volume layer
+            if (strands != null) for (Strand s : strands) if (!(mass && s.length() <= 3)) build(s, out, chunky);
             return out;
         });
     }

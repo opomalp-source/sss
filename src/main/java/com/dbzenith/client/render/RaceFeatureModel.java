@@ -32,6 +32,9 @@ public class RaceFeatureModel {
     private final ModelPart tentacle;
     private final ModelPart ears;
     private final ModelPart demonHorns;
+    private final ModelPart crest;
+    private final ModelPart crestRidge;
+    private final ModelPart browRidge;
     private final ModelPart wings;
     private final ModelPart body;
     private final ModelPart wrap;
@@ -44,6 +47,9 @@ public class RaceFeatureModel {
         tentacle = head.getChild("tentacle");
         ears = head.getChild("ears");
         demonHorns = head.getChild("demon_horns");
+        crest = head.getChild("crest");
+        crestRidge = head.getChild("crest_ridge");
+        browRidge = head.getChild("brow_ridge");
         body = root.getChild("body");
         wings = body.getChild("wings");
         wrap = body.getChild("tail_wrap");
@@ -118,6 +124,19 @@ public class RaceFeatureModel {
                     new float[][]{{1.9f, 2f, 1.9f}, {1.4f, 1.9f, 1.4f, -0.55f, 0, s * -0.1f}, {0.9f, 1.7f, 0.9f, -0.6f, 0, 0}, {0.5f, 1.2f, 0.5f, -0.5f, 0, 0}});
         }
 
+        // Frost Demon third form: the skull swept back into a long crest, a ridge along its top.
+        PartDefinition crest = head.addOrReplaceChild("crest", CubeListBuilder.create().texOffs(0, 32)
+                .addBox(-3.5f, -3.4f, 0, 7f, 4.6f, 7.5f), PartPose.offsetAndRotation(0, -4.4f, 1.2f, 0.22f, 0, 0));
+        crest.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(0, 32).addBox(-2.4f, -2.6f, 0, 4.8f, 3.2f, 4.2f),
+                PartPose.offsetAndRotation(0, 0, 7.2f, 0.18f, 0, 0));
+        PartDefinition ridge = head.addOrReplaceChild("crest_ridge", CubeListBuilder.create().texOffs(0, 32)
+                .addBox(-2.6f, -4.3f, -0.5f, 5.2f, 1.4f, 8.5f), PartPose.offsetAndRotation(0, -4.4f, 1.2f, 0.22f, 0, 0));
+        ridge.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(0, 32).addBox(-1.6f, -3.4f, 0, 3.2f, 1.2f, 4.4f),
+                PartPose.offsetAndRotation(0, 0, 7.6f, 0.18f, 0, 0));
+        // Super Saiyan 3: a heavy ridge over the eyes where the brows were.
+        head.addOrReplaceChild("brow_ridge", CubeListBuilder.create().texOffs(SKIN_U, 0).addBox(-3.7f, -5.5f, -4.45f, 7.4f, 1f, 0.7f),
+                PartPose.ZERO);
+
         PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.ZERO);
         // Saiyan tail: five furry links from the base of the spine.
         PartDefinition p = body;
@@ -148,6 +167,20 @@ public class RaceFeatureModel {
 
     public void renderFeature(PoseStack pose, VertexConsumer vc, int light, int overlay, RaceTraits.Feature feature, boolean withEars,
                               float r, float g, float b) {
+        renderFeature(pose, vc, light, overlay, feature, withEars, 1f, r, g, b);
+    }
+
+    /** {@code hornScale}: Frost Demon horn size for the form (0 hides them, leaving the ear plates). */
+    public void renderFeature(PoseStack pose, VertexConsumer vc, int light, int overlay, RaceTraits.Feature feature, boolean withEars,
+                              float hornScale, float r, float g, float b) {
+        crest.visible = false;
+        crestRidge.visible = false;
+        browRidge.visible = false;
+        for (String side : new String[]{"left", "right"}) {
+            ModelPart h = horns.getChild(side);
+            h.visible = hornScale > 0;
+            h.xScale = h.yScale = h.zScale = Math.max(0.01f, hornScale);
+        }
         antennae.visible = feature == RaceTraits.Feature.ANTENNAE;
         horns.visible = feature == RaceTraits.Feature.HORNS;
         tentacle.visible = feature == RaceTraits.Feature.TENTACLE;
@@ -162,6 +195,18 @@ public class RaceFeatureModel {
             return;
         }
         if (feature != RaceTraits.Feature.NONE || withEars) head.render(pose, vc, light, overlay, r, g, b, 1f);
+    }
+
+    /** One extra head shape on its own: "crest" or "brow_ridge". */
+    public void renderHeadShape(PoseStack pose, VertexConsumer vc, int light, int overlay, String which, float r, float g, float b) {
+        for (ModelPart p : new ModelPart[]{antennae, horns, tentacle, ears, demonHorns}) p.visible = false;
+        crest.visible = which.equals("crest");
+        crestRidge.visible = which.equals("crest_ridge");
+        browRidge.visible = which.equals("brow_ridge");
+        head.render(pose, vc, light, overlay, r, g, b, 1f);
+        crest.visible = false;
+        crestRidge.visible = false;
+        browRidge.visible = false;
     }
 
     /**

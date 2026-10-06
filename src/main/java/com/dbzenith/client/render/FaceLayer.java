@@ -83,7 +83,7 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
                     ((iris >> 16) & 255) / 255f * 0.8f, ((iris >> 8) & 255) / 255f * 0.8f, (iris & 255) / 255f * 0.8f, 1f);
         }
         int hair = form.hairColor() >= 0 ? form.hairColor() : race != null ? race.brow() : state.hairColor() >= 0 ? state.hairColor() : 0x3A2414;
-        draw(pose, buffers, Part.BROWS.ordinal(), FaceParts.get(face, Part.BROWS), light, overlay, race != null && form.hairColor() < 0 ? hair : darken(hair, 0.8f));
+        if (!FormShape.browRidge(form.id())) draw(pose, buffers, Part.BROWS.ordinal(), FaceParts.get(face, Part.BROWS), light, overlay, race != null && form.hairColor() < 0 ? hair : darken(hair, 0.8f));
         draw(pose, buffers, Part.NOSE.ordinal(), FaceParts.get(face, Part.NOSE), light, overlay, 0xFFFFFF);
         draw(pose, buffers, Part.MOUTH.ordinal(), FaceParts.get(face, Part.MOUTH), light, overlay, 0xFFFFFF);
         int extra = FaceParts.get(face, Part.EXTRA);

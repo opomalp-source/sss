@@ -90,12 +90,36 @@ public final class BodyShape {
         if (turn != 0 && event.getEntity() == net.minecraft.client.Minecraft.getInstance().player) {
             event.getEntity().yBodyRot = event.getEntity().yBodyRotO = event.getEntity().getYRot() + turn;
         }
-        Map<String, ModelPart> children = childrenOf(event.getRenderer().getModel().body);
+        PlayerModel<?> model = event.getRenderer().getModel();
+        PublicStatePacket state = ClientPublicStates.get(event.getEntity().getId());
+        int build = build(state);
+        float bulk = build >= 0 ? FormShape.bulk(state.form()) : 0;
+        shape(model, bulk);
+        if (bulk >= 1) build = NAMES.length - 1;                                      // heavy forms wear the biggest chest
+        Map<String, ModelPart> children = childrenOf(model.body);
         if (children == null) return;
-        int build = build(ClientPublicStates.get(event.getEntity().getId()));
         for (int i = 0; i < NAMES.length; i++) {
             ModelPart chest = children.get(NAMES[i]);
             if (chest != null) chest.visible = i == build;
         }
+    }
+
+    @SubscribeEvent
+    public static void post(RenderPlayerEvent.Post event) {
+        shape(event.getRenderer().getModel(), 0);                                   // the model is shared: back to normal
+    }
+
+    /** Swells (or pares down) the torso and limbs for a form's bulk: wider and deeper body, thicker arms, sturdier legs. */
+    static void shape(PlayerModel<?> m, float bulk) {
+        float body = 1 + 0.1f * bulk, depth = 1 + 0.14f * bulk, arm = 1 + 0.2f * bulk, leg = 1 + 0.09f * bulk;
+        scale(m.body, body, depth);
+        scale(m.jacket, body, depth);
+        for (ModelPart p : new ModelPart[]{m.rightArm, m.leftArm, m.rightSleeve, m.leftSleeve}) scale(p, arm, arm);
+        for (ModelPart p : new ModelPart[]{m.rightLeg, m.leftLeg, m.rightPants, m.leftPants}) scale(p, leg, leg);
+    }
+
+    private static void scale(ModelPart p, float xz, float z) {
+        p.xScale = xz;
+        p.zScale = z;
     }
 }

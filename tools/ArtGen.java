@@ -695,6 +695,10 @@ public class ArtGen {
                 if (noise(x, y / 3, 913) > 0.92) l = 1.0;                                         // stray light hairs
                 c.set(x, y, Hd.lum(l));
             }
+            for (int y = 64; y < 96; y++) for (int x = 0; x < 128; x++) {                          // a wide carapace row for big shells
+                double s = Math.abs(Math.sin(x * 0.4 + y * 0.2)) < 0.1 ? 0.7 : (y - 64) % 16 < 2 ? 1.0 : 0.9;
+                c.set(x, y, Hd.lum(s));
+            }
             c.save("entity/race_parts.png");
         }
     }

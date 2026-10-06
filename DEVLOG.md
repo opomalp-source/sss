@@ -799,3 +799,20 @@ The user sent reference pictures for the art direction they want: chunky anime-s
 
 ### Verified
 - Three-quarter and back screenshots of all five sets on a Saiyan, and of the Namekian garb on a Namekian.
+
+## 2026-10-06 — Session 3 (cont.): 14f Transformation shapes (v0.33.0)
+- **`FormShape`:** how a form reshapes the body beyond its overall size. These are client looks only; hitboxes still follow the form's scale.
+- **Bulk:**
+  - Hulking (2): Buffed, every Legendary form, Berserker, Wrathful, Primordial Majin, Mutant Overlord.
+  - Buffed (1): Full Power, SSJ Rage, Beast Awakening, Super Majin, Demon King, Namekian Warlord, Super, Ultimate and Zenith Perfect, Crimson Sovereign, Apex Mutation, Revenge Engine.
+  - Slim (-1): Pure and Evil Majin.
+- **How bulk is applied (`BodyShape`):** per-part scales set at render time. The body is wider and deeper, the arms are much thicker and the legs sturdier, and heavy forms also wear the biggest chest block. The model is shared, so the scales go back to normal after each player.
+- **Frost Demon forms (`RaceFeatureModel`, `RaceFeatureLayer`):**
+  - The second form's horns grow to 1.45x.
+  - The third form gets small horns and a long, pale, swept-back skull with a shell ridge in the form's shell colour (purple, steel, pink or gold).
+  - The final, Full Power, golden and god forms have a smooth head; only the ear plates remain.
+- **Super Saiyan 3:** the brows go and a heavy ridge in the skin's own shade sits over the eyes.
+- **Hair:** in the chunky styles, the short volume strands (length 3 or less) are dropped when the solid hair mass is drawn. They doubled up and puffed the hair into a ball.
+
+### Verified
+- Screenshots: LSSJ bulk; SSJ3; Frost Demon base, second, third (front and back) and final forms; Pure and Super Majin.
