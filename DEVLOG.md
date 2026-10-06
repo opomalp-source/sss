@@ -1078,3 +1078,46 @@ The user asked for this to be "REALLY GOOD (npc designs and authentic)". Designs
   - An Android has nothing to remake.
   - The Super dragon offers its wishes and Earth's; true immortality lasts forever and survives a lethal hit, and mortality undoes it.
   - 145 required tests pass.
+
+## 2026-10-06 — Session 3 (cont.): CX-16a UI v3 and character creation rebuilt (v0.41.0)
+
+User: the character creation design was ugly, cramped and overwhelming; overhaul it with tabs, start naked except for shorts, better body proportions (arms too skinny); more race customization; better HUD bars. Planned as CX-16 (16a-16d); this is 16a.
+
+### Added
+- **UI v3 kit (`client/ui/Ui`, `UiButton`, `UiSlider`):**
+  - A calm full-screen backdrop: a deep gradient, one soft glow in the race's (or the chosen aura's) colour, a darker floor.
+  - Flat glass cards with rounded corners and a hairline border.
+  - Selectable tiles: gold-rimmed and warm when chosen.
+  - Small gold section headings with a hairline.
+  - Rounded colour swatches with a white ring and gold halo for the chosen one.
+  - A soft oval platform of light.
+  - Buttons in five styles: primary gold, secondary glass, ghost, chip and tab.
+  - Sliders: label and value over a thin track that glows gold, with a white knob.
+- **Character creation, rebuilt (`CharacterCreationScreen`):**
+  - The composition is capped at 620 x 350 and centred, so large screens don't stretch it into empty space.
+  - **Left: the preview.** The character stands on a pool of light; drag to turn it, scroll to zoom. The Face tab zooms in on the face and the Hair tab on the head. The race and lineage names sit underneath.
+  - **Right: a card under five tabs:**
+    - **Race:** a grid of race tiles with colour dots, lineage chips with tooltips, and the race's description.
+    - **Body:** three build tiles with silhouettes, a height slider (metres and feet and inches), and skin tones. A race with its own skin says so instead.
+    - **Face:** each part in two columns of steppers, eye colours, and Surprise me.
+    - **Hair:** every style as a chip, the barber, the hair colour and the tips.
+    - **Path:** fighter, spiritualist or hybrid as tiles with a short description, an alignment slider shaded good to evil, and the aura colour.
+  - **Hair by race:** hairless races and races with painted hair (Namekian, Frost Demon, Majin, Bio-Android, Vampire, Tuffle, Core Person) start bald; hair can still be chosen.
+  - **Skin tone:** races with their own skin send none, so their ears and other parts keep the race's colours.
+- **Starting in shorts:**
+  - New characters get a skin tone (their own generated body) instead of their Minecraft skin.
+  - The generated body's outfit is now training shorts only: navy, with a waistband, a drawstring and a light side stripe, barefoot. Painted, HD and classic all match.
+  - The clothed race skins are now bare in the same shorts, keeping their marks: Namekian (pink arm bands), Majin (cracks on the corrupted), Vampire, Tuffle (the chest gem), Gen Alien (stripes), Kai, and Core Demon (the burnt emblem, claws). Their form recolours follow.
+  - Clothes come from the gi sets. The Namekian Warrior NPC now wears the Namekian gi on top of the bare race.
+- **Proportions:** everyone gets fuller arms (1.16x thicker), sturdier legs (1.07x) and a slightly fuller torso (1.04x). The shared model is reset to exactly vanilla after each player is drawn.
+- **Dev:** `create_<tab>` and `race<name>_` name flags open the creation screen on a tab and race.
+
+### Verified
+- Screenshots of every tab, and of every race's starting look side by side.
+- Fixed after review:
+  - The preview was too big; the face zoom now stops at the face.
+  - The race description was cut short.
+  - The hair tips label crowded the colour row.
+  - The path descriptions were cut.
+  - The HUD showed through the backdrop.
+  - The Vampire and Kai ears had taken the beige human tone.

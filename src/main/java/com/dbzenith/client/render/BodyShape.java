@@ -122,13 +122,16 @@ public final class BodyShape {
 
     @SubscribeEvent
     public static void post(RenderPlayerEvent.Post event) {
-        shape(event.getRenderer().getModel(), 0);                                   // the model is shared: back to normal
+        shape(event.getRenderer().getModel(), 1f, 1f, 1f, 1f);                       // the model is shared: back to vanilla
     }
 
     /** Swells (or pares down) the torso and limbs for a form's bulk: wider and deeper body, thicker arms, sturdier legs. */
     static void shape(PlayerModel<?> m, float bulk) {
-        shape(m, 1 + 0.1f * bulk, 1 + 0.14f * bulk, 1 + 0.2f * bulk, 1 + 0.09f * bulk);
+        shape(m, BODY + 0.1f * bulk, BODY + 0.14f * bulk, ARM + 0.2f * bulk, LEG + 0.09f * bulk);
     }
+
+    /** Everyone's proportions (CX-16a): fuller arms, sturdier legs and a touch more torso than the thin vanilla limbs. */
+    static final float BODY = 1.04f, ARM = 1.16f, LEG = 1.07f;
 
     static void shape(PlayerModel<?> m, float body, float depth, float arm, float leg) {
         scale(m.body, body, depth);

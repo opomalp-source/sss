@@ -1393,5 +1393,15 @@
   "wish.dbzenith.universal_restoration": "Restore everything",
   "wish.dbzenith.universal_restoration.desc": "Every soul in the other world returns to life, and every fighter online is healed in full.",
   "entity.dbzenith.dragon_spirit.black_star": "Black Star Dragon",
-  "entity.dbzenith.dragon_spirit.super": "Super Dragon"
+  "entity.dbzenith.dragon_spirit.super": "Super Dragon",
+  "screen.dbzenith.create_tab_race": "Race",
+  "screen.dbzenith.create_tab_hair": "Hair",
+  "screen.dbzenith.create_tab_path": "Path",
+  "screen.dbzenith.skin_race": "Your race has its own skin. Its colours and features come with the race and its lineage.",
+  "screen.dbzenith.preview_hint": "Drag to turn  ·  scroll to zoom",
+  "screen.dbzenith.height_label": "Height",
+  "screen.dbzenith.alignment_label": "Alignment",
+  "path.dbzenith.fighter.short": "Fists first. Strength, speed and toughness come cheaper to train; ki costs more.",
+  "path.dbzenith.spiritualist.short": "Ki first. Ki power, willpower and spirit come cheaper; the body costs more.",
+  "path.dbzenith.hybrid.short": "Both, evenly. Nothing is cheaper, nothing dearer: a fighter of every kind."
 }

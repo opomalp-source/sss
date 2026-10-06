@@ -288,34 +288,21 @@ public class ArtGen {
         // ---------------------------------------------------------- the outfit (untinted)
 
         static void outfit() throws IOException {
-            int[] pants = ramp(0xFF26346E, 6), boots = ramp(0xFF7A4424, 5), band = ramp(0xFF26346E, 5), sash = ramp(0xFF1A1A22, 4);
+            int[] shorts = ramp(0xFF26346E, 6), band = ramp(0xFF181C2C, 4);
             HdSkin s = new HdSkin();
             s.head = (f, x, y, w, h) -> 0;
-            s.body = (f, x, y, w, h) -> {                                    // the belt and its knot
-                double u = uOf(x, w), v = vOf(y, h);
-                if (v < 0.79 || v > 0.92) return v > 0.92 ? pantsAt(pants, f, x, y, w, h, 77) : 0;
-                int i = 2 + (v < 0.83 ? 1 : 0) - (v > 0.89 ? 1 : 0);
-                if (f == Face.FRONT && Math.abs(u - 0.5) < 0.12) i = Math.min(sash.length - 1, i + 1);   // the knot
-                if (noise(x, y, 41) > 0.9) i = Math.max(0, i - 1);
-                return sash[Math.max(0, Math.min(sash.length - 1, i))];
+            s.body = (f, x, y, w, h) -> {                                    // CX-16a: training shorts, nothing else
+                double v = vOf(y, h);
+                if (v < 0.86 || f == Face.TOP) return 0;
+                if (v < 0.925) return band[f == Face.FRONT ? 3 : 2];
+                return pantsAt(shorts, f, x, y, w, h, 77);
             };
-            s.arm = (f, x, y, w, h) -> {
-                double v = vOf(y, h), u = uOf(x, w);
-                if (f == Face.TOP || f == Face.BOTTOM || v < 0.72 || v > 0.87) return 0;            // wristbands
-                if (Math.abs(v - 0.795) < 0.015) return band[1];                                    // stitching
-                return band[f == Face.FRONT ? 3 : 2];
-            };
+            s.arm = (f, x, y, w, h) -> 0;
             s.leg = (f, x, y, w, h) -> {
                 double v = vOf(y, h), u = uOf(x, w);
-                if (v > 0.74 || f == Face.BOTTOM) {                                                   // boots
-                    if (f == Face.BOTTOM || v > 0.95) return boots[0];                                // the sole
-                    int i = f == Face.FRONT ? 3 : f == Face.BACK ? 1 : 2;
-                    if (v < 0.78) i = Math.min(boots.length - 1, i + 1);                              // the cuff
-                    if (f == Face.FRONT && v > 0.79 && v < 0.92 && Math.abs(u - 0.5) < 0.18 && ((int) (v * h)) % 2 == 0) return 0xFFE8D8B0;   // laces
-                    if (noise(x, y, 51) > 0.92) i = Math.max(0, i - 1);
-                    return boots[i];
-                }
-                return pantsAt(pants, f, x, y, w, h, 61);
+                if (v > 0.42 || f == Face.BOTTOM) return 0;
+                if ((f == Face.LEFT || f == Face.RIGHT) && Math.abs(u - 0.5) < 0.1) return 0xFFE0DCD4;
+                return pantsAt(shorts, f, x, y, w, h, 61);
             };
             s.save("entity/body_hd/outfit.png");
         }
@@ -720,7 +707,8 @@ public class ArtGen {
 
         /** A Namekian warrior in his gi (the cape, pads, antennae and ears are 3D). */
         static void namekianWarrior() throws IOException {
-            new Npc().race("namekian").face(3, 0xFF201418, true, 5, 0, 0, 0).save("namekian_warrior");
+            new Npc().race("namekian").layer("entity/gear/namekian_top.png").layer("entity/gear/namekian_pants.png")   // the race is bare now (CX-16a): dressed in the gi
+                    .layer("entity/gear/namekian_boots.png").face(3, 0xFF201418, true, 5, 0, 0, 0).save("namekian_warrior");
         }
 
         // ---------------------------------------------------------- the other world
@@ -1588,39 +1576,30 @@ public class ArtGen {
         }
 
         static void outfit() throws IOException {
-            int[] pants = ramp(0xFF26346E, 6), boots = ramp(0xFF7A4424, 5), band = ramp(0xFF26346E, 5), sash = ramp(0xFF2A2A36, 5);
+            int[] shorts = ramp(0xFF26346E, 6), band = ramp(0xFF181C2C, 5), stripe = ramp(0xFFE8E4DC, 4);
             Hd.HdSkin s = new Hd.HdSkin();
             s.head = (f, x, y, w, h) -> 0;
-            s.body = (f, x, y, w, h) -> {
+            s.body = (f, x, y, w, h) -> {                                                              // CX-16a: training shorts, nothing else
                 double uu = u(x, w), vv = v(y, h);
-                if (vv < 0.79 || f == Face.TOP) return 0;
-                if (vv > 0.92) return trousers(pants, f, x, y, w, h, true);
-                if (Math.abs(vv - 0.795) * h < 0.7 || Math.abs(vv - 0.915) * h < 0.7) return sash[0];
-                if (f == Face.FRONT && Math.abs(uu - 0.5) < 0.11) {                                       // the knot
-                    if (Math.abs(uu - 0.5) > 0.085) return sash[0];
-                    return at(sash, vv < 0.85 ? 4 : 3);
+                if (vv < 0.86 || f == Face.TOP) return 0;
+                if (vv < 0.925) {                                                                         // the waistband and its drawstring
+                    if (Math.abs(vv - 0.865) * h < 0.7) return band[0];
+                    if (f == Face.FRONT && vv > 0.88 && (Math.abs(uu - 0.46) < 0.02 || Math.abs(uu - 0.54) < 0.02)) return stripe[3];
+                    return at(band, f == Face.FRONT ? 3 : 2);
                 }
-                return at(sash, (f == Face.FRONT ? 3 : 2) + (vv < 0.83 ? 1 : 0));
+                return at(shorts, f == Face.FRONT ? 4 : f == Face.BACK ? 2 : 3);
             };
-            s.arm = (f, x, y, w, h) -> {
-                double vv = v(y, h);
-                if (f == Face.TOP || f == Face.BOTTOM || vv < 0.72 || vv > 0.87) return 0;
-                if (Math.abs(vv - 0.725) * h < 0.7 || Math.abs(vv - 0.865) * h < 0.7) return band[0];
-                if (Math.abs(vv - 0.795) * h < 0.5) return band[4];                                      // stitching
-                return at(band, f == Face.FRONT ? 3 : 2);
-            };
+            s.arm = (f, x, y, w, h) -> 0;
             s.leg = (f, x, y, w, h) -> {
                 double uu = u(x, w), vv = v(y, h);
-                if (vv > 0.74 || f == Face.BOTTOM) {
-                    if (f == Face.BOTTOM || vv > 0.955 || Math.abs(vv - 0.745) * h < 0.7) return boots[0];   // sole, top edge
-                    if (vv < 0.79) return at(boots, 4);                                                     // the cuff
-                    if (Math.abs(vv - 0.79) * h < 0.6) return boots[1];
-                    if (f == Face.FRONT && vv > 0.81 && vv < 0.92 && Math.abs(uu - 0.5) < 0.2 && y % 2 == 0) return 0xFFE8D8B0;   // laces
-                    int i = f == Face.FRONT ? 3 : f == Face.BACK ? 1 : 2;
-                    if (uu < 0.12 || uu > 0.88) i--;
-                    return at(boots, i);
-                }
-                return trousers(pants, f, x, y, w, h, false);
+                if (vv > 0.42 || f == Face.BOTTOM) return 0;                                              // to mid-thigh, then bare legs
+                if (f == Face.TOP) return at(shorts, 2);
+                if (Math.abs(vv - 0.41) * h < 0.8) return shorts[0];                                      // the hem
+                if ((f == Face.LEFT || f == Face.RIGHT) && Math.abs(uu - 0.5) < 0.1) return at(stripe, 2); // a side stripe
+                int i = f == Face.FRONT ? 4 : f == Face.BACK ? 2 : 3;
+                if (uu < 0.1 || uu > 0.9) i--;
+                if (Math.abs(vv - 0.08 - uu * 0.12) * h < 0.5 && f == Face.FRONT) i -= 2;                 // one fold across the front
+                return at(shorts, i);
             };
             s.save("entity/body_painted/outfit.png");
         }
@@ -1749,6 +1728,51 @@ public class ArtGen {
             return tone(r, lumOf(anat, f, x, y, w, h));
         }
 
+
+        // ---------------------------------------------------------- bare to the waist (CX-16a)
+
+        static final int[] SHORTS = ramp(0xFF26346E, 6), SHORTS_BAND = ramp(0xFF181C2C, 5);
+
+        /** The training shorts everyone starts in, on the body (the waistband and seat). 0 above them. */
+        static int shortsBody(Face f, int x, int y, int w, int h) {
+            double vv = v(y, h);
+            if (vv < 0.86 || f == Face.TOP) return 0;
+            if (vv < 0.925) return tone(SHORTS_BAND, (painted ? Painted.BASE + Painted.face(f) : Skins.faceLight(f)) + 0.02);
+            return cloth(SHORTS, f, x, y, w, h, 301, 0.4);
+        }
+
+        /** The shorts on a leg, to mid-thigh; 0 below. */
+        static int shortsLeg(Face f, int x, int y, int w, int h) {
+            double uu = u(x, w), vv = v(y, h);
+            if (vv > 0.42 || f == Face.BOTTOM || f == Face.TOP) return 0;
+            if (Math.abs(vv - 0.41) * h < 0.8) return SHORTS[0];
+            if ((f == Face.LEFT || f == Face.RIGHT) && Math.abs(uu - 0.5) < 0.1) return 0xFFE0DCD4;
+            return cloth(SHORTS, f, x, y, w, h, 302, 0.4);
+        }
+
+        /**
+         * A race as every new character starts out: bare skin (with the race's own marks, given as overlays that return
+         * 0 where there is none), barefoot, in training shorts. Replaces the body, arms and legs; the head is kept.
+         */
+        static void bare(Hd.HdSkin s, Hd.HdSkin a, int[] sk, FaceFn bodyMark, FaceFn armMark, FaceFn legMark) {
+            s.body = (f, x, y, w, h) -> {
+                int c = shortsBody(f, x, y, w, h);
+                if (c != 0) return c;
+                int m = bodyMark == null ? 0 : bodyMark.at(f, x, y, w, h);
+                return m != 0 ? m : skin(sk, a.body, f, x, y, w, h);
+            };
+            s.arm = (f, x, y, w, h) -> {
+                int m = armMark == null ? 0 : armMark.at(f, x, y, w, h);
+                return m != 0 ? m : skin(sk, a.arm, f, x, y, w, h);
+            };
+            s.leg = (f, x, y, w, h) -> {
+                int c = shortsLeg(f, x, y, w, h);
+                if (c != 0) return c;
+                int m = legMark == null ? 0 : legMark.at(f, x, y, w, h);
+                return m != 0 ? m : skin(sk, a.leg, f, x, y, w, h);
+            };
+        }
+
         // ---------------------------------------------------------- races
 
         static void namekian(String name, int skinC, int pinkC, int giC, int sashC, int pantsC, int shoeC, double k) throws IOException {
@@ -1792,6 +1816,17 @@ public class ArtGen {
                 if (vv > 0.84 || f == Face.BOTTOM) return tone(shoe, Skins.faceLight(f) + (f == Face.FRONT ? 0.15 * Hd.g(uu, vv, 0.5, 0.95, 0.3, 0.05) : 0));
                 return cloth(pants, f, x, y, w, h, 35, 1.3);
             };
+            bare(s, a, sk, null, (f, x, y, w, h) -> {                                                 // CX-16a: bare but for the pink bands
+                double uu = u(x, w), vv = v(y, h);
+                if ((f == Face.FRONT || f == Face.RIGHT) && vv > 0.42 && vv < 0.64) {
+                    if (painted) {
+                        if (Math.abs(vv - 0.425) * h < 0.7 || Math.abs(vv - 0.635) * h < 0.7) return 0xFF8A1E24;
+                        return tone(pink, lumOf(a.arm, f, x, y, w, h));
+                    }
+                    return tone(pink, lumOf(a.arm, f, x, y, w, h) + 0.07 * Math.sin(vv * 90 + uu * 3));
+                }
+                return 0;
+            }, null);
             s.save("entity/" + dir() + "/" + name + ".png");
         }
 
@@ -1875,6 +1910,8 @@ public class ArtGen {
                 if (vv > 0.74 || f == Face.BOTTOM) return tone(belt, Skins.faceLight(f) + (vv < 0.78 ? 0.1 : 0) + 0.12 * Hd.g(uu, vv, 0.4, 0.86, 0.15, 0.05));
                 return cloth(pants, f, x, y, w, h, 44, 1.8);
             };
+            bare(s, a, sk, (f, x, y, w, h) -> cracks.at(f, x, y, w, h) == 1 ? darker(skin(sk, a.body, f, x, y, w, h), 0.7) : 0,   // CX-16a: bare
+                    (f, x, y, w, h) -> cracks.at(f, x, y, w, h) == 1 ? darker(skin(sk, a.arm, f, x, y, w, h), 0.7) : 0, null);
             if (painted) {                                                                               // the rows of little holes
                 FaceFn body = s.body, arm = s.arm;
                 s.body = (f, x, y, w, h) -> f == Face.FRONT && y == 2 && x % 3 == 1 && Math.abs(u(x, w) - 0.5) < 0.26 ? sk[0] : body.at(f, x, y, w, h);
@@ -1919,6 +1956,7 @@ public class ArtGen {
                 if (vv > 0.76 || f == Face.BOTTOM) return tone(boot, Skins.faceLight(f) + 0.14 * Hd.g(uu, vv, 0.35, 0.82, 0.12, 0.05));
                 return cloth(trousers, f, x, y, w, h, 55, 1.1);
             };
+            bare(s, a, sk, null, null, null);                                                          // CX-16a: bare
             s.save("entity/" + dir() + "/vampire.png");
         }
 
@@ -1972,6 +2010,12 @@ public class ArtGen {
             };
             s.arm = (f, x, y, w, h) -> v(y, h) > 0.76 ? cloth(trim, f, x, y, w, h, 62, 0.3) : cloth(suit, f, x, y, w, h, 63, 0.5);
             s.leg = (f, x, y, w, h) -> v(y, h) > 0.76 || f == Face.BOTTOM ? cloth(trim, f, x, y, w, h, 64, 0.3) : cloth(suit, f, x, y, w, h, 65, 0.6);
+            bare(s, a, sk, (f, x, y, w, h) -> {                                                       // CX-16a: bare but for the core gem
+                if (f != Face.FRONT) return 0;
+                double uu = u(x, w), vv = v(y, h), gem = Math.hypot((uu - 0.5) / 0.75, vv - 0.3);
+                if (gem < 0.09) return mix(0xFFD01020, 0xFFFF9090, Math.max(0, 1 - Math.hypot(uu - 0.46, vv - 0.26) / 0.06));
+                return gem < 0.11 ? 0xFFE8C040 : 0;
+            }, null, null);
             s.save("entity/" + dir() + "/tuffle.png");
         }
 
@@ -2007,6 +2051,8 @@ public class ArtGen {
                 if (f == Face.FRONT && in(uu, vv, 0.2, 0.55, 0.8, 0.68)) return plate(metal, f, uu, vv, 0.2, 0.55, 0.8, 0.68);   // knee pads
                 return cloth(pants, f, x, y, w, h, 71, 1.0);
             };
+            bare(s, a, sk, (f, x, y, w, h) -> f == Face.BACK && Math.sin(v(y, h) * 20) > 0.75 ? tone(sk, lumOf(a.body, f, x, y, w, h) - 0.1) : 0,
+                    (f, x, y, w, h) -> f != Face.FRONT && Math.sin(v(y, h) * 18) > 0.75 ? tone(sk, lumOf(a.arm, f, x, y, w, h) - 0.1) : 0, null);   // CX-16a: bare, striped
             s.save("entity/" + dir() + "/gen_alien.png");
         }
 
@@ -2037,6 +2083,7 @@ public class ArtGen {
                 return skin(sk, a.arm, f, x, y, w, h);
             };
             s.leg = (f, x, y, w, h) -> v(y, h) > 0.86 || f == Face.BOTTOM ? tone(gold, Skins.faceLight(f) + 0.05) : cloth(under, f, x, y, w, h, 86, 1.1);
+            bare(s, a, sk, null, null, null);                                                          // CX-16a: bare
             s.save("entity/" + dir() + "/kai.png");
         }
 
@@ -2066,6 +2113,11 @@ public class ArtGen {
                 return skin(sk, a.arm, f, x, y, w, h);
             };
             s.leg = (f, x, y, w, h) -> v(y, h) > 0.85 || f == Face.BOTTOM ? tone(garb, Skins.faceLight(f) - 0.1) : cloth(garb, f, x, y, w, h, 93, 1.1);
+            bare(s, a, sk, (f, x, y, w, h) -> {                                                       // CX-16a: bare, the emblem burnt into the chest
+                if (f != Face.FRONT) return 0;
+                double em = Math.abs(u(x, w) - 0.5) * 1.4 + Math.abs(v(y, h) - 0.27);
+                return em < 0.12 ? mix(0xFFFFE070, 0xFFE03010, Math.min(1, em / 0.12)) : 0;
+            }, (f, x, y, w, h) -> v(y, h) > 0.93 ? tone(ramp(0xFF101010, 3), 0.8) : 0, null);
             s.save("entity/" + dir() + "/core_demon.png");
         }
     }
@@ -3983,17 +4035,15 @@ public class ArtGen {
 
         /** Untinted overlay for the generated bodies: face, training pants with a belt, boots and wristbands. */
         static void outfit() throws IOException {
-            int[] pants = ramp(0xFF26346E, 5), boots = ramp(0xFF7A4424, 4), band = ramp(0xFF26346E, 4);
+            int[] shorts = ramp(0xFF26346E, 5);
             Skin s = new Skin();
             s.head = (f, x, y, w, h) -> 0;                                                  // the face is drawn by parts (Faces)
-            s.body = (f, x, y, w, h) -> y == 10 ? 0xFF121A36 : y == 11 ? pants[f == Face.FRONT ? 3 : 2] : 0;
-            s.arm = (f, x, y, w, h) -> f != Face.TOP && f != Face.BOTTOM && (y == 9 || y == 10) ? band[f == Face.FRONT ? 3 : y == 9 ? 2 : 1] : 0;
+            s.body = (f, x, y, w, h) -> y == 10 ? 0xFF121A36 : y == 11 ? shorts[f == Face.FRONT ? 3 : 2] : 0;   // CX-16a: shorts only
+            s.arm = (f, x, y, w, h) -> 0;
             s.leg = (f, x, y, w, h) -> {
-                if (y >= 9 || f == Face.BOTTOM) return boots[f == Face.FRONT ? 3 : y == 9 ? 2 : 1];
-                if (f == Face.TOP) return 0;
-                int i = f == Face.FRONT ? 3 : f == Face.BACK ? 1 : 2;
-                if (y == 6 && f == Face.FRONT) i--;                                           // a crease at the knee
-                return pants[Math.max(0, i - (y == 8 ? 1 : 0))];
+                if (y > 4 || f == Face.BOTTOM || f == Face.TOP) return 0;
+                if ((f == Face.LEFT || f == Face.RIGHT) && x == 1) return 0xFFE0DCD4;
+                return shorts[(f == Face.FRONT ? 3 : f == Face.BACK ? 1 : 2) - (y == 4 ? 1 : 0)];
             };
             s.save("entity/body/outfit.png");
         }
