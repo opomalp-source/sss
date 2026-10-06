@@ -78,7 +78,7 @@ public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         if (state == null) return;
         Form form = flicker(player, state, ageInTicks);
         boolean formHair = form.hairStyle() != Form.HairStyle.NONE && form.hairColor() >= 0;
-        String code = hairFor(state.hairCode(), form);
+        String code = GearLayer.turban(player) ? "" : hairFor(state.hairCode(), form);   // a turban covers the hair
         int hairColor = form.hairColor() >= 0 ? form.hairColor() : state.hairColor();
         int eyeColor = form.eyeColor() >= 0 ? form.eyeColor() : state.eyeColor();
         if (code.isEmpty() && eyeColor < 0) return;

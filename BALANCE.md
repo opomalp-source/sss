@@ -75,7 +75,8 @@ Changes:
   (350-400), so every race has a second tier by then.
 - **Gear**: fighters punch through vanilla armour (`enemies.fighterArmorEffect` 0.25: armour counts a quarter against them;
   it still counts fully against vanilla mobs). Full gi sets take damage off everything: Turtle and Demon gi 5%, Battle Armor 15%
-  (shown in the tooltip).
+  (shown in the tooltip). v0.32.0 adds two sets: Namekian garb (ki +12%, dexterity +4%, 8% off) for ki fighters, and Majin
+  garb (strength +12%, dexterity +3%, 6% off) for brawlers, both between the gis and Battle Armor.
 
 ## Still for real play
 Feel, not numbers: how fights read with knockback, flight and dashes; whether racial passives (Namekian regeneration,

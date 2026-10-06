@@ -95,7 +95,8 @@ public class RaceFeatureLayer extends RenderLayer<AbstractClientPlayer, PlayerMo
         if (feature != RaceTraits.Feature.NONE) {
             int c = tint(state, feature, variant);
             boolean namekEars = feature == RaceTraits.Feature.ANTENNAE;           // Namekians have the long ears too
-            model.renderFeature(pose, vc, light, overlay, feature, namekEars, r(c), g(c), b(c));
+            RaceTraits.Feature shown = namekEars && GearLayer.turban(player) ? RaceTraits.Feature.NONE : feature;   // tucked under a turban
+            model.renderFeature(pose, vc, light, overlay, shown, namekEars, r(c), g(c), b(c));
         }
         if (tail) {
             int c = tailColor(state);

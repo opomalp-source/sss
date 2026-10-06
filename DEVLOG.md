@@ -778,3 +778,24 @@ The user sent reference pictures for the art direction they want: chunky anime-s
 
 ### Verified
 - Three-quarter and back screenshots: Namekian (base and orange), Frost Demon, Majin, Bio-Android and the Saiyan tail.
+
+## 2026-10-06 — Session 3 (cont.): 14e Clothes v2 (v0.32.0)
+- **`GearLayer`:** gi pieces on players are painted skin-layout textures drawn on the player model itself, so they follow the chest shape and every animation, plus their 3D pieces. `GiArmorItem.initializeClient` gives an `IClientItemExtensions` that swaps vanilla's flat armour model for an empty one on players. Mobs, and the Classic art style, keep the old layers.
+- **`GearModel` 3D pieces:**
+  - battle-armour shoulder pads, tilted, with a gold trim strip;
+  - broad Namekian shoulder pads;
+  - a cape that lifts behind a runner or flier, using the tail's lift;
+  - a turban with a purple band, which hides the hair and tucks the antennae away (the ears stay);
+  - the hanging tails of a gi's sash;
+  - billowing Majin trousers.
+
+  They use greyscale materials from `gear_parts.png` (cloth with folds, plate, band), tinted per piece.
+- **Painted textures (`ArtGen.Gear`, `entity/gear/<set>_{top,pants,boots}.png`):**
+  - **Gi:** a V of undershirt, a collar edge, the wrap line, an off-centre sash knot, short sleeves with hems, stitched wristbands and an original school emblem (a ring round a rising flame) on the back.
+  - **Gi trousers:** clean fold lines, tucked into boots with coloured cuffs, wraps and soles.
+  - **Battle armour:** an outlined chest plate with gold shoulder straps and ab plates, over a bodysuit, with gloves and gold toe caps.
+  - **Majin:** a vest left open over the belly with gold trim, a belt with an original star emblem, white trousers with dark ankle cuffs, gloves, and gold-toed shoes.
+- **New sets:** Namekian garb (ki +12%, dexterity +4%, 8% off) and Majin garb (strength +12%, dexterity +3%, 6% off). They come with recipes, item icons, classic armour layers and lang entries.
+
+### Verified
+- Three-quarter and back screenshots of all five sets on a Saiyan, and of the Namekian garb on a Namekian.

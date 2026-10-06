@@ -1251,5 +1251,11 @@
   "settings.dbzenith.art_style.desc": "Painted: anime-styled skins with clean line art and cel shading. HD: soft high-detail shading. Classic: the original pixel look.",
   "settings.dbzenith.art_style.painted": "Painted",
   "settings.dbzenith.art_style.hd": "HD",
-  "settings.dbzenith.art_style.classic": "Classic"
+  "settings.dbzenith.art_style.classic": "Classic",
+  "item.dbzenith.namekian_top": "Namekian Garb (with Cape and Turban)",
+  "item.dbzenith.namekian_pants": "Namekian Trousers",
+  "item.dbzenith.namekian_boots": "Namekian Shoes",
+  "item.dbzenith.majin_top": "Majin Vest",
+  "item.dbzenith.majin_pants": "Majin Trousers (with Belt)",
+  "item.dbzenith.majin_boots": "Majin Shoes"
 }

@@ -160,7 +160,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
     - Frost Demon horns, head dome, shoulder domes and ear pieces;
     - a segmented furry Saiyan tail with physics (swings, wraps round the waist);
     - other race tails, Demon horns, Bio-Android wings and crest.
-  - [ ] 14e Clothes v2, all original designs with 3D parts:
+  - [x] 14e Clothes v2 (v0.32.0; hoodie, jacket and Frost Demon armour still to add), all original designs with 3D parts:
     - Saiyan battle armour (chest plate, shoulder pads, undersuit);
     - a gi with undershirt, sash and wristbands;
     - weighted boots, hoodie and jacket;

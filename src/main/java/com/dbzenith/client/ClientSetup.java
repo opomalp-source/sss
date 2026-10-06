@@ -51,6 +51,7 @@ public final class ClientSetup {
     public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(FormHairModel.LAYER, FormHairModel::createLayer);
         event.registerLayerDefinition(RaceFeatureModel.LAYER, RaceFeatureModel::createLayer);
+        event.registerLayerDefinition(com.dbzenith.client.render.GearModel.LAYER, com.dbzenith.client.render.GearModel::createLayer);
         event.registerLayerDefinition(com.dbzenith.client.render.GreatApeModel.LAYER, com.dbzenith.client.render.GreatApeModel::createLayer);
         event.registerLayerDefinition(com.dbzenith.client.render.DragonModel.LAYER, com.dbzenith.client.render.DragonModel::createLayer);
         event.registerLayerDefinition(com.dbzenith.client.render.SpacePodRenderer.LAYER, com.dbzenith.client.render.SpacePodRenderer::createLayer);
@@ -68,6 +69,7 @@ public final class ClientSetup {
                 renderer.addLayer(new com.dbzenith.client.render.FaceLayer(renderer));
                 renderer.addLayer(new com.dbzenith.client.render.BodyFxLayer(renderer));
                 renderer.addLayer(new com.dbzenith.client.render.CosmeticsLayer(renderer));
+                renderer.addLayer(new com.dbzenith.client.render.GearLayer(renderer, event.getEntityModels()));
                 renderer.addLayer(new FormHairLayer(renderer, event.getEntityModels()));
                 renderer.addLayer(new RaceFeatureLayer(renderer, event.getEntityModels()));
             }

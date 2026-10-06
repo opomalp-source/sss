@@ -26,7 +26,9 @@ public class GiArmorItem extends ArmorItem {
     public enum Set {
         TURTLE(1.10, 1.10, 1.00, 0.05, 2, Items.LEATHER),
         DEMON(1.00, 1.05, 1.15, 0.05, 2, Items.LEATHER),
-        BATTLE_ARMOR(1.08, 1.00, 1.08, 0.15, 5, Items.IRON_INGOT);
+        BATTLE_ARMOR(1.08, 1.00, 1.08, 0.15, 5, Items.IRON_INGOT),
+        NAMEKIAN(1.00, 1.04, 1.12, 0.08, 3, Items.LEATHER),
+        MAJIN(1.12, 1.03, 1.00, 0.06, 2, Items.LEATHER);
 
         private final double strMult;
         private final double dexMult;
@@ -75,6 +77,12 @@ public class GiArmorItem extends ArmorItem {
 
     public Set set() {
         return set;
+    }
+
+    /** Painted clothes and their 3D pieces on players (CX-14e), instead of the flat vanilla armour layers. */
+    @Override
+    public void initializeClient(java.util.function.Consumer<net.minecraftforge.client.extensions.common.IClientItemExtensions> consumer) {
+        consumer.accept(com.dbzenith.client.render.GearLayer.EXTENSIONS);
     }
 
     /** The full set a player is wearing, or null. */

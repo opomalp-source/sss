@@ -30,6 +30,7 @@ public class ArtGen {
         GuiHd.all();
         Painted.all();
         RaceParts.all();
+        Gear.all();
         HudHd.all();
         System.out.println("ArtGen done");
     }
@@ -440,6 +441,235 @@ public class ArtGen {
 
 
 
+
+    // ================================================================== fighting clothes, painted (CX-14e)
+
+    /**
+     * Gi sets as painted skin-layout textures (128x128, drawn on the player model: client.render.GearLayer), one per
+     * piece so pieces mix: tops (the gi with its V of undershirt, wrap line, sash and knot, sleeves and wristbands, and
+     * an original school emblem on the back; battle armour's outlined chest plate over a bodysuit, with gloves; the
+     * Majin vest left open over the belly), trousers with clean fold lines, boots with wraps, caps and soles. Plus the
+     * greyscale material sheet for the 3D pieces (cape, turban, pads, sash tails, baggy trousers).
+     */
+    static final class Gear {
+        static void all() throws IOException {
+            gi("turtle", 0xFFF07820, 0xFF2852C8, 0xFF2852C8, 0xFF2852C8, true);
+            gi("demon", 0xFF6A3A9A, 0xFFC02838, 0xFF2A1A2E, 0xFF2A1A2E, true);
+            gi("namekian", 0xFF5A3A8A, 0xFF40B0E0, 0xFF5A3418, 0xFF46306E, false);
+            battleArmor();
+            majin();
+            parts();
+        }
+
+        static double u(int x, int w) { return (x + 0.5) / w; }
+        static double v(int y, int h) { return (y + 0.5) / h; }
+
+        static int cloth(int[] r, Face f, int x, int y, int w, int h, int seed) {
+            return HdRaces.paintedCloth(r, f, x, y, w, h, seed, 1.0);
+        }
+
+        static int flat(int[] r, Face f, double extra) {
+            return HdRaces.tone(r, Painted.BASE + Painted.face(f) + extra);
+        }
+
+        static int ink(int[] r) {
+            return HdRaces.tone(r, Painted.INK);
+        }
+
+        /** Within half a pixel of a row (v). */
+        static boolean row(double vv, double at, int h) {
+            return Math.abs(vv - at) * h < 0.6;
+        }
+
+        /** An original school emblem: a ring around a rising flame. */
+        static boolean emblem(double uu, double vv, double cu, double cv, double r) {
+            double dx = (uu - cu) / r, dy = (vv - cv) / r * 1.5, d = Math.hypot(dx, dy);
+            boolean ring = d > 0.78 && d < 1.0;
+            boolean flame = Math.abs(dx) < 0.32 * (1 - (dy + 0.7) / 1.4) + 0.06 && dy > -0.7 && dy < 0.55;
+            return ring || flame;
+        }
+
+        static void gi(String set, int clothC, int sashC, int bootC, int underC, boolean emblem) throws IOException {
+            int[] cl = ramp(clothC, 6), sa = ramp(sashC, 5), bt = ramp(bootC, 5), un = ramp(underC, 5), white = ramp(0xFFF4F0E8, 4);
+            Hd.HdSkin top = new Hd.HdSkin();
+            top.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM || vv > 0.9) return 0;
+                if (vv >= 0.765) {                                                                  // the sash and its knot
+                    if (row(vv, 0.77, h) || row(vv, 0.895, h)) return ink(sa);
+                    if (f == Face.FRONT && Math.abs(uu - 0.36) < 0.09) return Math.abs(uu - 0.36) > 0.065 ? ink(sa) : flat(sa, f, 0.06);
+                    return flat(sa, f, 0);
+                }
+                if (f == Face.FRONT) {
+                    double d = Math.abs(uu - 0.5), edge = (0.4 - vv) * 1.0;
+                    if (vv < 0.4 && d < edge - 0.04) return flat(un, f, 0);                          // undershirt in the V
+                    if (vv < 0.4 && d < edge + 0.02) return ink(cl);                                 // the collar's edge
+                    if (Painted.one(x, y, w, h, 0.5, 0.4, 0.66, 0.765) < Painted.LINE) return ink(cl);   // where the gi wraps over
+                }
+                if (f == Face.BACK && emblem && emblem(uu, vv, 0.5, 0.3, 0.22)) {
+                    double dx = (uu - 0.5) / 0.22, dy = (vv - 0.3) / 0.22 * 1.5, dd = Math.hypot(dx, dy);
+                    return dd > 0.74 && dd < 0.8 || dd > 0.98 ? ink(cl) : white[2];
+                }
+                return cloth(cl, f, x, y, w, h, set.hashCode());
+            };
+            top.arm = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (f == Face.TOP) return flat(cl, f, 0);
+                if (vv < 0.36) return row(vv, 0.35, h) ? ink(cl) : cloth(cl, f, x, y, w, h, set.hashCode() + 1);   // short sleeves
+                if (vv >= 0.72 && vv < 0.87 && f != Face.BOTTOM) {                                  // wristbands
+                    if (row(vv, 0.725, h) || row(vv, 0.865, h)) return ink(sa);
+                    return flat(sa, f, row(vv, 0.795, h) ? 0.08 : 0);
+                }
+                return 0;
+            };
+            top.save("entity/gear/" + set + "_top.png");
+
+            Hd.HdSkin pants = new Hd.HdSkin();
+            pants.body = (f, x, y, w, h) -> v(y, h) > 0.88 && f != Face.TOP ? cloth(cl, f, x, y, w, h, set.hashCode() + 2) : 0;
+            pants.leg = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (f == Face.BOTTOM || vv > 0.78) return 0;
+                if (row(vv, 0.775, h)) return ink(cl);                                              // tucked into the boots
+                double fold = Math.min(Painted.one(x, y, w, h, 0.3, 0.04, 0.37, 0.4), Painted.one(x, y, w, h, 0.72, 0.12, 0.64, 0.38));
+                fold = Math.min(fold, Painted.one(x, y, w, h, 0.2, 0.5, 0.5, 0.55, 0.8, 0.5));
+                fold = Math.min(fold, Painted.one(x, y, w, h, 0.15, 0.68, 0.5, 0.72, 0.85, 0.67));
+                if (fold < Painted.LINE) return HdRaces.tone(cl, Painted.SHADE);
+                return flat(cl, f, (u(x, w) < 0.1 || u(x, w) > 0.9) ? -0.1 : 0);
+            };
+            pants.save("entity/gear/" + set + "_pants.png");
+
+            Hd.HdSkin boots = new Hd.HdSkin();
+            boots.leg = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (f == Face.BOTTOM) return ink(bt);
+                if (vv < 0.72) return 0;
+                if (row(vv, 0.725, h) || vv > 0.955) return ink(bt);                               // the cuff's edge, the sole
+                if (vv < 0.78) return flat(sa, f, 0.02);                                           // a coloured cuff
+                if (row(vv, 0.82, h) || row(vv, 0.87, h)) return HdRaces.tone(bt, Painted.SHADE);   // wraps
+                return flat(bt, f, (u(x, w) < 0.12 || u(x, w) > 0.88) ? -0.1 : 0);
+            };
+            boots.save("entity/gear/" + set + "_boots.png");
+        }
+
+        static void battleArmor() throws IOException {
+            int[] plate = ramp(0xFFECEEF2, 6), gold = ramp(0xFFD8B040, 5), suit = ramp(0xFF2A2E48, 6);
+            Hd.HdSkin top = new Hd.HdSkin();
+            top.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                if (f == Face.TOP) return flat(gold, f, 0);                                         // the shoulder straps
+                if (vv < 0.72) {
+                    if (f == Face.FRONT || f == Face.BACK) {
+                        if (vv < 0.08 && (uu < 0.3 || uu > 0.7)) return row(vv, 0.075, h) ? ink(gold) : flat(gold, f, 0);
+                        if (f == Face.FRONT && vv > 0.42 && (row(vv, 0.5, h) || row(vv, 0.61, h)) && uu > 0.12 && uu < 0.88) return ink(plate);
+                    }
+                    return HdRaces.paintedPlate(plate, f, uu, vv, 0, 0, 1, 0.72);
+                }
+                if (row(vv, 0.735, h)) return ink(suit);
+                return cloth(suit, f, x, y, w, h, 301);                                            // the bodysuit below
+            };
+            top.arm = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (vv >= 0.82) return row(vv, 0.825, h) ? ink(plate) : flat(plate, f, 0);         // gloves
+                return cloth(suit, f, x, y, w, h, 302);
+            };
+            top.save("entity/gear/battle_armor_top.png");
+
+            Hd.HdSkin pants = new Hd.HdSkin();
+            pants.body = (f, x, y, w, h) -> v(y, h) > 0.88 && f != Face.TOP ? cloth(suit, f, x, y, w, h, 303) : 0;
+            pants.leg = (f, x, y, w, h) -> v(y, h) > 0.72 || f == Face.BOTTOM ? 0 : cloth(suit, f, x, y, w, h, 304);
+            pants.save("entity/gear/battle_armor_pants.png");
+
+            Hd.HdSkin boots = new Hd.HdSkin();
+            boots.leg = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (f == Face.BOTTOM) return ink(plate);
+                if (vv < 0.7) return 0;
+                if (row(vv, 0.705, h) || vv > 0.955) return ink(plate);
+                if (vv > 0.86 && f == Face.FRONT) return row(vv, 0.865, h) ? ink(gold) : flat(gold, f, 0);   // toe caps
+                return flat(plate, f, (u(x, w) < 0.12 || u(x, w) > 0.88) ? -0.1 : 0);
+            };
+            boots.save("entity/gear/battle_armor_boots.png");
+        }
+
+        static void majin() throws IOException {
+            int[] vest = ramp(0xFF26222E, 6), gold = ramp(0xFFE0B040, 5), white = ramp(0xFFF2F0F4, 6), shoe = ramp(0xFFB8862A, 5);
+            Hd.HdSkin top = new Hd.HdSkin();
+            top.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM || vv > 0.7) return 0;
+                if (row(vv, 0.69, h)) return ink(gold);
+                if (vv > 0.655) return flat(gold, f, 0);                                            // the hem's trim
+                if (f == Face.FRONT) {
+                    double d = Math.abs(uu - 0.5);
+                    if (d < 0.3) return 0;                                                           // open over the belly
+                    if (d < 0.345) return d < 0.31 ? ink(gold) : flat(gold, f, 0);
+                }
+                return cloth(vest, f, x, y, w, h, 401);
+            };
+            top.arm = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (vv < 0.8) return 0;
+                return row(vv, 0.805, h) ? ink(white) : flat(white, f, 0);                         // gloves
+            };
+            top.save("entity/gear/majin_top.png");
+
+            Hd.HdSkin pants = new Hd.HdSkin();
+            pants.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.TOP || vv < 0.72) return 0;
+                if (vv < 0.86) {                                                                     // the belt, an original emblem on the buckle
+                    if (row(vv, 0.725, h) || row(vv, 0.855, h)) return ink(vest);
+                    if (f == Face.FRONT && Math.abs(uu - 0.5) < 0.16) {
+                        double dx = (uu - 0.5) / 0.16, dy = (vv - 0.79) / 0.06;
+                        if (Math.abs(dx) > 0.86 || Math.abs(dy) > 0.82) return ink(gold);
+                        boolean star = Math.abs(dx) + Math.abs(dy) * 0.9 < 0.62 && !(Math.abs(dx) < 0.18 && Math.abs(dy) < 0.22);
+                        return star ? ink(vest) : flat(gold, f, 0.05);
+                    }
+                    return flat(vest, f, 0);
+                }
+                return cloth(white, f, x, y, w, h, 402);
+            };
+            pants.leg = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (f == Face.BOTTOM || vv > 0.8) return 0;
+                if (vv > 0.74) return row(vv, 0.745, h) ? ink(vest) : flat(vest, f, 0);            // ankle cuffs
+                return cloth(white, f, x, y, w, h, 403);
+            };
+            pants.save("entity/gear/majin_pants.png");
+
+            Hd.HdSkin boots = new Hd.HdSkin();
+            boots.leg = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (f == Face.BOTTOM) return ink(shoe);
+                if (vv < 0.8) return 0;
+                if (vv > 0.955) return ink(shoe);
+                if (f == Face.FRONT && vv > 0.88) return flat(gold, f, 0.04);                       // curled gold toes
+                return flat(shoe, f, (u(x, w) < 0.12 || u(x, w) > 0.88) ? -0.1 : 0);
+            };
+            boots.save("entity/gear/majin_boots.png");
+        }
+
+        /** Greyscale materials for the 3D pieces: cloth with folds (0,0), plate (64,0), band (64,32); 128x128. */
+        static void parts() throws IOException {
+            Canvas c = new Canvas(128, 128);
+            for (int y = 0; y < 64; y++) for (int x = 0; x < 64; x++) {
+                double l = 0.94 - 0.1 * y / 64.0;
+                double n = Hd.smooth(x * 1.4, y * 0.3, 5, 501);
+                if (Math.abs(n - 0.5) < 0.025) l = 0.74;                                          // fold lines
+                else if (n > 0.5 && n < 0.56) l -= 0.06;
+                c.set(x, y, Hd.lum(l));
+            }
+            for (int y = 0; y < 32; y++) for (int x = 64; x < 128; x++) {
+                double l = y % 18 < 2 ? 1.0 : y % 18 > 13 ? 0.78 : 0.92;                          // plate: lit rim, body, shaded edge
+                c.set(x, y, Hd.lum(l));
+            }
+            for (int y = 32; y < 64; y++) for (int x = 64; x < 128; x++) {
+                c.set(x, y, Hd.lum((y - 32) % 6 == 5 ? 0.72 : 0.92));                            // band: stitched rows
+            }
+            c.save("entity/gear_parts.png");
+        }
+    }
     // ================================================================== race parts (CX-14d)
 
     /**
@@ -2074,6 +2304,8 @@ public class ArtGen {
             ring();
             gi("turtle", 0xFFF07820, 0xFF2852C8, 0xFF2852C8);
             gi("demon", 0xFF6A3A9A, 0xFFC02838, 0xFF2A1A2E);
+            gi("namekian", 0xFF5A3A8A, 0xFF40B0E0, 0xFF5A3418);
+            gi("majin", 0xFF26222E, 0xFFE0B040, 0xFFB8862A);
             battleArmor();
         }
 
@@ -2497,6 +2729,8 @@ public class ArtGen {
         static void all() throws IOException {
             gi("turtle", 0xFFF07820, 0xFF2852C8, 0xFF2852C8, 0xFF2852C8);
             gi("demon", 0xFF6A3A9A, 0xFFC02838, 0xFF2A1A2E, 0xFF2A1A2E);
+            gi("namekian", 0xFF5A3A8A, 0xFF40B0E0, 0xFF5A3418, 0xFF46306E);
+            gi("majin", 0xFF26222E, 0xFFE0B040, 0xFFB8862A, 0xFFF2F0F4);
             battleArmor();
             scouter();
             weights();
