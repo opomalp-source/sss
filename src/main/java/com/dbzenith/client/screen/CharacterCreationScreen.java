@@ -39,7 +39,7 @@ import java.util.List;
  * without confirming restores it. New characters start in training shorts and nothing else.
  */
 public class CharacterCreationScreen extends Screen {
-    private enum Tab { RACE, BODY, FACE, HAIR, PATH }
+    private enum Tab { RACE, BODY, FACE, HAIR, FEATURES, PATH }
 
     private static final int SW = 12, GAP = 4;                       // colour swatches
     private static final int[] COLORS = {0xFFFFFF, 0xFFD040, 0xFF9A2A, 0xFF4040, 0xFF70D0, 0xB070FF, 0x5A6AFF, 0x3CC8FF, 0x40D0A0,
@@ -60,6 +60,10 @@ public class CharacterCreationScreen extends Screen {
     private int highlight = com.dbzenith.client.ClientPlayerData.get().getHighlightColor();
     private int aura = com.dbzenith.client.ClientPlayerData.get().getAuraColor();
     private Tab tab = Tab.RACE;
+    // the race's own look (CX-16b)
+    private int raceStyle, raceSkin = -1, raceMark = -1, racePart = -1;
+    /** Section headings placed by the current tab's init: {label, x, y, width}. */
+    private final List<Object[]> labels = new ArrayList<>();
 
     private PublicStatePacket originalState;
     private boolean confirmed;
@@ -93,6 +97,17 @@ public class CharacterCreationScreen extends Screen {
             variant = Variant.defaultFor(r);
             if (bornBald(r)) hairCode = HairCode.Preset.BALD.code();
         }
+        com.dbzenith.appearance.RaceCustom.Options o = com.dbzenith.appearance.RaceCustom.of(race, variant);   // dev: style<N>, skin<N>, mark<N>, part<N>
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("(style|skin|mark|part)([0-9])").matcher(name);
+        while (m.find()) {
+            int i = m.group(2).charAt(0) - '0';
+            switch (m.group(1)) {
+                case "style" -> raceStyle = i;
+                case "skin" -> raceSkin = i < o.skin().length ? o.skin()[i] : -1;
+                case "mark" -> raceMark = i < o.marks().length ? o.marks()[i] : -1;
+                default -> racePart = i < o.partColors().length ? o.partColors()[i] : -1;
+            }
+        }
         return this;
     }
 
@@ -109,6 +124,7 @@ public class CharacterCreationScreen extends Screen {
     protected void init() {
         if (originalState == null && minecraft.player != null) originalState = ClientPublicStates.get(minecraft.player.getId());
         rows.clear();
+        labels.clear();
         W = Math.min(width, 620);
         H = Math.min(height, 350);
         ox = (width - W) / 2;
@@ -138,6 +154,7 @@ public class CharacterCreationScreen extends Screen {
             case BODY -> initBody();
             case FACE -> initFace();
             case HAIR -> initHair();
+            case FEATURES -> initFeatures();
             case PATH -> initPath();
         }
         addRenderableWidget(UiButton.of(UiButton.Style.PRIMARY, Component.translatable("screen.dbzenith.create_confirm"),
@@ -177,6 +194,8 @@ public class CharacterCreationScreen extends Screen {
             tile(x, y, tw, th, () -> {
                 race = r;
                 if (!Variant.creationChoices(race).contains(variant)) variant = Variant.defaultFor(race);
+                raceStyle = 0;                                                  // a new race starts from its own look
+                raceSkin = raceMark = racePart = -1;
                 boolean bald = bornBald(r);                                    // hairless races start bald; the others get the spikes back
                 if (bald || hairCode.equals(HairCode.Preset.BALD.code())) {
                     preset = (bald ? HairCode.Preset.BALD : HairCode.Preset.SPIKY).ordinal();
@@ -299,6 +318,45 @@ public class CharacterCreationScreen extends Screen {
         return out;
     }
 
+    /** Features: the race's own colours and the style of its signature part (CX-16b). */
+    private void initFeatures() {
+        com.dbzenith.appearance.RaceCustom.Options o = com.dbzenith.appearance.RaceCustom.of(race, variant);
+        int y = cy;
+        if (!o.any()) {
+            labels.add(new Object[]{Component.translatable("screen.dbzenith.create_tab_features"), cx, y, cw});
+            return;
+        }
+        if (o.skin().length > 0) {
+            labels.add(new Object[]{Component.translatable("screen.dbzenith.custom_skin"), cx, y, cw});
+            rows.add(new SwatchRow(cx, y + 11, withNone(o.skin()), () -> raceSkin, c -> raceSkin = c));
+            y += 30;
+        }
+        if (o.marks().length > 0) {
+            labels.add(new Object[]{Component.translatable(o.marksKey()), cx, y, cw});
+            rows.add(new SwatchRow(cx, y + 11, withNone(o.marks()), () -> raceMark, c -> raceMark = c));
+            y += 30;
+        }
+        int styles = com.dbzenith.appearance.RaceCustom.styles(o.part());
+        if (styles > 0) {
+            labels.add(new Object[]{Component.translatable("screen.dbzenith.custom_part." + o.part().name().toLowerCase()), cx, y, cw});
+            int gap = 4, w = (cw - (styles - 1) * gap) / styles;
+            for (int i = 0; i < styles; i++) {
+                int s = i;
+                addRenderableWidget(UiButton.of(UiButton.Style.CHIP, Component.translatable(com.dbzenith.appearance.RaceCustom.styleKey(o.part(), i)),
+                        cx + i * (w + gap), y + 11, w, 14, b -> {
+                            raceStyle = s;
+                            rebuild();
+                        }).selected(raceStyle == i));
+            }
+            y += 32;
+        }
+        if (o.partColors().length > 0) {
+            String key = o.part() == com.dbzenith.appearance.RaceCustom.Part.TAIL ? "screen.dbzenith.custom_tail" : "screen.dbzenith.custom_horns";
+            labels.add(new Object[]{Component.translatable(key), cx, y, cw});
+            rows.add(new SwatchRow(cx, y + 11, withNone(o.partColors()), () -> racePart, c -> racePart = c));
+        }
+    }
+
     private void initPath() {
         FightingPath[] paths = FightingPath.values();
         int gap = 6, tw = (cw - 2 * gap) / 3, th = 66;
@@ -334,7 +392,7 @@ public class CharacterCreationScreen extends Screen {
         int flags = Races.of(race).tail() ? PublicStatePacket.TAIL : 0;
         ClientPublicStates.put(new PublicStatePacket(minecraft.player.getId(), flags, 50, Races.of(race).auraColor(),
                 PlayerData.BASE_FORM, race.ordinal(), body.ordinal(), 0, hairColor, eyeColor, 0L, PublicStatePacket.RACE_LOOK,
-                hairCode, skin(), stature, variant.ordinal(), "", face, highlight, "").withFace(face, highlight, aura >= 0 ? aura : Races.of(race).auraColor()));
+                hairCode, skin(), stature, variant.ordinal(), "", face, highlight, "", raceStyle, raceSkin, raceMark, racePart).withFace(face, highlight, aura >= 0 ? aura : Races.of(race).auraColor()));
         minecraft.player.refreshDimensions();
     }
 
@@ -348,6 +406,7 @@ public class CharacterCreationScreen extends Screen {
         ModNetwork.sendToServer(new CreateCharacterPacket(new CharacterCreation.Choices(race, path, body, hairCode, hairColor, eyeColor,
                 alignment, skin(), stature, variant.id())));
         ModNetwork.sendToServer(new com.dbzenith.network.FacePacket(face, highlight, aura));
+        ModNetwork.sendToServer(new com.dbzenith.network.RaceLookPacket(raceStyle, raceSkin, raceMark, racePart));
         minecraft.setScreen(null);
     }
 
@@ -370,7 +429,14 @@ public class CharacterCreationScreen extends Screen {
             case FACE -> drawFace(g);
             case HAIR -> drawHair(g);
             case PATH -> drawPath(g);
+            case FEATURES -> {
+                if (!com.dbzenith.appearance.RaceCustom.of(race, variant).any()) {
+                    Ui.paragraph(g, font, Component.translatable("screen.dbzenith.custom_none"), cx, cy + 14, cw, Ui.MUTED, 0.8f, 4);
+                }
+            }
+            default -> { }
         }
+        for (Object[] l : labels) Ui.section(g, font, (Component) l[0], (int) l[1], (int) l[2], (int) l[3]);
         for (SwatchRow r : rows) Ui.swatches(g, r.x, r.y, SW, GAP, r.colors, r.get.getAsInt(), mouseX, mouseY);
         super.render(g, mouseX, mouseY, partialTick);
     }

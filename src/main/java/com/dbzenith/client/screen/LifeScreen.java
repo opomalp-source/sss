@@ -52,6 +52,10 @@ public class LifeScreen extends Screen {
                 .bounds(left + 144, top + H - 48, 84, 18).build());
         addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.face_button"), b -> minecraft.setScreen(new FaceScreen(this)))
                 .bounds(left + 144, top + H - 26, 84, 18).build());
+        if (com.dbzenith.appearance.RaceCustom.of(d.getRace(), d.getVariant()).any()) {          // the race's own look (CX-16b)
+            addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.race_look"), b -> minecraft.setScreen(new RaceLookScreen(this)))
+                    .bounds(left + 144, top + H - 70, 84, 18).build());
+        }
         if (com.dbzenith.client.render.RaceSkinLayer.texture(d.getRace(), d.getVariant()) != null) {
             addRenderableWidget(ThemedButton.of(raceLookLabel(), b -> {
                 raceLook = !raceLook;
@@ -92,7 +96,8 @@ public class LifeScreen extends Screen {
         if (s != null) { // preview at once; the server's public state confirms it
             ClientPublicStates.put(new PublicStatePacket(s.entityId(), s.flags(), s.release(), s.auraColor(), s.form(),
                     s.race(), s.bodyType(), s.hairStyle(), s.hairColor(), s.eyeColor(), s.battlePower(),
-                    scar | tattoo << 4 | (raceLook ? PublicStatePacket.RACE_LOOK : 0), s.hairCode(), s.skinTone(), s.height(), s.variant(), s.transformTarget(), s.face(), s.highlight(), s.fusedName()));
+                    scar | tattoo << 4 | (raceLook ? PublicStatePacket.RACE_LOOK : 0), s.hairCode(), s.skinTone(), s.height(), s.variant(), s.transformTarget(), s.face(), s.highlight(), s.fusedName(),
+                    s.raceStyle(), s.raceSkin(), s.raceMark(), s.racePart()));
         }
     }
 

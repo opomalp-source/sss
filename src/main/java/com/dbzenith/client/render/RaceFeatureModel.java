@@ -173,6 +173,29 @@ public class RaceFeatureModel {
     /** {@code hornScale}: Frost Demon horn size for the form (0 hides them, leaving the ear plates). */
     public void renderFeature(PoseStack pose, VertexConsumer vc, int light, int overlay, RaceTraits.Feature feature, boolean withEars,
                               float hornScale, float r, float g, float b) {
+        renderFeature(pose, vc, light, overlay, feature, withEars, hornScale, 1f, r, g, b);
+    }
+
+    /** Sets a part's length (CX-16b: long, short or none): stretched along its own length, a little slimmer when short. */
+    private static void length(ModelPart p, float length) {
+        p.visible = length > 0;
+        float girth = length < 1 ? 0.8f + 0.2f * length : 1f;
+        p.xScale = girth;
+        p.zScale = girth;
+        p.yScale = Math.max(0.01f, length);
+    }
+
+    /** {@code length}: the chosen style's size for antennae, the tentacle, ears, demon horns and wings (1 classic). */
+    public void renderFeature(PoseStack pose, VertexConsumer vc, int light, int overlay, RaceTraits.Feature feature, boolean withEars,
+                              float hornScale, float length, float r, float g, float b) {
+        for (String side : new String[]{"left", "right"}) {
+            length(antennae.getChild(side), length);
+            length(ears.getChild(side), feature == RaceTraits.Feature.EARS ? length : 1f);   // a Namekian's ears keep their size
+            length(demonHorns.getChild(side), length);
+            length(wings.getChild(side), length);
+        }
+        length(tentacle, length);
+        for (String plate : new String[]{"plate_left", "plate_right"}) horns.getChild(plate).visible = false;   // drawn on their own, in the shell colour
         crest.visible = false;
         crestRidge.visible = false;
         browRidge.visible = false;
@@ -195,6 +218,19 @@ public class RaceFeatureModel {
             return;
         }
         if (feature != RaceTraits.Feature.NONE || withEars) head.render(pose, vc, light, overlay, r, g, b, 1f);
+    }
+
+    /** A Frost Demon's ear plates on their own (they are shell, coloured like it). */
+    public void renderHornPlates(PoseStack pose, VertexConsumer vc, int light, int overlay, float r, float g, float b) {
+        for (ModelPart p : new ModelPart[]{antennae, tentacle, ears, demonHorns, crest, crestRidge, browRidge}) p.visible = false;
+        horns.visible = true;
+        horns.getChild("left").visible = false;
+        horns.getChild("right").visible = false;
+        horns.getChild("plate_left").visible = true;
+        horns.getChild("plate_right").visible = true;
+        head.render(pose, vc, light, overlay, r, g, b, 1f);
+        horns.getChild("plate_left").visible = false;
+        horns.getChild("plate_right").visible = false;
     }
 
     /** One extra head shape on its own: "crest" or "brow_ridge". */

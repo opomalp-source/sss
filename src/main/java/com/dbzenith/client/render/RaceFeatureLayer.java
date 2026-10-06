@@ -66,6 +66,15 @@ public class RaceFeatureLayer extends RenderLayer<AbstractClientPlayer, PlayerMo
         };
     }
 
+    /** A part in the colours the player chose (CX-16b): skin-coloured parts take the skin colour, horns the part colour. */
+    static int chosen(PublicStatePacket state, RaceTraits.Feature feature, com.dbzenith.appearance.RaceCustom.Part part, int fallback) {
+        int c = switch (feature) {
+            case HORNS, DEMON_HORNS -> state.racePart();
+            default -> state.raceSkin();
+        };
+        return c >= 0 ? c : fallback;
+    }
+
     /** The race skin a player wears now, or "". */
     static String s(PublicStatePacket state, Variant variant) {
         return String.valueOf(com.dbzenith.transform.FormLooks.skin(state.form(), RaceSkinLayer.skinName(state.raceEnum(), variant)));
@@ -96,6 +105,19 @@ public class RaceFeatureLayer extends RenderLayer<AbstractClientPlayer, PlayerMo
         if (state == null) return;
         Variant variant = state.variantEnum();
         RaceTraits.Feature feature = variant.feature() != null ? variant.feature() : Races.of(state.raceEnum()).feature();
+        com.dbzenith.appearance.RaceCustom.Part part = com.dbzenith.appearance.RaceCustom.of(state.raceEnum(), variant).part();
+        int style = Math.max(0, Math.min(3, state.raceStyle()));
+        if (part == com.dbzenith.appearance.RaceCustom.Part.ALIEN) {             // a Gen Alien's pick (CX-16b)
+            feature = switch (style) {
+                case 1 -> RaceTraits.Feature.DEMON_HORNS;
+                case 2 -> RaceTraits.Feature.ANTENNAE;
+                case 3 -> RaceTraits.Feature.HORNS;
+                default -> RaceTraits.Feature.NONE;
+            };
+        }
+        float length = part == com.dbzenith.appearance.RaceCustom.Part.ALIEN || part == com.dbzenith.appearance.RaceCustom.Part.NONE
+                ? 1f : com.dbzenith.appearance.RaceCustom.LENGTH[style];
+        boolean own = RaceSkinLayer.custom(state) != null || RaceSkinLayer.skinName(state.raceEnum(), variant) == null;   // chosen colours show
         if (feature == RaceTraits.Feature.NONE && state.skinTone() >= 0
                 && com.dbzenith.appearance.FaceParts.get(state.face(), com.dbzenith.appearance.FaceParts.Part.EARS) == com.dbzenith.appearance.FaceParts.EARS_POINTED) {
             feature = RaceTraits.Feature.EARS;                                     // chosen in the Face screen
@@ -109,13 +131,20 @@ public class RaceFeatureLayer extends RenderLayer<AbstractClientPlayer, PlayerMo
         int overlay = OverlayTexture.NO_OVERLAY;
         if (feature != RaceTraits.Feature.NONE) {
             int c = tint(state, feature, variant);
+            if (own) c = chosen(state, feature, part, c);
             boolean namekEars = feature == RaceTraits.Feature.ANTENNAE;           // Namekians have the long ears too
             RaceTraits.Feature shown = namekEars && GearLayer.turban(player) ? RaceTraits.Feature.NONE : feature;   // tucked under a turban
-            model.renderFeature(pose, vc, light, overlay, shown, namekEars, FormShape.hornScale(state.form()), r(c), g(c), b(c));
+            float horn = FormShape.hornScale(state.form()) * (part == com.dbzenith.appearance.RaceCustom.Part.HORNS ? length : 1f);
+            model.renderFeature(pose, vc, light, overlay, shown, namekEars, horn, length, r(c), g(c), b(c));
+            if (shown == RaceTraits.Feature.HORNS && part == com.dbzenith.appearance.RaceCustom.Part.HORNS) {   // Frost Demon ear plates: shell
+                int sc = own && state.raceMark() >= 0 ? state.raceMark() : shellColor(state, variant);
+                model.renderHornPlates(pose, vc, light, overlay, r(sc), g(sc), b(sc));
+            }
             if (crest) {
                 int sk = s(state, variant).startsWith("mutant") ? 0x2A2230 : s(state, variant).startsWith("metal") ? 0xD8E2EC : 0xF0EEF4;
+                if (own && state.raceSkin() >= 0) sk = state.raceSkin();
                 model.renderHeadShape(pose, vc, light, overlay, "crest", r(sk), g(sk), b(sk));      // the long pale skull
-                int sc = shellColor(state, variant);
+                int sc = own && state.raceMark() >= 0 ? state.raceMark() : shellColor(state, variant);
                 model.renderHeadShape(pose, vc, light, overlay, "crest_ridge", r(sc), g(sc), b(sc)); // its shell ridge
             }
         }
@@ -125,6 +154,7 @@ public class RaceFeatureLayer extends RenderLayer<AbstractClientPlayer, PlayerMo
         }
         if (tail) {
             int c = tailColor(state);
+            if (c == TAIL && state.racePart() >= 0) c = state.racePart();   // the chosen fur, unless a form colours it
             float size = variant == Variant.LEGENDARY_PRIMAL ? 1.45f : variant == Variant.PRIMAL ? 1.3f : 1f;   // the Primal clans' great tails
             model.renderTail(pose, vc, light, overlay, ageInTicks, lift(player, state), player.isCrouching(), size, r(c), g(c), b(c));
         }

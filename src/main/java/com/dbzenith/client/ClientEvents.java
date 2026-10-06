@@ -161,6 +161,10 @@ public final class ClientEvents {
             mc.setScreen(new com.dbzenith.client.screen.QuestScreen(name.contains("patrol") ? com.dbzenith.quest.Quest.Giver.PATROL : com.dbzenith.quest.Quest.Giver.MASTER));
             delayTicks = Math.max(delayTicks, 5);
         }
+        if (name.startsWith("racelook_") && !(mc.screen instanceof com.dbzenith.client.screen.RaceLookScreen)) {
+            mc.setScreen(new com.dbzenith.client.screen.RaceLookScreen(null));
+            delayTicks = Math.max(delayTicks, 5);
+        }
         if (name.startsWith("life_") && !(mc.screen instanceof com.dbzenith.client.screen.LifeScreen)) {
             mc.setScreen(new com.dbzenith.client.screen.LifeScreen(null));
             delayTicks = Math.max(delayTicks, 5);

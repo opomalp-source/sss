@@ -1121,3 +1121,46 @@ User: the character creation design was ugly, cramped and overwhelming; overhaul
   - The path descriptions were cut.
   - The HUD showed through the backdrop.
   - The Vampire and Kai ears had taken the beige human tone.
+
+## 2026-10-07 — Session 3 (cont.): CX-16b Race customization (v0.42.0)
+
+User: race customization was far too little; not every Frost Demon looks like Frieza or every Namekian like Piccolo. Let us customize colours and body parts like horns, where the race has them.
+
+### Added
+- **What each race can change (`appearance.RaceCustom`), shared by client and server:** a skin colour, a marking colour, the style of the race's signature part (classic, long, short, none) and that part's colour. Every choice has a "the race's own" option. Palettes per race:
+  - **Frost Demon:** skin (7), shell (8), horns (classic, long, short, none) and horn colour.
+  - **Namekian:** skin (7), muscle bands (6), antennae.
+  - **Majin:** skin (7), head tentacle.
+  - **Vampire:** skin (5), ears.
+  - **Bio-Android:** skin (6), spots (5), wings.
+  - **Tuffle:** skin (5).
+  - **Gen Alien:** skin (7), a head of horns, antennae or ram horns (or none), and horn colour.
+  - **Kai:** skin and ears. **Core Demon:** skin, horns and horn colour.
+  - **Saiyan and Half-Saiyan:** tail fur colour (7).
+  - **Human, Android and Cyborg:** nothing more; their look is body, face and hair.
+- **Saved and shown:** on `PlayerData` (`raceStyle`, `raceSkinColor`, `raceMarkColor`, `racePartColor`) and in the public state. New `RaceLookPacket`; protocol 30.
+- **Colour layers (ArtGen `masks`):**
+  - Each race skin is split into a greyscale skin layer and a marking layer. Each pixel goes to the nearest ramp: the skin's, the markings', or the rest (shorts, hair, gems).
+  - `RaceSkinLayer` draws them tinted over the race skin while the race's own skin shows: no form recolour, painted or HD style.
+- **3D parts:**
+  - The style sets a part's length (antennae, tentacle, ears, demon horns, wings, Frost Demon horns): long is 1.45x, short 0.6x and slimmer, none hides it.
+  - Gen Aliens pick demon horns, antennae or ram horns.
+  - Skin-coloured parts take the skin colour, horns the part colour, the Frost Demon crest the skin and shell colours.
+  - The tail takes the fur colour unless a form recolours it.
+  - The Frost Demon ear plates are now drawn in the shell colour (purple by default, as canon), on NPCs too.
+- **Screens:**
+  - A new Features tab in character creation (after Hair): sections only for what the race has, with an explanation for the races that have nothing more to change.
+  - A new Features screen (from the Life screen) changes the look later, with a live, rotatable preview; Back restores it.
+- **Dev:** `style<N>`, `skin<N>`, `mark<N>` and `part<N>` name flags; the `racelook_` screen.
+
+### Verified
+- **Screenshots:**
+  - Frost Demons in lavender with a blue shell and long gold horns; hornless in black with gold; a green shell with green ear plates.
+  - A teal Namekian with long antennae.
+  - A blue Majin with a long tentacle.
+  - A blue Bio-Android with purple spots.
+  - A green Gen Alien.
+  - The Features tab for a race with nothing to change.
+  - The Race Look screen.
+- **GameTest:** the race look is clamped, saved and shown, Frost Demons get their options, and Humans have none.
+- 146 required tests pass.

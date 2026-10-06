@@ -172,4 +172,24 @@ public final class AppearanceTests {
         helper.assertTrue(d.getHairCode().equals(HairCode.Preset.PONYTAIL.code()), "...and changes nothing");
         helper.succeed();
     }
+
+    /** CX-16b: the race's own look is kept in range, saved, and shown to others. */
+    @GameTest(template = EMPTY)
+    public static void raceLookIsSavedAndShown(GameTestHelper helper) {
+        PlayerData d = new PlayerData();
+        d.initDefaultsIfNeeded();
+        d.setRace(com.dbzenith.stats.Race.FROST_DEMON);
+        d.setRaceCustom(9, 0x3A70D8, 0x7E6D8F4, -5);                                    // high bits masked off, negative = the race's own
+        helper.assertTrue(d.getRaceStyle() == 3 && d.getRaceSkinColor() == 0x3A70D8 && d.getRaceMarkColor() == 0xE6D8F4 && d.getRacePartColor() == -1,
+                "style clamped, colours masked, -1 kept");
+        PlayerData copy = new PlayerData();
+        copy.load(d.save());
+        helper.assertTrue(copy.getRaceStyle() == 3 && copy.getRaceSkinColor() == 0x3A70D8 && copy.getRaceMarkColor() == 0xE6D8F4, "saved");
+        var state = com.dbzenith.network.PublicStatePacket.of(1, d);
+        helper.assertTrue(state.raceStyle() == 3 && state.raceSkin() == 0x3A70D8 && state.raceMark() == 0xE6D8F4 && state.racePart() == -1, "shown");
+        var o = com.dbzenith.appearance.RaceCustom.of(com.dbzenith.stats.Race.FROST_DEMON, d.getVariant());
+        helper.assertTrue(o.part() == com.dbzenith.appearance.RaceCustom.Part.HORNS && o.skin().length > 0 && o.marks().length > 0, "Frost Demons choose horns and colours");
+        helper.assertTrue(!com.dbzenith.appearance.RaceCustom.of(com.dbzenith.stats.Race.HUMAN, com.dbzenith.race.Variant.HUMAN).any(), "humans have nothing more");
+        helper.succeed();
+    }
 }

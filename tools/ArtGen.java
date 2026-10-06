@@ -74,6 +74,79 @@ public class ArtGen {
             fur("ssj4_fur", 0xFFC0283A);
             fur("ssj4_fur_silver", 0xFFD8DCE6);
             faceDefaults();
+            masks();
+        }
+
+        /**
+         * CX-16b: each race skin split into tintable layers for the race colour choices: name_skin.png (the skin) and
+         * name_mark.png (bands, shell, spots), greyscale (the brightest tone of the ramp white) and empty elsewhere. Each
+         * pixel goes to whichever ramp it is nearest: the skin's, a marking's, or the rest (the shorts, hair, gems).
+         */
+        static void masks() throws IOException {
+            mask("namekian", 0xFF62B444, new int[]{0xFFE09A9A, 0xFF8A1E24}, new int[0]);
+            mask("demon_namekian", 0xFF3A8A6A, new int[]{0xFFB070A0, 0xFF8A1E24}, new int[0]);
+            mask("frost_demon", 0xFFF0EEF4, new int[]{0xFF8A4AC8}, new int[0]);
+            mask("metal_frost_demon", 0xFFD8E2EC, new int[]{0xFF6A7A90}, new int[0]);
+            mask("mutant_frost_demon", 0xFF2A2230, new int[]{0xFFE84AB0}, new int[0]);
+            mask("majin", 0xFFF59AC0, new int[0], new int[0]);
+            mask("corrupted_majin", 0xFF9A90A8, new int[0], new int[]{0xFF3A1A4A});
+            mask("vampire", 0xFFE6E0EA, new int[0], new int[]{0xFF1C1418});
+            mask("bio_android", 0xFF5AB04A, new int[]{0xFF1E3A1A}, new int[]{0xFF20242A, 0xFFE8E4D8, 0xFF7A3A9A});
+            mask("tuffle", 0xFFEDE0D6, new int[0], new int[]{0xFFC8CCD8, 0xFFD01020, 0xFFFF9090, 0xFFE8C040});
+            mask("gen_alien", 0xFF7A9AC0, new int[0], new int[0]);
+            mask("kai", 0xFFD8B8EC, new int[0], new int[]{0xFFF8F8FF});
+            mask("core_demon", 0xFFC83030, new int[0], new int[]{0xFF141010, 0xFF101010, 0xFFFFE070, 0xFFE03010});
+        }
+
+        static void mask(String name, int skinC, int[] marks, int[] rest) throws IOException {
+            java.util.List<int[]> cand = new java.util.ArrayList<>();                    // {colour, class}: 0 skin, 1 mark, 2 rest
+            for (int c : ramp(skinC, 6)) cand.add(new int[]{c, 0});
+            for (int m : marks) for (int c : ramp(m, 6)) cand.add(new int[]{c, 1});
+            for (int c : ramp(0xFF26346E, 6)) cand.add(new int[]{c, 2});                 // the shorts, their band and stripe
+            for (int c : ramp(0xFF181C2C, 5)) cand.add(new int[]{c, 2});
+            cand.add(new int[]{0xFFE0DCD4, 2});
+            for (int r : rest) for (int c : ramp(r, 4)) cand.add(new int[]{c, 2});
+            double[] top = {0, 0};
+            for (int[] k : cand) if (k[1] < 2) top[k[1]] = Math.max(top[k[1]], lum(k[0]));
+            for (String folder : new String[]{"race_hd", "race_painted"}) {
+                File in = new File(RES + "entity/" + folder + "/" + name + ".png");
+                if (!in.exists()) continue;
+                java.awt.image.BufferedImage src = javax.imageio.ImageIO.read(in);
+                Canvas skin = new Canvas(src.getWidth(), src.getHeight()), mark = new Canvas(src.getWidth(), src.getHeight());
+                boolean anyMark = false;
+                for (int y = 0; y < src.getHeight(); y++) for (int x = 0; x < src.getWidth(); x++) {
+                    int argb = src.getRGB(x, y);
+                    if ((argb >>> 24) == 0) continue;
+                    int best = 2;
+                    double bd = Double.MAX_VALUE;
+                    for (int[] k : cand) {
+                        double d = dist(argb, k[0]);
+                        if (d < bd) {
+                            bd = d;
+                            best = k[1];
+                        }
+                    }
+                    if (best == 2 || bd > 70) continue;
+                    int g = (int) Math.round(Math.min(1, lum(argb) / Math.max(1, top[best])) * 255);
+                    int grey = 0xFF000000 | g << 16 | g << 8 | g;
+                    if (best == 0) skin.set(x, y, grey);
+                    else {
+                        mark.set(x, y, grey);
+                        anyMark = true;
+                    }
+                }
+                skin.save("entity/" + folder + "/" + name + "_skin.png");
+                if (anyMark) mark.save("entity/" + folder + "/" + name + "_mark.png");
+            }
+        }
+
+        static double lum(int c) {
+            return 0.299 * (c >> 16 & 255) + 0.587 * (c >> 8 & 255) + 0.114 * (c & 255);
+        }
+
+        static double dist(int a, int b) {
+            int dr = (a >> 16 & 255) - (b >> 16 & 255), dg = (a >> 8 & 255) - (b >> 8 & 255), db = (a & 255) - (b & 255);
+            return Math.sqrt(dr * dr * 0.9 + dg * dg * 1.2 + db * db * 0.8);
         }
 
         static void recolor(String from, String to, Pick pick, Shift shift) throws IOException {

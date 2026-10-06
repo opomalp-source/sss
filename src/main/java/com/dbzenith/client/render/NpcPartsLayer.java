@@ -69,6 +69,9 @@ public class NpcPartsLayer<T extends Mob> extends RenderLayer<T, PlayerModel<T>>
             if (look.feature() != RaceTraits.Feature.NONE || look.ears()) {
                 features.renderFeature(pose, vc, light, overlay, look.feature(), look.ears(),
                         ((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f);
+                if (look.feature() == RaceTraits.Feature.HORNS) {                 // the ear plates in the shell purple
+                    features.renderHornPlates(pose, vc, light, overlay, 0x8A / 255f, 0x4A / 255f, 0xC8 / 255f);
+                }
             }
             if (look.tailColor() >= 0) {
                 int t = look.tailColor();

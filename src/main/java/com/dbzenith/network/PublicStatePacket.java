@@ -16,7 +16,8 @@ import java.util.function.Supplier;
  */
 public record PublicStatePacket(int entityId, int flags, int release, int auraColor, String form,
                                 int race, int bodyType, int hairStyle, int hairColor, int eyeColor, long battlePower,
-                                int looks, String hairCode, int skinTone, int height, int variant, String transformTarget, int face, int highlight, String fusedName) {
+                                int looks, String hairCode, int skinTone, int height, int variant, String transformTarget, int face, int highlight, String fusedName,
+                                int raceStyle, int raceSkin, int raceMark, int racePart) {
     public static final int CHARGING = 1;
     public static final int FLYING = 2;
     public static final int GUARDING = 4;
@@ -50,38 +51,46 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
                 d.hasFlag("god_ki") ? -1 : com.dbzenith.stats.StatCalculator.battlePower(d), // -1: god ki cannot be read
                 d.getScar() | d.getTattoo() << 4 | (d.isRaceLook() ? RACE_LOOK : 0),
                 d.getHairCode(), d.getSkinTone(), d.getHeightPercent(), d.getVariant().ordinal(), d.getTransformTarget(), d.getFace(), d.getHighlightColor(),
-                d.isFused() && d.isFusionHost() ? d.getFusedName() : "");
+                d.isFused() && d.isFusionHost() ? d.getFusedName() : "",
+                d.getRaceStyle(), d.getRaceSkinColor(), d.getRaceMarkColor(), d.getRacePartColor());
     }
 
     public int stateHash() {
         int h = (((flags * 31 + release) * 31 + auraColor) * 31 + form.hashCode());
         h = ((h * 31 + race) * 31 + bodyType) * 31 + hairStyle;
         h = (((h * 31 + hairColor) * 31 + eyeColor) * 31 + Long.hashCode(battlePower)) * 31 + looks;
-        return ((((((h * 31 + hairCode.hashCode()) * 31 + skinTone) * 31 + height) * 31 + variant) * 31 + transformTarget.hashCode()) * 31 + face) * 31 + highlight + fusedName.hashCode() * 17;
+        return ((((((h * 31 + hairCode.hashCode()) * 31 + skinTone) * 31 + height) * 31 + variant) * 31 + transformTarget.hashCode()) * 31 + face) * 31 + highlight + fusedName.hashCode() * 17
+                + ((raceStyle * 31 + raceSkin) * 31 + raceMark) * 31 + racePart;
     }
 
     /** A copy with a different look (client previews in the creation, barber and Life screens). */
     public PublicStatePacket withAppearance(String hairCode, int hairColor, int eyeColor, int skinTone) {
         return new PublicStatePacket(entityId, flags, release, auraColor, form, race, bodyType, hairStyle, hairColor,
-                eyeColor, battlePower, looks, hairCode, skinTone, height, variant, transformTarget, face, highlight, fusedName);
+                eyeColor, battlePower, looks, hairCode, skinTone, height, variant, transformTarget, face, highlight, fusedName, raceStyle, raceSkin, raceMark, racePart);
     }
 
     /** The same look with other flags and fused name (dev previews). */
     public PublicStatePacket withFlags(int newFlags, String name) {
         return new PublicStatePacket(entityId, newFlags, release, auraColor, form, race, bodyType, hairStyle, hairColor,
-                eyeColor, battlePower, looks, hairCode, skinTone, height, variant, transformTarget, face, highlight, name);
+                eyeColor, battlePower, looks, hairCode, skinTone, height, variant, transformTarget, face, highlight, name, raceStyle, raceSkin, raceMark, racePart);
     }
 
     /** The same look on another entity (dev previews). */
     public PublicStatePacket withEntity(int id) {
         return new PublicStatePacket(id, flags, release, auraColor, form, race, bodyType, hairStyle, hairColor,
-                eyeColor, battlePower, looks, hairCode, skinTone, height, variant, transformTarget, face, highlight, fusedName);
+                eyeColor, battlePower, looks, hairCode, skinTone, height, variant, transformTarget, face, highlight, fusedName, raceStyle, raceSkin, raceMark, racePart);
     }
 
     /** A copy with a different face, highlight and aura (Face screen preview). */
+    /** A copy with another race look (the creation and Life screens preview it). */
+    public PublicStatePacket withRaceCustom(int style, int skin, int mark, int part) {
+        return new PublicStatePacket(entityId, flags, release, auraColor, form, race, bodyType, hairStyle, hairColor,
+                eyeColor, battlePower, looks, hairCode, skinTone, height, variant, transformTarget, face, highlight, fusedName, style, skin, mark, part);
+    }
+
     public PublicStatePacket withFace(int face, int highlight, int aura) {
         return new PublicStatePacket(entityId, flags, release, aura, form, race, bodyType, hairStyle, hairColor,
-                eyeColor, battlePower, looks, hairCode, skinTone, height, variant, transformTarget, face, highlight, fusedName);
+                eyeColor, battlePower, looks, hairCode, skinTone, height, variant, transformTarget, face, highlight, fusedName, raceStyle, raceSkin, raceMark, racePart);
     }
 
     /** Charging, winding up a heavy or powering into a form: the aura roars. */
@@ -136,12 +145,17 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
         buf.writeInt(msg.face);
         buf.writeInt(msg.highlight);
         buf.writeUtf(msg.fusedName, 64);
+        buf.writeByte(msg.raceStyle);
+        buf.writeInt(msg.raceSkin);
+        buf.writeInt(msg.raceMark);
+        buf.writeInt(msg.racePart);
     }
 
     public static PublicStatePacket decode(FriendlyByteBuf buf) {
         return new PublicStatePacket(buf.readVarInt(), buf.readVarInt(), buf.readByte(), buf.readInt(), buf.readUtf(64),
                 buf.readByte(), buf.readByte(), buf.readByte(), buf.readInt(), buf.readInt(), buf.readVarLong(),
-                buf.readUnsignedShort(), buf.readUtf(com.dbzenith.appearance.HairCode.MAX_CODE_LENGTH), buf.readInt(), buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUtf(64), buf.readInt(), buf.readInt(), buf.readUtf(64));
+                buf.readUnsignedShort(), buf.readUtf(com.dbzenith.appearance.HairCode.MAX_CODE_LENGTH), buf.readInt(), buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUtf(64), buf.readInt(), buf.readInt(), buf.readUtf(64),
+                buf.readByte(), buf.readInt(), buf.readInt(), buf.readInt());
     }
 
     public static void handle(PublicStatePacket msg, Supplier<NetworkEvent.Context> ctx) {

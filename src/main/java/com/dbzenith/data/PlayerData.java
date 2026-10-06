@@ -418,6 +418,38 @@ public class PlayerData {
         }
     }
 
+    // ---- the race's own look (CX-16b, saved): a part style and three colours, -1 = the race's own
+    private int raceStyle;
+    private int raceSkinColor = -1, raceMarkColor = -1, racePartColor = -1;
+
+    /** Style of the race's signature part (horns, antennae, tentacle, ears, wings): 0 classic, 1 long, 2 short, 3 none. */
+    public int getRaceStyle() {
+        return raceStyle;
+    }
+
+    /** Skin colour for a race with a skin of its own, or -1. */
+    public int getRaceSkinColor() {
+        return raceSkinColor;
+    }
+
+    /** Marking / shell colour (Namekian bands, Frost Demon shell, Bio-Android spots), or -1. */
+    public int getRaceMarkColor() {
+        return raceMarkColor;
+    }
+
+    /** Colour of horns and the tail, or -1. */
+    public int getRacePartColor() {
+        return racePartColor;
+    }
+
+    public void setRaceCustom(int style, int skin, int mark, int part) {
+        raceStyle = Math.max(0, Math.min(3, style));
+        raceSkinColor = skin < 0 ? -1 : skin & 0xFFFFFF;
+        raceMarkColor = mark < 0 ? -1 : mark & 0xFFFFFF;
+        racePartColor = part < 0 ? -1 : part & 0xFFFFFF;
+        markDirty();
+    }
+
     public int getHighlightColor() {
         return highlightColor;
     }
@@ -1603,6 +1635,10 @@ public class PlayerData {
         tag.putInt("heightPercent", heightPercent);
         tag.putInt("face", face);
         tag.putInt("highlight", highlightColor);
+        tag.putInt("raceStyle", raceStyle);
+        tag.putInt("raceSkinColor", raceSkinColor);
+        tag.putInt("raceMarkColor", raceMarkColor);
+        tag.putInt("racePartColor", racePartColor);
         tag.putInt("auraColor", auraColor);
         tag.putBoolean("zenkaiArmed", zenkaiArmed);
         tag.putLong("lastZenkai", lastZenkai);
@@ -1731,6 +1767,10 @@ public class PlayerData {
         heightPercent = tag.contains("heightPercent") ? Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, tag.getInt("heightPercent"))) : 100;
         face = com.dbzenith.appearance.FaceParts.sanitize(tag.getInt("face"));
         highlightColor = tag.contains("highlight") ? tag.getInt("highlight") : -1;
+        raceStyle = tag.getInt("raceStyle");
+        raceSkinColor = tag.contains("raceSkinColor") ? tag.getInt("raceSkinColor") : -1;
+        raceMarkColor = tag.contains("raceMarkColor") ? tag.getInt("raceMarkColor") : -1;
+        racePartColor = tag.contains("racePartColor") ? tag.getInt("racePartColor") : -1;
         auraColor = tag.contains("auraColor") ? tag.getInt("auraColor") : -1;
         zenkaiArmed = tag.getBoolean("zenkaiArmed");
         lastZenkai = tag.contains("lastZenkai") ? tag.getLong("lastZenkai") : Long.MIN_VALUE / 2;

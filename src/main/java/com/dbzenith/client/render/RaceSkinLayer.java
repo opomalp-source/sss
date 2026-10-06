@@ -87,6 +87,28 @@ public class RaceSkinLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         PublicStatePacket state = ClientPublicStates.get(player.getId());
         if (state == null || !state.raceLook()) return;
         ResourceLocation tex = texture(state);
-        if (tex != null) renderColoredCutoutModel(getParentModel(), tex, pose, buffers, light, player, 1f, 1f, 1f);
+        if (tex == null) return;
+        renderColoredCutoutModel(getParentModel(), tex, pose, buffers, light, player, 1f, 1f, 1f);
+        String base = custom(state);                                           // the race colours chosen (CX-16b), over the race's own
+        if (base == null) return;
+        if (state.raceSkin() >= 0) tinted(pose, buffers, light, player, base + "_skin", state.raceSkin());
+        if (state.raceMark() >= 0 && com.dbzenith.appearance.RaceCustom.of(state.raceEnum(), state.variantEnum()).marks().length > 0) {
+            tinted(pose, buffers, light, player, base + "_mark", state.raceMark());
+        }
+    }
+
+    private void tinted(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player, String name, int c) {
+        renderColoredCutoutModel(getParentModel(), path(name), pose, buffers, light, player, ((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f);
+    }
+
+    /**
+     * The base race skin's name if the player's chosen race colours show now: they wear their race's own skin (no form
+     * recolours it) in an art style that has the colour layers. Null otherwise.
+     */
+    public static String custom(PublicStatePacket state) {
+        if (state == null || ArtStyle.get() == ArtStyle.CLASSIC) return null;
+        String base = skinName(state.raceEnum(), state.variantEnum());
+        if (base == null || !base.equals(com.dbzenith.transform.FormLooks.skin(state.form(), base))) return null;
+        return base;
     }
 }
