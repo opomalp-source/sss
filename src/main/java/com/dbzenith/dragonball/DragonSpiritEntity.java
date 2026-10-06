@@ -20,6 +20,11 @@ import java.util.UUID;
 public class DragonSpiritEntity extends Entity {
     public static final int LIFETIME = 2400;
 
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> SET =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(DragonSpiritEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Boolean> LIFTS_CURSE =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(DragonSpiritEntity.class, net.minecraft.network.syncher.EntityDataSerializers.BOOLEAN);
+
     private UUID summoner;
     private boolean granted;
 
@@ -33,15 +38,39 @@ public class DragonSpiritEntity extends Entity {
         summoner = id;
     }
 
+    /** Which set of balls raised this dragon (its looks and its wishes). */
+    public BallSet set() {
+        return BallSet.byOrdinal(entityData.get(SET));
+    }
+
+    public void setSet(BallSet set) {
+        entityData.set(SET, set.ordinal());
+    }
+
+    /** A Black Star dragon raised while the curse is on: its one wish is to lift it. */
+    public boolean liftsCurse() {
+        return entityData.get(LIFTS_CURSE);
+    }
+
+    public void setLiftsCurse(boolean lifts) {
+        entityData.set(LIFTS_CURSE, lifts);
+    }
+
+    /** The wishes this dragon can grant. */
+    public java.util.List<Wish> wishes() {
+        return liftsCurse() ? java.util.List.of(Wish.LIFT_CURSE) : Wish.of(set());
+    }
+
     public boolean isSummoner(Player p) {
         return summoner != null && summoner.equals(p.getUUID());
     }
 
     /** Grants one wish to the summoner. Returns false if this dragon already granted it or the player is someone else. */
     public boolean grant(ServerPlayer player, Wish wish) {
-        if (granted || !isSummoner(player)) return false;
+        if (granted || !isSummoner(player) || !wishes().contains(wish)) return false;
         granted = true;
         wish.grant(player);
+        if (set() == BallSet.BLACK_STAR && wish != Wish.LIFT_CURSE) DragonBalls.curse(player.server, player.level().getGameTime());
         DragonBalls.dragonDeparts(this);
         return true;
     }
@@ -61,6 +90,12 @@ public class DragonSpiritEntity extends Entity {
         return InteractionResult.PASS;
     }
 
+    /** The Eternal Dragon, the Black Star dragon, the Super Dragon. */
+    @Override
+    protected net.minecraft.network.chat.Component getTypeName() {
+        return set() == BallSet.EARTH ? super.getTypeName() : net.minecraft.network.chat.Component.translatable("entity.dbzenith.dragon_spirit." + set().id());
+    }
+
     @Override
     public boolean isPickable() {
         return true;
@@ -73,18 +108,24 @@ public class DragonSpiritEntity extends Entity {
 
     @Override
     protected void defineSynchedData() {
+        entityData.define(SET, 0);
+        entityData.define(LIFTS_CURSE, false);
     }
 
     @Override
     protected void readAdditionalSaveData(CompoundTag tag) {
         if (tag.hasUUID("summoner")) summoner = tag.getUUID("summoner");
         granted = tag.getBoolean("granted");
+        setSet(BallSet.byOrdinal(tag.getInt("set")));
+        setLiftsCurse(tag.getBoolean("liftsCurse"));
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
         if (summoner != null) tag.putUUID("summoner", summoner);
         tag.putBoolean("granted", granted);
+        tag.putInt("set", set().ordinal());
+        tag.putBoolean("liftsCurse", liftsCurse());
     }
 
     @Override

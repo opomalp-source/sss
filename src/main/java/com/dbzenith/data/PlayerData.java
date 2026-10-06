@@ -331,6 +331,7 @@ public class PlayerData {
         String id = v == null || v.race() != race ? "" : v.id();
         if (!id.equals(variant)) {
             variant = id;
+            derivedStale = true;
             markDirty();
         }
     }

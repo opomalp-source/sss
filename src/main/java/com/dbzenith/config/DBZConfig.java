@@ -205,6 +205,14 @@ public final class DBZConfig {
         public final ForgeConfigSpec.IntValue wishSenzuCount;
         public final ForgeConfigSpec.IntValue wishImmortalityTicks;
         public final ForgeConfigSpec.IntValue wishDiamonds;
+        public final ForgeConfigSpec.BooleanValue blackStarEnabled;
+        public final ForgeConfigSpec.IntValue blackStarScatterRadius;
+        public final ForgeConfigSpec.IntValue blackStarCurseTicks;
+        public final ForgeConfigSpec.IntValue meteorIntervalTicks;
+        public final ForgeConfigSpec.BooleanValue meteorsBreakBlocks;
+        public final ForgeConfigSpec.BooleanValue superBallsEnabled;
+        public final ForgeConfigSpec.IntValue superScatterRadius;
+        public final ForgeConfigSpec.IntValue wishBlackPowerTp;
 
         // --- gear ---
         public final ForgeConfigSpec.LongValue scouterLimit;
@@ -539,6 +547,18 @@ public final class DBZConfig {
             wishImmortalityTicks = b.comment("How long the immortality wish lasts (36000 = 30 minutes)")
                     .defineInRange("wishImmortalityTicks", 36000, 20, 10_000_000);
             wishDiamonds = b.defineInRange("wishDiamonds", 16, 1, 64);
+            blackStarEnabled = b.comment("Scatter the Black Star Dragon Balls across the other planets (Namek, the northern planet)").define("blackStarEnabled", true);
+            blackStarScatterRadius = b.comment("Black Star balls scatter within this many blocks of a planet's centre")
+                    .defineInRange("blackStarScatterRadius", 500, 16, 30_000);
+            blackStarCurseTicks = b.comment("After a Black Star wish, the seven must be summoned again within this long or meteors rain on Earth (168000 = 7 days)")
+                    .defineInRange("blackStarCurseTicks", 168_000, 200, 100_000_000);
+            meteorIntervalTicks = b.comment("While doomed, a meteor falls near each player on Earth this often")
+                    .defineInRange("meteorIntervalTicks", 300, 20, 1_000_000);
+            meteorsBreakBlocks = b.comment("Whether the meteors of the Black Star curse break blocks").define("meteorsBreakBlocks", false);
+            superBallsEnabled = b.comment("Scatter the Super Dragon Balls far out in the overworld").define("superBallsEnabled", true);
+            superScatterRadius = b.comment("Super Dragon Balls scatter within this many blocks of world spawn")
+                    .defineInRange("superScatterRadius", 3000, 16, 30_000);
+            wishBlackPowerTp = b.comment("TP granted by the Black Star power wish").defineInRange("wishBlackPowerTp", 15000, 0, Integer.MAX_VALUE);
             b.pop();
 
             b.push("gear");

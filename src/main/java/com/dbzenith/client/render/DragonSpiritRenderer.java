@@ -27,6 +27,8 @@ public class DragonSpiritRenderer extends EntityRenderer<DragonSpiritEntity> {
     private static final RenderType GLOW_TYPE = RenderType.entityTranslucentEmissive(GLOW);
     private static final int SEGMENTS = 56;
     private static final int GLOW_LIGHT = LightTexture.pack(15, 15);
+    private static final ResourceLocation BLACK_STAR = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/black_star_dragon.png");
+    private static final ResourceLocation SUPER = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/super_dragon.png");
 
     private final DragonModel model;
 
@@ -52,7 +54,10 @@ public class DragonSpiritRenderer extends EntityRenderer<DragonSpiritEntity> {
         float age = dragon.tickCount + partialTicks;
         float t = age * 0.015f;
         float rise = Mth.clamp(age / 60f, 0f, 1f);                                                  // emerges over 3 s
-        VertexConsumer body = buffers.getBuffer(RenderType.entityCutoutNoCull(DragonModel.TEXTURE));
+        com.dbzenith.dragonball.BallSet set = dragon.set();
+        pose.pushPose();
+        if (set == com.dbzenith.dragonball.BallSet.SUPER) pose.scale(2.4f, 2.4f, 2.4f);              // the Super dragon dwarfs the sky
+        VertexConsumer body = buffers.getBuffer(RenderType.entityCutoutNoCull(getTextureLocation(dragon)));
         int shown = (int) (SEGMENTS * rise);
         for (int i = 0; i < shown; i++) {
             float f = i / (float) SEGMENTS;
@@ -71,7 +76,7 @@ public class DragonSpiritRenderer extends EntityRenderer<DragonSpiritEntity> {
         }
         if (rise >= 1f) {
             Vec3 neck = coil(1f, t);
-            Vec3 cam = entityRenderDispatcher.camera.getPosition().subtract(dragon.getPosition(partialTicks)).subtract(neck);
+            Vec3 cam = entityRenderDispatcher.camera.getPosition().subtract(dragon.getPosition(partialTicks)).subtract(neck.scale(set == com.dbzenith.dragonball.BallSet.SUPER ? 2.4 : 1));
             float headYaw = (float) Math.atan2(cam.x, cam.z);
             float headPitch = (float) Math.atan2(cam.y, Math.sqrt(cam.x * cam.x + cam.z * cam.z));
             pose.pushPose();
@@ -84,8 +89,10 @@ public class DragonSpiritRenderer extends EntityRenderer<DragonSpiritEntity> {
             pose.popPose();
             VertexConsumer glow = buffers.getBuffer(GLOW_TYPE);                                // faint magic around the head
             float pulse = 0.85f + 0.15f * Mth.sin(age * 0.1f);
-            ball(pose, glow, (float) neck.x, (float) neck.y + 1.6f, (float) neck.z, 9f * pulse, 0x40, 0xFF, 0x70, 60);
+            int c = set == com.dbzenith.dragonball.BallSet.BLACK_STAR ? 0xFF3020 : set == com.dbzenith.dragonball.BallSet.SUPER ? 0xFFD040 : 0x40FF70;
+            ball(pose, glow, (float) neck.x, (float) neck.y + 1.6f, (float) neck.z, 9f * pulse, c >> 16, (c >> 8) & 255, c & 255, 60);
         }
+        pose.popPose();
         super.render(dragon, yaw, partialTicks, pose, buffers, light);
     }
 
@@ -112,6 +119,10 @@ public class DragonSpiritRenderer extends EntityRenderer<DragonSpiritEntity> {
 
     @Override
     public ResourceLocation getTextureLocation(DragonSpiritEntity dragon) {
-        return DragonModel.TEXTURE;
+        return switch (dragon.set()) {
+            case BLACK_STAR -> BLACK_STAR;
+            case SUPER -> SUPER;
+            default -> DragonModel.TEXTURE;
+        };
     }
 }

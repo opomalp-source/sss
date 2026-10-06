@@ -14,15 +14,23 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-/** One of the seven Dragon Balls as a small glowing block. Tracked by {@link DragonBalls}. */
+/** One of the seven balls of a set ({@link BallSet}) as a glowing block. Tracked by {@link DragonBalls}. */
 public class DragonBallBlock extends Block {
     private static final VoxelShape SHAPE = Block.box(4, 0, 4, 12, 8, 12);
+    /** A Super Dragon Ball fills its block. */
+    private static final VoxelShape BIG = Block.box(0, 0, 0, 16, 16, 16);
 
+    private final BallSet set;
     private final int star;
 
-    public DragonBallBlock(int star, Properties properties) {
+    public DragonBallBlock(BallSet set, int star, Properties properties) {
         super(properties);
+        this.set = set;
         this.star = star;
+    }
+
+    public BallSet set() {
+        return set;
     }
 
     public int star() {
@@ -31,25 +39,25 @@ public class DragonBallBlock extends Block {
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
-        return SHAPE;
+        return set == BallSet.SUPER ? BIG : SHAPE;
     }
 
     @Override
     public void onPlace(BlockState state, Level level, BlockPos pos, BlockState old, boolean moving) {
         super.onPlace(state, level, pos, old, moving);
-        if (level instanceof ServerLevel sl && !old.is(this)) DragonBalls.onPlaced(sl, star, pos);
+        if (level instanceof ServerLevel sl && !old.is(this)) DragonBalls.onPlaced(sl, set, star, pos);
     }
 
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moving) {
-        if (level instanceof ServerLevel sl && !newState.is(this)) DragonBalls.onRemoved(sl, star, pos);
+        if (level instanceof ServerLevel sl && !newState.is(this)) DragonBalls.onRemoved(sl, set, star, pos);
         super.onRemove(state, level, pos, newState, moving);
     }
 
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (level instanceof ServerLevel sl && player instanceof ServerPlayer sp) {
-            if (!DragonBalls.trySummon(sl, sp, pos)) {
+            if (!DragonBalls.trySummon(sl, sp, pos, set)) {
                 sp.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.dbzenith.need_all_balls"), true);
             }
         }

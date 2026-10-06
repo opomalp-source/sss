@@ -1,0 +1,4 @@
+{
+  "parent": "dbzenith:block/super_dragon_ball_template",
+  "textures": {"ball": "dbzenith:block/super_dragon_ball_1"}
+}

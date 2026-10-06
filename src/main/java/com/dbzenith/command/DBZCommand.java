@@ -331,9 +331,36 @@ public final class DBZCommand {
                 .then(Commands.literal("summon")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("pos", net.minecraft.commands.arguments.coordinates.BlockPosArgument.blockPos())
-                                        .executes(ctx -> com.dbzenith.dragonball.DragonBalls.trySummon(ctx.getSource().getLevel(),
-                                                EntityArgument.getPlayer(ctx, "player"),
-                                                net.minecraft.commands.arguments.coordinates.BlockPosArgument.getLoadedBlockPos(ctx, "pos")) ? 1 : 0))))
+                                        .executes(ctx -> {
+                                            var pos = net.minecraft.commands.arguments.coordinates.BlockPosArgument.getLoadedBlockPos(ctx, "pos");
+                                            var who = EntityArgument.getPlayer(ctx, "player");
+                                            for (var set : com.dbzenith.dragonball.BallSet.values()) {           // whichever set is gathered there
+                                                if (com.dbzenith.dragonball.DragonBalls.trySummon(ctx.getSource().getLevel(), who, pos, set)) return 1;
+                                            }
+                                            return 0;
+                                        }))))
+                .then(Commands.literal("curse")                                      // the Black Star curse (12d)
+                        .then(Commands.literal("start").executes(ctx -> {
+                            com.dbzenith.dragonball.DragonBalls.curse(ctx.getSource().getServer(), ctx.getSource().getServer().overworld().getGameTime());
+                            return 1;
+                        }))
+                        .then(Commands.literal("doom").executes(ctx -> {
+                            var server = ctx.getSource().getServer();
+                            com.dbzenith.dragonball.DragonBallData.get(server, com.dbzenith.dragonball.BallSet.BLACK_STAR).setCurse(server.overworld().getGameTime(), false);
+                            com.dbzenith.dragonball.DragonBalls.tickCurse(server, server.overworld().getGameTime() + 1);
+                            return 1;
+                        }))
+                        .then(Commands.literal("lift").executes(ctx -> {
+                            com.dbzenith.dragonball.DragonBalls.liftCurse(ctx.getSource().getServer());
+                            return 1;
+                        }))
+                        .then(Commands.literal("meteor").executes(ctx -> {             // one meteor, a dozen blocks ahead of you
+                            var p = ctx.getSource().getPlayerOrException();
+                            var ahead = p.position().add(p.getLookAngle().multiply(1, 0, 1).normalize().scale(14));
+                            int y = p.serverLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, (int) Math.floor(ahead.x), (int) Math.floor(ahead.z));
+                            com.dbzenith.dragonball.DragonBalls.meteorAt(p.serverLevel(), new net.minecraft.world.phys.Vec3(ahead.x, y, ahead.z), p.level().getGameTime());
+                            return 1;
+                        })))
                 .then(Commands.literal("tail")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("on", BoolArgumentType.bool())

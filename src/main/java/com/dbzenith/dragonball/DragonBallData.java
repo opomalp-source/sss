@@ -10,9 +10,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 
-/** Where the seven Dragon Balls are. One instance per server, stored with the overworld. */
+/** Where the seven balls of one set are. One instance per set and server, stored with the overworld. */
 public class DragonBallData extends SavedData {
-    private static final String NAME = "dbzenith_dragon_balls";
 
     public enum State { UNSET, PLACED, HELD, INERT }
 
@@ -24,13 +23,22 @@ public class DragonBallData extends SavedData {
 
     private final Entry[] balls = new Entry[DragonBalls.COUNT];
     private long inertUntil = -1;
+    /** The Black Star curse (12d): the game time it runs out, or -1. */
+    private long curseUntil = -1;
+    /** The curse ran out: meteors fall on Earth until it is lifted. */
+    private boolean doom;
 
     public DragonBallData() {
         for (int i = 0; i < balls.length; i++) balls[i] = new Entry();
     }
 
+    /** Earth's set. */
     public static DragonBallData get(MinecraftServer server) {
-        return server.overworld().getDataStorage().computeIfAbsent(DragonBallData::load, DragonBallData::new, NAME);
+        return get(server, BallSet.EARTH);
+    }
+
+    public static DragonBallData get(MinecraftServer server, BallSet set) {
+        return server.overworld().getDataStorage().computeIfAbsent(DragonBallData::load, DragonBallData::new, set.saveName());
     }
 
     /** Star is 1..7. */
@@ -55,6 +63,24 @@ public class DragonBallData extends SavedData {
         setDirty();
     }
 
+    public long getCurseUntil() {
+        return curseUntil;
+    }
+
+    public boolean isCursed() {
+        return curseUntil >= 0 || doom;
+    }
+
+    public boolean isDoom() {
+        return doom;
+    }
+
+    public void setCurse(long until, boolean doom) {
+        curseUntil = until;
+        this.doom = doom;
+        setDirty();
+    }
+
     @Override
     public CompoundTag save(CompoundTag tag) {
         ListTag list = new ListTag();
@@ -67,6 +93,8 @@ public class DragonBallData extends SavedData {
         }
         tag.put("balls", list);
         tag.putLong("inertUntil", inertUntil);
+        tag.putLong("curseUntil", curseUntil);
+        tag.putBoolean("doom", doom);
         return tag;
     }
 
@@ -85,6 +113,8 @@ public class DragonBallData extends SavedData {
             e.pos = BlockPos.of(t.getLong("pos"));
         }
         d.inertUntil = tag.getLong("inertUntil");
+        d.curseUntil = tag.contains("curseUntil") ? tag.getLong("curseUntil") : -1;
+        d.doom = tag.getBoolean("doom");
         return d;
     }
 }

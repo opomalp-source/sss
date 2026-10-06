@@ -199,3 +199,11 @@ Constants are in `CombatMoves`.
 - **Duration:** dance 30 min, Potara 60 min (config). Splits early when the host falls or either half leaves.
 - **Cost:** the dance is free but needs six presses in a 14-tick window per beat. The Potara costs a pair of earrings (a quest reward) and cannot fail.
 - **Config:** `fusionDanceMinutes`, `potaraMinutes`, `fusionDanceBonus`, `potaraBonus`, `failedFusionPower`.
+
+## Black Star and Super Dragon Balls (12d, v0.40.0)
+- **Black Star:**
+  - Wishes: remake (a random variant of your race), 15000 TP (three times the power wish), or full mastery of every reachable form.
+  - The price: 7 days to gather the seven again across the other planets. After that, meteors every 15 s near every player on Earth (2.6-power explosions, no block damage by default) until the curse is lifted.
+- **Super:**
+  - Scattered up to 3000 blocks out.
+  - Wishes: true immortality (body never drops below 1 until mortality is wished back), divine awakening (godly ki and 2000 God Ki XP), restore everything, plus all of Earth's wishes.

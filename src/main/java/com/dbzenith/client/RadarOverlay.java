@@ -58,8 +58,11 @@ public final class RadarOverlay implements IGuiOverlay {
                 py = cy + (int) ((py - cy) * (R - 3) / off);
             }
             boolean blink = (System.currentTimeMillis() / 400) % 2 == 0;
-            g.fill(px - 2, py - 2, px + 3, py + 3, blink ? 0xFFFFC020 : 0xFFFF8000);
-            g.drawString(font, String.valueOf(b.star()), px + 3, py - 4, 0xFFFFE080, false);
+            int set = (b.star() - 1) / 7, star = (b.star() - 1) % 7 + 1;                  // Earth, Black Star, Super (12d)
+            int lit = set == 1 ? 0xFFE02818 : set == 2 ? 0xFFFFE860 : 0xFFFFC020, dim = set == 1 ? 0xFF701008 : set == 2 ? 0xFFE0A020 : 0xFFFF8000;
+            int size = set == 2 ? 3 : 2;
+            g.fill(px - size, py - size, px + size + 1, py + size + 1, blink ? lit : dim);
+            g.drawString(font, String.valueOf(star), px + 3, py - 4, set == 1 ? 0xFFFF8070 : 0xFFFFE080, false);
         }
         Component label = nearest == Double.MAX_VALUE ? Component.translatable("hud.dbzenith.radar_none")
                 : Component.translatable("hud.dbzenith.radar_nearest", (int) nearest);

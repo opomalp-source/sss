@@ -1,0 +1,4 @@
+{
+  "parent": "dbzenith:block/dragon_ball_template",
+  "textures": {"ball": "dbzenith:block/black_star_ball_3", "shell": "dbzenith:block/black_star_ball_shell"}
+}

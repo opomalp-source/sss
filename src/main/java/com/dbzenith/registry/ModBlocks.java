@@ -30,11 +30,18 @@ public final class ModBlocks {
                     .strength(-1f, 3_600_000f).lightLevel(s -> 12).sound(SoundType.STONE)));
 
     /** One-star to seven-star Dragon Balls (index = star - 1). Explosion-proof, glowing. */
-    public static final java.util.List<RegistryObject<Block>> DRAGON_BALLS = java.util.stream.IntStream.rangeClosed(1, 7)
-            .mapToObj(star -> register("dragon_ball_" + star, () -> new DragonBallBlock(star, BlockBehaviour.Properties.of()
-                    .mapColor(MapColor.COLOR_ORANGE).strength(0.5f, 3_600_000f).lightLevel(s -> 10).noOcclusion()
-                    .sound(SoundType.GLASS).pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK))))
-            .toList();
+    public static final java.util.List<RegistryObject<Block>> DRAGON_BALLS = balls(com.dbzenith.dragonball.BallSet.EARTH, MapColor.COLOR_ORANGE);
+    /** The Black Star Dragon Balls and the Super Dragon Balls (12d). */
+    public static final java.util.List<RegistryObject<Block>> BLACK_STAR_BALLS = balls(com.dbzenith.dragonball.BallSet.BLACK_STAR, MapColor.COLOR_RED);
+    public static final java.util.List<RegistryObject<Block>> SUPER_BALLS = balls(com.dbzenith.dragonball.BallSet.SUPER, MapColor.GOLD);
+
+    private static java.util.List<RegistryObject<Block>> balls(com.dbzenith.dragonball.BallSet set, MapColor color) {
+        return java.util.stream.IntStream.rangeClosed(1, 7)
+                .mapToObj(star -> register(set.prefix() + "_" + star, () -> new DragonBallBlock(set, star, BlockBehaviour.Properties.of()
+                        .mapColor(color).strength(0.5f, 3_600_000f).lightLevel(s -> set == com.dbzenith.dragonball.BallSet.SUPER ? 14 : 10).noOcclusion()
+                        .sound(SoundType.GLASS).pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK))))
+                .toList();
+    }
 
     /** Namek trees: pale trunks and round blue-green canopies (generated on Namek). */
     public static final RegistryObject<Block> NAMEK_LOG = register("namek_log",

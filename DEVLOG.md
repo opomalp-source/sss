@@ -1030,3 +1030,51 @@ The user asked for this to be "REALLY GOOD (npc designs and authentic)". Designs
   - A missed beat botches.
   - The Potara spends the pair and fuses for an hour without a dance; fused names.
   - 142 required tests pass. The tests place the partner beside the asker, because vanilla's spawn spread could leave two test players out of fusion range.
+
+## 2026-10-06 — Session 3 (cont.): 12d Black Star and Super Dragon Balls (v0.40.0)
+
+### Added
+- **Three sets of seven (`BallSet`):** Earth's, the Black Star Dragon Balls and the Super Dragon Balls.
+  - Each set has its own blocks, its own tracking record (`DragonBallData.get(server, set)`; Earth's keeps its old save name), its own way of scattering, and its own dragon and wishes.
+  - The Dragon Radar shows all three: Earth's orange, the Black Star balls red, the Super balls bigger and gold.
+  - `/dbz summon` raises whichever set is gathered there.
+- **Black Star Dragon Balls:**
+  - Deep red glass with black stars, scattered around the middle of the other planets (Namek, the Kai of the north's planet).
+  - Their dragon is red with dark spines and gold eyes. It grants:
+    - **Remake me:** a random other variant of your race. Rare destinies are in the pool; paths only if you are on one. A race with one variant gets dark power instead.
+    - **Dark power:** 15000 TP.
+    - **Mastery:** every reachable form mastered, including the forms that mastery opens.
+  - **The curse:** after a Black Star wish the seven scatter at once, and a 7-day clock starts, with a warning every day.
+    - A dragon summoned from the seven while the curse is on grants nothing but lifting it.
+    - If the clock runs out, doom: every 15 seconds a meteor comes down 10-28 blocks from each player on Earth (a flame, smoke and white-hot trail from high and to one side, then an explosion, a flash ring and a crater). It lasts until the curse is lifted.
+    - Meteors break blocks and start fires only if `meteorsBreakBlocks` is on.
+- **Super Dragon Balls:**
+  - Huge gold-orange balls that fill their block, with 2x2 red stars, scattered up to 3000 blocks from spawn.
+  - Their dragon is gold with orange spines and 2.4 times the size: about seventy blocks of coil.
+  - It grants every one of Earth's wishes, plus:
+    - **True immortality:** permanent. The Eternal Dragon's 30-minute wish no longer shortens it.
+    - **Mortality:** undoes immortality.
+    - **Divine awakening:** godly ki plus 2000 God Ki XP.
+    - **Restore everything:** every soul revived and every player online healed.
+- **Wish screen:** each dragon shows only its own wishes, with its own heading and colour. Two columns when there are more than eight (the Super dragon's 13).
+- **Dragon names:** the Black Star Dragon and the Super Dragon.
+- **Dev:** `/dbz curse start|doom|lift|meteor`.
+- **Config** (`dragon_balls`): `blackStarEnabled`, `blackStarScatterRadius` (500), `blackStarCurseTicks` (168000), `meteorIntervalTicks` (300), `meteorsBreakBlocks` (false), `superBallsEnabled`, `superScatterRadius` (3000), `wishBlackPowerTp` (15000).
+
+### Verified
+- **Screenshots:**
+  - the three sets side by side;
+  - the Black Star wish screen;
+  - the Eternal, Black Star and Super dragons;
+  - a meteor's fall and impact.
+- **Fixed after review:**
+  - The Super balls were too pale: deeper gold-orange.
+  - Meteor fires would have burned builds: no fire unless block damage is on.
+  - The trail got a hot core.
+  - Aerial shots must use spectator mode: an earlier "invisible dragon" was the camera falling to the floor after each teleport.
+- **GameTests:**
+  - A Black Star wish remakes you and starts the curse; the next dragon offers only lifting it, and lifting ends the curse.
+  - The curse running out turns to doom.
+  - An Android has nothing to remake.
+  - The Super dragon offers its wishes and Earth's; true immortality lasts forever and survives a lethal hit, and mortality undoes it.
+  - 145 required tests pass.

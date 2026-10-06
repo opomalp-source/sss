@@ -3204,6 +3204,7 @@ public class ArtGen {
     static final class Blocks {
         static void all() throws IOException {
             for (int star = 1; star <= 7; star++) dragonBall(star);
+            otherBalls();
             punchingBag();
             gravityChamber();
             timeChamberDoor();
@@ -3313,6 +3314,39 @@ public class ArtGen {
             }
             c.set(5, 5, mix(c.get(5, 5), 0xFFFFFFFF, 0.55));                                // glint
             c.save("block/dragon_ball_" + star + ".png");
+        }
+
+
+        /**
+         * The Black Star Dragon Balls (12d): deep red glass with black stars, on the same small model as Earth's; and the
+         * Super Dragon Balls: big gold-orange spheres filling their block, with large red stars (2x2 pixels each).
+         */
+        static void otherBalls() throws IOException {
+            int[] red = ramp(0xFFD0301A, 6), gold = ramp(0xFFF09418, 6);
+            Canvas shell = new Canvas(16, 16), bigShell = new Canvas(16, 16);
+            for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) {
+                shell.set(x, y, red[(int) clamp((float) ((0.66 - (y - 4) * 0.03) * 6), 0, 5)]);
+                bigShell.set(x, y, gold[(int) clamp((float) ((0.5 - (y - 8) * 0.02) * 6), 0, 5)]);
+            }
+            shell.set(6, 6, 0xFFFFD8C8).set(7, 6, 0xFFFF9A80).set(6, 7, 0xFFFF9A80);
+            bigShell.set(4, 3, 0xFFFFFFFF).set(5, 3, 0xFFFFF0C0).set(4, 4, 0xFFFFF0C0).set(3, 4, 0xFFFFE8A0);
+            shell.save("block/black_star_ball_shell.png");
+            bigShell.save("block/super_dragon_ball_shell.png");
+            for (int star = 1; star <= 7; star++) {
+                Canvas c = new Canvas(16, 16);
+                for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) c.set(x, y, shell.get(x, y));
+                for (int[] s : STARS[star - 1]) c.set(5 + s[0], 5 + s[1], 0xFF140606);
+                c.set(5, 5, mix(c.get(5, 5), 0xFFFFFFFF, 0.45));
+                c.save("block/black_star_ball_" + star + ".png");
+                Canvas b = new Canvas(16, 16);
+                for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) b.set(x, y, bigShell.get(x, y));
+                for (int[] s : STARS[star - 1]) {
+                    int x = 2 + s[0] * 2, y = 2 + s[1] * 2;
+                    b.set(x, y, 0xFFD81010).set(x + 1, y, 0xFFD81010).set(x, y + 1, 0xFFB80C0C).set(x + 1, y + 1, 0xFFB80C0C);
+                }
+                b.set(3, 3, mix(b.get(3, 3), 0xFFFFFFFF, 0.6));
+                b.save("block/super_dragon_ball_" + star + ".png");
+            }
         }
 
         /**
@@ -4351,11 +4385,17 @@ public class ArtGen {
 
         /** Texture for client.render.DragonModel (64x64). */
         static void dragon() throws IOException {
-            int[] g = ramp(0xFF2E9A48, 5), belly = ramp(0xFFE8D890, 4), horn = ramp(0xFFE8DCC0, 4), gold = ramp(0xFFE0B040, 3);
+            dragon("eternal_dragon", 0xFF2E9A48, 0xFFE8D890, 0xFFE0B040, 0xFFFF2020);
+            dragon("black_star_dragon", 0xFFB0281C, 0xFFE8C890, 0xFF4A1410, 0xFFFFD030);   // 12d: red, dark spines, gold eyes
+            dragon("super_dragon", 0xFFE8A828, 0xFFFFF0B8, 0xFFFF7020, 0xFFFF2020);        // 12d: gold, orange spines
+        }
+
+        static void dragon(String name, int bodyC, int bellyC, int spineC, int eyeC) throws IOException {
+            int[] g = ramp(bodyC, 5), belly = ramp(bellyC, 4), horn = ramp(0xFFE8DCC0, 4), gold = ramp(spineC, 3);
             Canvas c = new Canvas(64, 64);
             box(c, 0, 0, 8, 8, 12, (f, x, y, w, h) -> f == Face.BOTTOM ? belly[(y % 3 == 0) ? 1 : 2] : scales(g, f, x, y)); // body segment
             box(c, 40, 0, 2, 4, 2, (f, x, y, w, h) -> y == 0 ? gold[2] : gold[1]);                      // dorsal spike
-            box(c, 48, 0, 1, 1, 1, (f, x, y, w, h) -> 0xFFFF2020);                                    // eyes
+            box(c, 48, 0, 1, 1, 1, (f, x, y, w, h) -> eyeC);                                          // eyes
             box(c, 0, 20, 8, 6, 10, (f, x, y, w, h) -> {                                             // skull
                 if (f == Face.FRONT && y == 1 && (x == 1 || x == 6)) return g[0];                       // brow
                 return f == Face.BOTTOM ? belly[1] : scales(g, f, x, y);
@@ -4372,7 +4412,7 @@ public class ArtGen {
             });
             box(c, 28, 36, 2, 2, 8, (f, x, y, w, h) -> horn[f == Face.TOP ? 3 : (f == Face.BOTTOM ? 0 : 1 + (x + y) % 2)]); // horns
             box(c, 0, 46, 1, 1, 12, (f, x, y, w, h) -> gold[f == Face.TOP ? 2 : 1]);                 // whiskers
-            c.save("entity/eternal_dragon.png");
+            c.save("entity/" + name + ".png");
         }
 
         /** Fur: vertical strands, lighter on top-facing and front faces. */
