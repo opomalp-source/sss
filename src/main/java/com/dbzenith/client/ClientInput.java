@@ -21,6 +21,7 @@ public final class ClientInput {
     private static boolean wasCharging;
     private static boolean wasGuarding;
     private static boolean wasHeavy;
+    private static boolean wasBlast;
 
     private ClientInput() {}
 
@@ -29,7 +30,7 @@ public final class ClientInput {
         if (event.phase != TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) {
-            wasCharging = wasGuarding = wasHeavy = false;
+            wasCharging = wasGuarding = wasHeavy = wasBlast = false;
             return;
         }
 
@@ -42,6 +43,18 @@ public final class ClientInput {
         if (guarding != wasGuarding) {
             ModNetwork.sendToServer(new InputPacket(guarding ? InputPacket.Action.GUARD_START : InputPacket.Action.GUARD_STOP));
             wasGuarding = guarding;
+        }
+
+        boolean blast = ModKeys.KI_BLAST.isDown() && mc.screen == null;      // ki blasts (CX-19): the server times the hold
+        boolean tapped = false;
+        while (ModKeys.KI_BLAST.consumeClick()) tapped = true;
+        if (!wasBlast && (blast || tapped)) {
+            ModNetwork.sendToServer(new com.dbzenith.network.KiBlastPacket(true));
+            wasBlast = true;
+        }
+        if (wasBlast && !blast) {
+            ModNetwork.sendToServer(new com.dbzenith.network.KiBlastPacket(false));
+            wasBlast = false;
         }
 
         while (ModKeys.HEAVY.consumeClick()) {                         // a heavy: the finisher of a combo (CX-19)
@@ -69,6 +82,12 @@ public final class ClientInput {
             }
             Technique t = ClientCombatState.selected();
             long now = mc.level.getGameTime();
+            double meter = ClientCombatState.meterCost(t);
+            if (t != null && meter > 0 && !mc.player.getAbilities().instabuild && ClientPlayerData.get().getSpecial() + 1e-6 < meter) {
+                mc.player.displayClientMessage(Component.translatable("message.dbzenith.no_meter",
+                        (int) Math.ceil(meter / com.dbzenith.combat.engine.SpecialMeter.BAR)).withStyle(net.minecraft.ChatFormatting.YELLOW), true);
+                continue;                                                  // a super needs its bars (CX-19)
+            }
             if (t != null && !ClientCombatState.onCooldown(t, now)) {
                 ModNetwork.sendToServer(new UseTechniquePacket(t.id()));
                 ClientCombatState.startCooldown(t, now);

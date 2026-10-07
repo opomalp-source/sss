@@ -93,7 +93,7 @@ public final class SagaHud {
         bar(g, font, HP_FRAME, HP_FILL, X + HP_X, Y + HP_Y, HP_W, HP_H, HP_SKEW, 0, d.getBody(),
                 hp < LOW_HEALTH ? 0.75f + 0.25f * Mth.sin(t * 0.6f) : 1f);
         bar(g, font, ST_FRAME, ST_FILL, X + ST_X, Y + ST_Y, ST_W, ST_H, ST_SKEW, 1, d.getStamina(), 1f);
-        int below = Y + ST_Y + ST_H + 4;
+        int below = com.dbzenith.client.ui.SpecialBar.draw(g, font, X + ST_X + 2, Y + ST_Y + ST_H + 4, d, t);   // the special meter (CX-19)
         if (!form.isBase()) {                                                             // the form, small, under the bars
             Component name = Component.literal(Component.translatable(form.translationKey()).getString().toUpperCase());
             text(g, font, name.getString(), X + ST_X + 2, below - 1, com.dbzenith.client.ui.DbzTheme.brighten(0xFF000000 | aura, 1.2f), 0.65f);

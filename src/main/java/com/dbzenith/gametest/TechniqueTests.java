@@ -67,6 +67,7 @@ public final class TechniqueTests {
         helper.assertTrue(TechniqueLibrary.learnWithTp(d, Techniques.WAVE_BEAM), "learn with TP");
         helper.assertTrue(d.getTrainingPoints() == 1000 - Techniques.WAVE_BEAM.learnCost(), "TP spent");
         helper.assertTrue(d.deckView().contains("wave_beam"), "auto-equipped into a free slot");
+        d.setSpecial(com.dbzenith.combat.engine.SpecialMeter.max());                       // a super: it takes a bar (CX-19)
         helper.assertTrue(TechniqueHandler.use(p, Techniques.WAVE_BEAM) == TechniqueHandler.Result.FIRED, "now usable");
         TestPlayers.remove(helper, p);
         helper.succeed();
@@ -105,6 +106,7 @@ public final class TechniqueTests {
         helper.assertTrue(zombie.hasEffect(MobEffects.BLINDNESS), "zombie in front is blinded");
         float hp = zombie.getHealth();
         TechniqueLibrary.learnFree(d, Techniques.EXPLOSIVE_WAVE);
+        d.setSpecial(com.dbzenith.combat.engine.SpecialMeter.max());
         helper.assertTrue(TechniqueHandler.use(p, Techniques.EXPLOSIVE_WAVE) == TechniqueHandler.Result.FIRED, "wave fires");
         helper.assertTrue(zombie.getHealth() < hp, "explosive wave damages nearby");
         TestPlayers.remove(helper, p);

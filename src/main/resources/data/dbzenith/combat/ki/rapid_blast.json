@@ -1,0 +1,12 @@
+{
+  "_comment": "Tap the Ki Blast key: a quick blast in your aura's colour. cost_percent is of max ki; damage multiplies the ki attack.",
+  "cost_percent": 1.5,
+  "damage": 0.35,
+  "size": 0.32,
+  "speed": 2.2,
+  "life": 30,
+  "cooldown": 3,
+  "hitstun": 5,
+  "knockback": 0.08,
+  "spread": 2.5
+}

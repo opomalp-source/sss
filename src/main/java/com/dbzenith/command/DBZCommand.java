@@ -390,6 +390,24 @@ public final class DBZCommand {
                                         .then(Commands.argument("direction", StringArgumentType.word())
                                                 .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.List.of("neutral", "forward", "back", "side", "up", "down"), b))
                                                 .executes(ctx -> strike(ctx, StringArgumentType.getString(ctx, "direction")))))))
+                .then(Commands.literal("special")                                   // the special meter (CX-19)
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("amount", com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg(0)).executes(ctx -> {
+                                    double v = com.mojang.brigadier.arguments.DoubleArgumentType.getDouble(ctx, "amount");
+                                    for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) ModCapabilities.get(p).ifPresent(d -> d.setSpecial(v));
+                                    ctx.getSource().sendSuccess(() -> Component.literal("Special meter set to " + v), true);
+                                    return 1;
+                                }))))
+                .then(Commands.literal("kiblast")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("charge", com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg(-1, 1)).executes(ctx -> {
+                                    double charge = com.mojang.brigadier.arguments.DoubleArgumentType.getDouble(ctx, "charge");
+                                    int n = 0;
+                                    for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) if (com.dbzenith.combat.engine.KiCombat.fireForTest(p, charge)) n++;
+                                    int fired = n;
+                                    ctx.getSource().sendSuccess(() -> Component.literal(fired + " blast(s) fired"), true);
+                                    return fired;
+                                }))))
                 .then(Commands.literal("pvpzone")
                         .then(Commands.literal("add").then(Commands.argument("name", StringArgumentType.word())
                                 .then(Commands.argument("from", net.minecraft.commands.arguments.coordinates.BlockPosArgument.blockPos())

@@ -269,6 +269,7 @@ public final class DbzHud implements IGuiOverlay {
         by = bar(g, font, 0, bx, by, 112, 8, bodyFrac, d.getBody(), bodyColor, t, dt);
         by = bar(g, font, 1, bx - 2, by, 102, 7, frac(d.getKi(), s.maxKi()), d.getKi(), kiColor, t, dt);
         by = bar(g, font, 2, bx - 4, by, 92, 6, frac(d.getStamina(), s.maxStamina()), d.getStamina(), DbzTheme.STAMINA, t, dt);
+        by = com.dbzenith.client.ui.SpecialBar.draw(g, font, bx - 6, by + 1, d, t);
         if (d.isGuarding() || d.getGuardMeter() < 100) {                                 // guard meter, only when it matters
             float gf = (float) (d.getGuardMeter() / 100);
             int gc = gf < 0.3f ? DbzTheme.mix(0xFFAEE6FF, 0xFFFF6A5A, 0.5f + 0.5f * Mth.sin(t * 0.8f)) : 0xFFAEE6FF;
@@ -382,6 +383,7 @@ public final class DbzHud implements IGuiOverlay {
         by = zbar(g, font, 0, bx, by, 132, bodyFrac, d.getBody(), bodyColor, t, dt, 0.8f);
         by = zbar(g, font, 1, bx + 2, by, 120, frac(d.getKi(), s.maxKi()), d.getKi(), kiColor, t, dt, flow);
         by = zbar(g, font, 2, bx + 4, by, 108, frac(d.getStamina(), s.maxStamina()), d.getStamina(), DbzTheme.STAMINA, t, dt, 1.2f);
+        by = com.dbzenith.client.ui.SpecialBar.draw(g, font, bx + 16, by + 1, d, t);
         if (d.isGuarding() || d.getGuardMeter() < 100) {
             float gf = (float) (d.getGuardMeter() / 100);
             int gc = gf < 0.3f ? DbzTheme.mix(0xFFAEE6FF, 0xFFFF6A5A, 0.5f + 0.5f * Mth.sin(t * 0.8f)) : 0xFFAEE6FF;
@@ -506,6 +508,7 @@ public final class DbzHud implements IGuiOverlay {
         y = cbar(g, font, 0, bx, y, 124, 7, bodyFrac, d.getBody(), hp, t, dt, low, false);
         y = cbar(g, font, 1, bx, y, 112, 5, frac(d.getKi(), s.maxKi()), d.getKi(), ki, t, dt, false, d.isCharging());
         y = cbar(g, font, 2, bx, y, 98, 3, frac(d.getStamina(), s.maxStamina()), d.getStamina(), 0xFFF2B33A, t, dt, false, false);
+        y = com.dbzenith.client.ui.SpecialBar.draw(g, font, bx, y + 1, d, t);
         if (d.isGuarding() || d.getGuardMeter() < 100) {                                  // the guard, and the breaker charges
             float gf = (float) (d.getGuardMeter() / 100);
             int gc = gf < 0.3f ? DbzTheme.mix(0xFFAEE6FF, 0xFFFF6A5A, 0.5f + 0.5f * Mth.sin(t * 0.8f)) : 0xFFAEE6FF;
@@ -557,7 +560,7 @@ public final class DbzHud implements IGuiOverlay {
             DbzTheme.text(g, font, compact(val[i]), x + w + 3, y - 1, DbzTheme.TEXT, 0.6f);
             y += 5;
         }
-        y += 1;
+        y = com.dbzenith.client.ui.SpecialBar.draw(g, font, x, y, d, t);
         String bp = String.format("%,d", StatCalculator.battlePower(d)) + "  " + d.getReleasePercent() + "%";
         DbzTheme.text(g, font, bp, x, y, held ? DbzTheme.brighten(aura, 1.1f) : DbzTheme.TITLE, 0.7f);
         y += 7;

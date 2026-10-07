@@ -222,6 +222,9 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue comboDamageDecay, comboMinDamage, hitstunDecay, hitstunMin, wallSlamBonus, groundSlamBonus, dashStrikeBonus, downedDamage;
         public final ForgeConfigSpec.IntValue juggleLimit, downedHitLimit, chainWindowTicks, inputBufferTicks, comboResetTicks, wakeUpGraceTicks;
         public final ForgeConfigSpec.IntValue vanishWindowTicks, vanishCooldownTicks, counterWindowTicks, burstRechargeTicks, superDashMaxTicks;
+        public final ForgeConfigSpec.BooleanValue specialMeter;
+        public final ForgeConfigSpec.IntValue specialBars;
+        public final ForgeConfigSpec.DoubleValue specialPerHit, specialPerHeavy, specialPerHitTaken, specialPerPerfectGuard, specialPerVanish;
         public final ForgeConfigSpec.DoubleValue vanishKiPercent, burstKiPercent, superDashKiPercent, superDashRange, superDashSpeed, guardArcDegrees;
         public final ForgeConfigSpec.BooleanValue pvpRules;
         public final ForgeConfigSpec.IntValue pvpToggleCooldown;
@@ -624,6 +627,13 @@ public final class DBZConfig {
             superDashSpeed = b.comment("Super dash speed, blocks per tick").defineInRange("superDashSpeed", 1.8, 0.2, 10.0);
             superDashMaxTicks = b.comment("A super dash gives up after this many ticks").defineInRange("superDashMaxTicks", 30, 1, 400);
             guardArcDegrees = b.comment("Guard covers blows from within this arc in front (360 = all round)").defineInRange("guardArcDegrees", 200.0, 0.0, 360.0);
+            specialMeter = b.comment("Supers and ultimates cost the special meter (bars of 100), built by fighting. Off: they cost only ki").define("specialMeter", true);
+            specialBars = b.comment("Bars in the special meter").defineInRange("specialBars", 3, 1, 10);
+            specialPerHit = b.comment("Meter for landing a light blow or ki blast").defineInRange("specialPerHit", 5.0, 0.0, 100.0);
+            specialPerHeavy = b.comment("Meter for landing a heavy blow or a charged blast").defineInRange("specialPerHeavy", 11.0, 0.0, 100.0);
+            specialPerHitTaken = b.comment("Meter for taking a blow").defineInRange("specialPerHitTaken", 4.0, 0.0, 100.0);
+            specialPerPerfectGuard = b.comment("Meter for a perfect guard").defineInRange("specialPerPerfectGuard", 25.0, 0.0, 100.0);
+            specialPerVanish = b.comment("Meter for a vanish").defineInRange("specialPerVanish", 15.0, 0.0, 100.0);
             b.pop();
 
             b.comment("PvP mode (CX-19): players fight each other only in PvP mode (key P, or /pvp)").push("pvp");
@@ -680,7 +690,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue showDebugOverlay;
         public final ForgeConfigSpec.BooleanValue customHotbar;
         public final ForgeConfigSpec.BooleanValue hideVanillaHearts;
-        public final ForgeConfigSpec.BooleanValue transformCutIn;
+        public final ForgeConfigSpec.BooleanValue transformCutIn, ultimateCinematic;
         public final ForgeConfigSpec.DoubleValue screenShake;
         public final ForgeConfigSpec.BooleanValue hitstop;
         public final ForgeConfigSpec.BooleanValue afterimages;
@@ -707,6 +717,8 @@ public final class DBZConfig {
                     .define("hideVanillaHearts", true);
             transformCutIn = b.comment("Play a cut-in (portrait slash and form name) when you transform")
                     .define("transformCutIn", true);
+            ultimateCinematic = b.comment("Play the cinematic (a cut-in with the technique's name, the screen darkening, a shake) when an ultimate is fired near you")
+                    .define("ultimateCinematic", true);
             hudScale = b.comment("Size of the portrait HUD (0.6 - 1.4)")
                     .defineInRange("hudScale", 1.0, 0.6, 1.4);
             hudStyle = b.comment("HUD: 0 Saga (a round portrait, a Release tab, a smoky BP and Ki bar, slanted health and stamina bars), 1 Classic, 2 Minimal (thin bars, no portrait), 3 Ornate (a portrait frame per form), 4 Clean (a portrait card and slim gradient bars)")

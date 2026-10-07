@@ -87,6 +87,7 @@ public final class Evasion {
         victim.hurtMarked = true;
         victim.fallDistance = 0;
         openCounter(g, attacker, now);
+        SpecialMeter.gain(victim, c.specialPerVanish.get());
         level.playSound(null, dest.x, dest.y, dest.z, ModSounds.VANISH.get(), SoundSource.PLAYERS, 0.8f, 1.6f);
         tell(victim, "message.dbzenith.vanish", ChatFormatting.AQUA);
         return true;
@@ -101,6 +102,7 @@ public final class Evasion {
     /** A perfect guard (a parry) opens the counter too. Called by GuardRules. */
     public static void onPerfectGuard(LivingEntity defender, Entity attacker, long now) {
         if (attacker instanceof LivingEntity a) openCounter(CombatEngine.of(defender), a, now);
+        SpecialMeter.gain(defender, DBZConfig.SERVER.specialPerPerfectGuard.get());
         tell(defender, "message.dbzenith.perfect_guard", ChatFormatting.GOLD);
         if (attacker instanceof ServerPlayer ap) ap.displayClientMessage(Component.translatable("message.dbzenith.parried").withStyle(ChatFormatting.RED), true);
     }

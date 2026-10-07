@@ -68,4 +68,16 @@ public final class ClientCombatState {
         cooldowns.clear();
         selected = 0;
     }
+
+    // the special meter (CX-19): what supers and ultimates cost, from the server's data
+    private static Map<String, Double> meterCosts = Map.of();
+
+    public static void setMeterCosts(Map<String, Double> costs) {
+        meterCosts = Map.copyOf(costs);
+    }
+
+    /** Special meter a technique costs (0: a basic one). */
+    public static double meterCost(Technique t) {
+        return t == null ? 0 : meterCosts.getOrDefault(t.id(), 0.0);
+    }
 }

@@ -93,3 +93,43 @@ Bare-handed melee runs through the combat engine (`combat/engine`), for players 
 **Counter:** after a vanish or a perfect guard (or a chase counter), any press within 12 ticks throws `counter_strike`: fast, unblockable, knocks the foe away. Counters can be vanished in turn, so trading vanishes is a duel of timing.
 
 **Config `[combat_engine]`:** vanishWindowTicks, vanishCooldownTicks, vanishKiPercent, counterWindowTicks, burstKiPercent, burstRechargeTicks, superDashKiPercent, superDashRange, superDashSpeed, superDashMaxTicks, guardArcDegrees. Parry: `parryWindowTicks` and `parryStunTicks` in the combat section.
+
+## Ki blasts, the special meter, supers and ultimates (phase 4)
+
+**Ki Blast key (C):**
+- **Tap:** a quick blast in your aura's colour (1.5% ki, as fast as every 3 ticks). It stuns briefly and pushes a little.
+- **Hold:** after 8 ticks you start charging (slowed, the focus pose). Release for a charged blast; it is full after 22 more ticks. It is bigger, harder and costlier (4-12% ki), stuns longer and throws the foe (a wall slam if one is behind them).
+- Blasts count toward the combo and can be guarded, vanished or dodged like blows.
+
+**The special meter:** three bars of 100 under the stamina bar.
+
+| Fills by | Amount |
+|---|---|
+| Landing a light blow or a quick blast | 5 |
+| Landing a heavy blow or a charged blast | 11 |
+| Taking a blow | 4 |
+| A perfect guard | 25 |
+| A vanish | 15 |
+
+**Technique tiers:**
+
+| Tier | Costs | Techniques |
+|---|---|---|
+| Super | 1 bar (and its ki) | Kamehameha, Galick Gun, Masenko, Destructo Disc, Mini Spirit Bomb, Tuffle Cannon, Explosive Wave, Death Beam |
+| Ultimate | 3 bars (and its ki), plus a cinematic | Spirit Bomb, Death Ball, Hakai |
+| Basic | Ki only | Everything else |
+
+- **Ultimate cinematic:** a cut-in with the name, a flash and a shake on the screen of everyone within 64 blocks. The game doesn't pause. Client config `ultimateCinematic` turns it off.
+- **Beam clash:** mash the ki key (R) to push. Press **Ki Blast** to spend a bar on a surge that doubles your push for 1.5 seconds.
+
+### Data
+
+- `data/dbzenith/combat/ki/rapid_blast.json` and `charged_blast.json`:
+  - Fields: `cost_percent`, `damage`, `size`, `speed`, `explosion`, `life`, `cooldown`, `hitstun`, `knockback`, `spread`, `homing`.
+  - For the charged blast, each value also has a `_max`, and two more fields set the charge: `min_charge` (ticks before charging starts) and `charge_ticks` (ticks to full).
+- `data/dbzenith/combat/techniques/<technique id>.json`: `tier` (`basic`, `super`, `ultimate`), `meter` (default 100 for a super and 300 for an ultimate), `cinematic` (default true for an ultimate).
+  - Making a technique a super is one small file. Deleting the file makes it basic again.
+
+**Config `[combat_engine]`:** `specialMeter` (off: supers and ultimates cost only ki), `specialBars`, `specialPerHit`, `specialPerHeavy`, `specialPerHitTaken`, `specialPerPerfectGuard`, `specialPerVanish`.
+
+**Dev:** `/dbz special <player> <amount>`, `/dbz kiblast <player> <charge>` (-1 for a quick blast, 0-1 for a charged one).

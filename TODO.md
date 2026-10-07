@@ -209,7 +209,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - [x] 19a (v0.51.0) PvP mode: key P and /pvp, server rules (cooldown, fight timer, pull-in on being struck, both must be in PvP mode), safe zones (spawn, other world, tournament grounds, /dbz pvpzone), effects judged like blows, the HUD badge and the name mark
   - [x] 19b (v0.52.0) Melee combos from data: the combat engine for players and NPCs (light chain, directional heavies: smash, rush, uppercut, launcher, spike, sweep, hook), cancel windows, input buffering, hitboxes, combo scaling, juggles, wall and ground slams, knockdowns, clashes, Z-hits; replaces Combat v3 melee
   - [x] 19c (v0.53.0) Guard from the front only, perfect guard, vanish step, counters, Burst, super dash, and the Dash moves rebuilt on the engine (tech roll, air recovery, side step, spot dodge, chase)
-  - [ ] 19d Ki blasts (rapid, charged), supers and ultimates (special meter), beam clash
+  - [x] 19d (v0.54.0) Ki blasts on key C (tap: quick, hold: charged; from data), the special meter (3 bars; built by landing and taking blows, perfect guards, vanishes), supers (1 bar) and ultimates (3 bars, a cut-in cinematic) from data, the meter surge in beam clashes, the meter on every HUD style
   - [ ] 19e Hit feedback and camera
   - [ ] 19f Lock-on
   - [ ] 19g Netcode: prediction, lag compensation, anti-cheat

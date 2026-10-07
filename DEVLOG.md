@@ -1508,3 +1508,32 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   - GameTest players now have their spawn protection cleared (they never tick it away, so blows on them were refused).
   - 161 GameTests.
 - **Checked in the dev client:** a super dash across 20 blocks to a Namekian Warrior. The first version overshot through the target; it now stops 1.7 blocks in front.
+
+## 2026-10-07 — CX-19 Combat v4, phase 4: ki blasts, the special meter, supers and ultimates (v0.54.0)
+- **Ki Blast key (C), `combat/engine/KiCombat`:**
+  - The client sends the key's down and up (`KiBlastPacket`; a tap shorter than a tick still counts). The server times the hold.
+  - A tap fires a quick blast in your aura's colour (1.5% ki, 3 ticks apart, a small stun and push).
+  - Holding past 8 ticks charges: you slow down, take the focus pose and hear the charge hum. On release you fire a charged blast that grows over 22 ticks (4-12% ki; damage x0.8-2.6, size, a small explosion when full; 14-28 ticks of stun and a throw that can wall-slam).
+  - Both blasts come from data: `data/dbzenith/combat/ki/rapid_blast.json` and `charged_blast.json`.
+  - `KiBlastEntity` gained `setColor` and `setCombat`. When an engine blast lands, `CombatEngine.kiHit` applies the stun and the push, counts it toward the combo and fills the meter. It does nothing if the blast was dodged or guarded: `CombatEvents` now reports the outcome of ki hits too, with a new `outcomeGuarded`.
+- **The special meter** (`SpecialMeter`, `PlayerData.special`, saved and synced):
+  - Three bars of 100.
+  - Filled by: landing a light blow or quick blast (+5), a heavy or charged blast (+11), taking a blow (+4), a perfect guard (+25), a vanish (+15).
+  - Config `[combat_engine]`: specialMeter, specialBars and the five gains.
+- **Technique tiers from data** (`data/dbzenith/combat/techniques/<id>.json`: `tier`, `meter`, `cinematic`):
+  - **Supers, 1 bar:** Kamehameha, Galick Gun, Masenko, Destructo Disc, Mini Spirit Bomb, Tuffle Cannon, Explosive Wave, Death Beam.
+  - **Ultimates, 3 bars plus a cinematic:** Spirit Bomb, Death Ball, Hakai.
+  - Every other technique is basic.
+  - Behaviour:
+    - `TechniqueHandler` refuses with `NO_METER` and the client gives a message without sending.
+    - The bars are spent when the technique fires; creative pays nothing. The admin `/dbz technique` pays no meter but still plays the cinematic.
+    - The costs reach clients through `TechniqueTiersPacket` on joining and after `/reload`. The deck screen shows "Super (1 bar)" or "Ultimate (3 bars)".
+- **Ultimate cinematic** (`UltimatePacket` → `client/fx/Cinematics`):
+  - Everyone within 64 blocks sees the cut-in band with the technique's name ("ULTIMATE" for the caster, "INCOMING ULTIMATE" for everyone else), a flash in its colour, a shake by distance and a zoom kick.
+  - The game never pauses. Client config `ultimateCinematic` turns it off.
+  - `CutInOverlay.show` plays a cut-in whatever the transformation toggle says.
+- **Beam clash:** the Ki Blast key during a struggle spends a bar for a surge that doubles your push for 1.5 s (`BeamStruggle.surge`). Mashing the ki key works as before.
+- **HUD:** `client/ui/SpecialBar` draws three slanted segments under the stamina bar on every HUD style. Full bars burn gold and pulse, the filling one is pale, and the count of full bars is shown.
+- **Dev:** `/dbz special <player> <amount>`, `/dbz kiblast <player> <charge -1..1>` (-1 = a quick one).
+- **Tests:** `KiCombatTests` (quick and charged blasts and their costs, cooldown and size; a charged blast stuns and builds meter; blows fill both meters; supers and ultimates need their bars and spend them). Two technique tests now give the meter first. 165 GameTests.
+- **Checked in the dev client:** the meter on the Saga HUD at 2.5 bars; quick and charged blasts in the aura's gold (a charged blast felled a zombie and an iron golem); the Death Ball's ULTIMATE cut-in.

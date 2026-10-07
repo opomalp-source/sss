@@ -1401,6 +1401,21 @@ public class PlayerData {
         markDirty();
     }
 
+    /** The special meter (CX-19): built by fighting, spent on supers and ultimates. Bars of 100. */
+    private double special;
+
+    public double getSpecial() {
+        return special;
+    }
+
+    public void setSpecial(double v) {
+        double c = Math.max(0, Math.min(com.dbzenith.combat.engine.SpecialMeter.max(), v));
+        if (Math.abs(c - special) > 1e-6) {
+            special = c;
+            markDirty();
+        }
+    }
+
     // guard meter (combat.GuardRules): 0..100, empties under blocked hits and breaks the guard
     private double guardMeter = 100;
     private long guardStartTick = Long.MIN_VALUE / 2;   // when the guard last went up (parry window); not saved
@@ -1655,6 +1670,7 @@ public class PlayerData {
         tag.putString("variant", variant);
         tag.putString("destiny", destiny);
         tag.putDouble("guardMeter", guardMeter);
+        tag.putDouble("special", special);
         net.minecraft.nbt.ListTag customs = new net.minecraft.nbt.ListTag();
         for (int i = 0; i < customSpecs.length; i++) {
             if (customSpecs[i] == null) continue;
@@ -1788,6 +1804,7 @@ public class PlayerData {
         variant = tag.getString("variant");
         destiny = tag.getString("destiny");
         guardMeter = tag.contains("guardMeter") ? tag.getDouble("guardMeter") : 100;
+        special = tag.getDouble("special");
         java.util.Arrays.fill(customSpecs, null);
         java.util.Arrays.fill(customBuilt, null);
         net.minecraft.nbt.ListTag customs = tag.getList("customTechniques", net.minecraft.nbt.Tag.TAG_COMPOUND);

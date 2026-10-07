@@ -100,8 +100,14 @@ public final class ModNetwork {
                 .encoder(TournamentPackets.Join::encode).decoder(TournamentPackets.Join::decode).consumerMainThread(TournamentPackets.Join::handle).add();
         CHANNEL.messageBuilder(PvpTogglePacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(PvpTogglePacket::encode).decoder(PvpTogglePacket::decode).consumerMainThread(PvpTogglePacket::handle).add();
+        CHANNEL.messageBuilder(KiBlastPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(KiBlastPacket::encode).decoder(KiBlastPacket::decode).consumerMainThread(KiBlastPacket::handle).add();
         CHANNEL.messageBuilder(MeleeInputPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(MeleeInputPacket::encode).decoder(MeleeInputPacket::decode).consumerMainThread(MeleeInputPacket::handle).add();
+        CHANNEL.messageBuilder(UltimatePacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(UltimatePacket::encode).decoder(UltimatePacket::decode).consumerMainThread(UltimatePacket::handle).add();
+        CHANNEL.messageBuilder(TechniqueTiersPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(TechniqueTiersPacket::encode).decoder(TechniqueTiersPacket::decode).consumerMainThread(TechniqueTiersPacket::handle).add();
         CHANNEL.messageBuilder(MoveAnimPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(MoveAnimPacket::encode).decoder(MoveAnimPacket::decode).consumerMainThread(MoveAnimPacket::handle).add();
         CHANNEL.messageBuilder(SelectTitlePacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)

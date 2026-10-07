@@ -63,6 +63,10 @@ public class KiBlastEntity extends Projectile {
     private float baseSize, baseExplosion;
     private boolean called;
     private final Set<java.util.UUID> contributors = new HashSet<>();
+    // the combat engine's ki blasts (CX-19): not saved, a blast lives a few seconds
+    private int combatStun = -1;
+    private double combatKnock;
+    private boolean combatHeavy;
 
     public KiBlastEntity(EntityType<? extends KiBlastEntity> type, Level level) {
         super(type, level);
@@ -93,6 +97,17 @@ public class KiBlastEntity extends Projectile {
         blast.baseExplosion = technique.explosionPower();
         blast.refreshDimensions();
         return blast;
+    }
+
+    public void setColor(int rgb) {
+        entityData.set(COLOR, rgb);
+    }
+
+    /** A ki blast of the combat engine (CX-19): it stuns, pushes and builds the special meter when it lands. */
+    public void setCombat(int hitstun, double knockback, boolean heavy) {
+        combatStun = hitstun;
+        combatKnock = knockback;
+        combatHeavy = heavy;
     }
 
     public void setHomingTarget(Entity target) {
@@ -326,7 +341,13 @@ public class KiBlastEntity extends Projectile {
             living.addEffect(new net.minecraft.world.effect.MobEffectInstance(com.dbzenith.registry.ModEffects.KI_SEAL.get(), (int) effectPower, 0));
         }
         target.invulnerableTime = 0; // volleys must not be eaten by i-frames
-        target.hurt(ModDamageTypes.kiBlast(level(), this, getOwner()), (float) damage);
+        com.dbzenith.combat.engine.CombatEngine.outcomeImpact = -1;
+        com.dbzenith.combat.engine.CombatEngine.outcomeDealt = 0;
+        com.dbzenith.combat.engine.CombatEngine.outcomeGuarded = false;
+        boolean struck = target.hurt(ModDamageTypes.kiBlast(level(), this, getOwner()), (float) damage);
+        if (combatStun >= 0 && target instanceof LivingEntity living && getOwner() instanceof LivingEntity owner) {
+            com.dbzenith.combat.engine.CombatEngine.kiHit(owner, living, struck, combatStun, combatKnock, combatHeavy);
+        }
         KiTraits.onHit(this, getOwner(), kiType, flags, target, damage, getDeltaMovement(), null);
         if (explosionPower <= 0 && level() instanceof net.minecraft.server.level.ServerLevel sl) {
             com.dbzenith.network.ImpactPacket.at(target.getBoundingBox().getCenter(), getDeltaMovement().normalize(),

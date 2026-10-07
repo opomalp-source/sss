@@ -1,0 +1,20 @@
+{
+  "_comment": "Hold the Ki Blast key: charging starts after min_charge ticks and is full charge_ticks later; each value goes from its base to its _max with the charge.",
+  "min_charge": 8,
+  "charge_ticks": 22,
+  "cost_percent": 4,
+  "cost_percent_max": 12,
+  "damage": 0.8,
+  "damage_max": 2.6,
+  "size": 0.5,
+  "size_max": 1.3,
+  "speed": 1.6,
+  "explosion": 0,
+  "explosion_max": 1.0,
+  "life": 50,
+  "cooldown": 12,
+  "hitstun": 14,
+  "hitstun_max": 28,
+  "knockback": 0.35,
+  "knockback_max": 1.1
+}

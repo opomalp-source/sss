@@ -24,5 +24,7 @@ public record UseTechniquePacket(String techniqueId) {
         TechniqueHandler.Result r = TechniqueHandler.use(player, Techniques.resolve(com.dbzenith.data.ModCapabilities.get(player).orElse(null), msg.techniqueId));
         if (r == TechniqueHandler.Result.STUNNED) player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.dbzenith.stunned"), true);
         if (r == TechniqueHandler.Result.SEALED) player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.dbzenith.ki_sealed"), true);
+        if (r == TechniqueHandler.Result.NO_METER) player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.dbzenith.no_meter",
+                (int) Math.ceil(com.dbzenith.combat.engine.KiCombat.tier(msg.techniqueId).meter() / com.dbzenith.combat.engine.SpecialMeter.BAR)).withStyle(net.minecraft.ChatFormatting.YELLOW), true);
     }
 }

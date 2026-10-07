@@ -61,6 +61,7 @@ public final class CombatEngine {
     /** What CombatEvents made of the engine's blow: the impact shown (guard, parry, ...) and the damage taken. */
     public static int outcomeImpact = -1;
     public static double outcomeDealt;
+    public static boolean outcomeGuarded;
 
     private CombatEngine() {}
 
@@ -346,6 +347,8 @@ public final class CombatEngine {
         if (downed) g.downedHits++;
         if (g.move != null && g.moveTick >= g.move.armor) g.move = null;      // knocked out of their own move
         if (a instanceof Player p) ModCapabilities.get(p).ifPresent(d -> d.registerHit(now, c.comboWindowTicks.get(), c.comboMaxHits.get()));
+        SpecialMeter.gain(a, m.button == Move.Button.HEAVY ? c.specialPerHeavy.get() : c.specialPerHit.get());
+        SpecialMeter.gain(v, c.specialPerHitTaken.get());
         int stun = (int) Math.round(m.hitstun * stunScale * (zhit ? 1.6 : 1.0));
         if (!downed) stun(g, v, stun, now);
         if (downed) return;                                                     // the floored are not thrown about
@@ -389,6 +392,39 @@ public final class CombatEngine {
         if (!a.onGround() && m.launch == Move.Launch.NONE) {                    // an air combo carries the attacker along
             a.setDeltaMovement(vel.scale(0.9));
             a.hurtMarked = true;
+        }
+    }
+
+    /**
+     * A ki blast from {@link KiCombat} struck {@code v} (after the damage, whose outcome CombatEvents left in the
+     * outcome fields): meter, hitstun and a push, unless it was dodged or guarded. Counts toward the combo.
+     */
+    public static void kiHit(LivingEntity a, LivingEntity v, boolean struck, int hitstun, double knockback, boolean heavy) {
+        if (a == null || v == null || !v.isAlive() || outcomeImpact == -2 || outcomeGuarded || (!struck && outcomeDealt <= 0)) return;
+        DBZConfig.Server c = DBZConfig.SERVER;
+        long now = v.level().getGameTime();
+        Fighter g = of(v);
+        if (now < g.wakeUntil || CombatMoves.isDowned(v, now)) return;
+        if (g.comboFrom != a.getId() || now - g.lastHitAt > c.comboResetTicks.get()) {
+            g.comboHits = 0;
+            g.juggleHits = 0;
+        }
+        double stunScale = Math.max(c.hitstunMin.get(), 1.0 - c.hitstunDecay.get() * g.comboHits);
+        g.comboHits++;
+        g.comboFrom = a.getId();
+        g.lastHitAt = now;
+        SpecialMeter.gain(a, heavy ? c.specialPerHeavy.get() : c.specialPerHit.get());
+        SpecialMeter.gain(v, c.specialPerHitTaken.get());
+        if (g.move != null && g.moveTick >= g.move.armor) g.move = null;       // knocked out of their own move
+        stun(g, v, (int) Math.round(hitstun * stunScale), now);
+        if (knockback > 0) {
+            Vec3 push = away(a, v).scale(knockback).add(0, heavy ? 0.2 : 0.02, 0);
+            v.setDeltaMovement(v.onGround() || heavy ? push : v.getDeltaMovement().scale(0.4).add(push.x, Math.max(push.y, 0.08), push.z));
+            v.hurtMarked = true;
+            if (heavy) {                                                        // a charged blast throws them (wall slams)
+                g.flightUntil = now + 12;
+                g.flightBy = a;
+            }
         }
     }
 

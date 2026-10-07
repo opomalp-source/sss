@@ -1629,5 +1629,12 @@
   "message.dbzenith.counter": "COUNTER!",
   "message.dbzenith.burst": "BURST!",
   "message.dbzenith.burst_empty": "No Burst left: they come back one at a time",
-  "message.dbzenith.burst_no_ki": "Not enough ki to Burst"
+  "message.dbzenith.burst_no_ki": "Not enough ki to Burst",
+  "key.dbzenith.ki_blast": "Ki Blast (tap: quick, hold: charged)",
+  "message.dbzenith.no_meter": "Needs %s bar(s) of special meter",
+  "message.dbzenith.beam_surge": "Surge! (1 bar)",
+  "cutin.dbzenith.ultimate": "ULTIMATE",
+  "cutin.dbzenith.ultimate_incoming": "INCOMING ULTIMATE",
+  "screen.dbzenith.tier_super": "Super (%s bar).",
+  "screen.dbzenith.tier_ultimate": "Ultimate (%s bars)."
 }

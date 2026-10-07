@@ -33,6 +33,7 @@ public final class BeamStruggle {
     final KiBeamEntity a, b;
     double t;                       // 0 = clash at a's hands, 1 = at b's hands
     double mashA, mashB;
+    int surgeA, surgeB;             // ticks left of a surge bought with the special meter (CX-19)
     int ticks;
     boolean over;
 
@@ -104,6 +105,26 @@ public final class BeamStruggle {
         return true;
     }
 
+    /** The Ki Blast key in a struggle: a bar of the special meter for a surge that doubles your push for a second and a half. */
+    public static boolean surge(ServerPlayer player) {
+        BeamStruggle s = BY_OWNER.get(player.getUUID());
+        if (s == null || s.over) return false;
+        PlayerData d = ModCapabilities.get(player).orElse(null);
+        if (d == null || (s.a.getOwner() == player ? s.surgeA : s.surgeB) > 0) return false;
+        if (!com.dbzenith.combat.engine.SpecialMeter.spend(player, d, com.dbzenith.combat.engine.SpecialMeter.BAR)) {
+            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.dbzenith.no_meter", 1)
+                    .withStyle(net.minecraft.ChatFormatting.YELLOW), true);
+            return false;
+        }
+        if (s.a.getOwner() == player) s.surgeA = 30;
+        else s.surgeB = 30;
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.AURA_CHARGE.get(),
+                net.minecraft.sounds.SoundSource.PLAYERS, 1f, 0.7f);
+        player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.dbzenith.beam_surge")
+                .withStyle(net.minecraft.ChatFormatting.GOLD), true);
+        return true;
+    }
+
     public static boolean isStruggling(Entity owner) {
         BeamStruggle s = BY_OWNER.get(owner.getUUID());
         return s != null && !s.over;
@@ -120,7 +141,9 @@ public final class BeamStruggle {
         ticks++;
         if (!(oa instanceof ServerPlayer)) mashA = Math.min(3, mashA + 0.06 + a.level().random.nextDouble() * 0.06);
         if (!(ob instanceof ServerPlayer)) mashB = Math.min(3, mashB + 0.06 + b.level().random.nextDouble() * 0.06);
-        double pa = a.damagePerPulse() * (1 + mashA), pb = b.damagePerPulse() * (1 + mashB);
+        double pa = a.damagePerPulse() * (1 + mashA) * (surgeA > 0 ? 2 : 1), pb = b.damagePerPulse() * (1 + mashB) * (surgeB > 0 ? 2 : 1);
+        if (surgeA > 0) surgeA--;
+        if (surgeB > 0) surgeB--;
         t += STEP * (pa - pb) / Math.max(1e-6, pa + pb);
         mashA *= 0.92;
         mashB *= 0.92;

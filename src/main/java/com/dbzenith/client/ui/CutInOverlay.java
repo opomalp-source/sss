@@ -27,8 +27,18 @@ public final class CutInOverlay implements IGuiOverlay {
     }
 
     public static void play(Component formName, int auraColor) {
+        if (DBZConfig.CLIENT.transformCutIn.get()) show(formName, auraColor);
+    }
+
+    /** A cut-in whatever the transformation toggle says (the caller checked its own toggle). */
+    public static void show(Component title, int auraColor, String caption) {
+        show(title, auraColor);
+        labelKey = caption;
+    }
+
+    private static void show(Component formName, int auraColor) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null || !DBZConfig.CLIENT.transformCutIn.get()) return;
+        if (mc.level == null) return;
         startedAt = mc.level.getGameTime();
         name = formName;
         color = 0xFF000000 | auraColor;

@@ -84,7 +84,7 @@ public final class CombatEvents {
             raw *= com.dbzenith.race.RacialSkills.blowFactor(by, victimData, foeBody, stronger, isKi);
         }
         double dealt;
-        boolean evaded = false;
+        boolean evaded = false, guarded = false;
         if (victimData != null) {
             Player player = (Player) victim;
             victimData.recomputeIfStale();
@@ -129,6 +129,7 @@ public final class CombatEvents {
                     }
                 }
             }
+            guarded = victimData.isGuarding();
             if (guardAway) victimData.setGuarding(true);
             evaded = afterimage;
             if (dealt > 0) com.dbzenith.race.TailRules.onHit(player, victimData, source); // blades can cut a tail
@@ -152,9 +153,10 @@ public final class CombatEvents {
             event.setAmount(amount);
         }
 
-        if (isStrike) {                                                         // the engine reads what became of its blow
+        if (isStrike || isKi) {                                                 // the engine reads what became of its blow
             com.dbzenith.combat.engine.CombatEngine.outcomeImpact = evaded ? -2 : impact;
             com.dbzenith.combat.engine.CombatEngine.outcomeDealt = dealt;
+            com.dbzenith.combat.engine.CombatEngine.outcomeGuarded = guarded;
         }
         if (impact >= 0 && source.getEntity() != null && victim.level() instanceof net.minecraft.server.level.ServerLevel level) {
             ImpactPacket.melee(source.getEntity(), victim, impact).send(level);

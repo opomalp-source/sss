@@ -165,6 +165,12 @@ public class DeckScreen extends MenuScreen {
             Component info = Component.translatable("screen.dbzenith.technique_info", (int) t.kiCost(),
                     String.format("%.1f", t.cooldownTicks() / 20.0), String.format("%.1f", t.damageMult()),
                     (int) com.dbzenith.skill.TechniqueMastery.get(d, t), t.description());
+            double meter = com.dbzenith.client.ClientCombatState.meterCost(t);   // supers and ultimates (CX-19)
+            if (meter > 0) {
+                int bars = (int) Math.ceil(meter / com.dbzenith.combat.engine.SpecialMeter.BAR);
+                info = Component.empty().append(Component.translatable(bars >= 3 ? "screen.dbzenith.tier_ultimate" : "screen.dbzenith.tier_super", bars)
+                        .withStyle(net.minecraft.ChatFormatting.GOLD)).append(" ").append(info);
+            }
             Ui.paragraph(g, font, info, lx, by, lw, 0xFFC8CEDC, 0.7f, 3);
         } else {
             Ui.paragraph(g, font, Component.translatable("screen.dbzenith.techniques_help"), lx, by, lw, Ui.MUTED, 0.7f, 3);

@@ -20,7 +20,7 @@ public final class TechniqueHandler {
     private static final double HOMING_RANGE = 32.0;
     private static final double HOMING_CONE_COS = Math.cos(Math.toRadians(35));
 
-    public enum Result { FIRED, COOLDOWN, NOT_ENOUGH_KI, NOT_EQUIPPED, INVALID, STUNNED, SEALED }
+    public enum Result { FIRED, COOLDOWN, NOT_ENOUGH_KI, NOT_EQUIPPED, INVALID, STUNNED, SEALED, NO_METER }
 
     private TechniqueHandler() {}
 
@@ -50,6 +50,10 @@ public final class TechniqueHandler {
         if (data.isOnCooldown(technique.id(), now)) return Result.COOLDOWN;
         double cost = DamageCalculator.kiCost(data, technique.kiCost()) * TechniqueMastery.costMultiplier(data, technique);
         if (!player.getAbilities().instabuild && data.getKi() < cost) return Result.NOT_ENOUGH_KI;
+        com.dbzenith.combat.engine.KiCombat.Tier tier = com.dbzenith.combat.engine.KiCombat.tier(technique.id());   // supers and ultimates: the special meter (CX-19)
+        double meter = bypassDeck ? 0 : tier.meter();                       // the admin path pays no meter
+        if (meter > 0 && com.dbzenith.combat.engine.SpecialMeter.enabled() && !player.getAbilities().instabuild
+                && data.getSpecial() + 1e-6 < meter) return Result.NO_METER;
 
         if (technique.style() == Technique.Style.SELF) {
             if (!TechniqueEffects.apply(player, data, technique)) return Result.INVALID;
@@ -61,6 +65,12 @@ public final class TechniqueHandler {
         if (!player.getAbilities().instabuild) data.setKi(data.getKi() - cost);
         data.setCooldown(technique.id(), now + TechniqueMastery.cooldownTicks(data, technique));
         TechniqueMastery.gain(data, technique);
+        com.dbzenith.combat.engine.SpecialMeter.spend(player, data, meter);
+        if (tier.cinematic()) {
+            com.dbzenith.network.UltimatePacket cine = new com.dbzenith.network.UltimatePacket(player.getId(), technique.id(),
+                    technique.color() == 0xFFFFFF ? com.dbzenith.ki.Aura.color(data) : technique.color());
+            for (ServerPlayer near : level.players()) if (near.distanceToSqr(player) < 64 * 64) com.dbzenith.network.ModNetwork.sendTo(near, cine);
+        }
         com.dbzenith.network.ModNetwork.sendToTrackingAndSelf(player, com.dbzenith.network.AnimEventPacket.forTechnique(player, technique));
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 technique.style() == Technique.Style.BEAM ? com.dbzenith.registry.ModSounds.BEAM_FIRE.get() : com.dbzenith.registry.ModSounds.KI_FIRE.get(),
