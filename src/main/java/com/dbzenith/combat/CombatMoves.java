@@ -84,115 +84,31 @@ public final class CombatMoves {
         return strafe > 0 ? DIR_LEFT : DIR_RIGHT;
     }
 
-    /** Heavy key released: a sweep while guarding, otherwise arm a directional heavy. */
-    public static void heavyReleased(ServerPlayer player, PlayerData d, float forward, float strafe) {
-        if (d.isGuarding()) {
-            d.releaseHeavyCharge();
-            sweep(player, d);
-            return;
-        }
-        int dir = direction(forward, strafe);
-        if (HeavyStrike.release(player, d) > 0) {
-            d.combat().heavyDir = dir;
-            if (dir != DIR_NEUTRAL) {
-                int kind = dir == DIR_BACK ? AnimEventPacket.UPPERCUT : dir == DIR_FORWARD ? AnimEventPacket.RUSH : AnimEventPacket.HOOK;
-                ModNetwork.sendToTrackingAndSelf(player, new AnimEventPacket(player.getId(), kind, dir));
-            }
-        }
-    }
-
-    /** The sweep: an unblockable low kick that floors whatever stands in front. */
-    public static int sweep(ServerPlayer player, PlayerData d) {
-        DBZConfig.Server c = DBZConfig.SERVER;
-        if (!player.getAbilities().instabuild && d.getStamina() < c.heavyStaminaCost.get()) return 0;
-        if (!player.getAbilities().instabuild) d.setStamina(d.getStamina() - c.heavyStaminaCost.get());
-        ServerLevel level = player.serverLevel();
-        long now = level.getGameTime();
-        Vec3 look = player.getLookAngle().multiply(1, 0, 1).normalize();
-        double damage = DamageCalculator.meleeOutgoing(d, 1.0, 1) * SWEEP_MULT;
-        int hits = 0;
-        for (LivingEntity e : TechniqueEffects.around(player, 3.0)) {
-            Vec3 to = e.position().subtract(player.position()).multiply(1, 0, 1);
-            if (to.lengthSqr() > 1e-4 && to.normalize().dot(look) < 0.3) continue;
-            if (Math.abs(e.getY() - player.getY()) > 1.5) continue;
-            unblockable = e;
-            e.invulnerableTime = 0;
-            e.hurt(ModDamageTypes.thrown(level, player), (float) damage);
-            unblockable = null;
-            knockDown(e, now);
-            hits++;
-        }
-        ModNetwork.sendToTrackingAndSelf(player, new AnimEventPacket(player.getId(), AnimEventPacket.SWEEP, 0));
-        ImpactPacket.at(player.position().add(look.scale(1.5)).add(0, 0.3, 0), look, ImpactPacket.SPIKE, 0.9f, 0xE0D0B0, player.getId()).send(level);
-        level.playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.WHOOSH.get(), SoundSource.PLAYERS, 1f, 0.7f);
-        return hits;
-    }
-
-    // ------------------------------------------------------------------ melee
-
     /**
-     * Before a blow lands: its multiplier from the attacker's moves (Z-hit, chase) and the victim's state (downed).
-     * Returns 0 for a clash (both blows cancel).
+     * A blow from the combat engine sent a foe flying (CX-19): the Dash key may chase it (until phase 3 replaces the
+     * dash moves too).
      */
-    public static double beforeMelee(Player attacker, PlayerData ad, LivingEntity victim, long now) {
+    public static void launched(Player attacker, PlayerData ad, LivingEntity victim, long now) {
         CombatState a = ad.combat();
+        if (isDowned(victim, now)) return;
+        if (a.launchTargetId != victim.getId() || now - a.launchTick > 60) a.chaseCount = 0;
+        a.launchTargetId = victim.getId();
+        a.launchTick = now;
+        if (a.chaseCount < MAX_CHASES) a.chaseReadyUntil = now + CHASE_WINDOW;
+        ad.markDirty();
         CombatState v = state(victim);
-        if (v != null && v.lastMeleeTargetId == attacker.getId() && now - v.lastMeleeTick <= CLASH_WINDOW) {   // both swung at once
-            clash(attacker, victim, now);
-            v.lastMeleeTick = Long.MIN_VALUE / 2;
-            a.lastMeleeTick = Long.MIN_VALUE / 2;
-            return 0;
-        }
-        a.lastMeleeTargetId = victim.getId();
-        a.lastMeleeTick = now;
-        double m = 1.0;
-        if (now - a.lastDashTick <= ZHIT_WINDOW) m *= ZHIT_MULT;
-        if (now - a.chaseTick <= 20) m *= CHASE_BONUS;
-        if (isDowned(victim, now)) m *= DOWNED_TAKEN;
-        if (v != null) v.lastAttackerId = attacker.getId();
-        return m;
+        if (v != null) v.launchedAt = now;
     }
 
-    /** True if this blow was a Z-hit (checked after {@link #beforeMelee}). */
-    public static boolean isZHit(PlayerData ad, long now) {
-        return now - ad.combat().lastDashTick <= ZHIT_WINDOW;
-    }
-
-    /** After a blow lands: Z-hit stun, launches and chases. */
-    public static void afterMelee(Player attacker, PlayerData ad, LivingEntity victim, boolean heavy, long now) {
-        CombatState a = ad.combat();
-        boolean armoured = state(victim) != null && now < state(victim).hyperArmorUntil;
-        if (isZHit(ad, now)) {
-            a.lastDashTick = Long.MIN_VALUE / 2;                      // one Z-hit per dash
-            if (!armoured) victim.addEffect(new MobEffectInstance(ModEffects.STUN.get(), ZHIT_STUN, 0));
-            if (victim.level() instanceof ServerLevel level) {
-                ImpactPacket.melee(attacker, victim, ImpactPacket.HEAVY).send(level);
-                level.playSound(null, victim.getX(), victim.getY(), victim.getZ(), com.dbzenith.registry.ModSounds.PUNCH_HEAVY.get(), SoundSource.PLAYERS, 1f, 0.5f);
-            }
-            if (attacker instanceof ServerPlayer sp) ModNetwork.sendToTrackingAndSelf(sp, new AnimEventPacket(sp.getId(), AnimEventPacket.ZHIT, 0));
-        }
-        if (heavy && !isDowned(victim, now)) {
-            if (a.launchTargetId != victim.getId() || now - a.launchTick > 60) a.chaseCount = 0;
-            a.launchTargetId = victim.getId();
-            a.launchTick = now;
-            if (a.chaseCount < MAX_CHASES) a.chaseReadyUntil = now + CHASE_WINDOW;
-            ad.markDirty();
-            CombatState v = state(victim);
-            if (v != null) v.launchedAt = now;
-        }
-        if (a.heavyDir != DIR_NEUTRAL && heavy) a.heavyDir = DIR_NEUTRAL;
-    }
-
-    static void clash(Player a, LivingEntity b, long now) {
-        Vec3 mid = a.position().add(b.position()).scale(0.5).add(0, 1.2, 0);
-        Vec3 apart = b.position().subtract(a.position()).multiply(1, 0, 1);
-        apart = apart.lengthSqr() < 1e-4 ? new Vec3(1, 0, 0) : apart.normalize();
-        AerialCombat.queue(a, apart.scale(-0.9).add(0, 0.25, 0));
-        AerialCombat.queue(b, apart.scale(0.9).add(0, 0.25, 0));
-        if (a.level() instanceof ServerLevel level) {
-            ImpactPacket.at(mid, apart, ImpactPacket.PARRY, 1.3f, 0xFFFFFF, a.getId()).send(level);
-            level.playSound(null, mid.x, mid.y, mid.z, com.dbzenith.registry.ModSounds.PARRY.get(), SoundSource.PLAYERS, 0.6f, 1.5f);
-            level.playSound(null, mid.x, mid.y, mid.z, com.dbzenith.registry.ModSounds.EXPLOSION.get(), SoundSource.PLAYERS, 0.4f, 1.8f);
+    /** Floor a fighter for {@code ticks}: stunned on the ground, half damage, no knockback, until they get up. */
+    public static void knockDown(LivingEntity e, long now, int ticks) {
+        DOWNED.put(e, now + ticks);
+        e.addEffect(new MobEffectInstance(ModEffects.STUN.get(), ticks, 0));
+        CombatState s = state(e);
+        if (s != null) {
+            s.downedUntil = now + ticks;
+            s.downedFlag = true;
+            if (e instanceof Player p) ModCapabilities.get(p).ifPresent(PlayerData::markDirty);
         }
     }
 

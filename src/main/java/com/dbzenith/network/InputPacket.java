@@ -37,8 +37,8 @@ public record InputPacket(Action action) {
                 case GUARD_STOP -> com.dbzenith.combat.GuardRules.lower(data);
                 case TOGGLE_FLIGHT -> FlightHandler.toggle(player);
                 case LOWER_RELEASE -> data.setReleasePercent(data.getReleasePercent() - DBZConfig.SERVER.releaseLowerStep.get());
-                case HEAVY_START -> data.startHeavyCharge();
-                case HEAVY_STOP -> com.dbzenith.combat.CombatMoves.heavyReleased(player, data, 0, 0);
+                case HEAVY_START -> { }
+                case HEAVY_STOP -> { }                                       // heavies are presses now (CX-19)
                 case TRANSFORM_UP -> FormHandler.transformUp(player);
                 case TRANSFORM_DOWN -> FormHandler.revertOne(player);
                 case RACIAL_USE -> com.dbzenith.race.RacialSkillEffects.use(player);

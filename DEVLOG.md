@@ -1456,3 +1456,32 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   - Safe zones and world spawn.
   - GameTest players get an in-memory pass so the older tests still fight (some tests reset player data, so it cannot be a saved flag). Test players never tick down their spawn protection, so the PvP tests use a blow that ignores it.
   - 157 GameTests.
+
+## 2026-10-07 — CX-19 Combat v4, phase 2: the combat engine and melee from data (v0.52.0)
+- **`combat/engine`**: one engine for every fighter, players and NPCs, on the server.
+  - `Move` and `Moves`: moves from `data/<ns>/combat/moves/*.json` (a server data reload listener). `Moves.select` picks the move for a press from the button, the push direction, looking up or down, ground or air, and the previous move. An exact direction beats `any`; then priority; it falls back to openers.
+  - `Fighter`: the state machine per entity (idle, attacking, guarding, stunned, launched, knockdown, charging, dead), the move in progress, the chain, a buffered press, and the combo being taken.
+  - `CombatEngine`:
+    - **Presses:** a press starts a move or is buffered; a landed move cancels into its follow-up from its cancel tick; a whiff recovers fully and doesn't continue the chain; a 12-tick chain window after each move.
+    - **Moves:** startup (with a lunge), the active ticks checking the `Hitbox` (sphere, cone or facing box, nearest first, each foe once), recovery; a hit interrupts a move unless it has armour then.
+    - **Hits:** the damage is the fighter's melee damage x the move x the combo scaling. A Z-hit within 10 ticks of a dash. Floored foes take half and at most two hits, then are untouchable for 10 ticks after getting up.
+    - **After a hit:** hitstun as the STUN effect (shortened along the combo), then the launch: away (a wall within 14 ticks is a wall slam), up (a juggle: air hits keep the foe floating until the juggle limit; it also offers the old Dash chase), spike (the ground slams and floors them) or a knockdown. Air combos carry the attacker along.
+    - **Clashes:** two active blows at each other in the same tick cancel and throw both apart.
+  - The blow is dealt as the new `dbzenith:strike` damage type (finished DBZ damage, tagged no-knockback). `CombatEvents` treats it like ki damage (defence, guard, parry, evasion, Ultra Instinct, alignment, racial skills, PvP rules) and hands the outcome (the impact shown and the damage dealt) back to the engine.
+- **Input:**
+  - A bare-handed attack (left click) is cancelled on the client (no vanilla swing) and sent as a `MeleeInputPacket` light, with the push from your movement keys. Mining with fists still works on blocks unless a foe is close in front.
+  - The Heavy key is now a press (`MeleeInputPacket` heavy). Looking up or down is read on the server.
+  - The server also cancels any bare-handed vanilla attack.
+- **NPCs:** `KiFighter.doHurtTarget` presses through the engine: the light chain with a heavy finisher now and then (sometimes a launcher). Their base is their attack-damage attribute (x the boss enrage). They show vanilla's arm swing for now.
+- **Animations:** `MoveAnimPacket` names the move's clip; `AnimController.playClip` looks it up among the `Anims` clips (cached) and plays it on the action layer, with the swing sound.
+- **12 moves:** `light_1`-`light_5` (jab, cross, hook, kick, a knock-away straight), `heavy_smash`, `heavy_rush`, `heavy_uppercut`, `heavy_launcher`, `heavy_spike`, `heavy_sweep` (unblockable knockdown), `heavy_hook` (long stun). The table and every field are in docs/COMBAT.md.
+- **Config `[combat_engine]`:** comboDamageDecay, comboMinDamage, hitstunDecay, hitstunMin, juggleLimit, downedHitLimit, downedDamage, wakeUpGraceTicks, chainWindowTicks, inputBufferTicks, comboResetTicks, wallSlamBonus, groundSlamBonus, dashStrikeBonus.
+- **Combat v3 removed:**
+  - Charged heavies (`HeavyReleasePacket` kept registered but does nothing), the directional heavies, the sweep, the old Z-hit and launch code, punch clashes, and the old heavy and aerial multipliers in `CombatEvents`.
+  - The Dash-key moves (chase, Revenge Counter, Breaker Wave, snap recovery, spot dodge, roll-out) stay until phase 3, fed by `CombatMoves.launched`.
+- **Dev:** `/dbz strike <player> <light|heavy> [direction]`.
+- **Fix:** the engine ticks over a reused snapshot (a hit adds the victim's fighter mid-loop: a ConcurrentModificationException crashed the test server).
+- **Tests:**
+  - `CombatV4Tests`: moves from data and the selection; a chain lands, continues and counts the combo; the uppercut launches; a bare vanilla punch does nothing; an NPC's swing is a move.
+  - The four Combat v3 melee tests went with what they tested. 157 GameTests.
+- **Checked in the dev client:** the light chain and the uppercut on a Namekian Warrior (clips, impacts, knockback), and a Frieza Force Soldier fighting Dev through the engine.

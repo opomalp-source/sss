@@ -132,36 +132,6 @@ public final class CombatDepthTests {
     }
 
     @GameTest(template = EMPTY, timeoutTicks = 100)
-    public static void heavyHitLaunchesThenAirHitsJuggle(GameTestHelper helper) {
-        ServerPlayer p = fighter(helper, 0.5, 1.5);
-        PlayerData d = ModCapabilities.getOrThrow(p);
-        net.minecraft.world.entity.animal.Cow mob = helper.spawn(EntityType.COW, new BlockPos(1, 1, 1));
-        mob.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000);
-        mob.setHealth(1000);
-        double[] startY = new double[1];
-        helper.startSequence()
-                .thenWaitUntil(() -> helper.assertTrue(mob.onGround(), "mob standing"))
-                .thenExecute(() -> {
-                    startY[0] = mob.getY();
-                    mob.setPos(p.getX() + 1.5, mob.getY(), p.getZ());
-                    d.armHeavy(2.0, helper.getLevel().getGameTime() + 60);
-                    p.attack(mob);
-                })
-                .thenExecuteAfter(4, () -> {
-                    helper.assertTrue(mob.getY() > startY[0] + 1.5, "launched: rose " + (mob.getY() - startY[0]));
-                    mob.invulnerableTime = 0;
-                    float before = mob.getHealth();
-                    p.attack(mob);
-                    helper.assertTrue(mob.getHealth() < before, "air hit lands");
-                })
-                .thenExecuteAfter(2, () -> {
-                    helper.assertTrue(mob.getDeltaMovement().y > 0 || mob.getY() > startY[0] + 2, "juggled: still going up");
-                    TestPlayers.remove(helper, p);
-                })
-                .thenSucceed();
-    }
-
-    @GameTest(template = EMPTY, timeoutTicks = 100)
     public static void gatheringSphereFormsOverheadThenFlies(GameTestHelper helper) {
         ServerPlayer p = fighter(helper, 1.5, 1.5);
         p.teleportTo(p.getX(), p.getY() + 30, p.getZ()); // open air

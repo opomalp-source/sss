@@ -1,0 +1,8 @@
+{
+  "_doc": "Fourth of the light chain: a stepping kick.",
+  "button": "light", "after": ["light_3"],
+  "startup": 3, "active": 2, "recovery": 6, "cancel": 4,
+  "damage": 1.0, "stamina_cost": 2.5, "hitstun": 14, "knockback": 0.22,
+  "hitbox": {"shape": "sphere", "range": 3.2, "radius": 1.1},
+  "lunge": 0.45, "anim": "KICK", "impact": "punch"
+}

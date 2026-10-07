@@ -20,6 +20,10 @@ public final class ModDamageTypes {
     public static final ResourceKey<DamageType> ABSORBED =
             ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(DBZenith.MOD_ID, "absorbed"));
 
+    /** A blow from the combat engine (CX-19): the amount is finished DBZ damage; knockback is the engine's own. */
+    public static final ResourceKey<DamageType> STRIKE =
+            ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(DBZenith.MOD_ID, "strike"));
+
     public static final ResourceKey<DamageType> HAKAI =
             ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(DBZenith.MOD_ID, "hakai"));
 
@@ -43,5 +47,9 @@ public final class ModDamageTypes {
     /** Erased by a Hakai: certain death, like absorption. */
     public static DamageSource hakai(Level level, Entity destroyer) {
         return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(HAKAI), destroyer, destroyer);
+    }
+
+    public static DamageSource strike(Level level, Entity attacker) {
+        return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(STRIKE), attacker, attacker);
     }
 }

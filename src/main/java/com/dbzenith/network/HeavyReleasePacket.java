@@ -19,6 +19,6 @@ public record HeavyReleasePacket(float forward, float strafe) {
 
     public static void handle(HeavyReleasePacket msg, Supplier<NetworkEvent.Context> ctx) {
         ServerPlayer player = ctx.get().getSender();
-        if (player != null && Float.isFinite(msg.forward) && Float.isFinite(msg.strafe)) com.dbzenith.data.ModCapabilities.get(player).ifPresent(d -> com.dbzenith.combat.CombatMoves.heavyReleased(player, d, msg.forward, msg.strafe));
+        // Combat v3 heavies are gone (CX-19): the Heavy key sends a MeleeInputPacket. Kept registered so the protocol ids stay put.
     }
 }

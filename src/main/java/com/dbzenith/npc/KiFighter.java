@@ -142,6 +142,21 @@ public class KiFighter extends Monster {
         return profile.baseKiDamage() * (1 + DBZConfig.SERVER.enemyDamagePerLevel.get() * (level - 1)) * damageMultiplier();
     }
 
+    /** Melee goes through the combat engine (CX-19): a chain of blows with a finisher now and then, like a player's. */
+    @Override
+    public boolean doHurtTarget(net.minecraft.world.entity.Entity target) {
+        if (target instanceof LivingEntity t && com.dbzenith.combat.engine.Moves.loaded()) {
+            com.dbzenith.combat.engine.CombatEngine.npcAttack(this, t);
+            return true;
+        }
+        return super.doHurtTarget(target);
+    }
+
+    /** How much harder than its base this fighter hits in melee (bosses when enraged). */
+    public double meleeMultiplier() {
+        return damageMultiplier();
+    }
+
     /** Bosses override (enraged phase). */
     protected double damageMultiplier() {
         return 1.0;

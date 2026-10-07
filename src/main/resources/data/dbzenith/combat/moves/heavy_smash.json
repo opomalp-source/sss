@@ -1,0 +1,8 @@
+{
+  "_doc": "Heavy, no direction: a two-handed smash that sends the foe flying (a wall slam if they hit one). Ends any light chain.",
+  "button": "heavy", "direction": "any", "after": ["start", "light_1", "light_2", "light_3", "light_4", "light_5"],
+  "startup": 6, "active": 2, "recovery": 14, "cancel": 9,
+  "damage": 1.8, "guard_damage": 1.6, "stamina_cost": 6, "hitstun": 22, "knockback": 1.4, "launch": "away",
+  "hitbox": {"shape": "sphere", "range": 3.0, "radius": 1.25, "max_targets": 2},
+  "lunge": 0.6, "anim": "HEAVY_PUNCH", "impact": "heavy"
+}

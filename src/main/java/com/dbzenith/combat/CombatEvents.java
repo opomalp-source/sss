@@ -47,45 +47,24 @@ public final class CombatEvents {
 
         boolean isKi = source.is(ModDamageTypes.KI_BLAST);
         boolean isThrow = source.is(ModDamageTypes.THROW);
+        boolean isStrike = source.is(ModDamageTypes.STRIKE);                   // a blow of the combat engine (CX-19): finished damage
         Player attacker = source.getEntity() instanceof Player p ? p : null;
-        boolean isMelee = !isKi && attacker != null && source.is(DamageTypes.PLAYER_ATTACK) && source.getDirectEntity() == attacker;
+        boolean isMelee = !isKi && !isStrike && attacker != null && source.is(DamageTypes.PLAYER_ATTACK) && source.getDirectEntity() == attacker;
         PlayerData attackerData = attacker != null ? ModCapabilities.get(attacker).orElse(null) : null;
 
         // 1) raw DBZ damage
         double raw;
         int impact = -1; // which hit effect the clients draw (ImpactPacket), -1 for none
-        if (isKi || isThrow) {
-            raw = event.getAmount(); // ki blasts and throws deal raw DBZ damage
-        } else if (isMelee && attackerData != null) {
+        if (isKi || isThrow || isStrike) {
+            raw = event.getAmount(); // ki blasts, throws and the engine's blows deal raw DBZ damage
+            if (isStrike) impact = com.dbzenith.combat.engine.CombatEngine.pendingImpact >= 0 ? com.dbzenith.combat.engine.CombatEngine.pendingImpact : ImpactPacket.PUNCH;
+        } else if (isMelee && attackerData != null) {                       // a weapon: vanilla's swing, with DBZ strength behind it
             attackerData.recomputeIfStale();
-            long nowTick = victim.level().getGameTime();
-            double moves = CombatMoves.beforeMelee(attacker, attackerData, victim, nowTick);   // Z-hit, chase, downed, clash
-            if (moves == 0) {
-                event.setCanceled(true);
-                return;
-            }
             DBZConfig.Server c = DBZConfig.SERVER;
             int combo = attackerData.registerHit(victim.level().getGameTime(), c.comboWindowTicks.get(), c.comboMaxHits.get());
             raw = DamageCalculator.meleeOutgoing(attackerData, event.getAmount(), combo);
-            raw *= moves;
-            int heavyDir = attackerData.combat().heavyDir;
-            double heavy = attackerData.consumeHeavy(victim.level().getGameTime());
-            raw *= heavy;
             attackerData.setStamina(attackerData.getStamina() - c.meleeStaminaCost.get());
-            double extraKnockback = attackerData.getAttribute(com.dbzenith.stats.Attribute.STRENGTH) * c.meleeKnockbackPerStrength.get();
-            if (heavy > 1.0) {
-                extraKnockback += c.heavyKnockback.get();
-            }
-            boolean aerial = AerialCombat.isAirborne(victim);
-            if (aerial) raw *= 1.0 + c.airComboBonus.get();
-            if (heavy > 1.0 && AerialCombat.isSpike(attacker)) raw *= 1.0 + c.spikeDamageBonus.get();
-            if (extraKnockback > 0 && !aerial) {
-                float yaw = attacker.getYRot() * Mth.DEG_TO_RAD;
-                victim.knockback(Math.min(3.0, extraKnockback), Mth.sin(yaw), -Mth.cos(yaw));
-            }
-            AerialCombat.afterHit(attacker, victim, heavy > 1.0, aerial, heavy > 1.0 ? heavyDir : CombatMoves.DIR_NEUTRAL);
-            CombatMoves.afterMelee(attacker, attackerData, victim, heavy > 1.0, nowTick);
-            impact = heavy <= 1.0 ? ImpactPacket.PUNCH : AerialCombat.isSpike(attacker) ? ImpactPacket.SPIKE : ImpactPacket.HEAVY;
+            impact = ImpactPacket.PUNCH;
         } else {
             raw = DamageCalculator.fromVanilla(event.getAmount());
             if (source.getEntity() instanceof com.dbzenith.npc.KiFighter f && source.getDirectEntity() == f) impact = ImpactPacket.PUNCH;
@@ -94,9 +73,9 @@ public final class CombatEvents {
         // 2) apply to victim
         PlayerData victimData = victim instanceof Player vp ? ModCapabilities.get(vp).orElse(null) : null;
         raw *= godKiFactor(attackerData, victimData);
-        if (attackerData != null && (isKi || isMelee || isThrow)) raw *= com.dbzenith.race.Alignment.damageMultiplier(attackerData);
+        if (attackerData != null && (isKi || isMelee || isThrow || isStrike)) raw *= com.dbzenith.race.Alignment.damageMultiplier(attackerData);
         if (attackerData != null || victimData != null) {                      // racial skills on both sides of the blow
-            PlayerData by = isKi || isMelee || isThrow ? attackerData : null;
+            PlayerData by = isKi || isMelee || isThrow || isStrike ? attackerData : null;
             double foeBody = victimData != null ? victimData.getBody() / Math.max(1, victimData.getDerived().maxBody())
                     : victim.getHealth() / Math.max(1f, victim.getMaxHealth());
             boolean stronger = by != null && (victimData != null
@@ -108,8 +87,8 @@ public final class CombatEvents {
         if (victimData != null) {
             Player player = (Player) victim;
             victimData.recomputeIfStale();
-            if (CombatMoves.unblockable == victim && victimData.isGuarding()) GuardRules.lower(victimData);   // the sweep takes your legs
-            if (!isKi && !isThrow && !isMelee && !source.is(DamageTypeTags.BYPASSES_ARMOR) && event.getAmount() > 0) {
+            if (isStrike && com.dbzenith.combat.engine.CombatEngine.pendingUnblockable && victimData.isGuarding()) GuardRules.lower(victimData);   // the sweep takes your legs
+            if (!isKi && !isThrow && !isMelee && !isStrike && !source.is(DamageTypeTags.BYPASSES_ARMOR) && event.getAmount() > 0) {
                 // Vanilla armor still matters against mobs and the environment.
                 float afterArmor = CombatRules.getDamageAfterAbsorb(event.getAmount(), player.getArmorValue(),
                         (float) player.getAttributeValue(Attributes.ARMOR_TOUGHNESS));
@@ -163,11 +142,15 @@ public final class CombatEvents {
             }
         } else {
             dealt = raw;
-            float amount = isKi || isThrow || isMelee ? DamageCalculator.toVanilla(raw) : event.getAmount();
+            float amount = isKi || isThrow || isMelee || isStrike ? DamageCalculator.toVanilla(raw) : event.getAmount();
             if (victim instanceof com.dbzenith.npc.KiFighter fighter) amount /= (float) fighter.toughness(); // leveled foes
             event.setAmount(amount);
         }
 
+        if (isStrike) {                                                         // the engine reads what became of its blow
+            com.dbzenith.combat.engine.CombatEngine.outcomeImpact = impact;
+            com.dbzenith.combat.engine.CombatEngine.outcomeDealt = dealt;
+        }
         if (impact >= 0 && source.getEntity() != null && victim.level() instanceof net.minecraft.server.level.ServerLevel level) {
             ImpactPacket.melee(source.getEntity(), victim, impact).send(level);
         }

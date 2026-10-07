@@ -1,0 +1,8 @@
+{
+  "_doc": "Heavy looking up, in the air: a rising kick that launches the foe higher.",
+  "button": "heavy", "direction": "up", "where": "air", "after": ["start", "light_1", "light_2", "light_3", "light_4", "light_5"],
+  "startup": 5, "active": 2, "recovery": 12, "cancel": 7,
+  "damage": 1.3, "stamina_cost": 5, "hitstun": 24, "launch": "up", "launch_power": 0.9,
+  "hitbox": {"shape": "sphere", "range": 2.8, "radius": 1.25},
+  "lunge": 0.4, "anim": "LAUNCHER", "impact": "heavy"
+}

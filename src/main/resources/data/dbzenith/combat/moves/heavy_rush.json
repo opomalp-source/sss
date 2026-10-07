@@ -1,0 +1,8 @@
+{
+  "_doc": "Heavy pushing forward: a shoulder-first rush that covers ground and knocks the foe away.",
+  "button": "heavy", "direction": "forward", "after": ["start", "light_1", "light_2", "light_3", "light_4", "light_5"],
+  "startup": 6, "active": 3, "recovery": 12, "cancel": 9,
+  "damage": 1.6, "stamina_cost": 6, "hitstun": 20, "knockback": 1.2, "launch": "away",
+  "hitbox": {"shape": "box", "range": 3.4, "radius": 0.9, "height": 2.0, "max_targets": 2},
+  "lunge": 1.6, "anim": "RUSH", "impact": "heavy"
+}

@@ -207,7 +207,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - [ ] 18b The combat actions (punches, kicks, transformations, casts, charge, guard) moved into the data clips too, and given to NPCs
 - [ ] CX-19 Combat v4 (user: a full PvP combat system, Sparking! ZERO feel with Dragon Block depth; phase by phase, stopping for feedback after each)
   - [x] 19a (v0.51.0) PvP mode: key P and /pvp, server rules (cooldown, fight timer, pull-in on being struck, both must be in PvP mode), safe zones (spawn, other world, tournament grounds, /dbz pvpzone), effects judged like blows, the HUD badge and the name mark
-  - [ ] 19b Melee combos from data (light chain, heavy finisher, directional launchers, cancel windows, buffering, hitboxes); replaces Combat v3
+  - [x] 19b (v0.52.0) Melee combos from data: the combat engine for players and NPCs (light chain, directional heavies: smash, rush, uppercut, launcher, spike, sweep, hook), cancel windows, input buffering, hitboxes, combo scaling, juggles, wall and ground slams, knockdowns, clashes, Z-hits; replaces Combat v3 melee
   - [ ] 19c Guard, perfect guard, vanish step, counter
   - [ ] 19d Ki blasts (rapid, charged), supers and ultimates (special meter), beam clash
   - [ ] 19e Hit feedback and camera

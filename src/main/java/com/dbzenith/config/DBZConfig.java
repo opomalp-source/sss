@@ -219,6 +219,8 @@ public final class DBZConfig {
         public final ForgeConfigSpec.IntValue scouterRange;
         public final ForgeConfigSpec.IntValue spacePodRechargeTicks;
         public final ForgeConfigSpec.BooleanValue otherworldEnabled;
+        public final ForgeConfigSpec.DoubleValue comboDamageDecay, comboMinDamage, hitstunDecay, hitstunMin, wallSlamBonus, groundSlamBonus, dashStrikeBonus, downedDamage;
+        public final ForgeConfigSpec.IntValue juggleLimit, downedHitLimit, chainWindowTicks, inputBufferTicks, comboResetTicks, wakeUpGraceTicks;
         public final ForgeConfigSpec.BooleanValue pvpRules;
         public final ForgeConfigSpec.IntValue pvpToggleCooldown;
         public final ForgeConfigSpec.IntValue pvpCombatTag;
@@ -592,6 +594,23 @@ public final class DBZConfig {
                     .defineInRange("failedFusionPower", 0.6, 0.0, 100.0);
             falseMoonTicks = b.comment("How long a Moon Orb's false moon shines (1200 = 1 minute)")
                     .defineInRange("falseMoonTicks", 1200, 20, 1_000_000);
+            b.pop();
+
+            b.comment("The combat engine (CX-19): melee moves come from data/dbzenith/combat/moves; these keep combos fair").push("combat_engine");
+            comboDamageDecay = b.comment("Each hit of a combo after the first does this much less damage (0.07 = 7%)").defineInRange("comboDamageDecay", 0.07, 0.0, 1.0);
+            comboMinDamage = b.comment("...but never less than this share of a fresh hit").defineInRange("comboMinDamage", 0.35, 0.0, 1.0);
+            hitstunDecay = b.comment("Each hit of a combo after the first stuns this much shorter").defineInRange("hitstunDecay", 0.05, 0.0, 1.0);
+            hitstunMin = b.comment("...but never shorter than this share").defineInRange("hitstunMin", 0.4, 0.0, 1.0);
+            juggleLimit = b.comment("Hits that keep a foe floating in the air; after this many they fall free").defineInRange("juggleLimit", 8, 0, 100);
+            downedHitLimit = b.comment("Hits a floored foe can take before they cannot be hit until they are up").defineInRange("downedHitLimit", 2, 0, 100);
+            downedDamage = b.comment("Damage a floored foe takes (share)").defineInRange("downedDamage", 0.5, 0.0, 1.0);
+            wakeUpGraceTicks = b.comment("Ticks a fighter who just got up cannot be struck").defineInRange("wakeUpGraceTicks", 10, 0, 200);
+            chainWindowTicks = b.comment("After a move ends, the next press continues the chain for this many ticks").defineInRange("chainWindowTicks", 12, 0, 100);
+            inputBufferTicks = b.comment("A press made too early is kept this many ticks and used as soon as it can be").defineInRange("inputBufferTicks", 8, 0, 40);
+            comboResetTicks = b.comment("A combo ends when its victim goes this many ticks without a hit").defineInRange("comboResetTicks", 30, 1, 400);
+            wallSlamBonus = b.comment("Extra damage (share of the blow) when a foe knocked away hits a wall").defineInRange("wallSlamBonus", 0.4, 0.0, 10.0);
+            groundSlamBonus = b.comment("Extra damage (share of the blow) when a spiked foe hits the ground").defineInRange("groundSlamBonus", 0.3, 0.0, 10.0);
+            dashStrikeBonus = b.comment("The first blow within half a second of a dash hits this much harder (a Z-hit)").defineInRange("dashStrikeBonus", 1.5, 1.0, 10.0);
             b.pop();
 
             b.comment("PvP mode (CX-19): players fight each other only in PvP mode (key P, or /pvp)").push("pvp");

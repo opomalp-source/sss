@@ -187,22 +187,4 @@ public final class CombatTests {
         helper.succeedWhen(() -> helper.assertTrue(zombie.getHealth() < start, "zombie should be hurt by the blast"));
     }
 
-    @GameTest(template = EMPTY)
-    public static void meleeBuildsComboAndCostsStamina(GameTestHelper helper) {
-        ServerPlayer player = TestPlayers.create(helper);
-        player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
-        PlayerData d = ModCapabilities.getOrThrow(player);
-        d.setAttribute(Attribute.STRENGTH, 200);
-        d.recomputeIfStale();
-        Zombie zombie = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(1, 1, 1));
-        float start = zombie.getHealth();
-        double stamina = d.getStamina();
-        player.attack(zombie);
-        helper.assertTrue(zombie.getHealth() < start, "zombie should take melee damage");
-        helper.assertTrue(start - zombie.getHealth() > 1.0f, "STR 200 should beat a bare fist, dealt " + (start - zombie.getHealth()));
-        helper.assertTrue(d.getComboHits() == 1, "first hit starts a combo, got " + d.getComboHits());
-        helper.assertTrue(d.getStamina() < stamina, "melee costs stamina");
-        TestPlayers.remove(helper, player);
-        helper.succeed();
-    }
 }

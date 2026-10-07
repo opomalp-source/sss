@@ -348,6 +348,23 @@ public final class AnimController {
         }
     }
 
+    private static final Map<String, KeyframeAnimation> CLIPS = new java.util.HashMap<>();
+
+    /** A combat-engine move started (CX-19): play its clip, named as in {@link Anims} (JAB_RIGHT, LAUNCHER, ...). */
+    public static void playClip(int entityId, String clip) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null || !(mc.level.getEntity(entityId) instanceof AbstractClientPlayer player)) return;
+        KeyframeAnimation anim = CLIPS.computeIfAbsent(clip.toUpperCase(java.util.Locale.ROOT), AnimController::devAnimation);
+        if (anim == null) return;
+        Track t = TRACKS.computeIfAbsent(player, p -> new Track());
+        long now = mc.level.getGameTime();
+        t.actionLockUntil = 0;                                       // a new blow always takes over from the last
+        play(player, t, anim, now, 0);
+        t.lastEventTick = now;
+        t.lastPunch = now;
+        com.dbzenith.client.ClientSounds.swing(player);
+    }
+
     private static KeyframeAnimation devAnimation(String name) {
         if (name.equals("BEAM")) return Anims.kiBeam(40);
         if (name.equals("THROW")) return Anims.kiThrow(30);

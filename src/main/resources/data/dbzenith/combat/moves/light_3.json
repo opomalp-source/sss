@@ -1,0 +1,8 @@
+{
+  "_doc": "Third of the light chain: a wide hook that catches foes slipping to the side.",
+  "button": "light", "after": ["light_2"],
+  "startup": 3, "active": 2, "recovery": 6, "cancel": 4,
+  "damage": 1.0, "stamina_cost": 2.5, "hitstun": 13, "knockback": 0.2,
+  "hitbox": {"shape": "cone", "range": 3.0, "angle": 100},
+  "lunge": 0.3, "anim": "HOOK", "impact": "punch"
+}

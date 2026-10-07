@@ -1,0 +1,8 @@
+{
+  "_doc": "End of the light chain: a straight with everything behind it, knocking the foe away (into a wall: a wall slam).",
+  "button": "light", "after": ["light_4"],
+  "startup": 4, "active": 2, "recovery": 12, "cancel": 7,
+  "damage": 1.35, "stamina_cost": 4, "hitstun": 18, "knockback": 1.0, "launch": "away",
+  "hitbox": {"shape": "sphere", "range": 3.0, "radius": 1.15},
+  "lunge": 0.5, "anim": "ZHIT", "impact": "heavy"
+}

@@ -1,0 +1,8 @@
+{
+  "_doc": "Opener of the light chain: a quick right jab. Times in ticks (20 a second).",
+  "button": "light", "after": ["start"],
+  "startup": 2, "active": 2, "recovery": 5, "cancel": 3,
+  "damage": 0.8, "stamina_cost": 2, "hitstun": 12, "knockback": 0.18,
+  "hitbox": {"shape": "sphere", "range": 2.8, "radius": 1.0},
+  "lunge": 0.3, "anim": "JAB_RIGHT", "impact": "punch"
+}

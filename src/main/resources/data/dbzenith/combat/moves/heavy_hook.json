@@ -1,0 +1,8 @@
+{
+  "_doc": "Heavy to the side: a spinning hook that stuns long enough to start a new chain.",
+  "button": "heavy", "direction": "side", "after": ["start", "light_1", "light_2", "light_3", "light_4", "light_5"],
+  "startup": 4, "active": 2, "recovery": 10, "cancel": 6,
+  "damage": 1.3, "stamina_cost": 5, "hitstun": 30, "knockback": 0.35,
+  "hitbox": {"shape": "cone", "range": 3.0, "angle": 120, "max_targets": 2},
+  "lunge": 0.3, "anim": "HOOK", "impact": "heavy"
+}

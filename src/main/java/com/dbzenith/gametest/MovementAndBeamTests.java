@@ -31,32 +31,6 @@ public final class MovementAndBeamTests {
 
     private MovementAndBeamTests() {}
 
-    @GameTest(template = EMPTY)
-    public static void heavyHitMultipliesMelee(GameTestHelper helper) {
-        ServerPlayer player = TestPlayers.create(helper);
-        player.setGameMode(GameType.SURVIVAL);
-        PlayerData d = ModCapabilities.getOrThrow(player);
-        d.setAttribute(Attribute.STRENGTH, 60);
-        d.recomputeIfStale();
-        Zombie a = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(0, 1, 0));
-        Zombie b = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(2, 1, 2));
-        float startA = a.getHealth();
-        float startB = b.getHealth();
-        player.attack(a);
-        float normal = startA - a.getHealth();
-
-        d.startHeavyCharge();
-        for (int i = 0; i < 40; i++) d.tickHeavyCharge();
-        double mult = HeavyStrike.release(player, d);
-        helper.assertTrue(mult >= 2.9, "full charge should arm ~3x, got " + mult);
-        player.attack(b);
-        float heavy = startB - b.getHealth();
-        helper.assertTrue(heavy > normal * 2, "heavy hit " + heavy + " should be > 2x normal " + normal);
-        helper.assertTrue(d.getHeavyArmedMultiplier() == 0, "heavy charge should be consumed");
-        TestPlayers.remove(helper, player);
-        helper.succeed();
-    }
-
     @GameTest(template = EMPTY, timeoutTicks = SPAWN_PROTECTION + 40)
     public static void dashMovesCostsAndEvades(GameTestHelper helper) {
         ServerPlayer player = TestPlayers.create(helper);

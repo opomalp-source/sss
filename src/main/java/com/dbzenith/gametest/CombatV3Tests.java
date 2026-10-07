@@ -47,36 +47,13 @@ public final class CombatV3Tests {
     }
 
     @GameTest(template = EMPTY)
-    public static void movesPickTheRightMultiplier(GameTestHelper helper) {
-        helper.assertTrue(CombatMoves.direction(1, 0) == CombatMoves.DIR_FORWARD && CombatMoves.direction(-1, 0) == CombatMoves.DIR_BACK
-                && CombatMoves.direction(0, 1) == CombatMoves.DIR_LEFT && CombatMoves.direction(0, -1) == CombatMoves.DIR_RIGHT
-                && CombatMoves.direction(0.1f, 0.1f) == CombatMoves.DIR_NEUTRAL, "movement picks the heavy");
-        Vec3 base = Vec3.atBottomCenterOf(helper.absolutePos(new BlockPos(1, 2, 1)));
-        ServerPlayer a = fighter(helper, base);
-        ServerPlayer b = fighter(helper, base.add(1.5, 0, 0));
-        PlayerData ad = ModCapabilities.getOrThrow(a), bd = ModCapabilities.getOrThrow(b);
-        long now = helper.getLevel().getGameTime();
-        helper.assertTrue(CombatMoves.beforeMelee(a, ad, b, now) == 1.0, "a plain blow");
-        helper.assertTrue(CombatMoves.beforeMelee(b, bd, a, now + 2) == 0.0, "both swung at once: a clash");
-        ad.combat().lastDashTick = now + 10;
-        helper.assertTrue(Math.abs(CombatMoves.beforeMelee(a, ad, b, now + 12) - 1.5) < 1e-9, "a blow off a dash is a Z-hit");
-        ad.combat().lastDashTick = Long.MIN_VALUE / 2;
-        CombatMoves.knockDown(b, now + 20);
-        helper.assertTrue(Math.abs(CombatMoves.beforeMelee(a, ad, b, now + 30) - 0.5) < 1e-9, "the downed take half");
-        helper.assertTrue(bd.combat().downedFlag, "and show it");
-        TestPlayers.remove(helper, a);
-        TestPlayers.remove(helper, b);
-        helper.succeed();
-    }
-
-    @GameTest(template = EMPTY)
     public static void heaviesLaunchAndChase(GameTestHelper helper) {
         Zombie z = zombie(helper, new BlockPos(3, 2, 1));
         Vec3 base = Vec3.atBottomCenterOf(helper.absolutePos(new BlockPos(1, 2, 1)));
         ServerPlayer a = fighter(helper, base);
         PlayerData ad = ModCapabilities.getOrThrow(a);
         long now = helper.getLevel().getGameTime();
-        CombatMoves.afterMelee(a, ad, z, true, now);
+        CombatMoves.launched(a, ad, z, now);
         helper.assertTrue(ad.combat().chaseReadyUntil > now, "a launch offers a chase");
         z.teleportTo(z.getX(), z.getY() + 6, z.getZ() + 6);
         helper.assertTrue(CombatMoves.dashKey(a, ad, 0, 0), "the dash key chases");
@@ -84,7 +61,7 @@ public final class CombatV3Tests {
         helper.assertTrue(!CombatMoves.dashKey(a, ad, 0, 0), "one chase per launch: the next dash is just a dash");
         for (int i = 0; i < 3; i++) {
             ad.refill();
-            CombatMoves.afterMelee(a, ad, z, true, now + 1);
+            CombatMoves.launched(a, ad, z, now + 1);
             CombatMoves.dashKey(a, ad, 0, 0);
         }
         helper.assertTrue(ad.combat().chaseCount == 3, "three chases a combo, got " + ad.combat().chaseCount);
@@ -101,9 +78,9 @@ public final class CombatV3Tests {
         PlayerData ad = ModCapabilities.getOrThrow(a);
         a.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, z.getEyePosition());
         long now = helper.getLevel().getGameTime();
-        float hp = z.getHealth();
-        helper.assertTrue(CombatMoves.sweep(a, ad) == 1 && z.getHealth() < hp, "the sweep connects");
-        helper.assertTrue(CombatMoves.isDowned(z, now), "and floors it");
+        float hp;
+        CombatMoves.knockDown(z, now);
+        helper.assertTrue(CombatMoves.isDowned(z, now), "floored");
 
         ad.setLastFoeHitTick(now);
         a.setShiftKeyDown(true);

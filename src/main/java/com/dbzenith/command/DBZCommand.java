@@ -245,7 +245,7 @@ public final class DBZCommand {
                                                 PlayerData d = ModCapabilities.getOrThrow(p);
                                                 long now = p.level().getGameTime();
                                                 int anim = switch (move) {
-                                                    case "sweep" -> { com.dbzenith.combat.CombatMoves.sweep(p, d); yield -1; }
+                                                    case "sweep" -> { com.dbzenith.combat.engine.CombatEngine.press(p, new com.dbzenith.combat.engine.Moves.Input(com.dbzenith.combat.engine.Move.Button.HEAVY, com.dbzenith.combat.engine.Move.Dir.BACK, false, false, true)); yield -1; }
                                                     case "breaker" -> { d.setLastFoeHitTick(now); p.setShiftKeyDown(true);
                                                         com.dbzenith.combat.CombatMoves.dashKey(p, d, 0, 0); p.setShiftKeyDown(false); yield -1; }
                                                     case "knockdown" -> { com.dbzenith.combat.CombatMoves.knockDown(p, now); yield -1; }
@@ -382,6 +382,14 @@ public final class DBZCommand {
                                     ctx.getSource().sendSuccess(() -> Component.literal("PvP mode " + (on ? "on" : "off") + " for " + targets.size() + " player(s)"), true);
                                     return targets.size();
                                 }))))
+                .then(Commands.literal("strike")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("button", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.List.of("light", "heavy"), b))
+                                        .executes(ctx -> strike(ctx, "neutral"))
+                                        .then(Commands.argument("direction", StringArgumentType.word())
+                                                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.List.of("neutral", "forward", "back", "side", "up", "down"), b))
+                                                .executes(ctx -> strike(ctx, StringArgumentType.getString(ctx, "direction")))))))
                 .then(Commands.literal("pvpzone")
                         .then(Commands.literal("add").then(Commands.argument("name", StringArgumentType.word())
                                 .then(Commands.argument("from", net.minecraft.commands.arguments.coordinates.BlockPosArgument.blockPos())
@@ -615,6 +623,26 @@ public final class DBZCommand {
         for (ServerPlayer p : targets) p.teleportTo(level, at.x, at.y, at.z, 0f, 0f);
         ctx.getSource().sendSuccess(() -> Component.literal("Sent " + targets.size() + " player(s) to " + dim.location()), true);
         return targets.size();
+    }
+
+    /** Dev: a combat-engine press for players, as if from their keys (CX-19). */
+    private static int strike(CommandContext<CommandSourceStack> ctx, String direction) throws CommandSyntaxException {
+        var button = "heavy".equals(StringArgumentType.getString(ctx, "button")) ? com.dbzenith.combat.engine.Move.Button.HEAVY : com.dbzenith.combat.engine.Move.Button.LIGHT;
+        var push = switch (direction) {
+            case "forward" -> com.dbzenith.combat.engine.Move.Dir.FORWARD;
+            case "back" -> com.dbzenith.combat.engine.Move.Dir.BACK;
+            case "side" -> com.dbzenith.combat.engine.Move.Dir.SIDE;
+            default -> com.dbzenith.combat.engine.Move.Dir.NEUTRAL;
+        };
+        int n = 0;
+        for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
+            boolean started = com.dbzenith.combat.engine.CombatEngine.press(p, new com.dbzenith.combat.engine.Moves.Input(button, push,
+                    "up".equals(direction), "down".equals(direction), p.onGround()));
+            String what = com.dbzenith.combat.engine.CombatEngine.describe(p);
+            ctx.getSource().sendSuccess(() -> Component.literal(p.getGameProfile().getName() + (started ? " struck: " : " (buffered/refused): ") + what), false);
+            n++;
+        }
+        return n;
     }
 
     private static int devshot(CommandContext<CommandSourceStack> ctx, int delay) throws CommandSyntaxException {

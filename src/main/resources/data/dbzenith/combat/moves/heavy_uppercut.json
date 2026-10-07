@@ -1,0 +1,8 @@
+{
+  "_doc": "Heavy looking up, on the ground: an uppercut that launches the foe into the air for a juggle (and a Dash chase).",
+  "button": "heavy", "direction": "up", "where": "ground", "after": ["start", "light_1", "light_2", "light_3", "light_4", "light_5"],
+  "startup": 5, "active": 2, "recovery": 12, "cancel": 7,
+  "damage": 1.3, "stamina_cost": 5, "hitstun": 24, "launch": "up", "launch_power": 1.0,
+  "hitbox": {"shape": "sphere", "range": 2.6, "radius": 1.2},
+  "lunge": 0.4, "anim": "UPPERCUT", "impact": "heavy"
+}

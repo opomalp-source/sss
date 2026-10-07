@@ -44,11 +44,9 @@ public final class ClientInput {
             wasGuarding = guarding;
         }
 
-        boolean heavy = ModKeys.HEAVY.isDown() && mc.screen == null;
-        if (heavy != wasHeavy) {
-            if (heavy) ModNetwork.sendToServer(new InputPacket(InputPacket.Action.HEAVY_START));
-            else ModNetwork.sendToServer(new com.dbzenith.network.HeavyReleasePacket(mc.player.input.forwardImpulse, mc.player.input.leftImpulse));
-            wasHeavy = heavy;
+        while (ModKeys.HEAVY.consumeClick()) {                         // a heavy: the finisher of a combo (CX-19)
+            ModNetwork.sendToServer(new com.dbzenith.network.MeleeInputPacket(true,
+                    com.dbzenith.network.MeleeInputPacket.push(mc.player.input.forwardImpulse, mc.player.input.leftImpulse)));
         }
         while (ModKeys.DASH.consumeClick()) {
             ModNetwork.sendToServer(new DashPacket(mc.player.input.forwardImpulse, mc.player.input.leftImpulse));
@@ -98,4 +96,31 @@ public final class ClientInput {
             else ModNetwork.sendToServer(new InputPacket(InputPacket.Action.RACIAL_USE));
         }
     }
+    /**
+     * A bare-handed attack becomes a light blow of the combat engine (CX-19) instead of vanilla's punch: no swing, the
+     * press goes to the server with the way you push. Mining with your fists still works on blocks, unless a foe is
+     * close in front of you.
+     */
+    @net.minecraftforge.eventbus.api.SubscribeEvent
+    public static void onAttackKey(net.minecraftforge.client.event.InputEvent.InteractionKeyMappingTriggered event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (!event.isAttack() || mc.player == null || !mc.player.getMainHandItem().isEmpty() || mc.player.isSpectator()) return;
+        if (mc.hitResult != null && mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK && !foeAhead(mc)) return;
+        event.setCanceled(true);
+        event.setSwingHand(false);
+        ModNetwork.sendToServer(new com.dbzenith.network.MeleeInputPacket(false,
+                com.dbzenith.network.MeleeInputPacket.push(mc.player.input.forwardImpulse, mc.player.input.leftImpulse)));
+    }
+
+    /** A living thing within five blocks in front of you. */
+    private static boolean foeAhead(Minecraft mc) {
+        net.minecraft.world.phys.Vec3 eye = mc.player.getEyePosition(), look = mc.player.getLookAngle();
+        for (net.minecraft.world.entity.LivingEntity e : mc.level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
+                mc.player.getBoundingBox().inflate(5), e -> e != mc.player && e.isAlive())) {
+            net.minecraft.world.phys.Vec3 to = e.getBoundingBox().getCenter().subtract(eye);
+            if (to.length() < 5 && to.normalize().dot(look) > 0.6) return true;
+        }
+        return false;
+    }
+
 }
