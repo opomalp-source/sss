@@ -543,6 +543,7 @@ public class ArtGen {
             trainingCricket();
             beerus();
             whis();
+            tournament();
         }
 
 
@@ -986,6 +987,182 @@ public class ArtGen {
                 return cloth(black, f, x, y, w, h, 694);
             };
             new Npc().body("lean", 0xFF96BCDC).face(4, 0xFF7A5AC8, true, 0, 0xFFF2F4F8, 1, 2).paint(s).save("whis");
+        }
+
+        // ---------------------------------------------------------- the World Martial Arts Tournament (CX-17c)
+
+        static void tournament() throws IOException {
+            announcer();
+            mrSatan();
+            spopovich();
+            pintar();
+            jewel();
+            nam();
+            ranfan();
+            yamu();
+        }
+
+        /** The Announcer: blond and slicked back, dark sunglasses, a black suit, white shirt and a red bow tie. */
+        static void announcer() throws IOException {
+            int[] suit = ramp(0xFF1C1C24, 6), shirt = ramp(0xFFF2F2F4, 4), red = ramp(0xFFC82828, 4);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> glasses(f, x, y, w, h, 0xFF101014, 0xFF202028);
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                if (f == Face.FRONT && vv < 0.1 && Math.abs(uu - 0.5) < 0.12) return Math.abs(uu - 0.5) < 0.04 ? flat(red, f, 0.06) : flat(red, f, 0);
+                if (f == Face.FRONT && vv < 0.55 && Math.abs(uu - 0.5) < 0.2 - vv * 0.3) return flat(shirt, f, 0);
+                if (f == Face.FRONT && vv > 0.3 && vv < 0.75 && Math.abs(uu - 0.5) < 0.03 && ((int) (vv * h)) % 4 == 0) return ink(shirt);  // buttons
+                return cloth(suit, f, x, y, w, h, 701);
+            };
+            s.arm = (f, x, y, w, h) -> v(y, h) > 0.86 ? 0 : v(y, h) > 0.82 ? flat(shirt, f, 0) : cloth(suit, f, x, y, w, h, 702);
+            s.leg = (f, x, y, w, h) -> v(y, h) > 0.86 || f == Face.BOTTOM ? flat(ramp(0xFF141418, 4), f, 0.05) : cloth(suit, f, x, y, w, h, 703);
+            new Npc().body("athletic", 0xFFF0C8A8).face(0, 0xFF2A2A30, true, 1, 0xFFC8A040, 1, 2).paint(s).save("tournament_announcer");
+        }
+
+        /** Mr. Satan, the champion: tanned, a thick moustache and heavy brows, a white gi with a black belt, red wristbands, brown boots. */
+        static void mrSatan() throws IOException {
+            int[] gi = ramp(0xFFF2EEE6, 5), black = ramp(0xFF181418, 4), red = ramp(0xFFC82A2A, 4), boot = ramp(0xFF6A4224, 4), stache = ramp(0xFF141210, 3);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.FRONT && vv > 0.68 && vv < 0.75 && Math.abs(uu - 0.5) < 0.24 - (vv - 0.68) * 0.8) return flat(stache, f, 0);
+                return 0;
+            };
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                if (vv > 0.76 && vv < 0.84) return f == Face.FRONT && Math.abs(uu - 0.42) < 0.05 && vv > 0.8 ? ink(black) : flat(black, f, 0);   // the belt and its knot
+                if (f == Face.FRONT && vv < 0.4 && Math.abs(Math.abs(uu - 0.5) - (0.2 - vv * 0.45)) < 0.03) return ink(gi);                     // the lapels
+                if (f == Face.FRONT && vv < 0.38 && Math.abs(uu - 0.5) < 0.2 - vv * 0.45) return 0;                                            // a bare chest at the neck
+                return cloth(gi, f, x, y, w, h, 711);
+            };
+            s.arm = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (vv < 0.36) return cloth(gi, f, x, y, w, h, 712);
+                if (vv > 0.72 && vv < 0.82) return flat(red, f, row(vv, 0.77, h) ? 0.06 : 0);
+                return 0;
+            };
+            s.leg = (f, x, y, w, h) -> v(y, h) > 0.74 || f == Face.BOTTOM ? flat(boot, f, row(v(y, h), 0.76, h) ? 0.08 : 0) : cloth(gi, f, x, y, w, h, 713);
+            new Npc().body("athletic", 0xFFC4895C).face(2, 0xFF2A1A10, true, 2, 0xFF141210, 1, 2).paint(s).save("mr_satan");
+        }
+
+        /** Spopovich: huge, pale and bald, Babidi's M on his brow; a navy sleeveless top, a red sash, white trousers. */
+        static void spopovich() throws IOException {
+            int[] navy = ramp(0xFF24305A, 5), red = ramp(0xFFB82A2A, 4), white = ramp(0xFFEAE6DE, 5), shoe = ramp(0xFF4A3424, 4), m = ramp(0xFFD02020, 3);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h), du = Math.abs(uu - 0.5);
+                if (f == Face.FRONT) {                                                                            // the M, pixel for pixel
+                    String[] mark = {"X...X", "XX.XX", "X.X.X", "X...X"};
+                    int col = x - (int) Math.round(w * 0.34), r = y - (int) Math.round(h * 0.12);
+                    if (col >= 0 && col < 5 && r >= 0 && r < 4 && mark[r].charAt(col) == 'X') return flat(m, f, 0);
+                }
+                return 0;
+            };
+            s.body = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                if (vv > 0.76 && vv < 0.86) return cloth(red, f, x, y, w, h, 721);
+                if (vv >= 0.86) return cloth(white, f, x, y, w, h, 722);
+                return cloth(navy, f, x, y, w, h, 723);
+            };
+            s.arm = (f, x, y, w, h) -> v(y, h) < 0.14 ? cloth(navy, f, x, y, w, h, 724) : 0;
+            s.leg = (f, x, y, w, h) -> v(y, h) > 0.84 || f == Face.BOTTOM ? flat(shoe, f, 0) : cloth(white, f, x, y, w, h, 725);
+            new Npc().body("bulky", 0xFFE6C4AA).face(3, 0xFF1A1010, true, 2, 0xFF6A4A3A, 0, 1).paint(s).save("spopovich");
+        }
+
+        /** Pintar: long black hair, bare-chested, red trousers with a black belt, black wristbands and boots. */
+        static void pintar() throws IOException {
+            int[] red = ramp(0xFFA82424, 5), black = ramp(0xFF161418, 4);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.body = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                if (vv > 0.8 && vv < 0.87) return flat(black, f, 0);
+                if (vv >= 0.87) return cloth(red, f, x, y, w, h, 731);
+                return 0;
+            };
+            s.arm = (f, x, y, w, h) -> v(y, h) > 0.74 && v(y, h) < 0.84 ? flat(black, f, 0) : 0;
+            s.leg = (f, x, y, w, h) -> v(y, h) > 0.78 || f == Face.BOTTOM ? flat(black, f, 0.04) : cloth(red, f, x, y, w, h, 732);
+            new Npc().body("athletic", 0xFFC08A62).face(1, 0xFF2A1A10, true, 1, 0xFF1A1414, 0, 2).paint(s).save("pintar");
+        }
+
+        /** Jewel: long blond hair, a purple vest over a white shirt, white trousers, purple boots. */
+        static void jewel() throws IOException {
+            int[] purple = ramp(0xFF6A3A9A, 5), white = ramp(0xFFF2F0F4, 5), gold = ramp(0xFFE0C060, 4);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                if (vv > 0.8 && vv < 0.86) return flat(gold, f, 0);
+                if (f == Face.FRONT && Math.abs(uu - 0.5) < 0.15 && vv < 0.8) return cloth(white, f, x, y, w, h, 741);
+                if (vv >= 0.86) return cloth(white, f, x, y, w, h, 742);
+                return cloth(purple, f, x, y, w, h, 743);
+            };
+            s.arm = (f, x, y, w, h) -> v(y, h) > 0.86 ? 0 : cloth(white, f, x, y, w, h, 744);
+            s.leg = (f, x, y, w, h) -> v(y, h) > 0.78 || f == Face.BOTTOM ? flat(purple, f, 0) : cloth(white, f, x, y, w, h, 745);
+            new Npc().body("lean", 0xFFF2D2BC).face(4, 0xFF3A70C0, true, 0, 0xFFD8C080, 1, 2).paint(s).save("jewel");
+        }
+
+        /** Nam: dark-skinned, a white turban, a white wrap with a red sash, loose white trousers, bare feet. */
+        static void nam() throws IOException {
+            int[] white = ramp(0xFFF0ECE2, 5), red = ramp(0xFFB83A2A, 4);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (f == Face.TOP) return cloth(white, f, x, y, w, h, 751);
+                if (f != Face.BOTTOM && vv < 0.28) return row(vv, 0.14, h) || row(vv, 0.24, h) ? ink(white) : cloth(white, f, x, y, w, h, 752);
+                return 0;
+            };
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                if (vv > 0.76 && vv < 0.86) return cloth(red, f, x, y, w, h, 753);
+                if (f == Face.FRONT && Math.abs((uu - 0.5) + (vv - 0.4) * 0.6) < 0.05 && vv < 0.76) return flat(red, f, 0);   // a sash across the chest
+                return cloth(white, f, x, y, w, h, 754);
+            };
+            s.arm = (f, x, y, w, h) -> v(y, h) < 0.3 ? cloth(white, f, x, y, w, h, 755) : 0;
+            s.leg = (f, x, y, w, h) -> v(y, h) > 0.84 || f == Face.BOTTOM ? 0 : cloth(white, f, x, y, w, h, 756);
+            new Npc().body("lean", 0xFF8A5A3A).face(0, 0xFF1A1010, true, 1, 0xFF1A1010, 0, 2).paint(s).save("nam");
+        }
+
+        /** Ranfan: a ponytail of black hair, a pink top with a mandarin collar and gold frogging, black trousers, pink shoes. */
+        static void ranfan() throws IOException {
+            int[] pink = ramp(0xFFE0609A, 5), black = ramp(0xFF181418, 5), gold = ramp(0xFFE8C860, 4);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                if (vv < 0.08) return flat(pink, f, 0.1);
+                if (f == Face.FRONT && vv < 0.6 && Math.abs(uu - 0.62) < 0.08 && ((int) (vv * h)) % 3 == 0) return flat(gold, f, 0);
+                if (vv > 0.84) return cloth(black, f, x, y, w, h, 761);
+                return cloth(pink, f, x, y, w, h, 762);
+            };
+            s.arm = (f, x, y, w, h) -> v(y, h) < 0.5 ? cloth(pink, f, x, y, w, h, 763) : 0;
+            s.leg = (f, x, y, w, h) -> v(y, h) > 0.86 || f == Face.BOTTOM ? flat(pink, f, 0) : cloth(black, f, x, y, w, h, 764);
+            new Npc().body("lean", 0xFFF4D6C2).face(4, 0xFF2A1A20, true, 0, 0xFF1A1418, 1, 0).paint(s).save("ranfan");
+        }
+
+        /** Yamu: small and bald, a thin moustache, a grey tunic with a black belt, black trousers. */
+        static void yamu() throws IOException {
+            int[] grey = ramp(0xFF7A7488, 5), black = ramp(0xFF161418, 4), stache = ramp(0xFF2A2020, 3);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.FRONT && vv > 0.7 && vv < 0.73 && Math.abs(uu - 0.5) < 0.16 && Math.abs(uu - 0.5) > 0.03) return flat(stache, f, 0);
+                return 0;
+            };
+            s.body = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                if (vv > 0.76 && vv < 0.84) return flat(black, f, 0);
+                if (vv >= 0.84) return cloth(black, f, x, y, w, h, 771);
+                return cloth(grey, f, x, y, w, h, 772);
+            };
+            s.arm = (f, x, y, w, h) -> v(y, h) < 0.4 ? cloth(grey, f, x, y, w, h, 773) : 0;
+            s.leg = (f, x, y, w, h) -> v(y, h) > 0.86 || f == Face.BOTTOM ? flat(black, f, 0.05) : cloth(black, f, x, y, w, h, 774);
+            new Npc().body("lean", 0xFFE0B898).face(3, 0xFF1A1010, true, 2, 0xFF2A2020, 0, 1).paint(s).save("yamu");
         }
 
         /** The Kai's training monkey: brown fur, a tan face and belly, quick bright eyes (the tail is 3D). */

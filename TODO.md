@@ -199,6 +199,6 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [ ] CX-17 Originals (the original additions planned in docs/CONTENT_EXPANSION.md)
   - [x] 17a (v0.47.0) The Spirit Bomb: raised overhead for up to twenty seconds, it draws ki from its thrower, from every player within 48 blocks who holds Charge, and a trickle from the living things around; it grows with what it gathers and spares everyone who gave to it; cast again to throw it. Taught by the Kai of the north.
   - [x] 17b (v0.48.0) Beerus's Planet: Beerus teaches Hakai, Whis teaches Ultra Instinct (-Sign- and Mastered, any race); the real Dragon Ball names everywhere (King Kai, Shenron, Frieza Race, Kamehameha...)
-  - [ ] 17c A tournament arena with brackets
+  - [x] 17c (v0.49.0) The World Martial Arts Tournament: grounds near spawn, the Announcer, an eight-fighter bracket (players and the real roster: Mr. Satan, Spopovich, Pintar, Jewel, Nam, Ranfan, Yamu), ring-outs, knockouts and decisions, prizes and the World Champion title
   - [ ] 17d A dojo of training robots (agility drill)
   - [ ] 17e Family (children with 5% of each parent's stats), planets and sectors, claiming

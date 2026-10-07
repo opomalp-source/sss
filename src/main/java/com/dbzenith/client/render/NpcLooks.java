@@ -53,6 +53,14 @@ public final class NpcLooks {
             Map.entry("grand_kai", look(HairCode.Preset.SWEPT, 0xF4F2F0, RaceTraits.Feature.NONE, true, 0xC8A6E0, -1, false, Extra.EARRINGS)),
             Map.entry("beerus", look(null, 0, RaceTraits.Feature.EARS, true, 0xB49CCC, 0xB49CCC, false, Extra.EARRINGS)),
             Map.entry("whis", look(HairCode.Preset.MOHAWK, 0xF2F4F8, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("tournament_announcer", look(HairCode.Preset.SLICK, 0xF0D060, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("mr_satan", look(HairCode.Preset.PUFF, 0x141210, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("spopovich", look(null, 0, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("pintar", look(HairCode.Preset.LONG, 0x1A1414, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("jewel", look(HairCode.Preset.LONG, 0xF0D890, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("nam", look(null, 0, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("ranfan", look(HairCode.Preset.PONYTAIL, 0x1A1418, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("yamu", look(null, 0, RaceTraits.Feature.NONE, false, 0, -1, false)),
             Map.entry("training_monkey", look(null, 0, RaceTraits.Feature.NONE, false, 0, 0x8A5A30, false)),
             Map.entry("damned_warrior", look(HairCode.Preset.WILD, 0x2A2430, RaceTraits.Feature.NONE, false, 0, -1, false)));
 

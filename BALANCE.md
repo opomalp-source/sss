@@ -226,3 +226,18 @@ Constants are in `CombatMoves`.
 - **Ultra Instinct -Sign-** (Whis's first lesson, level 1500): STR x4.5, DEX x7, Ki Power x4.5; 1.2% ki a second. Dodges 25% of blows and blasts, rising to 50% at full mastery.
 - **Mastered Ultra Instinct** (dodge 40 times in the Sign, level 2200, 50 mastery of the Sign): STR x6.5, DEX x10, Ki Power x6.5; 1.6% ki a second. Dodges 50%, rising to 75%, and each dodge counters for 80% of a punch.
 - **A dodge** costs 2% of max stamina (no dodge when below that) and sidesteps 3 blocks. Throws are never dodged.
+
+## World Martial Arts Tournament (17c, v0.49.0)
+- **Timing:** registration 30 s; each match 3 min (then a decision on the share of health left); 4 s countdown; 3 s between matches; one entry per player per Minecraft day (24000 ticks).
+- **Opponents:** roster fighters match your full power: 75% in the quarterfinal, 95% in the semifinal, 115% in the final.
+  - When two roster fighters meet, the higher seed wins more often: Mr. Satan 6, Spopovich 5, Pintar 4, Jewel 3, Nam 3, Ranfan 2, Yamu 2; the chance is seed / (sum of both seeds).
+- **Prizes:**
+
+  | Place | TP | Senzu Beans |
+  |---|---|---|
+  | Out in the quarterfinals | 300 | 0 |
+  | Out in the semifinals | 800 | 1 |
+  | Runner-up | 1500 | 2 |
+  | Champion | 3000 | 4, and the World Champion title |
+
+- **Between matches:** full body, ki and stamina. A knockout leaves you at 10% body.

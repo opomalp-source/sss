@@ -89,6 +89,23 @@ public final class ModNpcs {
             () -> EntityType.Builder.<KiFighter>of((t, l) -> new KiFighter(t, l, DAMNED_PROFILE), MobCategory.MONSTER)
                     .sized(0.6f, 1.9f).clientTrackingRange(8).fireImmune().build("damned_warrior"));
 
+    // ------------------------------------------------------------------ the World Martial Arts Tournament (CX-17c)
+
+    public static final RegistryObject<EntityType<OtherworldNpc>> TOURNAMENT_ANNOUNCER = otherworld("tournament_announcer", OtherworldNpc.Role.ANNOUNCER, 0.6f, 1.9f);
+    public static final java.util.Map<com.dbzenith.tournament.Roster, RegistryObject<EntityType<com.dbzenith.tournament.TournamentFighter>>> TOURNAMENT_FIGHTERS = new java.util.EnumMap<>(com.dbzenith.tournament.Roster.class);
+
+    static {
+        for (com.dbzenith.tournament.Roster r : com.dbzenith.tournament.Roster.values()) {
+            float w = r == com.dbzenith.tournament.Roster.SPOPOVICH ? 0.7f : 0.6f, h = r == com.dbzenith.tournament.Roster.SPOPOVICH ? 2.2f : r == com.dbzenith.tournament.Roster.YAMU ? 1.7f : 1.9f;
+            TOURNAMENT_FIGHTERS.put(r, TYPES.register(r.id(), () -> EntityType.Builder.<com.dbzenith.tournament.TournamentFighter>of(
+                    (t, l) -> new com.dbzenith.tournament.TournamentFighter(t, l, r), MobCategory.MISC).sized(w, h).clientTrackingRange(10).build(r.id())));
+        }
+    }
+
+    public static EntityType<com.dbzenith.tournament.TournamentFighter> tournamentFighter(com.dbzenith.tournament.Roster r) {
+        return TOURNAMENT_FIGHTERS.get(r).get();
+    }
+
     private ModNpcs() {}
 
     public static void register(IEventBus modBus) {
@@ -106,11 +123,12 @@ public final class ModNpcs {
         event.put(MASTER.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2).add(Attributes.MAX_HEALTH, 100).build());
         event.put(PATROL_OFFICER.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2).add(Attributes.MAX_HEALTH, 100).build());
         var resident = net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2).add(Attributes.MAX_HEALTH, 200).build();
-        for (var t : List.of(ENMA, OGRE_CLERK_RED, OGRE_CLERK_BLUE, NORTH_KAI, GRAND_KAI, BEERUS, WHIS)) event.put(t.get(), resident);
+        for (var t : List.of(ENMA, OGRE_CLERK_RED, OGRE_CLERK_BLUE, NORTH_KAI, GRAND_KAI, BEERUS, WHIS, TOURNAMENT_ANNOUNCER)) event.put(t.get(), resident);
         event.put(TRAINING_MONKEY.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.34).add(Attributes.MAX_HEALTH, 40).build());
         event.put(TRAINING_CRICKET.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.3).add(Attributes.MAX_HEALTH, 10).build());
         event.put(OGRE_GUARD.get(), KiFighter.attributes(220, 10, 0.25).add(Attributes.KNOCKBACK_RESISTANCE, 0.7).build());
         event.put(DAMNED_WARRIOR.get(), KiFighter.attributes(90, 8, 0.29).build());
+        for (var t : TOURNAMENT_FIGHTERS.values()) event.put(t.get(), KiFighter.attributes(120, 8, 0.3).add(Attributes.KNOCKBACK_RESISTANCE, 0.3).build());
     }
 
     @SubscribeEvent

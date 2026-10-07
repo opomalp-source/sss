@@ -368,6 +368,36 @@ public final class DBZCommand {
                                             boolean on = BoolArgumentType.getBool(ctx, "on");
                                             return apply(ctx, "Set tail " + on + " for", d -> d.setTail(on));
                                         }))))
+                .then(Commands.literal("tournament")
+                        .then(Commands.literal("join").then(Commands.argument("targets", EntityArgument.players()).executes(ctx -> {
+                            int n = 0;
+                            for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) if (com.dbzenith.tournament.Tournament.join(p)) n++;
+                            int count = n;
+                            ctx.getSource().sendSuccess(() -> Component.literal("Entered " + count + " player(s)"), true);
+                            return n;
+                        })))
+                        .then(Commands.literal("close").executes(ctx -> {
+                            var t = com.dbzenith.tournament.Tournament.current();
+                            if (t == null) return 0;
+                            t.closeSignup();
+                            return 1;
+                        }))
+                        .then(Commands.literal("result").then(Commands.argument("winner", IntegerArgumentType.integer(0, 1)).executes(ctx -> {
+                            var t = com.dbzenith.tournament.Tournament.current();
+                            if (t == null || t.phase() != com.dbzenith.tournament.Tournament.Phase.FIGHTING) return 0;
+                            t.forceResult(IntegerArgumentType.getInteger(ctx, "winner"), "decision");
+                            return 1;
+                        })))
+                        .then(Commands.literal("cancel").executes(ctx -> {
+                            com.dbzenith.tournament.Tournament.cancel();
+                            return 1;
+                        }))
+                        .then(Commands.literal("build").then(Commands.argument("pos", net.minecraft.commands.arguments.coordinates.BlockPosArgument.blockPos()).executes(ctx -> {
+                            var at = com.dbzenith.tournament.TournamentGrounds.build(ctx.getSource().getServer().overworld(),
+                                    net.minecraft.commands.arguments.coordinates.BlockPosArgument.getLoadedBlockPos(ctx, "pos"));
+                            ctx.getSource().sendSuccess(() -> Component.literal("Tournament ring at " + at.toShortString()), true);
+                            return 1;
+                        }))))
                 .then(Commands.literal("build")
                         .then(Commands.argument("kind", StringArgumentType.word())
                                 .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.List.of("dojo", "outpost"), b))

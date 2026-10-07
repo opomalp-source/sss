@@ -18,7 +18,7 @@ import java.util.List;
 public final class LifeSim {
     /** Titles in display order; each is earned by a milestone. */
     public enum Title {
-        TRANSFORMED, SURVIVOR, DRAGON_SUMMONER, PATROL_COMMANDER, LEGENDARY, DIVINE;
+        TRANSFORMED, SURVIVOR, DRAGON_SUMMONER, PATROL_COMMANDER, LEGENDARY, DIVINE, CHAMPION;
 
         public String id() {
             return name().toLowerCase(java.util.Locale.ROOT);
@@ -36,6 +36,7 @@ public final class LifeSim {
                 case PATROL_COMMANDER -> QuestManager.patrolRank(d) >= QuestManager.RANK_REP.length - 1;
                 case LEGENDARY -> safeLevel(d) >= 1000;
                 case DIVINE -> d.hasFlag("god_ki");
+                case CHAMPION -> d.hasFlag(com.dbzenith.tournament.Tournament.CHAMPION_FLAG);
             };
         }
     }

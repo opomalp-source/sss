@@ -30,6 +30,12 @@ public final class ClientHooks {
         Minecraft.getInstance().setScreen(new com.dbzenith.client.screen.JudgementScreen(dead, secondsLeft));
     }
 
+    /** The World Martial Arts Tournament's bracket: opens the screen, or refreshes it if it is open. */
+    public static void tournament(com.dbzenith.network.TournamentPackets.State state) {
+        com.dbzenith.client.screen.TournamentScreen.latest = state;
+        if (state.open()) Minecraft.getInstance().setScreen(new com.dbzenith.client.screen.TournamentScreen());
+    }
+
     public static void openQuestScreen(com.dbzenith.quest.Quest.Giver giver) {
         Minecraft.getInstance().setScreen(new com.dbzenith.client.screen.QuestScreen(giver));
     }

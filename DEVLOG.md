@@ -1348,3 +1348,37 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **Test fixes:**
   - `CombatTests` counted every ki blast near spawn, so the Spirit Bomb test's hovering bomb could make it see two; it now counts only its own player's.
   - The Beerus's Planet test waits for the temple chunk's entities to load (the test world keeps the planet between runs).
+
+## 2026-10-07 — CX-17c: the World Martial Arts Tournament (v0.49.0)
+- **`TournamentGrounds`** (SavedData, built on login in any world that doesn't have them, 56 blocks north of spawn; `/dbz tournament build <pos>`):
+  - A levelled stone plaza (trees and hills cleared, gaps filled down to the ground).
+  - The raised 15x15 ring of light tiles with diorite seams, steps on the south side and lanterns at the corners.
+  - Stepped stands on both sides under red-and-white awnings, the fighters' hall with an orange roof, and the great red gate.
+  - The World Tournament Announcer by the ring steps.
+- **`Tournament`** (in memory, one at a time; ticks on the server tick):
+  - **Sign-up:** talking to the Announcer opens the board; entering opens a 30 s registration for everyone else.
+  - **The draw:** players are spread through slots 0, 2, 4, 6..., the rest is filled from the shuffled roster, and Mr. Satan (the champion) always sits in slot 7.
+  - **Roster matches:** when two roster fighters meet, the result is announced from their seeds.
+  - **Matches with players:** the fighters are teleported to opposite corners, healed, and given a 3-2-1 countdown with bells.
+  - **Winning:** a ring-out (on the ground or in water below the tiles, or 40 blocks away), a knockout (`LivingDeathEvent` cancelled at HIGHEST priority: the loser is left on 10%) or a decision on the health share after 3 minutes. Flight is stopped every tick. A player who is offline, elsewhere, or too far from the ring forfeits.
+  - **Prizes:** losers are paid as they go out, the champion at the end (the `tournament_champion` flag gives the new CHAMPION title). Mr. Satan has a line for winning and one for losing ("It's a trick!").
+  - **Announcements:** in chat as "Announcer: ...", to everyone near the grounds and every entrant; the match clock shows on the action bar.
+- **`TournamentFighter`** (one entity type per `Roster` entry):
+  - It only targets the opponent it is given and is invulnerable until the bell.
+  - It never despawns, not even on peaceful (they are Monsters), and is never saved. It removes itself when it isn't in the current match.
+  - Its level comes from the player's full power by round.
+- **`TournamentScreen`** (UI v3):
+  - Before the draw it shows the rules and who has signed up, with a countdown.
+  - Then the bracket of eight: lines turn gold as fighters go through, the match being fought pulses, and the champion's box is at the right.
+  - "Enter the tournament" is disabled with the reason shown on hover. `TournamentPackets` State and Join; PROTOCOL 31.
+- **Art** (ArtGen `NpcArt.tournament`, original paintings of the real characters):
+  - The Announcer: blond, sunglasses, black suit, red bow tie.
+  - Mr. Satan: afro, moustache, white gi, black belt, red wristbands.
+  - Spopovich: huge, bald, Babidi's M as a pixel M, navy top, red sash.
+  - Pintar: long hair, bare-chested, red trousers.
+  - Jewel: long blond hair, purple vest.
+  - Nam: turban, white wrap, red sash, barefoot.
+  - Ranfan: ponytail, pink top with gold frogging.
+  - Yamu: small, bald, moustache, grey tunic.
+- **Tests:** `TournamentTests` (rounds and roster; a real match: enter, the draw puts the lone player in the first match against a roster fighter, the bell, a lethal blow only knocks out, the roster fighter goes through, the player is paid, the fighter leaves). 155 GameTests.
+- **Checked in the dev client:** the grounds from above and from the stands, the bracket screen, a quarterfinal against Spopovich (announcements, the countdown, the clock), and the roster lined up.

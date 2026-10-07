@@ -45,7 +45,7 @@ public class OtherworldNpc extends PathfinderMob {
         home.tick(this);
     }
 
-    public enum Role { ENMA, OGRE_CLERK, NORTH_KAI, GRAND_KAI, BEERUS, WHIS }
+    public enum Role { ENMA, OGRE_CLERK, NORTH_KAI, GRAND_KAI, BEERUS, WHIS, ANNOUNCER }
 
     /** The quest event a touch on Whis counts towards (his first lesson). */
     public static final String WHIS_TOUCHED = "dbzenith:touch_whis";
@@ -94,6 +94,7 @@ public class OtherworldNpc extends PathfinderMob {
                 case GRAND_KAI -> ModNetwork.sendTo(sp, new QuestPackets.Open(Quest.Giver.GRAND_KAI));
                 case BEERUS -> ModNetwork.sendTo(sp, new QuestPackets.Open(Quest.Giver.BEERUS));
                 case WHIS -> ModNetwork.sendTo(sp, new QuestPackets.Open(Quest.Giver.WHIS));
+                case ANNOUNCER -> com.dbzenith.tournament.Tournament.open(sp);
             }
         }
         return InteractionResult.sidedSuccess(level().isClientSide);

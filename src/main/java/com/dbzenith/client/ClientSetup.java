@@ -102,6 +102,12 @@ public final class ClientSetup {
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.GRAND_KAI.get(), ctx -> new FighterRenderer<>(ctx, "grand_kai", 1.05f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.BEERUS.get(), ctx -> new FighterRenderer<>(ctx, "beerus", 0.98f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.WHIS.get(), ctx -> new FighterRenderer<>(ctx, "whis", 1.06f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.TOURNAMENT_ANNOUNCER.get(), ctx -> new FighterRenderer<>(ctx, "tournament_announcer", 1f));
+        for (var e : com.dbzenith.npc.ModNpcs.TOURNAMENT_FIGHTERS.entrySet()) {
+            String skin = e.getKey().id();
+            float scale = e.getKey() == com.dbzenith.tournament.Roster.SPOPOVICH ? 1.14f : e.getKey() == com.dbzenith.tournament.Roster.YAMU ? 0.9f : 1f;
+            event.registerEntityRenderer(e.getValue().get(), ctx -> new FighterRenderer<>(ctx, skin, scale));
+        }
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.TRAINING_MONKEY.get(), ctx -> new FighterRenderer<>(ctx, "training_monkey", 0.48f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.TRAINING_CRICKET.get(), com.dbzenith.client.render.CricketRenderer::new);
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.OGRE_GUARD.get(), ctx -> new FighterRenderer<>(ctx, "ogre_guard", 1.3f));
