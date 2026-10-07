@@ -51,10 +51,17 @@ public final class NpcLooks {
             Map.entry("ogre_guard", look(HairCode.Preset.WILD, 0x141010, RaceTraits.Feature.DEMON_HORNS, false, 0xF0E0C0, -1, false)),
             Map.entry("north_kai", look(null, 0, RaceTraits.Feature.ANTENNAE, false, 0x2A2A3A, -1, false)),
             Map.entry("grand_kai", look(HairCode.Preset.SWEPT, 0xF4F2F0, RaceTraits.Feature.NONE, true, 0xC8A6E0, -1, false, Extra.EARRINGS)),
+            Map.entry("beerus", look(null, 0, RaceTraits.Feature.EARS, true, 0xB49CCC, 0xB49CCC, false, Extra.EARRINGS)),
+            Map.entry("whis", look(HairCode.Preset.MOHAWK, 0xF2F4F8, RaceTraits.Feature.NONE, false, 0, -1, false)),
             Map.entry("training_monkey", look(null, 0, RaceTraits.Feature.NONE, false, 0, 0x8A5A30, false)),
             Map.entry("damned_warrior", look(HairCode.Preset.WILD, 0x2A2430, RaceTraits.Feature.NONE, false, 0, -1, false)));
 
     private NpcLooks() {}
+
+    /** How long an NPC's race parts are (1 classic): Beerus's great cat ears. */
+    public static float featureLength(String skin) {
+        return "beerus".equals(skin) ? 2.1f : 1f;
+    }
 
     public static Look of(String skin) {
         return LOOKS.getOrDefault(skin, PLAIN);

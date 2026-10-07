@@ -55,6 +55,10 @@ public final class Techniques {
     public static final Technique SPIRIT_BOMB = add(Technique.builder("spirit_bomb").cost(250).damage(8.0).speed(0.55f).size(2.4f)
             .cooldown(1200).explosion(5f).color(0xBFEFFF).life(1400).drop(400).effect(Effect.SPIRIT_BOMB, 0).learn(6000, 400));
 
+    /** Hakai (CX-17b): Beerus teaches it to those who prove themselves. Erases what is weaker than you; the rest it maims. */
+    public static final Technique HAKAI = add(Technique.builder("hakai").style(Style.SELF).effect(Effect.HAKAI, 12)
+            .cost(300).damage(6.0).cooldown(1200).color(0x8A3AD0));
+
     // ---------------------------------------------------------------- racial
     public static final Technique SOLAR_FLARE = add(Technique.builder("solar_flare").style(Style.SELF).effect(Effect.BLIND_AREA, 12)
             .cost(30).cooldown(300).color(0xFFFFE0).race(Race.HUMAN));

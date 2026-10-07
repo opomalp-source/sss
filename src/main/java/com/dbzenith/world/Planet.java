@@ -21,7 +21,9 @@ import java.util.Locale;
 public enum Planet {
     EARTH(Level.OVERWORLD, 1),
     NAMEK(key("namek"), 1),
-    NORTHERN_PLANET(key("northern_planet"), 10);
+    NORTHERN_PLANET(key("northern_planet"), 10),
+    /** The God of Destruction's planet (CX-17b): only a pod set by someone with godly ki can find it. */
+    BEERUS_PLANET(key("beerus_planet"), 1);
 
 
     private final ResourceKey<Level> dimension;
@@ -59,6 +61,10 @@ public enum Planet {
         PlayerData d = ModCapabilities.get(player).orElse(null);
         long now = player.level().getGameTime();
         if (d == null || TimeChamber.isIn(player) || Planet.of(player.level()) == target) return false;
+        if (target == BEERUS_PLANET && !d.hasFlag(com.dbzenith.transform.GodKi.FLAG) && !player.getAbilities().instabuild) {
+            player.displayClientMessage(Component.translatable("message.dbzenith.pod_no_course"), true);
+            return false;
+        }
         if (d.isOnCooldown("space_travel", now) && !player.getAbilities().instabuild) {
             player.displayClientMessage(Component.translatable("message.dbzenith.pod_recharging"), true);
             return false;
@@ -73,6 +79,7 @@ public enum Planet {
         long now = player.level().getGameTime();
         ServerLevel level = player.server.getLevel(target.dimension);
         if (level == null) return false;
+        BeerusPlanetBuilder.ensureBuilt(level);
         BlockPos base = landingSite(level, target == EARTH ? level.getSharedSpawnPos() : BlockPos.ZERO);
         player.teleportTo(level, base.getX() + 0.5, base.getY(), base.getZ() + 0.5, player.getYRot(), 0f);
         player.fallDistance = 0;

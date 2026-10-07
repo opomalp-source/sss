@@ -24,6 +24,7 @@ public final class TechniqueLibrary {
     public static Component learnProblem(PlayerData data, Technique t) {
         if (data.knows(t.id())) return Component.translatable("technique.dbzenith.problem.known");
         if (!t.races().contains(data.getRace())) return Component.translatable("technique.dbzenith.problem.race");
+        if (t.learnCost() <= 0 && !t.isRacial() && t != com.dbzenith.skill.Techniques.KI_BLAST) return Component.translatable("technique.dbzenith.problem.taught");
         if (StatCalculator.level(data) < t.unlockLevel()) return Component.translatable("technique.dbzenith.problem.level", t.unlockLevel());
         if (data.getTrainingPoints() < t.learnCost()) return Component.translatable("technique.dbzenith.problem.tp", t.learnCost());
         return null;

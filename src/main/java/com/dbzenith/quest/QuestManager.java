@@ -81,6 +81,18 @@ public final class QuestManager {
         }
     }
 
+    private static void takeItem(Player player, String itemId, int count) {
+        Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemId));
+        if (item == null) return;
+        for (ItemStack s : player.getInventory().items) {
+            if (count <= 0) return;
+            if (!s.is(item)) continue;
+            int n = Math.min(count, s.getCount());
+            s.shrink(n);
+            count -= n;
+        }
+    }
+
     private static int countItem(Player player, String itemId) {
         Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemId));
         if (item == null) return 0;
@@ -106,6 +118,9 @@ public final class QuestManager {
         PlayerData d = ModCapabilities.get(player).orElse(null);
         if (q == null || d == null || !isComplete(player, d, q)) return false;
         d.finishQuest(q.id());
+        if (q.giver() == Quest.Giver.BEERUS) {                                 // Beerus eats what you bring him
+            for (Quest.Objective o : q.objectives()) if (o.type() == Quest.Objective.Type.COLLECT_ITEM) takeItem(player, o.target(), o.amount());
+        }
         Quest.Reward r = q.reward();
         if (r.tp() > 0) d.addTrainingPoints(r.tp());
         for (Quest.ItemReward ir : r.items()) {

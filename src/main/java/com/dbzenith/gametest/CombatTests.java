@@ -169,7 +169,7 @@ public final class CombatTests {
         helper.assertTrue(TechniqueHandler.use(player, Techniques.KI_BLAST) == TechniqueHandler.Result.COOLDOWN, "second use should be on cooldown");
         d.setKi(0);
         helper.assertTrue(TechniqueHandler.use(player, Techniques.WAVE_BEAM, true) == TechniqueHandler.Result.NOT_ENOUGH_KI, "no ki, no beam");
-        int blasts = helper.getLevel().getEntitiesOfClass(KiBlastEntity.class, player.getBoundingBox().inflate(4)).size();
+        int blasts = helper.getLevel().getEntitiesOfClass(KiBlastEntity.class, player.getBoundingBox().inflate(4), b -> b.getOwner() == player).size();
         helper.assertTrue(blasts == 1, "exactly one ki blast should spawn, found " + blasts);
         TestPlayers.remove(helper, player);
         helper.succeed();

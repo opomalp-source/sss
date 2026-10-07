@@ -120,6 +120,10 @@ public final class CombatEvents {
                 raw *= kept;
             }
             boolean afterimage = source.getEntity() != null && victim.level().getGameTime() <= victimData.getDashEvadeUntil();
+            if (!afterimage && !isThrow && source.getEntity() != null && victim instanceof net.minecraft.server.level.ServerPlayer uiPlayer
+                    && com.dbzenith.transform.UltraInstinct.evade(uiPlayer, victimData, source.getEntity(), victim.getRandom().nextDouble())) {
+                afterimage = true;                                               // Ultra Instinct: the body moved on its own
+            }
             if (afterimage && !isKi && victim instanceof net.minecraft.server.level.ServerPlayer sp
                     && source.getEntity() instanceof net.minecraft.world.entity.LivingEntity foe && foe != victim) {
                 com.dbzenith.race.RacialSkillEffects.echoStrike(sp, victimData, foe, victim.level().getGameTime());

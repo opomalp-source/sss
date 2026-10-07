@@ -20,6 +20,9 @@ public final class ModDamageTypes {
     public static final ResourceKey<DamageType> ABSORBED =
             ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(DBZenith.MOD_ID, "absorbed"));
 
+    public static final ResourceKey<DamageType> HAKAI =
+            ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(DBZenith.MOD_ID, "hakai"));
+
     private ModDamageTypes() {}
 
     /** A ki blast hit. The hurt amount passed with this source is raw DBZ damage, converted in CombatEvents. */
@@ -35,5 +38,10 @@ public final class ModDamageTypes {
     /** Absorbed by a Majin: certain death (bypasses invulnerability, armor and resistance via damage-type tags). */
     public static DamageSource absorbed(Level level, Entity majin) {
         return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(ABSORBED), majin, majin);
+    }
+
+    /** Erased by a Hakai: certain death, like absorption. */
+    public static DamageSource hakai(Level level, Entity destroyer) {
+        return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(HAKAI), destroyer, destroyer);
     }
 }

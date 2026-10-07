@@ -18,10 +18,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 /**
- * The people of the other world (CX-12). None can be hurt; each answers in its own way. Enma, judge of the dead, hears
+ * The people of the other world (CX-12). None can be hurt; each answers in its own way. King Yemma, judge of the dead, hears
  * your case and sends you back among the living once your time is served. His ogre clerks keep the queues moving and
- * have a word for everyone. The Kai of the north trains those who reach the end of Snake Way; the Grand Kai keeps the
- * springs of his paradise.
+ * have a word for everyone. King Kai trains those who reach the end of Snake Way; the Grand Kai keeps the
+ * springs of his planet. On Beerus's Planet (CX-17b) the God of Destruction teaches Hakai, and Whis, his attendant,
+ * teaches Ultra Instinct: every swing at him slips past, and touching him once is his first lesson.
  */
 public class OtherworldNpc extends PathfinderMob {
     private final HomeKeeper home = new HomeKeeper();
@@ -44,7 +45,11 @@ public class OtherworldNpc extends PathfinderMob {
         home.tick(this);
     }
 
-    public enum Role { ENMA, OGRE_CLERK, NORTH_KAI, GRAND_KAI }
+    public enum Role { ENMA, OGRE_CLERK, NORTH_KAI, GRAND_KAI, BEERUS, WHIS }
+
+    /** The quest event a touch on Whis counts towards (his first lesson). */
+    public static final String WHIS_TOUCHED = "dbzenith:touch_whis";
+    private static final int WHIS_LINES = 5;
 
     private static final int CLERK_LINES = 8;
 
@@ -87,9 +92,40 @@ public class OtherworldNpc extends PathfinderMob {
                         Component.translatable("npc.dbzenith.ogre_clerk." + random.nextInt(CLERK_LINES))));
                 case NORTH_KAI -> ModNetwork.sendTo(sp, new QuestPackets.Open(Quest.Giver.NORTH_KAI));
                 case GRAND_KAI -> ModNetwork.sendTo(sp, new QuestPackets.Open(Quest.Giver.GRAND_KAI));
+                case BEERUS -> ModNetwork.sendTo(sp, new QuestPackets.Open(Quest.Giver.BEERUS));
+                case WHIS -> ModNetwork.sendTo(sp, new QuestPackets.Open(Quest.Giver.WHIS));
             }
         }
         return InteractionResult.sidedSuccess(level().isClientSide);
+    }
+
+    /** Whis is never where the blow lands: now and then a fighter brushes him (more often in Ultra Instinct). */
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        if (role == Role.WHIS && !level().isClientSide && source.getEntity() instanceof ServerPlayer player) {
+            com.dbzenith.data.PlayerData d = com.dbzenith.data.ModCapabilities.get(player).orElse(null);
+            double chance = d != null && com.dbzenith.transform.UltraInstinct.isIn(d) ? 0.35 : 0.08;
+            net.minecraft.server.level.ServerLevel sl = (net.minecraft.server.level.ServerLevel) level();
+            if (random.nextDouble() < chance) {
+                com.dbzenith.quest.QuestManager.event(player, WHIS_TOUCHED);
+                player.displayClientMessage(Component.translatable("message.dbzenith.whis_touched"), true);
+                sl.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, getX(), getY() + 1.2, getZ(), 16, 0.3, 0.5, 0.3, 0.05);
+            } else {
+                double a = random.nextDouble() * Math.PI * 2;                                   // a step aside, unhurried
+                double x = getX() + Math.cos(a) * 2.5, z = getZ() + Math.sin(a) * 2.5;
+                if (level().noCollision(this, getBoundingBox().move(x - getX(), 0, z - getZ()))) teleportTo(x, getY(), z);
+                sl.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD, getX(), getY() + 1, getZ(), 4, 0.2, 0.5, 0.2, 0.01);
+                level().playSound(null, blockPosition(), net.minecraft.sounds.SoundEvents.ILLUSIONER_MIRROR_MOVE,
+                        net.minecraft.sounds.SoundSource.NEUTRAL, 0.6f, 1.5f);
+                if (random.nextInt(3) == 0) {
+                    player.displayClientMessage(Component.translatable("entity.dbzenith.whis.says",
+                            Component.translatable("npc.dbzenith.whis." + random.nextInt(WHIS_LINES))), true);
+                }
+            }
+            lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, player.getEyePosition());
+            return false;
+        }
+        return super.hurt(source, amount);
     }
 
     @Override

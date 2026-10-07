@@ -312,6 +312,14 @@ public final class Forms {
     public static final Form DEMON_GOD = add(Form.builder("demon_god").parent("demon_lord", 4).races(Race.CORE_PERSON).only(Variant.DEMON)
             .dbv(32, 56).drain(2.4, 0).lightning().colors(0x6A0A20, -1, 0xFF4000).unlock(1500, 50).requiresFlag("god_ki").build());
 
+    // --- Ultra Instinct (CX-17b): any race, taught by Whis. The body moves on its own: attacks slip past (UltraInstinct) ---
+    public static final Form ULTRA_INSTINCT_SIGN = add(Form.builder("ultra_instinct_sign").parent("base", 5)
+            .multipliers(4.5, 7.0, 4.5).drain(1.2, 0).calmAura().colors(0xCFE0FF, -1, 0xB8C4D8)
+            .unlock(1500, 0).requiresFlag(UltraInstinct.SIGN_FLAG).build());
+    public static final Form ULTRA_INSTINCT = add(Form.builder("ultra_instinct").parent("ultra_instinct_sign", 6)
+            .multipliers(6.5, 10.0, 6.5).drain(1.6, 0).calmAura().colors(0xEEF4FF, 0xE4E8F0, 0xC8D0E0)
+            .unlock(2200, 50).requiresFlag(UltraInstinct.MASTERED_FLAG).build());
+
     private Forms() {}
 
     private static Form add(Form f) {

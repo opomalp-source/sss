@@ -44,7 +44,7 @@ public final class Quests {
                 Reward.tp(1500).with("dbzenith:capsule", 1).rep(100, 10)));
     }
 
-    // ---------------------------------------------------------------- the Kai of the north, at the end of Snake Way
+    // ---------------------------------------------------------------- King Kai, at the end of Snake Way
     static {
         add(new Quest("catch_the_monkey", Quest.Giver.NORTH_KAI, List.of(Objective.kill(com.dbzenith.npc.TrainingMonkey.CAUGHT, 1)), List.of(), 0, false,
                 Reward.tp(800).flag("skill:kaioken:1")));
@@ -56,7 +56,7 @@ public final class Quests {
                 List.of("kaioken_times_three"), 0, false, Reward.tp(3000).teach("spirit_bomb")));
     }
 
-    // ---------------------------------------------------------------- the Grand Kai, in his paradise
+    // ---------------------------------------------------------------- the Grand Kai, on his planet
     static {
         add(new Quest("springs_of_paradise", Quest.Giver.GRAND_KAI, List.of(Objective.flag("spring_soaked")), List.of(), 0, false,
                 Reward.tp(1500).flag("godki:300")));
@@ -64,6 +64,18 @@ public final class Quests {
                 List.of("springs_of_paradise"), 0, false, Reward.tp(3000).with("dbzenith:senzu_bean", 6).with("dbzenith:potara_earrings", 1)));
         add(new Quest("the_fusion_dance", Quest.Giver.GRAND_KAI, List.of(Objective.level(150), Objective.kill("dbzenith:damned_warrior", 6)),
                 List.of("springs_of_paradise"), 0, false, Reward.tp(2000).teach("fusion_dance")));
+    }
+
+    // ---------------------------------------------------------------- Beerus's Planet (CX-17b): the God of Destruction and his attendant
+    static {
+        add(new Quest("a_gods_appetite", Quest.Giver.BEERUS, List.of(Objective.collect("minecraft:cake", 1), Objective.collect("minecraft:pumpkin_pie", 3),
+                Objective.collect("minecraft:cooked_salmon", 5)), List.of(), 0, false, Reward.tp(2500)));
+        add(new Quest("the_god_of_destruction", Quest.Giver.BEERUS, List.of(Objective.level(2000), Objective.kill("dbzenith:tyrant_lord", 1)),
+                List.of("a_gods_appetite"), 0, false, Reward.tp(5000).teach("hakai")));
+        add(new Quest("angel_training", Quest.Giver.WHIS, List.of(Objective.level(1500), Objective.kill(com.dbzenith.npc.OtherworldNpc.WHIS_TOUCHED, 1)),
+                List.of(), 0, false, Reward.tp(4000).flag(com.dbzenith.transform.UltraInstinct.SIGN_FLAG)));
+        add(new Quest("mastered_ultra_instinct", Quest.Giver.WHIS, List.of(Objective.level(2200), Objective.kill(com.dbzenith.transform.UltraInstinct.DODGED, 40)),
+                List.of("angel_training"), 0, false, Reward.tp(6000).flag(com.dbzenith.transform.UltraInstinct.MASTERED_FLAG)));
     }
 
     private Quests() {}

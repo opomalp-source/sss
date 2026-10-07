@@ -25,6 +25,7 @@ public class NpcPartsLayer<T extends Mob> extends RenderLayer<T, PlayerModel<T>>
     private static final ResourceLocation GEAR = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/gear_parts.png");
 
     private final NpcLooks.Look look;
+    private final float featureLength;
     private final FormHairModel hair;
     private final RaceFeatureModel features;
     private final GearModel gear;
@@ -33,6 +34,7 @@ public class NpcPartsLayer<T extends Mob> extends RenderLayer<T, PlayerModel<T>>
     public NpcPartsLayer(RenderLayerParent<T, PlayerModel<T>> parent, EntityModelSet models, String skin) {
         super(parent);
         this.look = NpcLooks.of(skin);
+        this.featureLength = NpcLooks.featureLength(skin);
         this.hair = new FormHairModel(models.bakeLayer(FormHairModel.LAYER));
         this.features = new RaceFeatureModel(models.bakeLayer(RaceFeatureModel.LAYER));
         this.gear = new GearModel(models.bakeLayer(GearModel.LAYER));
@@ -67,7 +69,7 @@ public class NpcPartsLayer<T extends Mob> extends RenderLayer<T, PlayerModel<T>>
             features.follow(m.head, m.body);
             int c = look.featureColor();
             if (look.feature() != RaceTraits.Feature.NONE || look.ears()) {
-                features.renderFeature(pose, vc, light, overlay, look.feature(), look.ears(),
+                features.renderFeature(pose, vc, light, overlay, look.feature(), look.ears(), 1f, featureLength,
                         ((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f);
                 if (look.feature() == RaceTraits.Feature.HORNS) {                 // the ear plates in the shell purple
                     features.renderHornPlates(pose, vc, light, overlay, 0x8A / 255f, 0x4A / 255f, 0xC8 / 255f);

@@ -218,3 +218,11 @@ Constants are in `CombatMoves`.
 - **Givers:** each player within 48 blocks who holds Charge lends 2% of their max ki every quarter second (8% a second) and is spared by the blast. Living things within 24 blocks that are not monsters or players add 0.2% of the thrower's max ki each, every half second (at most 20 of them).
 - **Growth** (share = gathered ki / the thrower's max ki): size 2.4 x (1 + 1.3 x sqrt(share)), at most 12; damage 8 x (1 + 3 x share), at most 12x; blast 5 x (1 + 0.6 x share), at most 2.2x.
 - **Impact:** everything within 1.5 x size + 3 blocks takes the damage (at least 30% of it at the edge), except the thrower and the givers; then the blast.
+
+## Hakai and Ultra Instinct (17b, v0.48.0)
+- **Hakai:** 300 ki, cooldown 60 s, reach 12 blocks, taught only by Beerus (no TP price).
+  - Erases outright: a player under half your battle power; a non-boss creature whose health (with fighter toughness) is under three times your max body; anything at or under a quarter of its health.
+  - Otherwise: a 6x ki-damage blow.
+- **Ultra Instinct -Sign-** (Whis's first lesson, level 1500): STR x4.5, DEX x7, Ki Power x4.5; 1.2% ki a second. Dodges 25% of blows and blasts, rising to 50% at full mastery.
+- **Mastered Ultra Instinct** (dodge 40 times in the Sign, level 2200, 50 mastery of the Sign): STR x6.5, DEX x10, Ki Power x6.5; 1.6% ki a second. Dodges 50%, rising to 75%, and each dodge counters for 80% of a punch.
+- **A dodge** costs 2% of max stamina (no dodge when below that) and sidesteps 3 blocks. Throws are never dodged.

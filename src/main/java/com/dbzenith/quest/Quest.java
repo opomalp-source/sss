@@ -16,7 +16,7 @@ import java.util.List;
 public record Quest(String id, Giver giver, List<Objective> objectives, List<String> requires, int minRank,
                     boolean repeatable, Reward reward) {
 
-    public enum Giver { MASTER, PATROL, NORTH_KAI, GRAND_KAI }
+    public enum Giver { MASTER, PATROL, NORTH_KAI, GRAND_KAI, BEERUS, WHIS }
 
     /** One goal. KILL counts events; the others are checked against the player's state. */
     public record Objective(Type type, String target, int amount) {

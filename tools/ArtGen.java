@@ -541,6 +541,8 @@ public class ArtGen {
             trainingMonkey();
             damnedWarrior();
             trainingCricket();
+            beerus();
+            whis();
         }
 
 
@@ -903,6 +905,87 @@ public class ArtGen {
             s.arm = (f, x, y, w, h) -> v(y, h) > 0.84 ? 0 : v(y, h) > 0.78 ? flat(gold, f, 0) : cloth(robe, f, x, y, w, h, 672);
             s.leg = (f, x, y, w, h) -> v(y, h) > 0.88 || f == Face.BOTTOM ? flat(gold, f, -0.1) : cloth(white, f, x, y, w, h, 673);
             new Npc().body("lean", 0xFFC8A6E0).face(4, 0xFF2A1A30, true, 0, 0xFFF4F2F0, 1, 2).paint(s).save("grand_kai");
+        }
+
+        /** Beerus: lean and violet-grey, gold eyes, no brows; bare-chested, a broad gold collar, a sash over black harem trousers, gold bands. */
+        static void beerus() throws IOException {
+            int[] gold = ramp(0xFFE2B444, 5), teal = ramp(0xFF3AA8A0, 4), black = ramp(0xFF1E1A24, 6), sash = ramp(0xFFC8762A, 5), white = ramp(0xFFF2EEE6, 4);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.FRONT && vv > 0.52 && vv < 0.6 && (Math.abs(uu - 0.12) < 0.04 || Math.abs(uu - 0.88) < 0.04)) return ink(black); // the wing of the liner
+                return 0;
+            };
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                double edge = 0.16 + 0.12 * (1 - Math.pow(Math.abs(uu - 0.5) * 2, 2));                   // the collar: broad, deepest at the middle
+                if (f == Face.LEFT || f == Face.RIGHT) edge = 0.16;
+                if (vv < edge) {
+                    if (row(vv, edge * 0.35, h) || row(vv, edge * 0.7, h)) return flat(teal, f, 0);
+                    if (vv > edge - 1.0 / h) return ink(gold);
+                    return flat(gold, f, (x % 3 == 0 ? 0.04 : 0));
+                }
+                if (vv > 0.74) {                                                                         // the sash, then the trousers' waist
+                    if (vv < 0.84) return f == Face.FRONT && Math.abs(uu - 0.62) < 0.07 ? flat(gold, f, 0.05) : cloth(sash, f, x, y, w, h, 681);
+                    return cloth(black, f, x, y, w, h, 682);
+                }
+                return 0;                                                                                // bare chest
+            };
+            s.arm = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (vv > 0.8 && vv < 0.9) return row(vv, 0.85, h) ? flat(teal, f, 0) : flat(gold, f, 0);           // gold cuffs
+                if (vv > 0.2 && vv < 0.26) return flat(gold, f, -0.05);                                         // an armband
+                return 0;
+            };
+            s.leg = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (f == Face.BOTTOM || vv > 0.86) return flat(gold, f, -0.1);                                  // pointed gold shoes
+                if (vv > 0.7 && vv < 0.76) return flat(gold, f, 0);                                              // ankle bands
+                if (vv > 0.76) return 0;
+                return cloth(black, f, x, y, w, h, 683 + (int) (vv * 4));                                       // loose trousers
+            };
+            new Npc().body("lean", 0xFFB49CCC).face(3, 0xFFE8C040, true, 5, 0, 1, 2).paint(s).save("beerus");
+        }
+
+        /** Whis: tall and pale blue, violet eyes, white hair; a maroon robe under a black cuirass set with white diamonds, a teal ring at the neck. */
+        static void whis() throws IOException {
+            int[] robe = ramp(0xFF7A1C30, 6), black = ramp(0xFF1C1C26, 5), white = ramp(0xFFF2F4F8, 4), teal = ramp(0xFF52C8D0, 5), gold = ramp(0xFFE0C060, 4);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.head = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.FRONT && vv > 0.78 && vv < 0.82 && Math.abs(uu - 0.5) < 0.1) return flat(ramp(0xFF6A3A8A, 3), f, 0);  // violet lips
+                return 0;
+            };
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                if (vv < 0.1) return flat(teal, f, row(vv, 0.05, h) ? 0.08 : 0);                                  // the ring at the neck
+                if (vv < 0.62) {                                                                                  // the cuirass
+                    if (f == Face.FRONT) {
+                        double d = Math.abs(uu - 0.5) / 0.1 + Math.abs(vv - 0.34) / 0.12;                          // a white diamond
+                        if (d < 1) return d > 0.7 ? ink(white) : flat(white, f, 0.04);
+                        if (Math.abs(vv - 0.34) < 0.03 && Math.abs(uu - 0.5) > 0.16 && Math.abs(uu - 0.5) < 0.3) return flat(white, f, 0);
+                    }
+                    if (row(vv, 0.6, h)) return ink(gold);
+                    return flat(black, f, (x + y) % 4 == 0 ? 0.03 : 0);
+                }
+                return cloth(robe, f, x, y, w, h, 691);
+            };
+            s.arm = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (vv < 0.22) return flat(black, f, 0);                                                          // the pauldrons
+                if (vv > 0.84) return 0;                                                                          // pale blue hands
+                if (vv > 0.78) return flat(white, f, 0);                                                          // white cuffs
+                return cloth(robe, f, x, y, w, h, 692);
+            };
+            s.leg = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (f == Face.BOTTOM || vv > 0.88) return flat(black, f, -0.1);
+                if (vv < 0.5) return cloth(robe, f, x, y, w, h, 693);                                            // the robe's skirt
+                return cloth(black, f, x, y, w, h, 694);
+            };
+            new Npc().body("lean", 0xFF96BCDC).face(4, 0xFF7A5AC8, true, 0, 0xFFF2F4F8, 1, 2).paint(s).save("whis");
         }
 
         /** The Kai's training monkey: brown fur, a tan face and belly, quick bright eyes (the tail is 3D). */

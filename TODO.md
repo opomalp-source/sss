@@ -198,7 +198,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - [x] 16e (v0.46.0) The Saga HUD to the user's spec: round portrait with the hair over the ring, Release tab, smoky BP and Ki bar, slanted health and stamina bars with values inside
 - [ ] CX-17 Originals (the original additions planned in docs/CONTENT_EXPANSION.md)
   - [x] 17a (v0.47.0) The Spirit Bomb: raised overhead for up to twenty seconds, it draws ki from its thrower, from every player within 48 blocks who holds Charge, and a trickle from the living things around; it grows with what it gathers and spares everyone who gave to it; cast again to throw it. Taught by the Kai of the north.
-  - [ ] 17b A Hakai-style Destroyer path and an evasion Instinct path
+  - [x] 17b (v0.48.0) Beerus's Planet: Beerus teaches Hakai, Whis teaches Ultra Instinct (-Sign- and Mastered, any race); the real Dragon Ball names everywhere (King Kai, Shenron, Frieza Race, Kamehameha...)
   - [ ] 17c A tournament arena with brackets
   - [ ] 17d A dojo of training robots (agility drill)
   - [ ] 17e Family (children with 5% of each parent's stats), planets and sectors, claiming

@@ -425,7 +425,7 @@ public final class DBZConfig {
             b.comment("Forms (see transform package)").push("transformations");
             unlockLevelScale = b.comment("Multiplies every form's unlock level (0.5 = forms unlock twice as early)")
                     .defineInRange("unlockLevelScale", 1.0, 0.0, 100.0);
-            rareVariantChance = b.comment("Chance a new character carries a rare destiny (Legendary Saiyan, Mutant Frost Demon, Corrupted Majin...)")
+            rareVariantChance = b.comment("Chance a new character carries a rare destiny (Legendary Saiyan, Mutant Frieza Race, Corrupted Majin...)")
                     .defineInRange("rareVariantChance", 0.05, 0.0, 1.0);
             milestoneLevel = b.comment("Level of the first milestone: rare destinies awaken and paths (Half-Saiyan, Human) are chosen")
                     .defineInRange("milestoneLevel", 150, 1, 100000);
@@ -539,7 +539,7 @@ public final class DBZConfig {
                     .defineInRange("scatterRadius", 800, 16, 30_000);
             dragonBallInertTicks = b.comment("After a wish the balls are stone for this long, then scatter again (48000 = 2 days)")
                     .defineInRange("inertTicks", 48000, 0, 10_000_000);
-            dragonWaitTicks = b.comment("How long the Eternal Dragon waits for a wish (2400 = 2 minutes)")
+            dragonWaitTicks = b.comment("How long Shenron waits for a wish (2400 = 2 minutes)")
                     .defineInRange("dragonWaitTicks", 2400, 200, 1_000_000);
             radarRange = b.comment("Dragon Radar range in blocks").defineInRange("radarRange", 1000, 16, 30_000);
             wishPowerTp = b.comment("TP granted by the power wish").defineInRange("wishPowerTp", 5000L, 0L, Long.MAX_VALUE);
@@ -567,10 +567,10 @@ public final class DBZConfig {
             scouterRange = b.comment("How far a scouter reads, in blocks").defineInRange("scouterRange", 64, 4, 512);
             spacePodRechargeTicks = b.comment("Space Pod recharge time between flights (1200 = 1 minute)")
                     .defineInRange("spacePodRechargeTicks", 1200, 0, 10_000_000);
-            otherworldEnabled = b.comment("Dying sends your soul to the other world (the check-in station, or Limbo if you were evil) with a halo,"
-                            + " until Enma sends you back or a wish revives you. Off: ordinary respawning.")
+            otherworldEnabled = b.comment("Dying sends your soul to the other world (the check-in station, or Hell if you were evil) with a halo,"
+                            + " until King Yemma sends you back or a wish revives you. Off: ordinary respawning.")
                     .define("otherworldEnabled", true);
-            otherworldDeathSeconds = b.comment("Seconds a soul must spend in the other world before Enma may send it back (Limbo holds evil souls half as long again)")
+            otherworldDeathSeconds = b.comment("Seconds a soul must spend in the other world before King Yemma may send it back (Hell holds evil souls half as long again)")
                     .defineInRange("otherworldDeathSeconds", 180, 0, 86_400);
             fusionDanceMinutes = b.comment("How long a fusion from the Fusion Dance (or a failed one) lasts, in minutes")
                     .defineInRange("fusionDanceMinutes", 30, 1, 100_000);
@@ -600,7 +600,7 @@ public final class DBZConfig {
             b.comment("Optional life-sim layer").push("life_sim");
             agingEnabled = b.comment("Characters age with in-game time; past 60, STR and DEX slowly decline")
                     .define("agingEnabled", true);
-            agingDaysPerYear = b.comment("In-game days per year of age (Androids and Majins never age; Namekians and Frost Demons age 4x slower)")
+            agingDaysPerYear = b.comment("In-game days per year of age (Androids and Majins never age; Namekians and the Frieza Race age 4x slower)")
                     .defineInRange("agingDaysPerYear", 8.0, 0.1, 10_000.0);
             thirstEnabled = b.comment("Thirst: drink (water bottles, milk, soups, melon) or swim to refill. Thirsty fighters recover stamina slowly")
                     .define("thirstEnabled", true);

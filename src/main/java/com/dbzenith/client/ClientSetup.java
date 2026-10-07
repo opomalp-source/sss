@@ -100,6 +100,8 @@ public final class ClientSetup {
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.OGRE_CLERK_BLUE.get(), ctx -> new FighterRenderer<>(ctx, "ogre_clerk_blue", 1.15f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.NORTH_KAI.get(), ctx -> new FighterRenderer<>(ctx, "north_kai", 0.85f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.GRAND_KAI.get(), ctx -> new FighterRenderer<>(ctx, "grand_kai", 1.05f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.BEERUS.get(), ctx -> new FighterRenderer<>(ctx, "beerus", 0.98f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.WHIS.get(), ctx -> new FighterRenderer<>(ctx, "whis", 1.06f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.TRAINING_MONKEY.get(), ctx -> new FighterRenderer<>(ctx, "training_monkey", 0.48f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.TRAINING_CRICKET.get(), com.dbzenith.client.render.CricketRenderer::new);
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.OGRE_GUARD.get(), ctx -> new FighterRenderer<>(ctx, "ogre_guard", 1.3f));

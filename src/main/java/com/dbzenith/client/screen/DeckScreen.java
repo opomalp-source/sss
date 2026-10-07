@@ -124,6 +124,7 @@ public class DeckScreen extends MenuScreen {
             int sc;
             if (equipped) { status = Component.translatable("screen.dbzenith.equipped"); sc = 0xFF8CE08C; }
             else if (known) { status = Component.translatable("screen.dbzenith.learned"); sc = Ui.MUTED; }
+            else if (t.learnCost() <= 0 && !t.isRacial()) { status = Component.translatable("screen.dbzenith.taught_only"); sc = Ui.MUTED; }
             else if (problemIsLevel(d, t)) { status = Component.translatable("screen.dbzenith.needs_level", t.unlockLevel()); sc = 0xFFE07068; }
             else { status = Component.translatable("screen.dbzenith.learn_for", t.learnCost()); sc = Ui.GOLD; }
             Ui.text(g, font, status, lx + lw - 6 - font.width(status) * 0.7f, y + 3.5f, sc, 0.7f);

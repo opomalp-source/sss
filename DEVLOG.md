@@ -1322,3 +1322,29 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **Quest:** "The Spirit Bomb" from the Kai of the north (level 500, defeat eight damned warriors, after Kaioken times three).
 - **Tests:** `SpiritBombTests` (a charging friend grows it, givers are spared, casting again throws it). 150 GameTests.
 - Checked in the dev client: gathering overhead, the throw, the burst.
+
+## 2026-10-07 — CX-17b: Beerus's Planet, Hakai and Ultra Instinct; the real names (v0.48.0)
+- **The real names** (user: "please use the real names"). Display text only; ids are unchanged, so saves keep working.
+  - People: King Kai, Bubbles, Gregory, King Yemma, Shenron / Super Shenron / Black Star Shenron, Frieza, Broly, Master Roshi, Galactic Patrolman, Saibaman, Frieza Force Soldier, Red Ribbon Android.
+  - Places: Hell, King Kai's Planet, the Grand Kai's Planet.
+  - Races and gear: the Frieza Race (and its Metal and Mutant variants), Frieza Force armour, the Frieza Force Emblem.
+  - Techniques: Kamehameha, Galick Gun, Masenko, Death Ball, Destructo Disc, Spirit Ball, Death Beam, Zanzoken, Energy Blast Volley, Mini Spirit Bomb (the old Gathering Sphere).
+  - Updated in the lang file, the README and the config comments.
+- **Beerus's Planet** (`Planet.BEERUS_PLANET`, dimension `dbzenith:beerus_planet`): a violet sky over flat grass.
+  - The Space Pod only sets a course for it with godly ki.
+  - `BeerusPlanetBuilder` builds it on first arrival, by pod or by any dimension change: a stepped purpur-and-gold pyramid temple with a stair cut into its face, a domed pavilion on top where Beerus lounges, braziers, a road from the landing site, the Oracle Fish's pond, round azalea trees, mushroom-capped rock pillars and floating rocks.
+  - Beerus and Whis are new `OtherworldNpc` roles. Their skins are painted in ArtGen `NpcArt` (Beerus: violet skin, gold collar and cuffs, sash, black trousers, gold eyes, tail; Whis: pale blue, maroon robe, black cuirass with white diamonds, teal neck ring, violet eyes, white crest).
+  - Beerus's tall cat ears are the race EARS part at 2.1x length (`NpcLooks.featureLength`).
+- **Hakai** (`Techniques.HAKAI`, effect HAKAI, class `skill.Hakai`): erases what is clearly weaker than you, and anything else takes a crushing blow.
+  - New damage type `dbzenith:hakai` (bypasses everything; "was erased by").
+  - Violet-to-black dust, witch sparks and ink as the target goes.
+  - Techniques without a TP price that are not racial (Hakai) can no longer be learned from the deck screen ("Taught by a master").
+- **Ultra Instinct** (forms `ultra_instinct_sign`, `ultra_instinct`; any race; class `transform.UltraInstinct`): `CombatEvents` lets the body dodge blows and ki attacks on its own, through the same path as the dash afterimage. A dodge sidesteps 3 blocks (drawn as a vanish streak) and costs a little stamina. Mastered counters every dodge. Numbers in BALANCE.md.
+- **Quests:**
+  - Beerus: "A God's Appetite" (bring a cake, three pumpkin pies and five cooked salmon; he eats them); "The God of Destruction" (level 2000, defeat Frieza: learn Hakai).
+  - Whis: "Angel Training" (level 1500, touch Whis, who sidesteps 92% of swings and 65% in Ultra Instinct: the Sign); "Mastered Ultra Instinct" (level 2200, dodge 40 times in Ultra Instinct).
+- **Tests:** `DestructionAndInstinctTests` (Hakai erases a zombie and spends nothing without a target, and cannot be bought; the Sign and Mastered dodge chances, stamina cost and roll; the planet needs godly ki, and Beerus and Whis are home). 153 GameTests.
+- **Checked in the dev client:** the temple from the landing road, Beerus in his pavilion, Whis at the stair, the Sign (black hair, silver aura) and Mastered (silver hair), and a Hakai erasing a cow.
+- **Test fixes:**
+  - `CombatTests` counted every ki blast near spawn, so the Spirit Bomb test's hovering bomb could make it see two; it now counts only its own player's.
+  - The Beerus's Planet test waits for the temple chunk's entities to load (the test world keeps the planet between runs).

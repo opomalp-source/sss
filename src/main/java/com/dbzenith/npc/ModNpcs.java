@@ -76,6 +76,8 @@ public final class ModNpcs {
     public static final RegistryObject<EntityType<OtherworldNpc>> OGRE_CLERK_BLUE = otherworld("ogre_clerk_blue", OtherworldNpc.Role.OGRE_CLERK, 0.7f, 2.1f);
     public static final RegistryObject<EntityType<OtherworldNpc>> NORTH_KAI = otherworld("north_kai", OtherworldNpc.Role.NORTH_KAI, 0.6f, 1.6f);
     public static final RegistryObject<EntityType<OtherworldNpc>> GRAND_KAI = otherworld("grand_kai", OtherworldNpc.Role.GRAND_KAI, 0.6f, 2.0f);
+    public static final RegistryObject<EntityType<OtherworldNpc>> BEERUS = otherworld("beerus", OtherworldNpc.Role.BEERUS, 0.6f, 1.9f);
+    public static final RegistryObject<EntityType<OtherworldNpc>> WHIS = otherworld("whis", OtherworldNpc.Role.WHIS, 0.6f, 2.1f);
     public static final RegistryObject<EntityType<TrainingMonkey>> TRAINING_MONKEY = TYPES.register("training_monkey",
             () -> EntityType.Builder.<TrainingMonkey>of(TrainingMonkey::new, MobCategory.MISC).sized(0.5f, 0.9f).clientTrackingRange(10).build("training_monkey"));
     public static final RegistryObject<EntityType<TrainingCricket>> TRAINING_CRICKET = TYPES.register("training_cricket",
@@ -104,7 +106,7 @@ public final class ModNpcs {
         event.put(MASTER.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2).add(Attributes.MAX_HEALTH, 100).build());
         event.put(PATROL_OFFICER.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2).add(Attributes.MAX_HEALTH, 100).build());
         var resident = net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2).add(Attributes.MAX_HEALTH, 200).build();
-        for (var t : List.of(ENMA, OGRE_CLERK_RED, OGRE_CLERK_BLUE, NORTH_KAI, GRAND_KAI)) event.put(t.get(), resident);
+        for (var t : List.of(ENMA, OGRE_CLERK_RED, OGRE_CLERK_BLUE, NORTH_KAI, GRAND_KAI, BEERUS, WHIS)) event.put(t.get(), resident);
         event.put(TRAINING_MONKEY.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.34).add(Attributes.MAX_HEALTH, 40).build());
         event.put(TRAINING_CRICKET.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.3).add(Attributes.MAX_HEALTH, 10).build());
         event.put(OGRE_GUARD.get(), KiFighter.attributes(220, 10, 0.25).add(Attributes.KNOCKBACK_RESISTANCE, 0.7).build());

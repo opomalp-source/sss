@@ -177,6 +177,9 @@ public final class TechniqueEffects {
                 player.displayClientMessage(Component.translatable("message.dbzenith.fusion_no_partner"), true);
                 return false;
             }
+            case HAKAI -> {
+                return Hakai.strike(player, data, t, lookedAtLiving(player, power));
+            }
             default -> {
                 return false;
             }
