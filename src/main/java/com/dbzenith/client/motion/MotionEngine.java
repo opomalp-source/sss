@@ -209,7 +209,7 @@ public final class MotionEngine {
                 else base = Tuning.flyPitchCruise + (float) Math.min(1, (h - Tuning.flyFast) / Tuning.flyFast) * (Tuning.flyPitchMax - Tuning.flyPitchCruise);
                 float climb = (float) (-m.vy * Tuning.flyClimb * Math.min(1, h / Tuning.flyCruise));
                 pitchTarget = Mth.clamp(base + climb, -30, 105);
-                bankTarget = (float) Mth.clamp(-m.yawRate * Tuning.flyBank * Math.min(1, h / 0.5) + m.lateral * Tuning.strafeBank,
+                bankTarget = (float) Mth.clamp(-m.yawRate * Tuning.flyBank * Math.min(1, h / 0.5) - m.lateral * Tuning.strafeBank,
                         -Tuning.flyBankMax, Tuning.flyBankMax);
             }
             m.lean += (leanTarget - m.lean) * k;
@@ -456,11 +456,13 @@ public final class MotionEngine {
         float fly = Mth.lerp(pt, m.flyBlendO, m.flyBlend);
         float pivot = Mth.lerp(fly, PIVOT_GROUND, PIVOT_AIR) - ANIMATOR_PIVOT;
         float a = bodyPitch * Mth.DEG_TO_RAD, r = p.get(Bone.BODY, Bone.ROLL) * Mth.DEG_TO_RAD;
-        float bx = p.get(Bone.BODY, Bone.X) / 16f - pivot * Mth.sin(r);
+        float bx = -p.get(Bone.BODY, Bone.X) / 16f + pivot * Mth.sin(r);              // model x points to the figure's left, the renderer's to its right
         float by = -p.get(Bone.BODY, Bone.Y) / 16f + pivot * (1f - Mth.cos(a)) + pivot * (1f - Mth.cos(r));
         float bz = p.get(Bone.BODY, Bone.Z) / 16f + pivot * Mth.sin(a);
         p.set(Bone.BODY, Bone.X, bx);
         p.set(Bone.BODY, Bone.Y, by);
         p.set(Bone.BODY, Bone.Z, bz);
+        // in the renderer's frame a positive pitch tips the figure backwards: hand it over as a forward lean
+        p.set(Bone.BODY, Bone.PITCH, -bodyPitch);
     }
 }

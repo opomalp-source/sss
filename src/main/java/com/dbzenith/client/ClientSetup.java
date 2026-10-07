@@ -72,11 +72,16 @@ public final class ClientSetup {
             PlayerRenderer renderer = event.getSkin(skin);
             if (renderer != null) {
                 com.dbzenith.client.render.BodyShape.attach(renderer.getModel());
-                renderer.addLayer(new com.dbzenith.client.render.BodySkinLayer(renderer));
-                renderer.addLayer(new com.dbzenith.client.render.RaceSkinLayer(renderer));
-                renderer.addLayer(new com.dbzenith.client.render.FormOverlayLayer(renderer));
+                var bodySkin = new com.dbzenith.client.render.BodySkinLayer(renderer);
+                var raceSkin = new com.dbzenith.client.render.RaceSkinLayer(renderer);
+                var formOverlay = new com.dbzenith.client.render.FormOverlayLayer(renderer);
+                var bodyFx = new com.dbzenith.client.render.BodyFxLayer(renderer);
+                renderer.addLayer(bodySkin);
+                renderer.addLayer(raceSkin);
+                renderer.addLayer(formOverlay);
                 renderer.addLayer(new com.dbzenith.client.render.FaceLayer(renderer));
-                renderer.addLayer(new com.dbzenith.client.render.BodyFxLayer(renderer));
+                renderer.addLayer(bodyFx);
+                for (var layer : java.util.List.of(bodySkin, raceSkin, formOverlay, bodyFx)) com.dbzenith.client.render.FirstPersonBody.register(renderer, layer);   // your own arm in first person (CX-18)
                 renderer.addLayer(new com.dbzenith.client.render.CosmeticsLayer(renderer));
                 renderer.addLayer(new com.dbzenith.client.render.GearLayer(renderer, event.getEntityModels()));
                 renderer.addLayer(new FormHairLayer(renderer, event.getEntityModels()));

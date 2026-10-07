@@ -35,6 +35,11 @@ public class BodySkinLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         return !(state.raceLook() && RaceSkinLayer.texture(state) != null);
     }
 
+    /** The body texture this character wears (its build), for afterimages. */
+    public static ResourceLocation bodyTexture(PublicStatePacket state) {
+        return tex(BUILDS[Math.max(0, Math.min(BUILDS.length - 1, state.bodyType()))]);
+    }
+
     @Override
     public void render(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player, float limbSwing,
                        float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {

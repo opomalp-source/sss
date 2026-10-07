@@ -109,7 +109,8 @@ public final class Afterimages {
         }
 
         PlayerModel<AbstractClientPlayer> model = event.getRenderer().getModel();
-        VertexConsumer vc = event.getMultiBufferSource().getBuffer(RenderType.entityTranslucent(event.getRenderer().getTextureLocation(player)));
+        net.minecraft.resources.ResourceLocation own = com.dbzenith.client.render.FirstPersonBody.bodyTexture(state);   // the character, not the Minecraft skin
+        VertexConsumer vc = event.getMultiBufferSource().getBuffer(RenderType.entityTranslucent(own != null ? own : event.getRenderer().getTextureLocation(player)));
         PoseStack pose = event.getPoseStack();
         for (Ghost ghost : trail.ghosts) {
             float age = ticks - ghost.born + partial;

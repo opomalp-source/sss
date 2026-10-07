@@ -1417,3 +1417,20 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   - the race idles on NPCs (Frieza regal, the Namekian with folded arms, Broly heavy, the Saibaman hunched), NPCs walking;
   - first person unchanged.
 - **Tests:** 155 GameTests still pass. The engine is client-only, so the GameTest server does not load it.
+
+## 2026-10-07 — CX-18a fixes from play (v0.50.1)
+- **User feedback:** the walk was too fast; the run didn't fit the player model; flying was backwards ("he flips upside down"); the first-person hand and the afterimages showed the Minecraft skin, not the character.
+- **Flight was backwards:**
+  - In the renderer's frame (after the body-yaw turn) a positive whole-body pitch tips the figure back. The old clips (`Anims.Keys`) had the opposite convention, and the engine inherited it, so cruising leaned back and fast flight lay on its back.
+  - The engine now hands the whole-figure pitch over negated, and `Keys.rot("body")` does the same for every old clip (the dash lunge, the knocked-down pose that is meant to be on the back, the air-recovery flip).
+  - The whole-figure sideways offset (the renderer's x points to the figure's right; the model's to its left), the roll pivot correction, the strafe bank and the side-step lean had the same mix-up and are fixed too.
+  - Checked from the front: fast flight comes at the camera face first, the body trailing behind.
+  - The earlier side-view screenshots had fooled me: the dev "side" camera turns the body but not the head, so the face was 90 degrees off.
+- **Walk:** one cycle per 2.4 blocks (about 11 ticks at walking speed, close to vanilla's pace) instead of one worked out from the leg swing (which hurried it to 8 ticks), with a slightly smaller swing and bob.
+- **Run rebuilt for the blocky model:**
+  - longer swings from the hips and shoulders; knees bend at most about 55 degrees instead of nearly 100;
+  - the arms pump straight forward and back beside the body (never across it), the elbow folding up to 72 degrees at the front so the fist comes up toward the chest;
+  - a calmer bob and twist, one cycle per 3 blocks; the engine's lean is capped at 11 degrees.
+- **Your own arm in first person** (`FirstPersonBody`): when the character has its own body (a chosen skin tone or a race look), the first-person arm is drawn as that body. The skin layers (body, race skin, form overlay, body glow) are run again with every other part of the model hidden, at the build's arm thickness, over the Minecraft skin underneath.
+- **Afterimages** (dashes, dodges, fast flight) use the character's body texture instead of the Minecraft skin.
+- **Devshot flag:** `hidegui`.

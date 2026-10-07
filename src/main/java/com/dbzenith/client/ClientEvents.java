@@ -105,6 +105,7 @@ public final class ClientEvents {
         com.dbzenith.client.anim.AnimController.devFreeze = false;
         com.dbzenith.client.fx.VfxV3.devSpeedLines = name.contains("speedlines");
         com.dbzenith.client.motion.MotionDev.fromShot(name, delayTicks);
+        mc.options.hideGui = name.contains("hidegui");
         if (name.contains("labels")) com.dbzenith.config.DBZConfig.CLIENT.animationLabels.set(true);
         if (name.contains("respawn") && mc.player != null && mc.player.isDeadOrDying()) mc.player.respawn();
         if (name.startsWith("judgement_") && !(mc.screen instanceof com.dbzenith.client.screen.JudgementScreen)) {

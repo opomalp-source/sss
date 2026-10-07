@@ -498,7 +498,7 @@ public final class Anims {
     /** Side step: a hop to one side ({@code side} -1 left, 1 right), the body leaning into it. */
     private static KeyframeAnimation sideStep(int side) {
         return once(8, a -> {
-            a.rot("body", 0, 0, 0, 0, Ease.LINEAR).rot("body", 2, 0, 0, 28 * side, Ease.OUTEXPO).rot("body", 8, 0, 0, 0, Ease.INOUTQUAD);
+            a.rot("body", 0, 0, 0, 0, Ease.LINEAR).rot("body", 2, 0, 0, -28 * side, Ease.OUTEXPO).rot("body", 8, 0, 0, 0, Ease.INOUTQUAD);
             a.pos("body", 0, 0, 0, 0, Ease.LINEAR).pos("body", 2, -3.0f * side, 1.0f, 0, Ease.OUTEXPO).pos("body", 8, 0, 0, 0, Ease.INOUTQUAD);
             a.rot("rightArm", 2, -40, 0, 25, Ease.OUTEXPO).rot("rightArm", 8, 0, 0, 5, Ease.INOUTQUAD);
             a.rot("leftArm", 2, -40, 0, -25, Ease.OUTEXPO).rot("leftArm", 8, 0, 0, -5, Ease.INOUTQUAD);
@@ -933,6 +933,7 @@ public final class Anims {
         }
 
         public Keys rot(String part, int tick, float pitch, float yaw, float roll, Ease ease) {
+            if (part.equals("body")) pitch = -pitch;                 // the renderer tips the whole figure back for a positive pitch: keep "positive leans forward"
             if (mirror) {
                 part = twin(part);
                 yaw = -yaw;
@@ -956,7 +957,7 @@ public final class Anims {
             }
             KeyframeAnimation.StateCollection p = b.getPart(part);
             if (part.equals("body")) {
-                dx /= 16f;
+                dx /= -16f;                                               // the renderer's x points to the figure's right
                 dy /= -16f;
                 dz /= 16f;
             }

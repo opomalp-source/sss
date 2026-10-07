@@ -34,7 +34,7 @@ public final class Tuning {
 
     // ---------------------------------------------------------------- procedural feel
     public static float runLean = 34f;             // forward lean per block-per-tick over walking speed
-    public static float runLeanMax = 16f;
+    public static float runLeanMax = 11f;
     public static float turnLean = 1.6f;           // roll into a turn, per degree of turn per tick (ground)
     public static float turnLeanMax = 9f;
     public static float flyPitchMax = 84f;         // body pitch at full flight speed
