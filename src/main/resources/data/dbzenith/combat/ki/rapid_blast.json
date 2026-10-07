@@ -1,5 +1,5 @@
 {
-  "_comment": "Tap the Ki Blast key: a quick blast in your aura's colour. cost_percent is of max ki; damage multiplies the ki attack.",
+  "_comment": "Tap the Ki Blast key: a quick blast in your aura's colour. cost_percent is of max ki; damage multiplies the ki attack; lock_homing is how hard it curves toward a locked-on foe (0 = straight).",
   "cost_percent": 1.5,
   "damage": 0.35,
   "size": 0.32,
@@ -8,5 +8,6 @@
   "cooldown": 3,
   "hitstun": 5,
   "knockback": 0.08,
-  "spread": 2.5
+  "spread": 2.5,
+  "lock_homing": 0.06
 }

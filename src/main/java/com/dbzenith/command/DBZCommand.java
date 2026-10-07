@@ -398,6 +398,28 @@ public final class DBZCommand {
                                     ctx.getSource().sendSuccess(() -> Component.literal("Special meter set to " + v), true);
                                     return 1;
                                 }))))
+                .then(Commands.literal("lockon")                                    // lock-on (CX-19 phase 6): as if from the key
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .executes(ctx -> {
+                                    for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
+                                        com.dbzenith.combat.engine.Targeting.set(p, -1);
+                                        com.dbzenith.network.ModNetwork.sendTo(p, new com.dbzenith.network.LockOnPacket(-1));
+                                    }
+                                    ctx.getSource().sendSuccess(() -> Component.literal("Lock released"), true);
+                                    return 1;
+                                })
+                                .then(Commands.argument("target", EntityArgument.entity()).executes(ctx -> {
+                                    var target = EntityArgument.getEntity(ctx, "target");
+                                    int n = 0;
+                                    for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
+                                        if (!com.dbzenith.combat.engine.Targeting.set(p, target.getId())) continue;
+                                        com.dbzenith.network.ModNetwork.sendTo(p, new com.dbzenith.network.LockOnPacket(target.getId()));
+                                        n++;
+                                    }
+                                    int locked = n;
+                                    ctx.getSource().sendSuccess(() -> Component.literal(locked + " player(s) locked onto " + target.getName().getString()), true);
+                                    return locked;
+                                }))))
                 .then(Commands.literal("kiblast")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("charge", com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg(-1, 1)).executes(ctx -> {

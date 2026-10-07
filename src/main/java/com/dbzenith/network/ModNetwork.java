@@ -100,6 +100,8 @@ public final class ModNetwork {
                 .encoder(TournamentPackets.Join::encode).decoder(TournamentPackets.Join::decode).consumerMainThread(TournamentPackets.Join::handle).add();
         CHANNEL.messageBuilder(PvpTogglePacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(PvpTogglePacket::encode).decoder(PvpTogglePacket::decode).consumerMainThread(PvpTogglePacket::handle).add();
+        CHANNEL.messageBuilder(LockOnPacket.class, nextId++)                                     // both ways
+                .encoder(LockOnPacket::encode).decoder(LockOnPacket::decode).consumerMainThread(LockOnPacket::handle).add();
         CHANNEL.messageBuilder(KiBlastPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(KiBlastPacket::encode).decoder(KiBlastPacket::decode).consumerMainThread(KiBlastPacket::handle).add();
         CHANNEL.messageBuilder(MeleeInputPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)

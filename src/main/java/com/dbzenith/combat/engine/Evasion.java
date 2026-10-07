@@ -284,6 +284,11 @@ public final class Evasion {
     /** The foe a super dash would go for: the one nearest the line of sight, in range and in view. */
     static LivingEntity superDashTarget(ServerPlayer p) {
         double range = DBZConfig.SERVER.superDashRange.get();
+        LivingEntity locked = Targeting.target(p);                              // locked on (phase 6): that foe, from any angle
+        if (locked != null) {
+            double d = locked.distanceTo(p);
+            if (d >= 4 && d <= range && p.hasLineOfSight(locked)) return locked;
+        }
         Vec3 eye = p.getEyePosition(), look = p.getLookAngle();
         LivingEntity best = null;
         double bestScore = Double.MAX_VALUE;

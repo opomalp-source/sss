@@ -1574,3 +1574,28 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **Checked in the dev client:**
   - A Namekian Warrior and a Frieza Force Soldier fighting each other: their move clips, reactions, launch, popups and rings.
   - The Death Ball's front camera and the return to first person.
+
+## 2026-10-07 — CX-19 Combat v4, phase 6: lock-on (v0.56.0)
+- **Lock-On key (N)**, `client/LockOn`:
+  - A tap locks onto the best foe or lets go; Shift+N moves to the next foe round to the right.
+  - The picker takes living things in sight within `lockOnRange` (48), in the front half of the view (or anything within 12 blocks). It scores the angle from the crosshair plus distance, with foes first: players in PvP mode, fighters, monsters.
+  - The lock lets go when the target dies or leaves, gets beyond 1.25x the range, or stays out of sight for 3 s.
+- **Camera:**
+  - Each frame (render tick start) the view turns smoothly toward the target's chest, frame-rate independent (`lockOnCameraSpeed`; 0 = marker only).
+  - Whatever the mouse turned since the last frame becomes free look, up to `lockOnFreeLook` (25°), and springs back.
+  - Movement keys stay relative to the view, so forward closes in and the sides circle the target, on the ground and in flight. Pitch follows in 3D.
+- **Over the shoulder (third person):**
+  - The view drawn is turned 12° left and 7° down, more when looking steeply up or down. The orbiting camera then shows the foe up and to the right instead of hidden behind your back.
+  - This is for the frame only: at render tick end the true aim is restored, so the tick (and the server) only ever see the aim at the target. Mouse movement made during the frame is kept.
+- **Marker:** four brackets turning round the target, red for a foe and gold for anyone else, drawn through walls, with its name and distance above (label size and position fixed after dev checks: below the brackets the ground hid it).
+- **Server** (`combat/engine/Targeting`, `LockOnPacket` both ways):
+  - The client reports its lock. The server checks it (alive, same world, within 80 blocks, not yourself) and refuses or clears bad ones.
+  - The **super dash** goes for the locked foe from any angle (4 blocks to the super dash range, in sight).
+  - **Ki blasts** curve toward it: `lock_homing` in `combat/ki/*.json` (quick 0.06, charged 0.04; `KiBlastEntity.setHomingTarget(target, strength)`).
+- **Dev:** `/dbz lockon <player> [target]` (no target: let go).
+- **Client config:** lockOnRange, lockOnCameraSpeed, lockOnFreeLook.
+- **Tests:** `LockOnTests`. The server checks the lock, the super dash goes for the locked foe at 90° off the view, and blasts bend toward the lock (fired into the sky so they cannot hit other tests). 172 GameTests.
+- **Checked in the dev client:**
+  - Locking on swings the view to a Namekian Warrior, and strafing left circles it while the server keeps the aim on it.
+  - The third-person over-the-shoulder view and the bracket marker with its label.
+  - In flight Dev drifted with no keys held; it turned out someone was playing in the dev window (blocks placed, hotbar changed), not the lock.

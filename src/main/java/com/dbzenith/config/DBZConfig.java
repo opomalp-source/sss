@@ -695,6 +695,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue customHotbar;
         public final ForgeConfigSpec.BooleanValue hideVanillaHearts;
         public final ForgeConfigSpec.BooleanValue transformCutIn, ultimateCinematic, damagePopups;
+        public final ForgeConfigSpec.DoubleValue lockOnRange, lockOnCameraSpeed, lockOnFreeLook;
         public final ForgeConfigSpec.DoubleValue screenShake;
         public final ForgeConfigSpec.BooleanValue hitstop;
         public final ForgeConfigSpec.BooleanValue afterimages;
@@ -725,6 +726,12 @@ public final class DBZConfig {
                     .define("ultimateCinematic", true);
             damagePopups = b.comment("Show the damage of each blow over whoever took it, and words for counters, criticals, guard breaks and perfect guards")
                     .define("damagePopups", true);
+            lockOnRange = b.comment("Lock-on (key N): how far away a foe can be locked onto, in blocks")
+                    .defineInRange("lockOnRange", 48.0, 8.0, 80.0);
+            lockOnCameraSpeed = b.comment("Lock-on: how quickly the camera turns to keep the foe framed (0 = it doesn't; only the marker shows)")
+                    .defineInRange("lockOnCameraSpeed", 1.0, 0.0, 3.0);
+            lockOnFreeLook = b.comment("Lock-on: how far (degrees) the mouse can look away from the foe; the view springs back")
+                    .defineInRange("lockOnFreeLook", 25.0, 0.0, 90.0);
             hudScale = b.comment("Size of the portrait HUD (0.6 - 1.4)")
                     .defineInRange("hudScale", 1.0, 0.6, 1.4);
             hudStyle = b.comment("HUD: 0 Saga (a round portrait, a Release tab, a smoky BP and Ki bar, slanted health and stamina bars), 1 Classic, 2 Minimal (thin bars, no portrait), 3 Ornate (a portrait frame per form), 4 Clean (a portrait card and slim gradient bars)")

@@ -27,8 +27,10 @@ public final class ModKeys {
     public static final KeyMapping PVP = key("pvp", GLFW.GLFW_KEY_P);
     /** Ki blasts (CX-19): tap for a quick blast, hold to charge one. */
     public static final KeyMapping KI_BLAST = key("ki_blast", GLFW.GLFW_KEY_C);
+    /** Lock-on (CX-19): tap to lock onto a foe or let go; with Shift, the next foe. */
+    public static final KeyMapping LOCK_ON = key("lock_on", GLFW.GLFW_KEY_N);
 
-    public static final KeyMapping[] ALL = {CHARGE, LOWER_RELEASE, FLY, GUARD, KI_ATTACK, NEXT_TECHNIQUE, HEAVY, DASH, TRANSFORM, STATS, RADIAL, RACIAL, SKILL, KAIOKEN, PVP, KI_BLAST};
+    public static final KeyMapping[] ALL = {CHARGE, LOWER_RELEASE, FLY, GUARD, KI_ATTACK, NEXT_TECHNIQUE, HEAVY, DASH, TRANSFORM, STATS, RADIAL, RACIAL, SKILL, KAIOKEN, PVP, KI_BLAST, LOCK_ON};
 
     private ModKeys() {}
 

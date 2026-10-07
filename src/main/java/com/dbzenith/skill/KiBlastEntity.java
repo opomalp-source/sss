@@ -67,6 +67,7 @@ public class KiBlastEntity extends Projectile {
     private int combatStun = -1;
     private double combatKnock;
     private boolean combatHeavy;
+    private double homingStrength = HOMING_STRENGTH;
 
     public KiBlastEntity(EntityType<? extends KiBlastEntity> type, Level level) {
         super(type, level);
@@ -108,6 +109,12 @@ public class KiBlastEntity extends Projectile {
         combatStun = hitstun;
         combatKnock = knockback;
         combatHeavy = heavy;
+    }
+
+    /** Homing with a gentler (or stronger) pull than a homing technique's (a lock-on curve, CX-19). */
+    public void setHomingTarget(Entity target, double strength) {
+        setHomingTarget(target);
+        homingStrength = strength;
     }
 
     public void setHomingTarget(Entity target) {
@@ -190,7 +197,7 @@ public class KiBlastEntity extends Projectile {
             Entity target = level.getEntity(homingTargetId);
             if (target != null && target.isAlive()) {
                 Vec3 toTarget = target.getBoundingBox().getCenter().subtract(position()).normalize().scale(motion.length());
-                motion = motion.lerp(toTarget, HOMING_STRENGTH);
+                motion = motion.lerp(toTarget, homingStrength);
                 setDeltaMovement(motion);
             }
         }

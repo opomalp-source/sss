@@ -1644,5 +1644,7 @@
   "subtitles.dbzenith.hit_crit": "Critical blow",
   "subtitles.dbzenith.counter_hit": "Counter",
   "subtitles.dbzenith.impact_boom": "Heavy impact",
-  "subtitles.dbzenith.hit_guarded": "Blow blocked"
+  "subtitles.dbzenith.hit_guarded": "Blow blocked",
+  "key.dbzenith.lock_on": "Lock-On (Shift: next foe)",
+  "message.dbzenith.lock_none": "No one in sight to lock onto"
 }

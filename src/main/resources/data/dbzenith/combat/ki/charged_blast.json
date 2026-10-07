@@ -16,5 +16,6 @@
   "hitstun": 14,
   "hitstun_max": 28,
   "knockback": 0.35,
-  "knockback_max": 1.1
+  "knockback_max": 1.1,
+  "lock_homing": 0.04
 }

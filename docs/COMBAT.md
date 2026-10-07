@@ -153,3 +153,16 @@ Bare-handed melee runs through the combat engine (`combat/engine`), for players 
 - **Damage popups:** each blow's damage over whoever took it. White is a normal blow, yellow a heavy, orange a critical, gold a counter, pale blue a blow through a guard, and ki attacks show in the ki's colour. Client config `damagePopups`.
 - **Ultimates:** a cut-in, a flash and a shake for everyone near, and your own swings your camera to the front for a moment. Client config `ultimateCinematic`.
 - **Stances:** the server tells clients when a fighter is stunned, launched, knocked down or guarding. Players and NPCs show it: a dazed sway, a tumble, lying down, then getting up. NPCs also play their moves and hit reactions with the same clips as players.
+
+## Lock-on (phase 6)
+
+- **N:** lock onto the best foe in view (nearest the crosshair; players in PvP mode, fighters and monsters first), or let go. **Shift+N:** the next foe round to the right.
+- **While locked:**
+  - The camera keeps the foe framed, in first or third person, on the ground and in flight. The mouse can look away a little and springs back.
+  - Movement is still yours: forward closes in, the sides circle the foe.
+  - In third person the view sits over your right shoulder.
+- **Marker:** brackets round the foe (red for a foe, gold for anyone else), with its name and distance.
+- **Moves:** the super dash goes for the locked foe from any angle, and ki blasts curve toward it (`lock_homing` in the ki blast files).
+- **Letting go:** automatic when the foe dies, gets too far, or is out of sight for 3 seconds.
+- **Client config:** `lockOnRange` (48), `lockOnCameraSpeed` (1; 0 = marker only), `lockOnFreeLook` (25°).
+- **Dev:** `/dbz lockon <player> [target]`.

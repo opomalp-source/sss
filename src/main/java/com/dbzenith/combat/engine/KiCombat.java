@@ -49,7 +49,7 @@ public final class KiCombat {
     /** One kind of blast, from data. */
     public record Blast(double costPercent, double costPercentMax, double damage, double damageMax, float size, float sizeMax, float speed,
                         float explosion, float explosionMax, int life, int cooldown, int chargeTicks, int minCharge, int hitstun, int hitstunMax,
-                        double knockback, double knockbackMax, boolean homing, float spread) {
+                        double knockback, double knockbackMax, boolean homing, float spread, double lockHoming) {
         static Blast parse(JsonObject j) {
             return new Blast(GsonHelper.getAsDouble(j, "cost_percent", 1.5), GsonHelper.getAsDouble(j, "cost_percent_max", GsonHelper.getAsDouble(j, "cost_percent", 1.5)),
                     GsonHelper.getAsDouble(j, "damage", 0.35), GsonHelper.getAsDouble(j, "damage_max", GsonHelper.getAsDouble(j, "damage", 0.35)),
@@ -58,7 +58,8 @@ public final class KiCombat {
                     GsonHelper.getAsInt(j, "life", 40), GsonHelper.getAsInt(j, "cooldown", 3), GsonHelper.getAsInt(j, "charge_ticks", 1),
                     GsonHelper.getAsInt(j, "min_charge", 0), GsonHelper.getAsInt(j, "hitstun", 5), GsonHelper.getAsInt(j, "hitstun_max", GsonHelper.getAsInt(j, "hitstun", 5)),
                     GsonHelper.getAsDouble(j, "knockback", 0.1), GsonHelper.getAsDouble(j, "knockback_max", GsonHelper.getAsDouble(j, "knockback", 0.1)),
-                    GsonHelper.getAsBoolean(j, "homing", false), GsonHelper.getAsFloat(j, "spread", 0f));
+                    GsonHelper.getAsBoolean(j, "homing", false), GsonHelper.getAsFloat(j, "spread", 0f),
+                    GsonHelper.getAsDouble(j, "lock_homing", 0.0));
         }
     }
 
@@ -203,6 +204,7 @@ public final class KiCombat {
         blast.moveTo(start.x, start.y, start.z, p.getYRot(), p.getXRot());
         blast.setDeltaMovement(look.normalize().scale(b.speed));
         if (b.homing) blast.setHomingTarget(Evasion.superDashTarget(p));
+        else if (b.lockHoming > 0 && Targeting.target(p) != null) blast.setHomingTarget(Targeting.target(p), b.lockHoming);   // curves toward the locked foe
         level.addFreshEntity(blast);
         ModNetwork.sendToTrackingAndSelf(p, new AnimEventPacket(p.getId(), AnimEventPacket.BLAST, 0));
         level.playSound(null, p.getX(), p.getY(), p.getZ(), com.dbzenith.registry.ModSounds.KI_FIRE.get(), SoundSource.PLAYERS,
