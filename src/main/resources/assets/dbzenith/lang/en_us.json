@@ -1636,5 +1636,13 @@
   "cutin.dbzenith.ultimate": "ULTIMATE",
   "cutin.dbzenith.ultimate_incoming": "INCOMING ULTIMATE",
   "screen.dbzenith.tier_super": "Super (%s bar).",
-  "screen.dbzenith.tier_ultimate": "Ultimate (%s bars)."
+  "screen.dbzenith.tier_ultimate": "Ultimate (%s bars).",
+  "popup.dbzenith.counter": "COUNTER!",
+  "popup.dbzenith.critical": "CRITICAL!",
+  "popup.dbzenith.guard_break": "GUARD BREAK!",
+  "popup.dbzenith.perfect_guard": "PERFECT GUARD!",
+  "subtitles.dbzenith.hit_crit": "Critical blow",
+  "subtitles.dbzenith.counter_hit": "Counter",
+  "subtitles.dbzenith.impact_boom": "Heavy impact",
+  "subtitles.dbzenith.hit_guarded": "Blow blocked"
 }

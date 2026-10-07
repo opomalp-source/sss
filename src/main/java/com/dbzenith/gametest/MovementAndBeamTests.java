@@ -38,11 +38,12 @@ public final class MovementAndBeamTests {
         PlayerData d = ModCapabilities.getOrThrow(player);
         Zombie zombie = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(1, 1, 1));
         helper.runAfterDelay(SPAWN_PROTECTION, () -> {
+            // sideways: a forward dash at whatever stands in front (other tests share the area) would be a super dash
             double stamina = d.getStamina();
-            helper.assertTrue(DashHandler.dash(player, 1, 0), "dash should succeed");
+            helper.assertTrue(DashHandler.dash(player, 0, 1), "dash should succeed");
             helper.assertTrue(player.getDeltaMovement().horizontalDistance() > 1.0, "dash should set a fast velocity");
             helper.assertTrue(d.getStamina() < stamina, "dash costs stamina");
-            helper.assertTrue(!DashHandler.dash(player, 1, 0), "dash should be on cooldown");
+            helper.assertTrue(!DashHandler.dash(player, 0, 1), "dash should be on cooldown");
             double body = d.getBody();
             player.hurt(player.damageSources().mobAttack(zombie), 4f);
             helper.assertTrue(d.getBody() == body, "attacks during the afterimage window should miss");

@@ -133,3 +133,23 @@ Bare-handed melee runs through the combat engine (`combat/engine`), for players 
 **Config `[combat_engine]`:** `specialMeter` (off: supers and ultimates cost only ki), `specialBars`, `specialPerHit`, `specialPerHeavy`, `specialPerHitTaken`, `specialPerPerfectGuard`, `specialPerVanish`.
 
 **Dev:** `/dbz special <player> <amount>`, `/dbz kiblast <player> <charge>` (-1 for a quick blast, 0-1 for a charged one).
+
+## Hit feedback (phase 5)
+
+- **Hitstop:** when a blow lands, both fighters freeze for a moment (light 2 ticks, heavy 4, perfect guard 6, guard break 5; criticals +1, counters +2). The knockback comes when the freeze ends. A move can set its own `hitstop` (ticks). Server config `hitstopScale` (0 = off); client config `hitstop` only stops the animation freeze.
+- **Criticals:** a blow from the back (the 90° behind the foe) does x1.2 (`critBehindBonus`). One that catches the foe winding up their own move does x1.15 (`critPunishBonus`).
+- **What you see and hear:**
+
+| Blow | Look | Sound |
+|---|---|---|
+| Light | White flash and ring | Slap with a whiff of air |
+| Heavy | Bigger flash, rings, camera kick | Punch over a sub boom |
+| Guarded | Pale blue sparks | Block over a muffled thud |
+| Perfect guard | Gold flash, the attacker reels, PERFECT GUARD! | Ringing parry |
+| Guard break | Blue burst, GUARD BREAK! | Shatter and a boom |
+| Critical | Red-orange burst, speed lines, CRITICAL! | A sharp crack |
+| Counter | Gold burst, speed lines, zoom kick, COUNTER! | A rising sting |
+
+- **Damage popups:** each blow's damage over whoever took it. White is a normal blow, yellow a heavy, orange a critical, gold a counter, pale blue a blow through a guard, and ki attacks show in the ki's colour. Client config `damagePopups`.
+- **Ultimates:** a cut-in, a flash and a shake for everyone near, and your own swings your camera to the front for a moment. Client config `ultimateCinematic`.
+- **Stances:** the server tells clients when a fighter is stunned, launched, knocked down or guarding. Players and NPCs show it: a dazed sway, a tumble, lying down, then getting up. NPCs also play their moves and hit reactions with the same clips as players.

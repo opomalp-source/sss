@@ -22,6 +22,8 @@ public final class CameraFx {
     private static float rush, rushO;
     private static float flash, flashO;
     private static int flashColor = 0xFFFFFF;
+    private static float lines, linesO;           // speed lines (CX-19e): a counter or a critical
+    private static int linesColor = 0xFFFFFF, linesSeed;
 
     private CameraFx() {}
 
@@ -60,6 +62,28 @@ public final class CameraFx {
         return flashColor;
     }
 
+    /** Speed lines rushing in from the screen's edges for a moment (a counter, a critical), 0..1. */
+    public static void speedLines(int rgb, float amount) {
+        if (!DBZConfig.CLIENT.fovEffects.get()) return;
+        if (amount >= lines) {
+            linesColor = rgb;
+            linesSeed++;
+        }
+        lines = Math.max(lines, Math.min(1f, amount));
+    }
+
+    public static float speedLinesAlpha(float partial) {
+        return Mth.lerp(partial, linesO, lines);
+    }
+
+    public static int speedLinesColor() {
+        return linesColor;
+    }
+
+    public static int speedLinesSeed() {
+        return linesSeed;
+    }
+
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END || Minecraft.getInstance().isPaused()) return;
@@ -70,6 +94,8 @@ public final class CameraFx {
         rush *= 0.8f;
         flashO = flash;
         flash = Math.max(0f, flash - 0.08f);
+        linesO = lines;
+        lines = Math.max(0f, lines - 0.12f);
     }
 
     @SubscribeEvent

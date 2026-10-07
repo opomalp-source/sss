@@ -56,5 +56,37 @@ public final class AuraEdgeOverlay implements IGuiOverlay {
             int a = (int) (Mth.clamp(flash, 0, 1) * 0.85f * 255);
             g.fill(0, 0, width, height, a << 24 | CameraFx.flashColor());
         }
+        float lines = CameraFx.speedLinesAlpha(partial);
+        if (lines > 0.01f) speedLines(g, width, height, lines, CameraFx.speedLinesColor(), CameraFx.speedLinesSeed());
+    }
+
+    /**
+     * Speed lines (CX-19e): thin wedges from the screen's edges toward the middle, stopping short of it, in a colour,
+     * fading with {@code alpha}. The same seed gives the same lines, so a burst holds still while it fades.
+     */
+    static void speedLines(GuiGraphics g, int width, int height, float alpha, int rgb, int seed) {
+        com.mojang.blaze3d.vertex.Tesselator tess = com.mojang.blaze3d.vertex.Tesselator.getInstance();
+        com.mojang.blaze3d.vertex.BufferBuilder buf = tess.getBuilder();
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShader(net.minecraft.client.renderer.GameRenderer::getPositionColorShader);
+        buf.begin(com.mojang.blaze3d.vertex.VertexFormat.Mode.TRIANGLES, com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_COLOR);
+        org.joml.Matrix4f m = g.pose().last().pose();
+        float cx = width / 2f, cy = height / 2f, far = (float) Math.hypot(cx, cy) * 1.05f;
+        int r = (rgb >> 16) & 255, gr = (rgb >> 8) & 255, b = rgb & 255;
+        java.util.Random rnd = new java.util.Random(seed * 31L + 7);
+        for (int i = 0; i < 44; i++) {
+            float ang = (float) (rnd.nextDouble() * Math.PI * 2), half = 0.004f + rnd.nextFloat() * 0.012f;
+            float inner = far * (0.42f + rnd.nextFloat() * 0.25f + (1 - alpha) * 0.2f);
+            int a = (int) (Mth.clamp(alpha * (0.45f + rnd.nextFloat() * 0.5f), 0, 1) * 255);
+            float x0 = cx + Mth.cos(ang) * inner, y0 = cy + Mth.sin(ang) * inner;
+            float x1 = cx + Mth.cos(ang - half) * far, y1 = cy + Mth.sin(ang - half) * far;
+            float x2 = cx + Mth.cos(ang + half) * far, y2 = cy + Mth.sin(ang + half) * far;
+            buf.vertex(m, x0, y0, 0).color(r, gr, b, 0).endVertex();
+            buf.vertex(m, x1, y1, 0).color(r, gr, b, a).endVertex();
+            buf.vertex(m, x2, y2, 0).color(r, gr, b, a).endVertex();
+        }
+        tess.end();
+        RenderSystem.disableBlend();
     }
 }

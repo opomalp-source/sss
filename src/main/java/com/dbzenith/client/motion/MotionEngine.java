@@ -62,7 +62,7 @@ public final class MotionEngine {
      * feet, scaled with the renderer's size.
      */
     public static void applyBody(LivingEntity e, com.mojang.blaze3d.vertex.PoseStack pose, float pt, float scale) {
-        MotionAnimation a = MotionAnimation.of(get(e));
+        dev.kosmx.playerAnim.api.layered.IAnimation a = com.dbzenith.client.anim.NpcActions.bodySource(e, MotionAnimation.of(get(e)));   // the combat layers move the body too (CX-19e)
         a.setupAnim(pt);
         if (!a.isActive()) return;
         dev.kosmx.playerAnim.core.util.Vec3f pos = a.get3DTransform("body", dev.kosmx.playerAnim.api.TransformType.POSITION, pt, dev.kosmx.playerAnim.core.util.Vec3f.ZERO);

@@ -90,7 +90,7 @@ public final class CombatV4Tests {
         double y0 = pig.getY();
         helper.assertTrue(CombatEngine.press(a, in(Move.Button.HEAVY, Move.Dir.NEUTRAL, true, false, true)), "the uppercut starts");
         helper.assertTrue(CombatEngine.peek(a).move().id.equals("heavy_uppercut"), "heavy_uppercut");
-        helper.runAfterDelay(10, () -> {
+        helper.runAfterDelay(14, () -> {                                     // the hitstop holds the launch a few ticks (phase 5)
             helper.assertTrue(pig.getY() > y0 + 1.0, "launched: " + (pig.getY() - y0));
             pig.discard();
             TestPlayers.remove(helper, a);

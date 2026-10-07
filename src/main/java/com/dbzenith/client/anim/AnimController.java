@@ -121,6 +121,9 @@ public final class AnimController {
         if (state == null || player.isPassenger() || player.isSleeping() || player.isFallFlying() || player.isSwimming()
                 || player.getPose() == Pose.SWIMMING || isApe(state.form())) return null;
         if (state.has(PublicStatePacket.DOWNED)) return Anims.DOWNED;
+        com.dbzenith.combat.engine.Fighter.State fs = FighterStates.get(player.getId());   // the engine's states (CX-19e)
+        if (fs == com.dbzenith.combat.engine.Fighter.State.LAUNCHED) return Anims.LAUNCHED;
+        if (fs == com.dbzenith.combat.engine.Fighter.State.STUNNED) return Anims.STUNNED;
         if (state.has(PublicStatePacket.MEDITATING)) return Anims.MEDITATE;
         if (state.has(PublicStatePacket.GUARDING)) return Anims.GUARD;
         if (state.has(PublicStatePacket.HEAVY)) return Anims.HEAVY_WINDUP;
@@ -262,7 +265,11 @@ public final class AnimController {
     /** Play a one-shot on whichever player has this entity id (effects that know who did what). */
     public static void playOn(int entityId, KeyframeAnimation anim) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null || entityId < 0 || !(mc.level.getEntity(entityId) instanceof AbstractClientPlayer player)) return;
+        if (mc.level == null || entityId < 0) return;
+        if (!(mc.level.getEntity(entityId) instanceof AbstractClientPlayer player)) {
+            if (mc.level.getEntity(entityId) instanceof net.minecraft.world.entity.LivingEntity npc) NpcActions.play(npc, anim);
+            return;
+        }
         play(player, TRACKS.computeIfAbsent(player, p -> new Track()), anim, mc.level.getGameTime(), 0);
     }
 
@@ -288,7 +295,10 @@ public final class AnimController {
     public static void hitstop(int entityId, int ticks) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || entityId < 0 || !com.dbzenith.config.DBZConfig.CLIENT.hitstop.get()) return;
-        if (!(mc.level.getEntity(entityId) instanceof AbstractClientPlayer player)) return;
+        if (!(mc.level.getEntity(entityId) instanceof AbstractClientPlayer player)) {
+            if (mc.level.getEntity(entityId) instanceof net.minecraft.world.entity.LivingEntity npc) NpcActions.hitstop(npc, ticks);   // NPCs (CX-19e)
+            return;
+        }
         Track t = TRACKS.computeIfAbsent(player, p -> new Track());
         t.hitstopUntil = Math.max(t.hitstopUntil, mc.level.getGameTime() + ticks);
         tickHitstop(player, t, mc.level.getGameTime());
@@ -353,9 +363,13 @@ public final class AnimController {
     /** A combat-engine move started (CX-19): play its clip, named as in {@link Anims} (JAB_RIGHT, LAUNCHER, ...). */
     public static void playClip(int entityId, String clip) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null || !(mc.level.getEntity(entityId) instanceof AbstractClientPlayer player)) return;
+        if (mc.level == null) return;
         KeyframeAnimation anim = CLIPS.computeIfAbsent(clip.toUpperCase(java.util.Locale.ROOT), AnimController::devAnimation);
         if (anim == null) return;
+        if (!(mc.level.getEntity(entityId) instanceof AbstractClientPlayer player)) {          // an NPC's move (CX-19e)
+            if (mc.level.getEntity(entityId) instanceof net.minecraft.world.entity.LivingEntity npc) NpcActions.play(npc, anim);
+            return;
+        }
         Track t = TRACKS.computeIfAbsent(player, p -> new Track());
         long now = mc.level.getGameTime();
         t.actionLockUntil = 0;                                       // a new blow always takes over from the last

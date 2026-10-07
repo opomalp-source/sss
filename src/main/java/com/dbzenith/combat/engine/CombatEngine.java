@@ -62,6 +62,8 @@ public final class CombatEngine {
     public static int outcomeImpact = -1;
     public static double outcomeDealt;
     public static boolean outcomeGuarded;
+    /** The blow under way: its impact flags (critical, counter, Z-hit) and the move's own hitstop (-1: by the impact). */
+    public static int pendingFlags, pendingHitstop = -1;
 
     private CombatEngine() {}
 
@@ -141,7 +143,11 @@ public final class CombatEngine {
             e.hurtMarked = true;
         }
         if (e instanceof ServerPlayer sp) ModNetwork.sendToTrackingAndSelf(sp, new com.dbzenith.network.MoveAnimPacket(sp.getId(), m.anim));
-        else e.swing(InteractionHand.MAIN_HAND, true);
+        else {                                                                 // NPCs play the move's clip too (phase 5)
+            ModNetwork.CHANNEL.send(net.minecraftforge.network.PacketDistributor.TRACKING_ENTITY.with(() -> e),
+                    new com.dbzenith.network.MoveAnimPacket(e.getId(), m.anim));
+            e.swing(InteractionHand.MAIN_HAND, true);
+        }
         e.level().playSound(null, e.getX(), e.getY(), e.getZ(), com.dbzenith.registry.ModSounds.WHOOSH.get(), SoundSource.PLAYERS,
                 m.button == Move.Button.HEAVY ? 0.7f : 0.45f, m.button == Move.Button.HEAVY ? 0.8f : 1.2f + e.getRandom().nextFloat() * 0.2f);
     }
@@ -169,6 +175,18 @@ public final class CombatEngine {
     static void tick(Fighter f, long now) {
         LivingEntity e = f.entity;
         DBZConfig.Server c = DBZConfig.SERVER;
+        if (f.freezeUntil > 0) {                                                // hitstop
+            if (now < f.freezeUntil) {
+                e.setDeltaMovement(Vec3.ZERO);
+                e.hurtMarked = true;
+                e.fallDistance = 0;
+                syncState(f, now);
+                return;
+            }
+            f.freezeUntil = 0;
+            if (f.heldVelocity != null) push(e, f.heldVelocity);
+            f.heldVelocity = null;
+        }
         if (f.superDashTarget != null) Evasion.tickSuperDash(f, now);
         if (f.move != null) {
             Move m = f.move;
@@ -228,6 +246,21 @@ public final class CombatEngine {
             f.juggleHits = 0;
             f.comboFrom = -1;
         }
+        syncState(f, now);
+    }
+
+    /**
+     * Tells the clients tracking a fighter when its stance changes (phase 5): stunned, launched, knocked down, guarding,
+     * or none of those. Attacking, dodging and charging show through their own animations, so they count as idle here.
+     */
+    static void syncState(Fighter f, long now) {
+        Fighter.State s = f.state(now);
+        if (s != Fighter.State.STUNNED && s != Fighter.State.LAUNCHED && s != Fighter.State.KNOCKDOWN && s != Fighter.State.GUARDING) s = Fighter.State.IDLE;
+        if (s == f.sentState) return;
+        f.sentState = s;
+        var packet = new com.dbzenith.network.FighterStatePacket(f.entity.getId(), s.ordinal());
+        if (f.entity instanceof ServerPlayer sp) ModNetwork.sendToTrackingAndSelf(sp, packet);
+        else ModNetwork.CHANNEL.send(net.minecraftforge.network.PacketDistributor.TRACKING_ENTITY.with(() -> f.entity), packet);
     }
 
     // ------------------------------------------------------------------ hits
@@ -319,9 +352,17 @@ public final class CombatEngine {
             }
         }
         if (downed) raw *= c.downedDamage.get();
+        // a critical (phase 5): from the back, or catching the foe in the wind-up of their own move
+        boolean behind = fromBehind(v, a);
+        boolean punish = g.move != null && g.moveTick < g.move.startup && g.moveTick >= g.move.armor;
+        boolean crit = !downed && (behind || punish);
+        if (crit) raw *= behind ? c.critBehindBonus.get() : c.critPunishBonus.get();
+        int flags = (crit ? ImpactPacket.CRIT : 0) | (zhit ? ImpactPacket.ZHIT : 0) | (m.id.equals("counter_strike") ? ImpactPacket.COUNTER : 0);
 
         pendingImpact = zhit ? ImpactPacket.HEAVY : impactOf(m.impact);
         pendingUnblockable = m.unblockable;
+        pendingFlags = flags;
+        pendingHitstop = m.hitstop;
         outcomeImpact = -1;
         outcomeDealt = 0;
         v.invulnerableTime = 0;
@@ -329,13 +370,17 @@ public final class CombatEngine {
         int outcome = outcomeImpact;
         pendingImpact = -1;
         pendingUnblockable = false;
+        pendingFlags = 0;
+        pendingHitstop = -1;
         if (outcome == -2) return;                                              // dodged (an afterimage, Ultra Instinct)
         if (!struck && outcome < 0) return;                                     // refused (PvP rules, invulnerable)
         f.landed = true;
+        int hitstop = hitstopTicks(m.hitstop, outcome < 0 ? impactOf(m.impact) : outcome, flags);
         if (outcome == ImpactPacket.GUARD || outcome == ImpactPacket.PARRY) {  // blocked: a little pushback, no combo
             Vec3 push = away(a, v).scale(0.25);
             v.setDeltaMovement(v.getDeltaMovement().add(push));
             v.hurtMarked = true;
+            freeze(f, g, hitstop, now, null, null);
             return;
         }
 
@@ -349,7 +394,7 @@ public final class CombatEngine {
         if (a instanceof Player p) ModCapabilities.get(p).ifPresent(d -> d.registerHit(now, c.comboWindowTicks.get(), c.comboMaxHits.get()));
         SpecialMeter.gain(a, m.button == Move.Button.HEAVY ? c.specialPerHeavy.get() : c.specialPerHit.get());
         SpecialMeter.gain(v, c.specialPerHitTaken.get());
-        int stun = (int) Math.round(m.hitstun * stunScale * (zhit ? 1.6 : 1.0));
+        int stun = (int) Math.round(m.hitstun * stunScale * (zhit ? 1.6 : 1.0)) + hitstop;     // the freeze doesn't eat the stun
         if (!downed) stun(g, v, stun, now);
         if (downed) return;                                                     // the floored are not thrown about
 
@@ -386,13 +431,65 @@ public final class CombatEngine {
                 }
             }
         }
+        Vec3 carry = !a.onGround() && m.launch == Move.Launch.NONE ? vel.scale(0.9) : null;   // an air combo carries the attacker along
+        if (hitstop > 0) {                                                      // both hang in the blow, then it lands
+            freeze(f, g, hitstop, now, vel, carry);
+            return;
+        }
         v.setDeltaMovement(vel);
         v.hurtMarked = true;
         v.hasImpulse = true;
-        if (!a.onGround() && m.launch == Move.Launch.NONE) {                    // an air combo carries the attacker along
-            a.setDeltaMovement(vel.scale(0.9));
+        if (carry != null) {
+            a.setDeltaMovement(carry);
             a.hurtMarked = true;
         }
+    }
+
+    /** A blow from the back: the attacker within the 90° behind the victim (a critical). */
+    static boolean fromBehind(LivingEntity victim, LivingEntity attacker) {
+        Vec3 to = attacker.position().subtract(victim.position()).multiply(1, 0, 1);
+        Vec3 look = victim.getLookAngle().multiply(1, 0, 1);
+        if (to.lengthSqr() < 1e-4 || look.lengthSqr() < 1e-4) return false;
+        return to.normalize().dot(look.normalize()) < -0.7071;
+    }
+
+    /** Hitstop ticks for a blow: the move's own, or by the kind of impact, times the config's scale (0 = off). */
+    public static int hitstopTicks(int moveHitstop, int impact, int flags) {
+        double scale;
+        try {
+            scale = DBZConfig.SERVER.hitstopScale.get();
+        } catch (IllegalStateException e) {
+            scale = 1;
+        }
+        int base = moveHitstop >= 0 ? moveHitstop + ImpactPacket.hitstopFor(ImpactPacket.PUNCH, flags) - 2 : ImpactPacket.hitstopFor(impact, flags);
+        return (int) Math.round(Math.max(0, base) * scale);
+    }
+
+    /**
+     * Freezes attacker and victim for {@code ticks} (hitstop): their moves wait, they hang where they are, and the
+     * knockback ({@code victimVel}, and the attacker's {@code attackerVel}) is given when it ends.
+     */
+    static void freeze(Fighter f, Fighter g, int ticks, long now, Vec3 victimVel, Vec3 attackerVel) {
+        if (ticks <= 0) {
+            if (victimVel != null) push(g.entity, victimVel);
+            if (attackerVel != null) push(f.entity, attackerVel);
+            return;
+        }
+        f.freezeUntil = Math.max(f.freezeUntil, now + ticks);
+        g.freezeUntil = Math.max(g.freezeUntil, now + ticks);
+        if (victimVel != null) g.heldVelocity = victimVel;
+        if (attackerVel != null) f.heldVelocity = attackerVel;
+        if (g.flightUntil > now) g.flightUntil += ticks;                       // the wall-slam window starts when it flies
+        for (LivingEntity e : new LivingEntity[]{f.entity, g.entity}) {
+            e.setDeltaMovement(Vec3.ZERO);
+            e.hurtMarked = true;
+        }
+    }
+
+    static void push(LivingEntity e, Vec3 vel) {
+        e.setDeltaMovement(vel);
+        e.hurtMarked = true;
+        e.hasImpulse = true;
     }
 
     /**

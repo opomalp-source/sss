@@ -22,7 +22,7 @@ public class MotionModel<T extends LivingEntity> extends PlayerModel<T> {
 
     /** The applier for an entity (kept with its motion). */
     static AnimationApplier applier(Motion m) {
-        if (m.applier == null) m.applier = new AnimationApplier(MotionAnimation.of(m));
+        if (m.applier == null) m.applier = new AnimationApplier(com.dbzenith.client.anim.NpcActions.stack(m.entity(), MotionAnimation.of(m)));   // with the combat layers (CX-19e)
         return (AnimationApplier) m.applier;
     }
 

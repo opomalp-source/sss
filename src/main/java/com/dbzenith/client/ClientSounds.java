@@ -39,13 +39,39 @@ public final class ClientSounds {
 
     /** The sound of an impact, sized by its scale. */
     public static void impact(ClientLevel level, Vec3 pos, int kind, float scale) {
+        impact(level, pos, kind, scale, 0);
+    }
+
+    /**
+     * The sound of an impact, in layers (CX-19e): a light blow is a slap with a whiff of air; a heavy one adds a sub boom;
+     * a guarded one is a block over a muffled thud; a perfect guard rings over a sharp block; a critical adds a crack and
+     * a counter its sting.
+     */
+    public static void impact(ClientLevel level, Vec3 pos, int kind, float scale, int flags) {
         float big = Mth.clamp(scale, 0.5f, 3f);
+        if ((flags & ImpactPacket.CRIT) != 0) at(level, pos, ModSounds.HIT_CRIT.get(), 0.75f, 1f);
+        if ((flags & ImpactPacket.COUNTER) != 0) at(level, pos, ModSounds.COUNTER_HIT.get(), 0.9f, 1f);
         switch (kind) {
-            case ImpactPacket.PUNCH -> at(level, pos, ModSounds.PUNCH_LIGHT.get(), 0.8f, 1f);
-            case ImpactPacket.HEAVY, ImpactPacket.SPIKE -> at(level, pos, ModSounds.PUNCH_HEAVY.get(), 1f, 1f);
-            case ImpactPacket.GUARD -> at(level, pos, ModSounds.GUARD_BLOCK.get(), 0.9f, 1f);
-            case ImpactPacket.PARRY -> at(level, pos, ModSounds.PARRY.get(), 0.9f, 1f);
-            case ImpactPacket.GUARD_BREAK -> at(level, pos, ModSounds.GUARD_BREAK.get(), 1f, 1f);
+            case ImpactPacket.PUNCH -> {
+                at(level, pos, ModSounds.PUNCH_LIGHT.get(), 0.8f, 1f);
+                at(level, pos, ModSounds.WHOOSH.get(), 0.18f, 1.6f);
+            }
+            case ImpactPacket.HEAVY, ImpactPacket.SPIKE -> {
+                at(level, pos, ModSounds.PUNCH_HEAVY.get(), 1f, 1f);
+                at(level, pos, ModSounds.IMPACT_BOOM.get(), 0.7f, kind == ImpactPacket.SPIKE ? 0.85f : 1f);
+            }
+            case ImpactPacket.GUARD -> {
+                at(level, pos, ModSounds.GUARD_BLOCK.get(), 0.8f, 1f);
+                at(level, pos, ModSounds.HIT_GUARDED.get(), 0.7f, 1f);
+            }
+            case ImpactPacket.PARRY -> {
+                at(level, pos, ModSounds.PARRY.get(), 0.9f, 1f);
+                at(level, pos, ModSounds.GUARD_BLOCK.get(), 0.6f, 1.3f);
+            }
+            case ImpactPacket.GUARD_BREAK -> {
+                at(level, pos, ModSounds.GUARD_BREAK.get(), 1f, 1f);
+                at(level, pos, ModSounds.IMPACT_BOOM.get(), 0.5f, 1.2f);
+            }
             case ImpactPacket.DEFLECT -> at(level, pos, ModSounds.DEFLECT.get(), 0.9f, 1f);
             case ImpactPacket.KI_HIT -> at(level, pos, ModSounds.KI_HIT.get(), 0.5f + 0.25f * big, 1.15f - 0.1f * big);
             case ImpactPacket.EXPLOSION -> at(level, pos, big > 1.6f ? ModSounds.EXPLOSION_BIG.get() : ModSounds.EXPLOSION.get(),

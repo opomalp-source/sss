@@ -44,6 +44,11 @@ public final class Fighter {
     long superDashUntil;
     boolean wasDowned;
 
+    // ---------------------------------------------------------------- feel (phase 5)
+    long freezeUntil;                    // hitstop: the move and the knockback wait until then
+    Vec3 heldVelocity;                   // the knockback to give when the freeze ends
+    State sentState = State.IDLE;        // the state clients were last told
+
     Fighter(LivingEntity entity) {
         this.entity = entity;
     }
@@ -67,6 +72,16 @@ public final class Fighter {
 
     public String lastMove() {
         return lastMove;
+    }
+
+    /** In hitstop (phase 5). */
+    public boolean frozen(long now) {
+        return now < freezeUntil;
+    }
+
+    /** The stance clients were last told. */
+    public State sentState() {
+        return sentState;
     }
 
     /** What the fighter is doing, as the state machine sees it. */

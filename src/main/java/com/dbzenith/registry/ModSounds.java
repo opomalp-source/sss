@@ -44,6 +44,11 @@ public final class ModSounds {
     public static final RegistryObject<SoundEvent> UI_OPEN = sound("ui_open");
     public static final RegistryObject<SoundEvent> STUN = sound("stun");
     public static final RegistryObject<SoundEvent> LAND = sound("land");
+    // CX-19e hit layers
+    public static final RegistryObject<SoundEvent> HIT_CRIT = sound("hit_crit");
+    public static final RegistryObject<SoundEvent> COUNTER_HIT = sound("counter_hit");
+    public static final RegistryObject<SoundEvent> IMPACT_BOOM = sound("impact_boom");
+    public static final RegistryObject<SoundEvent> HIT_GUARDED = sound("hit_guarded");
 
     private ModSounds() {}
 

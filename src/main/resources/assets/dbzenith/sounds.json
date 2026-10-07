@@ -114,5 +114,21 @@
   "land": {
     "subtitle": "subtitles.dbzenith.land",
     "sounds": ["dbzenith:land_1", "dbzenith:land_2"]
+  },
+  "hit_crit": {
+    "subtitle": "subtitles.dbzenith.hit_crit",
+    "sounds": ["dbzenith:hit_crit_1", "dbzenith:hit_crit_2"]
+  },
+  "counter_hit": {
+    "subtitle": "subtitles.dbzenith.counter_hit",
+    "sounds": ["dbzenith:counter_hit_1", "dbzenith:counter_hit_2"]
+  },
+  "impact_boom": {
+    "subtitle": "subtitles.dbzenith.impact_boom",
+    "sounds": ["dbzenith:impact_boom_1", "dbzenith:impact_boom_2"]
+  },
+  "hit_guarded": {
+    "subtitle": "subtitles.dbzenith.hit_guarded",
+    "sounds": ["dbzenith:hit_guarded_1", "dbzenith:hit_guarded_2"]
   }
 }

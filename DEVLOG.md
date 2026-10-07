@@ -1537,3 +1537,40 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **Dev:** `/dbz special <player> <amount>`, `/dbz kiblast <player> <charge -1..1>` (-1 = a quick one).
 - **Tests:** `KiCombatTests` (quick and charged blasts and their costs, cooldown and size; a charged blast stuns and builds meter; blows fill both meters; supers and ultimates need their bars and spend them). Two technique tests now give the meter first. 165 GameTests.
 - **Checked in the dev client:** the meter on the Saga HUD at 2.5 bars; quick and charged blasts in the aura's gold (a charged blast felled a zombie and an iron golem); the Death Ball's ULTIMATE cut-in.
+
+## 2026-10-07 — CX-19 Combat v4, phase 5: hit feedback and camera (v0.55.0)
+- **Hitstop on both fighters, on the server:**
+  - When an engine blow lands (or is blocked), attacker and victim freeze. The attacker's move waits, both hang where they are, and the knockback, launch or air-combo carry is given when the freeze ends (`Fighter.freezeUntil`, `heldVelocity`; `CombatEngine.freeze`).
+  - The stun is lengthened by the freeze, and so is the wall-slam window.
+  - Ticks by impact: light 2, heavy 4, guard 1, perfect guard 6, guard break 5; +1 for a critical, +2 for a counter. A move can set its own `hitstop` in its data. Config `hitstopScale` (0 = off).
+  - The impact packet carries the ticks, so the clients freeze the animations for exactly as long; fights you only watch freeze too.
+- **Criticals** (new):
+  - A blow from the back (the 90° behind the foe) or one that catches the foe in the wind-up of their own move. Not on a floored foe.
+  - Config `critBehindBonus` x1.2, `critPunishBonus` x1.15.
+  - Dev check: at first every hit was critical (NPCs are always mid-move and "outside the guard arc" covered 160°), so I narrowed it to the back and to wind-ups only.
+- **`ImpactPacket`:**
+  - New flags: CRIT, COUNTER (`counter_strike`) and ZHIT, plus the hitstop ticks.
+  - Looks: a critical is a red-orange flash and ring, a counter a gold flash and ring with speed lines and a zoom kick, a Z-hit a pale afterimage ring.
+- **Damage popups** (`DamageNumberPacket` → `client/fx/DamagePopups`):
+  - Every blow by a living attacker shows its damage over the victim (compact: 950, 1.2K, 12K). The number pops in, rises and fades, and alternates left and right.
+  - Colours: white; yellow for a heavy; orange for a critical; gold for a counter; pale blue through a guard; the ki's colour for ki.
+  - Words over the numbers: COUNTER!, CRITICAL!, GUARD BREAK!, PERFECT GUARD!
+  - Client config `damagePopups`.
+- **Layered hit sounds** (`ClientSounds.impact` with flags):
+  - A light blow adds a whiff of air; a heavy adds a sub boom; a guarded blow adds a muffled thud; a perfect guard adds a sharp block; a guard break adds a boom; criticals and counters add their own sounds.
+  - Four new sounds synthesized with `tools/SfxGen`: `hit_crit`, `counter_hit`, `impact_boom`, `hit_guarded` (two variants each). The existing sounds were left untouched.
+- **Speed lines** (`CameraFx.speedLines`, drawn by the aura-edge overlay): for counters, criticals and your own ultimate. They follow the client's `fovEffects` setting.
+- **Ultimate camera:** your own ultimate swings the view to the front for 1.8 s during the cut-in, then back to the view you had (unless you changed it). Client config `ultimateCinematic` turns it off.
+- **Fighter states for clients** (`FighterStatePacket` → `client/anim/FighterStates`): the engine tells clients tracking a fighter when it becomes stunned, launched, knocked down, guarding or idle.
+  - Players get the new **STUNNED** (dazed sway) and **LAUNCHED** (back arched, limbs trailing) stance clips.
+- **NPC combat animations** (`client/anim/NpcActions`):
+  - NPCs drawn with the motion engine's model now run a playerAnimator stack: the motion engine, then a stance layer (stunned, launched, downed, guarding), then an action layer.
+  - The action layer plays their moves (the server now sends `MoveAnimPacket` for NPCs too), hit reactions (heavy after a heavy impact), and a get-up after a knockdown. It freezes during hitstop.
+- **Tests:**
+  - `CombatFeelTests`: a heavy freezes both, then throws; a blow from behind is a critical; clients are told the stance; hitstop by kind.
+  - The uppercut test waits out the hitstop.
+  - The dash test dashes sideways, so whatever another test left in front can't make it a super dash (it failed now and then).
+  - 169 GameTests.
+- **Checked in the dev client:**
+  - A Namekian Warrior and a Frieza Force Soldier fighting each other: their move clips, reactions, launch, popups and rings.
+  - The Death Ball's front camera and the return to first person.

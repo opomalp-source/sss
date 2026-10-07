@@ -442,6 +442,24 @@ public final class Anims {
                 .pose(18, fight(), Ease.INOUTQUAD);
     });
 
+    /** Dazed (CX-19e): hunched over, arms slack, swaying on unsteady legs while a stun lasts. */
+    public static final KeyframeAnimation STUNNED = loop(24, a -> {
+        Pose p = new Pose().at(0, 1.4f, 0).r("torso", 14, 0, 0).r("head", 24, 0, 0)
+                .limb("rightArm", 8, 0, 10, 15).limb("leftArm", 6, 0, -10, 15)
+                .limb("rightLeg", -10, 0, 4, 22).limb("leftLeg", -6, 0, -4, 18);
+        Pose left = p.copy().r("torso", 14, 0, -6).r("head", 26, 8, -10), right = p.copy().r("torso", 12, 0, 6).r("head", 22, -8, 10);
+        a.pose(0, left, Ease.INOUTSINE).pose(12, right, Ease.INOUTSINE).pose(24, left, Ease.INOUTSINE);
+    });
+
+    /** Launched (CX-19e): thrown through the air, back arched, arms and legs trailing behind. */
+    public static final KeyframeAnimation LAUNCHED = loop(16, a -> {
+        Pose p = new Pose().at(0, 1.0f, 1.5f).r("torso", -38, 0, 0).r("head", -30, 0, 0)
+                .limb("rightArm", -150, 0, 30, 15).limb("leftArm", -140, 0, -35, 15)
+                .limb("rightLeg", 28, 0, 10, 25).limb("leftLeg", 12, 0, -10, 40);
+        a.pose(0, p, Ease.INOUTSINE)
+                .pose(8, p.copy().r("torso", -44, 0, 4).limb("rightArm", -160, 0, 38, 10).limb("leftLeg", 20, 0, -12, 55), Ease.INOUTSINE)
+                .pose(16, p, Ease.INOUTSINE);
+    });
     /** Just fought: the fighting stance with a light bounce on the balls of the feet. Head and legs stay free to look and walk. */
     public static final KeyframeAnimation COMBAT_STANCE = loop(24, a -> {
         Pose s = fight().freeing("head", "rightLeg", "leftLeg").at(0, 0.5f, 0);

@@ -158,8 +158,18 @@ public final class CombatEvents {
             com.dbzenith.combat.engine.CombatEngine.outcomeDealt = dealt;
             com.dbzenith.combat.engine.CombatEngine.outcomeGuarded = guarded;
         }
+        int feel = isStrike ? com.dbzenith.combat.engine.CombatEngine.pendingFlags : 0;     // critical, counter, Z-hit (CX-19e)
         if (impact >= 0 && source.getEntity() != null && victim.level() instanceof net.minecraft.server.level.ServerLevel level) {
-            ImpactPacket.melee(source.getEntity(), victim, impact).send(level);
+            int hitstop = com.dbzenith.combat.engine.CombatEngine.hitstopTicks(isStrike ? com.dbzenith.combat.engine.CombatEngine.pendingHitstop : -1, impact, feel);
+            ImpactPacket.melee(source.getEntity(), victim, impact).withFeel(feel, hitstop).send(level);
+        }
+        if (dealt > 0 && !evaded && source.getEntity() instanceof net.minecraft.world.entity.LivingEntity && source.getEntity() != victim
+                && victim.level() instanceof net.minecraft.server.level.ServerLevel level) {             // the damage number
+            int nf = feel | (guarded ? com.dbzenith.network.DamageNumberPacket.GUARDED : 0) | (isKi ? com.dbzenith.network.DamageNumberPacket.KI : 0)
+                    | (impact == ImpactPacket.HEAVY || impact == ImpactPacket.SPIKE || impact == ImpactPacket.GUARD_BREAK ? com.dbzenith.network.DamageNumberPacket.HEAVY : 0);
+            int color = source.getDirectEntity() instanceof com.dbzenith.skill.KiBlastEntity b ? b.getColor()
+                    : source.getDirectEntity() instanceof com.dbzenith.skill.KiBeamEntity b ? b.getColor() : 0xFFFFFF;
+            new com.dbzenith.network.DamageNumberPacket(victim.getId(), (float) dealt, nf, color).send(level, victim);
         }
 
         if (attackerData != null && dealt > 0) attackerData.markCombat(victim.level().getGameTime());

@@ -50,6 +50,10 @@ public final class SfxGen {
         save("ui_open", 0, uiOpen());
         for (int v = 0; v < 2; v++) save("stun", v, stun(v));
         for (int v = 0; v < 2; v++) save("land", v, land(v));
+        for (int v = 0; v < 2; v++) save("hit_crit", v, hitCrit(v));
+        for (int v = 0; v < 2; v++) save("counter_hit", v, counterHit(v));
+        for (int v = 0; v < 2; v++) save("impact_boom", v, impactBoom(v));
+        for (int v = 0; v < 2; v++) save("hit_guarded", v, hitGuarded(v));
         writeSoundsJson();
         System.out.println("SfxGen done: " + EVENTS.size() + " events");
     }
@@ -460,6 +464,70 @@ public final class SfxGen {
         return room(out, 0.12, 0.2);
     }
 
+
+    // ---------------------------------------------------------------- CX-19e hit layers
+
+    /** A critical blow: a sharp, bright crack over a short metallic ring. */
+    static double[] hitCrit(int v) {
+        double[] out = buf(0.5);
+        double[] crack = highpass(noise(out.length), 1800 + v * 300);
+        mul(crack, env(out.length, 0.0002, 0.025));
+        double[] snap = bandpass(noise(out.length), t -> 4200 - t * 3000, 1.6);
+        mul(snap, env(out.length, 0.0005, 0.05));
+        double[] ring = sine(out.length, t -> 2300 + v * 180);
+        mul(ring, env(out.length, 0.001, 0.14));
+        double[] ring2 = sine(out.length, t -> (2300 + v * 180) * 2.41);
+        mul(ring2, env(out.length, 0.001, 0.08));
+        mix(out, crack, 0.9);
+        mix(out, snap, 0.7);
+        mix(out, ring, 0.35);
+        mix(out, ring2, 0.18);
+        saturate(out, 1.4);
+        return room(out, 0.14, 0.18);
+    }
+
+    /** A counter: a quick rising sting into a hit. */
+    static double[] counterHit(int v) {
+        double[] out = buf(0.7);
+        double[] rise = saw(out.length, t -> 330 * Math.pow(2, Math.min(t, 0.12) / 0.12 * 1.0) * (1 + v * 0.06), 0.6);
+        rise = lowpass(rise, t -> 2600);
+        mul(rise, shape(out.length, t -> t < 0.12 ? t / 0.12 : Math.exp(-(t - 0.12) * 14)));
+        double[] chord = add(sine(out.length, t -> 660 * (1 + v * 0.06)), sine(out.length, t -> 990 * (1 + v * 0.06)));
+        mul(chord, shape(out.length, t -> t < 0.12 ? 0 : Math.exp(-(t - 0.12) * 6)));
+        double[] thump = sine(out.length, t -> t < 0.12 ? 0 : 90 * Math.exp(-(t - 0.12) * 10) + 42);
+        mul(thump, shape(out.length, t -> t < 0.12 ? 0 : Math.exp(-(t - 0.12) * 7)));
+        mix(out, rise, 0.45);
+        mix(out, chord, 0.3);
+        mix(out, thump, 0.9);
+        saturate(out, 1.5);
+        return room(out, 0.2, 0.25);
+    }
+
+    /** Under a heavy blow: a deep sub boom with a little air. */
+    static double[] impactBoom(int v) {
+        double[] out = buf(0.9);
+        double[] sub = sine(out.length, t -> 52 * Math.exp(-t * 4) + 30 + v * 3);
+        mul(sub, env(out.length, 0.002, 0.32));
+        double[] air = lowpass(brown(out.length), t -> 400);
+        mul(air, env(out.length, 0.004, 0.25));
+        mix(out, sub, 1.0);
+        mix(out, air, 0.5);
+        saturate(out, 2.0);
+        return room(out, 0.18, 0.35);
+    }
+
+    /** A blow on a raised guard: a dull, muffled thud. */
+    static double[] hitGuarded(int v) {
+        double[] out = buf(0.3);
+        double[] thud = sine(out.length, t -> 140 * Math.exp(-t * 20) + 70 + v * 8);
+        mul(thud, env(out.length, 0.001, 0.07));
+        double[] pad = lowpass(noise(out.length), t -> 700);
+        mul(pad, env(out.length, 0.001, 0.04));
+        mix(out, thud, 1.0);
+        mix(out, pad, 0.5);
+        saturate(out, 1.3);
+        return room(out, 0.06, 0.1);
+    }
     // ================================================================== building blocks
 
     static double[] buf(double seconds) {
@@ -670,7 +738,7 @@ public final class SfxGen {
 
     static void save(String event, int variant, double[] samples) throws Exception {
         normalizeTo(samples, 0.89);
-        String name = event + (variant > 0 || event.matches("punch_light|punch_heavy|whoosh|ki_fire|ki_hit|explosion|explosion_big|beam_fire|guard_block|parry|guard_break|deflect|dash|vanish|powerup|transform|flight|skill|ui_click|stun|land") ? "_" + (variant + 1) : "");
+        String name = event + (variant > 0 || event.matches("punch_light|punch_heavy|whoosh|ki_fire|ki_hit|explosion|explosion_big|beam_fire|guard_block|parry|guard_break|deflect|dash|vanish|powerup|transform|flight|skill|ui_click|stun|land|hit_crit|counter_hit|impact_boom|hit_guarded") ? "_" + (variant + 1) : "");
         File wav = new File("build/sfx/" + name + ".wav");
         writeWav(wav, samples);
         File ogg = new File(OUT + "sounds/" + name + ".ogg");

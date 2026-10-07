@@ -2,6 +2,7 @@ package com.dbzenith.client.fx;
 
 import com.dbzenith.DBZenith;
 import com.dbzenith.client.anim.AnimController;
+import com.dbzenith.client.anim.NpcActions;
 import com.dbzenith.network.ImpactPacket;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -73,7 +74,7 @@ public final class ImpactFx {
         RandomSource rnd = level.random;
         boolean mine = mc.player != null && (m.attackerId() == mc.player.getId() || m.victimId() == mc.player.getId());
         int tint = FxDraw.mix(m.color(), 0xFFFFFF, 0.55f);
-        com.dbzenith.client.ClientSounds.impact(level, pos, m.kind(), s);
+        com.dbzenith.client.ClientSounds.impact(level, pos, m.kind(), s, m.flags());
         switch (m.kind()) {
             case ImpactPacket.PUNCH -> {
                 add(Kind.FLASH, pos, dir, 0xFFFFFF, 0, 0.9f * s, 3, 230);
@@ -147,9 +148,45 @@ public final class ImpactFx {
             }
             default -> { }
         }
+        feel(m, level, pos, dir, s, mine);
+    }
+
+    /**
+     * What makes a blow special (CX-19e): a critical (a red-orange burst), a counter (gold, with speed lines for the two
+     * fighters), a Z-hit (an afterimage ring); the words over the victim; and the NPC victim's reel.
+     */
+    private static void feel(ImpactPacket m, ClientLevel level, Vec3 pos, Vec3 dir, float s, boolean mine) {
+        int k = m.kind(), f = m.flags();
+        if (k == ImpactPacket.HEAVY || k == ImpactPacket.SPIKE || k == ImpactPacket.GUARD_BREAK) NpcActions.heavyHint(m.victimId());
+        if ((f & ImpactPacket.CRIT) != 0) {
+            add(Kind.FLASH, pos, dir, 0xFF6A3A, 0, 2.2f * s, 4, 255);
+            add(Kind.FACING_RING, pos, dir, 0xFFB050, 0.2f * s, 2.0f * s, 6, 210);
+            burst(level, ParticleTypes.CRIT, pos, dir, 12, 0.7);
+            if (mine) CameraFx.speedLines(0xFFB070, 0.55f);
+            DamagePopups.word(m.victimId(), "critical", 0xFFFF7A4A);
+        }
+        if ((f & ImpactPacket.COUNTER) != 0) {
+            add(Kind.FLASH, pos, dir, 0xFFE07A, 0, 2.8f * s, 5, 255);
+            add(Kind.RING, pos, dir, 0xFFD040, 0.3f * s, 3.4f * s, 9, 230);
+            burst(level, ParticleTypes.ENCHANTED_HIT, pos, dir, 16, 0.6);
+            if (mine) {
+                CameraFx.speedLines(0xFFE890, 1f);
+                CameraFx.kick(0.8f);
+            }
+            DamagePopups.word(m.victimId(), "counter", 0xFFFFD34A);
+        }
+        if ((f & ImpactPacket.ZHIT) != 0) {
+            add(Kind.FACING_RING, pos, dir, 0x9FE8FF, 0.3f * s, 2.4f * s, 7, 200);
+            burst(level, ParticleTypes.CLOUD, pos, dir.reverse(), 6, 0.2);
+        }
+        if (k == ImpactPacket.GUARD_BREAK) DamagePopups.word(m.victimId(), "guard_break", 0xFFAEE6FF);
+        if (k == ImpactPacket.PARRY) DamagePopups.word(m.victimId(), "perfect_guard", 0xFFFFE6A0);
+        if (!mine) hitstop(m, ImpactPacket.hitstopFor(k, f));                    // fights you watch freeze too
     }
 
     private static void hitstop(ImpactPacket m, int frames) {
+        if (m.hitstop() >= 0) frames = m.hitstop();                                // the server's freeze, so both sides match (CX-19e)
+        if (frames <= 0) return;
         AnimController.hitstop(m.attackerId(), frames);
         AnimController.hitstop(m.victimId(), frames);
     }

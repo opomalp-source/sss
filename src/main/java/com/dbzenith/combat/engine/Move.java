@@ -54,6 +54,7 @@ public final class Move {
 
     public final String anim;
     public final String impact;
+    public final int hitstop;                      // freeze frames on landing (-1: by the impact kind)
     public final String sound;
 
     private Move(String id, JsonObject j) {
@@ -91,6 +92,7 @@ public final class Move {
         lunge = GsonHelper.getAsDouble(j, "lunge", 0.0);
         anim = GsonHelper.getAsString(j, "anim", "JAB_RIGHT");
         impact = GsonHelper.getAsString(j, "impact", "punch");
+        hitstop = GsonHelper.getAsInt(j, "hitstop", -1);
         sound = GsonHelper.getAsString(j, "sound", "whoosh");
     }
 
