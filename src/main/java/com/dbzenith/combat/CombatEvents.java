@@ -148,6 +148,22 @@ public final class CombatEvents {
             }
         } else {
             dealt = raw;
+            if (victim instanceof com.dbzenith.npc.TrainingDummy td) {           // the dummy's guard (CX-19 phase 9)
+                int gd = td.guards(source.getEntity(), isStrike || isMelee);
+                if (gd == 2) {                                                  // a parry: no damage, the attacker staggers
+                    dealt = raw = 0;
+                    impact = ImpactPacket.PARRY;
+                    if (source.getEntity() instanceof net.minecraft.world.entity.LivingEntity foe) {
+                        foe.addEffect(new net.minecraft.world.effect.MobEffectInstance(com.dbzenith.registry.ModEffects.STUN.get(),
+                                DBZConfig.SERVER.parryStunTicks.get(), 0));
+                        com.dbzenith.combat.engine.Evasion.onPerfectGuard(td, foe, victim.level().getGameTime());
+                    }
+                } else if (gd == 1) {                                           // a block: chip damage
+                    dealt = raw = raw * 0.1;
+                    if (impact >= 0) impact = ImpactPacket.GUARD;
+                }
+                guarded = gd > 0;
+            }
             float amount = isKi || isThrow || isMelee || isStrike ? DamageCalculator.toVanilla(raw) : event.getAmount();
             if (victim instanceof com.dbzenith.npc.KiFighter fighter) amount /= (float) fighter.toughness(); // leveled foes
             event.setAmount(amount);
@@ -171,6 +187,8 @@ public final class CombatEvents {
                     : source.getDirectEntity() instanceof com.dbzenith.skill.KiBeamEntity b ? b.getColor() : 0xFFFFFF;
             new com.dbzenith.network.DamageNumberPacket(victim.getId(), (float) dealt, nf, color, source.getEntity().getId()).send(level, victim);
             com.dbzenith.combat.engine.FoeFocus.fought(source.getEntity(), victim);   // for the enemy panel (phase 8)
+            if (source.getEntity() instanceof net.minecraft.world.entity.LivingEntity le) com.dbzenith.duel.Duels.onBlow(le, victim, dealt);
+            if (victim instanceof com.dbzenith.npc.TrainingDummy td) td.record(dealt);   // its string of blows
         }
 
         if (attackerData != null && dealt > 0) attackerData.markCombat(victim.level().getGameTime());

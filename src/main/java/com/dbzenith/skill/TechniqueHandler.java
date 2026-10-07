@@ -37,6 +37,7 @@ public final class TechniqueHandler {
         if (com.dbzenith.registry.ModEffects.isStunned(player)) return Result.STUNNED;
         if (com.dbzenith.registry.ModEffects.isKiSealed(player)) return Result.SEALED;
         if (BeamStruggle.isStruggling(player)) return Result.INVALID;     // both hands are busy
+        if (!com.dbzenith.duel.Duels.kiAllowed(player)) return Result.INVALID;   // a melee-only duel (CX-19 phase 9)
         if (!bypassDeck && !(data.knows(technique.id()) && data.deckView().contains(technique.id()))) return Result.NOT_EQUIPPED;
         if (technique.effect() == Technique.Effect.SPIRIT_BOMB && KiBlastEntity.releaseSpiritBomb(player)) {   // cast again: thrown
             com.dbzenith.network.ModNetwork.sendToTrackingAndSelf(player,
@@ -70,6 +71,7 @@ public final class TechniqueHandler {
             com.dbzenith.network.UltimatePacket cine = new com.dbzenith.network.UltimatePacket(player.getId(), technique.id(),
                     technique.color() == 0xFFFFFF ? com.dbzenith.ki.Aura.color(data) : technique.color());
             for (ServerPlayer near : level.players()) if (near.distanceToSqr(player) < 64 * 64) com.dbzenith.network.ModNetwork.sendTo(near, cine);
+            com.dbzenith.combat.CombatLog.near(player, net.minecraft.network.chat.Component.translatable("log.dbzenith.ultimate", player.getDisplayName(), technique.name()));
         }
         com.dbzenith.network.ModNetwork.sendToTrackingAndSelf(player, com.dbzenith.network.AnimEventPacket.forTechnique(player, technique));
         level.playSound(null, player.getX(), player.getY(), player.getZ(),

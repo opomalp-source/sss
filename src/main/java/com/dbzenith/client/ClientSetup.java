@@ -44,6 +44,8 @@ public final class ClientSetup {
         event.registerAboveAll("pvp_badge", new PvpIndicators.Badge());
         event.registerAboveAll("enemy_panel", new com.dbzenith.client.ui.EnemyPanel());          // CX-19 phase 8
         event.registerAboveAll("callouts", new com.dbzenith.client.ui.CalloutOverlay());
+        event.registerAboveAll("combat_log", new com.dbzenith.client.ui.CombatLogOverlay());       // CX-19 phase 9
+        event.registerAboveAll("frame_data", new com.dbzenith.client.fx.HitboxOverlay.FrameBar());
         event.registerAboveAll("transform_cut_in", new com.dbzenith.client.ui.CutInOverlay());
         event.registerAboveAll("beam_struggle", new com.dbzenith.client.ui.StruggleOverlay());
         event.registerAboveAll("fusion_dance", new com.dbzenith.client.ClientFusion.Overlay());
@@ -103,6 +105,7 @@ public final class ClientSetup {
         event.registerEntityRenderer(ModEntities.SPACE_POD.get(), com.dbzenith.client.render.SpacePodRenderer::new);
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.SPROUTLING.get(), ctx -> new FighterRenderer<>(ctx, "sproutling", 0.7f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.KI_SOLDIER.get(), ctx -> new FighterRenderer<>(ctx, "ki_soldier", 1f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.TRAINING_DUMMY.get(), ctx -> new FighterRenderer<>(ctx, "training_dummy", 1f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.ANDROID_UNIT.get(), ctx -> new FighterRenderer<>(ctx, "android_unit", 1f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.TYRANT_LORD.get(), ctx -> new FighterRenderer<>(ctx, "tyrant_lord", 1.1f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.RAMPAGE_BRUTE.get(), ctx -> new FighterRenderer<>(ctx, "rampage_brute", 1.6f));

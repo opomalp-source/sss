@@ -88,11 +88,25 @@ public final class Evasion {
         victim.fallDistance = 0;
         openCounter(g, attacker, now);
         SpecialMeter.gain(victim, c.specialPerVanish.get());
+        com.dbzenith.duel.Duels.onDefense(victim, false);
         level.playSound(null, dest.x, dest.y, dest.z, ModSounds.VANISH.get(), SoundSource.PLAYERS, 0.8f, 1.6f);
         tell(victim, "message.dbzenith.vanish", ChatFormatting.AQUA);
         return true;
     }
 
+
+    /** Opens the vanish window for anyone (a training dummy reading a blow): a blow landing within {@code ticks} misses. */
+    public static void openVanish(LivingEntity e, int ticks) {
+        Fighter g = CombatEngine.of(e);
+        long now = e.level().getGameTime();
+        if (now >= g.vanishReadyAt) g.vanishUntil = now + ticks;
+    }
+
+    /** Whether {@code e} may throw a counter now (after a vanish or a perfect guard). */
+    public static boolean counterReady(LivingEntity e, long now) {
+        Fighter g = CombatEngine.peek(e);
+        return g != null && now <= g.counterUntil;
+    }
     /** The counter window: the next press of {@code g} throws the counter at {@code at}. */
     public static void openCounter(Fighter g, LivingEntity at, long now) {
         g.counterUntil = now + DBZConfig.SERVER.counterWindowTicks.get();
@@ -103,6 +117,7 @@ public final class Evasion {
     public static void onPerfectGuard(LivingEntity defender, Entity attacker, long now) {
         if (attacker instanceof LivingEntity a) openCounter(CombatEngine.of(defender), a, now);
         SpecialMeter.gain(defender, DBZConfig.SERVER.specialPerPerfectGuard.get());
+        com.dbzenith.duel.Duels.onDefense(defender, true);
         tell(defender, "message.dbzenith.perfect_guard", ChatFormatting.GOLD);
         tell(attacker, "message.dbzenith.parried", ChatFormatting.RED);
     }
@@ -182,6 +197,7 @@ public final class Evasion {
         anim(p, AnimEventPacket.BREAKER, 0);
         level.playSound(null, p.getX(), p.getY(), p.getZ(), ModSounds.EXPLOSION.get(), SoundSource.PLAYERS, 0.9f, 1.3f);
         tell(p, "message.dbzenith.burst", ChatFormatting.YELLOW);
+        com.dbzenith.combat.CombatLog.near(p, Component.translatable("log.dbzenith.burst", p.getDisplayName()));
         return true;
     }
 

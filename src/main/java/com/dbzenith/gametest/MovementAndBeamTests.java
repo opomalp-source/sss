@@ -59,11 +59,13 @@ public final class MovementAndBeamTests {
         ServerPlayer player = TestPlayers.create(helper);
         player.setGameMode(GameType.SURVIVAL);
         player.moveTo(zombie.getX() - 3, zombie.getY(), zombie.getZ(), -90f, 0f); // yaw -90 faces +X; close, so neighbouring tests cannot get in the way
+        player.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, zombie.position().add(0, 0.3, 0));   // through it into the ground: the beam stops there, clear of other tests
         helper.assertTrue(TechniqueHandler.use(player, Techniques.FINGER_BEAM, true) == TechniqueHandler.Result.FIRED, "beam should fire");
         helper.assertTrue(!helper.getLevel().getEntitiesOfClass(KiBeamEntity.class, player.getBoundingBox().inflate(3)).isEmpty(),
                 "a beam entity should exist at the caster");
         helper.succeedWhen(() -> {
             helper.assertTrue(zombie.getHealth() < start, "zombie in the beam's path should be hurt");
+            helper.getLevel().getEntitiesOfClass(KiBeamEntity.class, player.getBoundingBox().inflate(64), b -> b.getOwner() == player).forEach(KiBeamEntity::discard);
             TestPlayers.remove(helper, player);
         });
     }

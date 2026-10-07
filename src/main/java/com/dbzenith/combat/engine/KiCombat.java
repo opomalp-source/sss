@@ -176,6 +176,7 @@ public final class KiCombat {
         PlayerData d = ModCapabilities.get(p).orElse(null);
         if (d == null || !p.isAlive() || p.isSpectator() || !CombatEngine.mayAct(p)) return false;
         if (ModEffects.isStunned(p) || ModEffects.isKiSealed(p)) return false;
+        if (!com.dbzenith.duel.Duels.kiAllowed(p)) return false;                // a melee-only duel (phase 9)
         long now = p.level().getGameTime();
         String cd = isCharged ? "ki_charged" : "ki_rapid";
         if (d.isOnCooldown(cd, now)) return false;

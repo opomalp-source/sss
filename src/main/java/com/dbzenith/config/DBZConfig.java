@@ -265,6 +265,7 @@ public final class DBZConfig {
 
         // --- networking ---
         public final ForgeConfigSpec.IntValue syncIntervalTicks, inputViolationKick, lagCompensationTicks;
+        public final ForgeConfigSpec.IntValue duelArenaRadius, duelTimeLimit, duelRingOutSeconds, duelChallengeSeconds;
         public final ForgeConfigSpec.DoubleValue inputRateScale;
 
         Server(ForgeConfigSpec.Builder b) {
@@ -694,6 +695,13 @@ public final class DBZConfig {
             lagCompensationTicks = b.comment("Lag compensation: a blow is also tested against where the victim was up to this many ticks ago, as the attacker saw them (their ping). 0 = off")
                     .defineInRange("lagCompensationTicks", 6, 0, 20);
             b.pop();
+
+            b.comment("Duels (CX-19): /duel <player>").push("duel");
+            duelArenaRadius = b.comment("The arena: a circle this many blocks round the spot where the duel began").defineInRange("duelArenaRadius", 24, 6, 128);
+            duelTimeLimit = b.comment("Seconds a round may last; then the one with more health left wins it").defineInRange("duelTimeLimit", 180, 20, 3600);
+            duelRingOutSeconds = b.comment("Seconds a duelist may be out of the arena before losing the round").defineInRange("duelRingOutSeconds", 5, 1, 60);
+            duelChallengeSeconds = b.comment("Seconds a challenge stays open").defineInRange("duelChallengeSeconds", 30, 5, 600);
+            b.pop();
         }
     }
 
@@ -701,7 +709,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue showDebugOverlay;
         public final ForgeConfigSpec.BooleanValue customHotbar;
         public final ForgeConfigSpec.BooleanValue hideVanillaHearts;
-        public final ForgeConfigSpec.BooleanValue transformCutIn, ultimateCinematic, damagePopups, prediction, enemyPanel, combatCallouts, comboCounter;
+        public final ForgeConfigSpec.BooleanValue transformCutIn, ultimateCinematic, damagePopups, prediction, enemyPanel, combatCallouts, comboCounter, combatLog, hitboxOverlay;
         public final ForgeConfigSpec.DoubleValue lockOnRange, lockOnCameraSpeed, lockOnFreeLook;
         public final ForgeConfigSpec.DoubleValue screenShake;
         public final ForgeConfigSpec.BooleanValue hitstop;
@@ -741,6 +749,10 @@ public final class DBZConfig {
                     .define("combatCallouts", true);
             comboCounter = b.comment("Show the combo counter beside the crosshair, with the combo's damage and time left")
                     .define("comboCounter", true);
+            combatLog = b.comment("Show the combat log: knockouts, big combos, guard breaks, bursts, ultimates and duels near you")
+                    .define("combatLog", true);
+            hitboxOverlay = b.comment("Training aid: draw every move's hitbox (yellow: startup, red: active, blue: recovery) and a frame bar for your own moves. Also /dbzhitbox")
+                    .define("hitboxOverlay", false);
             lockOnRange = b.comment("Lock-on (key N): how far away a foe can be locked onto, in blocks")
                     .defineInRange("lockOnRange", 48.0, 8.0, 80.0);
             lockOnCameraSpeed = b.comment("Lock-on: how quickly the camera turns to keep the foe framed (0 = it doesn't; only the marker shows)")

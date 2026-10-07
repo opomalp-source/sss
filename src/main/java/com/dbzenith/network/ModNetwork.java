@@ -122,6 +122,12 @@ public final class ModNetwork {
                 .encoder(FoeStatusPacket::encode).decoder(FoeStatusPacket::decode).consumerMainThread(FoeStatusPacket::handle).add();
         CHANNEL.messageBuilder(CalloutPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(CalloutPacket::encode).decoder(CalloutPacket::decode).consumerMainThread(CalloutPacket::handle).add();
+        CHANNEL.messageBuilder(CombatLogPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(CombatLogPacket::encode).decoder(CombatLogPacket::decode).consumerMainThread(CombatLogPacket::handle).add();
+        CHANNEL.messageBuilder(DuelCamPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(DuelCamPacket::encode).decoder(DuelCamPacket::decode).consumerMainThread(DuelCamPacket::handle).add();
+        CHANNEL.messageBuilder(DuelResultPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(DuelResultPacket::encode).decoder(DuelResultPacket::decode).consumerMainThread(DuelResultPacket::handle).add();
         CHANNEL.messageBuilder(MoveAnimPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(MoveAnimPacket::encode).decoder(MoveAnimPacket::decode).consumerMainThread(MoveAnimPacket::handle).add();
         CHANNEL.messageBuilder(SelectTitlePacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)

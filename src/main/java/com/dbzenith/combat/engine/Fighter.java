@@ -34,6 +34,7 @@ public final class Fighter {
     long flightUntil;                    // knocked away: a wall within this time is a wall slam
     LivingEntity flightBy;
     double lastBlow;                     // the last blow's damage, for slam bonuses
+    double comboDamage;                  // what the running combo has done (the combat log)
     long wakeUntil;                      // just got up: untouchable until
 
     // ---------------------------------------------------------------- evasion (phase 3)
@@ -68,6 +69,11 @@ public final class Fighter {
 
     public int comboHits() {
         return comboHits;
+    }
+
+    /** Who is running the combo on this fighter (an entity id; -1 none). */
+    public int comboFrom() {
+        return comboFrom;
     }
 
     public String lastMove() {

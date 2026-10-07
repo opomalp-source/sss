@@ -365,6 +365,7 @@ public final class AnimController {
     /** A move the server started (phase 7): for yourself, only if your client didn't already show it. */
     public static void onMove(int entityId, String clip, String moveId) {
         Minecraft mc = Minecraft.getInstance();
+        com.dbzenith.client.fx.HitboxOverlay.started(entityId, moveId);       // the frame data (phase 9)
         if (mc.player != null && entityId == mc.player.getId() && !com.dbzenith.client.Prediction.confirm(moveId)) return;
         playClip(entityId, clip);
     }

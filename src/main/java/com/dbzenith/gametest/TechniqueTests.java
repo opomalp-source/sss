@@ -68,6 +68,7 @@ public final class TechniqueTests {
         helper.assertTrue(d.getTrainingPoints() == 1000 - Techniques.WAVE_BEAM.learnCost(), "TP spent");
         helper.assertTrue(d.deckView().contains("wave_beam"), "auto-equipped into a free slot");
         d.setSpecial(com.dbzenith.combat.engine.SpecialMeter.max());                       // a super: it takes a bar (CX-19)
+        p.setXRot(-90);                                                          // fire into the sky: a beam crosses other tests' ground
         helper.assertTrue(TechniqueHandler.use(p, Techniques.WAVE_BEAM) == TechniqueHandler.Result.FIRED, "now usable");
         TestPlayers.remove(helper, p);
         helper.succeed();

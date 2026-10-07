@@ -183,6 +183,9 @@ public final class ImpactFx {
         if (k == ImpactPacket.GUARD_BREAK) DamagePopups.word(m.victimId(), "guard_break", 0xFFAEE6FF);
         if (k == ImpactPacket.PARRY) DamagePopups.word(m.victimId(), "perfect_guard", 0xFFFFE6A0);
         if (!mine) hitstop(m, ImpactPacket.hitstopFor(k, f));                    // fights you watch freeze too
+        int hs = m.hitstop() >= 0 ? m.hitstop() : ImpactPacket.hitstopFor(k, f);   // the frame data waits out the freeze too
+        HitboxOverlay.freeze(m.attackerId(), hs);
+        HitboxOverlay.freeze(m.victimId(), hs);
     }
 
     private static void hitstop(ImpactPacket m, int frames) {

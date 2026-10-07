@@ -75,6 +75,8 @@ public final class ModItems {
 
     public static final RegistryObject<Item> SPROUTLING_EGG = ITEMS.register("sproutling_spawn_egg",
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.dbzenith.npc.ModNpcs.SPROUTLING, 0x4CA03A, 0x203818, new Item.Properties()));
+    public static final RegistryObject<Item> TRAINING_DUMMY_EGG = ITEMS.register("training_dummy_spawn_egg",            // CX-19 phase 9
+            () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.dbzenith.npc.ModNpcs.TRAINING_DUMMY, 0xC9A66B, 0xC8322A, new Item.Properties()));
     public static final RegistryObject<Item> KI_SOLDIER_EGG = ITEMS.register("ki_soldier_spawn_egg",
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.dbzenith.npc.ModNpcs.KI_SOLDIER, 0xE8E8E8, 0x3A3A4A, new Item.Properties()));
     public static final RegistryObject<Item> ANDROID_UNIT_EGG = ITEMS.register("android_unit_spawn_egg",

@@ -184,3 +184,27 @@ Bare-handed melee runs through the combat engine (`combat/engine`), for players 
 - **Special meter, guard and PvP badge:** under your bars, and at the top (phases 1-4).
 - **Controls & Move List:** Settings → Controls → Controls & Move List. It shows your combat keys and every move's input and frame data (read from the move files, so new moves appear by themselves), plus dodging, guarding, ki and lock-on.
 - **Settings → Combat:** damage numbers, callouts, enemy panel, combo counter, ultimate cinematics, instant response. **Settings → Camera:** the lock-on camera, free look and range.
+
+## Duels, training and tools (phase 9)
+
+**Duels:** `/duel <player> [1|3|5] [full|melee]` challenges; the other clicks Accept.
+- 3-2-1-FIGHT, in a ringed arena of 24 blocks round the spot.
+- A knockout, a ring out (5 s outside the ring), or the clock (180 s; more health left wins) takes the round.
+- Duelists fight only each other, PvP mode or not. Melee rules ban ki.
+- At the end: a results screen with each side's numbers and the rating change.
+- Other commands:
+  - `/duel accept|decline [from]`, `/duel forfeit`;
+  - `/duel stats [player]`, `/duel top` (Elo from 1000);
+  - `/duel watch <player>`, `/duel leave` (spectate with a camera that frames both).
+- Server config `[duel]`: duelArenaRadius, duelTimeLimit, duelRingOutSeconds, duelChallengeSeconds.
+
+**Training dummy:** spawn egg.
+- Right-click (Shift: back) to cycle: stand, guard, perfect guard, dodge, counter, attack, random.
+- It never dies, heals after 3 s alone and goes back to its spot.
+- Its name shows your string: hits, damage, damage per second.
+
+**Hitboxes & frame data** (Settings → Combat, or `/dbzhitbox`):
+- Every move's hitbox in the world (yellow startup, red active, blue recovery) and every hurtbox.
+- A frame bar for your own moves showing the cancel point.
+
+**Combat log** (Settings → Combat): knockouts, big combos (5+), guard breaks, bursts, ultimates and duels near you.

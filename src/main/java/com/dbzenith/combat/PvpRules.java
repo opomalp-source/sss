@@ -35,7 +35,7 @@ import org.joml.Vector3f;
  */
 @Mod.EventBusSubscriber(modid = DBZenith.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class PvpRules {
-    public enum Verdict { ALLOW, BLOCK_SAFE, BLOCK_ATTACKER_OFF, BLOCK_VICTIM_OFF, PULL_IN }
+    public enum Verdict { ALLOW, BLOCK_SAFE, BLOCK_ATTACKER_OFF, BLOCK_VICTIM_OFF, PULL_IN, BLOCK_DUEL }
 
     private static final Vector3f RED = new Vector3f(0.95f, 0.15f, 0.12f), WHITE = new Vector3f(0.9f, 0.95f, 1f);
 
@@ -78,6 +78,9 @@ public final class PvpRules {
 
     /** What happens when {@code attacker} tries to harm {@code victim} (both players). */
     public static Verdict judge(ServerPlayer attacker, ServerPlayer victim) {
+        if (com.dbzenith.duel.Duels.inDuel(attacker) || com.dbzenith.duel.Duels.inDuel(victim)) {   // arena rules (CX-19 phase 9)
+            return com.dbzenith.duel.Duels.opponents(attacker, victim) ? Verdict.ALLOW : Verdict.BLOCK_DUEL;
+        }
         if (!active() || attacker == victim) return Verdict.ALLOW;
         if (bypass(attacker) && bypass(victim)) return Verdict.ALLOW;
         if (com.dbzenith.tournament.Tournament.isFighter(attacker) && com.dbzenith.tournament.Tournament.isFighter(victim)) return Verdict.ALLOW;
@@ -114,6 +117,7 @@ public final class PvpRules {
                 return false;
             }
             case BLOCK_SAFE -> attacker.displayClientMessage(Component.translatable("message.dbzenith.pvp_safe_zone"), true);
+            case BLOCK_DUEL -> attacker.displayClientMessage(Component.translatable("message.dbzenith.duel_no_interfere"), true);
             case BLOCK_ATTACKER_OFF -> attacker.displayClientMessage(Component.translatable("message.dbzenith.pvp_you_off"), true);
             case BLOCK_VICTIM_OFF -> attacker.displayClientMessage(Component.translatable("message.dbzenith.pvp_they_off", victim.getDisplayName()), true);
         }

@@ -238,10 +238,12 @@ public final class CombatEngine {
         if (f.wasDowned && !downed) {                                           // up again: a moment's grace
             f.wakeUntil = now + c.wakeUpGraceTicks.get();
             f.downedHits = 0;
+            endCombo(f);
             f.comboHits = 0;
         }
         f.wasDowned = downed;
         if (f.comboHits > 0 && now - f.lastHitAt > c.comboResetTicks.get() && !f.juggled && !downed) {
+            endCombo(f);
             f.comboHits = 0;
             f.juggleHits = 0;
             f.comboFrom = -1;
@@ -342,6 +344,7 @@ public final class CombatEngine {
         boolean downed = CombatMoves.isDowned(v, now);
         if (downed && g.downedHits >= c.downedHitLimit.get()) return;          // no beating a floored foe forever
         if (g.comboFrom != a.getId() || now - g.lastHitAt > c.comboResetTicks.get()) {
+            endCombo(g);
             g.comboHits = 0;
             g.juggleHits = 0;
         }
@@ -396,6 +399,7 @@ public final class CombatEngine {
         g.comboFrom = a.getId();
         g.lastHitAt = now;
         g.lastBlow = raw;
+        g.comboDamage += outcomeDealt > 0 ? outcomeDealt : raw;                // for the combat log (phase 9)
         if (downed) g.downedHits++;
         if (g.move != null && g.moveTick >= g.move.armor) g.move = null;      // knocked out of their own move
         if (a instanceof Player p) ModCapabilities.get(p).ifPresent(d -> d.registerHit(now, c.comboWindowTicks.get(), c.comboMaxHits.get()));
@@ -510,6 +514,7 @@ public final class CombatEngine {
         Fighter g = of(v);
         if (now < g.wakeUntil || CombatMoves.isDowned(v, now)) return;
         if (g.comboFrom != a.getId() || now - g.lastHitAt > c.comboResetTicks.get()) {
+            endCombo(g);
             g.comboHits = 0;
             g.juggleHits = 0;
         }
@@ -517,6 +522,7 @@ public final class CombatEngine {
         g.comboHits++;
         g.comboFrom = a.getId();
         g.lastHitAt = now;
+        g.comboDamage += outcomeDealt;
         SpecialMeter.gain(a, heavy ? c.specialPerHeavy.get() : c.specialPerHit.get());
         SpecialMeter.gain(v, c.specialPerHitTaken.get());
         if (g.move != null && g.moveTick >= g.move.armor) g.move = null;       // knocked out of their own move
@@ -532,6 +538,15 @@ public final class CombatEngine {
         }
     }
 
+
+    /** A combo on {@code g} is over: a long one goes in the combat log (phase 9). */
+    static void endCombo(Fighter g) {
+        if (g.comboHits >= com.dbzenith.combat.CombatLog.BIG_COMBO && g.comboFrom >= 0
+                && g.entity.level().getEntity(g.comboFrom) instanceof LivingEntity a) {
+            com.dbzenith.combat.CombatLog.combo(a, g.entity, g.comboHits, g.comboDamage);
+        }
+        g.comboDamage = 0;
+    }
     static void stun(Fighter g, LivingEntity v, int ticks, long now) {
         if (ticks <= 0) return;
         g.stunUntil = Math.max(g.stunUntil, now + ticks);

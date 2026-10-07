@@ -71,6 +71,8 @@ public final class EvasionTests {
     public static void aPerfectGuardCounters(GameTestHelper helper) {
         ServerPlayer[] p = pair(helper);
         ServerPlayer a = p[0], b = p[1];
+        a.teleportTo(a.getX(), a.getY() + 30, a.getZ());                       // up high: clear of other tests' blasts and explosions
+        b.teleportTo(b.getX(), b.getY() + 30, b.getZ());
         PlayerData bd = ModCapabilities.getOrThrow(b);
         GuardRules.raise(bd, helper.getLevel().getGameTime());
         CombatEngine.press(a, JAB);

@@ -50,6 +50,10 @@ public final class ModNpcs {
             () -> EntityType.Builder.<BossFighter>of((t, l) -> new BossFighter(t, l, BRUTE_PROFILE, BossEvent.BossBarColor.RED, 0xFF5030),
                     MobCategory.MONSTER).sized(1.2f, 3.0f).clientTrackingRange(10).build("rampage_brute"));
 
+    /** The training dummy (CX-19 phase 9). */
+    public static final RegistryObject<EntityType<TrainingDummy>> TRAINING_DUMMY = TYPES.register("training_dummy",
+            () -> EntityType.Builder.<TrainingDummy>of(TrainingDummy::new, MobCategory.MISC).sized(0.6f, 1.9f).clientTrackingRange(8).build("training_dummy"));
+
     public static final RegistryObject<EntityType<KiFighter>> NAMEKIAN_WARRIOR = TYPES.register("namekian_warrior",
             () -> EntityType.Builder.<KiFighter>of((t, l) -> new NeutralFighter(t, l, NAMEKIAN_PROFILE), MobCategory.CREATURE)
                     .sized(0.6f, 2.0f).clientTrackingRange(8).build("namekian_warrior"));
@@ -116,6 +120,7 @@ public final class ModNpcs {
     public static void attributes(EntityAttributeCreationEvent event) {
         event.put(SPROUTLING.get(), KiFighter.attributes(16, 3, 0.32).build());
         event.put(KI_SOLDIER.get(), KiFighter.attributes(30, 4, 0.27).build());
+        event.put(TRAINING_DUMMY.get(), TrainingDummy.attributes().build());
         event.put(ANDROID_UNIT.get(), KiFighter.attributes(60, 6, 0.24).add(Attributes.ARMOR, 8).build());
         event.put(TYRANT_LORD.get(), KiFighter.attributes(400, 6, 0.3).add(Attributes.KNOCKBACK_RESISTANCE, 0.6).build());
         event.put(RAMPAGE_BRUTE.get(), KiFighter.attributes(500, 9, 0.27).add(Attributes.KNOCKBACK_RESISTANCE, 0.9).build());

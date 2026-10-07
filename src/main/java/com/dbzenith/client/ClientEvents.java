@@ -102,6 +102,13 @@ public final class ClientEvents {
             delayTicks = Math.max(delayTicks, 6);
         }
         if (name.contains("callout_")) com.dbzenith.client.ui.CalloutOverlay.show("message.dbzenith.counter", 0xFFAA00);
+        if (name.contains("hitboxes")) com.dbzenith.config.DBZConfig.CLIENT.hitboxOverlay.set(true);                     // phase 9
+        if (name.contains("nohitbox")) com.dbzenith.config.DBZConfig.CLIENT.hitboxOverlay.set(false);
+        if (name.startsWith("duelresult_") && !(mc.screen instanceof com.dbzenith.client.screen.DuelResultScreen)) {
+            mc.setScreen(new com.dbzenith.client.screen.DuelResultScreen(new com.dbzenith.network.DuelResultPacket(1, "knockout", "Dev", "Rival", 2, 1,
+                    new double[]{12400, 31, 9, 3, 2}, new double[]{9800, 24, 6, 1, 4}, 1016, 16, 3, "full", false)));
+            delayTicks = Math.max(delayTicks, 14);
+        }
         if (name.startsWith("pathchoice_") && !(mc.screen instanceof com.dbzenith.client.screen.PathChoiceScreen)) {
             mc.setScreen(new com.dbzenith.client.screen.PathChoiceScreen(null));
             delayTicks = Math.max(delayTicks, 6);

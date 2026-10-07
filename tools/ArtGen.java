@@ -15,6 +15,11 @@ public class ArtGen {
     static final String RES = "src/main/resources/assets/dbzenith/textures/";
 
     public static void main(String[] args) throws IOException {
+        if (args.length > 1 && args[0].equals("only")) {                       // one piece, without touching the rest
+            if (args[1].equals("training_dummy")) TrainingDummy.make();
+            System.out.println("ArtGen done: " + args[1]);
+            return;
+        }
         Items.all();
         Blocks.all();
         Armor.all();
@@ -4354,6 +4359,55 @@ public class ArtGen {
         return sk[3];
     }
 
+
+    /**
+     * The training dummy (CX-19 phase 9): a stuffed burlap sparring figure. Stitched X eyes and a stitched mouth, a red
+     * and white target on the chest, rope at the neck, waist and wrists, and wooden posts for legs.
+     */
+    static final class TrainingDummy {
+        static void make() throws IOException {
+            int[] sack = ramp(0xFFC9A66B, 5), rope = ramp(0xFF8A6A3A, 4), wood = ramp(0xFF6E4A2A, 4), red = ramp(0xFFC8322A, 4);
+            int stitch = 0xFF3A2614;
+            FaceFn burlap = (f, x, y, w, h) -> {
+                int base = switch (f) { case FRONT, TOP -> 3; case BACK, BOTTOM -> 1; default -> 2; };
+                if (((x + y) & 1) == 0 && noise(x, y, 917 + f.ordinal()) > 0.55) base = Math.max(0, base - 1);   // the weave
+                if (noise(x, y, 931 + f.ordinal()) > 0.94) base = Math.min(sack.length - 1, base + 1);
+                return sack[base];
+            };
+            Skin s = new Skin();
+            s.head = (f, x, y, w, h) -> {
+                if (f == Face.FRONT) {
+                    if ((y == 2 || y == 4) && (x == 1 || x == 3 || x == 4 || x == 6)) return stitch;    // two stitched X eyes
+                    if (y == 3 && (x == 2 || x == 5)) return stitch;
+                    if (y == 6 && x >= 2 && x <= 5) return (x & 1) == 0 ? stitch : sack[1];            // a stitched mouth
+                }
+                if (f == Face.TOP && (x == 3 || x == 4) && (y == 3 || y == 4)) return rope[2];           // the tie on top
+                if (f != Face.TOP && f != Face.BOTTOM && x == w - 1 && (y & 1) == 0) return stitch;     // a side seam
+                return burlap.at(f, x, y, w, h);
+            };
+            s.body = (f, x, y, w, h) -> {
+                if (y == 0) return rope[f == Face.FRONT ? 2 : 1];                                       // rope at the neck
+                if (y == 9) return rope[f == Face.FRONT ? 3 : 2];                                       // and the waist
+                if (f == Face.FRONT && y <= 8) {                                                        // the target
+                    double d = Math.hypot(x - 3.5, y - 4.0);
+                    if (d < 1.0) return red[3];
+                    if (d < 2.0) return 0xFFEDE6D8;
+                    if (d < 3.0) return red[2];
+                }
+                if ((f == Face.LEFT || f == Face.RIGHT) && x == w / 2 && (y & 1) == 1) return stitch;  // a stitched side seam
+                return burlap.at(f, x, y, w, h);
+            };
+            s.arm = (f, x, y, w, h) -> y == 9 || y == 10 ? rope[f == Face.FRONT ? 3 : 2] : y == 11 || f == Face.BOTTOM ? sack[1] : burlap.at(f, x, y, w, h);
+            s.leg = (f, x, y, w, h) -> {
+                if (y <= 1) return burlap.at(f, x, y, w, h);                                             // the sack ends at the hips
+                int i = f == Face.FRONT ? 2 : f == Face.BACK ? 0 : 1;
+                if (noise(x, y * 3, 951 + f.ordinal()) > 0.82) i = Math.max(0, i - 1);                  // the grain
+                if (y == 11) i = 0;
+                return wood[i];
+            };
+            s.save(Skins.fighter("training_dummy"));
+        }
+    }
     static final class Skins {
         static void all() throws IOException {
             master();

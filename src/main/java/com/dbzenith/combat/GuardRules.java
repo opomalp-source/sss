@@ -64,6 +64,8 @@ public final class GuardRules {
         victim.addEffect(new MobEffectInstance(ModEffects.STUN.get(), c.guardBreakStunTicks.get(), 0));
         if (victim instanceof net.minecraft.server.level.ServerPlayer sp) com.dbzenith.network.CalloutPacket.send(sp, "message.dbzenith.guard_broken", 0xFF6A5A);
         if (attacker instanceof net.minecraft.server.level.ServerPlayer ap) com.dbzenith.network.CalloutPacket.send(ap, "message.dbzenith.guard_crushed", 0xAEE6FF);
+        com.dbzenith.combat.CombatLog.near(victim, attacker == null ? net.minecraft.network.chat.Component.translatable("log.dbzenith.guard_break_alone", victim.getDisplayName())
+                : net.minecraft.network.chat.Component.translatable("log.dbzenith.guard_break", attacker.getDisplayName(), victim.getDisplayName()));
         return Outcome.BREAK;
     }
 

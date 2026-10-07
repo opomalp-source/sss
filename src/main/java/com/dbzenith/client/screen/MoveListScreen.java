@@ -90,6 +90,10 @@ public class MoveListScreen extends Screen {
     }
 
     /** A move's name: move.dbzenith.<id> if there is one, else its id made readable. */
+    public static Component nameOf(Move m) {
+        return name(m);
+    }
+
     static Component name(Move m) {
         String id = m.id.contains(":") ? m.id.substring(m.id.indexOf(':') + 1) : m.id;
         String pretty = id.replace('_', ' ');

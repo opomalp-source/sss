@@ -80,6 +80,8 @@ public class SettingsScreen extends Screen {
                 o.add(new Option("combo_counter", c.comboCounter, 0, 0, null));
                 o.add(new Option("ultimate_cinematic", c.ultimateCinematic, 0, 0, null));
                 o.add(new Option("prediction", c.prediction, 0, 0, null));
+                o.add(new Option("combat_log", c.combatLog, 0, 0, null));
+                o.add(new Option("hitbox_overlay", c.hitboxOverlay, 0, 0, null));
             }
             case STYLE -> {
                 o.add(new Option("ui_style", c.uiStyle, 0, 1, new String[]{"zenith", "classic"}));
@@ -146,7 +148,7 @@ public class SettingsScreen extends Screen {
                 }).bounds(wx, y, 150, 16).tooltip(tip).build();
                 addRenderableWidget(b);
             }
-            y += ROW;
+            y += row(tab);
         }
         if (tab == Tab.CONTROLS) {
             addRenderableWidget(ThemedButton.of(Component.translatable("settings.dbzenith.keybinds"),
@@ -161,6 +163,11 @@ public class SettingsScreen extends Screen {
             rebuild();
         }).bounds(left + 8, top + H - 24, 110, 18).build());
         addRenderableWidget(ThemedButton.of(Component.translatable("gui.done"), b -> onClose()).bounds(left + W - 78, top + H - 24, 70, 18).build());
+    }
+
+    /** Row spacing: tighter for a tab with many options, so they fit above the buttons. */
+    private static int row(Tab tab) {
+        return options(tab).size() > 6 ? 19 : ROW;
     }
 
     private static <T> void reset(ForgeConfigSpec.ConfigValue<T> v) {
@@ -191,7 +198,7 @@ public class SettingsScreen extends Screen {
         int y = top + 48;
         for (Option opt : options(tab)) {
             g.drawString(font, Component.translatable("settings.dbzenith." + opt.key), left + 12, y, DbzTheme.TEXT, true);
-            y += ROW;
+            y += row(tab);
         }
         if (tab == Tab.CONTROLS) {
             DbzTheme.text(g, font, Component.translatable("settings.dbzenith.move_list_hint"), left + 12, top + 100, DbzTheme.DIM, 0.75f);

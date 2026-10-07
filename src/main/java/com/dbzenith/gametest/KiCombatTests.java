@@ -121,6 +121,7 @@ public final class KiCombatTests {
         d.setSpecial(0);
         helper.assertTrue(TechniqueHandler.use(p, Techniques.byId("finger_beam")) == TechniqueHandler.Result.NO_METER, "no bar, no Death Beam");
         d.setSpecial(150);
+        p.setXRot(-90);                                                          // fire into the sky: a beam crosses other tests' ground
         TechniqueHandler.Result r = TechniqueHandler.use(p, Techniques.byId("finger_beam"));
         helper.assertTrue(r == TechniqueHandler.Result.FIRED, "with a bar it fires: " + r);
         helper.assertTrue(Math.abs(d.getSpecial() - 50) < 1e-6, "and takes the bar: " + d.getSpecial());
