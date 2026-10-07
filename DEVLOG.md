@@ -1278,3 +1278,36 @@ From the user's original design list: metals ranked from Copper to Kachi Katchin
   - The weights' order.
   - 149 required tests pass.
 - **Not checked:** Earth's ores in a normal world. The dev world is superflat, which places no ores; they are added by the same Forge biome-modifier format the existing NPC spawns already use.
+
+## 2026-10-07 — Session 3 (cont.): CX-16e The Saga HUD (v0.46.0)
+
+User spec: a circular portrait in a glowing white and light-blue ring with the hair breaking out of it; a "Release: 100%" tab; a smoky main bar with "BP:" left and "Ki:" right; a red health bar and an orange-to-yellow stamina bar below, offset right, with values inside; slanted ends, white outlines and a soft glow everywhere; fills that drain proportionally and keep their gradient; big numbers in words; textures; tweakable constants; stat logic untouched.
+
+### Added
+- **`client.SagaHud`, the new default HUD style (0).** Clean moved to 4; Classic, Minimal and Ornate keep 1-3.
+  - All positions, sizes, text scales, colours and texture names are constants at the top of the class. It sits in the top-left corner and follows the GUI scale and the HUD size setting.
+  - **Portrait:**
+    - The live player model (form, hair, race) is drawn into an offscreen buffer (`TextureTarget`), then copied back through a mask: round below the ring's middle, open above it, so the hair rises over the ring.
+    - The ring pulses in the aura colour while charging or transformed.
+  - **Main bar:** "BP: <value>" just right of the ring (aura-tinted when transformed) and "Ki: <value>" right-aligned, in Minecraft's font with its shadow. "Release: N%" sits in the tab above, red over 100%.
+  - **Health and stamina:**
+    - Each is a frame texture (dark backing, white outline, glow), then its fill drawn as a cut-out of the fill texture up to the current value, along a line parallel to the slanted end. The end stays slanted and the gradient is never stretched.
+    - Damage just taken leaves a pale trail. Health pulses under 25%.
+    - The value sits in the middle of the bar.
+  - **Numbers:** "9.24 Billion", "44 Million", "2.5 Million", "31.54 Million", "344.66 Thousand"; values under 10,000 are shown as they are.
+  - The form name and the guard line sit under the bars; status chips follow.
+- **Textures (`textures/gui/hud/`, drawn at 4x, so 4 texture pixels make 1 GUI pixel; originals from ArtGen `SagaHud`):**
+
+  | File | Size (texture px) | On screen (GUI px) |
+  |---|---|---|
+  | `portrait_ring.png` | 192 x 192 | 48 x 48 |
+  | `release_tab.png` | 232 x 40 | 58 x 10 |
+  | `main_bar.png` | 616 x 72 | 154 x 18 (bar 150 x 14 + 2 px glow) |
+  | `health_frame.png` | 528 x 56 | 132 x 14 (bar 128 x 10 + 2 px glow) |
+  | `health_fill.png` | 504 x 32 | 126 x 8 |
+  | `stamina_frame.png` | 464 x 52 | 116 x 13 (bar 112 x 9 + 2 px glow) |
+  | `stamina_fill.png` | 440 x 28 | 110 x 7 |
+
+### Verified
+- Screenshots at rest, just hit (the trail and the slanted cut) and in Super Saiyan (the hair over the ring, the aura-tinted BP, the form name).
+- Fixed after review: the ring covered the "B" of "BP"; the text now starts just right of the ring.

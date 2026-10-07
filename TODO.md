@@ -195,3 +195,4 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - [x] 16b (v0.42.0) Race customization: per-race colours and body parts (Frost Demon horns, shell and skin colours; Namekian antennae and markings; Majin antenna and skin; Saiyan tail colour; Kai and demon ears and horns; Bio-Android spots and crest; and more), editable later too
   - [x] 16c (v0.43.0) HUD v3: cleaner, better-designed health, ki and stamina bars (not flat or "robloxy")
   - [x] 16d (v0.44.0) The other screens in the new style, with tabs: stats, techniques, racial and universal skills, forms, quests
+  - [x] 16e (v0.46.0) The Saga HUD to the user's spec: round portrait with the hair over the ring, Release tab, smoky BP and Ki bar, slanted health and stamina bars with values inside

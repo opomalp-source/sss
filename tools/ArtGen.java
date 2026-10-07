@@ -35,6 +35,7 @@ public class ArtGen {
         NpcArt.all();
         HudHd.all();
         Metals.all();
+        SagaHud.all();
         System.out.println("ArtGen done");
     }
 
@@ -3594,6 +3595,120 @@ public class ArtGen {
         if (n > 0.93) base = Math.max(0, base - 1);                                   // sparse, soft folds
         else if (n < 0.04) base = Math.min(r.length - 1, base + 1);
         return r[base];
+    }
+
+    // ================================================================== the Saga HUD (CX-16e)
+
+    /**
+     * Textures for client.SagaHud, at four times their size on screen (so 4 texture pixels make one GUI pixel):
+     * the portrait ring (a dark disc inside a glowing white and light-blue ring with a thin inner ring), the Release tab
+     * (a dark trapezoid), the main bar (smoky dark grey, a slanted right end, a white outline and a soft glow), and for
+     * health and stamina a frame (dark backing, outline, glow) plus a fill (a gradient cut to the bar's shape, drawn
+     * cropped so it keeps its gradient as it drains).
+     */
+    static final class SagaHud {
+        static final int OUTLINE = 0xFFF8FCFF, GLOW = 0xFFB8E4FF;
+
+        static void all() throws IOException {
+            ring();
+            tab();
+            bar("main_bar", 150, 14, 6, true);
+            bar("health_frame", 128, 10, 5, false);
+            fill("health_fill", 128, 10, 5, 0xFF6A0A12, 0xFFFF4038, 0xFFFFB0A0);
+            bar("stamina_frame", 112, 9, 5, false);
+            fill("stamina_fill", 112, 9, 5, 0xFFD25A0C, 0xFFFFD84A, 0xFFFFF4C0);
+        }
+
+        /**
+         * Signed distance (texture pixels, negative inside) to a bar: a vertical left edge, top and bottom edges, and a
+         * right edge slanted so the top reaches {@code skew} further than the bottom.
+         */
+        static double bar(double x, double y, double x0, double y0, double w, double h, double skew) {
+            double left = x0 - x, top = y0 - y, bottom = y - (y0 + h);
+            double edgeX = x0 + w - (y - y0) / h * skew;                                   // the slanted right edge at this row
+            double right = (x - edgeX) * h / Math.hypot(h, skew);
+            return Math.max(Math.max(left, right), Math.max(top, bottom));
+        }
+
+        static int alpha(int argb, double a) {
+            return (int) Math.round(Math.max(0, Math.min(1, a)) * ((argb >>> 24) & 255)) << 24 | (argb & 0xFFFFFF);
+        }
+
+        /** A bar's frame: its body (smoke for the main bar, dark backing for the others), a white outline and a glow round it. */
+        static void bar(String name, int w, int h, int skew, boolean smoke) throws IOException {
+            int s = 4, m = 2 * s, W = (w + 4) * s, H = (h + 4) * s;
+            Canvas c = new Canvas(W, H);
+            for (int y = 0; y < H; y++) for (int x = 0; x < W; x++) {
+                double d = bar(x + 0.5, y + 0.5, m, m, w * s, h * s, skew * s);
+                if (d > m) continue;
+                if (d > 0) {                                                                  // the soft outer glow
+                    double a = Math.pow(1 - d / m, 2) * 0.6;
+                    c.set(x, y, alpha(GLOW, a));
+                } else if (d > -3) {
+                    c.set(x, y, OUTLINE);                                                     // the white outline
+                } else if (smoke) {                                                           // cloudy, smoky grey
+                    double n = 0.55 * Hd.smooth(x * 0.6, y * 1.6, 22, 51) + 0.3 * Hd.smooth(x * 1.2, y * 2.4, 9, 52)
+                            + 0.15 * Hd.smooth(x * 2.0, y * 3.0, 4, 53);
+                    double band = Math.exp(-Math.pow((y - m - h * s * 0.32) / (h * s * 0.22), 2)) * 0.18;   // a lighter streak
+                    double l = Math.max(0, Math.min(1, n * 0.85 + band));
+                    c.set(x, y, mix(0xF0222428, 0xF07A7E88, l));
+                } else {
+                    double v = (y - m) / (double) (h * s);
+                    c.set(x, y, mix(0xE8140608, 0xE8301418, 1 - Math.abs(v - 0.5) * 2));       // the dark backing
+                }
+            }
+            c.save("gui/hud/" + name + ".png");
+        }
+
+        /** A fill: dark at the top and bottom edges, bright through the middle, a thin highlight near the top. */
+        static void fill(String name, int w, int h, int skew, int edge, int core, int shine) throws IOException {
+            int s = 4, iw = (w - 2) * s, ih = (h - 2) * s;
+            double sk = skew * s * (h - 2) / (double) h;                                      // the slant, over the inner height
+            Canvas c = new Canvas(iw, ih);
+            for (int y = 0; y < ih; y++) for (int x = 0; x < iw; x++) {
+                if (bar(x + 0.5, y + 0.5, 0, 0, iw, ih, sk) > 0) continue;
+                double v = (y + 0.5) / ih, mid = 1 - Math.abs(v - 0.5) * 2;                    // 0 at the edges, 1 in the middle
+                int col = mix(edge, core, Math.pow(mid, 0.7));
+                if (Math.abs(v - 0.22) * ih < 1.2) col = mix(col, shine, 0.55);                 // the highlight
+                c.set(x, y, col);
+            }
+            c.save("gui/hud/" + name + ".png");
+        }
+
+        /** The portrait ring: a dark disc, a thin inner ring, a gap, the bright ring (lit from above) and its glow. */
+        static void ring() throws IOException {
+            int S = 192;
+            double cx = 96, cy = 96;
+            Canvas c = new Canvas(S, S);
+            for (int y = 0; y < S; y++) for (int x = 0; x < S; x++) {
+                double dx = x + 0.5 - cx, dy = y + 0.5 - cy, r = Math.hypot(dx, dy), up = -dy / Math.max(1, r);
+                int col;
+                if (r < 69) col = mix(0xF0101826, 0xF02A3C5C, Math.max(0, 1 - r / 69) * 0.8 + 0.1 * up);   // the disc behind the face
+                else if (r < 72) col = mix(0xFFA8DCFF, 0xFFE8F6FF, 0.5 + 0.5 * up);                       // the thin inner ring
+                else if (r < 75) col = 0xC00A1420;                                                         // a dark gap
+                else if (r < 85) {                                                                        // the ring itself
+                    double across = 1 - Math.abs(r - 80) / 5;
+                    col = mix(mix(0xFF7EC4F0, 0xFFFFFFFF, 0.35 + 0.45 * up), 0xFFFFFFFF, across * 0.5);
+                } else if (r < 96) col = alpha(GLOW, Math.pow(1 - (r - 85) / 11, 2) * 0.7);                // the glow
+                else continue;
+                c.set(x, y, col);
+            }
+            c.save("gui/hud/portrait_ring.png");
+        }
+
+        /** The Release tab: a dark trapezoid narrowing upward, outlined on its top and sides, open at the bottom. */
+        static void tab() throws IOException {
+            int W = 232, H = 40, inset = 24;
+            Canvas c = new Canvas(W, H);
+            for (int y = 0; y < H; y++) for (int x = 0; x < W; x++) {
+                double t = (H - y) / (double) H;                                                // 0 at the bottom, 1 at the top
+                double l = t * inset, r = W - t * inset;
+                if (x < l || x >= r) continue;
+                boolean edge = y < 3 || x < l + 3 || x >= r - 3;
+                c.set(x, y, edge ? 0xE8E8F4FF : 0xEC0E1218);
+            }
+            c.save("gui/hud/release_tab.png");
+        }
     }
 
     // ================================================================== metals and alloys (12e)

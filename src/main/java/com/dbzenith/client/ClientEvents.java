@@ -113,6 +113,7 @@ public final class ClientEvents {
         if (name.contains("hudclassic")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(1);
         if (name.contains("hudminimal")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(2);
         if (name.contains("hudornate")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(3);
+        if (name.contains("hudclean")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(4);
         if (name.contains("uiclassic")) com.dbzenith.config.DBZConfig.CLIENT.uiStyle.set(1);
         if (name.contains("uizenith")) com.dbzenith.config.DBZConfig.CLIENT.uiStyle.set(0);
         if (name.contains("hdoff") || name.contains("artclassic")) com.dbzenith.config.DBZConfig.CLIENT.artStyle.set(2);

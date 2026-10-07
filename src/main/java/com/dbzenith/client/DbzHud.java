@@ -67,7 +67,12 @@ public final class DbzHud implements IGuiOverlay {
             case 1 -> classic(g, font, mc, d, s, form, held, aura, accent, t, dt, hudScale);
             case 2 -> minimal(g, font, d, s, form, held, aura, t, dt);
             case 3 -> zenith(g, font, mc, d, s, form, held, aura, accent, t, dt, hudScale);
-            default -> clean(g, font, mc, d, s, form, held, aura, t, dt, hudScale);
+            case 4 -> clean(g, font, mc, d, s, form, held, aura, t, dt, hudScale);
+            default -> {                                                                 // the Saga HUD (CX-16e)
+                int[] at = SagaHud.render(g, font, mc, d, s, form, held, aura, t, dt, hudScale);
+                chipLeft = at[0];
+                yield at[1];
+            }
         };
         int chipX = chipLeft;
 
@@ -305,7 +310,7 @@ public final class DbzHud implements IGuiOverlay {
     private static final String[] TECH = {"machine", "metal", "overclock", "upgrade", "omega", "core", "android", "protocol", "neural", "conversion", "tuffle"};
     private static final String[] REGAL = {"form", "perfect", "king", "sovereign", "warlord", "dragon", "elder", "ultimate"};
 
-    /** 0 Clean (CX-16c, the default), 1 Classic, 2 Minimal, 3 Ornate (the old Zenith frame). */
+    /** 0 Saga (CX-16e, the default), 1 Classic, 2 Minimal, 3 Ornate (the old Zenith frame), 4 Clean. */
     public static int hudStyle() {
         try {
             return com.dbzenith.config.DBZConfig.CLIENT.hudStyle.get();
@@ -579,7 +584,7 @@ public final class DbzHud implements IGuiOverlay {
 
     /** The backing of the technique and skill chips by the hotbar. */
     private static void chipBack(GuiGraphics g, int x, int y, int w, int h) {
-        if (hudStyle() == 0) {                                                            // glass, like the rest of the clean HUD
+        if (hudStyle() == 0 || hudStyle() == 4) {                                                            // glass, like the rest of the clean HUD
             Ui.round(g, x - 1, y - 1, w + 2, h + 2, 2, 0xC80B101A);
             Ui.outline(g, x - 1, y - 1, w + 2, h + 2, 2, 0x30FFFFFF);
             return;
@@ -594,7 +599,7 @@ public final class DbzHud implements IGuiOverlay {
 
     private static int chip(GuiGraphics g, Font font, int x, int y, Component text, int color) {
         int w = (int) (font.width(text) * 0.75f) + 6;
-        if (hudStyle() == 0) {                                                            // a glass pill
+        if (hudStyle() == 0 || hudStyle() == 4) {                                                            // a glass pill
             Ui.round(g, x, y - 1, w, 9, 2, 0xB80B101A);
             Ui.outline(g, x, y - 1, w, 9, 2, DbzTheme.withAlpha(color, 110));
             DbzTheme.text(g, font, text, x + 3, y + 1, color, 0.75f);
