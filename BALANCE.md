@@ -212,3 +212,9 @@ Constants are in `CombatMoves`.
 - **Plating:** 0.3% damage reduction per tier per plated gi piece (tier 1 tin: 0.3%; tier 10 Kachi Katchin: 3%, so 9% for three pieces). It adds to the set's own reduction, e.g. Battle Armor 15% + 9% = 24%.
 - **Weights:** Training 1.5x / -10% speed, Heavy 2.5x / -25%, Tungsten 3.5x / -33%, Katchin 5x / -42%.
 - **Rarity, veins per chunk:** tin 10, zinc 8, silver 5, titanium 3 (Earth, deep) and 6 (Namek, as tungsten), mithril 5, adamantium 5, Katchin 2 (size 3).
+
+## The Spirit Bomb (17a, v0.47.0)
+- **Cost:** 250 ki to raise, then 5% of the thrower's max ki a second while it gathers (a full bar over the twenty seconds). Cooldown 60 s.
+- **Givers:** each player within 48 blocks who holds Charge lends 2% of their max ki every quarter second (8% a second) and is spared by the blast. Living things within 24 blocks that are not monsters or players add 0.2% of the thrower's max ki each, every half second (at most 20 of them).
+- **Growth** (share = gathered ki / the thrower's max ki): size 2.4 x (1 + 1.3 x sqrt(share)), at most 12; damage 8 x (1 + 3 x share), at most 12x; blast 5 x (1 + 0.6 x share), at most 2.2x.
+- **Impact:** everything within 1.5 x size + 3 blocks takes the damage (at least 30% of it at the edge), except the thrower and the givers; then the blast.

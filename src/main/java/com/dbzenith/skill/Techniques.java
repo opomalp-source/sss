@@ -47,6 +47,13 @@ public final class Techniques {
             .speed(1.5f).size(0.5f).cooldown(200).color(0x6A3FA0).life(60).learn(500, 130));
     public static final Technique GATHERING_SPHERE = add(Technique.builder("gathering_sphere").cost(300).damage(12.0).speed(0.9f).size(3.5f)
             .cooldown(400).explosion(4.5f).color(0x9FE8FF).life(220).drop(30).learn(1500, 300));
+    /**
+     * The Spirit Bomb (CX-17a): raised overhead, it gathers for up to twenty seconds, from your ki, from every player
+     * near who holds Charge to lend theirs, and from the living things around; cast it again to throw it. It hits
+     * everything where it lands, sparing you and all who lent it their energy.
+     */
+    public static final Technique SPIRIT_BOMB = add(Technique.builder("spirit_bomb").cost(250).damage(8.0).speed(0.55f).size(2.4f)
+            .cooldown(1200).explosion(5f).color(0xBFEFFF).life(1400).drop(400).effect(Effect.SPIRIT_BOMB, 0).learn(6000, 400));
 
     // ---------------------------------------------------------------- racial
     public static final Technique SOLAR_FLARE = add(Technique.builder("solar_flare").style(Style.SELF).effect(Effect.BLIND_AREA, 12)

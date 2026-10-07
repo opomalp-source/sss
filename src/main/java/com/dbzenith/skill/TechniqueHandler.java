@@ -37,6 +37,11 @@ public final class TechniqueHandler {
         if (com.dbzenith.registry.ModEffects.isKiSealed(player)) return Result.SEALED;
         if (BeamStruggle.isStruggling(player)) return Result.INVALID;     // both hands are busy
         if (!bypassDeck && !(data.knows(technique.id()) && data.deckView().contains(technique.id()))) return Result.NOT_EQUIPPED;
+        if (technique.effect() == Technique.Effect.SPIRIT_BOMB && KiBlastEntity.releaseSpiritBomb(player)) {   // cast again: thrown
+            com.dbzenith.network.ModNetwork.sendToTrackingAndSelf(player,
+                    new com.dbzenith.network.AnimEventPacket(player.getId(), com.dbzenith.network.AnimEventPacket.THROW, 2));
+            return Result.FIRED;
+        }
         data.recomputeIfStale();
 
         ServerLevel level = player.serverLevel();

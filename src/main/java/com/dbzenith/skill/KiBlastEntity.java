@@ -24,6 +24,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 import org.joml.Vector3f;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -34,6 +35,8 @@ public class KiBlastEntity extends Projectile {
     private static final EntityDataAccessor<Float> SIZE = SynchedEntityData.defineId(KiBlastEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Integer> COLOR = SynchedEntityData.defineId(KiBlastEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> STYLE = SynchedEntityData.defineId(KiBlastEntity.class, EntityDataSerializers.INT);
+    /** Shown as the Spirit Bomb (a solid, bright sphere). */
+    private static final EntityDataAccessor<Boolean> SPIRIT = SynchedEntityData.defineId(KiBlastEntity.class, EntityDataSerializers.BOOLEAN);
 
     private static final double HOMING_STRENGTH = 0.12;
 
@@ -54,6 +57,12 @@ public class KiBlastEntity extends Projectile {
     private int flags;
     private int bouncesLeft;
     private boolean split;
+    // the Spirit Bomb (CX-17a): energy gathered while it hovers, and who lent it
+    private boolean spiritBomb;
+    private double energy, baseDamage;
+    private float baseSize, baseExplosion;
+    private boolean called;
+    private final Set<java.util.UUID> contributors = new HashSet<>();
 
     public KiBlastEntity(EntityType<? extends KiBlastEntity> type, Level level) {
         super(type, level);
@@ -77,6 +86,11 @@ public class KiBlastEntity extends Projectile {
         blast.entityData.set(SIZE, technique.size());
         blast.entityData.set(COLOR, technique.color());
         blast.entityData.set(STYLE, technique.style().ordinal());
+        blast.spiritBomb = technique.effect() == Technique.Effect.SPIRIT_BOMB;
+        blast.entityData.set(SPIRIT, blast.spiritBomb);
+        blast.baseDamage = damage;
+        blast.baseSize = technique.size();
+        blast.baseExplosion = technique.explosionPower();
         blast.refreshDimensions();
         return blast;
     }
@@ -107,6 +121,7 @@ public class KiBlastEntity extends Projectile {
         entityData.define(SIZE, 0.5f);
         entityData.define(COLOR, 0xFFFFFF);
         entityData.define(STYLE, 0);
+        entityData.define(SPIRIT, false);
     }
 
     @Override
@@ -183,6 +198,7 @@ public class KiBlastEntity extends Projectile {
         Vec3 above = caster.getEyePosition().add(0, 2.0 + getSize() / 2.0, 0);
         setPos(above.x, above.y - getSize() / 2.0, above.z);
         setDeltaMovement(Vec3.ZERO);
+        if (spiritBomb) gather(caster);
         if (--holdTicks > 0) return;
         Vec3 eye = caster.getEyePosition();
         Vec3 end = eye.add(caster.getLookAngle().scale(64));
@@ -198,9 +214,100 @@ public class KiBlastEntity extends Projectile {
         return holdTicks > 0;
     }
 
+    public boolean isSpiritBomb() {
+        return entityData.get(SPIRIT);
+    }
+
+    /** Energy the Spirit Bomb has gathered (ki points). */
+    public double gathered() {
+        return energy;
+    }
+
+    /** The Spirit Bomb spares its thrower and everyone who lent it energy. */
+    public boolean spares(Entity e) {
+        return spiritBomb && e != null && (e == getOwner() || contributors.contains(e.getUUID()));
+    }
+
+    /** Throws a gathering Spirit Bomb at once (its thrower cast it again). */
+    public void launchNow() {
+        if (holdTicks > 1) holdTicks = 1;
+    }
+
+    /** A player casts the Spirit Bomb again while theirs is still gathering: it is thrown. Returns whether there was one. */
+    public static boolean releaseSpiritBomb(net.minecraft.server.level.ServerPlayer player) {
+        for (KiBlastEntity b : player.level().getEntitiesOfClass(KiBlastEntity.class, player.getBoundingBox().inflate(40),
+                b -> b.spiritBomb && b.isHovering() && b.getOwner() == player)) {
+            b.launchNow();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * One tick of gathering: the thrower's ki, every player within 48 blocks who holds Charge (they lend 8% of their ki a
+     * second and are spared by the blast), and a trickle from the living things around. Streams of light run into the
+     * ball from each giver; it grows, and so do its damage and its blast.
+     */
+    private void gather(LivingEntity caster) {
+        if (!(level() instanceof net.minecraft.server.level.ServerLevel sl)) return;
+        com.dbzenith.data.PlayerData cd = caster instanceof net.minecraft.world.entity.player.Player p ? com.dbzenith.data.ModCapabilities.get(p).orElse(null) : null;
+        double maxKi = cd == null ? 100 : Math.max(1, cd.getDerived().maxKi());
+        Vec3 ball = getBoundingBox().getCenter();
+        if (!called) {                                                       // the call goes out once
+            called = true;
+            for (net.minecraft.server.level.ServerPlayer p : sl.players()) {
+                if (p != caster && p.distanceToSqr(caster) < 48 * 48) {
+                    p.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.dbzenith.spirit_bomb_call", caster.getDisplayName())
+                            .withStyle(net.minecraft.ChatFormatting.AQUA));
+                }
+            }
+        }
+        if (cd != null && cd.getKi() > maxKi * 0.0025) {                    // 5% of your ki a second: a full bar over the twenty seconds
+            cd.setKi(cd.getKi() - maxKi * 0.0025);
+            energy += maxKi * 0.0025;
+        }
+        if (age % 5 == 0) {
+            for (net.minecraft.server.level.ServerPlayer p : sl.players()) {
+                if (p == caster || p.isSpectator() || p.distanceToSqr(caster) > 48 * 48) continue;
+                com.dbzenith.data.PlayerData pd = com.dbzenith.data.ModCapabilities.get(p).orElse(null);
+                if (pd == null || !pd.isCharging()) continue;
+                double give = pd.getDerived().maxKi() * 0.02;
+                if (pd.getKi() < give) continue;
+                pd.setKi(pd.getKi() - give);
+                energy += give;
+                contributors.add(p.getUUID());
+                stream(sl, p.getEyePosition(), ball);
+            }
+        }
+        if (age % 10 == 0) {
+            List<LivingEntity> life = level().getEntitiesOfClass(LivingEntity.class, caster.getBoundingBox().inflate(24),
+                    e -> !(e instanceof net.minecraft.world.entity.player.Player) && !(e instanceof net.minecraft.world.entity.monster.Enemy) && e.isAlive());
+            energy += Math.min(20, life.size()) * maxKi * 0.002;
+            for (int i = 0; i < Math.min(4, life.size()); i++) stream(sl, life.get(i).position().add(0, life.get(i).getBbHeight() * 0.6, 0), ball);
+            sl.playSound(null, ball.x, ball.y, ball.z, net.minecraft.sounds.SoundEvents.BEACON_AMBIENT, net.minecraft.sounds.SoundSource.PLAYERS, 1.2f, 0.8f + (float) Math.min(0.8, energy / maxKi * 0.2));
+        }
+        double share = energy / maxKi;
+        float size = (float) Math.min(12, baseSize * (1 + Math.sqrt(share) * 1.3));
+        if (Math.abs(size - getSize()) > 0.05f) {
+            entityData.set(SIZE, size);
+            refreshDimensions();
+        }
+        damage = baseDamage * Math.min(12, 1 + share * 3);
+        explosionPower = (float) (baseExplosion * Math.min(2.2, 1 + share * 0.6));
+        caster.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 5, 3, false, false));
+    }
+
+    /** A thin stream of light from a giver into the ball. */
+    private void stream(net.minecraft.server.level.ServerLevel sl, Vec3 from, Vec3 to) {
+        for (int k = 0; k < 6; k++) {
+            Vec3 p = from.lerp(to, (k + (age % 5) / 5.0) / 6.0);
+            sl.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0);
+        }
+    }
+
     @Override
     protected boolean canHitEntity(Entity target) {
-        return super.canHitEntity(target) && target != getOwner() && !hitIds.contains(target.getId());
+        return super.canHitEntity(target) && target != getOwner() && !hitIds.contains(target.getId()) && !spares(target);
     }
 
     @Override
@@ -310,6 +417,15 @@ public class KiBlastEntity extends Projectile {
     }
 
     private void impact() {
+        if (spiritBomb) {                                                    // everything where it lands takes it, but its givers
+            double reach = getSize() * 1.5 + 3;
+            for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(reach),
+                    e -> e.isAlive() && !e.isSpectator() && !spares(e) && !hitIds.contains(e.getId()))) {
+                double fall = 1 - Math.min(0.7, e.distanceTo(this) / (reach * 2));
+                e.invulnerableTime = 0;
+                e.hurt(ModDamageTypes.kiBlast(level(), this, getOwner()), (float) (damage * fall));
+            }
+        }
         if (explosionPower > 0) {
             Level.ExplosionInteraction interaction = DBZConfig.SERVER.kiBlastsBreakBlocks.get()
                     ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE;
@@ -326,6 +442,8 @@ public class KiBlastEntity extends Projectile {
     protected void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putDouble("damage", damage);
+        tag.putBoolean("spiritBomb", spiritBomb);
+        tag.putDouble("energy", energy);
         tag.putInt("pierce", pierceLeft);
         tag.putInt("life", lifeTicks);
         tag.putInt("age", age);
@@ -347,6 +465,10 @@ public class KiBlastEntity extends Projectile {
     protected void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         damage = tag.getDouble("damage");
+        spiritBomb = tag.getBoolean("spiritBomb");
+        entityData.set(SPIRIT, spiritBomb);
+        energy = tag.getDouble("energy");
+        baseDamage = damage;
         pierceLeft = tag.getInt("pierce");
         lifeTicks = tag.getInt("life");
         age = tag.getInt("age");

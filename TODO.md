@@ -146,7 +146,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - [x] 13d UI v2 (v0.26.0): ornate themed panels, buttons and frames; a "UI style" setting (Zenith / Classic)
   - [x] 13e HUD v2 (v0.27.0): detailed portrait frames per form, animated bars, new layouts; a "HUD style" setting (Zenith / Classic / Minimal)
   - [x] 13f Art detail setting (v0.23.0): Zenith Settings > Style > HD art
-- [ ] CX-14 Art direction v2 (user request with reference pictures, saved locally in reference/ (git-ignored, inspiration only, nothing copied): chunky anime-styled Minecraft characters). This comes next and replaces the noisy HD look as the default.
+- [x] CX-14 Art direction v2 (user request with reference pictures, saved locally in reference/ (git-ignored, inspiration only, nothing copied): chunky anime-styled Minecraft characters). This comes next and replaces the noisy HD look as the default.
   - [x] 14a Painted skins (v0.28.0): every race skin and generated body repainted in the reference direction:
     - clean dark line art for the anatomy (pecs, abs, obliques, biceps, deltoids, back muscles, knees);
     - 2-3 tone cel shading with soft highlights, readable at 64x64;
@@ -196,3 +196,9 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - [x] 16c (v0.43.0) HUD v3: cleaner, better-designed health, ki and stamina bars (not flat or "robloxy")
   - [x] 16d (v0.44.0) The other screens in the new style, with tabs: stats, techniques, racial and universal skills, forms, quests
   - [x] 16e (v0.46.0) The Saga HUD to the user's spec: round portrait with the hair over the ring, Release tab, smoky BP and Ki bar, slanted health and stamina bars with values inside
+- [ ] CX-17 Originals (the original additions planned in docs/CONTENT_EXPANSION.md)
+  - [x] 17a (v0.47.0) The Spirit Bomb: raised overhead for up to twenty seconds, it draws ki from its thrower, from every player within 48 blocks who holds Charge, and a trickle from the living things around; it grows with what it gathers and spares everyone who gave to it; cast again to throw it. Taught by the Kai of the north.
+  - [ ] 17b A Hakai-style Destroyer path and an evasion Instinct path
+  - [ ] 17c A tournament arena with brackets
+  - [ ] 17d A dojo of training robots (agility drill)
+  - [ ] 17e Family (children with 5% of each parent's stats), planets and sectors, claiming

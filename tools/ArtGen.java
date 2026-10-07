@@ -36,6 +36,7 @@ public class ArtGen {
         HudHd.all();
         Metals.all();
         SagaHud.all();
+        Originals.all();
         System.out.println("ArtGen done");
     }
 
@@ -3595,6 +3596,29 @@ public class ArtGen {
         if (n > 0.93) base = Math.max(0, base - 1);                                   // sparse, soft folds
         else if (n < 0.04) base = Math.min(r.length - 1, base + 1);
         return r[base];
+    }
+
+    // ================================================================== originals (CX-17)
+
+    /** The Spirit Bomb's sphere: a white-hot core through pale cyan to a deep blue edge, slow swirls, a crisp bright rim. */
+    static final class Originals {
+        static void all() throws IOException {
+            int S = 128;
+            Canvas c = new Canvas(S, S);
+            for (int y = 0; y < S; y++) for (int x = 0; x < S; x++) {
+                double dx = (x + 0.5 - S / 2.0) / (S / 2.0 - 2), dy = (y + 0.5 - S / 2.0) / (S / 2.0 - 2), r = Math.hypot(dx, dy);
+                if (r > 1) continue;
+                double a = Math.atan2(dy, dx), swirl = 0.5 + 0.5 * Math.sin(a * 5 + r * 14 - Math.pow(r, 2) * 6);
+                int col;
+                if (r < 0.32) col = mix(0xFFFFFFFF, 0xFFE4F8FF, r / 0.32);
+                else if (r < 0.78) col = mix(0xFFE4F8FF, 0xFF8ED8FF, (r - 0.32) / 0.46);
+                else if (r < 0.93) col = mix(0xFF8ED8FF, 0xFF2E8EF0, (r - 0.78) / 0.15);
+                else col = mix(0xFF2E8EF0, 0xFFE8FBFF, (r - 0.93) / 0.07);                    // the bright rim
+                if (r > 0.25 && r < 0.92) col = mix(col, 0xFFFFFFFF, swirl * 0.22 * (1 - r));    // energy swirling in
+                c.set(x, y, col);
+            }
+            c.save("entity/spirit_bomb.png");
+        }
     }
 
     // ================================================================== the Saga HUD (CX-16e)

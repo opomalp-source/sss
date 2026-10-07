@@ -1311,3 +1311,14 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 ### Verified
 - Screenshots at rest, just hit (the trail and the slanted cut) and in Super Saiyan (the hair over the ring, the aura-tinted BP, the form name).
 - Fixed after review: the ring covered the "B" of "BP"; the text now starts just right of the ring.
+
+## 2026-10-07 — CX-17a: the Spirit Bomb (v0.47.0)
+- Back to the content roadmap after the design overhaul: CX-17 "Originals", the original additions planned in `docs/CONTENT_EXPANSION.md`.
+- **`Techniques.SPIRIT_BOMB`** (effect `SPIRIT_BOMB`): a held ki ball raised two blocks over the head for up to 400 ticks.
+  - While it hovers, `KiBlastEntity.gather()` draws ki from the thrower, from charging players within 48 blocks (they get a chat call when it is raised, and streams of light run from them into it) and a trickle from the peaceful living things around. Size, damage and blast grow with the share gathered (numbers in BALANCE.md). The thrower is slowed while holding it.
+  - Casting it again throws it at once (`releaseSpiritBomb`, with the throw animation); otherwise it is thrown on its own when the time runs out.
+  - The thrower and every giver are spared: `canHitEntity` skips them and `SpiritBombEvents` cancels any damage they would take from it. The impact hurts everything else in a wide area, then explodes.
+  - A synced `SPIRIT` flag lets the renderer draw it as a soft, pale-blue sphere with a halo (`textures/entity/spirit_bomb.png`, ArtGen `Originals`); the plain ki-ball look was nearly invisible against the sky.
+- **Quest:** "The Spirit Bomb" from the Kai of the north (level 500, defeat eight damned warriors, after Kaioken times three).
+- **Tests:** `SpiritBombTests` (a charging friend grows it, givers are spared, casting again throws it). 150 GameTests.
+- Checked in the dev client: gathering overhead, the throw, the burst.

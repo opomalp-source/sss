@@ -13,7 +13,7 @@ public final class Technique {
     public enum Style { BALL, DISK, BEAM, SELF }
 
     /** Special behavior. NONE = plain damage. */
-    public enum Effect { NONE, HEAL_SELF, HEAL_ALLY, BLIND_AREA, EXPLOSIVE_WAVE, TELEPORT, KI_SENSE, ENERGY_ABSORB, CANDY, KI_TRANSFER, STUN_AREA, KI_SEAL, GRAB, FUSE, ABSORB, LIFE_DRAIN, FUSION_DANCE }
+    public enum Effect { NONE, HEAL_SELF, HEAL_ALLY, BLIND_AREA, EXPLOSIVE_WAVE, TELEPORT, KI_SENSE, ENERGY_ABSORB, CANDY, KI_TRANSFER, STUN_AREA, KI_SEAL, GRAB, FUSE, ABSORB, LIFE_DRAIN, FUSION_DANCE, SPIRIT_BOMB }
 
     /** What a ki attack does to whatever it hits besides damage (Ki Creator v2). */
     public enum KiType { PURE, BURNING, FREEZING, SHOCK, CORROSIVE, DRAINING, DIVINE }

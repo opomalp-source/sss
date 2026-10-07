@@ -26,6 +26,7 @@ public class KiBlastRenderer extends EntityRenderer<KiBlastEntity> {
     private static final ResourceLocation STAR = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/impact_star.png");
     private static final ResourceLocation STREAK = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/fx_streak.png");
     private static final ResourceLocation RING = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/shock_ring.png");
+    private static final ResourceLocation SPIRIT = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/spirit_bomb.png");
 
     public KiBlastRenderer(EntityRendererProvider.Context context) {
         super(context);
@@ -72,6 +73,14 @@ public class KiBlastRenderer extends EntityRenderer<KiBlastEntity> {
             }
         }
 
+        if (entity.isSpiritBomb()) {                                         // the Spirit Bomb (CX-17a): a solid, bright sphere in a halo
+            float breathe = 1f + 0.03f * Mth.sin(t * 0.25f);
+            FxDraw.billboard(pose, buffers.getBuffer(FxRenderTypes.soft(GLOW)), camera, 0, mid, 0, size * 1.9f * breathe, 0, 0, 0, 1, 1, c, 150);
+            FxDraw.billboard(pose, buffers.getBuffer(FxRenderTypes.soft(SPIRIT)), camera, 0, mid, 0, size * 1.02f * breathe, t * 0.01f, 0, 0, 1, 1, 0xFFFFFF, 255);
+            FxDraw.billboard(pose, buffers.getBuffer(FxRenderTypes.additive(STAR)), camera, 0, mid, 0, size * 1.15f, -t * 0.05f, 0, 0, 1, 1, hot, 90);
+            super.render(entity, yaw, partialTicks, pose, buffers, light);
+            return;
+        }
         float pulse = 1f + 0.08f * Mth.sin(t * 0.8f);
         FxDraw.billboard(pose, buffers.getBuffer(FxRenderTypes.soft(GLOW)), camera, 0, mid, 0, size * 2.6f * pulse, 0, 0, 0, 1, 1, c, 210);
         FxDraw.billboard(pose, buffers.getBuffer(FxRenderTypes.additive(STAR)), camera, 0, mid, 0, size * 2.4f, t * 0.35f, 0, 0, 1, 1, hot, 170);

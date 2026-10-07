@@ -52,6 +52,8 @@ public final class Quests {
                 List.of("catch_the_monkey"), 0, false, Reward.tp(1200).teach("gathering_sphere")));
         add(new Quest("kaioken_times_three", Quest.Giver.NORTH_KAI, List.of(Objective.level(400), Objective.kill("dbzenith:damned_warrior", 5)),
                 List.of("strike_the_cricket"), 0, false, Reward.tp(2000).flag("skill:kaioken:3")));
+        add(new Quest("the_spirit_bomb", Quest.Giver.NORTH_KAI, List.of(Objective.level(500), Objective.kill("dbzenith:damned_warrior", 8)),
+                List.of("kaioken_times_three"), 0, false, Reward.tp(3000).teach("spirit_bomb")));
     }
 
     // ---------------------------------------------------------------- the Grand Kai, in his paradise

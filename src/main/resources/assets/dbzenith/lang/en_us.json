@@ -1518,5 +1518,10 @@
   "item.dbzenith.metal_plating": "Plates a gi piece: +%s%% damage reduction (gi and ingot at a crafting table)",
   "item.dbzenith.gi.plated": "Plated with %s: +%s%% damage reduction",
   "settings.dbzenith.hud_style.saga": "Saga",
-  "hud.dbzenith.release": "Release: %s%%"
+  "hud.dbzenith.release": "Release: %s%%",
+  "technique.dbzenith.spirit_bomb": "Spirit Bomb",
+  "technique.dbzenith.spirit_bomb.desc": "Raise your hands and gather: your own ki, the ki of every player nearby who holds Charge, and a little from every living thing around. It grows for up to twenty seconds; cast it again to throw it. It strikes everything where it lands, sparing you and all who lent it their energy.",
+  "message.dbzenith.spirit_bomb_call": "%s is gathering a Spirit Bomb! Hold Charge to lend your energy (you will be spared by it).",
+  "quest.dbzenith.the_spirit_bomb": "The Spirit Bomb",
+  "quest.dbzenith.the_spirit_bomb.desc": "\"Here's my best technique, and it's not about your own power at all. You borrow it: from the people around you, the animals, the trees. Raise your hands and ask. Get to level 500 and put eight of the damned down first, though; it takes a strong body to hold that much.\" Learn the Spirit Bomb."
 }
