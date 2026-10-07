@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:blasting",
+  "ingredient": {"item": "dbzenith:raw_tungsten"},
+  "result": "dbzenith:tungsten_ingot",
+  "experience": 0.8,
+  "cookingtime": 100
+}

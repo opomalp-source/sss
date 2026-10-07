@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {"item": "dbzenith:bronze_blend"},
+  "result": "dbzenith:bronze_ingot",
+  "experience": 0.7,
+  "cookingtime": 200
+}

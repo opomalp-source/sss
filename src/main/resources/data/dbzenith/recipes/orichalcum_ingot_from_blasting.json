@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:blasting",
+  "ingredient": {"item": "dbzenith:orichalcum_blend"},
+  "result": "dbzenith:orichalcum_ingot",
+  "experience": 1.0,
+  "cookingtime": 160
+}

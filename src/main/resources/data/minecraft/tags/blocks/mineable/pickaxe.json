@@ -1,0 +1,4 @@
+{
+  "replace": false,
+  "values": ["dbzenith:tin_ore", "dbzenith:zinc_ore", "dbzenith:silver_ore", "dbzenith:titanium_ore", "dbzenith:tungsten_ore", "dbzenith:mithril_ore", "dbzenith:adamantium_ore", "dbzenith:katchin_ore", "dbzenith:katchin_block", "dbzenith:kachi_katchin_block"]
+}

@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:blasting",
+  "ingredient": {"item": "dbzenith:electrum_blend"},
+  "result": "dbzenith:electrum_ingot",
+  "experience": 1.0,
+  "cookingtime": 160
+}

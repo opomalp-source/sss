@@ -184,12 +184,12 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - a burst on starting a charge, ground dust and lifting rocks;
   - looks per form: SSJ spiky gold, SSJ2 crackling, God calm flame, Blue glow, silver wisps, red Kaioken, dark evil.
 - [x] CX-11 VFX v3 (v0.35.0 aura, v0.37.0 vanishes, ground cracks, ground arcs, beam scorch, speed lines; real bloom and heat haze deferred: they need post-processing shaders)
-- [ ] CX-12 World (user: "make it REALLY GOOD (npc designs and authentic)")
+- [x] CX-12 World (user: "make it REALLY GOOD (npc designs and authentic)")
   - [x] 12a The other world (v0.38.0): souls of the dead (halo), the check-in station and Enma, ogre clerks, Snake Way, the Kai of the north's planet (10x gravity; catch the monkey, strike the cricket: Kaioken, Gathering Sphere), Limbo for evil souls, the revive wish; every NPC repainted in the painted style with 3D hair, race parts and gear
   - [x] 12b God Ki pools (v0.38.0): the springs of the Grand Kai's paradise (meditate to awaken and grow godly ki)
   - [x] 12c Fusion v2: the fusion dance (timed duet) and the Kai earrings (v0.39.0)
   - [x] 12d Black Star and Super Dragon Ball wishes (variant reroll, true immortality) (v0.40.0)
-  - [ ] 12e Metals and alloys tiers
+  - [x] 12e Metals and alloys tiers (v0.45.0)
 - [x] CX-16 Design overhaul (user: "the character creation design is ugly and cramped... I want a design overhaul")
   - [x] 16a (v0.41.0) UI v3 foundation and character creation rebuilt: full-screen layout, a large rotatable preview, tabs (Race, Body, Face, Hair, Path), roomy cards; new characters start in shorts only; better body proportions (thicker arms, sturdier limbs)
   - [x] 16b (v0.42.0) Race customization: per-race colours and body parts (Frost Demon horns, shell and skin colours; Namekian antennae and markings; Majin antenna and skin; Saiyan tail colour; Kai and demon ears and horns; Bio-Android spots and crest; and more), editable later too

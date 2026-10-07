@@ -207,3 +207,8 @@ Constants are in `CombatMoves`.
 - **Super:**
   - Scattered up to 3000 blocks out.
   - Wishes: true immortality (body never drops below 1 until mortality is wished back), divine awakening (godly ki and 2000 God Ki XP), restore everything, plus all of Earth's wishes.
+
+## Metals and alloys (12e, v0.45.0)
+- **Plating:** 0.3% damage reduction per tier per plated gi piece (tier 1 tin: 0.3%; tier 10 Kachi Katchin: 3%, so 9% for three pieces). It adds to the set's own reduction, e.g. Battle Armor 15% + 9% = 24%.
+- **Weights:** Training 1.5x / -10% speed, Heavy 2.5x / -25%, Tungsten 3.5x / -33%, Katchin 5x / -42%.
+- **Rarity, veins per chunk:** tin 10, zinc 8, silver 5, titanium 3 (Earth, deep) and 6 (Namek, as tungsten), mithril 5, adamantium 5, Katchin 2 (size 3).

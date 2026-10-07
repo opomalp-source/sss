@@ -59,6 +59,24 @@ public final class ModBlocks {
             BlockBehaviour.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_CYAN).strength(1.5f).noOcclusion()
                     .lightLevel(s -> 12).sound(net.minecraft.world.level.block.SoundType.AMETHYST)));
 
+    /** Ores of the natural metals (12e), and the two hardest metals as building blocks: nothing short of a god breaks them. */
+    public static final java.util.Map<com.dbzenith.item.Metal, RegistryObject<Block>> ORES = new java.util.EnumMap<>(com.dbzenith.item.Metal.class);
+
+    static {
+        for (com.dbzenith.item.Metal m : com.dbzenith.item.Metal.values()) {
+            if (m.kind() != com.dbzenith.item.Metal.Kind.ORE) continue;
+            float hard = m.tier() >= 8 ? 12f : m.tier() >= 6 ? 6f : m.tier() >= 4 ? 4.5f : 3f;
+            ORES.put(m, register(m.id() + "_ore", () -> new net.minecraft.world.level.block.DropExperienceBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.STONE).strength(hard, hard).requiresCorrectToolForDrops(),
+                    net.minecraft.util.valueproviders.UniformInt.of(m.tier() >= 6 ? 3 : 0, m.tier() >= 6 ? 7 : 2))));
+        }
+    }
+
+    public static final RegistryObject<Block> KATCHIN_BLOCK = register("katchin_block", () -> new Block(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.COLOR_CYAN).strength(100f, 3_600_000f).requiresCorrectToolForDrops().sound(SoundType.NETHERITE_BLOCK)));
+    public static final RegistryObject<Block> KACHI_KATCHIN_BLOCK = register("kachi_katchin_block", () -> new Block(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.COLOR_BLUE).strength(300f, 3_600_000f).requiresCorrectToolForDrops().sound(SoundType.NETHERITE_BLOCK)));
+
     private ModBlocks() {}
 
     private static RegistryObject<Block> register(String name, Supplier<Block> block) {

@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["###", "###", "###"],
+  "key": {"#": {"item": "dbzenith:katchin_ingot"}},
+  "result": {"item": "dbzenith:katchin_block"}
+}

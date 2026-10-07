@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [{"item": "dbzenith:kachi_katchin_block"}],
+  "result": {"item": "dbzenith:kachi_katchin_ingot", "count": 9}
+}

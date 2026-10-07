@@ -105,13 +105,16 @@ public class GiArmorItem extends ArmorItem {
         Set s = wornSet(player);
         if (s == null) data.setGearMultipliers(1, 1, 1);
         else data.setGearMultipliers(s.strMult(), s.dexMult(), s.kiMult());
-        data.setGearReduction(s == null ? 0 : s.reduction());
+        data.setGearReduction((s == null ? 0 : s.reduction()) + GiPlating.reduction(player));   // plus any metal plating (12e)
     }
 
     @Override
     public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("item.dbzenith.gi.set_bonus",
                 pct(set.strMult), pct(set.dexMult), pct(set.kiMult), Math.round(set.reduction * 100)).withStyle(net.minecraft.ChatFormatting.GOLD));
+        Metal plate = GiPlating.of(stack);
+        if (plate != null) tooltip.add(Component.translatable("item.dbzenith.gi.plated", Component.translatable(plate.translationKey()),
+                String.format("%.1f", plate.platingReduction() * 100)).withStyle(net.minecraft.ChatFormatting.AQUA));
     }
 
     private static String pct(double m) {

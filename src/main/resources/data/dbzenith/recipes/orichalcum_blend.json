@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [{"item": "dbzenith:mithril_ingot"}, {"item": "dbzenith:adamantium_ingot"}],
+  "result": {"item": "dbzenith:orichalcum_blend", "count": 2}
+}

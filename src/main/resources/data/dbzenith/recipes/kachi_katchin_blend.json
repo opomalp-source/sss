@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [{"item": "dbzenith:katchin_ingot"}, {"item": "dbzenith:katchin_ingot"}, {"item": "dbzenith:katchin_ingot"}, {"item": "dbzenith:katchin_ingot"}, {"item": "dbzenith:celestial_bronze_ingot"}, {"item": "minecraft:nether_star"}],
+  "result": {"item": "dbzenith:kachi_katchin_blend", "count": 1}
+}

@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [{"item": "minecraft:iron_ingot"}, {"item": "minecraft:iron_ingot"}, {"item": "minecraft:coal"}],
+  "result": {"item": "dbzenith:steel_blend", "count": 2}
+}

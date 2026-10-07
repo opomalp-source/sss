@@ -1,0 +1,6 @@
+{
+  "type": "forge:add_features",
+  "biomes": "#minecraft:is_overworld",
+  "features": ["dbzenith:ore_tin", "dbzenith:ore_zinc", "dbzenith:ore_silver", "dbzenith:ore_titanium"],
+  "step": "underground_ores"
+}

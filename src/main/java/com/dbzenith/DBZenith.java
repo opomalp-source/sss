@@ -32,6 +32,7 @@ public class DBZenith {
         ModItems.register(modBus);
         ModEntities.register(modBus);
         ModBlocks.register(modBus);
+        com.dbzenith.registry.ModRecipes.register(modBus);
         ModBlockEntities.register(modBus);
         com.dbzenith.registry.ModEffects.register(modBus);
         com.dbzenith.registry.ModSounds.register(modBus);

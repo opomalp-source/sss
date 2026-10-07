@@ -30,6 +30,29 @@ public final class ModItems {
             () -> new TrainingWeightsItem(1.5, 0.1, new Item.Properties()));
     public static final RegistryObject<Item> HEAVY_TRAINING_WEIGHTS = ITEMS.register("heavy_training_weights",
             () -> new TrainingWeightsItem(2.5, 0.25, new Item.Properties().rarity(Rarity.UNCOMMON)));
+    /** Weights forged from the dense metals (12e): far heavier, far slower, far more training. */
+    public static final RegistryObject<Item> TUNGSTEN_TRAINING_WEIGHTS = ITEMS.register("tungsten_training_weights",
+            () -> new TrainingWeightsItem(3.5, 0.33, new Item.Properties().rarity(Rarity.RARE)));
+    public static final RegistryObject<Item> KATCHIN_TRAINING_WEIGHTS = ITEMS.register("katchin_training_weights",
+            () -> new TrainingWeightsItem(5.0, 0.42, new Item.Properties().rarity(Rarity.EPIC)));
+
+    // ---- metals and alloys (12e): an ingot for each (but vanilla's), raw ore for the natural ones, a blend for each alloy
+    public static final java.util.Map<com.dbzenith.item.Metal, RegistryObject<Item>> INGOTS = new java.util.EnumMap<>(com.dbzenith.item.Metal.class);
+    public static final java.util.Map<com.dbzenith.item.Metal, RegistryObject<Item>> RAW = new java.util.EnumMap<>(com.dbzenith.item.Metal.class);
+    public static final java.util.Map<com.dbzenith.item.Metal, RegistryObject<Item>> BLENDS = new java.util.EnumMap<>(com.dbzenith.item.Metal.class);
+
+    static {
+        for (com.dbzenith.item.Metal m : com.dbzenith.item.Metal.values()) {
+            if (m.kind() == com.dbzenith.item.Metal.Kind.VANILLA) continue;
+            Rarity r = m.tier() >= 8 ? Rarity.EPIC : m.tier() >= 6 ? Rarity.RARE : m.tier() >= 4 ? Rarity.UNCOMMON : Rarity.COMMON;
+            INGOTS.put(m, ITEMS.register(m.id() + "_ingot", () -> new com.dbzenith.item.MetalItem(m, new Item.Properties().rarity(r))));
+            if (m.kind() == com.dbzenith.item.Metal.Kind.ORE) {
+                RAW.put(m, ITEMS.register("raw_" + m.id(), () -> new com.dbzenith.item.MetalItem(m, new Item.Properties())));
+            } else {
+                BLENDS.put(m, ITEMS.register(m.id() + "_blend", () -> new com.dbzenith.item.MetalItem(m, new Item.Properties())));
+            }
+        }
+    }
 
     public static final RegistryObject<Item> DRAGON_RADAR = ITEMS.register("dragon_radar",
             () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.RARE)));

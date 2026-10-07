@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["# #", "#W#", "###"],
+  "key": {"#": {"item": "dbzenith:tungsten_ingot"}, "W": {"item": "dbzenith:heavy_training_weights"}},
+  "result": {"item": "dbzenith:tungsten_training_weights"}
+}

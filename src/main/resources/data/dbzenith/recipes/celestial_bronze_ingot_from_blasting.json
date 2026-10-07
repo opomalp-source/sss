@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:blasting",
+  "ingredient": {"item": "dbzenith:celestial_bronze_blend"},
+  "result": "dbzenith:celestial_bronze_ingot",
+  "experience": 1.0,
+  "cookingtime": 160
+}

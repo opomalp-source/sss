@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [{"item": "dbzenith:electrum_ingot"}, {"item": "dbzenith:orichalcum_ingot"}, {"item": "dbzenith:tungsten_carbide_ingot"}, {"item": "dbzenith:bronze_ingot"}, {"item": "dbzenith:katchin_ingot"}],
+  "result": {"item": "dbzenith:celestial_bronze_blend", "count": 1}
+}

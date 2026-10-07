@@ -34,6 +34,7 @@ public class ArtGen {
         AuraV3.all();
         NpcArt.all();
         HudHd.all();
+        Metals.all();
         System.out.println("ArtGen done");
     }
 
@@ -3593,6 +3594,147 @@ public class ArtGen {
         if (n > 0.93) base = Math.max(0, base - 1);                                   // sparse, soft folds
         else if (n < 0.04) base = Math.min(r.length - 1, base + 1);
         return r[base];
+    }
+
+    // ================================================================== metals and alloys (12e)
+
+    /**
+     * Metals and alloys: an ingot for each (a bevelled bar, lit from the top left), raw chunks for the ores (lumpy,
+     * speckled), blend piles for the alloys (a mound of mixed grains in the colours that go into it), ore blocks (the
+     * stone, or Limbo's blackstone, with veins of the metal), the riveted Katchin plates and the denser weights.
+     */
+    static final class Metals {
+        static final String[][] METALS = {
+                {"tin", "C8CCD4"}, {"zinc", "98A6B2"}, {"silver", "E6EAF2"}, {"titanium", "8C9CB4"}, {"tungsten", "5C6068"},
+                {"mithril", "9AE0F0"}, {"adamantium", "7A5AA0"}, {"katchin", "4A8A7C"},
+                {"bronze", "C88A3A"}, {"brass", "D8B850"}, {"steel", "7E848E"}, {"electrum", "E8D890"}, {"durasteel", "5A6C80"},
+                {"tungsten_carbide", "3C4048"}, {"orichalcum", "E8803A"}, {"celestial_bronze", "F0CC70"}, {"kachi_katchin", "3A4C8A"}};
+        static final java.util.Set<String> ORES = java.util.Set.of("tin", "zinc", "silver", "titanium", "tungsten", "mithril", "adamantium", "katchin");
+        /** What each alloy is made of, for the grains in its blend. */
+        static final java.util.Map<String, int[]> GRAINS = java.util.Map.of(
+                "bronze", new int[]{0xFFE07850, 0xFFC8CCD4}, "brass", new int[]{0xFFE07850, 0xFF98A6B2},
+                "steel", new int[]{0xFFD8D8D8, 0xFF2A2A2E}, "electrum", new int[]{0xFFF0C840, 0xFFE6EAF2},
+                "durasteel", new int[]{0xFF7E848E, 0xFF8C9CB4}, "tungsten_carbide", new int[]{0xFF5C6068, 0xFF8C9CB4},
+                "orichalcum", new int[]{0xFF9AE0F0, 0xFF7A5AA0}, "celestial_bronze", new int[]{0xFFE8D890, 0xFFE8803A, 0xFF4A8A7C},
+                "kachi_katchin", new int[]{0xFF4A8A7C, 0xFFF0CC70, 0xFFB070FF});
+
+        static void all() throws IOException {
+            for (String[] m : METALS) {
+                int c = 0xFF000000 | Integer.parseInt(m[1], 16);
+                ingot(m[0], c);
+                if (ORES.contains(m[0])) {
+                    raw(m[0], c);
+                    ore(m[0], c, m[0].equals("adamantium"));
+                } else {
+                    blend(m[0], c, GRAINS.get(m[0]));
+                }
+            }
+            plates("katchin_block", 0xFF4A8A7C, false);
+            plates("kachi_katchin_block", 0xFF3A4C8A, true);
+            Items.weights("tungsten_training_weights", 0xFF4A4E58, 0xFF2A1A12, true);
+            Items.weights("katchin_training_weights", 0xFF3E7A6C, 0xFF1A1A22, true);
+        }
+
+        /** A bar seen from above the front: a light top, the mid front, a dark end, a hard rim and a glint. */
+        static void ingot(String name, int color) throws IOException {
+            int[] r = ramp(color, 6);
+            Canvas c = new Canvas(16, 16);
+            c.paint(0, 0, java.util.Map.of('#', r[0], 't', r[4], 'T', r[5], 'f', r[3], 'F', r[2], 's', r[1]),
+                    "................",
+                    "................",
+                    "................",
+                    "................",
+                    "................",
+                    "......########..",
+                    "....##TTtttttt#.",
+                    "..##TTtttttttt#.",
+                    ".#tttttttttt##s#",
+                    ".#ffffffffff#ss#",
+                    ".#fFffffffff#ss#",
+                    ".#FFFFFFFFFF#s#.",
+                    ".#FFFFFFFFFF##..",
+                    "..##########....",
+                    "................",
+                    "................");
+            c.set(5, 6, mix(r[5], 0xFFFFFFFF, 0.7)).set(6, 6, mix(r[5], 0xFFFFFFFF, 0.4));
+            c.save("item/" + name + "_ingot.png");
+        }
+
+        /** A raw lump: three rounded knobs, lit from the top, speckled, rimmed. */
+        static void raw(String name, int color) throws IOException {
+            int[] r = ramp(color, 6), rock = ramp(0xFF6A6A70, 4);
+            Canvas c = new Canvas(16, 16);
+            double[][] knobs = {{6.5, 9, 4.2}, {10, 8, 3.6}, {8, 5.5, 3.2}};
+            for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) {
+                double best = 9;
+                for (double[] k : knobs) best = Math.min(best, Math.hypot(x + 0.5 - k[0], y + 0.5 - k[1]) / k[2]);
+                if (best > 1) continue;
+                int i = (int) clamp((float) (4.2 - (y - 4) * 0.35 - best * 1.5), 0, 5);
+                boolean rocky = noise(x, y, name.hashCode()) > 0.72;
+                c.set(x, y, rocky ? rock[Math.min(3, i / 2 + 1)] : r[i]);
+            }
+            c.outline().save("item/raw_" + name + ".png");
+        }
+
+        /** A mound of grains: the alloy's own colour mixed with the colours of what goes into it. */
+        static void blend(String name, int color, int[] grains) throws IOException {
+            int[] r = ramp(color, 6);
+            Canvas c = new Canvas(16, 16);
+            for (int y = 5; y < 14; y++) for (int x = 1; x < 15; x++) {
+                double half = (y - 4) * 0.85;                                          // a cone, flattened at the foot
+                if (Math.abs(x + 0.5 - 8) > Math.min(6.6, half)) continue;
+                int i = (int) clamp((float) (4.5 - (y - 5) * 0.35 - (x - 4) * 0.12), 0, 5);
+                double n = noise(x, y, name.hashCode());
+                int px = r[i];
+                if (n > 0.66) px = mix(grains[(x + y) % grains.length], r[i], 0.25);   // grains of the ingredients
+                else if (n < 0.12) px = r[Math.max(0, i - 2)];
+                c.set(x, y, px);
+            }
+            c.set(8, 5, mix(r[5], 0xFFFFFFFF, 0.5));
+            c.outline().save("item/" + name + "_blend.png");
+        }
+
+        /** Stone (or blackstone) with veins of the metal: clusters with a lit edge and a dark rim. */
+        static void ore(String name, int color, boolean blackstone) throws IOException {
+            int[] r = ramp(color, 6), st = ramp(blackstone ? 0xFF2E282E : 0xFF7E7E80, 5);
+            Canvas c = new Canvas(16, 16);
+            for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) {
+                double n = noise(x, y, 17), m = noise(x / 2, y / 2, 29);
+                int i = n > 0.8 ? 3 : n < 0.2 ? 1 : 2;
+                if (m > 0.85) i = Math.max(0, i - 1);
+                c.set(x, y, st[i]);
+            }
+            boolean dark = FormLooks.lum(color) < 110;                                 // dark metals (tungsten) need a brighter glint
+            int[][] veins = {{3, 3}, {11, 4}, {7, 9}, {12, 12}, {2, 11}};
+            java.util.Random rnd = new java.util.Random(name.hashCode());
+            for (int[] v : veins) {
+                for (int k = 0; k < 7; k++) {                                          // bold enough to spot against the stone
+                    int x = v[0] + rnd.nextInt(3) - 1, y = v[1] + rnd.nextInt(3) - 1;
+                    if (x < 0 || y < 0 || x > 15 || y > 15) continue;
+                    c.set(x, y, mix(r[3 + rnd.nextInt(3)], 0xFFFFFFFF, dark ? 0.42 : 0.15));
+                }
+                c.set(v[0], v[1], r[5]);
+                if (v[1] + 2 < 16) c.set(v[0], v[1] + 2, r[0]);
+            }
+            c.save("block/" + name + "_ore.png");
+        }
+
+        /** Riveted plates of the hardest metals: four bevelled panels, a rivet at each corner, a faint sheen. */
+        static void plates(String name, int color, boolean gilded) throws IOException {
+            int[] r = ramp(color, 6), gold = ramp(0xFFE8C050, 4);
+            Canvas c = new Canvas(16, 16);
+            for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) {
+                int px = x % 8, py = y % 8;
+                int i = 3;
+                if (px == 0 || py == 0) i = 5;                                         // the lit edge of each panel
+                else if (px == 7 || py == 7) i = 0;                                    // its shadowed edge
+                else if (noise(x, y, name.hashCode()) > 0.8) i = 4;
+                c.set(x, y, r[i]);
+                if ((px == 1 || px == 6) && (py == 1 || py == 6)) c.set(x, y, gilded ? gold[3] : r[5]);   // rivets
+            }
+            if (gilded) for (int i = 2; i < 14; i += 4) c.set(i, i, mix(gold[2], r[4], 0.4));                 // a gold sheen
+            c.save("block/" + name + ".png");
+        }
     }
 
     // ================================================================== armor layers (64x32, vanilla layout)

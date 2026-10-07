@@ -9,7 +9,7 @@
         {"block": "minecraft:blackstone", "height": 59},
         {"block": "minecraft:crimson_nylium", "height": 1}
       ],
-      "lakes": false, "features": false, "structure_overrides": []
+      "lakes": false, "features": true, "structure_overrides": []
     }
   }
 }

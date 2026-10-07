@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [{"item": "dbzenith:tungsten_ingot"}, {"item": "dbzenith:titanium_ingot"}, {"item": "minecraft:coal"}],
+  "result": {"item": "dbzenith:tungsten_carbide_blend", "count": 2}
+}

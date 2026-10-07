@@ -1222,3 +1222,59 @@ User: overhaul the techniques screen "and so on", with tabs where useful; a desi
 
 ### Verified
 - Screenshots of all four menu pages, and of Life, Settings, Quests and the Ki Creator in the default style.
+
+## 2026-10-07 — Session 3 (cont.): 12e Metals and alloys (v0.45.0)
+
+From the user's original design list: metals ranked from Copper to Kachi Katchin, with alloys between them.
+
+### Added
+- **Twenty metals in ten tiers (`item.Metal`):**
+
+  | Tier | Metals |
+  |---|---|
+  | 1 | Copper, Tin, Zinc |
+  | 2 | Iron, Gold, Silver, Bronze, Brass |
+  | 3 | Steel, Electrum |
+  | 4 | Titanium, Tungsten |
+  | 5 | Durasteel, Tungsten Carbide |
+  | 6 | Mithril, Adamantium |
+  | 7 | Orichalcum |
+  | 8 | Katchin |
+  | 9 | Celestial Bronze |
+  | 10 | Kachi Katchin |
+
+  Copper, iron and gold are vanilla's. Each other metal has an ingot (with forge `ingots/` tags); the ingot tooltips give the tier and what plating with it adds.
+- **Ores (raw drops, fortune and silk touch, smelting and blasting):**
+  - **Earth:** tin, zinc, silver, and titanium deep down (a Forge biome modifier on every overworld biome).
+  - **Namek:** tungsten and titanium.
+  - **The Kai's planet:** mithril, and rare Katchin. World features are now switched on for its flat terrain.
+  - **Limbo:** adamantium in the blackstone. World features switched on there too.
+  - Hardness and tool tier rise with the metal: stone pick for tin and zinc, iron for silver, titanium and tungsten, diamond for mithril, adamantium and Katchin.
+- **Alloys:** blends are crafted shapeless, then smelted in a blast furnace (bronze and brass also in a plain furnace):
+  - Bronze: 3 copper + tin.
+  - Brass: 3 copper + zinc.
+  - Steel: 2 iron + coal.
+  - Electrum: gold + silver.
+  - Durasteel: steel + titanium.
+  - Tungsten Carbide: tungsten + titanium + coal.
+  - Orichalcum: mithril + adamantium.
+  - Celestial Bronze: electrum, orichalcum, tungsten carbide, bronze and Katchin.
+  - Kachi Katchin: 4 Katchin, Celestial Bronze and a nether star.
+- **Uses:**
+  - **Gi plating** (a new `dbzenith:gi_plating` crafting recipe): a gi piece plus any ingot gives the piece plated with that metal. Each plated piece worn adds 0.3% damage reduction per tier, set or no set, so three Kachi Katchin pieces add 9%. The tooltip shows the plating.
+  - **Denser training weights:** Tungsten (3.5x training, -33% speed) and Katchin (5x, -42%), built on the previous tier.
+  - **Blocks of Katchin and Kachi Katchin:** blast resistance 3,600,000, so no ki blast or explosion breaks them; hardness 100 and 300, diamond tools only. For training halls that last.
+- **Art (ArtGen `Metals`):** bevelled ingots lit from the top left, lumpy raw chunks, blend piles speckled with their ingredients, ores with bold veins (brighter glints for dark metals), riveted Katchin plates (gold rivets on Kachi Katchin), and the two weights.
+
+### Verified
+- **In game:**
+  - The icons on the hotbar.
+  - Ores counted in fresh chunks: Limbo (41 adamantium), Namek (28 tungsten, 11 titanium), the Kai's planet (36 mithril; Katchin about 1 per 3 chunks, now doubled).
+- **Fixed:** the Kai's planet starts at y -64, so its ores were placed in the air above the stone. They are now at y -60 to -6.
+- **GameTests:**
+  - Plating through the real recipe manager (one ingot only), and one plated piece's reduction counting alone.
+  - Every alloy has its blend and blasting recipe, and every ore its block and smelting.
+  - Katchin blocks survive a power-6 explosion; tool tags.
+  - The weights' order.
+  - 149 required tests pass.
+- **Not checked:** Earth's ores in a normal world. The dev world is superflat, which places no ores; they are added by the same Forge biome-modifier format the existing NPC spawns already use.

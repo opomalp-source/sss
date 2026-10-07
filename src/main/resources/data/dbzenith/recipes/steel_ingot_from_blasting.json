@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:blasting",
+  "ingredient": {"item": "dbzenith:steel_blend"},
+  "result": "dbzenith:steel_ingot",
+  "experience": 1.0,
+  "cookingtime": 160
+}

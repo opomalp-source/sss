@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [{"item": "minecraft:copper_ingot"}, {"item": "minecraft:copper_ingot"}, {"item": "minecraft:copper_ingot"}, {"item": "dbzenith:tin_ingot"}],
+  "result": {"item": "dbzenith:bronze_blend", "count": 4}
+}

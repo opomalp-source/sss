@@ -10,7 +10,7 @@
         {"block": "minecraft:dirt", "height": 3},
         {"block": "minecraft:grass_block", "height": 1}
       ],
-      "lakes": false, "features": false, "structure_overrides": []
+      "lakes": false, "features": true, "structure_overrides": []
     }
   }
 }
