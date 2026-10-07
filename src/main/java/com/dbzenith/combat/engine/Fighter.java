@@ -35,10 +35,22 @@ public final class Fighter {
     LivingEntity flightBy;
     double lastBlow;                     // the last blow's damage, for slam bonuses
     long wakeUntil;                      // just got up: untouchable until
+
+    // ---------------------------------------------------------------- evasion (phase 3)
+    long vanishUntil, vanishReadyAt;     // a dash opens a vanish window; vanishes have a cooldown
+    long counterUntil;                   // after a vanish or a perfect guard: a press throws the counter
+    int counterTarget = -1;
+    LivingEntity superDashTarget;        // rushing at a foe
+    long superDashUntil;
     boolean wasDowned;
 
     Fighter(LivingEntity entity) {
         this.entity = entity;
+    }
+
+    /** Tests and dev: treat this fighter as juggled (in the air from a launch). */
+    public void markJuggled() {
+        juggled = true;
     }
 
     public Move move() {

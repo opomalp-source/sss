@@ -56,13 +56,13 @@ public final class CombatV3Tests {
         CombatMoves.launched(a, ad, z, now);
         helper.assertTrue(ad.combat().chaseReadyUntil > now, "a launch offers a chase");
         z.teleportTo(z.getX(), z.getY() + 6, z.getZ() + 6);
-        helper.assertTrue(CombatMoves.dashKey(a, ad, 0, 0), "the dash key chases");
+        helper.assertTrue(com.dbzenith.combat.engine.Evasion.dashKey(a, ad, 0, 0), "the dash key chases");
         helper.assertTrue(a.distanceTo(z) < 3 && ad.combat().chaseCount == 1, "right into its path, got " + a.distanceTo(z));
-        helper.assertTrue(!CombatMoves.dashKey(a, ad, 0, 0), "one chase per launch: the next dash is just a dash");
+        helper.assertTrue(!com.dbzenith.combat.engine.Evasion.dashKey(a, ad, 0, 0), "one chase per launch: the next dash is just a dash");
         for (int i = 0; i < 3; i++) {
             ad.refill();
             CombatMoves.launched(a, ad, z, now + 1);
-            CombatMoves.dashKey(a, ad, 0, 0);
+            com.dbzenith.combat.engine.Evasion.dashKey(a, ad, 0, 0);
         }
         helper.assertTrue(ad.combat().chaseCount == 3, "three chases a combo, got " + ad.combat().chaseCount);
         z.discard();
@@ -82,20 +82,14 @@ public final class CombatV3Tests {
         CombatMoves.knockDown(z, now);
         helper.assertTrue(CombatMoves.isDowned(z, now), "floored");
 
-        ad.setLastFoeHitTick(now);
-        a.setShiftKeyDown(true);
-        helper.assertTrue(CombatMoves.dashKey(a, ad, 0, 0) && ad.combat().breakerCharges == 1, "Breaker Wave spends a charge");
-        CombatMoves.dashKey(a, ad, 0, 0);
-        helper.assertTrue(ad.combat().breakerCharges == 0, "two charges");
-        helper.assertTrue(CombatMoves.dashKey(a, ad, 0, 0) && ad.combat().breakerCharges == 0, "then none");
-        a.setShiftKeyDown(false);
-
-        ad.combat().lastAttackerId = z.getId();
+        for (int i = 0; i < 2; i++) {                                           // Burst: Dash while caught in a combo
+            a.addEffect(new MobEffectInstance(ModEffects.STUN.get(), 40, 0));
+            ad.refill();
+            helper.assertTrue(com.dbzenith.combat.engine.Evasion.dashKey(a, ad, 0, 0) && !ModEffects.isStunned(a), "a Burst frees you");
+        }
+        helper.assertTrue(ad.combat().breakerCharges == 0, "two charges: " + ad.combat().breakerCharges);
         a.addEffect(new MobEffectInstance(ModEffects.STUN.get(), 40, 0));
-        hp = z.getHealth();
-        helper.assertTrue(CombatMoves.dashKey(a, ad, 0, 0), "dash while stunned");
-        helper.assertTrue(!ModEffects.isStunned(a) && z.getHealth() < hp, "is a Revenge Counter");
-        helper.assertTrue(ad.combat().hyperArmorUntil > helper.getLevel().getGameTime(), "with hyper armour");
+        helper.assertTrue(com.dbzenith.combat.engine.Evasion.dashKey(a, ad, 0, 0) && ModEffects.isStunned(a), "then none");
         z.discard();
         TestPlayers.remove(helper, a);
         helper.succeed();
@@ -108,18 +102,18 @@ public final class CombatV3Tests {
         PlayerData ad = ModCapabilities.getOrThrow(a);
         long now = helper.getLevel().getGameTime();
         CombatMoves.knockDown(a, now);
-        helper.assertTrue(CombatMoves.dashKey(a, ad, 0, 0) && !CombatMoves.isDowned(a, now) && !ad.combat().downedFlag, "roll up from the floor");
+        helper.assertTrue(com.dbzenith.combat.engine.Evasion.dashKey(a, ad, 0, 0) && !CombatMoves.isDowned(a, now) && !ad.combat().downedFlag, "roll up from the floor");
 
         a.teleportTo(base.x, base.y + 6, base.z);
         a.setOnGround(false);
-        ad.combat().launchedAt = now;
+        com.dbzenith.combat.engine.CombatEngine.of(a).markJuggled();
         double stamina = ad.getStamina();
-        helper.assertTrue(CombatMoves.dashKey(a, ad, 0, 0) && ad.getStamina() < stamina, "snap recovery in the air");
+        helper.assertTrue(com.dbzenith.combat.engine.Evasion.dashKey(a, ad, 0, 0) && ad.getStamina() < stamina, "snap recovery in the air");
 
         a.teleportTo(base.x, base.y, base.z);
         a.setOnGround(true);
         ad.setGuarding(true);
-        helper.assertTrue(CombatMoves.dashKey(a, ad, 0, 0) && ad.getDashEvadeUntil() >= now + 10, "spot dodge while guarding");
+        helper.assertTrue(com.dbzenith.combat.engine.Evasion.dashKey(a, ad, 0, 0) && ad.getDashEvadeUntil() >= now + 10, "spot dodge while guarding");
         TestPlayers.remove(helper, a);
         helper.succeed();
     }

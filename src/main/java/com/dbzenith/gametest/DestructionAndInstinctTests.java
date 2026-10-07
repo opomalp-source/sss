@@ -36,6 +36,8 @@ public final class DestructionAndInstinctTests {
     public static void hakaiErasesWhatIsWeaker(GameTestHelper helper) {
         ServerPlayer p = TestPlayers.create(helper);
         p.setGameMode(GameType.CREATIVE);
+        net.minecraft.world.phys.Vec3 at = net.minecraft.world.phys.Vec3.atBottomCenterOf(helper.absolutePos(new net.minecraft.core.BlockPos(1, 2, 1)));   // away from spawn, where other tests' players stand
+        p.teleportTo(at.x, at.y, at.z);
         PlayerData d = ModCapabilities.getOrThrow(p);
         helper.assertTrue(com.dbzenith.skill.TechniqueLibrary.learnProblem(d, Techniques.HAKAI) != null, "Hakai cannot be bought with TP");
         Zombie z = EntityType.ZOMBIE.create(p.level());

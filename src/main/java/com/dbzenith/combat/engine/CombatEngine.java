@@ -83,6 +83,11 @@ public final class CombatEngine {
         if (!mayAct(e)) return false;
         Fighter.State st = f.state(now);
         if (st == Fighter.State.STUNNED || st == Fighter.State.LAUNCHED || st == Fighter.State.KNOCKDOWN || st == Fighter.State.DEAD) return false;
+        Move counter = Evasion.counter(f, now);                                 // right after a vanish or a perfect guard
+        if (counter != null) {
+            start(f, counter, now);
+            return true;
+        }
         if (f.move != null) {
             boolean cancellable = f.landed && f.moveTick >= f.move.cancel;
             Move next = cancellable ? Moves.select(in, f.move.id) : null;
@@ -163,6 +168,7 @@ public final class CombatEngine {
     static void tick(Fighter f, long now) {
         LivingEntity e = f.entity;
         DBZConfig.Server c = DBZConfig.SERVER;
+        if (f.superDashTarget != null) Evasion.tickSuperDash(f, now);
         if (f.move != null) {
             Move m = f.move;
             if (now < f.stunUntil && f.moveTick >= m.armor) {                  // hit out of it
@@ -291,6 +297,7 @@ public final class CombatEngine {
         DBZConfig.Server c = DBZConfig.SERVER;
         Fighter g = of(v);
         if (now < g.wakeUntil) return;                                          // just got up
+        if (Evasion.tryVanish(v, a, now)) return;                               // they dashed just in time
         boolean downed = CombatMoves.isDowned(v, now);
         if (downed && g.downedHits >= c.downedHitLimit.get()) return;          // no beating a floored foe forever
         if (g.comboFrom != a.getId() || now - g.lastHitAt > c.comboResetTicks.get()) {
@@ -321,6 +328,7 @@ public final class CombatEngine {
         int outcome = outcomeImpact;
         pendingImpact = -1;
         pendingUnblockable = false;
+        if (outcome == -2) return;                                              // dodged (an afterimage, Ultra Instinct)
         if (!struck && outcome < 0) return;                                     // refused (PvP rules, invulnerable)
         f.landed = true;
         if (outcome == ImpactPacket.GUARD || outcome == ImpactPacket.PARRY) {  // blocked: a little pushback, no combo

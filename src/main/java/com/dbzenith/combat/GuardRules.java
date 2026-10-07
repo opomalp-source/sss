@@ -51,6 +51,7 @@ public final class GuardRules {
                 double len = Math.max(0.01, Math.sqrt(dx * dx + dz * dz));
                 foe.knockback(0.9, -dx / len, -dz / len);
             }
+            com.dbzenith.combat.engine.Evasion.onPerfectGuard(victim, attacker, now);   // a perfect guard: counter (CX-19)
             return Outcome.PARRY;
         }
         double maxBody = Math.max(1, d.getDerived().maxBody());

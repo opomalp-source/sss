@@ -1485,3 +1485,26 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   - `CombatV4Tests`: moves from data and the selection; a chain lands, continues and counts the combo; the uppercut launches; a bare vanilla punch does nothing; an NPC's swing is a move.
   - The four Combat v3 melee tests went with what they tested. 157 GameTests.
 - **Checked in the dev client:** the light chain and the uppercut on a Namekian Warrior (clips, impacts, knockback), and a Frieza Force Soldier fighting Dev through the engine.
+
+## 2026-10-07 — CX-19 Combat v4, phase 3: guard, vanish, counter, Burst, super dash (v0.53.0)
+- **`combat/engine/Evasion`** takes over the Dash key from Combat v3 (`CombatMoves.dashKey` and its moves are gone; the downed bookkeeping stays in `CombatMoves`). The key now does, in order:
+  - floored: a tech roll;
+  - caught in a combo (stunned, or juggled with hits taken): a **Burst** (25% ki and one of two charges; it frees you, ends the combo, throws everyone within 5 blocks off and stuns them briefly, and cuts their moves). The Burst replaces the Breaker Wave and the Revenge Counter; the PvP rules apply to whom it pushes;
+  - juggled but free: an air recovery;
+  - guarding: a side step or spot dodge;
+  - after a launch: the chase (the next blow is a Z-hit);
+  - pushing forward at a foe in a 20° cone, 4-40 blocks away, in sight: a **super dash** (5% ki; flies at them each tick, easing off as it closes in so the client's momentum doesn't carry it through, stops dead 2.6 blocks away and opens a Z-hit);
+  - otherwise: the ordinary dash, which opens a 5-tick **vanish** window.
+- **Vanish** (`tryVanish`, checked in `CombatEngine.hit` before any damage): the blow misses; the defender appears 1.6 blocks behind the attacker, facing them (4% ki, 3 s cooldown) and gets the counter window.
+- **Counter:** after a vanish, a perfect guard (`GuardRules` calls `Evasion.onPerfectGuard` on a parry) or a chase counter, a press within 12 ticks throws `counter_strike` (a data move that the chain never picks).
+- **Guard:**
+  - Covers only blows within a 200° arc in front: `CombatEvents` lowers the guard for one blow from behind and raises it again afterwards.
+  - A dodged engine blow (an afterimage, a spot dodge, Ultra Instinct) is reported to the engine as a miss (outcome -2), so it neither stuns nor launches.
+- **Feedback** on the action bar: VANISH!, PERFECT GUARD!, Parried!, COUNTER!, BURST! (proper popups come with the HUD phase).
+- **Config `[combat_engine]`:** the vanish window, cooldown and ki; the counter window; the Burst ki and recharge; the super dash ki, range, speed and time limit; the guard arc.
+- **Tests:**
+  - `EvasionTests`: a vanish dodges and counters; a perfect guard counters; guard only covers the front; the super dash goes straight for the foe.
+  - The Combat v3 dash tests are ported (chase, Burst charges, roll, air recovery, spot dodge); the stun test expects a stunned dash to try a Burst.
+  - GameTest players now have their spawn protection cleared (they never tick it away, so blows on them were refused).
+  - 161 GameTests.
+- **Checked in the dev client:** a super dash across 20 blocks to a Namekian Warrior. The first version overshot through the target; it now stops 1.7 blocks in front.

@@ -32,7 +32,7 @@ public record InputPacket(Action action) {
                 case CHARGE_START -> data.setCharging(true);
                 case CHARGE_STOP -> data.setCharging(false);
                 case GUARD_START -> {
-                    if (com.dbzenith.combat.GuardRules.raise(data, player.level().getGameTime())) com.dbzenith.combat.CombatMoves.guardRaised(player, data);
+                    if (com.dbzenith.combat.GuardRules.raise(data, player.level().getGameTime())) com.dbzenith.combat.engine.Evasion.guardRaised(player, data);
                 }
                 case GUARD_STOP -> com.dbzenith.combat.GuardRules.lower(data);
                 case TOGGLE_FLIGHT -> FlightHandler.toggle(player);

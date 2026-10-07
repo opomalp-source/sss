@@ -25,7 +25,7 @@ public final class DashHandler {
         if (data == null || !player.isAlive() || player.isSpectator()) return false;
         DBZConfig.Server c = DBZConfig.SERVER;
         long now = player.level().getGameTime();
-        if (com.dbzenith.combat.CombatMoves.dashKey(player, data, forward, strafe)) return true;   // the dash key in context
+        if (com.dbzenith.combat.engine.Evasion.dashKey(player, data, forward, strafe)) return true;   // the dash key in context (CX-19)
         if (data.isOnCooldown(COOLDOWN_ID, now)) return false;
         if (com.dbzenith.registry.ModEffects.isStunned(player)) return false;
         boolean free = player.getAbilities().instabuild;

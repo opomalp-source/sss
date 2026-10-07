@@ -247,7 +247,7 @@ public final class DBZCommand {
                                                 int anim = switch (move) {
                                                     case "sweep" -> { com.dbzenith.combat.engine.CombatEngine.press(p, new com.dbzenith.combat.engine.Moves.Input(com.dbzenith.combat.engine.Move.Button.HEAVY, com.dbzenith.combat.engine.Move.Dir.BACK, false, false, true)); yield -1; }
                                                     case "breaker" -> { d.setLastFoeHitTick(now); p.setShiftKeyDown(true);
-                                                        com.dbzenith.combat.CombatMoves.dashKey(p, d, 0, 0); p.setShiftKeyDown(false); yield -1; }
+                                                        com.dbzenith.combat.engine.Evasion.dashKey(p, d, 0, 0); p.setShiftKeyDown(false); yield -1; }
                                                     case "knockdown" -> { com.dbzenith.combat.CombatMoves.knockDown(p, now); yield -1; }
                                                     case "uppercut" -> com.dbzenith.network.AnimEventPacket.UPPERCUT;
                                                     case "rush" -> com.dbzenith.network.AnimEventPacket.RUSH;

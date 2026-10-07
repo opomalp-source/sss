@@ -221,6 +221,8 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue otherworldEnabled;
         public final ForgeConfigSpec.DoubleValue comboDamageDecay, comboMinDamage, hitstunDecay, hitstunMin, wallSlamBonus, groundSlamBonus, dashStrikeBonus, downedDamage;
         public final ForgeConfigSpec.IntValue juggleLimit, downedHitLimit, chainWindowTicks, inputBufferTicks, comboResetTicks, wakeUpGraceTicks;
+        public final ForgeConfigSpec.IntValue vanishWindowTicks, vanishCooldownTicks, counterWindowTicks, burstRechargeTicks, superDashMaxTicks;
+        public final ForgeConfigSpec.DoubleValue vanishKiPercent, burstKiPercent, superDashKiPercent, superDashRange, superDashSpeed, guardArcDegrees;
         public final ForgeConfigSpec.BooleanValue pvpRules;
         public final ForgeConfigSpec.IntValue pvpToggleCooldown;
         public final ForgeConfigSpec.IntValue pvpCombatTag;
@@ -611,6 +613,17 @@ public final class DBZConfig {
             wallSlamBonus = b.comment("Extra damage (share of the blow) when a foe knocked away hits a wall").defineInRange("wallSlamBonus", 0.4, 0.0, 10.0);
             groundSlamBonus = b.comment("Extra damage (share of the blow) when a spiked foe hits the ground").defineInRange("groundSlamBonus", 0.3, 0.0, 10.0);
             dashStrikeBonus = b.comment("The first blow within half a second of a dash hits this much harder (a Z-hit)").defineInRange("dashStrikeBonus", 1.5, 1.0, 10.0);
+            vanishWindowTicks = b.comment("After a dash, a blow landing within this many ticks is vanished: you appear behind the attacker").defineInRange("vanishWindowTicks", 5, 0, 40);
+            vanishCooldownTicks = b.comment("Ticks between vanishes").defineInRange("vanishCooldownTicks", 60, 0, 6000);
+            vanishKiPercent = b.comment("Ki a vanish costs (percent of max)").defineInRange("vanishKiPercent", 4.0, 0.0, 100.0);
+            counterWindowTicks = b.comment("After a vanish or a perfect guard, a press within this many ticks throws a counter").defineInRange("counterWindowTicks", 12, 0, 100);
+            burstKiPercent = b.comment("Ki a Burst (Dash while caught in a combo) costs (percent of max)").defineInRange("burstKiPercent", 25.0, 0.0, 100.0);
+            burstRechargeTicks = b.comment("A spent Burst charge comes back after this many ticks (two charges)").defineInRange("burstRechargeTicks", 600, 0, 72000);
+            superDashKiPercent = b.comment("Ki a super dash (Dash forward at a foe) costs (percent of max)").defineInRange("superDashKiPercent", 5.0, 0.0, 100.0);
+            superDashRange = b.comment("A super dash reaches foes this far away").defineInRange("superDashRange", 40.0, 4.0, 256.0);
+            superDashSpeed = b.comment("Super dash speed, blocks per tick").defineInRange("superDashSpeed", 1.8, 0.2, 10.0);
+            superDashMaxTicks = b.comment("A super dash gives up after this many ticks").defineInRange("superDashMaxTicks", 30, 1, 400);
+            guardArcDegrees = b.comment("Guard covers blows from within this arc in front (360 = all round)").defineInRange("guardArcDegrees", 200.0, 0.0, 360.0);
             b.pop();
 
             b.comment("PvP mode (CX-19): players fight each other only in PvP mode (key P, or /pvp)").push("pvp");

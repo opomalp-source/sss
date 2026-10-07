@@ -53,7 +53,8 @@ import java.util.Map;
 @Mod.EventBusSubscriber(modid = DBZenith.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class CombatMoves {
     public static final int DIR_NEUTRAL = 0, DIR_FORWARD = 1, DIR_BACK = 2, DIR_LEFT = 3, DIR_RIGHT = 4;
-    static final int ZHIT_WINDOW = 10, ZHIT_STUN = 20, CHASE_WINDOW = 30, MAX_CHASES = 3, COUNTER_WINDOW = 8,
+    public static final int MAX_CHASES = 3;
+    static final int ZHIT_WINDOW = 10, ZHIT_STUN = 20, CHASE_WINDOW = 30, COUNTER_WINDOW = 8,
             DOWNED_TICKS = 30, BREAKER_RECHARGE = 600, REVENGE_COOLDOWN = 80, CLASH_WINDOW = 3;
     static final double ZHIT_MULT = 1.5, CHASE_BONUS = 1.15, SWEEP_MULT = 1.2, DOWNED_TAKEN = 0.5;
 
@@ -124,7 +125,7 @@ public final class CombatMoves {
         }
     }
 
-    static void getUp(LivingEntity e) {
+    public static void getUp(LivingEntity e) {
         DOWNED.remove(e);
         e.removeEffect(ModEffects.STUN.get());
         CombatState s = state(e);
@@ -140,182 +141,6 @@ public final class CombatMoves {
         SPIKED.put(e, now + 60);
     }
 
-    // ------------------------------------------------------------------ the dash key, in context
-
-    /**
-     * Runs before an ordinary dash. Returns true when the key did something else: ground slide, snap recovery, Breaker
-     * Wave, Revenge Counter, spot dodge / side step, or a chase.
-     */
-    public static boolean dashKey(ServerPlayer player, PlayerData d, float forward, float strafe) {
-        long now = player.level().getGameTime();
-        CombatState s = d.combat();
-        DBZConfig.Server c = DBZConfig.SERVER;
-        boolean free = player.getAbilities().instabuild;
-        boolean underAttack = now - d.getLastFoeHitTick() <= 20;
-        if (isDowned(player, now) || s.downed(now)) {                       // ground slide: roll out
-            getUp(player);
-            float yaw = player.getYRot() * Mth.DEG_TO_RAD;
-            Vec3 dir = new Vec3(-Mth.sin(yaw), 0, Mth.cos(yaw)).scale(forward == 0 && strafe == 0 ? -1 : forward)
-                    .add(new Vec3(Mth.cos(yaw), 0, Mth.sin(yaw)).scale(strafe));
-            dir = dir.lengthSqr() < 1e-4 ? new Vec3(-Mth.sin(yaw), 0, Mth.cos(yaw)).scale(-1) : dir.normalize();
-            player.setDeltaMovement(dir.scale(c.dashStrength.get() * 0.7).add(0, 0.15, 0));
-            player.hurtMarked = true;
-            d.setDashEvadeUntil(now + 8);
-            anim(player, AnimEventPacket.RECOVER, 1);
-            return true;
-        }
-        if (player.isShiftKeyDown() && (underAttack || ModEffects.isStunned(player))) return breaker(player, d, now);
-        if (ModEffects.isStunned(player)) return revenge(player, d, now);
-        if (!player.onGround() && now - s.launchedAt <= 30) {                // snap recovery
-            if (!free && d.getStamina() < 15) return true;
-            if (!free) d.setStamina(d.getStamina() - 15);
-            s.launchedAt = Long.MIN_VALUE / 2;
-            player.setDeltaMovement(0, 0.12, 0);
-            player.hurtMarked = true;
-            player.fallDistance = 0;
-            d.setDashEvadeUntil(now + 8);
-            anim(player, AnimEventPacket.RECOVER, 0);
-            player.serverLevel().sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + 1, player.getZ(), 12, 0.4, 0.4, 0.4, 0.05);
-            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.DASH.get(), SoundSource.PLAYERS, 0.8f, 1.4f);
-            return true;
-        }
-        if (d.isGuarding()) {                                              // spot dodge or side step
-            double cost = c.dashStaminaCost.get() * 0.5;
-            if (!free && d.getStamina() < cost) return true;
-            if (!free) d.setStamina(d.getStamina() - cost);
-            if (Math.abs(strafe) > 0.3f) {
-                float yaw = player.getYRot() * Mth.DEG_TO_RAD;
-                Vec3 left = new Vec3(Mth.cos(yaw), 0, Mth.sin(yaw)).scale(Math.signum(strafe) * c.dashStrength.get() * 0.55);
-                player.setDeltaMovement(left.x, player.onGround() ? 0.1 : player.getDeltaMovement().y, left.z);
-                player.hurtMarked = true;
-                d.setDashEvadeUntil(now + 8);
-                anim(player, AnimEventPacket.DODGE, strafe > 0 ? 1 : 2);
-            } else {
-                d.setDashEvadeUntil(now + 10);
-                anim(player, AnimEventPacket.DODGE, 0);
-            }
-            return true;
-        }
-        if (now < s.chaseReadyUntil && s.chaseCount < MAX_CHASES) return chase(player, d, now);
-        return false;
-    }
-
-    static boolean chase(ServerPlayer player, PlayerData d, long now) {
-        CombatState s = d.combat();
-        Entity e = player.level().getEntity(s.launchTargetId);
-        if (!(e instanceof LivingEntity target) || !target.isAlive() || target.distanceTo(player) > 40) return false;
-        boolean free = player.getAbilities().instabuild;
-        DBZConfig.Server c = DBZConfig.SERVER;
-        if (!free && (d.getStamina() < c.dashStaminaCost.get() || d.getKi() < c.dashKiCost.get())) return false;
-        if (!free) {
-            d.setStamina(d.getStamina() - c.dashStaminaCost.get());
-            d.setKi(d.getKi() - c.dashKiCost.get());
-        }
-        Vec3 flight = target.getDeltaMovement();
-        Vec3 ahead = flight.lengthSqr() > 0.01 ? flight.normalize() : target.position().subtract(player.position()).normalize();
-        Vec3 dest = target.position().add(ahead.scale(1.8));
-        ServerLevel level = player.serverLevel();
-        level.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + 1, player.getZ(), 8, 0.3, 0.5, 0.3, 0.02);
-        player.teleportTo(dest.x, dest.y, dest.z);
-        player.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, target.getEyePosition());
-        player.setDeltaMovement(Vec3.ZERO);
-        player.hurtMarked = true;
-        player.fallDistance = 0;
-        s.chaseCount++;
-        s.chaseTick = now;
-        s.chaseReadyUntil = Long.MIN_VALUE / 2;
-        d.setDashEvadeUntil(now + 6);
-        d.markDirty();
-        CombatState v = state(target);
-        if (v != null) {
-            v.chasedTick = now;
-            v.chaserId = player.getId();
-        }
-        anim(player, AnimEventPacket.DASH, 0);
-        level.playSound(null, dest.x, dest.y, dest.z, com.dbzenith.registry.ModSounds.VANISH.get(), SoundSource.PLAYERS, 0.5f, 1.9f);
-        return true;
-    }
-
-    /** Guard raised: just as a chaser arrives, that is a chase counter: you vanish behind them and they stagger. */
-    public static void guardRaised(ServerPlayer player, PlayerData d) {
-        long now = player.level().getGameTime();
-        CombatState s = d.combat();
-        if (now - s.chasedTick > COUNTER_WINDOW) return;
-        Entity e = player.level().getEntity(s.chaserId);
-        s.chasedTick = Long.MIN_VALUE / 2;
-        if (!(e instanceof LivingEntity chaser) || !chaser.isAlive()) return;
-        Vec3 behind = chaser.position().subtract(chaser.getLookAngle().normalize().scale(1.5));
-        player.teleportTo(behind.x, behind.y, behind.z);
-        player.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, chaser.getEyePosition());
-        player.setDeltaMovement(Vec3.ZERO);
-        player.hurtMarked = true;
-        chaser.addEffect(new MobEffectInstance(ModEffects.STUN.get(), 15, 0));
-        CombatState cs = state(chaser);
-        if (cs != null) cs.chaseReadyUntil = Long.MIN_VALUE / 2;
-        ImpactPacket.at(chaser.position().add(0, 1, 0), player.getLookAngle(), ImpactPacket.PARRY, 1.1f, 0xC0E0FF, player.getId()).send(player.serverLevel());
-        player.displayClientMessage(Component.translatable("message.dbzenith.chase_counter"), true);
-        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.VANISH.get(), SoundSource.PLAYERS, 0.6f, 1.5f);
-    }
-
-    static boolean revenge(ServerPlayer player, PlayerData d, long now) {
-        boolean free = player.getAbilities().instabuild;
-        double cost = d.getDerived().maxStamina() * 0.10;
-        if (d.isOnCooldown("revenge", now) || !free && d.getStamina() < cost) return true;   // stunned: nothing else to do
-        if (!free) d.setStamina(d.getStamina() - cost);
-        d.setCooldown("revenge", now + REVENGE_COOLDOWN);
-        CombatState s = d.combat();
-        player.removeEffect(ModEffects.STUN.get());
-        s.hyperArmorUntil = now + 12;
-        Entity e = player.level().getEntity(s.lastAttackerId);
-        if (e instanceof LivingEntity foe && foe.isAlive() && foe.distanceTo(player) < 10) {
-            Vec3 front = foe.position().add(player.position().subtract(foe.position()).multiply(1, 0, 1).normalize().scale(1.2));
-            player.teleportTo(front.x, foe.getY(), front.z);
-            player.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, foe.getEyePosition());
-            s.lastDashTick = now;                                      // the counter lands as a Z-hit
-            double damage = DamageCalculator.meleeOutgoing(d, 1.0, 1) * ZHIT_MULT;
-            foe.invulnerableTime = 0;
-            foe.hurt(ModDamageTypes.thrown(player.serverLevel(), player), (float) damage);
-            foe.addEffect(new MobEffectInstance(ModEffects.STUN.get(), ZHIT_STUN, 0));
-            ImpactPacket.melee(player, foe, ImpactPacket.HEAVY).send(player.serverLevel());
-            s.lastDashTick = Long.MIN_VALUE / 2;
-        }
-        anim(player, AnimEventPacket.ZHIT, 1);
-        player.displayClientMessage(Component.translatable("message.dbzenith.revenge"), true);
-        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.PUNCH_HEAVY.get(), SoundSource.PLAYERS, 1f, 0.6f);
-        return true;
-    }
-
-    static boolean breaker(ServerPlayer player, PlayerData d, long now) {
-        CombatState s = d.combat();
-        if (s.breakerCharges <= 0) {
-            player.displayClientMessage(Component.translatable("message.dbzenith.breaker_empty"), true);
-            return true;
-        }
-        s.breakerCharges--;
-        if (s.breakerRechargeAt < now) s.breakerRechargeAt = now + BREAKER_RECHARGE;
-        d.markDirty();
-        player.removeEffect(ModEffects.STUN.get());
-        getUp(player);
-        d.setDashEvadeUntil(now + 10);
-        ServerLevel level = player.serverLevel();
-        double damage = DamageCalculator.kiOutgoing(d, 0.3);
-        for (LivingEntity e : TechniqueEffects.around(player, 5)) {
-            e.invulnerableTime = 0;
-            e.hurt(ModDamageTypes.kiBlast(level, player, player), (float) damage);
-            Vec3 push = e.position().subtract(player.position()).normalize().scale(1.7);
-            AerialCombat.queue(e, new Vec3(push.x, 0.45, push.z));
-        }
-        int aura = com.dbzenith.ki.Aura.color(d);
-        ImpactPacket.at(player.position().add(0, 1, 0), new Vec3(0, 1, 0), ImpactPacket.EXPLOSION, 1.3f, aura, player.getId()).send(level);
-        anim(player, AnimEventPacket.BREAKER, 0);
-        level.playSound(null, player.getX(), player.getY(), player.getZ(), com.dbzenith.registry.ModSounds.EXPLOSION.get(), SoundSource.PLAYERS, 0.9f, 1.3f);
-        return true;
-    }
-
-    static void anim(ServerPlayer player, int kind, int data) {
-        ModNetwork.sendToTrackingAndSelf(player, new AnimEventPacket(player.getId(), kind, data));
-    }
-
     // ------------------------------------------------------------------ ticking and events
 
     /** Per player tick (KiTicker): breaker charges come back one at a time. */
@@ -323,7 +148,7 @@ public final class CombatMoves {
         CombatState s = d.combat();
         if (s.breakerCharges < 2 && now >= s.breakerRechargeAt) {
             s.breakerCharges++;
-            s.breakerRechargeAt = s.breakerCharges < 2 ? now + BREAKER_RECHARGE : Long.MIN_VALUE / 2;
+            s.breakerRechargeAt = s.breakerCharges < 2 ? now + DBZConfig.SERVER.burstRechargeTicks.get() : Long.MIN_VALUE / 2;
             d.markDirty();
         }
         if (s.downedUntil > Long.MIN_VALUE / 2 && now >= s.downedUntil) {

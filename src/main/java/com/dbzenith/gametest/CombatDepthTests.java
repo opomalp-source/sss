@@ -57,7 +57,7 @@ public final class CombatDepthTests {
         p.addEffect(new MobEffectInstance(ModEffects.STUN.get(), 100, 0));
         helper.assertTrue(TechniqueHandler.use(p, Techniques.KI_BLAST, true) == TechniqueHandler.Result.STUNNED, "no techniques while stunned");
         helper.assertTrue(p.getAttributeValue(Attributes.MOVEMENT_SPEED) < 1e-6, "cannot move: " + p.getAttributeValue(Attributes.MOVEMENT_SPEED));
-        ModCapabilities.getOrThrow(p).setStamina(0);                    // a stunned dash is a Revenge Counter, which needs stamina
+        ModCapabilities.getOrThrow(p).setKi(0);                         // a stunned dash is a Burst (CX-19), which needs ki
         DashHandler.dash(p, 1, 0);
         helper.assertTrue(ModEffects.isStunned(p) && p.getDeltaMovement().horizontalDistanceSqr() < 1e-6, "cannot dash");
         Zombie zombie = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(1, 1, 1));

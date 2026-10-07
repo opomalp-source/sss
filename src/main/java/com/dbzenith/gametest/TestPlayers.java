@@ -30,6 +30,12 @@ public final class TestPlayers {
         level.getServer().getPlayerList().placeNewPlayer(connection, player);
         channel.releaseOutbound();
         com.dbzenith.combat.PvpRules.TEST_BYPASS.add(player.getUUID());   // older tests fight freely (CX-19)
+        try {                                                                    // fake players never tick their spawn protection away
+            java.lang.reflect.Field f = ServerPlayer.class.getDeclaredField("spawnInvulnerableTime");
+            f.setAccessible(true);
+            f.setInt(player, 0);
+        } catch (ReflectiveOperationException ignored) {
+        }
         return player;
     }
 

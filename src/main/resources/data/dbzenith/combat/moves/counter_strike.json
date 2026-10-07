@@ -1,0 +1,8 @@
+{
+  "_doc": "The counter: thrown by any press right after a vanish or a perfect guard (never chosen from the chain, hence the 'after'). Fast, unblockable, knocks the foe away.",
+  "button": "light", "after": ["counter_window"],
+  "startup": 1, "active": 3, "recovery": 8, "cancel": 6,
+  "damage": 1.5, "stamina_cost": 3, "hitstun": 28, "knockback": 0.9, "launch": "away", "unblockable": true,
+  "hitbox": {"shape": "sphere", "range": 3.0, "radius": 1.3},
+  "lunge": 0.5, "anim": "ZHIT", "impact": "heavy"
+}

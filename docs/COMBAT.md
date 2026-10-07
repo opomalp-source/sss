@@ -70,3 +70,26 @@ Bare-handed melee runs through the combat engine (`combat/engine`), for players 
 **Dev:**
 - `/dbz strike <player> <light|heavy> [neutral|forward|back|side|up|down]` presses a button and prints the fighter's state.
 - `/dbz move <player> sweep|knockdown`.
+
+## Guard, dodges and counters (phase 3)
+
+**Guard (Guard key, held):**
+- Covers blows from the front (a 200° arc, `guardArcDegrees`); blows from behind get round it.
+- Blocked blows empty the guard meter; an empty meter breaks the guard (a stun, and no guarding for a moment).
+- **Perfect guard:** raising the guard within 5 ticks before a blow lands parries it: no damage, the attacker staggers, and you get the counter.
+
+**The Dash key, in order of what the moment calls for:**
+
+| Situation | Dash does |
+|---|---|
+| Floored | Tech roll out (brief invulnerability) |
+| Caught in a combo (stunned, or juggled) | **Burst**: a shockwave that throws everyone off you and ends the combo. 25% ki and one of two charges (each comes back after 30 s) |
+| Launched but free | Air recovery (stamina) |
+| Guarding | Side step (with A/D) or spot dodge (brief invulnerability) |
+| Right after launching a foe | Chase: vanish into its flight path (three per combo); the next blow is a Z-hit. A foe who raises guard just as you arrive vanishes behind you instead (a chase counter) |
+| Pushing forward at a foe in front (4-40 blocks) | **Super dash**: rush to them (5% ki), arriving with a Z-hit ready |
+| Otherwise | An ordinary dash, which opens the **vanish** window: a blow landing within 5 ticks misses and you appear behind the attacker (4% ki, 3 s cooldown) |
+
+**Counter:** after a vanish or a perfect guard (or a chase counter), any press within 12 ticks throws `counter_strike`: fast, unblockable, knocks the foe away. Counters can be vanished in turn, so trading vanishes is a duel of timing.
+
+**Config `[combat_engine]`:** vanishWindowTicks, vanishCooldownTicks, vanishKiPercent, counterWindowTicks, burstKiPercent, burstRechargeTicks, superDashKiPercent, superDashRange, superDashSpeed, superDashMaxTicks, guardArcDegrees. Parry: `parryWindowTicks` and `parryStunTicks` in the combat section.

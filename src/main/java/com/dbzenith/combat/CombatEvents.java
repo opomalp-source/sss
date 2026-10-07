@@ -84,9 +84,12 @@ public final class CombatEvents {
             raw *= com.dbzenith.race.RacialSkills.blowFactor(by, victimData, foeBody, stronger, isKi);
         }
         double dealt;
+        boolean evaded = false;
         if (victimData != null) {
             Player player = (Player) victim;
             victimData.recomputeIfStale();
+            boolean guardAway = victimData.isGuarding() && !com.dbzenith.combat.engine.Evasion.guardCovers(victim, source.getEntity());
+            if (guardAway) victimData.setGuarding(false);                       // a blow from behind gets round the guard (CX-19)
             if (isStrike && com.dbzenith.combat.engine.CombatEngine.pendingUnblockable && victimData.isGuarding()) GuardRules.lower(victimData);   // the sweep takes your legs
             if (!isKi && !isThrow && !isMelee && !isStrike && !source.is(DamageTypeTags.BYPASSES_ARMOR) && event.getAmount() > 0) {
                 // Vanilla armor still matters against mobs and the environment.
@@ -126,6 +129,8 @@ public final class CombatEvents {
                     }
                 }
             }
+            if (guardAway) victimData.setGuarding(true);
+            evaded = afterimage;
             if (dealt > 0) com.dbzenith.race.TailRules.onHit(player, victimData, source); // blades can cut a tail
             BodyHealth.adoptExternalChanges(player, victimData);
             victimData.setBody(victimData.getBody() - dealt);
@@ -148,7 +153,7 @@ public final class CombatEvents {
         }
 
         if (isStrike) {                                                         // the engine reads what became of its blow
-            com.dbzenith.combat.engine.CombatEngine.outcomeImpact = impact;
+            com.dbzenith.combat.engine.CombatEngine.outcomeImpact = evaded ? -2 : impact;
             com.dbzenith.combat.engine.CombatEngine.outcomeDealt = dealt;
         }
         if (impact >= 0 && source.getEntity() != null && victim.level() instanceof net.minecraft.server.level.ServerLevel level) {

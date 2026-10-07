@@ -1622,5 +1622,12 @@
   "message.dbzenith.pvp_you_off": "Turn on PvP mode (P) to fight other players",
   "message.dbzenith.pvp_they_off": "%s is not in PvP mode",
   "message.dbzenith.pvp_pulled_in": "%s attacked you: you are in PvP mode now! Fight back, or switch it off (P) once the fight is over.",
-  "message.dbzenith.pvp_pulled_other": "%s is in PvP mode now"
+  "message.dbzenith.pvp_pulled_other": "%s is in PvP mode now",
+  "message.dbzenith.vanish": "VANISH!",
+  "message.dbzenith.perfect_guard": "PERFECT GUARD!",
+  "message.dbzenith.parried": "Parried!",
+  "message.dbzenith.counter": "COUNTER!",
+  "message.dbzenith.burst": "BURST!",
+  "message.dbzenith.burst_empty": "No Burst left: they come back one at a time",
+  "message.dbzenith.burst_no_ki": "Not enough ki to Burst"
 }
