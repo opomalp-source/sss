@@ -312,6 +312,7 @@ public class KiBlastEntity extends Projectile {
 
     @Override
     protected void onHitEntity(EntityHitResult result) {
+        com.dbzenith.combat.PvpRules.actor(getOwner());
         super.onHitEntity(result);
         if (level().isClientSide) return;
         Entity target = result.getEntity();
@@ -417,6 +418,7 @@ public class KiBlastEntity extends Projectile {
     }
 
     private void impact() {
+        com.dbzenith.combat.PvpRules.actor(getOwner());
         if (spiritBomb) {                                                    // everything where it lands takes it, but its givers
             double reach = getSize() * 1.5 + 3;
             for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(reach),

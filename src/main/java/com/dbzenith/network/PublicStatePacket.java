@@ -39,13 +39,15 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
     public static final int FUSED = FUSED_DANCE | FUSED_POTARA | FUSED_FAT | FUSED_THIN;
     /** Bit in {@code looks}: show the full race skin. */
     public static final int RACE_LOOK = 256;
+    /** In PvP mode (CX-19). */
+    public static final int PVP = 1 << 15;
 
     public static PublicStatePacket of(int entityId, PlayerData d) {
         int flags = (d.isCharging() ? CHARGING : 0) | (d.isFlying() ? FLYING : 0)
                 | (d.isGuarding() ? GUARDING : 0) | (d.isChargingHeavy() ? HEAVY : 0)
                 | (Races.of(d.getRace()).tail() && d.hasTail() ? TAIL : 0) | (d.isMeditating() ? MEDITATING : 0) | (d.isTransforming() ? TRANSFORMING : 0)
                 | (d.getKaiokenStage() > 0 ? KAIOKEN : 0) | (d.getRacialActive().contains("ki_barrier") ? BARRIER : 0)
-                | (d.combat().downedFlag ? DOWNED : 0) | (d.isDead() ? DEAD : 0) | com.dbzenith.fusion.Fusion.publicBits(d);
+                | (d.combat().downedFlag ? DOWNED : 0) | (d.isDead() ? DEAD : 0) | (d.isPvp() ? PVP : 0) | com.dbzenith.fusion.Fusion.publicBits(d);
         return new PublicStatePacket(entityId, flags, d.getReleasePercent(), Aura.color(d), d.getFormId(),
                 d.getRace().ordinal(), d.getBodyType().ordinal(), d.getHairStyle(), d.getHairColor(), d.getEyeColor(),
                 d.hasFlag("god_ki") ? -1 : com.dbzenith.stats.StatCalculator.battlePower(d), // -1: god ki cannot be read

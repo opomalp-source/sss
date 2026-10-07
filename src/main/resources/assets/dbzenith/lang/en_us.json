@@ -1611,5 +1611,16 @@
   "screen.dbzenith.tournament.over": "The tournament is over",
   "screen.dbzenith.tournament.entrants": "Signed up",
   "screen.dbzenith.tournament.champion": "CHAMPION",
-  "screen.dbzenith.tournament.rules": "Eight fighters, one match at a time on the ring. You win by ring-out (your foe touches anything below the tiles), by knockout (a blow that would kill only knocks down) or, after three minutes, by having more health left. No flying. You are healed between matches, and your opponents grow stronger every round. Prizes: training points and Senzu Beans by how far you get, and the title of World Champion. One entry a day."
+  "screen.dbzenith.tournament.rules": "Eight fighters, one match at a time on the ring. You win by ring-out (your foe touches anything below the tiles), by knockout (a blow that would kill only knocks down) or, after three minutes, by having more health left. No flying. You are healed between matches, and your opponents grow stronger every round. Prizes: training points and Senzu Beans by how far you get, and the title of World Champion. One entry a day.",
+  "key.dbzenith.pvp": "PvP mode",
+  "hud.dbzenith.pvp": "PvP",
+  "message.dbzenith.pvp_on": "PvP mode ON: players in PvP mode can fight you",
+  "message.dbzenith.pvp_off": "PvP mode OFF",
+  "message.dbzenith.pvp_cooldown": "PvP mode can be switched again in %ss",
+  "message.dbzenith.pvp_in_combat": "You are in a fight: PvP mode stays on for another %ss",
+  "message.dbzenith.pvp_safe_zone": "No fighting here: this is a safe zone",
+  "message.dbzenith.pvp_you_off": "Turn on PvP mode (P) to fight other players",
+  "message.dbzenith.pvp_they_off": "%s is not in PvP mode",
+  "message.dbzenith.pvp_pulled_in": "%s attacked you: you are in PvP mode now! Fight back, or switch it off (P) once the fight is over.",
+  "message.dbzenith.pvp_pulled_other": "%s is in PvP mode now"
 }

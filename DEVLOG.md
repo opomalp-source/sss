@@ -1434,3 +1434,25 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **Your own arm in first person** (`FirstPersonBody`): when the character has its own body (a chosen skin tone or a race look), the first-person arm is drawn as that body. The skin layers (body, race skin, form overlay, body glow) are run again with every other part of the model hidden, at the build's arm thickness, over the Minecraft skin underneath.
 - **Afterimages** (dashes, dodges, fast flight) use the character's body texture instead of the Minecraft skin.
 - **Devshot flag:** `hidegui`.
+
+## 2026-10-07 — CX-19 Combat v4, phase 1: PvP mode (v0.51.0)
+- **User request:** a full PvP combat system (Sparking! ZERO feel, Dragon Block depth), built phase by phase, stopping for feedback after each.
+  - Step 0 (findings and plan) was answered: everything from the reference video; replace Combat v3; own hitbox melee; PvP off by default but switched on when you are struck; the P key; a new special meter (I pick which techniques use it); safe zones where needed; 17d and 18b paused.
+- **`PvpRules`** (server), every player-on-player blow goes through `judge`:
+  - Rules off in the config: allow.
+  - Both are the two fighters of a tournament match: allow.
+  - Either stands in a safe zone: blocked.
+  - The attacker is not in PvP mode: blocked.
+  - The victim is in PvP mode (or "both" is not required): allow.
+  - Otherwise the victim is pulled in (their PvP mode turns on, that first blow does no harm) or blocked, per the config.
+  - Allowed blows tag both players as fighting for 15 s, and PvP mode cannot be switched off during that time.
+  - **Hooks:** `LivingAttackEvent` at HIGHEST priority (melee, ki, throws, beams and explosions owned by a player). For effects that come without a blow (stuns, seals, blindness, slowness), the acting player is marked during techniques, racial skills and ki hits, and `MobEffectEvent.Applicable` refuses harmful effects that player puts on another unless the rules allow it. Grabs and Majin absorption check directly.
+- **PvP mode:** off on joining and after death (not saved). Toggled with the key (P), `/pvp [on|off]` or `PvpTogglePacket`, with a 10 s cooldown. Operators: `/dbz pvp <targets> <true|false>`. A red ring and power-up sound going in, white and power-down coming out.
+- **Safe zones:** within 32 blocks of world spawn; the whole other world (not Hell); the tournament grounds except between the two fighters of a match; and boxes set with `/dbz pvpzone add <name> <from> <to>` / `remove` / `list` (`PvpZones`, saved with the world).
+- **Visible to all:** the PVP bit in the public state; a red ⚔ before the names of players in PvP mode; a pulsing red "PvP" badge at the top of your own screen.
+- **Config `[pvp]`:** enabled, toggleCooldownSeconds, combatTagSeconds, requireBoth, autoEnableWhenHit, spawnSafeRadius, safeOtherworld, safeTournament. Vanilla's server pvp switch still applies first.
+- **Tests (`PvpTests`):**
+  - Out of PvP mode there is no harm; the cooldown holds; a blow pulls the victim in harmlessly; then the fight is on; there is no leaving mid-fight; effects are judged like blows.
+  - Safe zones and world spawn.
+  - GameTest players get an in-memory pass so the older tests still fight (some tests reset player data, so it cannot be a saved flag). Test players never tick down their spawn protection, so the PvP tests use a blow that ignores it.
+  - 157 GameTests.

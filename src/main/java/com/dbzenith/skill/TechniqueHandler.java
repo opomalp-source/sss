@@ -31,6 +31,7 @@ public final class TechniqueHandler {
     /** {@code bypassDeck}: admin/testing path (/dbz technique) that skips the learned + deck check. */
     public static Result use(ServerPlayer player, Technique technique, boolean bypassDeck) {
         if (technique == null || !player.isAlive() || player.isSpectator()) return Result.INVALID;
+        com.dbzenith.combat.PvpRules.actor(player);                         // effects it causes on players are judged (CX-19)
         PlayerData data = ModCapabilities.get(player).orElse(null);
         if (data == null || !Forms.byId(data.getFormId()).allowsTechniques()) return Result.INVALID;
         if (com.dbzenith.registry.ModEffects.isStunned(player)) return Result.STUNNED;

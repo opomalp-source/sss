@@ -81,6 +81,7 @@ public final class ClientInput {
         }
         while (ModKeys.STATS.consumeClick()) mc.setScreen(new StatScreen());
         while (ModKeys.RADIAL.consumeClick()) com.dbzenith.client.ui.RadialMenuScreen.open();
+        while (ModKeys.PVP.consumeClick()) ModNetwork.sendToServer(new com.dbzenith.network.PvpTogglePacket());   // PvP mode (CX-19)
         while (ModKeys.KAIOKEN.consumeClick()) {
             ModNetwork.sendToServer(new InputPacket(Screen.hasShiftDown() ? InputPacket.Action.KAIOKEN_OFF : InputPacket.Action.KAIOKEN_UP));
         }

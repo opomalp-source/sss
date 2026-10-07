@@ -81,6 +81,11 @@ public final class DBZCommand {
     }
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        // /pvp, /pvp on, /pvp off: anyone, for themselves (CX-19)
+        dispatcher.register(Commands.literal("pvp")
+                .executes(ctx -> com.dbzenith.combat.PvpRules.toggle(ctx.getSource().getPlayerOrException(), null) ? 1 : 0)
+                .then(Commands.literal("on").executes(ctx -> com.dbzenith.combat.PvpRules.toggle(ctx.getSource().getPlayerOrException(), true) ? 1 : 0))
+                .then(Commands.literal("off").executes(ctx -> com.dbzenith.combat.PvpRules.toggle(ctx.getSource().getPlayerOrException(), false) ? 1 : 0)));
         dispatcher.register(Commands.literal("dbz")
                 .requires(src -> src.hasPermission(2))
                 .then(Commands.literal("stats")
@@ -368,6 +373,41 @@ public final class DBZCommand {
                                             boolean on = BoolArgumentType.getBool(ctx, "on");
                                             return apply(ctx, "Set tail " + on + " for", d -> d.setTail(on));
                                         }))))
+                .then(Commands.literal("pvp")
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("on", BoolArgumentType.bool()).executes(ctx -> {
+                                    boolean on = BoolArgumentType.getBool(ctx, "on");
+                                    var targets = EntityArgument.getPlayers(ctx, "targets");
+                                    for (ServerPlayer p : targets) com.dbzenith.combat.PvpRules.set(p, on, true);
+                                    ctx.getSource().sendSuccess(() -> Component.literal("PvP mode " + (on ? "on" : "off") + " for " + targets.size() + " player(s)"), true);
+                                    return targets.size();
+                                }))))
+                .then(Commands.literal("pvpzone")
+                        .then(Commands.literal("add").then(Commands.argument("name", StringArgumentType.word())
+                                .then(Commands.argument("from", net.minecraft.commands.arguments.coordinates.BlockPosArgument.blockPos())
+                                        .then(Commands.argument("to", net.minecraft.commands.arguments.coordinates.BlockPosArgument.blockPos()).executes(ctx -> {
+                                            String name = StringArgumentType.getString(ctx, "name");
+                                            var a = net.minecraft.commands.arguments.coordinates.BlockPosArgument.getBlockPos(ctx, "from");
+                                            var b = net.minecraft.commands.arguments.coordinates.BlockPosArgument.getBlockPos(ctx, "to");
+                                            String dim = ctx.getSource().getLevel().dimension().location().toString();
+                                            com.dbzenith.combat.PvpZones.of(ctx.getSource().getServer()).add(name, dim, a, b);
+                                            ctx.getSource().sendSuccess(() -> Component.literal("No-PvP zone " + name + " in " + dim + ": " + a.toShortString() + " to " + b.toShortString()), true);
+                                            return 1;
+                                        })))))
+                        .then(Commands.literal("remove").then(Commands.argument("name", StringArgumentType.word()).executes(ctx -> {
+                            String name = StringArgumentType.getString(ctx, "name");
+                            boolean gone = com.dbzenith.combat.PvpZones.of(ctx.getSource().getServer()).remove(name);
+                            ctx.getSource().sendSuccess(() -> Component.literal(gone ? "Removed " + name : "No zone " + name), true);
+                            return gone ? 1 : 0;
+                        })))
+                        .then(Commands.literal("list").executes(ctx -> {
+                            var zones = com.dbzenith.combat.PvpZones.of(ctx.getSource().getServer()).zones();
+                            StringBuilder sb = new StringBuilder(zones.size() + " no-PvP zone(s)");
+                            for (var z : zones) sb.append("\n ").append(z.name()).append(" (").append(z.dimension()).append(") ")
+                                    .append(z.x0()).append(' ').append(z.y0()).append(' ').append(z.z0()).append(" to ").append(z.x1()).append(' ').append(z.y1()).append(' ').append(z.z1());
+                            ctx.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
+                            return zones.size();
+                        })))
                 .then(Commands.literal("tournament")
                         .then(Commands.literal("join").then(Commands.argument("targets", EntityArgument.players()).executes(ctx -> {
                             int n = 0;

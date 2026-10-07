@@ -52,6 +52,7 @@ public final class GrabThrow {
             return true;
         }
         LivingEntity target = lookedAt(player, range);
+        if (target != null && !com.dbzenith.combat.PvpRules.mayAffect(player, target)) return false;   // PvP mode (CX-19)
         if (target == null || !grabbable(target)) {
             player.displayClientMessage(Component.translatable("message.dbzenith.nothing_to_grab"), true);
             return false;

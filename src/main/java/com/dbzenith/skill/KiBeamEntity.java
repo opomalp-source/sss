@@ -149,6 +149,7 @@ public class KiBeamEntity extends Entity {
     }
 
     private void pulse(Entity owner, Vec3 start, Vec3 end) {
+        com.dbzenith.combat.PvpRules.actor(owner);
         double r = getWidth() / 2.0;
         AABB sweep = new AABB(start, end).inflate(r + 0.5);
         for (LivingEntity target : level().getEntitiesOfClass(LivingEntity.class, sweep, e -> e != owner && e.isAlive() && !e.isSpectator())) {

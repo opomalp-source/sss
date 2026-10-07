@@ -49,6 +49,7 @@ public final class RacialSkillEffects {
 
     /** Fire the selected active racial skill. Returns whether it went off. */
     public static boolean use(ServerPlayer player) {
+        com.dbzenith.combat.PvpRules.actor(player);                         // effects it causes on players are judged (CX-19)
         PlayerData d = ModCapabilities.get(player).orElse(null);
         if (d == null || !player.isAlive()) return false;
         RacialSkill s = RacialSkills.byId(d.getRacialSelected());

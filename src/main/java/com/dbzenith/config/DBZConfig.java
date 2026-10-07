@@ -219,6 +219,14 @@ public final class DBZConfig {
         public final ForgeConfigSpec.IntValue scouterRange;
         public final ForgeConfigSpec.IntValue spacePodRechargeTicks;
         public final ForgeConfigSpec.BooleanValue otherworldEnabled;
+        public final ForgeConfigSpec.BooleanValue pvpRules;
+        public final ForgeConfigSpec.IntValue pvpToggleCooldown;
+        public final ForgeConfigSpec.IntValue pvpCombatTag;
+        public final ForgeConfigSpec.BooleanValue pvpRequireBoth;
+        public final ForgeConfigSpec.BooleanValue pvpAutoEnable;
+        public final ForgeConfigSpec.IntValue pvpSpawnSafeRadius;
+        public final ForgeConfigSpec.BooleanValue pvpSafeOtherworld;
+        public final ForgeConfigSpec.BooleanValue pvpSafeTournament;
         public final ForgeConfigSpec.IntValue otherworldDeathSeconds;
         public final ForgeConfigSpec.IntValue fusionDanceMinutes;
         public final ForgeConfigSpec.IntValue potaraMinutes;
@@ -584,6 +592,17 @@ public final class DBZConfig {
                     .defineInRange("failedFusionPower", 0.6, 0.0, 100.0);
             falseMoonTicks = b.comment("How long a Moon Orb's false moon shines (1200 = 1 minute)")
                     .defineInRange("falseMoonTicks", 1200, 20, 1_000_000);
+            b.pop();
+
+            b.comment("PvP mode (CX-19): players fight each other only in PvP mode (key P, or /pvp)").push("pvp");
+            pvpRules = b.comment("Use the PvP mode rules. Off: only the vanilla server pvp setting decides").define("enabled", true);
+            pvpToggleCooldown = b.comment("Seconds between toggles").defineInRange("toggleCooldownSeconds", 10, 0, 3600);
+            pvpCombatTag = b.comment("After hitting or being hit by a player, PvP mode cannot be turned off for this many seconds").defineInRange("combatTagSeconds", 15, 0, 3600);
+            pvpRequireBoth = b.comment("Both players must be in PvP mode to hurt each other").define("requireBoth", true);
+            pvpAutoEnable = b.comment("A player in PvP mode who strikes someone who is not pulls them into PvP mode (that first blow does no harm)").define("autoEnableWhenHit", true);
+            pvpSpawnSafeRadius = b.comment("No PvP within this many blocks of world spawn (0 = none)").defineInRange("spawnSafeRadius", 32, 0, 100_000);
+            pvpSafeOtherworld = b.comment("No PvP in the other world (King Yemma's station, Snake Way, King Kai's and the Grand Kai's planets); Hell is not safe").define("safeOtherworld", true);
+            pvpSafeTournament = b.comment("No PvP on the tournament grounds, except between the two fighters of a match").define("safeTournament", true);
             b.pop();
 
             b.comment("Enemy fighters and bosses scale to the strongest nearby player").push("enemies");

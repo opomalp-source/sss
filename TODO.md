@@ -205,3 +205,15 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [ ] CX-18 Animation v5 (user: an overhaul, "dynamic and universal": one system for the player and every NPC, data-driven, smooth, speed-scaled, procedural)
   - [x] 18a (v0.50.0) The motion engine: walk, sprint, jump, fall, landing, takeoff and flight (hover, cruise, fast, ascend, descend, backward, strafe banking) for the player and every humanoid NPC; JSON clips, sets with race and form overrides, entity profiles and tuning; /dbzanim; guide in docs/ANIMATION.md
   - [ ] 18b The combat actions (punches, kicks, transformations, casts, charge, guard) moved into the data clips too, and given to NPCs
+- [ ] CX-19 Combat v4 (user: a full PvP combat system, Sparking! ZERO feel with Dragon Block depth; phase by phase, stopping for feedback after each)
+  - [x] 19a (v0.51.0) PvP mode: key P and /pvp, server rules (cooldown, fight timer, pull-in on being struck, both must be in PvP mode), safe zones (spawn, other world, tournament grounds, /dbz pvpzone), effects judged like blows, the HUD badge and the name mark
+  - [ ] 19b Melee combos from data (light chain, heavy finisher, directional launchers, cancel windows, buffering, hitboxes); replaces Combat v3
+  - [ ] 19c Guard, perfect guard, vanish step, counter
+  - [ ] 19d Ki blasts (rapid, charged), supers and ultimates (special meter), beam clash
+  - [ ] 19e Hit feedback and camera
+  - [ ] 19f Lock-on
+  - [ ] 19g Netcode: prediction, lag compensation, anti-cheat
+  - [ ] 19h HUD: combo, guard bar, special meter, lock-on marker, enemy panel, move list, combat settings
+  - [ ] 19i Duels, training dummy, hitbox overlay, combat log
+  - [ ] 19j Balance pass and guides
+- Paused for CX-19: 17d (the robot dojo), 18b (the combat animations as data; folded into 19b)

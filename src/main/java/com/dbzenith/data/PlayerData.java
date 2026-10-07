@@ -540,6 +540,39 @@ public class PlayerData {
         return meditateTicks;
     }
 
+    // ---------------------------------------------------------------- PvP mode (CX-19): never saved, so every session and every life starts out of it
+    private boolean pvp;
+    private long pvpReadyAt, pvpCombatUntil;
+
+    public boolean isPvp() {
+        return pvp;
+    }
+
+    public void setPvp(boolean on) {
+        if (on != pvp) {
+            pvp = on;
+            markDirty();
+        }
+    }
+
+    /** Game time from which PvP mode may be toggled again. */
+    public long getPvpReadyAt() {
+        return pvpReadyAt;
+    }
+
+    public void setPvpReadyAt(long t) {
+        pvpReadyAt = t;
+    }
+
+    /** Game time until which this player counts as in a fight with another player. */
+    public long getPvpCombatUntil() {
+        return pvpCombatUntil;
+    }
+
+    public void setPvpCombatUntil(long t) {
+        pvpCombatUntil = t;
+    }
+
     public boolean isMeditating() {
         return meditating;
     }

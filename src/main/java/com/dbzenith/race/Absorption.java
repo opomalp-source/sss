@@ -134,6 +134,7 @@ public final class Absorption {
 
     public static boolean absorb(ServerPlayer player, PlayerData data, LivingEntity target) {
         if (data.getRace() != Race.MAJIN) return false;
+        if (target != null && !com.dbzenith.combat.PvpRules.mayAffect(player, target)) return false;   // PvP mode (CX-19)
         if (target == null || target instanceof BossFighter || target.getType().is(Tags.EntityTypes.BOSSES)) {
             player.displayClientMessage(Component.translatable("message.dbzenith.absorb_nothing"), true);
             return false;

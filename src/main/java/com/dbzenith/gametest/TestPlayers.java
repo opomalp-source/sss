@@ -29,6 +29,7 @@ public final class TestPlayers {
         connection.setProtocol(ConnectionProtocol.PLAY);
         level.getServer().getPlayerList().placeNewPlayer(connection, player);
         channel.releaseOutbound();
+        com.dbzenith.combat.PvpRules.TEST_BYPASS.add(player.getUUID());   // older tests fight freely (CX-19)
         return player;
     }
 
