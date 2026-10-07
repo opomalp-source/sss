@@ -142,10 +142,10 @@ public final class CombatEngine {
             e.setDeltaMovement(e.getDeltaMovement().add(push));
             e.hurtMarked = true;
         }
-        if (e instanceof ServerPlayer sp) ModNetwork.sendToTrackingAndSelf(sp, new com.dbzenith.network.MoveAnimPacket(sp.getId(), m.anim));
+        if (e instanceof ServerPlayer sp) ModNetwork.sendToTrackingAndSelf(sp, new com.dbzenith.network.MoveAnimPacket(sp.getId(), m.anim, m.id));
         else {                                                                 // NPCs play the move's clip too (phase 5)
             ModNetwork.CHANNEL.send(net.minecraftforge.network.PacketDistributor.TRACKING_ENTITY.with(() -> e),
-                    new com.dbzenith.network.MoveAnimPacket(e.getId(), m.anim));
+                    new com.dbzenith.network.MoveAnimPacket(e.getId(), m.anim, m.id));
             e.swing(InteractionHand.MAIN_HAND, true);
         }
         e.level().playSound(null, e.getX(), e.getY(), e.getZ(), com.dbzenith.registry.ModSounds.WHOOSH.get(), SoundSource.PLAYERS,
@@ -269,13 +269,17 @@ public final class CombatEngine {
     static void detect(Fighter f, Move m, long now) {
         LivingEntity a = f.entity;
         Vec3 eye = a.getEyePosition(), look = a.getLookAngle();
-        double reach = m.range + m.radius + 1.5;
+        int rewind = LagComp.rewindTicks(a);                                   // where a player attacker saw them (phase 7)
+        double reach = m.range + m.radius + 1.5 + (rewind > 0 ? 3 : 0);        // they may have moved off since
         AABB box = a.getBoundingBox().inflate(reach);
         SCRATCH.clear();
         for (LivingEntity v : a.level().getEntitiesOfClass(LivingEntity.class, box)) {
             if (v == a || !v.isAlive() || v.isSpectator() || v instanceof ArmorStand || f.struck.contains(v.getId())) continue;
             if (a.isPassengerOfSameVehicle(v) || v.isAlliedTo(a)) continue;
-            if (!Hitbox.contains(m, eye, look, a.getYRot(), v.getBoundingBox())) continue;
+            if (!Hitbox.contains(m, eye, look, a.getYRot(), v.getBoundingBox())) {
+                AABB then = rewind > 0 ? LagComp.boxAt(v, rewind) : null;
+                if (then == null || !Hitbox.contains(m, eye, look, a.getYRot(), then)) continue;
+            }
             if (!a.hasLineOfSight(v)) continue;
             SCRATCH.add(v);
         }

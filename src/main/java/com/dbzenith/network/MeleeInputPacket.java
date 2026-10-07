@@ -25,7 +25,7 @@ public record MeleeInputPacket(boolean heavy, byte push) {
 
     public static void handle(MeleeInputPacket m, Supplier<NetworkEvent.Context> ctx) {
         ServerPlayer p = ctx.get().getSender();
-        if (p == null) return;
+        if (!InputGuard.allow(p, InputGuard.Kind.MELEE) || !InputGuard.sane(p, m.push >= 0 && m.push <= 3, "melee push " + m.push)) return;
         Move.Dir push = switch (m.push) {
             case 1 -> Move.Dir.FORWARD;
             case 2 -> Move.Dir.BACK;

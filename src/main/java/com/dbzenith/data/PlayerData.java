@@ -45,6 +45,7 @@ public class PlayerData {
     private DerivedStats derived = DerivedStats.EMPTY;
     private boolean derivedStale = true;
     private boolean dirty = true;
+    private boolean poolsDirty;
     private int ticksSinceSync;
 
     public PlayerData() {
@@ -230,7 +231,7 @@ public class PlayerData {
         double v = Mth.clamp(body, 0, derived.maxBody());
         if (v != this.body) {
             this.body = v;
-            markDirty();
+            markPoolsDirty();
         }
     }
 
@@ -243,7 +244,7 @@ public class PlayerData {
         double v = Mth.clamp(ki, 0, derived.maxKi());
         if (v != this.ki) {
             this.ki = v;
-            markDirty();
+            markPoolsDirty();
         }
     }
 
@@ -256,7 +257,7 @@ public class PlayerData {
         double v = Mth.clamp(stamina, 0, derived.maxStamina());
         if (v != this.stamina) {
             this.stamina = v;
-            markDirty();
+            markPoolsDirty();
         }
     }
 
@@ -1412,7 +1413,7 @@ public class PlayerData {
         double c = Math.max(0, Math.min(com.dbzenith.combat.engine.SpecialMeter.max(), v));
         if (Math.abs(c - special) > 1e-6) {
             special = c;
-            markDirty();
+            markPoolsDirty();
         }
     }
 
@@ -1430,7 +1431,7 @@ public class PlayerData {
         double c = Math.max(0, Math.min(100, v));
         if (Math.abs(c - guardMeter) > 1e-6) {
             guardMeter = c;
-            markDirty();
+            markPoolsDirty();
         }
     }
 
@@ -1605,15 +1606,34 @@ public class PlayerData {
         return dirty;
     }
 
-    /** Called once per server tick. Returns true when a sync packet should be sent now. */
-    boolean tickSyncTimer(int interval) {
+    /**
+     * The pools (body, ki, stamina, special and guard meters) change nearly every tick: they go in a small packet of their
+     * own (CX-19 phase 7), and the whole state only when something else changed.
+     */
+    public void markPoolsDirty() {
+        poolsDirty = true;
+    }
+
+    public static final int SYNC_NONE = 0, SYNC_POOLS = 1, SYNC_FULL = 2;
+
+    /** Called once per server tick: what to send now ({@link #SYNC_NONE}, {@link #SYNC_POOLS} or {@link #SYNC_FULL}). */
+    public int tickSyncTimer(int interval) {
         ticksSinceSync++;
-        if (dirty && ticksSinceSync >= interval) {
-            dirty = false;
-            ticksSinceSync = 0;
-            return true;
-        }
-        return false;
+        if (!(dirty || poolsDirty) || ticksSinceSync < interval) return SYNC_NONE;
+        int what = dirty ? SYNC_FULL : SYNC_POOLS;
+        dirty = false;
+        poolsDirty = false;
+        ticksSinceSync = 0;
+        return what;
+    }
+
+    /** The client: the pools from a {@code PoolsSyncPacket}, as they are (the server already clamped them). */
+    public void applyPools(double body, double ki, double stamina, double special, double guardMeter) {
+        this.body = body;
+        this.ki = ki;
+        this.stamina = stamina;
+        this.special = special;
+        this.guardMeter = guardMeter;
     }
 
     // ------------------------------------------------------------------ persistence

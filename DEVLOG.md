@@ -1599,3 +1599,29 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   - Locking on swings the view to a Namekian Warrior, and strafing left circles it while the server keeps the aim on it.
   - The third-person over-the-shoulder view and the bracket marker with its label.
   - In flight Dev drifted with no keys held; it turned out someone was playing in the dev window (blocks placed, hotbar changed), not the lock.
+
+## 2026-10-07 — CX-19 Combat v4, phase 7: netcode and fairness (v0.57.0)
+- **Inputs are guarded** (`network/InputGuard`): every combat input packet passes it first.
+  - **State:** nothing from the dead, spectators or the sleeping.
+  - **Rate:** a token bucket per player and kind of input, well above what hands can do (burst / per second): melee 8/14, ki blast 12/24, dash 4/6, techniques 4/8, beam mash 10/25, lock-on 4/8, toggles 4/6, other inputs 16/30. Releases (charge stop, guard stop, the Ki Blast key coming up, letting go of a lock) always pass, so nothing can get stuck.
+  - **Malformed values** are rejected: a melee push outside 0-3, a dash input that is not a number or is beyond ±1.
+  - Violations are counted and logged at most every 10 s. `inputViolationKick` kicks past that many in a minute (0 = never).
+  - Config `[network]`: inputRateScale (0 = off) and inputViolationKick.
+- **Lag compensation** (`combat/engine/LagComp`):
+  - Every living thing within 48 blocks of a player has its box recorded each tick in a fixed ring of 24 (no allocation once made).
+  - A player's blow is tested against the victim where they are, and where the attacker saw them: half the ping in ticks plus one for interpolation, at most `lagCompensationTicks` (6). The search reaches 3 blocks further when rewinding.
+  - Everything else stays the server's: costs, damage, knockback from the present positions.
+- **Smaller sync:** body, ki, stamina, the special meter and the guard meter now mark only "pools dirty". The server sends them in `PoolsSyncPacket` (40 bytes), and the whole player state only when something else changed. Before, ki changing every tick resent the whole state 10 times a second.
+- **Client prediction** (`client/Prediction`):
+  - **Melee:** the move files reach clients (`MovesSyncPacket`, on joining and after `/reload`). A press picks the move as the server would (`Moves.select` now also takes any move list; a test checks the client's copy picks what the server picks) and plays its clip and swing at once.
+    - The chain follows the client's own impacts.
+    - `MoveAnimPacket` now carries the move's id. It confirms the prediction (nothing replays) or corrects it (the server's move plays, as with a counter). If it never comes, the predicted pose is dropped after the ping plus 6 ticks.
+  - **Quick ki blasts:** the throwing pose on release; the server's pose event for it is swallowed.
+  - **Dashes:** a plain dash moves you at once with the server's formula and settings.
+    - `DashPacket` says it was predicted, so the server sets but doesn't push the velocity again. If the server refuses the dash, it stops the client's.
+    - Nothing is predicted where the Dash key could do something else: floored, stunned, launched, guarding, a likely chase (someone near launched), a likely super dash (a foe in the cone, or locked on), on cooldown, short of stamina or ki.
+  - Client config `prediction`.
+- **Dev:** `/dbz netstats <player>` (ping, lag compensation ticks, inputs accepted and dropped, violations, tracked entities).
+- **Tests:** `NetcodeTests` (a flood of inputs is cut, spectators and malformed values are refused; with 300 ms of ping a jab lands where the pig was, with none it misses; only the pools go when only the pools change; the client picks the same moves). 176 GameTests.
+- **Checked in the dev client:** the pools packet keeps the HUD live (ki and the special meter), and the moves arrive on joining without errors.
+- **Not checked by hand:** prediction itself needs real key presses and some latency to see. Locally the round trip is nearly zero.

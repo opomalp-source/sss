@@ -16,6 +16,6 @@ public record PvpTogglePacket() {
 
     public static void handle(PvpTogglePacket msg, Supplier<NetworkEvent.Context> ctx) {
         ServerPlayer p = ctx.get().getSender();
-        if (p != null) com.dbzenith.combat.PvpRules.toggle(p, null);
+        if (InputGuard.allow(p, InputGuard.Kind.TOGGLE)) com.dbzenith.combat.PvpRules.toggle(p, null);
     }
 }

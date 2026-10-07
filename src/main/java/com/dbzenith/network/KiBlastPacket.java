@@ -18,6 +18,7 @@ public record KiBlastPacket(boolean down) {
 
     public static void handle(KiBlastPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ServerPlayer p = ctx.get().getSender();
-        if (p != null) com.dbzenith.combat.engine.KiCombat.key(p, msg.down);
+        // a release always goes through (a dropped one would leave the charge running); presses are limited
+        if (p != null && (msg.down ? InputGuard.allow(p, InputGuard.Kind.KI_BLAST) : p.isAlive())) com.dbzenith.combat.engine.KiCombat.key(p, msg.down);
     }
 }

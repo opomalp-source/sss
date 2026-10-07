@@ -21,6 +21,23 @@ public final class DashHandler {
 
     /** {@code forward}/{@code strafe} are the client's input impulses (-1..1; strafe positive = left). */
     public static boolean dash(ServerPlayer player, float forward, float strafe) {
+        return dash(player, forward, strafe, false);
+    }
+
+    /**
+     * {@code predicted}: the client already made the plain dash (CX-19 phase 7). Then the server doesn't push the velocity
+     * again; and if it refuses the dash after all, it stops the client's.
+     */
+    public static boolean dash(ServerPlayer player, float forward, float strafe, boolean predicted) {
+        boolean done = plainOrContext(player, forward, strafe, predicted);
+        if (!done && predicted && player.isAlive()) {                         // the client dashed for nothing: stop it
+            player.setDeltaMovement(Vec3.ZERO);
+            player.hurtMarked = true;
+        }
+        return done;
+    }
+
+    private static boolean plainOrContext(ServerPlayer player, float forward, float strafe, boolean predicted) {
         PlayerData data = ModCapabilities.get(player).orElse(null);
         if (data == null || !player.isAlive() || player.isSpectator()) return false;
         DBZConfig.Server c = DBZConfig.SERVER;
@@ -45,7 +62,7 @@ public final class DashHandler {
         double speed = c.dashStrength.get() * (1.0 + data.getDerived().moveSpeed());
         Vec3 v = dir.normalize().scale(speed);
         player.setDeltaMovement(v.x, player.onGround() ? Math.max(0.15, v.y) : v.y, v.z);
-        player.hurtMarked = true; // pushes the velocity to the client
+        player.hurtMarked = !predicted; // pushes the velocity to the client (unless it already moved itself)
         com.dbzenith.network.ModNetwork.sendToTrackingAndSelf(player, new com.dbzenith.network.AnimEventPacket(player.getId(),
                 com.dbzenith.network.AnimEventPacket.DASH, 0));
 

@@ -83,9 +83,9 @@ public final class PlayerDataEvents {
                 data.setLastPublicStateHash(state.stateHash());
                 ModNetwork.sendToTrackingAndSelf(player, state);
             }
-            if (data.tickSyncTimer(DBZConfig.SERVER.syncIntervalTicks.get())) {
-                ModNetwork.sendTo(player, new SyncPlayerDataPacket(data.writeSyncTag()));
-            }
+            int sync = data.tickSyncTimer(DBZConfig.SERVER.syncIntervalTicks.get());
+            if (sync == PlayerData.SYNC_FULL) ModNetwork.sendTo(player, new SyncPlayerDataPacket(data.writeSyncTag()));
+            else if (sync == PlayerData.SYNC_POOLS) ModNetwork.sendTo(player, com.dbzenith.network.PoolsSyncPacket.of(data));   // just the pools (CX-19)
         });
     }
 

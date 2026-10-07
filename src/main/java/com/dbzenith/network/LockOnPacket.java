@@ -22,7 +22,8 @@ public record LockOnPacket(int entityId) {
     public static void handle(LockOnPacket m, Supplier<NetworkEvent.Context> ctx) {
         if (ctx.get().getDirection().getReceptionSide().isServer()) {
             ServerPlayer p = ctx.get().getSender();
-            if (p != null && !com.dbzenith.combat.engine.Targeting.set(p, m.entityId)) ModNetwork.sendTo(p, new LockOnPacket(-1));
+            if (m.entityId < 0 ? p == null : !InputGuard.allow(p, InputGuard.Kind.LOCK_ON)) return;   // letting go always passes
+            if (!com.dbzenith.combat.engine.Targeting.set(p, m.entityId)) ModNetwork.sendTo(p, new LockOnPacket(-1));
         } else {
             com.dbzenith.client.LockOn.forceTarget(m.entityId);   // client-only class, loaded only here
         }

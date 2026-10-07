@@ -24,6 +24,8 @@ import java.util.Map;
 public final class Moves extends SimpleJsonResourceReloadListener {
     private static final org.slf4j.Logger LOG = com.mojang.logging.LogUtils.getLogger();
     private static Map<String, Move> moves = new LinkedHashMap<>();
+    /** The move files as loaded, for clients to predict move starts with (phase 7). */
+    private static Map<String, String> sources = new LinkedHashMap<>();
 
     private Moves() {
         super(new Gson(), "combat/moves");
@@ -37,15 +39,18 @@ public final class Moves extends SimpleJsonResourceReloadListener {
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager rm, ProfilerFiller profiler) {
         Map<String, Move> out = new LinkedHashMap<>();
+        Map<String, String> src = new LinkedHashMap<>();
         for (Map.Entry<ResourceLocation, JsonElement> e : files.entrySet()) {
             String id = e.getKey().getNamespace().equals(DBZenith.MOD_ID) ? e.getKey().getPath() : e.getKey().toString();
             try {
                 out.put(id, Move.parse(id, e.getValue().getAsJsonObject()));
+                src.put(id, e.getValue().toString());
             } catch (RuntimeException ex) {
                 LOG.error("Bad combat move {}: {}", e.getKey(), ex.toString());
             }
         }
         moves = out;
+        sources = src;
         LOG.info("Combat engine: {} moves", out.size());
     }
 
@@ -69,14 +74,24 @@ public final class Moves extends SimpleJsonResourceReloadListener {
      * that takes any; then the higher priority. Falls back to the openers when nothing follows {@code previous}.
      */
     public static Move select(Input input, String previous) {
-        Move m = best(input, previous);
-        return m != null || "start".equals(previous) ? m : best(input, "start");
+        return select(moves.values(), input, previous);
     }
 
-    private static Move best(Input in, String previous) {
+    /** The same choice among any set of moves (the client predicts with its copy). */
+    public static Move select(Iterable<Move> from, Input input, String previous) {
+        Move m = best(from, input, previous);
+        return m != null || "start".equals(previous) ? m : best(from, input, "start");
+    }
+
+    /** The move files (id, JSON), for {@code MovesSyncPacket}. */
+    public static Map<String, String> sources() {
+        return sources;
+    }
+
+    private static Move best(Iterable<Move> from, Input in, String previous) {
         Move best = null;
         int bestScore = Integer.MIN_VALUE;
-        for (Move m : moves.values()) {
+        for (Move m : from) {
             if (m.button != in.button() || !m.follows(previous)) continue;
             if (m.where == Move.Where.GROUND && !in.ground() || m.where == Move.Where.AIR && in.ground()) continue;
             int score;

@@ -398,6 +398,17 @@ public final class DBZCommand {
                                     ctx.getSource().sendSuccess(() -> Component.literal("Special meter set to " + v), true);
                                     return 1;
                                 }))))
+                .then(Commands.literal("netstats")                                  // netcode (CX-19 phase 7)
+                        .then(Commands.argument("targets", EntityArgument.players()).executes(ctx -> {
+                            for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
+                                long[] s = com.dbzenith.network.InputGuard.stats(p);
+                                String line = String.format("%s: ping %d ms, lag compensation %d tick(s), inputs %d accepted / %d dropped, %d violation(s) this minute; %d entities with position history",
+                                        p.getGameProfile().getName(), p.latency, com.dbzenith.combat.engine.LagComp.rewindTicks(p), s[0], s[1], s[2],
+                                        com.dbzenith.combat.engine.LagComp.tracked());
+                                ctx.getSource().sendSuccess(() -> Component.literal(line), false);
+                            }
+                            return 1;
+                        })))
                 .then(Commands.literal("lockon")                                    // lock-on (CX-19 phase 6): as if from the key
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .executes(ctx -> {

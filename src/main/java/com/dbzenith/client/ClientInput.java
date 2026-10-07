@@ -22,6 +22,7 @@ public final class ClientInput {
     private static boolean wasGuarding;
     private static boolean wasHeavy;
     private static boolean wasBlast;
+    private static long blastDownAt;
 
     private ClientInput() {}
 
@@ -51,18 +52,23 @@ public final class ClientInput {
         if (!wasBlast && (blast || tapped)) {
             ModNetwork.sendToServer(new com.dbzenith.network.KiBlastPacket(true));
             wasBlast = true;
+            blastDownAt = mc.level.getGameTime();
         }
         if (wasBlast && !blast) {
             ModNetwork.sendToServer(new com.dbzenith.network.KiBlastPacket(false));
             wasBlast = false;
+            Prediction.kiBlast((int) (mc.level.getGameTime() - blastDownAt));      // a tap throws at once (phase 7)
         }
 
         while (ModKeys.HEAVY.consumeClick()) {                         // a heavy: the finisher of a combo (CX-19)
-            ModNetwork.sendToServer(new com.dbzenith.network.MeleeInputPacket(true,
-                    com.dbzenith.network.MeleeInputPacket.push(mc.player.input.forwardImpulse, mc.player.input.leftImpulse)));
+            byte push = com.dbzenith.network.MeleeInputPacket.push(mc.player.input.forwardImpulse, mc.player.input.leftImpulse);
+            Prediction.melee(true, push);                                // shown at once (phase 7)
+            ModNetwork.sendToServer(new com.dbzenith.network.MeleeInputPacket(true, push));
         }
         while (ModKeys.DASH.consumeClick()) {
-            ModNetwork.sendToServer(new DashPacket(mc.player.input.forwardImpulse, mc.player.input.leftImpulse));
+            float fw = mc.player.input.forwardImpulse, st = mc.player.input.leftImpulse;
+            boolean predicted = Prediction.dash(fw, st);                 // a plain dash moves you at once (phase 7)
+            ModNetwork.sendToServer(new DashPacket(fw, st, predicted));
         }
 
         while (ModKeys.FLY.consumeClick()) ModNetwork.sendToServer(new InputPacket(InputPacket.Action.TOGGLE_FLIGHT));
@@ -128,8 +134,9 @@ public final class ClientInput {
         if (mc.hitResult != null && mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK && !foeAhead(mc)) return;
         event.setCanceled(true);
         event.setSwingHand(false);
-        ModNetwork.sendToServer(new com.dbzenith.network.MeleeInputPacket(false,
-                com.dbzenith.network.MeleeInputPacket.push(mc.player.input.forwardImpulse, mc.player.input.leftImpulse)));
+        byte push = com.dbzenith.network.MeleeInputPacket.push(mc.player.input.forwardImpulse, mc.player.input.leftImpulse);
+        Prediction.melee(false, push);                                    // shown at once (phase 7)
+        ModNetwork.sendToServer(new com.dbzenith.network.MeleeInputPacket(false, push));
     }
 
     /** A living thing within five blocks in front of you. */

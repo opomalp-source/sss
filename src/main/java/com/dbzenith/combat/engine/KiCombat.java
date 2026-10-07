@@ -124,6 +124,9 @@ public final class KiCombat {
         var packet = new com.dbzenith.network.TechniqueTiersPacket(costs);
         if (event.getPlayer() != null) ModNetwork.sendTo(event.getPlayer(), packet);
         else for (ServerPlayer p : event.getPlayerList().getPlayers()) ModNetwork.sendTo(p, packet);
+        var moves = new com.dbzenith.network.MovesSyncPacket(Moves.sources());                   // and the moves, for prediction (phase 7)
+        if (event.getPlayer() != null) ModNetwork.sendTo(event.getPlayer(), moves);
+        else for (ServerPlayer p : event.getPlayerList().getPlayers()) ModNetwork.sendTo(p, moves);
     }
 
     // ------------------------------------------------------------------ the key

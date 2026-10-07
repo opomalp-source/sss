@@ -220,6 +220,7 @@ public final class AnimController {
     public static void onEvent(AnimEventPacket msg) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return;
+        if (com.dbzenith.client.Prediction.swallow(msg)) return;            // already shown (phase 7)
         Entity e = mc.level.getEntity(msg.entityId());
         if (!(e instanceof AbstractClientPlayer player)) return;
         Track t = TRACKS.computeIfAbsent(player, p -> new Track());
@@ -361,6 +362,13 @@ public final class AnimController {
     private static final Map<String, KeyframeAnimation> CLIPS = new java.util.HashMap<>();
 
     /** A combat-engine move started (CX-19): play its clip, named as in {@link Anims} (JAB_RIGHT, LAUNCHER, ...). */
+    /** A move the server started (phase 7): for yourself, only if your client didn't already show it. */
+    public static void onMove(int entityId, String clip, String moveId) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null && entityId == mc.player.getId() && !com.dbzenith.client.Prediction.confirm(moveId)) return;
+        playClip(entityId, clip);
+    }
+
     public static void playClip(int entityId, String clip) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return;

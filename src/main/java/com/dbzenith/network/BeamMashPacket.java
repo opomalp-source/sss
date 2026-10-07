@@ -18,6 +18,6 @@ public record BeamMashPacket() {
 
     public static void handle(BeamMashPacket m, Supplier<NetworkEvent.Context> ctx) {
         ServerPlayer player = ctx.get().getSender();
-        if (player != null) BeamStruggle.mash(player);
+        if (InputGuard.allow(player, InputGuard.Kind.BEAM_MASH)) BeamStruggle.mash(player);
     }
 }

@@ -212,7 +212,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - [x] 19d (v0.54.0) Ki blasts on key C (tap: quick, hold: charged; from data), the special meter (3 bars; built by landing and taking blows, perfect guards, vanishes), supers (1 bar) and ultimates (3 bars, a cut-in cinematic) from data, the meter surge in beam clashes, the meter on every HUD style
   - [x] 19e (v0.55.0) Hit feedback: hitstop on both fighters (server-side, knockback after the freeze), criticals (from the back, or catching a wind-up), counter and Z-hit looks, damage popups and words, layered hit sounds (four new synthesized), speed lines, the ultimate camera, fighter states synced to clients (stunned and launched stances), and NPC combat animations (moves, reactions, stun, launch, knockdown, get-up)
   - [x] 19f (v0.56.0) Lock-on: key N (Shift: next foe), a target picker, a camera that keeps the foe framed with free look and free movement (circle-strafing, flight), over-the-shoulder framing in third person, a bracket marker with name and distance, automatic release, and the server-side lock (super dash to the locked foe from any angle, ki blasts curving toward it)
-  - [ ] 19g Netcode: prediction, lag compensation, anti-cheat
+  - [x] 19g (v0.57.0) Netcode: input rate limits and sanity checks (InputGuard), lag compensation (position history, rewind by ping), the pools-only sync packet, client prediction of melee starts, quick ki blasts and plain dashes with server reconciliation, /dbz netstats
   - [ ] 19h HUD: combo, guard bar, special meter, lock-on marker, enemy panel, move list, combat settings
   - [ ] 19i Duels, training dummy, hitbox overlay, combat log
   - [ ] 19j Balance pass and guides

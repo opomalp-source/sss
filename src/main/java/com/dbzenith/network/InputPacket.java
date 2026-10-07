@@ -26,7 +26,8 @@ public record InputPacket(Action action) {
 
     public static void handle(InputPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ServerPlayer player = ctx.get().getSender();
-        if (player == null || !player.isAlive()) return;
+        boolean release = msg.action == Action.CHARGE_STOP || msg.action == Action.GUARD_STOP;            // letting go is never dropped
+        if (release ? player == null || !player.isAlive() : !InputGuard.allow(player, InputGuard.Kind.INPUT)) return;
         ModCapabilities.get(player).ifPresent(data -> {
             switch (msg.action) {
                 case CHARGE_START -> data.setCharging(true);

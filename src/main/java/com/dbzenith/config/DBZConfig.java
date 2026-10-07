@@ -264,7 +264,8 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue startingAge;
 
         // --- networking ---
-        public final ForgeConfigSpec.IntValue syncIntervalTicks;
+        public final ForgeConfigSpec.IntValue syncIntervalTicks, inputViolationKick, lagCompensationTicks;
+        public final ForgeConfigSpec.DoubleValue inputRateScale;
 
         Server(ForgeConfigSpec.Builder b) {
             balanceVersion = b.comment("Balance revision of this file. When the mod rebalances, values from older revisions are reset to the new defaults once (see BALANCE.md). Leave it alone.")
@@ -686,6 +687,12 @@ public final class DBZConfig {
             b.push("network");
             syncIntervalTicks = b.comment("Minimum ticks between player-data syncs to the client while values are changing")
                     .defineInRange("syncIntervalTicks", 2, 1, 100);
+            inputRateScale = b.comment("Combat inputs per second each player may send, times this (CX-19: melee 14, ki blast 24, dash 6, techniques 8...). 0 = no limit")
+                    .defineInRange("inputRateScale", 1.0, 0.0, 10.0);
+            inputViolationKick = b.comment("Kick a player whose inputs were dropped this many times in a minute (flooding, malformed packets). 0 = never kick, only drop and log")
+                    .defineInRange("inputViolationKick", 0, 0, 10000);
+            lagCompensationTicks = b.comment("Lag compensation: a blow is also tested against where the victim was up to this many ticks ago, as the attacker saw them (their ping). 0 = off")
+                    .defineInRange("lagCompensationTicks", 6, 0, 20);
             b.pop();
         }
     }
@@ -694,7 +701,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue showDebugOverlay;
         public final ForgeConfigSpec.BooleanValue customHotbar;
         public final ForgeConfigSpec.BooleanValue hideVanillaHearts;
-        public final ForgeConfigSpec.BooleanValue transformCutIn, ultimateCinematic, damagePopups;
+        public final ForgeConfigSpec.BooleanValue transformCutIn, ultimateCinematic, damagePopups, prediction;
         public final ForgeConfigSpec.DoubleValue lockOnRange, lockOnCameraSpeed, lockOnFreeLook;
         public final ForgeConfigSpec.DoubleValue screenShake;
         public final ForgeConfigSpec.BooleanValue hitstop;
@@ -726,6 +733,8 @@ public final class DBZConfig {
                     .define("ultimateCinematic", true);
             damagePopups = b.comment("Show the damage of each blow over whoever took it, and words for counters, criticals, guard breaks and perfect guards")
                     .define("damagePopups", true);
+            prediction = b.comment("Start your own blows, quick ki blasts and dashes on screen at once instead of waiting for the server (it still decides; a wrong guess is corrected)")
+                    .define("prediction", true);
             lockOnRange = b.comment("Lock-on (key N): how far away a foe can be locked onto, in blocks")
                     .defineInRange("lockOnRange", 48.0, 8.0, 80.0);
             lockOnCameraSpeed = b.comment("Lock-on: how quickly the camera turns to keep the foe framed (0 = it doesn't; only the marker shows)")

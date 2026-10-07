@@ -166,3 +166,12 @@ Bare-handed melee runs through the combat engine (`combat/engine`), for players 
 - **Letting go:** automatic when the foe dies, gets too far, or is out of sight for 3 seconds.
 - **Client config:** `lockOnRange` (48), `lockOnCameraSpeed` (1; 0 = marker only), `lockOnFreeLook` (25°).
 - **Dev:** `/dbz lockon <player> [target]`.
+
+## Netcode and fairness (phase 7)
+
+- **The server decides:** every hit, cost, cooldown, reach and position.
+- **Input limits:** each kind of input has a per-second budget per player (well above human speed). Extra presses are dropped, and malformed packets are rejected. Server config `[network]`: `inputRateScale` (0 = no limit), `inputViolationKick` (0 = never kick).
+- **Lag compensation:** your blows are also tested against where you saw your foe, rewound by your ping (at most `lagCompensationTicks`, 6 = 300 ms). Fair at normal latencies; a high-ping player can't reach back further than that.
+- **Prediction:** your own blows, quick ki blasts and plain dashes start on your screen at once. The server confirms or corrects them, and a refused one is taken back. Client config `prediction`.
+- **Small packets:** the fast-changing pools (body, ki, stamina, the special and guard meters) go in a 40-byte packet; the full state only when something else changes.
+- **Dev:** `/dbz netstats <player>`.
