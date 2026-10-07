@@ -640,6 +640,8 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue speedLines;
         public final ForgeConfigSpec.BooleanValue hairPhysics;
         public final ForgeConfigSpec.BooleanValue proceduralMotion;
+        public final ForgeConfigSpec.BooleanValue animationEngine;
+        public final ForgeConfigSpec.BooleanValue animationLabels;
         public final ForgeConfigSpec.IntValue artStyle;
         public final ForgeConfigSpec.IntValue uiStyle;
         public final ForgeConfigSpec.IntValue hudStyle;
@@ -682,6 +684,12 @@ public final class DBZConfig {
                     .defineInRange("artStyle", 0, 0, 2);
             proceduralMotion = b.comment("Bodies bank into flying turns, lean into climbs, dives and fast runs, and squash on hard landings")
                     .define("proceduralMotion", true);
+            b.pop();
+            b.push("animation");
+            animationEngine = b.comment("Animation v5: one motion engine for the player and every NPC (walk, run, jump, fall, flight, landing; data in assets/dbzenith/motion). Off: the old animations")
+                    .define("engine", true);
+            animationLabels = b.comment("Show each figure's motion state above its head (a debugging aid; also /dbzanim labels)")
+                    .define("labels", false);
             b.pop();
         }
     }

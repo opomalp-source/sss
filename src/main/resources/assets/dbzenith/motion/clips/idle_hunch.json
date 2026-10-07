@@ -1,0 +1,13 @@
+{
+  "_doc": "A hunched, twitchy idle (Saibamen, Bubbles): bent forward, knees bent, arms dangling in front.",
+  "sync": "time", "length": 40, "loop": true,
+  "bones": {
+    "torso":    [{"t": 0.0, "rot": [24, 0, 2]}, {"t": 0.5, "rot": [26, 0, -2]}],
+    "head":     [{"t": 0.0, "rot": [-6, 6, 0]}, {"t": 0.5, "rot": [-6, -6, 0]}],
+    "rightArm": [{"t": 0.0, "rot": [-22, 0, 10], "bend": 32}, {"t": 0.5, "rot": [-18, 0, 12], "bend": 28}],
+    "leftArm":  [{"t": 0.0, "rot": [-18, 0, -12], "bend": 28}, {"t": 0.5, "rot": [-22, 0, -10], "bend": 32}],
+    "rightLeg": [{"t": 0.0, "rot": [-14, 0, 6], "bend": 34}],
+    "leftLeg":  [{"t": 0.0, "rot": [-10, 0, -6], "bend": 30}],
+    "body":     [{"t": 0.0, "pos": [0, 1.8, 0]}, {"t": 0.5, "pos": [0, 1.5, 0]}]
+  }
+}

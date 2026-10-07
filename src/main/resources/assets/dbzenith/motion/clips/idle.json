@@ -1,0 +1,13 @@
+{
+  "_doc": "Standing: a relaxed stance, feet a little apart, a slow breath lifting the chest and shoulders. Time-synced, 4 seconds a breath.",
+  "sync": "time", "length": 80, "loop": true,
+  "bones": {
+    "torso":    [{"t": 0.0, "rot": [0.5, 0, 0]}, {"t": 0.45, "rot": [-1.2, 0, 0]}],
+    "head":     [{"t": 0.0, "rot": [0.5, 0, 0]}, {"t": 0.45, "rot": [-1, 0, 0]}],
+    "rightArm": [{"t": 0.0, "rot": [1, 0, 4], "bend": 7}, {"t": 0.45, "rot": [-1.5, 0, 6.5], "bend": 10}],
+    "leftArm":  [{"t": 0.0, "rot": [1, 0, -4], "bend": 7}, {"t": 0.45, "rot": [-1.5, 0, -6.5], "bend": 10}],
+    "rightLeg": [{"t": 0.0, "rot": [0, 0, 2.5], "bend": 2}],
+    "leftLeg":  [{"t": 0.0, "rot": [-1, 0, -2.5], "bend": 4}],
+    "body":     [{"t": 0.0, "pos": [0.2, 0, 0]}, {"t": 0.45, "pos": [0.1, -0.28, 0]}]
+  }
+}

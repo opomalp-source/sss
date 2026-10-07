@@ -1382,3 +1382,38 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   - Yamu: small, bald, moustache, grey tunic.
 - **Tests:** `TournamentTests` (rounds and roster; a real match: enter, the draw puts the lone player in the first match against a roster fighter, the bell, a lethal blow only knocks out, the roster fighter goes through, the player is paid, the fighter leaves). 155 GameTests.
 - **Checked in the dev client:** the grounds from above and from the stands, the bracket screen, a quarterfinal against Spopovich (announcements, the countdown, the clock), and the roster lined up.
+
+## 2026-10-07 — CX-18a: Animation v5, the motion engine (v0.50.0)
+- **User request:** an overhaul of walking, sprinting and flying; one universal, data-driven system for the player and every NPC. Step 0 (inspection and plan) was reported first; the user said to keep going, so the defaults were taken.
+- **What was there:**
+  - playerAnimator layers for players only: a stance loop and actions, with 52 clips keyed in `Anims.java`.
+  - Whole-body bank and pitch from `ProceduralMotion`.
+  - NPCs had nothing but vanilla's walk swing.
+- **The engine (`client/motion`):**
+  - `MotionEngine` reads each figure every tick: speed in its own frame, turn rate, ground and air time, falls, water and riding, items and swings. For players it also uses the synced flight flag, race and form. Anything hanging in the air without gravity's pull counts as flying.
+  - It picks a `State` (with a short hold so flickers do not jitter), cross-fades clips (smoothstep weights, per-kind blend times) and keeps the gait phase locked to the ground covered. The stride comes from each clip's leg swing and the figure's size; slow walks swing less.
+  - Procedural layers on top:
+    - a run leans from the waist and the feet with speed and acceleration, and rolls into turns;
+    - flight pitches the body from upright (hover) to horizontal (fast), climbs and dives tilt it, turns and strafing bank it;
+    - the arms trail turns and stops; breath deepens after a sprint;
+    - a landing crouch scales with the impact, and takeoff is a crouch-and-spring.
+  - **Rig coupling:** the torso leans and twists about the waist and carries the neck and shoulders with it; the head takes back the body's pitch so the eyes stay ahead; the whole figure turns about the feet on the ground and its middle in the air.
+- **Output:**
+  - `MotionAnimation` is a playerAnimator layer (priority 900) under the old stances and actions.
+  - `AnimController` now only keeps charge, guard, meditate, the heavy wind-up, knocked-down and the combat stance for itself.
+  - NPCs use `MotionModel` (`FighterRenderer`'s model). It runs the same animation through playerAnimator's `AnimationApplier`, so NPCs get identical poses with elbow and knee bends. `FighterRenderer.setupRotations` applies the whole-body transform, scaled with the renderer.
+- **Data (`assets/dbzenith/motion`, reloaded with F3+T):** see docs/ANIMATION.md.
+  - 20 clips: walk, sprint, idle and the four race idles, the powered stance, jump, fall, hover, cruise, fast, ascend, descend, backward, charge, plus a heavy walk and idle and a hunched idle and lope.
+  - Sets: `fighter` (race and form overrides), `brute`, `beast`.
+  - `profiles.json` (Saibamen and Bubbles hunch; Broly, Spopovich, ogres and King Yemma are heavy; Frieza, Beerus, Whis and the Kais stand regal; the Namekian Warrior folds his arms; Mr. Satan strikes the champion's stance) and `tuning.json`.
+- **Tools:** `/dbzanim toggle | labels | get | set | info`; config `animation.engine` and `animation.labels`. The old `ProceduralMotion` tilt is off while the engine is on. Devshot drive flags (`drivewalk`, `drivesprint`, `driveback`, `driveleft`, `driveturn`, `driveup`, `drivedown`) for testing real movement.
+- **Performance and safety:** no allocations per frame in the engine; playerAnimator's API allocates its own small vectors. Level of detail at 40 and 80 blocks. Client-side only; nothing new on the network.
+- **Fixes found while checking:**
+  - The dev "side" camera turns the body yaw at render time, so players are now read in their view yaw. That is also right for backward flight: flying away from where you look.
+  - Mobs with their AI off never update their footing and read as flying; they now count as grounded.
+- **Checked in the dev client:**
+  - the walk and sprint in side view, cycle frames showing knee bends, heel strike, arm swing and pump;
+  - hover, cruise and fast flight, backward, strafe and descend;
+  - the race idles on NPCs (Frieza regal, the Namekian with folded arms, Broly heavy, the Saibaman hunched), NPCs walking;
+  - first person unchanged.
+- **Tests:** 155 GameTests still pass. The engine is client-only, so the GameTest server does not load it.

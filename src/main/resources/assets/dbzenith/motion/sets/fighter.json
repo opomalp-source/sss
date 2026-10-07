@@ -1,0 +1,37 @@
+{
+  "_doc": "The base set for every humanoid: the player and NPCs. Races and forms swap single clips through overrides.",
+  "clips": {
+    "idle": "idle", "walk": "walk", "sprint": "sprint", "jump": "jump", "fall": "fall",
+    "hover": "hover", "cruise": "cruise", "fast": "fast", "ascend": "ascend", "descend": "descend", "backward": "backward",
+    "charge": "charge"
+  },
+  "overrides": {
+    "race:namekian": {"idle": "idle_crossed"},
+    "race:frost_demon": {"idle": "idle_regal"},
+    "race:core_person": {"idle": "idle_regal"},
+    "race:android": {"idle": "idle_regal"},
+    "race:cyborg": {"idle": "idle_regal"},
+    "race:tuffle": {"idle": "idle_regal"},
+    "race:majin": {"idle": "idle_loose"},
+    "race:vampire": {"idle": "idle_loose"},
+    "race:bio_android": {"idle": "idle_loose"},
+    "race:gen_alien": {"idle": "idle_loose"},
+    "form:super_saiyan": {"idle": "idle_powered"},
+    "form:super_saiyan_2": {"idle": "idle_powered"},
+    "form:super_saiyan_3": {"idle": "idle_powered"},
+    "form:super_saiyan_4": {"idle": "idle_powered"},
+    "form:super_saiyan_blue": {"idle": "idle_powered"},
+    "form:super_saiyan_rage": {"idle": "idle_powered"},
+    "form:lssj": {"idle": "idle_heavy", "walk": "walk_heavy"},
+    "form:lssj2": {"idle": "idle_heavy", "walk": "walk_heavy"},
+    "form:lssj3": {"idle": "idle_heavy", "walk": "walk_heavy"},
+    "form:super_saiyan_g3": {"idle": "idle_heavy", "walk": "walk_heavy"},
+    "form:buffed": {"idle": "idle_heavy", "walk": "walk_heavy"},
+    "form:giant_namekian": {"idle": "idle_heavy", "walk": "walk_heavy"},
+    "form:golden_form": {"idle": "idle_regal"},
+    "form:final_form": {"idle": "idle_regal"},
+    "form:beast_awakening": {"idle": "idle_powered"},
+    "form:potential_unleashed": {"idle": "idle_powered"},
+    "form:ultimate": {"idle": "idle_powered"}
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "_doc": "Cruising flight: the engine pitches the body toward horizontal with speed; the arms sweep back along the sides, the legs trail with a lazy flutter.",
+  "sync": "time", "length": 24, "loop": true,
+  "bones": {
+    "rightArm": [{"t": 0.0, "rot": [26, 0, 10], "bend": 8}, {"t": 0.5, "rot": [30, 0, 12], "bend": 10}],
+    "leftArm":  [{"t": 0.0, "rot": [30, 0, -12], "bend": 10}, {"t": 0.5, "rot": [26, 0, -10], "bend": 8}],
+    "rightLeg": [{"t": 0.0, "rot": [8, 0, 3], "bend": 6}, {"t": 0.5, "rot": [13, 0, 3], "bend": 16}],
+    "leftLeg":  [{"t": 0.0, "rot": [14, 0, -3], "bend": 18}, {"t": 0.5, "rot": [9, 0, -3], "bend": 8}],
+    "torso":    [{"t": 0.0, "rot": [0, 0, 0]}]
+  }
+}

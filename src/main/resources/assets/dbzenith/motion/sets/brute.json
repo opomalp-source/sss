@@ -1,0 +1,1 @@
+{ "_doc": "Big, heavy fighters.", "parent": "fighter", "clips": {"idle": "idle_heavy", "walk": "walk_heavy"} }

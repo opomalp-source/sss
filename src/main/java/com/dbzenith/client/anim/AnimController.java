@@ -37,6 +37,8 @@ import java.util.WeakHashMap;
 public final class AnimController {
     public static final ResourceLocation STATE_LAYER = new ResourceLocation(DBZenith.MOD_ID, "state");
     public static final ResourceLocation ACTION_LAYER = new ResourceLocation(DBZenith.MOD_ID, "action");
+    /** The motion engine (CX-18): walking, running, flight and idles, under the stances and actions. */
+    public static final ResourceLocation MOTION_LAYER = new ResourceLocation(DBZenith.MOD_ID, "motion");
 
     private static final Map<AbstractClientPlayer, Track> TRACKS = new WeakHashMap<>();
     /** A stance must hold this many ticks before the loop swaps, so brief flickers in speed do not jitter the pose. */
@@ -47,6 +49,8 @@ public final class AnimController {
 
     /** Called once from client setup. */
     public static void registerLayers() {
+        PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(MOTION_LAYER, 900,
+                player -> com.dbzenith.client.motion.MotionAnimation.of(com.dbzenith.client.motion.MotionEngine.get(player)));
         PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(STATE_LAYER, 1000, player -> withSpeed(player, 0));
         PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(ACTION_LAYER, 1500, player -> withSpeed(player, 1));
     }
@@ -121,6 +125,12 @@ public final class AnimController {
         if (state.has(PublicStatePacket.GUARDING)) return Anims.GUARD;
         if (state.has(PublicStatePacket.HEAVY)) return Anims.HEAVY_WINDUP;
         if (state.has(PublicStatePacket.CHARGING) || state.has(PublicStatePacket.TRANSFORMING)) return Anims.CHARGE;
+        if (com.dbzenith.client.motion.MotionEngine.enabled()) {                    // the motion engine moves the body now
+            double mx = player.getX() - player.xo, mz = player.getZ() - player.zo;
+            boolean bare = player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty();
+            boolean fresh = now - t.lastPunch < 100 || now - t.lastHurtTick < 100;
+            return bare && fresh && player.onGround() && mx * mx + mz * mz < 0.0225 ? Anims.COMBAT_STANCE : null;
+        }
         if (state.has(PublicStatePacket.FLYING) && !player.onGround()) {
             double dx = player.getX() - player.xo, dz = player.getZ() - player.zo;
             double horizontal = Math.sqrt(dx * dx + dz * dz);

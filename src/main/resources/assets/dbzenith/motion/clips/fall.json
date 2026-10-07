@@ -1,0 +1,12 @@
+{
+  "_doc": "Falling: arms up and out, legs reaching down for the ground, a slow flail.",
+  "sync": "time", "length": 30, "loop": true,
+  "bones": {
+    "rightArm": [{"t": 0.0, "rot": [-38, 0, 44], "bend": 18}, {"t": 0.5, "rot": [-46, 0, 50], "bend": 24}],
+    "leftArm":  [{"t": 0.0, "rot": [-46, 0, -50], "bend": 24}, {"t": 0.5, "rot": [-38, 0, -44], "bend": 18}],
+    "rightLeg": [{"t": 0.0, "rot": [-14, 0, 3], "bend": 22}, {"t": 0.5, "rot": [-4, 0, 3], "bend": 12}],
+    "leftLeg":  [{"t": 0.0, "rot": [6, 0, -3], "bend": 12}, {"t": 0.5, "rot": [-10, 0, -3], "bend": 22}],
+    "torso":    [{"t": 0.0, "rot": [-4, 0, 0]}],
+    "head":     [{"t": 0.0, "rot": [5, 0, 0]}]
+  }
+}

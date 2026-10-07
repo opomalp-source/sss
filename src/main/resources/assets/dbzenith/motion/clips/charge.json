@@ -1,0 +1,13 @@
+{
+  "_doc": "Powering up (NPCs that report it): a wide low stance, fists clenched down and out, the head thrown back, the whole body shaking.",
+  "sync": "time", "length": 8, "loop": true, "ease": "linear",
+  "bones": {
+    "body":     [{"t": 0.0, "pos": [0.3, 2.2, 0]}, {"t": 0.25, "pos": [-0.3, 2.2, 0]}, {"t": 0.5, "pos": [0.3, 2.2, 0]}, {"t": 0.75, "pos": [-0.3, 2.2, 0]}],
+    "torso":    [{"t": 0.0, "rot": [8, 0, 0]}],
+    "head":     [{"t": 0.0, "rot": [-16, 2, 0]}, {"t": 0.5, "rot": [-15, -2, 0]}],
+    "rightArm": [{"t": 0.0, "rot": [14, 0, 26], "bend": 35}, {"t": 0.5, "rot": [14, 0, 22], "bend": 35}],
+    "leftArm":  [{"t": 0.0, "rot": [14, 0, -22], "bend": 35}, {"t": 0.5, "rot": [14, 0, -26], "bend": 35}],
+    "rightLeg": [{"t": 0.0, "rot": [-4, 0, 16], "bend": 30}],
+    "leftLeg":  [{"t": 0.0, "rot": [-4, 0, -16], "bend": 30}]
+  }
+}

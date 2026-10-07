@@ -1,0 +1,11 @@
+{
+  "_doc": "Dropping down: arms out for balance, the knees coming up ready to land.",
+  "sync": "time", "length": 30, "loop": true,
+  "bones": {
+    "rightArm": [{"t": 0.0, "rot": [-18, 0, 36], "bend": 16}, {"t": 0.5, "rot": [-22, 0, 40], "bend": 20}],
+    "leftArm":  [{"t": 0.0, "rot": [-22, 0, -40], "bend": 20}, {"t": 0.5, "rot": [-18, 0, -36], "bend": 16}],
+    "rightLeg": [{"t": 0.0, "rot": [-24, 0, 3], "bend": 48}],
+    "leftLeg":  [{"t": 0.0, "rot": [4, 0, -3], "bend": 20}],
+    "head":     [{"t": 0.0, "rot": [8, 0, 0]}]
+  }
+}

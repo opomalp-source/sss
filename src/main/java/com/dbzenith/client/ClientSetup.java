@@ -31,6 +31,12 @@ public final class ClientSetup {
         event.enqueueWork(com.dbzenith.client.ui.SettingsEntry::registerConfigScreen);
     }
 
+    /** The motion engine's clips, sets, profiles and tuning (CX-18), reloaded with the resource packs. */
+    @SubscribeEvent
+    public static void reloadListeners(net.minecraftforge.client.event.RegisterClientReloadListenersEvent event) {
+        event.registerReloadListener(com.dbzenith.client.motion.MotionData.INSTANCE);
+    }
+
     @SubscribeEvent
     public static void registerOverlays(RegisterGuiOverlaysEvent event) {
         event.registerBelowAll("aura_edge", new com.dbzenith.client.fx.AuraEdgeOverlay());

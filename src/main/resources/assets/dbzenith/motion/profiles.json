@@ -1,0 +1,21 @@
+{
+  "_doc": "Which animation set each entity uses, and the race or form whose overrides apply to it. Any humanoid NPC drawn with the fighter renderer is animated; entities not listed use \"default\".",
+  "player":  {"set": "fighter"},
+  "default": {"set": "fighter"},
+  "entities": {
+    "dbzenith:sproutling":        {"set": "beast"},
+    "dbzenith:training_monkey":   {"set": "beast"},
+    "dbzenith:rampage_brute":     {"set": "brute"},
+    "dbzenith:spopovich":         {"set": "brute"},
+    "dbzenith:ogre_guard":        {"set": "brute"},
+    "dbzenith:enma":              {"set": "brute"},
+    "dbzenith:tyrant_lord":       {"race": "frost_demon"},
+    "dbzenith:namekian_warrior":  {"race": "namekian"},
+    "dbzenith:beerus":            {"race": "core_person"},
+    "dbzenith:whis":              {"race": "core_person"},
+    "dbzenith:grand_kai":         {"race": "core_person"},
+    "dbzenith:martial_arts_master": {"race": "core_person"},
+    "dbzenith:android_unit":      {"race": "android"},
+    "dbzenith:mr_satan":          {"form": "super_saiyan"}
+  }
+}

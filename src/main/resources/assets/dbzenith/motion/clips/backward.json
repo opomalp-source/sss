@@ -1,0 +1,11 @@
+{
+  "_doc": "Flying backwards: leaning back (the engine), arms forward and braking, legs swung forward.",
+  "sync": "time", "length": 24, "loop": true,
+  "bones": {
+    "rightArm": [{"t": 0.0, "rot": [-34, 0, 9], "bend": 30}, {"t": 0.5, "rot": [-38, 0, 11], "bend": 34}],
+    "leftArm":  [{"t": 0.0, "rot": [-38, 0, -11], "bend": 34}, {"t": 0.5, "rot": [-34, 0, -9], "bend": 30}],
+    "rightLeg": [{"t": 0.0, "rot": [-26, 0, 2], "bend": 30}],
+    "leftLeg":  [{"t": 0.0, "rot": [-14, 0, -2], "bend": 18}],
+    "torso":    [{"t": 0.0, "rot": [-4, 0, 0]}]
+  }
+}

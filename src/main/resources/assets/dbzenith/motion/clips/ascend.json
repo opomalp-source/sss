@@ -1,0 +1,11 @@
+{
+  "_doc": "Rising straight up: a fist raised overhead, the other arm along the side, legs straight together.",
+  "sync": "time", "length": 16, "loop": true,
+  "bones": {
+    "rightArm": [{"t": 0.0, "rot": [-172, 0, -6], "bend": 4}, {"t": 0.5, "rot": [-174, 0, -7], "bend": 6}],
+    "leftArm":  [{"t": 0.0, "rot": [12, 0, -9], "bend": 10}, {"t": 0.5, "rot": [14, 0, -10], "bend": 12}],
+    "rightLeg": [{"t": 0.0, "rot": [3, 0, 1], "bend": 4}],
+    "leftLeg":  [{"t": 0.0, "rot": [5, 0, -1], "bend": 8}, {"t": 0.5, "rot": [7, 0, -1], "bend": 12}],
+    "head":     [{"t": 0.0, "rot": [-10, 0, 0]}]
+  }
+}

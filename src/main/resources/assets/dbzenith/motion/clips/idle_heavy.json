@@ -1,0 +1,12 @@
+{
+  "_doc": "A heavy idle: legs planted wide, arms out from the bulk, chest heaving.",
+  "sync": "time", "length": 64, "loop": true,
+  "bones": {
+    "torso":    [{"t": 0.0, "rot": [4, 0, 0]}, {"t": 0.5, "rot": [2, 0, 0]}],
+    "rightArm": [{"t": 0.0, "rot": [-6, 0, 16], "bend": 22}, {"t": 0.5, "rot": [-8, 0, 19], "bend": 24}],
+    "leftArm":  [{"t": 0.0, "rot": [-6, 0, -16], "bend": 22}, {"t": 0.5, "rot": [-8, 0, -19], "bend": 24}],
+    "rightLeg": [{"t": 0.0, "rot": [0, 0, 8], "bend": 8}],
+    "leftLeg":  [{"t": 0.0, "rot": [0, 0, -8], "bend": 8}],
+    "body":     [{"t": 0.0, "pos": [0, 0.8, 0]}, {"t": 0.5, "pos": [0, 0.4, 0]}]
+  }
+}

@@ -1,0 +1,3 @@
+{
+  "_doc": "Overrides for the motion engine's feel (see client/motion/Tuning.java for every name and its default). Change live with /dbzanim set <name> <value>."
+}

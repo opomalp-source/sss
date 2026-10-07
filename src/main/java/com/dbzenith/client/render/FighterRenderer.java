@@ -14,10 +14,17 @@ public class FighterRenderer<T extends net.minecraft.world.entity.Mob> extends H
 
     public FighterRenderer(EntityRendererProvider.Context ctx, String skin, float scale) {
         // The player model: outer layers (capes, helmets, sleeves) and separately painted left limbs.
-        super(ctx, new net.minecraft.client.model.PlayerModel<>(ctx.bakeLayer(ModelLayers.PLAYER), false), 0.5f * scale);
+        super(ctx, new com.dbzenith.client.motion.MotionModel<>(ctx.bakeLayer(ModelLayers.PLAYER), false), 0.5f * scale);
         this.texture = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/fighter/" + skin + ".png");
         this.scale = scale;
         addLayer(new NpcPartsLayer<>(this, ctx.getModelSet(), skin));
+    }
+
+    /** The motion engine tips and moves the whole figure (flight pitch, banking, leaning, crouching on landing), as playerAnimator does for players. */
+    @Override
+    protected void setupRotations(T fighter, PoseStack pose, float bob, float yaw, float partialTick) {
+        super.setupRotations(fighter, pose, bob, yaw, partialTick);
+        if (com.dbzenith.client.motion.MotionEngine.enabled()) com.dbzenith.client.motion.MotionEngine.applyBody(fighter, pose, partialTick, scale);
     }
 
     @Override

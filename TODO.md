@@ -202,3 +202,6 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - [x] 17c (v0.49.0) The World Martial Arts Tournament: grounds near spawn, the Announcer, an eight-fighter bracket (players and the real roster: Mr. Satan, Spopovich, Pintar, Jewel, Nam, Ranfan, Yamu), ring-outs, knockouts and decisions, prizes and the World Champion title
   - [ ] 17d A dojo of training robots (agility drill)
   - [ ] 17e Family (children with 5% of each parent's stats), planets and sectors, claiming
+- [ ] CX-18 Animation v5 (user: an overhaul, "dynamic and universal": one system for the player and every NPC, data-driven, smooth, speed-scaled, procedural)
+  - [x] 18a (v0.50.0) The motion engine: walk, sprint, jump, fall, landing, takeoff and flight (hover, cruise, fast, ascend, descend, backward, strafe banking) for the player and every humanoid NPC; JSON clips, sets with race and form overrides, entity profiles and tuning; /dbzanim; guide in docs/ANIMATION.md
+  - [ ] 18b The combat actions (punches, kicks, transformations, casts, charge, guard) moved into the data clips too, and given to NPCs

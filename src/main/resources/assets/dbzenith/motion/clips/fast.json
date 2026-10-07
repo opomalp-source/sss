@@ -1,0 +1,11 @@
+{
+  "_doc": "Flying flat out: horizontal (the engine's pitch), one fist punched ahead, the other arm swept back, legs straight together and trembling in the wind.",
+  "sync": "time", "length": 6, "loop": true, "ease": "linear",
+  "bones": {
+    "rightArm": [{"t": 0.0, "rot": [-168, 0, -4], "bend": 0}, {"t": 0.5, "rot": [-169, 0, -5], "bend": 0}],
+    "leftArm":  [{"t": 0.0, "rot": [24, 0, -10], "bend": 6}, {"t": 0.5, "rot": [26, 0, -11], "bend": 6}],
+    "rightLeg": [{"t": 0.0, "rot": [4, 0, 1.5], "bend": 3}, {"t": 0.5, "rot": [5, 0, 1.5], "bend": 4}],
+    "leftLeg":  [{"t": 0.0, "rot": [6, 0, -1.5], "bend": 5}, {"t": 0.5, "rot": [4, 0, -1.5], "bend": 3}],
+    "torso":    [{"t": 0.0, "rot": [0, 2, 0]}]
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "_doc": "A heavy walk (Broly, Spopovich, ogres): wide-legged, a rolling side-to-side weight shift, shoulders swinging, arms held out from the bulk.",
+  "sync": "stride", "loop": true, "symmetric": true,
+  "bones": {
+    "rightLeg": [
+      {"t": 0.00, "rot": [-30, 0, 4], "bend": 6},
+      {"t": 0.12, "rot": [-24, 0, 4], "bend": 22},
+      {"t": 0.32, "rot": [0, 0, 4], "bend": 10},
+      {"t": 0.50, "rot": [24, 0, 4], "bend": 12},
+      {"t": 0.62, "rot": [22, 0, 5], "bend": 40},
+      {"t": 0.78, "rot": [-4, 0, 6], "bend": 56}
+    ],
+    "rightArm": [
+      {"t": 0.00, "rot": [18, 0, 14], "bend": 16},
+      {"t": 0.50, "rot": [-18, 0, 12], "bend": 26}
+    ],
+    "torso": [
+      {"t": 0.00, "rot": [5, -9, 3]},
+      {"t": 0.25, "rot": [4, 0, 0]},
+      {"t": 0.50, "rot": [5, 9, -3]},
+      {"t": 0.75, "rot": [4, 0, 0]}
+    ],
+    "body": [
+      {"t": 0.05, "pos": [-0.3, 1.0, 0], "rot": [0, 0, -2.5]},
+      {"t": 0.28, "pos": [-0.8, -0.3, 0], "rot": [0, 0, -1]},
+      {"t": 0.55, "pos": [0.3, 1.0, 0], "rot": [0, 0, 2.5]},
+      {"t": 0.78, "pos": [0.8, -0.3, 0], "rot": [0, 0, 1]}
+    ]
+  }
+}

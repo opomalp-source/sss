@@ -104,6 +104,8 @@ public final class ClientEvents {
         com.dbzenith.client.fx.CameraFx.devTurn = name.contains("side") ? 90f : name.contains("turn") ? 45f : 0f;
         com.dbzenith.client.anim.AnimController.devFreeze = false;
         com.dbzenith.client.fx.VfxV3.devSpeedLines = name.contains("speedlines");
+        com.dbzenith.client.motion.MotionDev.fromShot(name, delayTicks);
+        if (name.contains("labels")) com.dbzenith.config.DBZConfig.CLIENT.animationLabels.set(true);
         if (name.contains("respawn") && mc.player != null && mc.player.isDeadOrDying()) mc.player.respawn();
         if (name.startsWith("judgement_") && !(mc.screen instanceof com.dbzenith.client.screen.JudgementScreen)) {
             mc.setScreen(new com.dbzenith.client.screen.JudgementScreen(true, 97));

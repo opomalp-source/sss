@@ -1,0 +1,12 @@
+{
+  "_doc": "Loose idle (Majin, Vampires, Bio-Androids, Gen Aliens): shoulders rolled forward, arms hanging loose, a lazy sway.",
+  "sync": "time", "length": 56, "loop": true,
+  "bones": {
+    "torso":    [{"t": 0.0, "rot": [10, 0, 4]}, {"t": 0.5, "rot": [10, 0, -4]}],
+    "rightArm": [{"t": 0.0, "rot": [-14, 0, 12], "bend": 20}, {"t": 0.5, "rot": [-10, 0, 14], "bend": 22}],
+    "leftArm":  [{"t": 0.0, "rot": [-10, 0, -14], "bend": 22}, {"t": 0.5, "rot": [-14, 0, -12], "bend": 20}],
+    "rightLeg": [{"t": 0.0, "rot": [-2, 0, 6], "bend": 12}],
+    "leftLeg":  [{"t": 0.0, "rot": [-2, 0, -6], "bend": 12}],
+    "body":     [{"t": 0.0, "pos": [-0.4, 0.8, 0]}, {"t": 0.5, "pos": [0.4, 0.8, 0]}]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "_doc": "Powered-up stance (Super Saiyan and other strong forms): feet wide, fists balled out from the sides, chest high, a deep heavy breath.",
+  "sync": "time", "length": 50, "loop": true,
+  "bones": {
+    "torso":    [{"t": 0.0, "rot": [-3, 0, 0]}, {"t": 0.5, "rot": [-5, 0, 0]}],
+    "head":     [{"t": 0.0, "rot": [-2, 0, 0]}, {"t": 0.5, "rot": [-3, 0, 0]}],
+    "rightArm": [{"t": 0.0, "rot": [-4, 0, 14], "bend": 26}, {"t": 0.5, "rot": [-6, 0, 17], "bend": 30}],
+    "leftArm":  [{"t": 0.0, "rot": [-4, 0, -14], "bend": 26}, {"t": 0.5, "rot": [-6, 0, -17], "bend": 30}],
+    "rightLeg": [{"t": 0.0, "rot": [-2, 0, 7], "bend": 10}],
+    "leftLeg":  [{"t": 0.0, "rot": [-2, 0, -7], "bend": 10}],
+    "body":     [{"t": 0.0, "pos": [0, 0.7, 0]}, {"t": 0.5, "pos": [0, 0.4, 0]}]
+  }
+}

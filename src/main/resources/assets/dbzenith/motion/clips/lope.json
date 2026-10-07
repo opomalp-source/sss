@@ -1,0 +1,18 @@
+{
+  "_doc": "A hunched lope (Saibamen, Bubbles): low, quick steps, arms swinging loose in front.",
+  "sync": "stride", "loop": true, "symmetric": true,
+  "bones": {
+    "rightLeg": [
+      {"t": 0.00, "rot": [-42, 0, 4], "bend": 30},
+      {"t": 0.30, "rot": [0, 0, 4], "bend": 36},
+      {"t": 0.50, "rot": [30, 0, 4], "bend": 30},
+      {"t": 0.70, "rot": [4, 0, 4], "bend": 74}
+    ],
+    "rightArm": [
+      {"t": 0.00, "rot": [6, 0, 10], "bend": 30},
+      {"t": 0.50, "rot": [-44, 0, 8], "bend": 40}
+    ],
+    "torso": [{"t": 0.0, "rot": [28, -6, 0]}, {"t": 0.5, "rot": [28, 6, 0]}],
+    "body":  [{"t": 0.1, "pos": [0, 2.4, 0]}, {"t": 0.35, "pos": [0, 1.2, 0]}, {"t": 0.6, "pos": [0, 2.4, 0]}, {"t": 0.85, "pos": [0, 1.2, 0]}]
+  }
+}

@@ -84,7 +84,7 @@ public final class ProceduralMotion {
         Motion m = MOTION.get(p);
         if (m == null) return;
         m.pushed = false;
-        if (!DBZConfig.CLIENT.proceduralMotion.get() || event.isCanceled() || com.dbzenith.client.ui.PortraitRenderer.isDrawing()) return;
+        if (!DBZConfig.CLIENT.proceduralMotion.get() || com.dbzenith.client.motion.MotionEngine.enabled() || event.isCanceled() || com.dbzenith.client.ui.PortraitRenderer.isDrawing()) return;
         float pt = event.getPartialTick();
         float bank = Mth.lerp(pt, m.bankO, m.bank), pitch = Mth.lerp(pt, m.pitchO, m.pitch), squash = Mth.lerp(pt, m.squashO, m.squash);
         if (Math.abs(bank) < 0.1f && Math.abs(pitch) < 0.1f && squash < 0.01f) return;

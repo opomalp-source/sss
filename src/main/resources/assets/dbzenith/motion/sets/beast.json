@@ -1,0 +1,1 @@
+{ "_doc": "Small, hunched, quick creatures.", "parent": "fighter", "clips": {"idle": "idle_hunch", "walk": "lope", "sprint": "lope"} }
