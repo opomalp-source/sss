@@ -312,6 +312,9 @@ public final class CombatEngine {
             ImpactPacket.at(mid, apart, ImpactPacket.PARRY, 1.3f, 0xFFFFFF, a.getId()).send(level);
             level.playSound(null, mid.x, mid.y, mid.z, com.dbzenith.registry.ModSounds.PARRY.get(), SoundSource.PLAYERS, 0.7f, 1.5f);
         }
+        for (LivingEntity e : new LivingEntity[]{a, v}) {                      // a callout for the players in it (phase 8)
+            if (e instanceof ServerPlayer sp) com.dbzenith.network.CalloutPacket.send(sp, "message.dbzenith.clash", 0xFFFFFF);
+        }
         return true;
     }
 

@@ -175,3 +175,12 @@ Bare-handed melee runs through the combat engine (`combat/engine`), for players 
 - **Prediction:** your own blows, quick ki blasts and plain dashes start on your screen at once. The server confirms or corrects them, and a refused one is taken back. Client config `prediction`.
 - **Small packets:** the fast-changing pools (body, ki, stamina, the special and guard meters) go in a 40-byte packet; the full state only when something else changes.
 - **Dev:** `/dbz netstats <player>`.
+
+## The combat HUD (phase 8)
+
+- **Enemy panel** (top right): your locked target, or whoever you last fought (5 s). It shows their name, form and battle power, health, the distance and what they're caught in. For players it also shows ki, guard and the special meter.
+- **Callouts:** VANISH!, PERFECT GUARD!, COUNTER!, CLASH!, BEAM STRUGGLE!, BURST!, GUARD BROKEN! across the middle of the screen.
+- **Combo counter:** the hits beside the crosshair, the combo's damage, and a bar until it drops.
+- **Special meter, guard and PvP badge:** under your bars, and at the top (phases 1-4).
+- **Controls & Move List:** Settings → Controls → Controls & Move List. It shows your combat keys and every move's input and frame data (read from the move files, so new moves appear by themselves), plus dodging, guarding, ki and lock-on.
+- **Settings → Combat:** damage numbers, callouts, enemy panel, combo counter, ultimate cinematics, instant response. **Settings → Camera:** the lock-on camera, free look and range.

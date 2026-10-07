@@ -265,6 +265,11 @@ public final class Prediction {
         }
     }
 
+    /** The moves the client knows (for the move list). */
+    public static List<Move> moves() {
+        return moves;
+    }
+
     /** For /dbz netstats on the client side and tests: moves known. */
     public static int movesKnown() {
         return moves.size();

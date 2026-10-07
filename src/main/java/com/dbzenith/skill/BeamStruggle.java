@@ -84,6 +84,7 @@ public final class BeamStruggle {
             BY_OWNER.put(other.getOwner().getUUID(), s);
             for (KiBeamEntity beam : new KiBeamEntity[]{self, other}) {
                 if (beam.getOwner() instanceof ServerPlayer p) {
+                    com.dbzenith.network.CalloutPacket.send(p, "message.dbzenith.beam_clash", 0xFFE070);   // phase 8
                     ModNetwork.sendToTrackingAndSelf(p, new AnimEventPacket(p.getId(), AnimEventPacket.BEAM, MAX_TICKS));
                 }
             }

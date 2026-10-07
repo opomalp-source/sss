@@ -42,6 +42,8 @@ public final class ClientSetup {
         event.registerBelowAll("aura_edge", new com.dbzenith.client.fx.AuraEdgeOverlay());
         event.registerAboveAll("hud", new DbzHud());
         event.registerAboveAll("pvp_badge", new PvpIndicators.Badge());
+        event.registerAboveAll("enemy_panel", new com.dbzenith.client.ui.EnemyPanel());          // CX-19 phase 8
+        event.registerAboveAll("callouts", new com.dbzenith.client.ui.CalloutOverlay());
         event.registerAboveAll("transform_cut_in", new com.dbzenith.client.ui.CutInOverlay());
         event.registerAboveAll("beam_struggle", new com.dbzenith.client.ui.StruggleOverlay());
         event.registerAboveAll("fusion_dance", new com.dbzenith.client.ClientFusion.Overlay());

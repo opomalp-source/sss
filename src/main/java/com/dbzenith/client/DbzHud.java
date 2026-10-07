@@ -36,8 +36,6 @@ public final class DbzHud implements IGuiOverlay {
     private static final float[] GHOST = new float[3];
     private static final float[] HOLD_UNTIL = new float[3];
     private static float lastT = -1;
-    private static int lastCombo;
-    private static float comboAt;
     private static int chipLeft = 54;
 
     @Override
@@ -115,24 +113,8 @@ public final class DbzHud implements IGuiOverlay {
 
         g.pose().popPose();
 
-        // ---------------------------------------------------------- combo
-        int combo = d.getComboHits();
-        if (combo != lastCombo) {
-            if (combo > lastCombo) comboAt = t;
-            lastCombo = combo;
-        }
-        if (combo >= 2) {
-            float pop = Math.max(0, 1 - (t - comboAt) / 5f);
-            float scale = 2.2f + 0.9f * pop * pop;
-            String n = String.valueOf(combo);
-            int color = combo >= 10 ? 0xFFFF5030 : combo >= 5 ? DbzTheme.ACCENT : DbzTheme.TITLE;
-            g.pose().pushPose();
-            g.pose().translate(width / 2f + 22, height / 2f - 30, 0);
-            g.pose().scale(scale, scale, 1);
-            g.drawString(font, n, -font.width(n) / 2, -4, color, true);
-            g.pose().popPose();
-            DbzTheme.text(g, font, Component.translatable("hud.dbzenith.hits"), width / 2f + 22 + font.width(n) * scale / 2 + 2, height / 2f - 30, DbzTheme.TEXT, 0.9f);
-        }
+        // ---------------------------------------------------------- combo (CX-19 phase 8: with its damage and time left)
+        com.dbzenith.client.ui.ComboCounter.render(g, font, width, height, t);
 
         // ---------------------------------------------------------- powering up into a form
         if (d.isTransforming()) {

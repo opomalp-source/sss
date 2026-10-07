@@ -93,9 +93,15 @@ public final class ClientEvents {
             delayTicks = Math.max(delayTicks, 6);
         }
         if (name.startsWith("settings_") && !(mc.screen instanceof com.dbzenith.client.screen.SettingsScreen)) {
-            mc.setScreen(new com.dbzenith.client.screen.SettingsScreen(null));
+            String[] parts = name.split("_");
+            mc.setScreen(new com.dbzenith.client.screen.SettingsScreen(null).onTab(parts.length > 2 ? parts[1] : "hud"));
             delayTicks = Math.max(delayTicks, 6);
         }
+        if (name.startsWith("movelist") && !(mc.screen instanceof com.dbzenith.client.screen.MoveListScreen)) {   // movelist0_ .. movelist3_
+            mc.setScreen(new com.dbzenith.client.screen.MoveListScreen(null).onTab(name.length() > 8 && Character.isDigit(name.charAt(8)) ? name.charAt(8) - '0' : 0));
+            delayTicks = Math.max(delayTicks, 6);
+        }
+        if (name.contains("callout_")) com.dbzenith.client.ui.CalloutOverlay.show("message.dbzenith.counter", 0xFFAA00);
         if (name.startsWith("pathchoice_") && !(mc.screen instanceof com.dbzenith.client.screen.PathChoiceScreen)) {
             mc.setScreen(new com.dbzenith.client.screen.PathChoiceScreen(null));
             delayTicks = Math.max(delayTicks, 6);

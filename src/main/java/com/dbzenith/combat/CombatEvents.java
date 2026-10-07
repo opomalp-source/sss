@@ -169,7 +169,8 @@ public final class CombatEvents {
                     | (impact == ImpactPacket.HEAVY || impact == ImpactPacket.SPIKE || impact == ImpactPacket.GUARD_BREAK ? com.dbzenith.network.DamageNumberPacket.HEAVY : 0);
             int color = source.getDirectEntity() instanceof com.dbzenith.skill.KiBlastEntity b ? b.getColor()
                     : source.getDirectEntity() instanceof com.dbzenith.skill.KiBeamEntity b ? b.getColor() : 0xFFFFFF;
-            new com.dbzenith.network.DamageNumberPacket(victim.getId(), (float) dealt, nf, color).send(level, victim);
+            new com.dbzenith.network.DamageNumberPacket(victim.getId(), (float) dealt, nf, color, source.getEntity().getId()).send(level, victim);
+            com.dbzenith.combat.engine.FoeFocus.fought(source.getEntity(), victim);   // for the enemy panel (phase 8)
         }
 
         if (attackerData != null && dealt > 0) attackerData.markCombat(victim.level().getGameTime());

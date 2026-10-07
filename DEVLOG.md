@@ -1625,3 +1625,27 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **Tests:** `NetcodeTests` (a flood of inputs is cut, spectators and malformed values are refused; with 300 ms of ping a jab lands where the pig was, with none it misses; only the pools go when only the pools change; the client picks the same moves). 176 GameTests.
 - **Checked in the dev client:** the pools packet keeps the HUD live (ki and the special meter), and the moves arrive on joining without errors.
 - **Not checked by hand:** prediction itself needs real key presses and some latency to see. Locally the round trip is nearly zero.
+
+## 2026-10-07 — CX-19 Combat v4, phase 8: the combat HUD (v0.58.0)
+- **Enemy panel** (`client/ui/EnemyPanel`, top right, where nothing else sits in a fight):
+  - Shows the foe you face: the locked-on target, else whoever you last hit or were hit by in the last 5 s (`combat/engine/FoeFocus`, fed by `CombatEvents` with each blow that lands).
+  - Name (◎ when locked), form and battle power for players, health with a trail of what was just lost, the distance, and what the foe is caught in (stunned, airborne, down, guarding, from the fighter states).
+  - For player foes, ki, guard and special-meter bars: `FoeStatusPacket` 4 times a second, and once when there is no foe any more.
+- **Combat callouts** (`client/ui/CalloutOverlay`, `CalloutPacket`):
+  - Big slanted bands in their colour, slashing in above the crosshair, the newest on top, up to three: VANISH!, PERFECT GUARD!, Parried!, COUNTER!, Chase counter!, BURST!, CLASH! (new: both fighters of a clash), BEAM STRUGGLE!, GUARD BROKEN! for the victim and GUARD CRUSHED! for the attacker.
+  - They replace the action-bar messages from `Evasion.tell`.
+  - First placed at 30% of the height, they covered the combo counter; now at 19%.
+- **Combo counter** (`client/ui/ComboCounter`): the hit count pops beside the crosshair as before. It now also shows the damage the combo has done (the damage numbers now carry the attacker) and a bar running down to when the combo drops.
+- **Controls & Move List** (`client/screen/MoveListScreen`, from Settings → Controls):
+  - Controls: the combat keys as bound now.
+  - Melee: every move the server sent (data-pack moves included), with its input (button, push, where, what it follows), frame data (startup, active, recovery, damage) and what it does (launches, knocks away, floors, unblockable, armour). Readable names for the built-in moves (`move.dbzenith.*`).
+  - Dodge & Guard, and Ki & Lock-On: every Dash-key move, guard, perfect guard, guard break, counter, quick and charged blasts, techniques, supers, ultimates, beam struggle and surge, lock-on.
+  - The window fits the screen (up to 460 wide); the mouse wheel scrolls.
+- **Settings:**
+  - A Combat tab: damage numbers, callouts, enemy panel, combo counter, ultimate cinematics, instant response.
+  - The lock-on camera, free look and range join the Camera tab (sliders show %, degrees and blocks).
+  - The Controls tab leads to the move list (the old Combat v3 move notes there are gone).
+  - Client config: enemyPanel, combatCallouts, comboCounter.
+- **Dev:** devshot names `movelist0_`..`movelist3_` (a tab), `settings_<tab>_`, `callout_`.
+- **Tests:** `CombatHudTests` (the foe is who you fight, a lock first). 177 GameTests.
+- **Checked in the dev client:** the enemy panel (locked Namekian Warrior: health, AIRBORNE, distance), the COUNTER! callout over the combo counter ("3 hits, 572 damage"), every tab of the move list, and the Combat settings tab.

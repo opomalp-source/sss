@@ -118,6 +118,10 @@ public final class ModNetwork {
                 .encoder(PoolsSyncPacket::encode).decoder(PoolsSyncPacket::decode).consumerMainThread(PoolsSyncPacket::handle).add();
         CHANNEL.messageBuilder(MovesSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(MovesSyncPacket::encode).decoder(MovesSyncPacket::decode).consumerMainThread(MovesSyncPacket::handle).add();
+        CHANNEL.messageBuilder(FoeStatusPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(FoeStatusPacket::encode).decoder(FoeStatusPacket::decode).consumerMainThread(FoeStatusPacket::handle).add();
+        CHANNEL.messageBuilder(CalloutPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(CalloutPacket::encode).decoder(CalloutPacket::decode).consumerMainThread(CalloutPacket::handle).add();
         CHANNEL.messageBuilder(MoveAnimPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(MoveAnimPacket::encode).decoder(MoveAnimPacket::decode).consumerMainThread(MoveAnimPacket::handle).add();
         CHANNEL.messageBuilder(SelectTitlePacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)

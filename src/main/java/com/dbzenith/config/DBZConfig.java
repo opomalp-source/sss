@@ -701,7 +701,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue showDebugOverlay;
         public final ForgeConfigSpec.BooleanValue customHotbar;
         public final ForgeConfigSpec.BooleanValue hideVanillaHearts;
-        public final ForgeConfigSpec.BooleanValue transformCutIn, ultimateCinematic, damagePopups, prediction;
+        public final ForgeConfigSpec.BooleanValue transformCutIn, ultimateCinematic, damagePopups, prediction, enemyPanel, combatCallouts, comboCounter;
         public final ForgeConfigSpec.DoubleValue lockOnRange, lockOnCameraSpeed, lockOnFreeLook;
         public final ForgeConfigSpec.DoubleValue screenShake;
         public final ForgeConfigSpec.BooleanValue hitstop;
@@ -735,6 +735,12 @@ public final class DBZConfig {
                     .define("damagePopups", true);
             prediction = b.comment("Start your own blows, quick ki blasts and dashes on screen at once instead of waiting for the server (it still decides; a wrong guess is corrected)")
                     .define("prediction", true);
+            enemyPanel = b.comment("Show the foe you face (locked on, or last fought) top right: health, and for players ki, guard and special meter")
+                    .define("enemyPanel", true);
+            combatCallouts = b.comment("Show big callouts for vanishes, perfect guards, counters, clashes, bursts and guard breaks")
+                    .define("combatCallouts", true);
+            comboCounter = b.comment("Show the combo counter beside the crosshair, with the combo's damage and time left")
+                    .define("comboCounter", true);
             lockOnRange = b.comment("Lock-on (key N): how far away a foe can be locked onto, in blocks")
                     .defineInRange("lockOnRange", 48.0, 8.0, 80.0);
             lockOnCameraSpeed = b.comment("Lock-on: how quickly the camera turns to keep the foe framed (0 = it doesn't; only the marker shows)")

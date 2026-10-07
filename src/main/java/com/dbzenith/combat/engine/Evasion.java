@@ -104,7 +104,7 @@ public final class Evasion {
         if (attacker instanceof LivingEntity a) openCounter(CombatEngine.of(defender), a, now);
         SpecialMeter.gain(defender, DBZConfig.SERVER.specialPerPerfectGuard.get());
         tell(defender, "message.dbzenith.perfect_guard", ChatFormatting.GOLD);
-        if (attacker instanceof ServerPlayer ap) ap.displayClientMessage(Component.translatable("message.dbzenith.parried").withStyle(ChatFormatting.RED), true);
+        tell(attacker, "message.dbzenith.parried", ChatFormatting.RED);
     }
 
     /** Within the counter window, a press is the counter: faces the foe and throws {@code counter_strike}. */
@@ -275,7 +275,7 @@ public final class Evasion {
         if (chaser instanceof net.minecraft.world.entity.player.Player cp) ModCapabilities.get(cp).ifPresent(cd -> cd.combat().chaseReadyUntil = Long.MIN_VALUE / 2);
         openCounter(CombatEngine.of(p), chaser, now);
         ImpactPacket.at(chaser.position().add(0, 1, 0), p.getLookAngle(), ImpactPacket.PARRY, 1.1f, 0xC0E0FF, p.getId()).send(p.serverLevel());
-        p.displayClientMessage(Component.translatable("message.dbzenith.chase_counter"), true);
+        tell(p, "message.dbzenith.chase_counter", ChatFormatting.AQUA);
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), ModSounds.VANISH.get(), SoundSource.PLAYERS, 0.6f, 1.5f);
     }
 
@@ -360,8 +360,9 @@ public final class Evasion {
         ModNetwork.sendToTrackingAndSelf(p, new AnimEventPacket(p.getId(), kind, data));
     }
 
+    /** A big callout on that player's screen (phase 8): the key's text in the colour. */
     static void tell(Entity e, String key, ChatFormatting color) {
-        if (e instanceof ServerPlayer p) p.displayClientMessage(Component.translatable(key).withStyle(color, ChatFormatting.BOLD), true);
+        if (e instanceof ServerPlayer p) com.dbzenith.network.CalloutPacket.send(p, key, color.getColor() == null ? 0xFFFFFF : color.getColor());
     }
 
     /** Whether {@code defender} faces {@code from} closely enough for its guard to cover the blow. */

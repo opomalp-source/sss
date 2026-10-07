@@ -62,6 +62,8 @@ public final class GuardRules {
         d.setGuarding(false);
         d.setGuardLockUntil(now + c.guardBreakLockTicks.get());
         victim.addEffect(new MobEffectInstance(ModEffects.STUN.get(), c.guardBreakStunTicks.get(), 0));
+        if (victim instanceof net.minecraft.server.level.ServerPlayer sp) com.dbzenith.network.CalloutPacket.send(sp, "message.dbzenith.guard_broken", 0xFF6A5A);
+        if (attacker instanceof net.minecraft.server.level.ServerPlayer ap) com.dbzenith.network.CalloutPacket.send(ap, "message.dbzenith.guard_crushed", 0xAEE6FF);
         return Outcome.BREAK;
     }
 

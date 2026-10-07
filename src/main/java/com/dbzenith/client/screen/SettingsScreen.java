@@ -21,10 +21,14 @@ import java.util.List;
 public class SettingsScreen extends Screen {
     private static final int W = 360, H = 222, ROW = 22;
 
-    private enum Tab { HUD, STYLE, EFFECTS, CAMERA, CONTROLS }
+    private enum Tab { HUD, STYLE, EFFECTS, CAMERA, COMBAT, CONTROLS }
 
     /** One setting: what it is, how it is shown and changed. */
-    private record Option(String key, ForgeConfigSpec.ConfigValue<?> value, double min, double max, String[] choices) {}
+    private record Option(String key, ForgeConfigSpec.ConfigValue<?> value, double min, double max, String[] choices, String unit) {
+        Option(String key, ForgeConfigSpec.ConfigValue<?> value, double min, double max, String[] choices) {
+            this(key, value, min, max, choices, "%");
+        }
+    }
 
     private final Screen parent;
     private Tab tab = Tab.HUD;
@@ -33,6 +37,12 @@ public class SettingsScreen extends Screen {
     public SettingsScreen(Screen parent) {
         super(Component.translatable("screen.dbzenith.settings"));
         this.parent = parent;
+    }
+
+    /** Dev: open on a tab by name (hud, style, effects, camera, combat, controls). */
+    public SettingsScreen onTab(String name) {
+        for (Tab t : Tab.values()) if (t.name().equalsIgnoreCase(name)) tab = t;
+        return this;
     }
 
     private static List<Option> options(Tab tab) {
@@ -59,6 +69,17 @@ public class SettingsScreen extends Screen {
                 o.add(new Option("screen_shake", c.screenShake, 0, 2, null));
                 o.add(new Option("fov_effects", c.fovEffects, 0, 0, null));
                 o.add(new Option("speed_lines", c.speedLines, 0, 0, null));
+                o.add(new Option("lock_camera", c.lockOnCameraSpeed, 0, 3, null));                // lock-on (CX-19)
+                o.add(new Option("lock_free_look", c.lockOnFreeLook, 0, 90, null, "\u00b0"));
+                o.add(new Option("lock_range", c.lockOnRange, 8, 80, null, "m"));
+            }
+            case COMBAT -> {                                                    // CX-19
+                o.add(new Option("damage_popups", c.damagePopups, 0, 0, null));
+                o.add(new Option("callouts", c.combatCallouts, 0, 0, null));
+                o.add(new Option("enemy_panel", c.enemyPanel, 0, 0, null));
+                o.add(new Option("combo_counter", c.comboCounter, 0, 0, null));
+                o.add(new Option("ultimate_cinematic", c.ultimateCinematic, 0, 0, null));
+                o.add(new Option("prediction", c.prediction, 0, 0, null));
             }
             case STYLE -> {
                 o.add(new Option("ui_style", c.uiStyle, 0, 1, new String[]{"zenith", "classic"}));
@@ -103,12 +124,15 @@ public class SettingsScreen extends Screen {
 
                     @Override
                     protected void updateMessage() {
-                        setMessage(Component.literal(String.format("%.0f%%", (opt.min + value * (opt.max - opt.min)) * 100)));
+                        double v = opt.min + value * (opt.max - opt.min);
+                        setMessage(Component.literal(opt.unit.equals("%") ? String.format("%.0f%%", v * 100)
+                                : opt.unit.equals("m") ? Component.translatable("settings.dbzenith.blocks", Math.round(v)).getString() : Math.round(v) + opt.unit));
                     }
 
                     @Override
                     protected void applyValue() {
-                        dbl.set(Math.round((opt.min + value * (opt.max - opt.min)) * 100) / 100.0);
+                        double v = opt.min + value * (opt.max - opt.min);
+                        dbl.set(opt.unit.equals("%") ? Math.round(v * 100) / 100.0 : Math.round(v));
                         save();
                     }
                 };
@@ -127,6 +151,8 @@ public class SettingsScreen extends Screen {
         if (tab == Tab.CONTROLS) {
             addRenderableWidget(ThemedButton.of(Component.translatable("settings.dbzenith.keybinds"),
                     b -> minecraft.setScreen(new KeyBindsScreen(this, minecraft.options))).bounds(left + W / 2 - 90, top + 50, 180, 18).build());
+            addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.move_list"),                // CX-19 phase 8
+                    b -> minecraft.setScreen(new MoveListScreen(this))).bounds(left + W / 2 - 90, top + 74, 180, 18).build());
         }
 
         addRenderableWidget(ThemedButton.of(Component.translatable("settings.dbzenith.reset"), b -> {
@@ -168,13 +194,7 @@ public class SettingsScreen extends Screen {
             y += ROW;
         }
         if (tab == Tab.CONTROLS) {
-            DbzTheme.text(g, font, Component.translatable("settings.dbzenith.moves"), left + 12, top + 74, DbzTheme.TITLE, 0.8f);
-            String[] moves = {"zhit", "directional", "sweep", "chase", "chase_counter", "revenge", "breaker", "recover", "dodge", "clash", "downed"};
-            for (int i = 0; i < moves.length; i++) {                     // the combat moves, how to do each
-                int my = top + 84 + i * 9;
-                DbzTheme.text(g, font, Component.translatable("settings.dbzenith.move." + moves[i]), left + 14, my, DbzTheme.ACCENT, 0.7f);
-                DbzTheme.text(g, font, Component.translatable("settings.dbzenith.move." + moves[i] + ".how"), left + 96, my, DbzTheme.TEXT, 0.7f);
-            }
+            DbzTheme.text(g, font, Component.translatable("settings.dbzenith.move_list_hint"), left + 12, top + 100, DbzTheme.DIM, 0.75f);
         }
         DbzTheme.divider(g, left + 8, top + 38, W - 16);
         super.render(g, mouseX, mouseY, partial);
