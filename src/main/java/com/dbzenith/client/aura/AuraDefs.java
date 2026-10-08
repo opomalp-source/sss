@@ -51,6 +51,14 @@ public final class AuraDefs extends SimplePreparableReloadListener<Map<String, A
         byForm = Map.copyOf(forms);
     }
 
+    /** Reads every aura file again now, without reloading the other resources (/dbzaura reload). */
+    public static int reloadNow() {
+        ResourceManager rm = net.minecraft.client.Minecraft.getInstance().getResourceManager();
+        Map<String, AuraDef> loaded = INSTANCE.prepare(rm, net.minecraft.util.profiling.InactiveProfiler.INSTANCE);
+        INSTANCE.apply(loaded, rm, net.minecraft.util.profiling.InactiveProfiler.INSTANCE);
+        return loaded.size();
+    }
+
     @Override
     protected Map<String, AuraDef> prepare(ResourceManager rm, ProfilerFiller profiler) {
         Map<String, JsonObject> raw = new HashMap<>();

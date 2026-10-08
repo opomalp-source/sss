@@ -68,12 +68,14 @@ final class AuraShell {
             float yy = bottom + (s + peak * q * q) * height;
             float lean = s * s;
             float drag = 0.15f + 0.85f * (float) Math.pow(s, 1.3);
-            float w0 = Mth.TWO_PI * (1.2f * s - rise), w1 = Mth.TWO_PI * (2.0f * s - rise * 1.3f), w2 = Mth.TWO_PI * (3.1f * s - rise * 1.7f);
+            float rows = d.lobeRows;
+            float w0 = Mth.TWO_PI * (rows * s - rise), w1 = Mth.TWO_PI * (rows * 1.67f * s - rise * 1.3f), w2 = Mth.TWO_PI * (rows * 2.6f * s - rise * 1.7f);
             for (int j = 0; j < this.segs; j++) {
                 float a = j * Mth.TWO_PI / this.segs;
                 float l = 0.5f * Mth.sin(c0 * a + seed + 0.3f * t) * Mth.sin(w0 + seed * 1.7f)
                         + 0.3f * Mth.sin(c1 * a + seed * 2.1f - 0.4f * t) * Mth.sin(w1 + seed * 0.6f)
                         + 0.2f * Mth.sin(c2 * a + seed * 3.3f + 0.5f * t) * Mth.sin(w2 + seed * 2.9f);
+                if (d.lobeBillow > 0) l = Mth.lerp(d.lobeBillow, l, 2.2f * Math.abs(l) - 0.45f);   // round puffs, creased between
                 float r = base * (1 + lobes * env * l);
                 int k = i * MAX_SEGS + j;
                 float back = 0.55f + 0.45f * Math.max(0, cos[j] * hx + sin[j] * hz);

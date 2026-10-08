@@ -2066,3 +2066,22 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   - The shot helper takes `@<command>` steps between shots, for example to turn the camera to look down from above.
 - **Tests:** `AuraTests` (every shipped aura file reads, wears real forms, keeps sane sizes, opacities and spikes; Blue is lobed and blue). 207 GameTests.
 - **Checked in the dev client:** Blue from the front, side, behind and above, by day and night, frame to frame (the bulges rise and the outline moves), and the plain fallback.
+
+## 2026-10-08 — CX-24 phase 2: aura layers and states (v0.73.0)
+- **The ask:** auras that never sit still and answer what the fighter does, matched against the user's Godot prototype videos (SS_Blue, GF2KK). Stacking rules agreed: technique shell outside the form's aura (about 1.35x wide, 1.5x tall), red edge blended, pink-white middle added on.
+- **Layers as data** (`AuraDef.Layer`): an aura is one body (shape, bulges, sway, pulse) worn as a list of 1-6 layers drawn outermost first: `shell`, `glow` (follows another layer's outline, `wraps`) or `haze`. Each has its own colours, opacities, rim, lobed or jagged spikes, pace, seed and blend (`normal` or `add`). Files without `layers` get glow, shell, haze.
+- **Shape:** `peak` (one tall flame above the head, flickering), `flare` (wider base), `lobes.rows` (bulges stacked up the height) and `lobes.billow` (round puffs with creases, Blue's cloud look).
+- **States** (`AuraSystem.State`, followed each tick, drawn interpolated):
+  - charging, powering up or transforming: bigger, taller, wilder (flicker, scroll, deeper spikes, bigger bulges), brighter, shaking, with energy motes rising from the ground;
+  - moving fast or flying: the shell streams back, the top and the back side most (deadzone 0.12 blocks a tick, capped);
+  - hit or swinging: a short flare; a new aura: a burst.
+  - The aura keeps its own clock, so speeding up never jumps; each fighter runs at a slightly different pace.
+  - The shader takes an `AuraBoost` brightness.
+- **Particles:** all drawn after the shells in one batch per texture, capped at 900 a frame: `sparkle`, `ember`, and `motes`. Your own aura from your own eyes shows only the motes, kept away from the camera.
+- **Data:** `"extends"` between files (objects merged key by key, lists replaced, `forms` never inherited, loops reported); sub-folders only sort files. `react` block (charge, move, hit, burst) per aura.
+- **Live tweaking:** `/dbzaura state <idle|charge|fly|hit|burst|hithold|bursthold>`, `/dbzaura set <path> <value>`, `/dbzaura dump` (to `aura_tweaks/<id>.json`), `/dbzaura reload` (aura files only). Devshots: `aurapv.<id>.<state>`, `aurareload`, `auraset.<path-with-dashes>+<value>`.
+- **Super Saiyan Blue** retuned against the video: shorter and wider (1.5 x 1.95), 2.6 rows of billowy bulges, a thicker edge band, a cyan outer glow plus a thin gold one, a smooth milky middle.
+- **Docs:** `docs/AURA_GUIDE.md` (every key, the commands, shader packs).
+- **Tests:** `AuraTests` checks layers, glows, reactions; `auraExtendsMerges`. 208 GameTests (two timing tests, guard meter and super dash, failed once on a slow first run and passed on the rerun).
+- **Checked in a dev client** (cloud container, Xvfb + llvmpipe): Blue idle (frame to frame), charging, hit flare, burst, flying sideways, side, back, top (a lobed disc), night, and the plain fallback.
+

@@ -197,8 +197,8 @@ public final class AuraSystem {
         s.charge += (target - s.charge) * (target > s.charge ? 0.2f : 0.09f);
 
         float dx = (float) (e.getX() - e.xo), dy = (float) (e.getY() - e.yo), dz = (float) (e.getZ() - e.zo);
-        if (dev && devState.equals("fly")) {                                    // as if flying fast the way you look
-            Vec3 look = Vec3.directionFromRotation(0, e.getYRot());
+        if (dev && devState.equals("fly")) {                                    // as if flying fast
+            Vec3 look = Vec3.directionFromRotation(0, e.getYRot() + 90);       // sideways, so the trail shows from the front
             dx = (float) look.x * 1.4f;
             dy = 0;
             dz = (float) look.z * 1.4f;
@@ -574,6 +574,11 @@ public final class AuraSystem {
                                 .then(Commands.argument("value", StringArgumentType.greedyString())
                                         .executes(ctx -> tweak(StringArgumentType.getString(ctx, "path"), StringArgumentType.getString(ctx, "value"))))))
                 .then(Commands.literal("dump").executes(ctx -> dump()))
+                .then(Commands.literal("reload").executes(ctx -> {
+                    int n = reload();
+                    tell(Component.literal("Reloaded " + n + " auras"));
+                    return n;
+                }))
                 .then(Commands.argument("aura", StringArgumentType.word())
                         .suggests((ctx, b) -> SharedSuggestionProvider.suggest(AuraDefs.ids(), b))
                         .executes(ctx -> {
@@ -682,6 +687,14 @@ public final class AuraSystem {
         if (mc.player != null) mc.player.displayClientMessage(c, true);
     }
 
+    /** Reads the aura files again; whoever wears one takes the new version straight away. */
+    static int reload() {
+        int n = AuraDefs.reloadNow();
+        if (preview != null) preview = AuraDefs.byId(preview.id);
+        for (State s : STATES.values()) if (s.def != null && AuraDefs.byId(s.def.id) != null) s.def = AuraDefs.byId(s.def.id);
+        return n;
+    }
+
     /** For the dev screenshots: wear an aura by id (null or "off" to stop). */
     public static void devPreview(String id) {
         preview = id == null || id.equals("off") ? null : AuraDefs.byId(id);
@@ -693,6 +706,7 @@ public final class AuraSystem {
      * {@code auraset.layers-1-spikes-size+0.25}.
      */
     public static void devFromShot(String name) {
+        if (name.contains("aurareload")) reload();
         int at = name.indexOf("aurapv.");
         if (at >= 0) {
             String[] parts = name.substring(at + 7).split("\\.");

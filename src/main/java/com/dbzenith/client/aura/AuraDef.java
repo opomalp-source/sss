@@ -29,6 +29,8 @@ public final class AuraDef {
     // slow bulges in the shell itself, rising
     public final int lobeCount;
     public final float lobeSize, lobeRise;
+    /** How many bulges stack up the height, and how billowy they are (0 smooth waves .. 1 round puffs with creases between). */
+    public final float lobeRows, lobeBillow;
     // motion of the whole body
     public final float pulse, pulseSpeed, sway, speed;
     /** Drawn in this order: put the outermost first. */
@@ -173,6 +175,8 @@ public final class AuraDef {
         lobeCount = Math.max(1, GsonHelper.getAsInt(l, "count", 5));
         lobeSize = GsonHelper.getAsFloat(l, "size", jagged ? 0.05f : 0.12f);
         lobeRise = GsonHelper.getAsFloat(l, "rise", 0.35f);
+        lobeRows = GsonHelper.getAsFloat(l, "rows", 1.2f);
+        lobeBillow = GsonHelper.getAsFloat(l, "billow", 0f);
 
         JsonObject m = GsonHelper.getAsJsonObject(j, "motion", new JsonObject());
         pulse = GsonHelper.getAsFloat(m, "pulse", 0.03f);
