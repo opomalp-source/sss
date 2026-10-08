@@ -1733,3 +1733,26 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **docs/COMBAT_ASSETS.md:** every texture (path, size, use, generator), sound (variants, length, character), the particles worth making, and every animation clip (name, ticks, use) in the format the game reads, plus the order to make them in.
 - **Tests:** `BalanceTests` (the curve, no one-shots, the combo cap, the weaker side's share, form moves) and the PvP targets in the balance report. The perfect-guard test now checks the parry by the counter it opens (other tests' stray explosions can touch the defender's health). 184 GameTests.
 - **CX-19 is complete:** PvP mode, melee from data, guard and evasion, ki and the special meter, hit feedback, lock-on, netcode, the combat HUD, duels and training tools, and the balance pass.
+
+## 2026-10-08 — CX-20 PvP change request, phase 1: a plain switch (v0.61.0)
+- **The user's change request** reworks PvP (where it conflicts with CX-19, it wins):
+  - a plain PvP switch;
+  - normal Minecraft with PvP off and an instant fighting stance with it on;
+  - auto-tag by any hit;
+  - a dot crosshair;
+  - two bottom-right transformation bars (form and technique meters) for PvP;
+  - styles learned from masters.
+- **Step-0 answers:**
+  - **PvP off:** weak plain hits on anything, no combat engine. Being hit by a player or an NPC tags you and switches PvP on, and the hit counts.
+  - **Transforming:** free outside PvP, only through the bars in PvP.
+  - **Styles:** PvP on uses the fighting stance plus your sprint and flight styles; PvP off uses walk, sprint and flight styles.
+  - **Masters:** add Goku and Vegeta (structures later), with a per-master affinity.
+  - **Bars:** the right bar in the aura colour; the left in the technique's colour (Kaioken red, Ultra Instinct Sign grey, mastered white). Ultra Instinct is a technique, not a form.
+  - **Keys:** reuse J and O. The special meter stays.
+- **This phase:**
+  - `PvpRules.toggle`/`set` only flip the flag: the ring of particles, the power-up and power-down sounds and every action-bar message are gone. Refusals (the toggle cooldown, being tagged) are silent.
+  - The pull-in messages are gone.
+  - `client/PvpIndicators` is deleted (the ⚔ name mark and the HUD badge).
+  - Lock-on no longer reads anyone's PvP state (other players are simply foes).
+  - The toggle cooldown defaults to 0.
+  - Seven strings removed. The PvP test now checks the switch flips straight back. 184 GameTests.

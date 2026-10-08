@@ -216,4 +216,13 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - [x] 19h (v0.58.0) HUD: the enemy panel (lock or last foe; health, and ki, guard and special for players), combat callouts (vanish, perfect guard, parried, counter, clash, beam struggle, burst, guard broken and crushed), the combo counter with its damage and time left, the Controls & Move List screen (keys, every move from data with input and frame data, dodge, guard, ki, lock-on), a Combat settings tab and the lock-on settings
   - [x] 19i (v0.59.0) Duels (/duel: challenge, countdown, arena, rounds, ring out, time, melee rules, results screen, Elo ladder, /duel watch with the duel camera), the training dummy (seven behaviours, the string readout, never dies, goes home), the hitbox and frame-data overlay (/dbzhitbox), the combat log
   - [x] 19j (v0.60.0) The PvP balance curve (fight length by equalJabsToKo, the power ratio from the blows themselves, softened and capped, no one-shots, a combo cap), modelled and checked by the balance report; moves for some forms (forms, form_damage); artist animations replacing any clip; docs/COMBAT_GUIDE.md and docs/COMBAT_ASSETS.md
+- [ ] CX-20 PvP change request (user: a plain switch, normal Minecraft out of PvP, the fighting stance in it, auto-tag, a dot crosshair, form and technique meters in two bottom-right bars, styles from masters; phase by phase, stopping for feedback)  - [x] 20a (v0.61.0) A plain switch: every PvP indicator and effect removed, no toggle cooldown by default  - [ ] 20b PvP off = normal Minecraft (weak plain hits, no combat moves), PvP on = the fighting stance  - [ ] 20c Auto-tag (any hit by a player or NPC turns PvP on; tag timer; options)  - [ ] 20d The dot crosshair  - [ ] 20e The bars (visuals)  - [ ] 20f The bars (logic): form and technique meters, J and O in PvP, Ultra Instinct as a technique  - [ ] 20g Styles from masters (data, learning, affinity, Goku and Vegeta, the equip screen, NPC styles)  - [ ] 20h Polish, the guide, the asset list
+  - [x] 20a (v0.61.0) A plain switch: every PvP indicator and effect removed, no toggle cooldown by default
+  - [ ] 20b PvP off = normal Minecraft (weak plain hits, no combat moves), PvP on = the fighting stance
+  - [ ] 20c Auto-tag (any hit by a player or NPC turns PvP on; tag timer; options)
+  - [ ] 20d The dot crosshair
+  - [ ] 20e The bars (visuals)
+  - [ ] 20f The bars (logic): form and technique meters, J and O in PvP, Ultra Instinct as a technique
+  - [ ] 20g Styles from masters (data, learning, affinity, Goku and Vegeta, the equip screen, NPC styles)
+  - [ ] 20h Polish, the guide, the asset list
 - Paused for CX-19: 17d (the robot dojo), 18b (the combat animations as data; folded into 19b)

@@ -41,7 +41,6 @@ public final class ClientSetup {
     public static void registerOverlays(RegisterGuiOverlaysEvent event) {
         event.registerBelowAll("aura_edge", new com.dbzenith.client.fx.AuraEdgeOverlay());
         event.registerAboveAll("hud", new DbzHud());
-        event.registerAboveAll("pvp_badge", new PvpIndicators.Badge());
         event.registerAboveAll("enemy_panel", new com.dbzenith.client.ui.EnemyPanel());          // CX-19 phase 8
         event.registerAboveAll("callouts", new com.dbzenith.client.ui.CalloutOverlay());
         event.registerAboveAll("combat_log", new com.dbzenith.client.ui.CombatLogOverlay());       // CX-19 phase 9

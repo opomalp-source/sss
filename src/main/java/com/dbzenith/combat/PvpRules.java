@@ -5,13 +5,10 @@ import com.dbzenith.config.DBZConfig;
 import com.dbzenith.data.ModCapabilities;
 import com.dbzenith.data.PlayerData;
 import com.dbzenith.world.Otherworld;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -19,7 +16,6 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.joml.Vector3f;
 
 /**
  * PvP mode (CX-19). Players can only hurt each other in PvP mode; it is off when a player joins and after every death.
@@ -37,7 +33,6 @@ import org.joml.Vector3f;
 public final class PvpRules {
     public enum Verdict { ALLOW, BLOCK_SAFE, BLOCK_ATTACKER_OFF, BLOCK_VICTIM_OFF, PULL_IN, BLOCK_DUEL }
 
-    private static final Vector3f RED = new Vector3f(0.95f, 0.15f, 0.12f), WHITE = new Vector3f(0.9f, 0.95f, 1f);
 
     /** GameTest players: two of them fight whatever the rules (the PvP tests take theirs out). */
     public static final java.util.Set<java.util.UUID> TEST_BYPASS = java.util.concurrent.ConcurrentHashMap.newKeySet();
@@ -110,8 +105,6 @@ public final class PvpRules {
             }
             case PULL_IN -> {
                 set(victim, true, true);
-                victim.displayClientMessage(Component.translatable("message.dbzenith.pvp_pulled_in", attacker.getDisplayName()).withStyle(ChatFormatting.RED), false);
-                attacker.displayClientMessage(Component.translatable("message.dbzenith.pvp_pulled_other", victim.getDisplayName()).withStyle(ChatFormatting.GOLD), true);
                 tag(attacker, now);
                 tag(victim, now);
                 return false;
@@ -163,8 +156,9 @@ public final class PvpRules {
     // ------------------------------------------------------------------ toggling
 
     /**
-     * Turns PvP mode on or off ({@code want} null: the other way), as the player asked. Refused during the cooldown, or
-     * turning it off while in a fight. Returns whether it changed.
+     * Turns PvP mode on or off ({@code want} null: the other way), as the player asked: a plain switch, no sound, light or
+     * message (change request, phase 1). Silently refused during the toggle cooldown (0 by default), or turning it off
+     * while combat-tagged. Returns whether it changed.
      */
     public static boolean toggle(ServerPlayer p, Boolean want) {
         PlayerData d = ModCapabilities.get(p).orElse(null);
@@ -172,33 +166,17 @@ public final class PvpRules {
         boolean on = want == null ? !d.isPvp() : want;
         if (on == d.isPvp()) return false;
         long now = p.level().getGameTime();
-        if (now < d.getPvpReadyAt() && !p.getAbilities().instabuild) {
-            p.displayClientMessage(Component.translatable("message.dbzenith.pvp_cooldown", (d.getPvpReadyAt() - now + 19) / 20), true);
-            return false;
-        }
-        if (!on && now < d.getPvpCombatUntil() && !p.getAbilities().instabuild) {
-            p.displayClientMessage(Component.translatable("message.dbzenith.pvp_in_combat", (d.getPvpCombatUntil() - now + 19) / 20), true);
-            return false;
-        }
+        if (now < d.getPvpReadyAt() && !p.getAbilities().instabuild) return false;
+        if (!on && now < d.getPvpCombatUntil() && !p.getAbilities().instabuild) return false;
         set(p, on, false);
         return true;
     }
 
-    /** Sets PvP mode with its sound, ring of light and message. {@code forced}: pulled in, so no cooldown on turning it back off later. */
+    /** Sets PvP mode, nothing more. {@code forced}: switched on by the game (a tag), so no toggle cooldown afterwards. */
     public static void set(ServerPlayer p, boolean on, boolean forced) {
         PlayerData d = ModCapabilities.get(p).orElse(null);
         if (d == null) return;
         d.setPvp(on);
         if (!forced) d.setPvpReadyAt(p.level().getGameTime() + DBZConfig.SERVER.pvpToggleCooldown.get() * 20L);
-        ServerLevel level = p.serverLevel();
-        Vec3 at = p.position();
-        for (int i = 0; i < 24; i++) {                                     // a ring at the feet: red going in, white coming out
-            double a = Math.PI * 2 * i / 24;
-            level.sendParticles(new DustParticleOptions(on ? RED : WHITE, 1.4f), at.x + Math.cos(a) * 1.1, at.y + 0.1, at.z + Math.sin(a) * 1.1, 1, 0, 0.05, 0, 0);
-        }
-        level.playSound(null, at.x, at.y, at.z, on ? com.dbzenith.registry.ModSounds.POWERUP.get() : com.dbzenith.registry.ModSounds.POWER_DOWN.get(),
-                SoundSource.PLAYERS, 0.8f, on ? 1.3f : 1.0f);
-        p.displayClientMessage(Component.translatable(on ? "message.dbzenith.pvp_on" : "message.dbzenith.pvp_off")
-                .withStyle(on ? ChatFormatting.RED : ChatFormatting.AQUA), true);
     }
 }

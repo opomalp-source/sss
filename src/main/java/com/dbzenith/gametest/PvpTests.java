@@ -56,7 +56,7 @@ public final class PvpTests {
         helper.assertTrue(b.getHealth() == body && !db.isPvp(), "out of PvP mode: no harm, and the victim stays out");
 
         helper.assertTrue(PvpRules.toggle(a, true) && da.isPvp(), "the attacker turns PvP mode on");
-        helper.assertTrue(!PvpRules.toggle(a, false), "and cannot flip it straight back (cooldown)");
+        helper.assertTrue(PvpRules.toggle(a, false) && !da.isPvp() && PvpRules.toggle(a, true) && da.isPvp(), "a plain switch: straight back off and on (no cooldown by default)");
         b.invulnerableTime = 0;
         b.hurt(com.dbzenith.combat.ModDamageTypes.absorbed(b.level(), a), 2f);   // test players never wear off their spawn protection: a blow that ignores it
         helper.assertTrue(db.isPvp(), "a blow pulls the victim into PvP mode");

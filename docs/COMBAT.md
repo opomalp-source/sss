@@ -5,7 +5,7 @@ transformation interactions, balancing characters) is completed in the balance p
 
 ## PvP mode (phase 1)
 
-- **Toggling:** PvP mode is off on joining and after death. Toggle it with **P** or `/pvp [on|off]`.
+- **Toggling:** PvP mode is off on joining and after death. Toggle it with **P** or `/pvp [on|off]`: a plain switch, no sound, light, message or marker (CX-20).
 - **Fights:** both players must be in PvP mode. A player in PvP mode who strikes one who isn't pulls them in; that first blow does no harm.
 - **Limits:** a cooldown between toggles, and no switching off while in a fight.
 - **Safe zones:** around spawn, the other world (not Hell), the tournament grounds (except between the two fighters of a match), and `/dbz pvpzone add|remove|list`.

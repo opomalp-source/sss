@@ -646,7 +646,7 @@ public final class DBZConfig {
 
             b.comment("PvP mode (CX-19): players fight each other only in PvP mode (key P, or /pvp)").push("pvp");
             pvpRules = b.comment("Use the PvP mode rules. Off: only the vanilla server pvp setting decides").define("enabled", true);
-            pvpToggleCooldown = b.comment("Seconds between toggles").defineInRange("toggleCooldownSeconds", 10, 0, 3600);
+            pvpToggleCooldown = b.comment("Seconds between toggles (0 = none: the key is a plain switch)").defineInRange("toggleCooldownSeconds", 0, 0, 3600);
             pvpCombatTag = b.comment("After hitting or being hit by a player, PvP mode cannot be turned off for this many seconds").defineInRange("combatTagSeconds", 15, 0, 3600);
             pvpRequireBoth = b.comment("Both players must be in PvP mode to hurt each other").define("requireBoth", true);
             pvpAutoEnable = b.comment("A player in PvP mode who strikes someone who is not pulls them into PvP mode (that first blow does no harm)").define("autoEnableWhenHit", true);

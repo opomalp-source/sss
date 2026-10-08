@@ -136,10 +136,7 @@ public final class LockOn {
 
     /** A foe worth fighting: a player in PvP mode, a fighter, a monster. */
     static boolean hostile(LivingEntity e) {
-        if (e instanceof Player) {
-            PublicStatePacket s = ClientPublicStates.get(e.getId());
-            return s != null && s.has(PublicStatePacket.PVP);
-        }
+        if (e instanceof Player) return true;                                // another player is always a foe here (no PvP marks: change request)
         return e instanceof Enemy || e instanceof com.dbzenith.npc.KiFighter;
     }
 
