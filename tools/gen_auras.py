@@ -164,7 +164,7 @@ FAMILIES = {
     "fam_majin": {
         "silhouette": "lobed",
         "shape": {"width": 1.6, "height": 2.0, "bottom": -0.08, "widest": 0.35, "taper": 1.3, "tip": 0.8, "peak": 0.05, "flare": 0.15},
-        "lobes": {"count": 4, "size": 0.2, "rise": 0.7, "rows": 3.5, "billow": 0.9},
+        "lobes": {"count": 4, "size": 0.15, "rise": 0.7, "rows": 2.8, "billow": 0.8},
         "motion": {"pulse": 0.05, "pulseSpeed": 2.2, "sway": 0.04},
         "layers": [
             glow(1.06, 0.6),
@@ -319,7 +319,7 @@ form('metal_god_core', 'fam_tech', '#E8F0FF', 3, lightning={"rate": 3.5, "size":
 form('evil_majin', 'fam_majin', '#C05080', 1)
 form('super_majin', 'fam_majin', '#FF70B0', 2)
 form('pure_majin', 'fam_majin', '#FF4FA0', 3, react={"charge": {"wild": 1.6, "shake": 0.04}}, motion={"pulseSpeed": 4.0})
-form('primordial_majin', 'fam_majin', '#FF2080', 4, lobes={"size": 0.26, "rise": 1.2})
+form('primordial_majin', 'fam_majin', '#FF2080', 4, lobes={"size": 0.18, "rise": 1.2})
 form('pure_corruption', 'fam_dark', '#9A70C0', 3, lightning={"rate": 2.5, "size": 0.9})
 # Android and cyborg
 form('upgrade_mk2', 'fam_tech', '#9AD0FF', 1)

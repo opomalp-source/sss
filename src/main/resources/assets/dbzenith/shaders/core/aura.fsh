@@ -5,8 +5,8 @@
 // The aura shell (CX-24). Only the far half of the shell is drawn (the near half is culled), so the fighter inside is
 // never tinted. How squarely a point faces the eye says how far in from the outline it is: "depth", 0 on the outline,
 // 1 at the middle, as a share of the radius. The colour runs from the edge in to the white-hot core by depth, and the
-// outline is cut by twisting noise into soft lobes or sharp flames that stream upward, taller near the top. Mode 3
-// draws flame tongues: ribbons with u across and v from base to tip, the tongue's own seed in the vertex red.
+// outline is shaped by twisting noise into broad rounded flame crests that stream upward, with a feathered edge. Mode 3
+// draws inner flames: soft ribbons with u across and v from base to tip, the flame's own seed in the vertex red.
 
 uniform vec4 AuraCore;    // rgb, opacity in the middle
 uniform vec4 AuraMid;     // rgb
@@ -74,13 +74,11 @@ void main() {
         float rise = t * AuraMotion.y * 2.0;
         float wave = (pnoise(vec2(v * 3.0 - rise * 1.3, ts), 64.0) - 0.5) * 0.5 * v;
         float w = pow(max(0.0, 1.0 - v), 0.85) * (0.45 + 0.55 * smoothstep(0.0, 0.25, v));
-        float n = pnoise(vec2(u * 2.5 + ts * 3.0, v * 4.0 - rise * 2.0), 64.0);
-        float n2 = pnoise(vec2(u * 6.0 + ts, v * 9.0 - rise * 3.0), 64.0);
-        float d = abs(u - wave) / max(w, 0.001) + (0.6 * n + 0.4 * n2 - 0.5) * (0.5 + 0.6 * AuraShape.y);
-        float aa = fwidth(d) + 0.02;
-        float body = 1.0 - smoothstep(0.85 - aa, 0.85 + aa, d);
+        float n = pnoise(vec2(u * 2.0 + ts * 3.0, v * 3.0 - rise * 2.0), 64.0);
+        float d = abs(u - wave) / max(w, 0.001) + (n - 0.5) * 0.25;           // a gentle wobble, no ragged bites
+        float body = (1.0 - smoothstep(0.55, 0.95, d)) * (1.0 - smoothstep(0.75, 1.0, v));
         if (body <= 0.003) discard;
-        float heat = clamp((1.0 - d / 0.85) * (1.0 - 0.55 * v), 0.0, 1.0);
+        float heat = clamp((1.0 - d / 0.95) * (1.0 - 0.55 * v), 0.0, 1.0);
         vec3 col = mix(AuraEdge.rgb, AuraMid.rgb, smoothstep(0.08, 0.4, heat));
         col = mix(col, AuraCore.rgb, smoothstep(0.4, 0.85, heat));
         col = mix(col, AuraCore.rgb, clamp(AuraBoost.x * 0.25, 0.0, 0.5));
@@ -89,21 +87,23 @@ void main() {
         return;
     }
 
-    float period = max(1.0, floor(AuraShape.z + 0.5));
+    // The outline: a few broad, rounded flame crests that flow upward and sway, never thin spikes. The noise is kept
+    // low (at most ten crests round), mostly one octave, shaped with smoothsteps (no sharpened ridges), its depth
+    // capped, its flicker slow, and its edge feathered, so the silhouette stays one smooth, cohesive flame.
+    float period = clamp(floor(AuraShape.z + 0.5), 3.0, 10.0);
     float scroll = t * AuraMotion.y;
-    // spikes lean upward: deeper in, the same feature sits lower; the noise twists as it rises
     float warp = AuraFlow.x * (pnoise(vec2(surface.x * period, surface.y * period * 0.2 - t * 0.9 + seed * 1.3), period) - 0.5);
-    vec2 p = vec2(surface.x * period + warp * 2.0, surface.y * period * AuraBoost.w + depth * AuraMode.w - scroll + seed);
-    float n = 0.65 * pnoise(p, period) + 0.35 * pnoise(p * 2.0 + vec2(0.0, 7.3), period * 2.0);
-    float ridge = pow(1.0 - abs(2.0 * n - 1.0), 3.0);
-    float shaped = mix(n, ridge, AuraShape.y);
-    float flicker = 1.0 + AuraMotion.w * (pnoise(vec2(surface.x * period, t * 9.0 + seed * 3.0), period) - 0.5) * 2.0;
+    vec2 p = vec2(surface.x * period + warp * 1.2, surface.y * period * AuraBoost.w + depth * AuraMode.w * 0.5 - scroll + seed);
+    float n = 0.8 * pnoise(p, period) + 0.2 * pnoise(p * 2.0 + vec2(0.0, 7.3), period * 2.0);
+    float crest = smoothstep(0.15, 0.85, n);
+    crest = mix(crest, crest * crest * (3.0 - 2.0 * crest), AuraShape.y);   // "sharper" flames: fuller crests, still round
+    float flicker = 1.0 + min(AuraMotion.w, 0.3) * (pnoise(vec2(surface.x * period, t * 2.5 + seed * 3.0), period) - 0.5);
     float foot = smoothstep(0.0, 0.2, surface.y);
-    float tall = mix(1.0 - 0.45 * AuraBoost.y, 1.0 + 0.6 * AuraBoost.y, surface.y);   // taller flames near the top
-    float cut = AuraShape.x * (1.0 - shaped) * max(0.0, flicker) * foot * tall;
+    float tall = 1.0 + 0.35 * AuraBoost.y * surface.y;                        // a little deeper near the top: it tapers
+    float cut = min(AuraShape.x, 0.12) * (1.0 - crest) * flicker * foot * tall;
 
-    float aa = fwidth(depth) * 1.5 + 0.002;
-    float body = smoothstep(cut, cut + aa, depth);
+    float feather = 0.035 + fwidth(depth) * 1.5;
+    float body = smoothstep(cut, cut + feather, depth);
     if (body <= 0.003) discard;
 
     float e = depth - cut;

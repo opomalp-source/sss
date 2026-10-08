@@ -2121,3 +2121,25 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **Checked in a dev client:** SSJ, SSJ2, SSJ3, God, Blue (with wisps), UI, LSSJ3, SSJ4, Golden Frieza, Pure Majin,
   Super Android, Elder Blood, Beast, the base aura charging, Kaioken alone and x10 / x20 over Blue, flying, and clips.
 
+## 2026-10-08 — CX-24: smooth, cohesive aura silhouettes (v0.75.0)
+- **The ask:** no more random spikes, jagged protrusions or separate flame pieces sticking out of the aura; a smooth,
+  rounded, tapering flame that still flows upward and flickers, same colours and style.
+- **Causes found and fixed at the source:**
+  - **Shell shader** (`aura.fsh`): the outline was cut by noise sharpened into ridges (`pow(1-|2n-1|,3)`), at up to
+    42 crests round with a second octave doubling it, flickering at `t*9`, up to 1.6x deeper near the top and with a
+    one-pixel edge. Now: at most ten broad crests, mostly one octave, shaped with smoothsteps (no ridges), depth capped
+    at 12% of the radius, slow bounded flicker, a feathered edge. "Sharpness" now only makes crests fuller.
+  - **Flame tongues** (`AuraFlames`): ribbons sat on the outline leaning outward, long, and broke off at the base. Now
+    they are inner flames laid along the built shell's own surface (`AuraShell.sample`, bulges, sway and trail
+    included), pulled in by more than their width, growing and fading in place: they can never cross the silhouette.
+  - **Mesh bulges** (`AuraShell`): the billow fold used `|l|` (a sharp V between puffs); waves finer than the mesh
+    could carry (about three vertices a wave) came out as polygon zigzags; a wild charge pushed bulges far enough to
+    fold the surface. Now a softened `|l|`, waves faded out past a fixed level of detail (about five up, seven round),
+    and a soft limit on bulge depth.
+  - **Particles:** embers no longer fly off past the top, motes rise inside the aura's outline instead of up to 1.3x
+    outside it, and lightning stays inside the body of the aura.
+- Near auras get a finer mesh (40 rings x 64 segments) so the outline shows no facets up close.
+- Majin's family bulges toned down (size 0.15, 2.8 rows).
+- **Checked in a dev client:** the full gallery (Kaioken over Blue x10/x20, base, SSJ 1-3, God, UI, LSSJ3, SSJ4, Golden,
+  Majin idle and charging, Android, Elder Blood, Beast, flying, charging) and clips. 209 GameTests.
+

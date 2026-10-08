@@ -12,10 +12,10 @@
   },
   "lobes": {
     "count": 4,
-    "size": 0.2,
+    "size": 0.15,
     "rise": 0.7,
-    "rows": 3.5,
-    "billow": 0.9
+    "rows": 2.8,
+    "billow": 0.8
   },
   "motion": {
     "pulse": 0.05,

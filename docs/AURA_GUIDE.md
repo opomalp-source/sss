@@ -103,7 +103,7 @@ Drawn in order: put the outermost first. One to six layers.
 
 | Key | Meaning |
 |---|---|
-| `kind` | `shell` (the flame body), `glow` (a bright band just outside another layer), `haze` (a soft inner fill, no hard outline) or `tongues` (flame licks on the outline that rise and break off). |
+| `kind` | `shell` (the flame body), `glow` (a bright band just outside another layer), `haze` (a soft inner fill, no hard outline) or `tongues` (soft inner flames flowing up just inside the outline; they never cross it). |
 | `blend` | `normal` keeps colour in daylight; `add` adds light (glows, white-hot cores). Glows default to `add`. |
 | `scale`, `heightScale`, `lift` | Size and height against the aura's shape, and how far up it sits. A glow's scale is against the layer it wraps (1.03..1.1). |
 | `wraps` | For a glow: the index of the layer whose outline it follows (default: the next shell). |
@@ -111,7 +111,7 @@ Drawn in order: put the outermost first. One to six layers.
 | `alpha.core/edge` | Opacity in the middle and at the edge. `opacity` scales the whole layer. |
 | `rim.width/strength` | The bright band at the edge, and how strongly the rim tint shows. |
 | `silhouette` | `lobed` or `jagged`, for this layer's spike defaults. |
-| `spikes.count/size/sharpness/lean` | The outline cut into flames: how many round, how deep, 0 soft .. 1 sharp, how much they lean upward. |
+| `spikes.count/size/sharpness/lean` | The outline's flowing flame crests: how many round (at most 10 are used), how deep (at most 0.12 of the radius), 0 gentle .. 1 fuller crests (always rounded), how much they lean upward. |
 | `motion.scroll/flicker/streaks/speed` | Flames rising, spikes flickering, light streaks, and this layer's pace. |
 | `lobes`, `sway`, `seed` | How much of the body's bulges and sway it takes, and its own seed so it moves differently. |
 | `motion.warp/tallFlames/stretch/streakSpeed` | How much the flames twist, how much taller they are near the top, how long the noise is drawn out upward, how fast the light streaks climb. |

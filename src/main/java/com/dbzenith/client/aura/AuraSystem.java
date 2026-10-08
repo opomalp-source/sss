@@ -479,7 +479,7 @@ public final class AuraSystem {
         float lod = dist < 14 ? 1f : dist < 36 ? 0.62f : 0.4f;
         if (detail == 0) lod *= 0.65f;
         if (detail == 2) lod = Math.min(1f, lod * 1.3f);
-        int rings = Math.max(8, Math.round(28 * lod)), segs = Math.max(12, Math.round(40 * lod));
+        int rings = Math.max(8, Math.round(40 * lod)), segs = Math.max(12, Math.round(64 * lod));   // fine enough up close that the outline shows no facets
         float fade = sl.fade;
         if (ox * ox + oz * oz < radius * radius * 1.2f && -oy > bottom && -oy < bottom + height) fade *= 0.25f;   // the eye inside the shell
 
@@ -496,8 +496,15 @@ public final class AuraSystem {
         for (int i = 0; i < layers.size(); i++) {
             AuraDef.Layer l = layers.get(i);
             if (l.kind == AuraDef.Layer.TONGUES) {
-                tongues(d, l, sl.seed, ox, oy, oz, radius, height, bottom, ph * l.speed, wild, bright, tx, ty, tz, Mth.clamp(l.opacity * fade, 0, 1),
-                        dist, detail, shader, pose, buffers);
+                int ref = mainShell(d);                                           // the flames follow the main shell's surface
+                if (ref < 0) continue;
+                if (built != ref) {
+                    AuraDef.Layer g = layers.get(ref);
+                    SHELL.build(d, radius * g.scale, height * g.heightScale, bottom * g.scale + g.lift * height, ph * g.speed, sl.seed + g.seed,
+                            rings, segs, d.lobeSize * g.lobes * (1 + 0.4f * (wild - 1)), d.sway * g.sway, peak, tx * g.scale, ty * g.scale, tz * g.scale);
+                    built = ref;
+                }
+                tongues(l, sl.seed, ox, oy, oz, height, ph * l.speed, wild, bright, Mth.clamp(l.opacity * fade, 0, 1), dist, detail, shader, pose, buffers);
                 continue;
             }
             boolean glow = l.kind == AuraDef.Layer.GLOW;
@@ -536,10 +543,15 @@ public final class AuraSystem {
 
     private static final ResourceLocation TONGUE_TEX = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/aura_tongue.png");
 
-    /** A layer of flame tongues: through the aura shader, or the old flame texture on the plain shaders. */
-    private static void tongues(AuraDef d, AuraDef.Layer l, float seed, float ox, float oy, float oz, float radius, float height, float bottom,
-                                float t, float wild, float bright, float tx, float ty, float tz, float opacity, float dist, int detail,
-                                boolean shader, PoseStack pose, MultiBufferSource.BufferSource buffers) {
+    /** The first flame shell of an aura, which its inner flames follow; -1 when it has none. */
+    private static int mainShell(AuraDef d) {
+        for (int i = 0; i < d.layers.size(); i++) if (d.layers.get(i).kind == AuraDef.Layer.SHELL) return i;
+        return -1;
+    }
+
+    /** A layer of inner flames along the built shell: through the aura shader, or the old flame texture on the plain shaders. */
+    private static void tongues(AuraDef.Layer l, float seed, float ox, float oy, float oz, float height, float t, float wild, float bright,
+                                float opacity, float dist, int detail, boolean shader, PoseStack pose, MultiBufferSource.BufferSource buffers) {
         if (dist > 48 || (detail == 0 && dist > 20)) return;
         int budget = detail == 0 ? Math.max(4, l.tongueCount / 2) : 64;
         if (shader) {
@@ -549,14 +561,14 @@ public final class AuraSystem {
             RenderSystem.disableCull();
             BufferBuilder bb = Tesselator.getInstance().getBuilder();
             bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
-            AuraFlames.emit(bb, null, d, l, ox, oy, oz, radius, height, bottom, t, wild, seed + l.seed, tx, ty, tz, 1f, 0, 0, budget);
+            AuraFlames.emit(bb, null, SHELL, l, ox, oy, oz, height, t, wild, seed + l.seed, 1f, 0, 0, budget);
             BufferBuilder.RenderedBuffer done = bb.endOrDiscardIfEmpty();
             if (done != null) BufferUploader.drawWithShader(done);
             RenderSystem.enableCull();
         } else {
             var type = l.additive ? FxRenderTypes.additive(TONGUE_TEX) : FxRenderTypes.soft(TONGUE_TEX);
-            AuraFlames.emit(buffers.getBuffer(type), pose.last().pose(), d, l, ox, oy, oz, radius, height, bottom, t, wild, seed + l.seed,
-                    tx, ty, tz, opacity * (1 + 0.3f * bright), AuraDef.mix(l.edge, l.mid, 0.35f), 16, budget);
+            AuraFlames.emit(buffers.getBuffer(type), pose.last().pose(), SHELL, l, ox, oy, oz, height, t, wild, seed + l.seed,
+                    opacity * (1 + 0.3f * bright), AuraDef.mix(l.edge, l.mid, 0.35f), 16, budget);
             buffers.endBatch(type);
         }
     }
@@ -625,8 +637,9 @@ public final class AuraSystem {
             float a = (h & 1023) / 1023f * Mth.TWO_PI;
             float in = 0.25f + 0.7f * ((h >>> 10) & 1023) / 1023f;
             float s0 = 0.05f + 0.35f * ((h >>> 20) & 1023) / 1023f;
-            float s = ember ? s0 + life * 1.1f : Math.min(1f, s0 + life * 0.75f);
-            float rr = AuraShell.profile(d, Math.min(1f, s)) * st.radius * in * (ember ? 1 + 0.5f * life : 1);
+            // both stay inside the aura: embers drift up and cool before the top instead of flying off past it
+            float s = ember ? Math.min(0.92f, s0 + life * 0.8f) : Math.min(0.95f, s0 + life * 0.75f);
+            float rr = AuraShell.profile(d, s) * st.radius * in * (ember ? 0.85f : 0.95f);
             a += ember ? 0.6f * Mth.sin(life * 5 + i) : 0;
             float px = st.x + Mth.cos(a) * rr, py = st.y + st.bottom + s * st.height, pz = st.z + Mth.sin(a) * rr;
             float size = st.body * (ember ? 0.03f : 0.022f) * d.particleSize * (0.6f + 0.8f * ((h >>> 5) & 255) / 255f) * (ember ? 1 - 0.6f * life : 1);
@@ -658,10 +671,12 @@ public final class AuraSystem {
             float life = phase - cycle;
             int h = hash((int) (seed * 977) + i * 6151 + cycle * 92821);
             float a = (h & 1023) / 1023f * Mth.TWO_PI;
-            float out = (0.55f + 0.75f * ((h >>> 10) & 1023) / 1023f) * st.radius * (1 - 0.35f * life);
-            if (eyes) out = Math.max(out, st.body * 0.55f);                      // never through your own eyes
+            // inside the aura's outline at the height they have reached, never scattered round it
+            float sNow = life * life * 0.85f;
+            float out = (0.3f + 0.55f * ((h >>> 10) & 1023) / 1023f) * AuraShell.profile(d, sNow) * st.radius;
+            if (eyes) out = Math.max(out, Math.min(st.body * 0.55f, AuraShell.profile(d, sNow) * st.radius * 0.9f));   // not through your eyes
             float px = st.x + Mth.cos(a) * out, pz = st.z + Mth.sin(a) * out;
-            float py = st.y + st.bottom + life * life * st.height * 1.1f;
+            float py = st.y + st.bottom + sNow * st.height;
             float w = st.body * 0.018f * d.moteSize * (0.7f + 0.6f * ((h >>> 20) & 255) / 255f);
             float len = w * (3 + 9 * life);                                       // they speed up as they rise
             int alpha = Mth.clamp((int) (230 * Mth.sin(Mth.PI * life) * st.fade * Math.min(1, c * 1.5f)), 0, 255);
@@ -702,11 +717,13 @@ public final class AuraSystem {
             if ((h & 3) == 0) continue;                                           // a gap now and then: it flickers
             float life = phase - cycle;
             float r0 = (h & 1023) / 1023f, r1 = ((h >>> 10) & 1023) / 1023f, r2 = ((h >>> 20) & 1023) / 1023f;
-            float s = 0.15f + 0.75f * r1;
+            // inside the aura's body, short enough that no bolt reaches past its outline
+            float s = 0.15f + 0.6f * r1;
             float a = view + (r0 < 0.5f ? 1 : -1) * (Mth.HALF_PI * (0.55f + 0.5f * r2)) + (r0 - 0.5f) * 0.6f;
-            float rr = AuraShell.profile(d, s) * st.radius * (0.65f + 0.3f * r2);
+            float room = AuraShell.profile(d, s) * st.radius;
+            float rr = room * (0.3f + 0.3f * r2);
             float x = st.x + Mth.cos(a) * rr, y = st.y + st.bottom + s * st.height, z = st.z + Mth.sin(a) * rr;
-            float len = st.body * 0.55f * d.lightningSize * (0.6f + 0.8f * r0);
+            float len = Math.min(st.body * 0.45f * d.lightningSize * (0.6f + 0.8f * r0), room * 0.55f);
             float dir = (r2 - 0.5f) * 2.4f + (r1 < 0.5f ? 0 : Mth.PI);
             int pts = 6;
             for (int k = 0; k < pts; k++) {                                       // a jagged walk

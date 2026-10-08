@@ -13,11 +13,13 @@ import org.joml.Matrix4f;
  * allocated), then written out as quads whose outside faces are wound to be culled, so only the far half shows.
  */
 final class AuraShell {
-    static final int MAX_RINGS = 32, MAX_SEGS = 48;
+    static final int MAX_RINGS = 44, MAX_SEGS = 72;
     private static final int N = (MAX_RINGS + 1) * MAX_SEGS;
 
     private final float[] x = new float[N], y = new float[N], z = new float[N];
     private final float[] nx = new float[N], ny = new float[N], nz = new float[N];
+    /** Each ring's middle (it moves with the lean and the trail). */
+    private final float[] rcx = new float[MAX_RINGS + 1], rcy = new float[MAX_RINGS + 1], rcz = new float[MAX_RINGS + 1];
     private final float[] cos = new float[MAX_SEGS], sin = new float[MAX_SEGS];
     private int trigSegs = -1;
     int rings, segs;
@@ -56,6 +58,15 @@ final class AuraShell {
         centerY = bottom + height * 0.45f;
         int c0 = d.lobeCount, c1 = d.lobeCount + 2, c2 = d.lobeCount * 2 + 1;   // whole numbers round, so no seam
         float rise = d.lobeRise * t;
+        // A bulge finer than the mesh can carry (fewer than about six rings or segments a wave) would come out as sharp
+        // polygon zigzags, so each wave fades out as it nears that limit.
+        float rows0 = d.lobeRows;
+        // The cap is a fixed level of detail too (about five waves up, seven round), so a finer mesh up close shows the
+        // same broad, cohesive bulges and not a busier outline.
+        int vr = Math.min(this.rings, 30), sr = Math.min(this.segs, 42);
+        float k0 = 0.5f * fine(rows0, vr) * fine(c0, sr);
+        float k1 = 0.3f * fine(rows0 * 1.67f, vr) * fine(c1, sr);
+        float k2 = 0.2f * fine(rows0 * 2.6f, vr) * fine(c2, sr);
         float leanX = sway * height * Mth.sin(t * 0.9f + seed), leanZ = sway * height * Mth.cos(t * 0.7f + seed * 1.3f);
         float th = Mth.sqrt(tx * tx + tz * tz);
         float hx = th > 1e-4f ? tx / th : 0, hz = th > 1e-4f ? tz / th : 0;
@@ -73,11 +84,15 @@ final class AuraShell {
             float w0 = Mth.TWO_PI * (rows * s - rise), w1 = Mth.TWO_PI * (rows * 1.67f * s - rise * 1.3f), w2 = Mth.TWO_PI * (rows * 2.6f * s - rise * 1.7f);
             for (int j = 0; j < this.segs; j++) {
                 float a = j * Mth.TWO_PI / this.segs;
-                float l = 0.5f * Mth.sin(c0 * a + seed + 0.3f * t) * Mth.sin(w0 + seed * 1.7f)
-                        + 0.3f * Mth.sin(c1 * a + seed * 2.1f - 0.4f * t) * Mth.sin(w1 + seed * 0.6f)
-                        + 0.2f * Mth.sin(c2 * a + seed * 3.3f + 0.5f * t) * Mth.sin(w2 + seed * 2.9f);
-                if (d.lobeBillow > 0) l = Mth.lerp(d.lobeBillow, l, 2.2f * Math.abs(l) - 0.45f);   // round puffs, creased between
-                float r = base * (1 + lobes * env * l);
+                float l = k0 * Mth.sin(c0 * a + seed + 0.3f * t) * Mth.sin(w0 + seed * 1.7f)
+                        + k1 * Mth.sin(c1 * a + seed * 2.1f - 0.4f * t) * Mth.sin(w1 + seed * 0.6f)
+                        + k2 * Mth.sin(c2 * a + seed * 3.3f + 0.5f * t) * Mth.sin(w2 + seed * 2.9f);
+                // round puffs: a softened |l| keeps the dip between two puffs rounded (a plain |l| makes a sharp V
+                // there, which zigzags into jagged edges when the puffs are big)
+                if (d.lobeBillow > 0) l = Mth.lerp(d.lobeBillow, l, 2.2f * (Mth.sqrt(l * l + 0.04f) - 0.2f) - 0.45f);
+                // soft-limited, so even a wild charge never pushes a bulge far enough to fold the surface over itself
+                float bulge = lobes * env * l;
+                float r = base * (1 + bulge / (1 + Math.abs(bulge) * 2.5f));
                 int k = i * MAX_SEGS + j;
                 // a comet: sideways motion pulls the back of the shell out behind while the front stays round the
                 // fighter; up or down motion streams the top (or the bottom) the other way
@@ -87,6 +102,18 @@ final class AuraShell {
                 y[k] = yy + ty * w;
                 z[k] = sin[j] * r + leanZ * lean + tz * w;
             }
+        }
+        for (int i = 0; i <= this.rings; i++) {                                      // each ring's middle
+            float sx = 0, sy = 0, sz = 0;
+            for (int j = 0; j < this.segs; j++) {
+                int k = i * MAX_SEGS + j;
+                sx += x[k];
+                sy += y[k];
+                sz += z[k];
+            }
+            rcx[i] = sx / this.segs;
+            rcy[i] = sy / this.segs;
+            rcz[i] = sz / this.segs;
         }
         for (int i = 0; i <= this.rings; i++) {                                      // normals from the neighbours
             int up = Math.min(this.rings, i + 1), dn = Math.max(0, i - 1);
@@ -109,6 +136,39 @@ final class AuraShell {
                 }
             }
         }
+    }
+
+    /**
+     * A point on the built shell (relative to the feet, unscaled) at height share {@code s} and angle {@code a}, pulled
+     * {@code inset} of the way in towards that height's middle; and how far the surface lies from the middle there.
+     * Things placed with it stay inside the shell whatever its bulges, sway or trail. Writes x, y, z, radius to {@code out}.
+     */
+    void sample(float s, float a, float inset, float[] out) {
+        float fi = Mth.clamp(s, 0f, 1f) * rings;
+        int i0 = Math.min(rings - 1, (int) fi);
+        float ti = fi - i0;
+        float aa = a / Mth.TWO_PI;
+        aa -= Mth.floor(aa);
+        float fj = aa * segs;
+        int j0 = (int) fj % segs, j1 = (j0 + 1) % segs;
+        float tj = fj - (int) fj;
+        float px = 0, py = 0, pz = 0, cx = 0, cy = 0, cz = 0;
+        for (int di = 0; di <= 1; di++) {
+            int ri = i0 + di;
+            float wi = di == 0 ? 1 - ti : ti;
+            int k0 = ri * MAX_SEGS + j0, k1 = ri * MAX_SEGS + j1;
+            px += wi * Mth.lerp(tj, x[k0], x[k1]);
+            py += wi * Mth.lerp(tj, y[k0], y[k1]);
+            pz += wi * Mth.lerp(tj, z[k0], z[k1]);
+            cx += wi * rcx[ri];
+            cy += wi * rcy[ri];
+            cz += wi * rcz[ri];
+        }
+        float dx = px - cx, dz = pz - cz;
+        out[0] = cx + dx * (1 - inset);
+        out[1] = py;
+        out[2] = cz + dz * (1 - inset);
+        out[3] = Mth.sqrt(dx * dx + dz * dz);
     }
 
     /**
@@ -171,6 +231,12 @@ final class AuraShell {
         }
         vc.vertex(m, px, py, pz).color((rgb >> 16) & 255, (rgb >> 8) & 255, rgb & 255, Mth.clamp((int) (a * 255), 0, 255))
                 .uv(0.5f, 0.5f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(LightTexture.FULL_BRIGHT).normal(n, 0, 1, 0).endVertex();
+    }
+
+    /** 1 for a wave of {@code cycles} the {@code steps} vertices carry smoothly, fading to 0 when it gets too fine. */
+    private static float fine(float cycles, int steps) {
+        float most = steps / 6f;
+        return Mth.clamp(2f - cycles / most, 0f, 1f);
     }
 
     static float smooth(float e0, float e1, float v) {
