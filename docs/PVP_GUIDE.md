@@ -1,6 +1,6 @@
 # PvP, the meters and fighting styles (CX-20)
 
-How PvP mode works, how the two bars fill and gate forms and techniques, and how fighting styles and their masters are built. It also covers how to add a master, a style or a form threshold. The textures and animations are listed in [PVP_ASSETS.md](PVP_ASSETS.md).
+How PvP mode works, how the two bars fill and gate forms and techniques, how fighting styles and their masters are built, and how blows and ki attacks send fighters flying and leave craters (CX-21). It also covers how to add a master, a style or a form threshold. The textures and animations are listed in [PVP_ASSETS.md](PVP_ASSETS.md).
 
 ## PvP mode
 
@@ -220,6 +220,45 @@ A master is an NPC who teaches styles. Each is its own entity type, because enti
 - **Training:** "Train together" counts every second spent within 10 blocks of the master.
 - **Learn:** puts the style into every slot still on the default.
 
+
+## Knockback and destruction (CX-21)
+
+- **Sent flying:** in a fight (players in PvP mode, and NPCs), a landed blow sends the victim flying when:
+  - it is a knock-away move;
+  - it is every 5th hit of a combo (`blowAwayComboHits`);
+  - it lands hard enough (force at least `blowAwayForce`, 1.6).
+- **Force (about 0–3):** mostly the share of the victim's health the blow took (its square root, so small blows still count). It rises for a heavy, a critical or a Z-hit, and a little for a long combo. A jab taking 2% is about 0.7; a heavy that takes a quarter of your health is about 2.3. The flight speed is 0.35 + `blowAwaySpeed` × force (0.55) blocks a tick.
+- **Craters:** a fighter sent flying who slams into a wall, lands hard, or is spiked into the ground leaves a crater sized by the force *and the speed left at impact*. A hard hit across a short gap makes a big one; a light knock or a long, slowing flight makes a dent. Ki attacks do the same where they strike:
+  - **Ki blasts:** by their explosion power or size. A plain rapid blast only cracks the surface.
+  - **Beams:** carve into what they hit as they fire, and explosive ones leave a crater at the end.
+
+| Force | What happens |
+|---|---|
+| under 0.35 | nothing |
+| 0.35–0.8 | the surface cracks: grass and dirt to coarse dirt, stone to cobblestone, bricks to cracked bricks, sandstone to sand |
+| above 0.8 | a bowl dug into the surface (radius about 0.9 + 2.3 × (force − 0.8), up to `maxRadius`), cracked blocks round its rim, debris, dust and a boom |
+
+- **What is never torn up:**
+  - safe zones (`/dbz pvpzone`), the world spawn's safe radius (`[pvp] spawnSafeRadius`), the tournament grounds and the other world;
+  - blocks holding something (chests, furnaces...), fluids and unbreakable blocks;
+  - blocks harder than the force allows: 2 + 12 × force, up to `maxHardness` (obsidian needs a force of 4, more than the most a blow carries).
+- **Protection:** a player's crater asks protection mods first (a block break event for each block). NPCs follow the `mobGriefing` game rule.
+- **The Ki creator:** each design has a free toggle beside the modifiers: **Craters** (the default) or **Calm**, which leaves the land alone. It is not a modifier and costs nothing. Built-in techniques always make craters.
+
+Server config `[destruction]`:
+
+| Option | Default | Meaning |
+|---|---|---|
+| `enabled` | true | Craters at all |
+| `knockbackCraters` | true | From fighters sent flying |
+| `kiCraters` | true | From ki attacks |
+| `maxRadius` | 6 | The largest crater (blocks) |
+| `maxHardness` | 50 | The hardest block anything breaks |
+| `maxBlocks` | 500 | At most this many blocks per crater |
+| `dropChance` | 0 | The share of removed blocks that drop as items |
+| `blowAwayComboHits` | 5 | Every this many combo hits send the victim flying (0: off) |
+| `blowAwayForce` | 1.6 | A blow this hard sends them flying on its own |
+| `blowAwaySpeed` | 0.55 | Flight speed per unit of force |
 ## All the debug commands (CX-20)
 
 | Command | Does |

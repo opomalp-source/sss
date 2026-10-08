@@ -235,6 +235,9 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue pvpTagForcesOn;
         public final ForgeConfigSpec.BooleanValue pvpHurtOutOfPvp;
         public final ForgeConfigSpec.BooleanValue pvpMeterGate;
+        public final ForgeConfigSpec.BooleanValue destructionEnabled, destructionKnockback, destructionKi;
+        public final ForgeConfigSpec.DoubleValue destructionMaxRadius, destructionMaxHardness, destructionDrops, blowAwayForce, blowAwaySpeed;
+        public final ForgeConfigSpec.IntValue destructionMaxBlocks, blowAwayComboHits;
         public final ForgeConfigSpec.IntValue pvpSpawnSafeRadius;
         public final ForgeConfigSpec.BooleanValue pvpSafeOtherworld;
         public final ForgeConfigSpec.BooleanValue pvpSafeTournament;
@@ -662,6 +665,19 @@ public final class DBZConfig {
             pvpEqualJabsToKo = b.comment("The length of a fight: between equal players, this many jabs knock one out, at any level (heavies, combos and ki scale from there)").defineInRange("equalJabsToKo", 40, 5, 1000);
             pvpMaxHitFraction = b.comment("No single blow takes more than this share of the foe's health").defineInRange("maxHitFraction", 0.35, 0.01, 1.0);
             pvpComboCapFraction = b.comment("Once a combo has taken this share of the foe's health, the rest of it lands at a quarter").defineInRange("comboCapFraction", 0.6, 0.05, 10.0);
+            b.pop();
+
+            b.comment("Knockback and destruction (CX-20): combos and hard blows blow fighters away; they, and ki attacks, leave craters").push("destruction");
+            destructionEnabled = b.comment("Craters at all (off: the land is never torn up)").define("enabled", true);
+            destructionKnockback = b.comment("Fighters blown into walls and the ground leave craters").define("knockbackCraters", true);
+            destructionKi = b.comment("Ki attacks leave craters (each technique can be made calm in the Ki creator)").define("kiCraters", true);
+            destructionMaxRadius = b.comment("The largest crater's radius in blocks").defineInRange("maxRadius", 6.0, 1.0, 16.0);
+            destructionMaxHardness = b.comment("The hardest block anything can break (stone 1.5, iron block 5, obsidian 50)").defineInRange("maxHardness", 50.0, 0.0, 1000.0);
+            destructionMaxBlocks = b.comment("At most this many blocks removed by one crater").defineInRange("maxBlocks", 500, 0, 5000);
+            destructionDrops = b.comment("The share of removed blocks that drop as items (0: none, 1: all)").defineInRange("dropChance", 0.0, 0.0, 1.0);
+            blowAwayComboHits = b.comment("Every this many hits of a combo, the blow sends the victim flying (0: only knock-away moves and hard blows)").defineInRange("blowAwayComboHits", 5, 0, 50);
+            blowAwayForce = b.comment("A blow at least this hard (force, about 0..3; a heavy that takes a quarter of the victim's health is about 2) sends the victim flying even outside a long combo").defineInRange("blowAwayForce", 1.6, 0.0, 10.0);
+            blowAwaySpeed = b.comment("How fast a victim flies, per unit of force (blocks a tick)").defineInRange("blowAwaySpeed", 0.55, 0.0, 5.0);
             b.pop();
 
             b.comment("Enemy fighters and bosses scale to the strongest nearby player").push("enemies");

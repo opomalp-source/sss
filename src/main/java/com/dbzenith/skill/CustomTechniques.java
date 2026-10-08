@@ -24,6 +24,13 @@ public final class CustomTechniques {
     public static final String PREFIX = "custom_";
     public static final int MAX_SLOTS = 8;
     public static final int MAX_MODS = 2, MAX_MODS_LATE = 3, THIRD_MOD_LEVEL = 800;
+    /** A flag beside the modifiers (not one of them, and free): the design leaves the land alone, no craters (CX-20). */
+    public static final int CALM = 1 << 30;
+
+    /** The modifier bits of a design's {@code mods}, without the flags. */
+    public static int modBits(int mods) {
+        return mods & ~CALM;
+    }
     public static final int NAME_LENGTH = 24;
     public static final int UNLOCK_LEVEL = 10;
 
@@ -174,7 +181,7 @@ public final class CustomTechniques {
 
     /** TP to create (or rewrite) a technique: grows with the square of its power, plus each modifier. */
     public static long tpCost(Spec s) {
-        return 100 + 80L * s.power() * s.power() + 150L * Integer.bitCount(s.mods())
+        return 100 + 80L * s.power() * s.power() + 150L * Integer.bitCount(modBits(s.mods()))
                 + (s.type() == Technique.KiType.PURE ? 0 : 200) + (s.method() == Method.FIRED ? 0 : 150);
     }
 
@@ -204,7 +211,7 @@ public final class CustomTechniques {
         if (s.method() == null || s.origin() == null || s.type() == null) return Component.translatable("kicreator.dbzenith.problem.invalid");
         if (!s.method().fits(s.kind()) || !s.origin().fits(s.kind())) return Component.translatable("kicreator.dbzenith.problem.invalid");
         if (s.type() == Technique.KiType.DIVINE && !d.hasFlag("god_ki")) return Component.translatable("kicreator.dbzenith.problem.divine");
-        if (s.mods() < 0 || s.mods() >= 1 << Mod.values().length || Integer.bitCount(s.mods()) > maxMods(d))
+        if (s.mods() < 0 || modBits(s.mods()) >= 1 << Mod.values().length || Integer.bitCount(modBits(s.mods())) > maxMods(d))
             return Component.translatable("kicreator.dbzenith.problem.mods");
         for (Mod m : s.modSet()) if (!m.fits(s.kind())) return Component.translatable("kicreator.dbzenith.problem.mods");
         if (StatCalculator.level(d) < UNLOCK_LEVEL) return Component.translatable("technique.dbzenith.problem.level", UNLOCK_LEVEL);
@@ -405,6 +412,7 @@ public final class CustomTechniques {
                 .cooldown((int) Math.max(10, Math.round(units * a[1] * tax * cooldownMult)));
         if (hold > 0) b.drop(hold);
         if (explosion > 0) b.explosion(explosion);
+        b.destructive((s.mods() & CALM) == 0);                         // craters where it strikes, unless made calm (CX-20)
         return b.named(s.name(), summary(s)).build();
     }
 

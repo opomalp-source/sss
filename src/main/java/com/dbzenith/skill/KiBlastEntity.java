@@ -45,6 +45,9 @@ public class KiBlastEntity extends Projectile {
     private int lifeTicks = 60;
     private int age;
     private float explosionPower;
+    /** Tears the land up where it strikes (CX-20), and the face it struck (null: against its flight). */
+    private boolean destructive = true;
+    private Vec3 impactNormal;
     private int homingTargetId = -1;
     private Technique.Effect effect = Technique.Effect.NONE;
     private double effectPower;
@@ -81,6 +84,7 @@ public class KiBlastEntity extends Projectile {
         blast.pierceLeft = technique.pierce();
         blast.lifeTicks = technique.lifeTicks();
         blast.explosionPower = technique.explosionPower();
+        blast.destructive = technique.destructive();
         blast.effect = technique.effect();
         blast.effectPower = technique.effectPower();
         blast.holdTicks = technique.holdTicks();
@@ -402,6 +406,7 @@ public class KiBlastEntity extends Projectile {
             level().playSound(null, getX(), getY(), getZ(), net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_HIT, net.minecraft.sounds.SoundSource.PLAYERS, 0.8f, 1.6f);
             return;
         }
+        impactNormal = Vec3.atLowerCornerOf(result.getDirection().getNormal());
         splitApart(Vec3.atLowerCornerOf(result.getDirection().getNormal()));
         impact();
     }
@@ -465,6 +470,11 @@ public class KiBlastEntity extends Projectile {
                         com.dbzenith.network.ImpactPacket.EXPLOSION, explosionPower, getColor(), getOwner() == null ? -1 : getOwner().getId()).send(sl);
             }
         }
+        if (destructive && level() instanceof net.minecraft.server.level.ServerLevel sl) {       // the crater (CX-20)
+            Vec3 n = impactNormal != null ? impactNormal : getDeltaMovement().lengthSqr() > 1e-6 ? getDeltaMovement().normalize().scale(-1) : new Vec3(0, 1, 0);
+            double force = explosionPower > 0 ? 0.5 + explosionPower * 0.55 : 0.2 + getSize() * 0.5;
+            com.dbzenith.combat.Destruction.ki(sl, position().add(0, getBbHeight() / 2, 0), n, force, getOwner() != null ? getOwner() : this);
+        }
         discard();
     }
 
@@ -478,6 +488,7 @@ public class KiBlastEntity extends Projectile {
         tag.putInt("life", lifeTicks);
         tag.putInt("age", age);
         tag.putFloat("explosion", explosionPower);
+        tag.putBoolean("destructive", destructive);
         tag.putFloat("size", getSize());
         tag.putInt("color", getColor());
         tag.putInt("style", entityData.get(STYLE));
@@ -503,6 +514,7 @@ public class KiBlastEntity extends Projectile {
         lifeTicks = tag.getInt("life");
         age = tag.getInt("age");
         explosionPower = tag.getFloat("explosion");
+        destructive = !tag.contains("destructive") || tag.getBoolean("destructive");
         entityData.set(SIZE, tag.getFloat("size"));
         entityData.set(COLOR, tag.getInt("color"));
         entityData.set(STYLE, tag.getInt("style"));

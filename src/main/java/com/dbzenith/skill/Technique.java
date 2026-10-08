@@ -33,6 +33,8 @@ public final class Technique {
     private final int pierce;
     private final boolean homing;
     private final float explosionPower;
+    /** Whether it tears the land up where it strikes (CX-20; the Ki creator can make a technique calm). */
+    private final boolean destructive;
     private final int color;
     private final int lifeTicks;
     private final Style style;
@@ -59,6 +61,7 @@ public final class Technique {
         pierce = b.pierce;
         homing = b.homing;
         explosionPower = b.explosionPower;
+        destructive = b.destructive;
         color = b.color;
         lifeTicks = b.lifeTicks;
         style = b.style;
@@ -95,6 +98,7 @@ public final class Technique {
     public int pierce() { return pierce; }
     public boolean homing() { return homing; }
     public float explosionPower() { return explosionPower; }
+    public boolean destructive() { return destructive; }
     /** 0xRRGGBB tint. */
     public int color() { return color; }
     /** Max flight time / beam duration. */
@@ -152,6 +156,7 @@ public final class Technique {
         private int pierce;
         private boolean homing;
         private float explosionPower;
+        private boolean destructive = true;
         private int color = 0xFFFFFF;
         private int lifeTicks = 60;
         private Style style = Style.BALL;
@@ -179,6 +184,7 @@ public final class Technique {
         public Builder pierce(int n) { pierce = n; return this; }
         public Builder homing() { homing = true; return this; }
         public Builder explosion(float power) { explosionPower = power; return this; }
+        public Builder destructive(boolean on) { destructive = on; return this; }
         public Builder color(int rgb) { color = rgb; return this; }
         public Builder life(int ticks) { lifeTicks = ticks; return this; }
         public Builder style(Style s) { style = s; return this; }

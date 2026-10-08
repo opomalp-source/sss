@@ -143,9 +143,15 @@ public class KiCreatorScreen extends Screen {
                 rebuild();
             }).bounds(ex + (i % 5) * 54, top + 113 + (i / 5) * 14, 51, 12)
                     .tooltip(Tooltip.create(Component.translatable("kicreator.dbzenith.mod." + m.name().toLowerCase() + ".desc"))).build().selected(on);
-            b.active = m.fits(kind) && (on || Integer.bitCount(mods) < max);
+            b.active = m.fits(kind) && (on || Integer.bitCount(CustomTechniques.modBits(mods)) < max);
             addRenderableWidget(b);
         }
+        boolean calm = (mods & CustomTechniques.CALM) != 0;                // destruction: a free toggle beside the modifiers (CX-20)
+        addRenderableWidget(ThemedButton.of(Component.translatable(calm ? "kicreator.dbzenith.destruction_off" : "kicreator.dbzenith.destruction_on"), x -> {
+            mods ^= CustomTechniques.CALM;
+            rebuild();
+        }).bounds(ex + 4 * 54, top + 113 + 2 * 14, 51, 12)
+                .tooltip(Tooltip.create(Component.translatable("kicreator.dbzenith.destruction.desc"))).build().selected(!calm));
 
         boolean exists = d.getCustomSpec(slot) != null;
         addRenderableWidget(ThemedButton.of(Component.translatable(exists ? "kicreator.dbzenith.rewrite" : "kicreator.dbzenith.create",
@@ -255,7 +261,7 @@ public class KiCreatorScreen extends Screen {
             g.fill(sx + i * 10, sy, sx + i * 10 + 9, sy + 9, 0xFF000000 | COLORS[i]);
         }
         int max = CustomTechniques.maxMods(d);
-        DbzTheme.text(g, font, Component.translatable("kicreator.dbzenith.mods_n", Integer.bitCount(mods), max), ex, top + 103, DbzTheme.DIM, 0.75f);
+        DbzTheme.text(g, font, Component.translatable("kicreator.dbzenith.mods_n", Integer.bitCount(CustomTechniques.modBits(mods)), max), ex, top + 103, DbzTheme.DIM, 0.75f);
 
         // what it will do, in your hands
         Technique t = CustomTechniques.build(slot, spec());

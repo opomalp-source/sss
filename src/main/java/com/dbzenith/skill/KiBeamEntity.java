@@ -44,6 +44,8 @@ public class KiBeamEntity extends Entity {
     private float extendSpeed = 3f;
     private int lifeTicks = 30;
     private float explosionPower;
+    /** Tears the land up where it strikes (CX-20). */
+    private boolean destructive = true;
     private boolean hitBlock;
     BeamStruggle struggle;          // locked with another beam (server only)
 
@@ -61,6 +63,7 @@ public class KiBeamEntity extends Entity {
         beam.extendSpeed = technique.speed();
         beam.lifeTicks = technique.lifeTicks();
         beam.explosionPower = technique.explosionPower();
+        beam.destructive = technique.destructive();
         beam.kiType = technique.kiType();
         beam.flags = technique.flags();
         beam.chargeTicks = technique.has(Technique.CHARGED) ? 20 : 0;
@@ -145,6 +148,10 @@ public class KiBeamEntity extends Entity {
         BeamStruggle.lookFor(this);
         if (struggle != null) return;
 
+        if (hitBlock && destructive && tickCount % 6 == 0 && level() instanceof net.minecraft.server.level.ServerLevel sl) {   // it carves into what it strikes (CX-20)
+            com.dbzenith.combat.Destruction.ki(sl, block.getLocation(), Vec3.atLowerCornerOf(block.getDirection().getNormal()),
+                    0.45 + getWidth() * 0.5, owner != null ? owner : this);
+        }
         if (tickCount % DBZConfig.SERVER.beamDamageIntervalTicks.get() == 0) pulse(owner, start, start.add(dir.scale(length)));
     }
 
@@ -177,6 +184,9 @@ public class KiBeamEntity extends Entity {
             Level.ExplosionInteraction interaction = DBZConfig.SERVER.kiBlastsBreakBlocks.get()
                     ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE;
             level().explode(this, end.x, end.y, end.z, explosionPower, interaction);
+            if (destructive && level() instanceof net.minecraft.server.level.ServerLevel sl2) {     // the crater (CX-20)
+                com.dbzenith.combat.Destruction.ki(sl2, end, direction().scale(-1), 0.6 + explosionPower * 0.55, getOwner());
+            }
             if (level() instanceof net.minecraft.server.level.ServerLevel sl) {
                 com.dbzenith.network.ImpactPacket.at(end, direction(), com.dbzenith.network.ImpactPacket.EXPLOSION, explosionPower, getColor(), getOwner().getId()).send(sl);
             }

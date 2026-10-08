@@ -1957,3 +1957,28 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   - `docs/PVP_GUIDE.md`: PvP mode and its options, the meters (what fills, gates and drains them, the rules file field by field), adding a form threshold or a technique step, styles and slots, the style file, clips and their inheritance with pose values that work on the player model, adding a master step by step, and every debug command;
   - `docs/PVP_ASSETS.md`: every texture with its size, on-screen size and maker, and every style's clips slot by slot with what each inherits from (generated from the data).
 - **Tests:** 199 GameTests.
+
+## 2026-10-08 — CX-21: knockback and destruction (v0.69.0)
+- **Sent flying** (user: "when you get combos, you get shot back"):
+  - In a fight (players in PvP mode, and NPCs), a landed blow sends the victim flying when it is a knock-away move, every fifth hit of a combo, or a hard enough blow.
+  - Its **force** (about 0..3, `CombatEngine.force`) comes mostly from the share of the victim's health it took (the square root, so small blows still count), plus a heavy, a critical or a Z-hit, plus the combo behind it. It sets how fast and how long they fly.
+  - Charged ki blasts that throw a foe carry a force too.
+- **Craters** (user: "the stronger the hit, the more destruction"; `combat/Destruction`):
+  - A fighter sent flying who hits a wall, lands hard, or is spiked into the ground leaves a crater. Its size comes from the force and the speed left at impact, so a hard hit across a short gap digs deep and a light or long, slowing flight only dents.
+  - Under 0.35: nothing. Up to 0.8: the surface cracks (grass and dirt to coarse dirt, stone to cobblestone, bricks to cracked bricks). Above: a ragged bowl dug along the surface's normal, wider than deep, growing with the force up to 6 blocks, cracked blocks round the rim, break particles, debris, the crater decal and a boom sized to it.
+  - The hardest block it breaks grows with the force (obsidian survives).
+  - **Never:** safe zones, the spawn's safe radius, the tournament grounds, the other world, blocks holding something (chests...), fluids, unbreakable blocks.
+  - A player's crater asks protection mods first (a break event per block); NPCs follow `mobGriefing`.
+- **Ki attacks** (user: "add destruction to ki attacks"):
+  - Blasts leave a crater by their explosion power or size (a plain rapid blast only cracks the surface).
+  - Beams carve into what they hit as they fire (through a wall, given time), and explosive ones leave a crater at the end.
+- **The Ki creator** (user: "toggleable"): each design has a free toggle beside the modifiers, **Craters** (default) or **Calm**. It isn't a modifier: no slot, no TP. It is a flag in the design's `mods` (`CustomTechniques.CALM`), so saved designs keep working. Techniques carry `destructive`.
+- **Server config `[destruction]`:** `enabled`, `knockbackCraters`, `kiCraters`, `maxRadius` (6), `maxHardness` (50), `maxBlocks` (500), `dropChance` (0), `blowAwayComboHits` (5), `blowAwayForce` (1.6), `blowAwaySpeed` (0.55). Explained in docs/PVP_GUIDE.md.
+- **Tests** (`DestructionTests`, 4):
+  - harder blows have more force; which blows send fighters flying;
+  - a heavy smash leaves its victim flying with a force;
+  - craters: nothing from a tap, only cracks from a light impact, a far bigger crater from a harder one; chests and obsidian survive; nothing in a safe zone or with destruction off;
+  - Ki creator designs make craters by default, and a calm one doesn't, at no TP and no modifier slot.
+
+  203 GameTests.
+- **Checked in the dev client:** a heavy rush smashed the training dummy into a stone wall, leaving a dug-out hole ringed with cracked cobblestone; a Wave Beam held on the wall carved a tunnel through it.

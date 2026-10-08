@@ -219,12 +219,28 @@ public final class CombatEngine {
         if (now < f.flightUntil && e.horizontalCollision && f.flightBy != null) {    // knocked into a wall
             f.flightUntil = 0;
             slam(f, f.flightBy, f.lastBlow * c.wallSlamBonus.get(), now);
+            if (e.level() instanceof ServerLevel sl) {                             // the crater (CX-20)
+                Vec3 dir = f.flightDir.lengthSqr() < 1e-4 ? e.getLookAngle().multiply(-1, 0, -1).normalize() : f.flightDir;
+                Vec3 at = e.position().add(0, e.getBbHeight() * 0.5, 0).add(dir.scale(e.getBbWidth() / 2 + 0.45));
+                com.dbzenith.combat.Destruction.slam(sl, at, dir.scale(-1), impactForce(f), e, f.flightBy);
+            }
             e.setDeltaMovement(Vec3.ZERO);
             e.hurtMarked = true;
             stun(f, e, 20, now);
         }
+        if (now < f.flightUntil && e.onGround() && f.flightVy < -0.55 && f.flightBy != null && !f.spiked) {   // a hard landing (CX-20)
+            f.flightUntil = 0;
+            if (e.level() instanceof ServerLevel sl) {
+                double hit = f.flightForce * Mth.clamp(-f.flightVy / 1.2, 0.35, 1.0);
+                com.dbzenith.combat.Destruction.slam(sl, e.position(), new Vec3(0, 1, 0), hit, e, f.flightBy);
+            }
+        }
         if (f.spiked && e.onGround()) {                                         // driven into the ground
             f.spiked = false;
+            if (e.level() instanceof ServerLevel sl && f.flightBy != null) {    // the crater (CX-20)
+                double hit = Math.max(f.flightForce, 0.8) * Mth.clamp(-f.flightVy / 1.0, 0.5, 1.2);
+                com.dbzenith.combat.Destruction.slam(sl, e.position(), new Vec3(0, 1, 0), hit, e, f.flightBy);
+            }
             if (f.flightBy != null) slam(f, f.flightBy, f.lastBlow * c.groundSlamBonus.get(), now);
             e.setDeltaMovement(new Vec3(0, 0.38, 0));
             e.hurtMarked = true;
@@ -234,6 +250,13 @@ public final class CombatEngine {
         if (f.juggled && e.onGround() && now - f.lastHitAt > 3) {
             f.juggled = false;
             f.juggleHits = 0;
+        }
+        if (now < f.flightUntil || f.spiked) {                                  // in flight: the speed it would strike with (CX-20)
+            Vec3 dv = e.getDeltaMovement();
+            if (now >= f.freezeUntil) {
+                f.flightSpeed = Math.sqrt(dv.x * dv.x + dv.z * dv.z);
+                f.flightVy = dv.y;
+            }
         }
         boolean downed = CombatMoves.isDowned(e, now);
         if (f.wasDowned && !downed) {                                           // up again: a moment's grace
@@ -444,7 +467,21 @@ public final class CombatEngine {
                 }
             }
         }
-        Vec3 carry = !a.onGround() && m.launch == Move.Launch.NONE ? vel.scale(0.9) : null;   // an air combo carries the attacker along
+        // ---- long combos and hard blows send the victim flying; where they hit, they leave a crater (CX-20)
+        double force = force(v, outcomeDealt > 0 ? outcomeDealt : raw, m.button == Move.Button.HEAVY, zhit || (flags & ImpactPacket.CRIT) != 0, g.comboHits);
+
+        boolean blown = blowsAway(m.launch, g.comboHits, force);
+        if (blown) {
+            double speed = Math.max(m.launch == Move.Launch.AWAY ? m.knockback * m.launchPower : 0, 0.35 + c.blowAwaySpeed.get() * force);
+            vel = dir.scale(speed).add(0, Math.max(vel.y, 0.18 + 0.05 * force), 0);
+            g.flightUntil = now + 10 + (int) (8 * force);
+            g.flightBy = a;
+            g.juggled = false;
+            launchedAway(g, force, speed, dir);
+        } else if (m.launch == Move.Launch.DOWN || m.launch == Move.Launch.SPIKE) {
+            g.flightForce = Math.max(1.0, force);
+        }
+        Vec3 carry = !a.onGround() && m.launch == Move.Launch.NONE && !blown ? vel.scale(0.9) : null;   // an air combo carries the attacker along
         if (hitstop > 0) {                                                      // both hang in the blow, then it lands
             freeze(f, g, hitstop, now, vel, carry);
             return;
@@ -536,6 +573,7 @@ public final class CombatEngine {
             if (heavy) {                                                        // a charged blast throws them (wall slams)
                 g.flightUntil = now + 12;
                 g.flightBy = a;
+                launchedAway(g, Mth.clamp(0.6 + knockback * 1.2, 0.6, 2.5), knockback, away(a, v));   // its crater (CX-20)
             }
         }
     }
@@ -554,6 +592,44 @@ public final class CombatEngine {
         g.stunUntil = Math.max(g.stunUntil, now + ticks);
         MobEffectInstance cur = v.getEffect(ModEffects.STUN.get());
         if (cur == null || cur.getDuration() < ticks) v.addEffect(new MobEffectInstance(ModEffects.STUN.get(), ticks, 0, false, false, true));
+    }
+
+    /**
+     * How hard a blow lands (CX-20), about 0..3: mostly the share of the victim's health it took (its square root, so
+     * small blows still count), more for a heavy, a critical or a Z-hit, and a little for the combo behind it.
+     */
+    public static double force(LivingEntity v, double dealt, boolean heavy, boolean crit, int comboHits) {
+        double share;
+        if (v instanceof Player p) {
+            double max = ModCapabilities.get(p).map(d -> d.getDerived().maxBody()).orElse((double) v.getMaxHealth());
+            share = dealt / Math.max(1, max);
+        } else {
+            share = com.dbzenith.combat.DamageCalculator.toVanilla(dealt) / Math.max(1f, v.getMaxHealth());
+        }
+        double f = (heavy ? 0.7 : 0.25) + 3.2 * Math.sqrt(Mth.clamp(share, 0, 1)) + 0.06 * Math.min(comboHits, 10) + (crit ? 0.3 : 0);
+        return Mth.clamp(f, 0, 3);
+    }
+
+    /** Whether a landed blow sends the victim flying (CX-20): knock-away moves, every Nth hit of a combo, a hard enough blow. */
+    public static boolean blowsAway(Move.Launch launch, int comboHits, double force) {
+        if (launch == Move.Launch.AWAY) return true;
+        if (launch != Move.Launch.NONE) return false;
+        int every = DBZConfig.SERVER.blowAwayComboHits.get();
+        return (every > 0 && comboHits > 0 && comboHits % every == 0) || force >= DBZConfig.SERVER.blowAwayForce.get();
+    }
+
+    /** Sent flying: remembered for the crater where it lands. */
+    static void launchedAway(Fighter g, double force, double speed, Vec3 dir) {
+        g.flightForce = force;
+        g.launchSpeed = Math.max(0.1, speed);
+        g.flightDir = dir;
+        g.flightSpeed = speed;
+        g.flightVy = 0;
+    }
+
+    /** The force a flying fighter strikes with: the launch's, by how much of its speed is left. */
+    static double impactForce(Fighter g) {
+        return g.flightForce * Mth.clamp(g.flightSpeed / Math.max(0.1, g.launchSpeed), 0.35, 1.0);
     }
 
     /** A slam into a wall or the ground: extra damage and a crater. */

@@ -32,6 +32,9 @@ public final class Fighter {
     long stunUntil;
     boolean juggled, spiked;
     long flightUntil;                    // knocked away: a wall within this time is a wall slam
+    double flightForce, launchSpeed;     // how hard it was sent flying (about 0..3) and how fast, for its crater (CX-20)
+    double flightSpeed, flightVy;        // its speed and fall the tick before (a collision zeroes them)
+    Vec3 flightDir = Vec3.ZERO;
     LivingEntity flightBy;
     double lastBlow;                     // the last blow's damage, for slam bonuses
     double comboDamage;                  // what the running combo has done (the combat log)
@@ -86,6 +89,15 @@ public final class Fighter {
     }
 
     /** In hitstop (phase 5). */
+    /** Sent flying and not yet landed (CX-20), and how hard. */
+    public boolean blownAway(long now) {
+        return now < flightUntil;
+    }
+
+    public double flightForce() {
+        return flightForce;
+    }
+
     public boolean frozen(long now) {
         return now < freezeUntil;
     }

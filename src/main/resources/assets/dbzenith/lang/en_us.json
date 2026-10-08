@@ -2029,5 +2029,8 @@
   "screen.dbzenith.styles_default": "Default",
   "screen.dbzenith.styles_default_desc": "The default animation. Masters teach styles: right-click one, train together and win their affinity, then set any slot here.",
   "screen.dbzenith.styles_from": "Taught by %s",
-  "screen.dbzenith.styles_count": "%s of %s styles learned. Purely cosmetic: no buffs or debuffs"
+  "screen.dbzenith.styles_count": "%s of %s styles learned. Purely cosmetic: no buffs or debuffs",
+  "kicreator.dbzenith.destruction_on": "Craters",
+  "kicreator.dbzenith.destruction_off": "Calm",
+  "kicreator.dbzenith.destruction.desc": "Craters: it tears up the land where it strikes, more the stronger it is (beams carve as they fire). Calm: it leaves the land alone. Free: it is not one of your modifiers."
 }
