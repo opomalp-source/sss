@@ -102,6 +102,10 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue kiCostReleaseScaling;
         public final ForgeConfigSpec.DoubleValue kiBlastBaseDamage;
         public final ForgeConfigSpec.BooleanValue kiBlastsBreakBlocks;
+        public final ForgeConfigSpec.BooleanValue techCharge;
+        public final ForgeConfigSpec.DoubleValue techChargeCost;
+        public final ForgeConfigSpec.IntValue techTapTicks, transformHoldMin;
+        public final ForgeConfigSpec.DoubleValue transformDecay;
         public final ForgeConfigSpec.IntValue heavyMaxChargeTicks;
         public final ForgeConfigSpec.DoubleValue heavyMinMultiplier;
         public final ForgeConfigSpec.DoubleValue heavyMaxMultiplier;
@@ -397,6 +401,13 @@ public final class DBZConfig {
                     .defineInRange("kiBlastBaseDamage", 40.0, 0.0, 1e9);
             kiBlastsBreakBlocks = b.comment("Whether explosive techniques break blocks")
                     .define("kiBlastsBreakBlocks", false);
+            techCharge = b.comment("Holding the technique key charges a technique (CX-23): bigger and stronger the longer, costing ki as it grows. Off: it goes off at once")
+                    .define("techniqueCharging", true);
+            techChargeCost = b.comment("Ki drained a second while charging, as a share of the technique's own cost (it rises to twice this at a full charge)")
+                    .defineInRange("chargeCostPerSecond", 0.35, 0.0, 10.0);
+            techTapTicks = b.comment("A press shorter than this (ticks) is a tap: the technique goes off at once, uncharged").defineInRange("tapTicks", 6, 0, 40);
+            transformHoldMin = b.comment("Transformations are held (CX-23): at least this many ticks of holding the key, even for a mastered form").defineInRange("transformHoldMin", 10, 0, 200);
+            transformDecay = b.comment("Letting go of the key mid power-up: the bar falls back by this many ticks a tick (it stops at empty)").defineInRange("transformDecay", 0.5, 0.0, 10.0);
             heavyMaxChargeTicks = b.comment("Ticks of holding the heavy-hit key for a full charge")
                     .defineInRange("heavyMaxChargeTicks", 30, 1, 1200);
             heavyMinMultiplier = b.comment("Heavy hit multiplier for a tap")

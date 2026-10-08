@@ -63,7 +63,7 @@
   "hud.dbzenith.guard": "GUARD",
   "hud.dbzenith.heavy_charging": "HEAVY...",
   "hud.dbzenith.powering_up": "POWERING UP: %s",
-  "hud.dbzenith.powering_hint": "a hard hit breaks it - master the form to 75%% to transform at once",
+  "hud.dbzenith.powering_hint": "Keep holding the transform key. Let go and it fades back; a hard hit breaks it",
   "screen.dbzenith.god_ki": "God Ki",
   "screen.dbzenith.god_ki_level": "Lv %s/%s",
   "hud.dbzenith.heavy_ready": "HEAVY x%s",
@@ -2032,5 +2032,11 @@
   "screen.dbzenith.styles_count": "%s of %s styles learned. Purely cosmetic: no buffs or debuffs",
   "kicreator.dbzenith.destruction_on": "Craters",
   "kicreator.dbzenith.destruction_off": "Calm",
-  "kicreator.dbzenith.destruction.desc": "Craters: it tears up the land where it strikes, more the stronger it is (beams carve as they fire). Calm: it leaves the land alone. Free: it is not one of your modifiers."
+  "kicreator.dbzenith.destruction.desc": "Craters: it tears up the land where it strikes, more the stronger it is (beams carve as they fire). Calm: it leaves the land alone. Free: it is not one of your modifiers.",
+  "hud.dbzenith.powering_fading": "%s fading... hold the key again",
+  "hud.dbzenith.charging": "CHARGING  x%s  %s",
+  "hud.dbzenith.charge_max": "FULL POWER  x%s",
+  "message.dbzenith.charge_fizzled": "Your charge fizzled out",
+  "message.dbzenith.charge_no_ki": "Not enough ki for that",
+  "message.dbzenith.transform_faded": "Your power-up faded"
 }

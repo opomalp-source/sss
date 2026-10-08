@@ -55,6 +55,16 @@ public class KiBeamEntity extends Entity {
         setNoGravity(true);
     }
 
+    /** A charged beam (CX-23): {@code scale} times as wide, its blast at the end growing with it. */
+    public static KiBeamEntity create(Level level, LivingEntity owner, Technique technique, double totalDamage, float scale) {
+        KiBeamEntity beam = create(level, owner, technique, totalDamage);
+        if (scale != 1f) {
+            beam.entityData.set(WIDTH, technique.size() * scale);
+            beam.explosionPower = technique.explosionPower() > 0 ? technique.explosionPower() * (1 + (scale - 1) * 1.3f) : scale >= 1.6f ? 1.5f * (scale - 1) : 0;
+        }
+        return beam;
+    }
+
     public static KiBeamEntity create(Level level, LivingEntity owner, Technique technique, double totalDamage) {
         KiBeamEntity beam = new KiBeamEntity(ModEntities.KI_BEAM.get(), level);
         beam.entityData.set(OWNER, owner.getId());

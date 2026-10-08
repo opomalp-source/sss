@@ -123,12 +123,31 @@ public final class DbzHud implements IGuiOverlay {
             float p = Mth.clamp(d.getTransformTicks() / (float) Math.max(1, d.getTransformTotal()), 0, 1);
             int w = 120, h = 6, x = width / 2 - w / 2, y = height / 2 + 26;
             float shake = p > 0.7f ? (p - 0.7f) * 4 * Mth.sin(t * 3.1f) : 0;
-            Component label = Component.translatable("hud.dbzenith.powering_up", Component.translatable(target.translationKey()));
+            boolean holding = d.isTransformHeld();                                    // let go: the bar fades back (CX-23)
+            if (!holding) tc = DbzTheme.mix(tc, 0xFF606670, 0.6f);
+            Component label = Component.translatable(holding ? "hud.dbzenith.powering_up" : "hud.dbzenith.powering_fading", Component.translatable(target.translationKey()));
             DbzTheme.text(g, font, label, width / 2f - font.width(label) * 0.8f / 2 + shake, y - 9, tc, 0.8f);
             DbzTheme.slant(g, x - 1 + shake, y - 1, w + 2, h + 2, 3, 0xF0040508, 0xF0040508);
-            DbzTheme.slantBar(g, x + shake, y, w, h, 3, p, DbzTheme.mix(tc, 0xFFFFFFFF, 0.25f + 0.25f * Mth.sin(t * 0.9f)));
+            DbzTheme.slantBar(g, x + shake, y, w, h, 3, p, holding ? DbzTheme.mix(tc, 0xFFFFFFFF, 0.25f + 0.25f * Mth.sin(t * 0.9f)) : tc);
             DbzTheme.text(g, font, Component.translatable("hud.dbzenith.powering_hint"), width / 2f - font.width(Component.translatable("hud.dbzenith.powering_hint")) * 0.6f / 2,
                     y + h + 3, DbzTheme.DIM, 0.6f);
+        }
+
+        // ---------------------------------------------------------- charging a technique (CX-23)
+        com.dbzenith.client.ClientKiCharge.Charge kc = com.dbzenith.client.ClientKiCharge.get(mc.player.getId());
+        if (kc != null) {
+            float f = com.dbzenith.client.ClientKiCharge.shownFraction(kc, partialTick);
+            int cc = 0xFF000000 | kc.color();
+            int w = 100, h = 5, x = width / 2 - w / 2, y = height / 2 + 26 + (d.isTransforming() ? 26 : 0);
+            boolean full = f >= 0.999f;
+            float shake = f > 0.75f ? (f - 0.75f) * 3 * Mth.sin(t * 3.3f) : 0;
+            String secs = String.format(java.util.Locale.ROOT, "%.1fs", f * kc.maxTicks() / 20f);
+            Component label = full ? Component.translatable("hud.dbzenith.charge_max", String.format(java.util.Locale.ROOT, "%.1f", kc.power()))
+                    : Component.translatable("hud.dbzenith.charging", String.format(java.util.Locale.ROOT, "%.1f", kc.power()), secs);
+            int lc = full ? DbzTheme.mix(cc, 0xFFFFFFFF, 0.5f + 0.5f * Mth.sin(t * 0.8f)) : cc;
+            DbzTheme.text(g, font, label, width / 2f - font.width(label) * 0.75f / 2 + shake, y - 9, lc, 0.75f);
+            DbzTheme.slant(g, x - 1 + shake, y - 1, w + 2, h + 2, 3, 0xF0040508, 0xF0040508);
+            DbzTheme.slantBar(g, x + shake, y, w, h, 3, f, DbzTheme.mix(cc, 0xFFFFFFFF, 0.2f + 0.3f * f));
         }
 
         // ---------------------------------------------------------- technique, right of the hotbar

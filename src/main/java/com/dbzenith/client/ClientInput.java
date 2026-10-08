@@ -23,6 +23,9 @@ public final class ClientInput {
     private static boolean wasHeavy;
     private static boolean wasBlast;
     private static long blastDownAt;
+    /** The technique being charged (held), and whether the transform key is held (CX-23). */
+    private static Technique chargingTechnique;
+    private static boolean transformHeld;
 
     private ClientInput() {}
 
@@ -86,6 +89,7 @@ public final class ClientInput {
                 ClientStruggle.mashed();
                 continue;
             }
+            if (chargingTechnique != null) continue;             // already holding one (CX-23)
             Technique t = ClientCombatState.selected();
             long now = mc.level.getGameTime();
             double meter = ClientCombatState.meterCost(t);
@@ -94,13 +98,24 @@ public final class ClientInput {
                         (int) Math.ceil(meter / com.dbzenith.combat.engine.SpecialMeter.BAR)).withStyle(net.minecraft.ChatFormatting.YELLOW), true);
                 continue;                                                  // a super needs its bars (CX-19)
             }
-            if (t != null && !ClientCombatState.onCooldown(t, now)) {
-                ModNetwork.sendToServer(new UseTechniquePacket(t.id()));
-                ClientCombatState.startCooldown(t, now);
+            if (t != null && !ClientCombatState.onCooldown(t, now)) {   // held: it charges until let go (CX-23)
+                ModNetwork.sendToServer(new com.dbzenith.network.KiChargePackets.Input(true, t.id()));
+                chargingTechnique = t;
             }
         }
+        if (chargingTechnique != null && !ModKeys.KI_ATTACK.isDown()) {     // let go: it fires
+            ModNetwork.sendToServer(new com.dbzenith.network.KiChargePackets.Input(false, ""));
+            ClientCombatState.startCooldown(chargingTechnique, mc.level.getGameTime());
+            chargingTechnique = null;
+        }
         while (ModKeys.TRANSFORM.consumeClick()) {
-            ModNetwork.sendToServer(new InputPacket(Screen.hasShiftDown() ? InputPacket.Action.TRANSFORM_DOWN : InputPacket.Action.TRANSFORM_UP));
+            boolean down = Screen.hasShiftDown();
+            ModNetwork.sendToServer(new InputPacket(down ? InputPacket.Action.TRANSFORM_DOWN : InputPacket.Action.TRANSFORM_UP));
+            transformHeld = !down;                                     // held to power up; let go and it falls back (CX-23)
+        }
+        if (transformHeld && !ModKeys.TRANSFORM.isDown()) {
+            ModNetwork.sendToServer(new InputPacket(InputPacket.Action.TRANSFORM_RELEASE));
+            transformHeld = false;
         }
         while (ModKeys.STATS.consumeClick()) mc.setScreen(new StatScreen());
         while (ModKeys.RADIAL.consumeClick()) com.dbzenith.client.ui.RadialMenuScreen.open();

@@ -398,6 +398,20 @@ public final class DBZCommand {
                                     ctx.getSource().sendSuccess(() -> Component.literal("Special meter set to " + v), true);
                                     return 1;
                                 }))))
+                .then(Commands.literal("charge")                                    // CX-23: start a technique charge as if the key were held, or let it go
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("technique", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.stream.Stream.concat(java.util.stream.Stream.of("release"),
+                                                Techniques.all().stream().map(Technique::id)), b))
+                                        .executes(ctx -> {
+                                            String id = StringArgumentType.getString(ctx, "technique");
+                                            for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
+                                                if (id.equals("release")) com.dbzenith.skill.KiCharge.release(p);
+                                                else com.dbzenith.skill.KiCharge.press(p, id, true);
+                                            }
+                                            ctx.getSource().sendSuccess(() -> Component.literal(id.equals("release") ? "Released" : "Charging " + id), true);
+                                            return 1;
+                                        }))))
                 .then(Commands.literal("style")                                     // CX-20: fighting styles
                         .then(Commands.literal("grant").then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("style", StringArgumentType.word()).suggests(DBZCommand::suggestStyles)

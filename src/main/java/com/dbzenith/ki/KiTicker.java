@@ -70,6 +70,7 @@ public final class KiTicker {
         com.dbzenith.transform.Kaioken.tick(player, data, now);
         com.dbzenith.combat.meter.MeterLogic.tick(player, data, now);              // the PvP meters (CX-20)
         com.dbzenith.style.StyleLogic.tick(player, data, now);                     // training with a master (CX-20)
+        com.dbzenith.skill.KiCharge.tick(player, data, now);                       // charging a technique (CX-23)
         com.dbzenith.combat.CombatMoves.tick(player, data, now);
         data.tickRisingCharge();
         boolean fighting = now - data.getLastCombatTick() < 200;                      // ten seconds since the last blow

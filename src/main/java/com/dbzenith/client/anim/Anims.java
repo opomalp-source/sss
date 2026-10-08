@@ -177,6 +177,36 @@ public final class Anims {
         a.pose(0, g, Ease.INOUTSINE).pose(10, g.copy().move(0, 0.4f, 0).r("torso", 12, -6, 0), Ease.INOUTSINE).pose(20, g, Ease.INOUTSINE);
     });
 
+    /** Charging a blast (CX-23): the lead hand thrust out with the palm open, the other hand gripping that wrist, braced. */
+    public static final KeyframeAnimation TECH_HOLD_BLAST = loop(8, a -> {
+        Pose p = new Pose().at(0, 1.2f, 0).r("torso", 4, -12, 0).r("head", -4, 10, 0)
+                .limb("rightArm", -88, -6, 4, 10).limb("leftArm", -72, 40, 0, 62).freeing("rightLeg", "leftLeg");
+        for (int t = 0; t <= 8; t += 2) a.pose(t, p.copy().move(t % 4 == 0 ? 0.08f : -0.08f, 0, 0), Ease.LINEAR);
+    });
+
+    /** Charging a beam (CX-23): turned away, both hands cupped together at the hip, gathering it there, knees bent. */
+    public static final KeyframeAnimation TECH_HOLD_BEAM = loop(8, a -> {
+        Pose p = new Pose().at(0, 1.6f, 0).r("torso", 10, 32, 0).r("head", -4, -26, 0)
+                .limb("rightArm", 24, -20, 20, 96).limb("leftArm", -10, 64, -6, 112).freeing("rightLeg", "leftLeg");
+        for (int t = 0; t <= 8; t += 2) a.pose(t, p.copy().move(t % 4 == 0 ? 0.08f : -0.08f, 0, 0), Ease.LINEAR);
+    });
+
+    /** Charging something huge overhead (CX-23): both arms raised high, palms up under it, leaning back, head up. */
+    public static final KeyframeAnimation TECH_HOLD_OVERHEAD = loop(8, a -> {
+        Pose p = new Pose().at(0, 0.8f, 0).r("torso", -8, 0, 0).r("head", -22, 0, 0)
+                .limb("rightArm", -170, -10, 10, 14).limb("leftArm", -170, 10, -10, 14).freeing("rightLeg", "leftLeg");
+        for (int t = 0; t <= 8; t += 2) a.pose(t, p.copy().move(t % 4 == 0 ? 0.08f : -0.08f, 0, 0), Ease.LINEAR);
+    });
+
+    /** The hold pose for a kind of charge (KiCharge.KIND_*). */
+    public static KeyframeAnimation techHold(int kind) {
+        return switch (kind) {
+            case com.dbzenith.skill.KiCharge.KIND_BEAM -> custom("tech_hold_beam", TECH_HOLD_BEAM);
+            case com.dbzenith.skill.KiCharge.KIND_OVERHEAD -> custom("tech_hold_overhead", TECH_HOLD_OVERHEAD);
+            default -> custom("tech_hold_blast", TECH_HOLD_BLAST);
+        };
+    }
+
     /** Heavy strike wind-up: fist drawn far back, shoulders twisted, weight sunk on the back leg, straining. */
     public static final KeyframeAnimation HEAVY_WINDUP = loop(10, a -> {
         Pose w = heavyLoad();

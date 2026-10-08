@@ -129,6 +129,8 @@ public final class AnimController {
         if (state.has(PublicStatePacket.MEDITATING)) return Anims.MEDITATE;
         if (state.has(PublicStatePacket.GUARDING)) return Anims.GUARD;
         if (state.has(PublicStatePacket.HEAVY)) return Anims.HEAVY_WINDUP;
+        var techCharge = com.dbzenith.client.ClientKiCharge.get(player.getId());             // charging a technique (CX-23)
+        if (techCharge != null) return Anims.techHold(techCharge.kind());
         if (state.has(PublicStatePacket.CHARGING) || state.has(PublicStatePacket.TRANSFORMING)) return Anims.CHARGE;
         if (com.dbzenith.client.motion.MotionEngine.enabled()) {                    // the motion engine moves the body now
             return null;                                                       // the fighting stance is the motion engine's, by PvP mode (CX-20)

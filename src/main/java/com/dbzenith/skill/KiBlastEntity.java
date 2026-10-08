@@ -77,6 +77,21 @@ public class KiBlastEntity extends Projectile {
         setNoGravity(true);
     }
 
+    /** A charged blast (CX-23): {@code scale} times the size, its explosion growing with it. */
+    public static KiBlastEntity create(Level level, LivingEntity owner, Technique technique, double damage, float scale) {
+        KiBlastEntity blast = create(level, owner, technique, damage);
+        if (scale != 1f) {
+            float size = technique.size() * scale;
+            blast.entityData.set(SIZE, size);
+            blast.baseSize = size;
+            float boom = technique.explosionPower() > 0 ? technique.explosionPower() * (1 + (scale - 1) * 1.3f) : scale >= 1.6f ? 1.2f * (scale - 1) : 0;
+            blast.explosionPower = boom;
+            blast.baseExplosion = boom;
+            blast.refreshDimensions();
+        }
+        return blast;
+    }
+
     public static KiBlastEntity create(Level level, LivingEntity owner, Technique technique, double damage) {
         KiBlastEntity blast = new KiBlastEntity(ModEntities.KI_BLAST.get(), level);
         blast.setOwner(owner);

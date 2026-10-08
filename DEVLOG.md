@@ -2008,3 +2008,37 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **Dev, the pose sheet** (`PoseSheetScreen`, devshots `posesheet_<slot>_<phase>[_<turn>]`, `posesheet_clips_<prefix>_...`, `posesheetnpc_...`): one figure drawn once per clip, frozen at a phase and turned to an angle, through the real animation pipeline (`MotionEngine.devClip`). Every style's version of a slot can be compared at a glance.
 - **Tests:** 203 GameTests.
 - **Checked in the dev client:** pose sheets of every slot for the player and an NPC, and the masters in the world: tapered torsos and fuller limbs, Goku scratching his head, Frieza's hands behind his back, Piccolo's folded arms.
+
+## 2026-10-08 — CX-23: charged ki attacks and held transformations (v0.71.0)
+- **Charging techniques** (user: "hold the button to charge them, for some attacks up to 30 seconds or more; the more you charge the bigger and stronger, but it costs more ki"; `skill/KiCharge`):
+  - Holding the technique key (R) charges the selected technique; letting go fires it. A quick tap still fires at once, uncharged.
+  - **How long and how strong** (`Technique.chargeTicks`, `chargePower`, `.charge(seconds, power)` in code):
+    - beams up to 30 s, five times the damage and over twice as wide;
+    - single blasts and disks up to 12 s, 3.5 times, twice the size;
+    - volleys up to 6 s, twice;
+    - ultimates half as long again (the Supernova up to 67 s);
+    - the Death Beam a quick 8 s.
+
+    The explosion grows with the size, so a charged blast leaves a far bigger crater. Self techniques, mines and the Spirit Bomb (it gathers its own way) still go off at once.
+  - **Ki:** while charging, ki drains (35% of the technique's cost a second, rising to twice that as it grows) and you move slowly. If the ki would fall below what firing costs, it goes off on its own. Stunned, ki-sealed or caught in a beam struggle, the charge fizzles.
+  - **What everyone sees:**
+    - a held pose (a blast with the hand thrust out; a beam cupped at the hip, turned away; something huge with both arms raised overhead);
+    - a glowing orb where it gathers (a soft glow in the technique's colour, a turning flare, a white-hot core) that swells with the charge, energy streaking in, crackling near full.
+  - **What you see:** a gauge under the crosshair with the damage multiplier reached and the seconds charged, and FULL POWER when maxed. In first person your own sparks are hidden and your orb smaller, so it never fills the screen.
+- **Held transformations** (user: "you have to hold the button to transform; let go in the middle and the bar goes down slowly"):
+  - Holding J powers up; letting go makes the bar fall back slowly (half a tick a tick); holding again picks up where it was. At empty the power-up is gone.
+  - Every held power-up takes at least `transformHoldMin` (10 ticks), even mastered or in creative.
+  - **Paid on completion:** a power-up now pays its ki when it takes hold, not when it starts, so letting go, being interrupted or tapping costs nothing.
+  - The HUD bar greys and reads "fading" while you let go.
+- **Config** (`[ki]`): `techniqueCharging`, `chargeCostPerSecond` (0.35), `tapTicks` (6), `transformHoldMin` (10), `transformDecay` (0.5).
+- **Dev:** `/dbz charge <player> <technique|release>` starts a charge as if the key were held, or lets it go.
+- **Tests** (`ChargeTests`, 3):
+  - a tap fires the plain blast; a held charge drains ki, reaches full, and fires a blast over twice the size;
+  - a charge goes off on its own when the ki runs short, and fizzles when stunned;
+  - transformations: held to start, falling back when let go, resuming when held again, paid on completion, fading to nothing at no cost.
+
+  206 GameTests.
+- **Checked in the dev client:**
+  - charging a Kamehameha-style beam (hands cupped at the hip, blue glow), then a wide charged beam carving a trench;
+  - the Supernova as a glowing sun over the head;
+  - the gauge in first person (CHARGING x1.9 3.7s) with the view clear.

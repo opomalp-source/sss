@@ -35,7 +35,7 @@ public final class Techniques {
             .cooldown(60).explosion(1.5f).color(0x4FA8FF).life(30).learn(400, 80));
     public static final Technique KI_HEAL = add(Technique.builder("ki_heal").style(Style.SELF).effect(Effect.HEAL_ALLY, 0.2)
             .cost(60).cooldown(200).color(0x9CFF9C).learn(400, 90));
-    public static final Technique FINGER_BEAM = add(Technique.builder("finger_beam").style(Style.BEAM).cost(45).damage(2.0).speed(48f).size(0.18f)
+    public static final Technique FINGER_BEAM = add(Technique.builder("finger_beam").charge(8, 2.5).style(Style.BEAM).cost(45).damage(2.0).speed(48f).size(0.18f)
             .cooldown(40).color(0xFF5FD2).life(8).learn(500, 120));
     public static final Technique KI_TRANSFER = add(Technique.builder("ki_transfer").style(Style.SELF).effect(Effect.KI_TRANSFER, 8)
             .cost(0).cooldown(60).color(0xA8F0FF).learn(200, 30));
@@ -68,7 +68,7 @@ public final class Techniques {
             .cooldown(70).explosion(1.5f).color(0x6FD0FF).life(30).race(Race.HALF_SAIYAN));
     public static final Technique REGENERATE = add(Technique.builder("regenerate").style(Style.SELF).effect(Effect.HEAL_SELF, 0.35)
             .cost(80).cooldown(300).color(0x8CFF7A).race(Race.NAMEKIAN));
-    public static final Technique SUPERNOVA_ORB = add(Technique.builder("supernova_orb").cost(150).damage(5.0).speed(0.7f).size(2.5f)
+    public static final Technique SUPERNOVA_ORB = add(Technique.builder("supernova_orb").charge(45, 6).cost(150).damage(5.0).speed(0.7f).size(2.5f)
             .cooldown(200).explosion(3.0f).color(0xFF7A30).life(120).race(Race.FROST_DEMON));
     public static final Technique CANDY_BEAM = add(Technique.builder("candy_beam").effect(Effect.CANDY, 40).cost(40).damage(0.2)
             .speed(2.0f).size(0.4f).cooldown(100).color(0xFF80C0).life(40).race(Race.MAJIN));

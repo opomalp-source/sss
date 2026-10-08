@@ -45,7 +45,7 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
     public static PublicStatePacket of(int entityId, PlayerData d) {
         int flags = (d.isCharging() ? CHARGING : 0) | (d.isFlying() ? FLYING : 0)
                 | (d.isGuarding() ? GUARDING : 0) | (d.isChargingHeavy() ? HEAVY : 0)
-                | (Races.of(d.getRace()).tail() && d.hasTail() ? TAIL : 0) | (d.isMeditating() ? MEDITATING : 0) | (d.isTransforming() ? TRANSFORMING : 0)
+                | (Races.of(d.getRace()).tail() && d.hasTail() ? TAIL : 0) | (d.isMeditating() ? MEDITATING : 0) | (d.isTransforming() && d.isTransformHeld() ? TRANSFORMING : 0)
                 | (d.getKaiokenStage() > 0 ? KAIOKEN : 0) | (d.getRacialActive().contains("ki_barrier") ? BARRIER : 0)
                 | (d.combat().downedFlag ? DOWNED : 0) | (d.isDead() ? DEAD : 0) | (d.isPvp() ? PVP : 0) | com.dbzenith.fusion.Fusion.publicBits(d);
         return new PublicStatePacket(entityId, flags, d.getReleasePercent(), Aura.color(d), d.getFormId(),

@@ -227,4 +227,5 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - [x] 20h (v0.68.0) Polish: styles proved cosmetic (no buffs or debuffs), data checks; docs/PVP_GUIDE.md (new master, style, form threshold) and docs/PVP_ASSETS.md (textures and animations with sizes)
 - [x] CX-21 (v0.69.0) Knockback and destruction: combos and hard blows send fighters flying by force; craters sized by force and impact speed on walls and ground; ki blasts and beams leave craters and carve; a Craters/Calm toggle in the Ki creator; [destruction] config
 - [x] CX-22 (v0.70.0) Proportions (tapered torso, fuller limbs, NPCs shaped too), the floating torso fixed for every layer (RigFix), all 16 styles redone (108 clips) with verified poses, the dev pose sheet
+- [x] CX-23 (v0.71.0) Charged ki attacks (hold R: up to 30 s for beams, longer for ultimates, bigger and stronger, ki drain, orb and pose, gauge) and held transformations (hold J, the bar falls back when let go, paid on completion)
 - Paused for CX-19: 17d (the robot dojo), 18b (the combat animations as data; folded into 19b)

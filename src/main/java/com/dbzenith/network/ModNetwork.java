@@ -178,6 +178,10 @@ public final class ModNetwork {
                 .encoder(AnimEventPacket::encode).decoder(AnimEventPacket::decode).consumerMainThread(AnimEventPacket::handle).add();
         CHANNEL.messageBuilder(MeterRulesPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)          // CX-20
                 .encoder(MeterRulesPacket::encode).decoder(MeterRulesPacket::decode).consumerMainThread(MeterRulesPacket::handle).add();
+        CHANNEL.messageBuilder(KiChargePackets.Input.class, nextId++, NetworkDirection.PLAY_TO_SERVER)            // CX-23
+                .encoder(KiChargePackets.Input::encode).decoder(KiChargePackets.Input::decode).consumerMainThread(KiChargePackets.Input::handle).add();
+        CHANNEL.messageBuilder(KiChargePackets.State.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(KiChargePackets.State::encode).decoder(KiChargePackets.State::decode).consumerMainThread(KiChargePackets.State::handle).add();
         CHANNEL.messageBuilder(com.dbzenith.style.StylePackets.Data.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.dbzenith.style.StylePackets.Data::encode).decoder(com.dbzenith.style.StylePackets.Data::decode).consumerMainThread(com.dbzenith.style.StylePackets.Data::handle).add();
         CHANNEL.messageBuilder(com.dbzenith.style.StylePackets.Slots.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)

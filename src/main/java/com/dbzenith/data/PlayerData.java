@@ -1339,6 +1339,31 @@ public class PlayerData {
     // a transformation being powered up into (not saved; synced): the form, ticks done and ticks needed
     private String transformTarget = "";
     private int transformTicks, transformTotal;
+    /** Whether the key is held (CX-23: let go and the power-up falls back), and the fall's fraction of a tick. */
+    private boolean transformHeld = true;
+    private double transformFall;
+
+    public boolean isTransformHeld() {
+        return transformHeld;
+    }
+
+    public void setTransformHeld(boolean held) {
+        if (held != transformHeld) {
+            transformHeld = held;
+            markDirty();
+        }
+    }
+
+    /** Lets the power-up fall back by {@code ticks} (fractions add up); returns the ticks left. */
+    public int fallTransform(double ticks) {
+        transformFall += ticks;
+        int whole = (int) transformFall;
+        if (whole > 0) {
+            transformFall -= whole;
+            setTransformTicks(Math.max(0, transformTicks - whole));
+        }
+        return transformTicks;
+    }
 
     public String getTransformTarget() {
         return transformTarget;
@@ -1360,6 +1385,8 @@ public class PlayerData {
         transformTarget = form;
         transformTicks = 0;
         transformTotal = Math.max(1, total);
+        transformHeld = true;
+        transformFall = 0;
         markDirty();
     }
 
@@ -2093,6 +2120,7 @@ public class PlayerData {
         tag.putString("transformTarget", transformTarget);
         tag.putInt("transformTicks", transformTicks);
         tag.putInt("transformTotal", transformTotal);
+        tag.putBoolean("transformHeld", transformHeld);
         tag.putInt("racialMask", racialMask);
         tag.putInt("kaioken", kaiokenStage);
         CompoundTag cs = new CompoundTag();
@@ -2122,6 +2150,7 @@ public class PlayerData {
         transformTarget = tag.getString("transformTarget");
         transformTicks = tag.getInt("transformTicks");
         transformTotal = tag.getInt("transformTotal");
+        transformHeld = !tag.contains("transformHeld") || tag.getBoolean("transformHeld");
         racialMask = tag.getInt("racialMask");
         kaiokenStage = tag.getInt("kaioken");
         combat.load(tag.getCompound("combat"));

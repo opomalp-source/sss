@@ -53,8 +53,28 @@ public final class FormHandler {
         return transformUp(player, false);
     }
 
+    /**
+     * The transform key went down (CX-23): a power-up already under way picks up where it is; otherwise one starts, held
+     * at least {@code transformHoldMin} ticks even when mastered. Letting go (InputPacket.TRANSFORM_RELEASE) makes the
+     * bar fall back slowly; at empty it is gone.
+     */
+    public static boolean holdUp(ServerPlayer player) {
+        PlayerData data = ModCapabilities.get(player).orElse(null);
+        if (data == null) return false;
+        if (data.isTransforming()) {
+            data.setTransformHeld(true);
+            return true;
+        }
+        return transformUp(player, false, true);
+    }
+
     /** @param instant skip the power-up (tests, scripted scenes) */
     public static boolean transformUp(ServerPlayer player, boolean instant) {
+        return transformUp(player, instant, false);
+    }
+
+    /** @param byKey started by the held key: the power-up takes at least {@code transformHoldMin} ticks, even in creative */
+    public static boolean transformUp(ServerPlayer player, boolean instant, boolean byKey) {
         PlayerData data = ModCapabilities.get(player).orElse(null);
         if (data == null || !player.isAlive()) return false;
         if (data.isTransforming()) return false;                         // already powering up
@@ -92,9 +112,14 @@ public final class FormHandler {
             player.displayClientMessage(Component.translatable("message.dbzenith.no_ki_to_transform"), true);
             return false;
         }
-        if (!player.getAbilities().instabuild) data.setKi(data.getKi() - cost);
-        int time = instant || player.getAbilities().instabuild ? 0 : transformTime(data, next);
+
+        int time = instant || (player.getAbilities().instabuild && !byKey) ? 0 : transformTime(data, next);
+        if (byKey && !instant) {                                            // held (CX-23): never quicker than the minimum
+            int min = DBZConfig.SERVER.transformHoldMin.get();
+            time = player.getAbilities().instabuild ? min : Math.max(min, time);
+        }
         if (time <= 0) {
+            if (!player.getAbilities().instabuild) data.setKi(data.getKi() - cost);     // a power-up pays when it completes (CX-23)
             enter(player, data, next);
         } else {
             data.startTransforming(next.id(), time);
@@ -120,6 +145,13 @@ public final class FormHandler {
         Form target = Forms.byId(data.getTransformTarget());
         if (!player.isAlive() || target.isBase() || com.dbzenith.registry.ModEffects.isKiSealed(player)) {
             data.stopTransforming();
+            return;
+        }
+        if (!data.isTransformHeld()) {                                       // let go (CX-23): the bar falls back slowly
+            if (data.fallTransform(DBZConfig.SERVER.transformDecay.get()) <= 0) {
+                data.stopTransforming();
+                player.displayClientMessage(Component.translatable("message.dbzenith.transform_faded"), true);
+            }
             return;
         }
         int t = data.getTransformTicks() + 1;
@@ -148,6 +180,14 @@ public final class FormHandler {
         }
         if (t >= total) {
             data.stopTransforming();
+            double cost = data.getDerived().maxKi() * DBZConfig.SERVER.transformKiCostPercent.get() / 100.0;   // paid now that it holds (CX-23)
+            if (!player.getAbilities().instabuild) {
+                if (data.getKi() < cost) {
+                    player.displayClientMessage(Component.translatable("message.dbzenith.no_ki_to_transform"), true);
+                    return;
+                }
+                data.setKi(data.getKi() - cost);
+            }
             if (problem(data, target) == null) {
                 enter(player, data, target);
                 com.dbzenith.network.ImpactPacket.at(player.position().add(0, 1, 0), new net.minecraft.world.phys.Vec3(0, 1, 0),
@@ -156,7 +196,7 @@ public final class FormHandler {
         }
     }
 
-    /** A hard enough hit breaks a power-up: the ki spent is lost. */
+    /** A hard enough hit breaks a power-up (it had not been paid for yet: power-ups pay when they complete). */
     public static void interrupt(ServerPlayer player, PlayerData data) {
         if (!data.isTransforming()) return;
         data.stopTransforming();

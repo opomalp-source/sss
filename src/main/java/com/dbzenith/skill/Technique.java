@@ -48,6 +48,9 @@ public final class Technique {
     private final String summary;         // ...and a generated description
     private final KiType kiType;
     private final int flags;
+    /** Holding the key charges it (CX-23): up to this many ticks (0: it goes off at once), for up to this much damage. */
+    private final int chargeTicks;
+    private final double chargePower;
 
     private Technique(Builder b) {
         id = b.id;
@@ -72,6 +75,22 @@ public final class Technique {
         races = b.races;
         holdTicks = b.holdTicks;
         displayName = b.displayName;
+        if (b.chargeTicks >= 0) {                                          // CX-23: how long it can be charged, and how strong it gets
+            chargeTicks = b.chargeTicks;
+            chargePower = b.chargePower;
+        } else if (style == Style.SELF || effect == Effect.SPIRIT_BOMB || has(PLACED)) {
+            chargeTicks = 0;                                               // self techniques, mines and the Spirit Bomb (it gathers its own way)
+            chargePower = 1;
+        } else if (style == Style.BEAM) {
+            chargeTicks = 600;                                             // beams: up to 30 s, five times as strong
+            chargePower = 5;
+        } else if (count > 1 || has(RAIN)) {
+            chargeTicks = 120;                                             // volleys: up to 6 s, twice as strong
+            chargePower = 2;
+        } else {
+            chargeTicks = 240;                                             // single blasts and disks: up to 12 s, three and a half times
+            chargePower = 3.5;
+        }
         summary = b.summary;
         kiType = b.kiType;
         flags = b.flags;
@@ -138,6 +157,9 @@ public final class Technique {
     public KiType kiType() { return kiType; }
     public int flags() { return flags; }
     public boolean has(int flag) { return (flags & flag) != 0; }
+    /** The longest charge in ticks (0: it goes off at once) and the damage multiplier at a full charge. */
+    public int chargeTicks() { return chargeTicks; }
+    public double chargePower() { return chargePower; }
 
     /** Made in the Ki Creator. */
     public boolean isCustom() {
@@ -170,6 +192,8 @@ public final class Technique {
         private String summary;
         private KiType kiType = KiType.PURE;
         private int flags;
+        private int chargeTicks = -1;
+        private double chargePower = 1;
 
         private Builder(String id) {
             this.id = id;
@@ -195,6 +219,8 @@ public final class Technique {
         public Builder named(String name, String description) { displayName = name; summary = description; return this; }
         public Builder kiType(KiType t) { kiType = t; return this; }
         public Builder flags(int f) { flags |= f; return this; }
+        /** How long holding the key can charge it (seconds; 0: none) and its damage multiplier at a full charge. */
+        public Builder charge(double seconds, double power) { chargeTicks = (int) Math.round(seconds * 20); chargePower = power; return this; }
 
         public Technique build() {
             return new Technique(this);

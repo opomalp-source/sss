@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 /** Client to server: a held-key or toggle input. The server decides what it means. */
 public record InputPacket(Action action) {
     public enum Action { CHARGE_START, CHARGE_STOP, GUARD_START, GUARD_STOP, TOGGLE_FLIGHT, LOWER_RELEASE, HEAVY_START, HEAVY_STOP,
-        TRANSFORM_UP, TRANSFORM_DOWN, RACIAL_USE, SKILL_USE, KAIOKEN_UP, KAIOKEN_OFF }
+        TRANSFORM_UP, TRANSFORM_DOWN, RACIAL_USE, SKILL_USE, KAIOKEN_UP, KAIOKEN_OFF, TRANSFORM_RELEASE }
 
     public static void encode(InputPacket msg, FriendlyByteBuf buf) {
         buf.writeEnum(msg.action);
@@ -41,7 +41,8 @@ public record InputPacket(Action action) {
                 case LOWER_RELEASE -> data.setReleasePercent(data.getReleasePercent() - DBZConfig.SERVER.releaseLowerStep.get());
                 case HEAVY_START -> { }
                 case HEAVY_STOP -> { }                                       // heavies are presses now (CX-19)
-                case TRANSFORM_UP -> FormHandler.transformUp(player);
+                case TRANSFORM_UP -> FormHandler.holdUp(player);                      // held to power up (CX-23)
+                case TRANSFORM_RELEASE -> data.setTransformHeld(false);
                 case TRANSFORM_DOWN -> FormHandler.revertOne(player);
                 case RACIAL_USE -> com.dbzenith.race.RacialSkillEffects.use(player);
                 case SKILL_USE -> com.dbzenith.race.RacialSkillEffects.useSkill(player);

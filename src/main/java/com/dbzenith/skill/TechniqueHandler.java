@@ -25,13 +25,20 @@ public final class TechniqueHandler {
     private TechniqueHandler() {}
 
     public static Result use(ServerPlayer player, Technique technique) {
-        return use(player, technique, false);
+        return use(player, technique, false, 0);
     }
 
     /** {@code bypassDeck}: admin/testing path (/dbz technique) that skips the learned + deck check. */
     public static Result use(ServerPlayer player, Technique technique, boolean bypassDeck) {
+        return use(player, technique, bypassDeck, 0);
+    }
+
+    /**
+     * Whether the technique could be used now (FIRED if so), with no cost paid and nothing fired: before a charge starts
+     * (CX-23). The Spirit Bomb's second press (the throw) counts as usable.
+     */
+    public static Result check(ServerPlayer player, Technique technique, boolean bypassDeck) {
         if (technique == null || !player.isAlive() || player.isSpectator()) return Result.INVALID;
-        com.dbzenith.combat.PvpRules.actor(player);                         // effects it causes on players are judged (CX-19)
         PlayerData data = ModCapabilities.get(player).orElse(null);
         if (data == null || !Forms.byId(data.getFormId()).allowsTechniques()) return Result.INVALID;
         if (com.dbzenith.registry.ModEffects.isStunned(player)) return Result.STUNNED;
@@ -40,28 +47,58 @@ public final class TechniqueHandler {
         if (!com.dbzenith.duel.Duels.kiAllowed(player)) return Result.INVALID;   // a melee-only duel (CX-19 phase 9)
         if (!bypassDeck && technique.style() != Technique.Style.SELF && !com.dbzenith.combat.PvpRules.combatOn(player)) return Result.INVALID;   // PvP off: no attacks (CX-20)
         if (!bypassDeck && !(data.knows(technique.id()) && data.deckView().contains(technique.id()))) return Result.NOT_EQUIPPED;
-        if (technique.effect() == Technique.Effect.SPIRIT_BOMB && KiBlastEntity.releaseSpiritBomb(player)) {   // cast again: thrown
+        data.recomputeIfStale();
+        long now = player.serverLevel().getGameTime();
+        if (data.isOnCooldown(technique.id(), now)) return Result.COOLDOWN;
+        double cost = DamageCalculator.kiCost(data, technique.kiCost()) * TechniqueMastery.costMultiplier(data, technique);
+        if (!player.getAbilities().instabuild && data.getKi() < cost) return Result.NOT_ENOUGH_KI;
+        double meter = bypassDeck ? 0 : com.dbzenith.combat.engine.KiCombat.tier(technique.id()).meter();
+        if (meter > 0 && com.dbzenith.combat.engine.SpecialMeter.enabled() && !player.getAbilities().instabuild
+                && data.getSpecial() + 1e-6 < meter) return Result.NO_METER;
+        return Result.FIRED;
+    }
+
+    /** The ki a technique costs this player when it goes off (before any charging). */
+    public static double baseCost(PlayerData data, Technique technique) {
+        return DamageCalculator.kiCost(data, technique.kiCost()) * TechniqueMastery.costMultiplier(data, technique);
+    }
+
+    /** The damage multiplier of a charge (0..1 of the technique's longest): up to its {@code chargePower}. */
+    public static double chargeDamage(Technique technique, double charge) {
+        double f = Math.max(0, Math.min(1, charge));
+        return 1 + (technique.chargePower() - 1) * Math.pow(f, 0.85);
+    }
+
+    /** How much bigger a charge makes it: beams up to 2.2x as wide, blasts twice the size, volleys a little. */
+    public static float chargeScale(Technique technique, double charge) {
+        double f = Math.max(0, Math.min(1, charge));
+        double grow = technique.style() == Technique.Style.BEAM ? 1.2 : technique.count() > 1 || technique.has(Technique.RAIN) ? 0.4 : 1.0;
+        return (float) (1 + grow * f);
+    }
+
+    /** Uses a technique charged to {@code charge} (0..1 of its longest charge; 0 for a tap): stronger and bigger (CX-23). */
+    public static Result use(ServerPlayer player, Technique technique, boolean bypassDeck, double charge) {
+        Result ok = check(player, technique, bypassDeck);
+        if (technique != null && technique.effect() == Technique.Effect.SPIRIT_BOMB && ok != Result.INVALID && ok != Result.NOT_EQUIPPED && ok != Result.STUNNED && ok != Result.SEALED
+                && KiBlastEntity.releaseSpiritBomb(player)) {                  // cast again: thrown
             com.dbzenith.network.ModNetwork.sendToTrackingAndSelf(player,
                     new com.dbzenith.network.AnimEventPacket(player.getId(), com.dbzenith.network.AnimEventPacket.THROW, 2));
             return Result.FIRED;
         }
-        data.recomputeIfStale();
-
+        if (ok != Result.FIRED) return ok;
+        com.dbzenith.combat.PvpRules.actor(player);                         // effects it causes on players are judged (CX-19)
+        PlayerData data = ModCapabilities.get(player).orElse(null);
         ServerLevel level = player.serverLevel();
         long now = level.getGameTime();
-        if (data.isOnCooldown(technique.id(), now)) return Result.COOLDOWN;
-        double cost = DamageCalculator.kiCost(data, technique.kiCost()) * TechniqueMastery.costMultiplier(data, technique);
-        if (!player.getAbilities().instabuild && data.getKi() < cost) return Result.NOT_ENOUGH_KI;
+        double cost = baseCost(data, technique);
         com.dbzenith.combat.engine.KiCombat.Tier tier = com.dbzenith.combat.engine.KiCombat.tier(technique.id());   // supers and ultimates: the special meter (CX-19)
         double meter = bypassDeck ? 0 : tier.meter();                       // the admin path pays no meter
-        if (meter > 0 && com.dbzenith.combat.engine.SpecialMeter.enabled() && !player.getAbilities().instabuild
-                && data.getSpecial() + 1e-6 < meter) return Result.NO_METER;
 
         if (technique.style() == Technique.Style.SELF) {
             if (!TechniqueEffects.apply(player, data, technique)) return Result.INVALID;
         } else {
-            spawn(level, player, technique, DamageCalculator.kiOutgoing(data, technique.damageMult()) * TechniqueMastery.damageMultiplier(data, technique)
-                    * com.dbzenith.race.RacialSkillEffects.risingChargeBonus(data));
+            spawn(level, player, technique, chargeDamage(technique, charge) * DamageCalculator.kiOutgoing(data, technique.damageMult()) * TechniqueMastery.damageMultiplier(data, technique)
+                    * com.dbzenith.race.RacialSkillEffects.risingChargeBonus(data), chargeScale(technique, charge));
         }
 
         if (!player.getAbilities().instabuild) data.setKi(data.getKi() - cost);
@@ -86,10 +123,15 @@ public final class TechniqueHandler {
      * Players go through {@link #use}; NPCs (Phase 4) and {@code /dbz cast} call this directly.
      */
     public static void spawn(ServerLevel level, LivingEntity caster, Technique technique, double damage) {
+        spawn(level, caster, technique, damage, 1f);
+    }
+
+    /** The same, {@code scale} times the size (a charged technique, CX-23). */
+    public static void spawn(ServerLevel level, LivingEntity caster, Technique technique, double damage, float scale) {
         if (technique.style() == Technique.Style.SELF) return; // self effects need a player caster (TechniqueEffects)
         Vec3 look = caster.getLookAngle();
         if (technique.style() == Technique.Style.BEAM) {
-            level.addFreshEntity(KiBeamEntity.create(level, caster, technique, damage));
+            level.addFreshEntity(KiBeamEntity.create(level, caster, technique, damage, scale));
             return;
         }
         if (technique.has(Technique.PLACED) || technique.has(Technique.RAIN)) {
@@ -101,9 +143,9 @@ public final class TechniqueHandler {
                     ? eye.add(look.scale(10))                         // nothing in reach: a mine hangs ten blocks out
                     : aim.getLocation().subtract(look.scale(0.6));
             for (int i = 0; i < technique.count(); i++) {
-                KiBlastEntity blast = KiBlastEntity.create(level, caster, technique, damage);
+                KiBlastEntity blast = KiBlastEntity.create(level, caster, technique, damage, scale);
                 if (technique.has(Technique.PLACED)) {              // a mine where you look
-                    blast.moveTo(spot.x, spot.y - technique.size() / 2.0, spot.z, 0, 0);
+                    blast.moveTo(spot.x, spot.y - technique.size() * scale / 2.0, spot.z, 0, 0);
                     blast.setDeltaMovement(Vec3.ZERO);
                 } else {                                            // rain: falls on the spot from high above
                     double r = 3.0 * Math.sqrt(level.random.nextDouble()), a = level.random.nextDouble() * Math.PI * 2;
@@ -117,8 +159,8 @@ public final class TechniqueHandler {
         LivingEntity homingTarget = technique.homing() ? findTarget(caster, look) : null;
         for (int i = 0; i < technique.count(); i++) {
             Vec3 dir = technique.spreadDegrees() > 0 ? spread(look, technique.spreadDegrees(), caster) : look;
-            KiBlastEntity blast = KiBlastEntity.create(level, caster, technique, damage);
-            Vec3 start = caster.getEyePosition().add(look.scale(0.6)).subtract(0, technique.size() / 2.0, 0);
+            KiBlastEntity blast = KiBlastEntity.create(level, caster, technique, damage, scale);
+            Vec3 start = caster.getEyePosition().add(look.scale(0.6)).subtract(0, technique.size() * scale / 2.0, 0);
             blast.moveTo(start.x, start.y, start.z, caster.getYRot(), caster.getXRot());
             blast.setDeltaMovement(dir.normalize().scale(technique.speed()));
             blast.setHomingTarget(homingTarget);
