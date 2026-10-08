@@ -5,28 +5,28 @@
   ],
   "tint": "#70B8FF",
   "shape": {
-    "width": 1.42,
-    "height": 1.892
+    "width": 1.638,
+    "height": 1.65
   },
   "layers": [
     {
       "kind": "glow",
-      "scale": 1.05,
-      "opacity": 0.8,
+      "scale": 1.13,
+      "opacity": 1.0,
       "colors": {
-        "rim": "$glow"
+        "rim": "$c"
       }
     },
     {
       "kind": "shell",
       "colors": {
         "core": "$core",
-        "mid": "$mid",
+        "mid": "$c",
         "edge": "$edge",
         "rim": "$white"
       },
       "alpha": {
-        "core": 0.45,
+        "core": 0.0,
         "edge": 1.0
       },
       "rim": {
@@ -44,38 +44,11 @@
         "flicker": 0.5,
         "streaks": 0.9,
         "streakSpeed": 6.0,
-        "stretch": 0.45,
+        "stretch": 0.5,
         "tallFlames": 0.4,
         "warp": 0.1
-      }
-    },
-    {
-      "kind": "tongues",
-      "blend": "add",
-      "colors": {
-        "core": "$white",
-        "mid": "$mid",
-        "edge": "$edge"
       },
-      "alpha": {
-        "core": 0.9,
-        "edge": 0.7
-      },
-      "spikes": {
-        "sharpness": 1.0
-      },
-      "tongues": {
-        "count": 16,
-        "length": 0.36,
-        "width": 0.099,
-        "life": 0.25,
-        "top": 0.25,
-        "rise": 0.2,
-        "wave": 0.05
-      },
-      "motion": {
-        "scroll": 3.0
-      }
+      "band": 0.17
     }
   ]
 }

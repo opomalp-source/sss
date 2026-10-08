@@ -2163,3 +2163,22 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - All families, Blue and Kaioken (both tiers) re-proportioned in `tools/gen_auras.py` (`flame_proportions`).
 - **Checked in a dev client:** the full gallery and clips (the tongues climb, the width holds still). 209 GameTests.
 
+## 2026-10-08 — CX-24: the hollow anime aura, after the user's reference video (v0.77.0)
+- **The reference** (an 18 s clip of Dokkan-style SSJ1, SSJ2, SSJ2 full power and SSJ3 auras): a thick glowing band
+  forming a fir-tree flame silhouette (about five sharp tongues up each side pointing up and out, a crown on top, a
+  smooth bowl under the feet) round an almost empty middle with small streaks of light rising in it; saturated colour
+  with a wide soft halo; fast flicker; blue-white lightning on SSJ2/3. About as wide as the fighter is tall, about 1.4
+  times as tall.
+- **Hollow band** (`aura.fsh`, per-layer `band`): a shell with `band` > 0 draws a bright band of that width behind
+  its flame edge (the form's full colour, streaked with upward blur) and leaves the middle clear (`alpha.core` 0).
+  Because depth is the share of the radius in from the outline, the band is the same thickness from every side.
+- **Flecks** (`particles.type: "flecks"`): small vertical streaks of light shooting up inside the aura and flickering.
+- **Tongues:** steeper (root depth 0.24-0.34 of the radius), needle tips (sharpness 0.9), five rows up the height
+  (`stretch` 0.5); none in the bottom third, so the bowl round the feet stays smooth.
+- **Data** (`tools/gen_auras.py`, `anime()`): every family and Kaioken drop the layers that filled the middle (inner
+  flames, hazes, added light shells), gain the band, flecks and a wider halo (glow 1.13); proportions about 1.5x wider
+  and 0.75x as tall as v0.76, a crown instead of a needle on top. Kaioken wraps at 1.15 (x20: 1.25) round the now
+  wider form auras, its x20 tongues still deeper. SSJ2/3 lightning is blue-white. Blue keeps its colours.
+- A 3D shell was kept rather than flat 2D sprites: the band reads the same from every angle (side, behind, above).
+- **Checked in a dev client** against the video, by night and day, with clips. 209 GameTests.
+

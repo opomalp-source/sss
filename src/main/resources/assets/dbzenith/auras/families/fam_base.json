@@ -3,17 +3,21 @@
   "followFighter": true,
   "idle": false,
   "shape": {
-    "width": 1.3,
-    "height": 1.677,
-    "peak": 0.175,
-    "flare": 0.03
+    "width": 1.5,
+    "height": 1.462,
+    "peak": 0.075,
+    "flare": 0.03,
+    "bottom": -0.08
   },
   "lobes": {
     "size": 0.02,
     "rise": 1.0
   },
   "particles": {
-    "type": "none"
+    "type": "flecks",
+    "rate": 1.1,
+    "size": 1.0,
+    "color": "$core"
   },
   "react": {
     "charge": {

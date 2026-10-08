@@ -4,13 +4,13 @@
   ],
   "silhouette": "lobed",
   "shape": {
-    "width": 1.43,
-    "height": 1.8,
-    "bottom": -0.05,
-    "widest": 0.36,
-    "taper": 1.4,
-    "tip": 0.9,
-    "peak": 0.2,
+    "width": 1.6,
+    "height": 1.5,
+    "bottom": -0.08,
+    "widest": 0.4,
+    "taper": 1.8,
+    "tip": 0.62,
+    "peak": 0.08,
     "flare": 0.03
   },
   "lobes": {
@@ -27,8 +27,8 @@
   "layers": [
     {
       "kind": "glow",
-      "scale": 1.07,
-      "opacity": 0.75,
+      "scale": 1.13,
+      "opacity": 1.0,
       "colors": {
         "rim": "#7FDFFF"
       },
@@ -47,12 +47,12 @@
       "kind": "shell",
       "colors": {
         "core": "#FFFFFF",
-        "mid": "#A6EEFF",
+        "mid": "#2EB4FF",
         "edge": "#1FA2FF",
         "rim": "#FFE65C"
       },
       "alpha": {
-        "core": 0.88,
+        "core": 0.0,
         "edge": 1.0
       },
       "rim": {
@@ -60,82 +60,27 @@
         "strength": 0.7
       },
       "spikes": {
-        "count": 5,
-        "size": 0.28,
-        "sharpness": 0.55,
+        "count": 6,
+        "size": 0.27,
+        "sharpness": 0.85,
         "lean": 0.9
       },
       "motion": {
         "scroll": 1.0,
         "flicker": 0.15,
         "streaks": 0.35,
-        "stretch": 0.26,
+        "stretch": 0.5,
         "tallFlames": 0.5,
         "warp": 0.3
-      }
-    },
-    {
-      "kind": "tongues",
-      "colors": {
-        "core": "#FFFFFF",
-        "mid": "#BFF2FF",
-        "edge": "#2AA8FF"
       },
-      "alpha": {
-        "core": 0.75,
-        "edge": 0.6
-      },
-      "spikes": {
-        "sharpness": 0.1
-      },
-      "tongues": {
-        "count": 12,
-        "length": 0.42,
-        "width": 0.16,
-        "life": 1.0,
-        "top": 0.45,
-        "rise": 0.4,
-        "wave": 0.35,
-        "inset": 0.16
-      },
-      "motion": {
-        "scroll": 0.8
-      }
-    },
-    {
-      "kind": "haze",
-      "scale": 0.7,
-      "colors": {
-        "core": "#FFFFFF",
-        "mid": "#F0FCFF",
-        "edge": "#D8F6FF"
-      },
-      "alpha": {
-        "core": 0.25,
-        "edge": 0.25
-      },
-      "spikes": {
-        "count": 5,
-        "size": 0.18,
-        "sharpness": 0.55,
-        "lean": 0.9
-      },
-      "motion": {
-        "scroll": 1.0,
-        "flicker": 0.15,
-        "streaks": 0.35,
-        "speed": 1.8,
-        "stretch": 0.26,
-        "tallFlames": 0.5,
-        "warp": 0.3
-      }
+      "band": 0.17
     }
   ],
   "particles": {
-    "type": "sparkle",
-    "rate": 1.0,
+    "type": "flecks",
+    "rate": 1.1,
     "size": 1.0,
-    "color": "#E8FFFF"
+    "color": "#D8F8FF"
   },
   "motes": {
     "rate": 1.0,

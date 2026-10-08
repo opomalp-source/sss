@@ -249,10 +249,10 @@ form('super_saiyan', 'fam_flame', GOLD, 1, lightning={"rate": 0.5, "size": 0.45,
 form('super_saiyan_g2', 'fam_flame', '#FFCF30', 2, shape={"width": 1.2, "height": 2.15})
 form('super_saiyan_g3', 'fam_roar', '#FFC828', 3, shape={"width": 1.4, "height": 2.3, "peak": 0.35}, motion={"pulseSpeed": 3.5},
      particles={"type": "sparkle", "rate": 0.5})
-form('super_saiyan_2', 'fam_flame', '#FFD840', 2, lightning={"rate": 3.5, "size": 1.0, "color": "#F4FBFF"},
+form('super_saiyan_2', 'fam_flame', '#FFD840', 2, lightning={"rate": 3.5, "size": 1.0, "color": "#7FD4FF"},
      layers_mod={1: {"spikes": {"count": 7, "size": 0.36, "sharpness": 0.85}, "motion": {"streaks": 0.65}}})
 form('super_saiyan_3', 'fam_flame', '#FFDA48', 3, shape={"height": 2.45, "peak": 0.55, "flare": 0.04},
-     lightning={"rate": 5, "size": 1.2, "color": "#F4FBFF"}, tongues={"length": 0.4, "count": 30},
+     lightning={"rate": 5, "size": 1.2, "color": "#7FD4FF"},
      react={"charge": {"shake": 0.05, "wild": 1.8}})
 form('super_saiyan_god', 'fam_divine', '#FF3B3B', 4, layers_mod={1: {"colors": {"edge": "#E81E3A", "mid": "#FF8A7A", "rim": "#FFD0A0"}}},
      particles={"type": "ember", "rate": 1.2, "color": "#FFB080"})
@@ -399,24 +399,26 @@ def build(fid, fam, tint, tier, extra):
     w = shape.get('width', famj['shape']['width'])
     h = shape.get('height', famj['shape']['height'])
     if 'shape' in extra and 'width' in extra['shape']:
-        w = w * 1.3                                    # (the family's own width is scaled when its file is written)
+        w = w * WIDTH_K                                # (the family's own width is scaled when its file is written)
     if 'shape' in extra and 'height' in extra['shape']:
-        h = h * 0.86
+        h = h * HEIGHT_K
     if 'peak' in shape:
-        shape['peak'] = round(shape['peak'] * 0.7, 3)
+        shape['peak'] = round(shape['peak'] * 0.3, 3)
     fam_w, fam_h = famj['shape']['width'], famj['shape']['height']
     if 'shape' not in extra or 'width' not in extra['shape']:
-        w = fam_w * 1.3
+        w = fam_w * WIDTH_K
     if 'shape' not in extra or 'height' not in extra['shape']:
-        h = fam_h * 0.86
+        h = fam_h * HEIGHT_K
     shape['width'] = round(w * (1 + 0.02 * tier), 3)
     shape['height'] = round(h * (1 + 0.05 * tier), 3)
     out['shape'] = shape
     for key in ('lobes', 'motion', 'react', 'lightning'):
         if key in extra:
             out[key] = extra[key]
-    if 'particles' in extra:
+    if 'particles' in extra and fam == 'fam_wisp':
         out['particles'] = extra['particles']
+    elif 'particles' in extra and 'color' in extra['particles']:
+        out['particles'] = {"color": extra['particles']['color']}
     # layers: a form changes only what it names, so copy the family's list and lay the changes over it
     layers = json.loads(json.dumps(famj['layers']))
     mods = dict(extra.get('layers_mod', {}))
@@ -458,7 +460,7 @@ def kaioken():
         ]
     return {
         "technique": "kaioken", "tint": "#FF2A1E",
-        "wrap": {"scale": 1.3, "height": 1.35},
+        "wrap": {"scale": 1.15, "height": 1.22},
         "silhouette": "jagged",
         "shape": {"width": 1.3, "height": 2.4, "bottom": -0.08, "widest": 0.34, "taper": 1.05, "tip": 1.2, "peak": 0.5, "flare": 0.08},
         "lobes": {"count": 3, "size": 0.02, "rise": 1.8, "rows": 1.5},
@@ -470,7 +472,7 @@ def kaioken():
         "grow": {"scale": 0.025, "height": 0.03, "wild": 0.06},
         "tiers": [
             {"from": 1},
-            {"from": 11, "wrap": {"scale": 1.45, "height": 1.6},
+            {"from": 11, "wrap": {"scale": 1.25, "height": 1.35},
              "shape": {"peak": 0.75, "flare": 0.1}, "motion": {"pulse": 0.07, "pulseSpeed": 9.0},
              "layers": layers(8, 0.42, 0.7, 3.4, 36, 0.5),
              "particles": {"rate": 2.6}, "lightning": {"rate": 2.5, "size": 1.0, "color": "#FFE0E6"},
@@ -481,15 +483,54 @@ def kaioken():
     }
 
 
+WIDTH_K, HEIGHT_K = 1.5, 0.75    # about as wide as the fighter is tall, about 1.45 times as tall (with the peak)
+
+
+def anime(fam, keep_particles=False):
+    """The hollow anime look (after the user's reference video): each flame shell becomes a bright band behind its
+    flame edge with an almost clear middle; the layers that fill the middle (inner flames, hazes, added light shells)
+    go; small streaks of light rise inside instead of sparkles or embers."""
+    layers = []
+    for l in fam.get('layers', []):
+        if l['kind'] in ('tongues', 'haze') or (l['kind'] == 'shell' and l.get('blend') == 'add'):
+            continue
+        if l['kind'] == 'shell':
+            l = json.loads(json.dumps(l))
+            l['band'] = 0.17
+            l.setdefault('alpha', {})['core'] = 0.0
+            l['alpha']['edge'] = 1.0
+            cols = l.setdefault('colors', {})
+            if cols.get('mid') in ('$mid', '$rim', '$glow'):
+                cols['mid'] = '$c'                     # the band just inside the edge: the form's full colour
+            sp = l.setdefault('spikes', {})
+            sp['size'] = round(min(0.34, max(sp.get('size', 0.3) * 0.75, 0.24)), 3)   # steep tongues, wilder auras still deeper
+            sp['sharpness'] = max(sp.get('sharpness', 0.8), 0.9)               # slim, needle-sharp tips
+            l.setdefault('motion', {})['stretch'] = 0.5                      # about five up each side
+        if l['kind'] == 'glow':
+            l = json.loads(json.dumps(l))
+            l['scale'] = 1.13
+            l['opacity'] = 1.0                         # a strong, wide halo round the band
+            if l.get('colors', {}).get('rim') == '$glow':
+                l['colors']['rim'] = '$c'
+        layers.append(l)
+    if 'layers' in fam:
+        fam['layers'] = layers
+    if not keep_particles and 'particles' in fam:
+        fam['particles'] = {"type": "flecks", "rate": 1.1, "size": 1.0, "color": fam['particles'].get('color', '$core')}
+    return fam
+
+
 def flame_proportions(obj):
-    """The aura's outline around a Minecraft fighter: about twice the body wide, a flame top that narrows to a point."""
+    """The aura's outline around a Minecraft fighter: about as wide as it is tall, a flame top narrowing to a point."""
     sh = obj.get('shape')
     if isinstance(sh, dict):
-        if 'width' in sh: sh['width'] = round(sh['width'] * 1.3, 3)
-        if 'height' in sh: sh['height'] = round(sh['height'] * 0.86, 3)
-        if 'peak' in sh: sh['peak'] = round(sh['peak'] * 0.7, 3)
-        if 'taper' in sh: sh['taper'] = 1.4
-        if 'tip' in sh: sh['tip'] = 0.9
+        if 'width' in sh: sh['width'] = round(sh['width'] * WIDTH_K, 3)
+        if 'height' in sh: sh['height'] = round(sh['height'] * HEIGHT_K, 3)
+        sh['bottom'] = -0.08
+        if 'peak' in sh: sh['peak'] = round(sh['peak'] * 0.3, 3)   # a crown of tongues on top, not one needle
+        if 'taper' in sh: sh['taper'] = 1.8
+        if 'tip' in sh: sh['tip'] = 0.62
+        if 'widest' in sh: sh['widest'] = 0.4
     for t in obj.get('tiers', []):
         flame_proportions(t)
     return obj
@@ -506,13 +547,19 @@ def write(path, obj):
 
 def main():
     for name, fam in FAMILIES.items():
+        anime(fam, keep_particles=(name == 'fam_wisp'))
+    for name, fam in FAMILIES.items():
         write(os.path.join(ROOT, 'families', name + '.json'), fam)
     for fid, (fam, tint, tier, extra) in FORMS.items():
         if fid in KEEP:
             continue
         write(os.path.join(ROOT, 'forms', fid + '.json'), build(fid, fam, tint, tier, extra))
     write(os.path.join(ROOT, 'base.json'), {"extends": "fam_base", "forms": ["base"], "tint": "#7FC8FF"})
-    write(os.path.join(ROOT, 'techniques', 'kaioken.json'), kaioken())
+    k = kaioken()
+    anime(k)
+    for t in k['tiers']:
+        anime(t)
+    write(os.path.join(ROOT, 'techniques', 'kaioken.json'), k)
     print(len(FAMILIES), 'families,', len(FORMS), 'forms')
 
 

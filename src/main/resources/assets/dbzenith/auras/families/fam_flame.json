@@ -1,13 +1,13 @@
 {
   "silhouette": "jagged",
   "shape": {
-    "width": 1.365,
-    "height": 1.763,
-    "bottom": -0.05,
-    "widest": 0.36,
-    "taper": 1.4,
-    "tip": 0.9,
-    "peak": 0.224,
+    "width": 1.575,
+    "height": 1.537,
+    "bottom": -0.08,
+    "widest": 0.4,
+    "taper": 1.8,
+    "tip": 0.62,
+    "peak": 0.096,
     "flare": 0.03
   },
   "lobes": {
@@ -24,22 +24,22 @@
   "layers": [
     {
       "kind": "glow",
-      "scale": 1.06,
-      "opacity": 0.7,
+      "scale": 1.13,
+      "opacity": 1.0,
       "colors": {
-        "rim": "$glow"
+        "rim": "$c"
       }
     },
     {
       "kind": "shell",
       "colors": {
         "core": "$core",
-        "mid": "$mid",
+        "mid": "$c",
         "edge": "$edge",
         "rim": "$white"
       },
       "alpha": {
-        "core": 0.7,
+        "core": 0.0,
         "edge": 1.0
       },
       "rim": {
@@ -48,8 +48,8 @@
       },
       "spikes": {
         "count": 6,
-        "size": 0.32,
-        "sharpness": 0.75,
+        "size": 0.24,
+        "sharpness": 0.9,
         "lean": 1.0
       },
       "motion": {
@@ -57,60 +57,17 @@
         "flicker": 0.35,
         "streaks": 0.5,
         "streakSpeed": 3.0,
-        "stretch": 0.3,
+        "stretch": 0.5,
         "tallFlames": 0.7,
         "warp": 0.35
-      }
-    },
-    {
-      "kind": "tongues",
-      "colors": {
-        "core": "$white",
-        "mid": "$mid",
-        "edge": "$edge"
       },
-      "alpha": {
-        "core": 0.95,
-        "edge": 0.9
-      },
-      "spikes": {
-        "sharpness": 0.8
-      },
-      "tongues": {
-        "count": 22,
-        "length": 0.39,
-        "width": 0.165,
-        "life": 0.45,
-        "top": 0.35,
-        "rise": 0.3,
-        "wave": 0.2
-      },
-      "motion": {
-        "scroll": 2.2
-      }
-    },
-    {
-      "kind": "haze",
-      "scale": 0.62,
-      "blend": "add",
-      "colors": {
-        "core": "$white",
-        "mid": "$core",
-        "edge": "$mid"
-      },
-      "alpha": {
-        "core": 0.3,
-        "edge": 0.25
-      },
-      "motion": {
-        "speed": 2.0
-      }
+      "band": 0.17
     }
   ],
   "particles": {
-    "type": "sparkle",
-    "rate": 0.6,
-    "size": 0.8,
+    "type": "flecks",
+    "rate": 1.1,
+    "size": 1.0,
     "color": "$core"
   },
   "motes": {

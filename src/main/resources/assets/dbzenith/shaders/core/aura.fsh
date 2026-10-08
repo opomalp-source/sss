@@ -17,7 +17,7 @@ uniform vec4 AuraShape;   // spike depth (share of the radius), sharpness 0..1, 
 uniform vec4 AuraMotion;  // time in seconds, scroll speed, streaks, flicker
 uniform vec4 AuraMode;    // 0 shell / 1 glow / 2 haze, seed, opacity, lean of the spikes
 uniform vec4 AuraBoost;   // extra brightness (charging, a hit, a burst), taller flames near the top, streak speed, stretch
-uniform vec4 AuraFlow;    // twist of the flames (domain warp), unused
+uniform vec4 AuraFlow;    // twist of the flames (domain warp), the bright band's width (0: filled, the older look), unused
 uniform float FogStart;
 uniform float FogEnd;
 
@@ -65,7 +65,7 @@ float flameCut(float depth, float t, float seed) {
     tooth *= 1.0 - smoothstep(0.88, 1.0, f);                                  // the quick turn back in above the tip
     float len = 0.55 + 0.45 * pnoise(vec2(ang + floor(v) * 3.1, seed + floor(v) * 1.37), count);
     len *= 1.0 + min(AuraMotion.w, 0.5) * 0.6 * (pnoise(vec2(ang, t * 3.0 + floor(v) * 5.3), count) - 0.5);   // flicker
-    float foot = smoothstep(0.02, 0.2, surface.y);                            // a clean base round the feet
+    float foot = smoothstep(0.06, 0.34, surface.y);                           // a clean bowl round the feet, tongues from the knees up
     float tall = 1.0 + 0.5 * AuraBoost.y * surface.y;                         // longer tongues higher up
     return min(AuraShape.x, 0.42) * (1.0 - clamp(tooth * len, 0.0, 1.0)) * foot * tall;
 }
@@ -123,6 +123,21 @@ void main() {
 
     float e = depth - cut;
     float rimWidth = AuraShape.w;
+    float band = AuraFlow.y;
+    if (band > 0.0) {
+        // The anime look: a thick band of light just behind the flame edge, saturated at the very edge and hotter just
+        // inside, streaked with fast upward blur, and the middle left almost clear so the fighter shows through.
+        float inBand = 1.0 - smoothstep(band * 0.7, band * 1.5, e);
+        vec3 c = mix(AuraEdge.rgb, AuraMid.rgb, smoothstep(0.0, band * 0.55, e));
+        float blur = pnoise(vec2(surface.x * 64.0 + warp * 4.0, surface.y * 0.9 - t * AuraMotion.y * AuraBoost.z * 0.5 + seed), 64.0);
+        c = mix(c, AuraCore.rgb, AuraMotion.z * smoothstep(0.5, 0.9, blur) * inBand);
+        float tintB = AuraRim.a * (0.5 + 0.5 * pnoise(vec2(surface.x * 16.0, surface.y * 1.2 - t * 0.8 + seed * 2.0), 16.0));
+        c = mix(c, AuraRim.rgb, (1.0 - smoothstep(0.0, rimWidth, e)) * tintB);
+        c = mix(c, AuraCore.rgb, clamp(AuraBoost.x * 0.3, 0.0, 0.6) * inBand);
+        float a = mix(AuraCore.a, AuraEdge.a, inBand) * (0.9 + 0.3 * blur * inBand) * (1.0 + 0.25 * AuraBoost.x);
+        fragColor = vec4(c, min(1.0, a * body * fade));
+        return;
+    }
     float rim = 1.0 - smoothstep(0.0, rimWidth, e);
     vec3 col = mix(AuraEdge.rgb, AuraMid.rgb, smoothstep(rimWidth * 0.5, rimWidth + 0.14, e));
     col = mix(col, AuraCore.rgb, smoothstep(0.16, 0.48, depth));

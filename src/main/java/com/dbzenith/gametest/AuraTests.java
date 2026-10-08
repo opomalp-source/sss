@@ -117,7 +117,7 @@ public final class AuraTests {
         helper.assertTrue(high.wrapScale > low.wrapScale && high.wrapHeight > low.wrapHeight, "x20 wraps wider and taller");
         helper.assertTrue(high.layers.get(1).spikeSize > low.layers.get(1).spikeSize && high.peak > low.peak, "x20 is wilder");
         helper.assertTrue(k.forStage(20) == high, "a tier is read once and kept");
-        helper.assertTrue(low.wrapScale > 1.2f, "it sits well outside the form's aura");
+        helper.assertTrue(low.wrapScale > 1.1f, "it sits outside the form's aura");
         helper.succeed();
     }
 

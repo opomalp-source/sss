@@ -1,13 +1,13 @@
 {
   "silhouette": "jagged",
   "shape": {
-    "width": 1.274,
-    "height": 1.892,
-    "bottom": -0.05,
-    "widest": 0.36,
-    "taper": 1.4,
-    "tip": 0.9,
-    "peak": 0.245,
+    "width": 1.47,
+    "height": 1.65,
+    "bottom": -0.08,
+    "widest": 0.4,
+    "taper": 1.8,
+    "tip": 0.62,
+    "peak": 0.105,
     "flare": 0.02
   },
   "lobes": {
@@ -24,22 +24,22 @@
   "layers": [
     {
       "kind": "glow",
-      "scale": 1.05,
-      "opacity": 0.8,
+      "scale": 1.13,
+      "opacity": 1.0,
       "colors": {
-        "rim": "$glow"
+        "rim": "$c"
       }
     },
     {
       "kind": "shell",
       "colors": {
         "core": "$white",
-        "mid": "$mid",
+        "mid": "$c",
         "edge": "$edge",
         "rim": "$white"
       },
       "alpha": {
-        "core": 0.6,
+        "core": 0.0,
         "edge": 1.0
       },
       "rim": {
@@ -48,7 +48,7 @@
       },
       "spikes": {
         "count": 7,
-        "size": 0.3,
+        "size": 0.24,
         "sharpness": 0.9,
         "lean": 1.4
       },
@@ -57,43 +57,17 @@
         "flicker": 0.2,
         "streaks": 0.7,
         "streakSpeed": 3.5,
-        "stretch": 0.27,
+        "stretch": 0.5,
         "tallFlames": 0.6,
         "warp": 0.25
-      }
-    },
-    {
-      "kind": "tongues",
-      "colors": {
-        "core": "$white",
-        "mid": "$mid",
-        "edge": "$edge"
       },
-      "alpha": {
-        "core": 0.95,
-        "edge": 0.85
-      },
-      "spikes": {
-        "sharpness": 0.9
-      },
-      "tongues": {
-        "count": 14,
-        "length": 0.468,
-        "width": 0.094,
-        "life": 0.6,
-        "top": 0.4,
-        "rise": 0.35,
-        "wave": 0.12
-      },
-      "motion": {
-        "scroll": 1.6
-      }
+      "band": 0.17
     }
   ],
   "particles": {
-    "type": "sparkle",
-    "rate": 1.2,
-    "size": 0.9,
+    "type": "flecks",
+    "rate": 1.1,
+    "size": 1.0,
     "color": "$white"
   },
   "motes": {

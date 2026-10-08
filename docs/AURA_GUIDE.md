@@ -114,12 +114,13 @@ Drawn in order: put the outermost first. One to six layers.
 | `spikes.count/size/sharpness/lean` | The outline's flame tongues: how many round (at most 8), how far in their roots lie (share of the radius, at most 0.42), 0 short broad points .. 1 long slim ones, how much they lean. |
 | `motion.scroll/flicker/streaks/speed` | Flames rising, spikes flickering, light streaks, and this layer's pace. |
 | `lobes`, `sway`, `seed` | How much of the body's bulges and sway it takes, and its own seed so it moves differently. |
+| `band` | For a shell: the width (share of the radius) of the bright band behind its flame edge, leaving the middle clear (the anime look). 0 fills the whole shell. |
 | `motion.warp/tallFlames/stretch/streakSpeed` | How much the tongues sway, how much longer they are near the top, how many stack up the height (stretch x 10, 1.5 to 6), how fast the light streaks climb. `scroll` is how fast the tongues climb. |
 | `tongues.count/length/width/life/top/rise/wave/inset/low` | For a `tongues` layer: how many at once, length (share of the height), width (share of their length), seconds each lives, share off the top, how far they climb, how much they wave, how far in from the outline they start, how low they start. |
 
 ### `particles` and `motes`
 
-`particles.type`: `none`, `sparkle` (star dust rising inside) or `ember` (sparks drifting up and out past the top).
+`particles.type`: `none`, `flecks` (small streaks of light shooting up inside, the anime look), `sparkle` (star dust rising inside) or `ember` (sparks drifting up inside).
 `motes` rise from the ground round a charging fighter; set `rate` to 0 for none.
 
 ### `react`: what the aura does when the fighter does something

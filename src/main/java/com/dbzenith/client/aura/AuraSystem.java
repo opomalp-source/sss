@@ -369,6 +369,7 @@ public final class AuraSystem {
             for (Slot sl : slots(DRAW[i])) {
                 if (!sl.drawn || sl.fade <= 0.01f) continue;
                 if (sl.charge > 0.02f) budget -= motes(pose, dots, sl, budget, detail);
+                if (sl.shells && "flecks".equals(sl.def.particles)) budget -= flecks(pose, dots, sl, budget, detail);
                 if (sl.shells && sl.def.lightningRate > 0) budget -= lightning(pose, dots, sl, t, budget, detail);
             }
         }
@@ -607,7 +608,7 @@ public final class AuraSystem {
         sh.safeGetUniform("AuraMotion").set(t, g.scroll, l.streaks, l.flicker * wild);
         sh.safeGetUniform("AuraMode").set((float) l.kind, seed, opacity, g.spikeLean);
         sh.safeGetUniform("AuraBoost").set(bright, g.tallFlames, g.streakSpeed, g.stretch);
-        sh.safeGetUniform("AuraFlow").set(g.warp, 0f, 0f, 0f);
+        sh.safeGetUniform("AuraFlow").set(g.warp, l.kind == AuraDef.Layer.SHELL ? l.band : 0f, 0f, 0f);
     }
 
     private static void set(ShaderInstance sh, String name, int rgb, float a) {
@@ -682,6 +683,50 @@ public final class AuraSystem {
             float w = st.body * 0.018f * d.moteSize * (0.7f + 0.6f * ((h >>> 20) & 255) / 255f);
             float len = w * (3 + 9 * life);                                       // they speed up as they rise
             int alpha = Mth.clamp((int) (230 * Mth.sin(Mth.PI * life) * st.fade * Math.min(1, c * 1.5f)), 0, 255);
+            if (alpha < 4) continue;
+            float sx = pz, sz = -px;                                              // across the line of sight, level
+            float sl = Mth.sqrt(sx * sx + sz * sz);
+            if (sl < 1e-4f) continue;
+            sx = sx / sl * w;
+            sz = sz / sl * w;
+            corner(vc, m, nm, px - sx, py - len, pz - sz, 0, 1, r, g, b, alpha);
+            corner(vc, m, nm, px + sx, py - len, pz + sz, 1, 1, r, g, b, alpha);
+            corner(vc, m, nm, px + sx, py + len, pz + sz, 1, 0, r, g, b, alpha);
+            corner(vc, m, nm, px - sx, py + len, pz - sz, 0, 0, r, g, b, alpha);
+            drawn++;
+        }
+        return drawn;
+    }
+
+    /**
+     * Flecks: small streaks of light shooting up inside the aura and flickering out, the sparks of energy in the
+     * hollow middle of an anime aura. Returns how many it drew.
+     */
+    private static int flecks(PoseStack pose, VertexConsumer vc, Slot st, int budget, int detail) {
+        AuraDef d = st.def;
+        if (d.particleRate <= 0) return 0;
+        Matrix4f m = pose.last().pose();
+        Matrix3f nm = pose.last().normal();
+        float t = st.phase, seed = st.seed;
+        int count = Math.min(budget, Math.round(20 * d.particleRate * (1 + st.charge) * (detail == 0 ? 0.5f : detail == 2 ? 1.4f : 1f)));
+        int r = (d.particleColor >> 16) & 255, g = (d.particleColor >> 8) & 255, b = d.particleColor & 255;
+        int drawn = 0;
+        for (int i = 0; i < count; i++) {
+            float period = 0.45f + (i % 6) * 0.08f;
+            float phase = (t * 1.2f + i * 0.613f + seed) / period;
+            int cycle = Mth.floor(phase);
+            float life = phase - cycle;
+            int h = hash((int) (seed * 733) + i * 9277 + cycle * 81233);
+            float a = (h & 1023) / 1023f * Mth.TWO_PI;
+            float s0 = 0.05f + 0.6f * ((h >>> 10) & 1023) / 1023f;
+            float sNow = Math.min(0.92f, s0 + life * 0.35f);
+            float rr = AuraShell.profile(d, sNow) * st.radius * (0.2f + 0.6f * ((h >>> 20) & 255) / 255f);
+            float px = st.x + Mth.cos(a) * rr, pz = st.z + Mth.sin(a) * rr;
+            float py = st.y + st.bottom + sNow * st.height;
+            float w = st.body * 0.011f * d.particleSize;
+            float len = st.body * 0.06f * d.particleSize * (0.6f + 0.8f * ((h >>> 5) & 255) / 255f);
+            float flick = (h & (1 << 29)) != 0 ? 1f : 0.55f;
+            int alpha = Mth.clamp((int) (235 * Mth.sin(Mth.PI * life) * flick * st.fade), 0, 255);
             if (alpha < 4) continue;
             float sx = pz, sz = -px;                                              // across the line of sight, level
             float sl = Mth.sqrt(sx * sx + sz * sz);

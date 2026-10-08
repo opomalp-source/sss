@@ -5,16 +5,16 @@
   ],
   "tint": "#E8F4FF",
   "shape": {
-    "width": 1.378,
-    "height": 2.077
+    "width": 1.59,
+    "height": 1.811
   },
   "layers": [
     {
       "kind": "glow",
-      "scale": 1.05,
-      "opacity": 0.55,
+      "scale": 1.13,
+      "opacity": 1.0,
       "colors": {
-        "rim": "$glow"
+        "rim": "$c"
       }
     },
     {
@@ -26,8 +26,8 @@
         "rim": "$white"
       },
       "alpha": {
-        "core": 0.18,
-        "edge": 0.75
+        "core": 0.0,
+        "edge": 1.0
       },
       "rim": {
         "width": 0.035,
@@ -36,7 +36,7 @@
       "spikes": {
         "count": 6,
         "size": 0.24,
-        "sharpness": 0.6,
+        "sharpness": 0.9,
         "lean": 1.2
       },
       "motion": {
@@ -44,39 +44,11 @@
         "flicker": 0.15,
         "streaks": 0.7,
         "streakSpeed": 3.5,
-        "stretch": 0.25,
+        "stretch": 0.5,
         "tallFlames": 0.5,
         "warp": 0.5
-      }
-    },
-    {
-      "kind": "tongues",
-      "blend": "add",
-      "colors": {
-        "core": "$white",
-        "mid": "$core",
-        "edge": "$rim"
       },
-      "alpha": {
-        "core": 0.8,
-        "edge": 0.5
-      },
-      "spikes": {
-        "sharpness": 0.2
-      },
-      "tongues": {
-        "count": 24,
-        "length": 0.546,
-        "width": 0.077,
-        "life": 1.0,
-        "top": 0.4,
-        "rise": 0.45,
-        "wave": 0.6,
-        "inset": 0.05
-      },
-      "motion": {
-        "scroll": 1.0
-      }
+      "band": 0.17
     }
   ],
   "react": {

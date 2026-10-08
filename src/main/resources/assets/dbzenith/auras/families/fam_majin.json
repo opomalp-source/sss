@@ -1,13 +1,13 @@
 {
   "silhouette": "lobed",
   "shape": {
-    "width": 1.495,
-    "height": 1.763,
-    "bottom": -0.05,
-    "widest": 0.36,
-    "taper": 1.4,
-    "tip": 0.9,
-    "peak": 0.175,
+    "width": 1.725,
+    "height": 1.537,
+    "bottom": -0.08,
+    "widest": 0.4,
+    "taper": 1.8,
+    "tip": 0.62,
+    "peak": 0.075,
     "flare": 0.05
   },
   "lobes": {
@@ -24,23 +24,23 @@
   "layers": [
     {
       "kind": "glow",
-      "scale": 1.06,
-      "opacity": 0.6,
+      "scale": 1.13,
+      "opacity": 1.0,
       "colors": {
-        "rim": "$glow"
+        "rim": "$c"
       }
     },
     {
       "kind": "shell",
       "colors": {
         "core": "$core",
-        "mid": "$mid",
+        "mid": "$c",
         "edge": "$edge",
         "rim": "$white"
       },
       "alpha": {
-        "core": 0.55,
-        "edge": 0.9
+        "core": 0.0,
+        "edge": 1.0
       },
       "rim": {
         "width": 0.06,
@@ -48,64 +48,24 @@
       },
       "spikes": {
         "count": 5,
-        "size": 0.3,
-        "sharpness": 0.35,
+        "size": 0.24,
+        "sharpness": 0.9,
         "lean": 0.9
       },
       "motion": {
         "scroll": 1.2,
         "flicker": 0.2,
         "streaks": 0.3,
-        "stretch": 0.28,
+        "stretch": 0.5,
         "tallFlames": 0.6,
         "warp": 0.5
-      }
-    },
-    {
-      "kind": "tongues",
-      "colors": {
-        "core": "$core",
-        "mid": "$mid",
-        "edge": "$edge"
       },
-      "alpha": {
-        "core": 0.7,
-        "edge": 0.6
-      },
-      "spikes": {
-        "sharpness": 0.0
-      },
-      "tongues": {
-        "count": 12,
-        "length": 0.36,
-        "width": 0.2,
-        "life": 1.0,
-        "top": 0.5,
-        "rise": 0.5,
-        "wave": 0.4,
-        "inset": 0.2
-      },
-      "motion": {
-        "scroll": 0.7
-      }
-    },
-    {
-      "kind": "haze",
-      "scale": 0.7,
-      "colors": {
-        "core": "$white",
-        "mid": "$core",
-        "edge": "$mid"
-      },
-      "alpha": {
-        "core": 0.25,
-        "edge": 0.3
-      }
+      "band": 0.17
     }
   ],
   "particles": {
-    "type": "sparkle",
-    "rate": 0.5,
+    "type": "flecks",
+    "rate": 1.1,
     "size": 1.0,
     "color": "$core"
   },
