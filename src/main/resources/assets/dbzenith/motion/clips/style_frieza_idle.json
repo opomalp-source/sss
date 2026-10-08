@@ -1,0 +1,2 @@
+{"_doc": "Frieza (Galactic Emperor): hands behind the back, head tilted down at you.", "base": "idle_regal",
+ "bones": {"head": [{"t": 0.0, "rot": [4, 0, 4]}, {"t": 0.5, "rot": [5, 0, 4]}]}}

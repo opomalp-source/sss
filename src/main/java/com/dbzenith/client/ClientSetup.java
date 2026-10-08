@@ -126,6 +126,11 @@ public final class ClientSetup {
             float scale = e.getKey() == com.dbzenith.tournament.Roster.SPOPOVICH ? 1.14f : e.getKey() == com.dbzenith.tournament.Roster.YAMU ? 0.9f : 1f;
             event.registerEntityRenderer(e.getValue().get(), ctx -> new FighterRenderer<>(ctx, skin, scale));
         }
+        for (var e : com.dbzenith.npc.ModNpcs.MASTERS.entrySet()) {                         // the style masters (CX-20)
+            String skin = e.getKey().id();
+            float scale = e.getKey().scale;
+            event.registerEntityRenderer(e.getValue().get(), ctx -> new FighterRenderer<>(ctx, skin, scale));
+        }
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.TRAINING_MONKEY.get(), ctx -> new FighterRenderer<>(ctx, "training_monkey", 0.48f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.TRAINING_CRICKET.get(), com.dbzenith.client.render.CricketRenderer::new);
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.OGRE_GUARD.get(), ctx -> new FighterRenderer<>(ctx, "ogre_guard", 1.3f));

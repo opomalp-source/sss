@@ -1,0 +1,5 @@
+{"_doc": "Tien: the Tri-Beam, hands joined in a triangle out in front.", "base": "charge",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-86, -26, 0], "bend": 22}, {"t": 0.5, "rot": [-87, -26, 0], "bend": 22}],
+  "leftArm":  [{"t": 0.0, "rot": [-86, 26, 0], "bend": 22}, {"t": 0.5, "rot": [-87, 26, 0], "bend": 22}],
+  "head":     [{"t": 0.0, "rot": [-4, 0, 0]}]}}

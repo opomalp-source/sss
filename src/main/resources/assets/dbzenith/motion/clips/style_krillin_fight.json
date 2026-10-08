@@ -1,0 +1,10 @@
+{"_doc": "Krillin: the classic Turtle School stance, the lead palm out at chest height, the rear hand cocked by the ribs, crouched.",
+ "sync": "time", "length": 20, "loop": true,
+ "bones": {
+  "torso":    [{"t": 0.0, "rot": [8, -24, 0]}, {"t": 0.5, "rot": [9, -23, 0]}],
+  "head":     [{"t": 0.0, "rot": [0, 16, 0]}],
+  "leftArm":  [{"t": 0.0, "rot": [-84, 16, -8], "bend": 24}, {"t": 0.5, "rot": [-80, 16, -8], "bend": 28}],
+  "rightArm": [{"t": 0.0, "rot": [-22, -14, 18], "bend": 116}, {"t": 0.5, "rot": [-20, -14, 18], "bend": 118}],
+  "rightLeg": [{"t": 0.0, "rot": [20, 0, 10], "bend": 28}, {"t": 0.5, "rot": [22, 0, 10], "bend": 34}],
+  "leftLeg":  [{"t": 0.0, "rot": [-20, 0, -8], "bend": 28}, {"t": 0.5, "rot": [-22, 0, -8], "bend": 34}],
+  "body":     [{"t": 0.0, "pos": [0, 1.5, 0]}, {"t": 0.5, "pos": [0, 2.0, 0]}]}}

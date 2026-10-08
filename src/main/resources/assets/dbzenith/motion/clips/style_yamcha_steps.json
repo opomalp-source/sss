@@ -1,0 +1,6 @@
+{"_doc": "Yamcha: prowling low with the claws up.", "base": "fight_walk", "speed": 1.1,
+ "bones": {
+  "leftArm":  [{"t": 0.0, "rot": [-74, 8, -12], "bend": 54}],
+  "rightArm": [{"t": 0.0, "rot": [-52, -8, 14], "bend": 46}],
+  "torso":    [{"t": 0.0, "rot": [20, -12, 0]}]},
+ "offset": {"body": {"pos": [0, 1.2, 0]}}}

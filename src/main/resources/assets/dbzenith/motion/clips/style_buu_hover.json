@@ -1,0 +1,5 @@
+{"_doc": "Majin Buu: floating cross-legged, hands on the knees.", "base": "style_piccolo_hover", "speed": 1.6,
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-44, 0, 10], "bend": 30}],
+  "leftArm":  [{"t": 0.0, "rot": [-44, 0, -10], "bend": 30}],
+  "head":     [{"t": 0.0, "rot": [-4, 0, 6]}, {"t": 0.5, "rot": [-4, 0, -6]}]}}

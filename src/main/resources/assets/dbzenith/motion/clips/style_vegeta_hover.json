@@ -1,0 +1,7 @@
+{"_doc": "Vegeta: hovering with the arms crossed and the legs straight together.", "base": "hover",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-72, -48, 0], "bend": 112}],
+  "leftArm":  [{"t": 0.0, "rot": [-66, 52, 0], "bend": 108}],
+  "rightLeg": [{"t": 0.0, "rot": [3, 0, 1], "bend": 4}, {"t": 0.5, "rot": [4, 0, 1], "bend": 6}],
+  "leftLeg":  [{"t": 0.0, "rot": [3, 0, -1], "bend": 4}, {"t": 0.5, "rot": [4, 0, -1], "bend": 6}],
+  "head":     [{"t": 0.0, "rot": [-6, 0, 0]}]}}

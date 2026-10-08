@@ -1,0 +1,6 @@
+{"_doc": "Master Roshi: a short, stooped shuffle with the hands behind the back.", "base": "walk", "speed": 1.3,
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [24, 28, 6], "bend": 70}],
+  "leftArm":  [{"t": 0.0, "rot": [24, -28, -6], "bend": 70}],
+  "head":     [{"t": 0.0, "rot": [-14, 0, 0]}]},
+ "offset": {"torso": {"rot": [18, 0, 0]}, "body": {"pos": [0, 0.8, 0]}}}

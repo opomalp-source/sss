@@ -1,0 +1,3 @@
+{"_doc": "Master Roshi (Turtle Hermit): an old man stoop, hands clasped behind the back.", "base": "idle_regal",
+ "offset": {"torso": {"rot": [20, 0, 0]}, "body": {"pos": [0, 0.8, 0]}},
+ "bones": {"head": [{"t": 0.0, "rot": [-14, 0, 0]}, {"t": 0.5, "rot": [-13, 4, 0]}]}}

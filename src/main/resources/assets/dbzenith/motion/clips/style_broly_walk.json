@@ -1,0 +1,1 @@
+{"_doc": "Broly: a heavy, rolling walk.", "base": "walk_heavy", "speed": 0.9, "offset": {"torso": {"rot": [6, 0, 0]}}}

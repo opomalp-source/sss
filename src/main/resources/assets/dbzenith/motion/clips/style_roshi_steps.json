@@ -1,0 +1,5 @@
+{"_doc": "Master Roshi: shuffling in the Turtle Hermit stance.", "base": "fight_walk", "speed": 1.2,
+ "bones": {
+  "leftArm":  [{"t": 0.0, "rot": [-120, 10, -14], "bend": 50}],
+  "rightArm": [{"t": 0.0, "rot": [-38, -12, 18], "bend": 34}],
+  "torso":    [{"t": 0.0, "rot": [12, -18, 0]}]}}

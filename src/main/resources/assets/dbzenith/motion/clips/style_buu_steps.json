@@ -1,0 +1,5 @@
+{"_doc": "Majin Buu: hopping about with the arms out.", "base": "fight_walk", "speed": 1.2,
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-40, 0, 62], "bend": 20}],
+  "leftArm":  [{"t": 0.0, "rot": [-40, 0, -62], "bend": 20}],
+  "body":     [{"t": 0.00, "pos": [0, 0.6, 0]}, {"t": 0.25, "pos": [0, -1.0, 0]}, {"t": 0.50, "pos": [0, 0.6, 0]}, {"t": 0.75, "pos": [0, -1.0, 0]}]}}

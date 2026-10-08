@@ -1,0 +1,4 @@
+{"_doc": "Majin Buu: a skipping, bouncy walk with the arms swinging wide.", "base": "walk",
+ "bones": {
+  "body": [{"t": 0.00, "pos": [0, 0.4, 0]}, {"t": 0.12, "pos": [0, -1.4, 0]}, {"t": 0.30, "pos": [0, 0.6, 0]}, {"t": 0.50, "pos": [0, 0.4, 0]}, {"t": 0.62, "pos": [0, -1.4, 0]}, {"t": 0.80, "pos": [0, 0.6, 0]}]},
+ "offset": {"rightArm": {"rot": [0, 0, 14]}, "leftArm": {"rot": [0, 0, -14]}}}

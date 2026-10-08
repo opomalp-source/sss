@@ -1,0 +1,4 @@
+{"master": "master_roshi", "color": "#F0A030",
+ "slots": {"idle": "style_roshi_idle", "walk": "style_roshi_walk", "charge": "style_roshi_charge", "fight_stance": "style_roshi_fight", "fight_steps": "style_roshi_steps"},
+ "requirements": {"battle_power": 300, "affinity": 3, "training_minutes": 5, "items": [{"item": "minecraft:cooked_cod", "count": 6}]},
+ "npcs": ["dbzenith:martial_arts_master"]}

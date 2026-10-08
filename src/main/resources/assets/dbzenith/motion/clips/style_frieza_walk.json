@@ -1,0 +1,5 @@
+{"_doc": "Frieza: small, gliding steps with the hands behind the back.", "base": "walk", "speed": 1.3,
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [24, 28, 6], "bend": 70}],
+  "leftArm":  [{"t": 0.0, "rot": [24, -28, -6], "bend": 70}]},
+ "offset": {"torso": {"rot": [-4, 0, 0]}}}

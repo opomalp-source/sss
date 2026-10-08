@@ -81,6 +81,15 @@ public final class ModItems {
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.dbzenith.npc.ModNpcs.KI_SOLDIER, 0xE8E8E8, 0x3A3A4A, new Item.Properties()));
     public static final RegistryObject<Item> ANDROID_UNIT_EGG = ITEMS.register("android_unit_spawn_egg",
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.dbzenith.npc.ModNpcs.ANDROID_UNIT, 0x808890, 0xC02020, new Item.Properties()));
+    /** A spawn egg for each style master (CX-20). */
+    public static final java.util.Map<com.dbzenith.style.MasterRoster, RegistryObject<Item>> MASTER_EGGS = new java.util.EnumMap<>(com.dbzenith.style.MasterRoster.class);
+
+    static {
+        for (com.dbzenith.style.MasterRoster m : com.dbzenith.style.MasterRoster.values()) {
+            MASTER_EGGS.put(m, ITEMS.register(m.id() + "_spawn_egg", () -> new net.minecraftforge.common.ForgeSpawnEggItem(
+                    com.dbzenith.npc.ModNpcs.MASTERS.get(m), 0xFF000000 | m.eggBase, 0xFF000000 | m.eggSpots, new Item.Properties())));
+        }
+    }
     public static final RegistryObject<Item> MASTER_EGG = ITEMS.register("martial_arts_master_spawn_egg",
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.dbzenith.npc.ModNpcs.MASTER, 0xF07820, 0xF4F4F4, new Item.Properties()));
     public static final RegistryObject<Item> PATROL_EGG = ITEMS.register("patrol_officer_spawn_egg",

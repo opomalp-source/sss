@@ -1,0 +1,4 @@
+{"_doc": "Frieza: gliding through the air with the hands behind the back.", "base": "cruise",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [24, 28, 6], "bend": 70}],
+  "leftArm":  [{"t": 0.0, "rot": [24, -28, -6], "bend": 70}]}}

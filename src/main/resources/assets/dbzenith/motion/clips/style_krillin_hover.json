@@ -1,0 +1,2 @@
+{"_doc": "Krillin: knees tucked up while hovering.", "base": "hover",
+ "offset": {"rightLeg": {"rot": [-14, 0, 0], "bend": 24}, "leftLeg": {"rot": [-18, 0, 0], "bend": 30}}}

@@ -332,7 +332,10 @@ public final class MotionEngine {
                 form = ps.form();
             }
         }
-        if (m.clipsVersion == MotionData.version() && java.util.Objects.equals(race, m.raceKey) && java.util.Objects.equals(form, m.formKey)) return;
+        String styleKey = com.dbzenith.client.ClientStyles.key(e);                  // fighting styles (CX-20)
+        if (m.clipsVersion == MotionData.version() && java.util.Objects.equals(race, m.raceKey) && java.util.Objects.equals(form, m.formKey)
+                && styleKey.equals(m.styleKey)) return;
+        m.styleKey = styleKey;
         m.clipsVersion = MotionData.version();
         m.raceKey = race;
         m.formKey = form;
@@ -340,15 +343,30 @@ public final class MotionEngine {
         String[] keys = {type == null ? null : "entity:" + type, form == null ? null : "form:" + form, race == null ? null : "race:" + race};
         AnimSet set = MotionData.sets().get(profile.set());
         for (State s : State.ALL) {
-            String id = set == null ? null : set.clipFor(s, keys, MotionData.sets(), 0);
+            String id = styled(e, s, false, set == null ? null : set.clipFor(s, keys, MotionData.sets(), 0));
             m.clips[s.ordinal()] = MotionData.clip(id);
         }
         String[] fightKeys = {"mode:fighting", keys[0], keys[1], keys[2]};   // the fighting stance wins over a race's or form's idle
         for (State s : State.ALL) {
-            String id = set == null ? null : set.clipFor(s, fightKeys, MotionData.sets(), 0);
+            String id = styled(e, s, true, set == null ? null : set.clipFor(s, fightKeys, MotionData.sets(), 0));
             Clip c = MotionData.clip(id);
             m.fightClips[s.ordinal()] = c == m.clips[s.ordinal()] ? null : c;   // null: the same clip either way
         }
+    }
+
+    /**
+     * A style's clip for this state, if the figure's style fills that slot (and the clip exists), else {@code fallback}.
+     * In the fighting set, states without a fighting slot of their own (sprint, flight...) keep the ordinary slot's.
+     */
+    private static String styled(LivingEntity e, State s, boolean fighting, String fallback) {
+        boolean ownSlot = false;
+        for (com.dbzenith.style.StyleSlot slot : com.dbzenith.style.StyleSlot.ALL) {
+            if (slot.fighting != fighting || !slot.state.equals(s.key)) continue;
+            ownSlot = true;
+            String clip = com.dbzenith.client.ClientStyles.clip(e, slot);
+            if (clip != null && MotionData.clip(clip) != null) return clip;
+        }
+        return fighting && !ownSlot ? styled(e, s, false, fallback) : fallback;
     }
 
     // ------------------------------------------------------------------ sampling

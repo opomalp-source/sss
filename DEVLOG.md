@@ -1894,3 +1894,57 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   - in PvP with empty bars, J refused;
   - four punches on the training dummy filled the form bar to about a quarter;
   - with the bar full, J went Super Saiyan, and the bar then drained (the form's drain plus the out-of-combat decay).
+
+## 2026-10-08 — CX-20 phase 7: fighting styles and the masters who teach them (v0.67.0)
+- **Sixteen masters** (user: "way more than only the masters I said"), each their own NPC (`style/MasterRoster`, `StyleMaster`) with a spawn egg, an original painted skin (ArtGen `only masters`) and 3D hair and parts (`NpcLooks`):
+  - Goku, Vegeta, Master Roshi, Krillin;
+  - Piccolo, Tien Shinhan, Gohan, Future Trunks;
+  - Frieza, Cell, Android 17, Hit;
+  - Jiren, Broly, Yamcha, Majin Buu.
+
+  They stand where placed, watch you, can't be hurt, and move in their own style. Structures to find them in come later (user).
+- **Sixteen styles** (`data/<ns>/styles/*.json`), one per master, from the Turtle Hermit (easy) to Jiren's Pride Trooper (hardest). Each changes some of nine animation slots:
+  - stance, walk, sprint, hover, flight, fast flight, charging;
+  - fighting stance and fighting steps (PvP on).
+
+  Each style has a signature look:
+  - Vegeta's crossed arms and coiled guard; Piccolo meditating cross-legged in the air; Tien's crane on one leg;
+  - Hit and Android 17 with their hands in their pockets (Hit even fighting); Frieza's hands behind the back and a finger raised;
+  - Jiren fighting with crossed arms; Broly's clawed spread; Yamcha's Wolf Fang crouch; Buu's aeroplane flight;
+  - Future Trunks gripping the hilt over his shoulder; Master Roshi's stoop and Max Power flex.
+
+  100 new clips in all.
+- **Clips can inherit** (`MotionData.inherit`): a clip with `"base"` starts as that clip; the bones it keys replace the base's, `"offset"` adds to the bones it keeps, and `"speed"` speeds it up. Most style clips are a few lines over an existing one.
+- **Choosing each slot on its own** (user: "choose the walking, sprinting, flying anim and so on in the K menu individually"):
+  - The K menu has a **Styles** page: each of the nine slots on its row, ◀ ▶ through the default and every learned style that fills it, so Goku's walk, Vegeta's stance and Piccolo's hover can go together.
+  - Your character stands on the right, moving as chosen; the picked row shows its style, its master and what it does.
+  - Saved, synced to everyone who sees you (`StylePackets.Slots`, on change and on tracking), and drawn by the motion engine (`ClientStyles`, `MotionEngine.styled`).
+  - In the fighting set, slots without a fighting version of their own (sprint, flight) keep the chosen style.
+- **Learning** (`style/StyleLogic`, the server checks everything):
+  - **The master's screen** (right-click): the master, a greeting, your affinity (hearts), minutes trained together, what they like as a gift, and each style they teach, with what it changes, every requirement ticked or crossed, and Learn.
+  - **Requirements** per style (data): battle power, affinity, minutes trained together, items handed over, a quest done, a race, a flag.
+  - **Affinity** (0–10 per master, user: per-master affinity): +1 for the first talk of the day, +2 for a liked gift (right-click holding it, three a day), +1 every five minutes trained.
+  - **Training:** "Train together" counts every second you stay within 10 blocks.
+  - **Learning** puts the style in every slot still on the default.
+- **NPCs use styles:**
+  - masters their own (`masters/<id>.json` `uses`);
+  - other NPC types named by a style (`npcs`): the martial arts master moves as the Turtle Hermit, Namekian warriors as the Demon Clan, the tyrant lord as the Galactic Emperor, the rampage brute as the Legendary Berserker, android units as the Park Ranger.
+- **Dev:**
+  - `/dbz style grant|revoke <player> <style|all>`;
+  - `/dbz style equip <player> <slot> <style|default>`;
+  - `/dbz style affinity <player> <master> <n>`;
+  - `/dbz style training <player> <master> <minutes>`;
+  - devshot screens `styles_`, `master_`.
+- **Tests** (`StyleTests`, 4):
+  - every master's data, style and own movement load; every style has a master, at least four slots and a fighting stance;
+  - learning needs every requirement, only from the master in person, and hands over the items;
+  - each slot is chosen on its own (a second style leaves chosen slots alone; no unlearned style or missing slot); forgetting empties slots; saved and loaded;
+  - affinity from talks and gifts, three gifts a day, no unwanted gifts; training counts and ends when you walk off.
+
+  197 GameTests.
+- **Checked in the dev client:**
+  - all sixteen masters standing in their styles (Frieza with his hands behind his back);
+  - Goku's screen: greeting, hearts, the requirement list, Train together;
+  - the Styles page with mixed slots, its preview showing Dev live in Vegeta's and then Tien's fighting stance.
+
+  Long style names shrink to fit between the arrows.

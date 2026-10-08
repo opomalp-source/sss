@@ -178,6 +178,14 @@ public final class ModNetwork {
                 .encoder(AnimEventPacket::encode).decoder(AnimEventPacket::decode).consumerMainThread(AnimEventPacket::handle).add();
         CHANNEL.messageBuilder(MeterRulesPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)          // CX-20
                 .encoder(MeterRulesPacket::encode).decoder(MeterRulesPacket::decode).consumerMainThread(MeterRulesPacket::handle).add();
+        CHANNEL.messageBuilder(com.dbzenith.style.StylePackets.Data.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.dbzenith.style.StylePackets.Data::encode).decoder(com.dbzenith.style.StylePackets.Data::decode).consumerMainThread(com.dbzenith.style.StylePackets.Data::handle).add();
+        CHANNEL.messageBuilder(com.dbzenith.style.StylePackets.Slots.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.dbzenith.style.StylePackets.Slots::encode).decoder(com.dbzenith.style.StylePackets.Slots::decode).consumerMainThread(com.dbzenith.style.StylePackets.Slots::handle).add();
+        CHANNEL.messageBuilder(com.dbzenith.style.StylePackets.OpenMaster.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.dbzenith.style.StylePackets.OpenMaster::encode).decoder(com.dbzenith.style.StylePackets.OpenMaster::decode).consumerMainThread(com.dbzenith.style.StylePackets.OpenMaster::handle).add();
+        CHANNEL.messageBuilder(com.dbzenith.style.StylePackets.Action.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.dbzenith.style.StylePackets.Action::encode).decoder(com.dbzenith.style.StylePackets.Action::decode).consumerMainThread(com.dbzenith.style.StylePackets.Action::handle).add();
         CHANNEL.messageBuilder(UpgradeAttributePacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(UpgradeAttributePacket::encode)
                 .decoder(UpgradeAttributePacket::decode)

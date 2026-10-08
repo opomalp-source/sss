@@ -1,0 +1,4 @@
+{"_doc": "Hit: even flat out, the hands stay in the pockets.", "base": "fast",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [8, -8, 6], "bend": 30}],
+  "leftArm":  [{"t": 0.0, "rot": [8, 8, -6], "bend": 30}]}}

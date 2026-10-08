@@ -1,0 +1,6 @@
+{"_doc": "Tien: hovering upright, arms crossed, legs straight.", "base": "hover",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-72, -48, 0], "bend": 112}],
+  "leftArm":  [{"t": 0.0, "rot": [-66, 52, 0], "bend": 108}],
+  "rightLeg": [{"t": 0.0, "rot": [2, 0, 1], "bend": 3}],
+  "leftLeg":  [{"t": 0.0, "rot": [2, 0, -1], "bend": 3}]}}

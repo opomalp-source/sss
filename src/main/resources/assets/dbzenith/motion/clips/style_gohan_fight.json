@@ -1,0 +1,10 @@
+{"_doc": "Gohan: the open-hand stance, both palms forward at mid height, low and wide, still.",
+ "sync": "time", "length": 30, "loop": true,
+ "bones": {
+  "torso":    [{"t": 0.0, "rot": [10, -14, 0]}, {"t": 0.5, "rot": [11, -14, 0]}],
+  "head":     [{"t": 0.0, "rot": [-4, 10, 0]}],
+  "leftArm":  [{"t": 0.0, "rot": [-66, 14, -14], "bend": 50}, {"t": 0.5, "rot": [-64, 14, -14], "bend": 52}],
+  "rightArm": [{"t": 0.0, "rot": [-50, -14, 16], "bend": 66}, {"t": 0.5, "rot": [-48, -14, 16], "bend": 68}],
+  "rightLeg": [{"t": 0.0, "rot": [16, 0, 14], "bend": 36}],
+  "leftLeg":  [{"t": 0.0, "rot": [-18, 0, -12], "bend": 38}],
+  "body":     [{"t": 0.0, "pos": [0, 2.0, 0]}, {"t": 0.5, "pos": [0, 2.1, 0]}]}}

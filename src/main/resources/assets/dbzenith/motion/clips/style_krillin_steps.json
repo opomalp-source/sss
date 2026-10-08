@@ -1,0 +1,5 @@
+{"_doc": "Krillin: quick little steps in stance.", "base": "fight_walk", "speed": 1.15,
+ "bones": {
+  "leftArm":  [{"t": 0.0, "rot": [-84, 16, -8], "bend": 24}],
+  "rightArm": [{"t": 0.0, "rot": [-22, -14, 18], "bend": 116}],
+  "torso":    [{"t": 0.0, "rot": [8, -22, 0]}]}}

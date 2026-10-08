@@ -1,0 +1,5 @@
+{"_doc": "Cell: hands cupped at the right hip, gathering a Kamehameha.", "base": "charge",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [14, -14, 18], "bend": 100}, {"t": 0.5, "rot": [14, -14, 19], "bend": 102}],
+  "leftArm":  [{"t": 0.0, "rot": [-24, 52, 0], "bend": 118}, {"t": 0.5, "rot": [-24, 52, 0], "bend": 120}],
+  "torso":    [{"t": 0.0, "rot": [8, 26, 0]}]}}

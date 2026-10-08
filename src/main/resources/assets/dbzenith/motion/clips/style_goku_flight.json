@@ -1,0 +1,2 @@
+{"_doc": "Goku: one fist out ahead, the other arm along the side.", "base": "cruise",
+ "bones": {"rightArm": [{"t": 0.0, "rot": [-160, 0, -6], "bend": 0}, {"t": 0.5, "rot": [-162, 0, -7], "bend": 2}]}}

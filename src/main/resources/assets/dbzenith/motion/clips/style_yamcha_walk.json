@@ -1,0 +1,2 @@
+{"_doc": "Yamcha: strolling with a hand behind the head.", "base": "walk",
+ "bones": {"rightArm": [{"t": 0.0, "rot": [-150, -40, 10], "bend": 130}]}}

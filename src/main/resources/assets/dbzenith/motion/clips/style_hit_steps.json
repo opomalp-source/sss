@@ -1,0 +1,5 @@
+{"_doc": "Hit: gliding steps with the hands in the pockets.", "base": "fight_walk", "speed": 0.9,
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [8, -8, 6], "bend": 30}],
+  "leftArm":  [{"t": 0.0, "rot": [8, 8, -6], "bend": 30}],
+  "torso":    [{"t": 0.0, "rot": [2, -16, 0]}]}}

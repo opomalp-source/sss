@@ -1,0 +1,2 @@
+{"_doc": "Piccolo (Demon Clan): arms crossed, head bowed a little, perfectly still.", "base": "idle_crossed", "speed": 0.8,
+ "bones": {"head": [{"t": 0.0, "rot": [6, 0, 0]}, {"t": 0.5, "rot": [7, 0, 0]}]}}

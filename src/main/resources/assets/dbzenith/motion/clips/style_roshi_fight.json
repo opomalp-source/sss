@@ -1,0 +1,10 @@
+{"_doc": "Master Roshi: the Turtle Hermit stance, rear leg back, lead hand raised high and open, the other low and forward.",
+ "sync": "time", "length": 40, "loop": true,
+ "bones": {
+  "torso":    [{"t": 0.0, "rot": [12, -20, 0]}, {"t": 0.5, "rot": [13, -20, 0]}],
+  "head":     [{"t": 0.0, "rot": [-8, 16, 0]}],
+  "leftArm":  [{"t": 0.0, "rot": [-120, 10, -14], "bend": 50}, {"t": 0.5, "rot": [-118, 10, -14], "bend": 52}],
+  "rightArm": [{"t": 0.0, "rot": [-38, -12, 18], "bend": 34}, {"t": 0.5, "rot": [-36, -12, 18], "bend": 36}],
+  "rightLeg": [{"t": 0.0, "rot": [26, 0, 10], "bend": 30}],
+  "leftLeg":  [{"t": 0.0, "rot": [-20, 0, -8], "bend": 40}],
+  "body":     [{"t": 0.0, "pos": [0, 1.8, 0]}, {"t": 0.5, "pos": [0, 2.0, 0]}]}}

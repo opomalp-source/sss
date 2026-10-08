@@ -1,0 +1,4 @@
+{"_doc": "Android 17: hovering with the hands in the pockets.", "base": "hover",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [8, -8, 6], "bend": 30}],
+  "leftArm":  [{"t": 0.0, "rot": [8, 8, -6], "bend": 30}]}}

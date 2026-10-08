@@ -1,0 +1,4 @@
+{"_doc": "Majin Buu: flying like an aeroplane, arms straight out to the sides.", "base": "cruise",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [0, 0, 84], "bend": 4}, {"t": 0.5, "rot": [0, 0, 80], "bend": 4}],
+  "leftArm":  [{"t": 0.0, "rot": [0, 0, -80], "bend": 4}, {"t": 0.5, "rot": [0, 0, -84], "bend": 4}]}}

@@ -1,0 +1,3 @@
+{"master": "tien", "color": "#2E8A4A",
+ "slots": {"idle": "style_tien_idle", "walk": "style_tien_walk", "hover": "style_tien_hover", "charge": "style_tien_charge", "fight_stance": "style_tien_fight", "fight_steps": "style_tien_steps"},
+ "requirements": {"battle_power": 4000, "affinity": 3, "training_minutes": 8}}

@@ -1,0 +1,5 @@
+{"_doc": "Gohan: steady steps with the hands open.", "base": "fight_walk",
+ "bones": {
+  "leftArm":  [{"t": 0.0, "rot": [-66, 14, -14], "bend": 50}],
+  "rightArm": [{"t": 0.0, "rot": [-50, -14, 16], "bend": 66}],
+  "torso":    [{"t": 0.0, "rot": [10, -12, 0]}]}}

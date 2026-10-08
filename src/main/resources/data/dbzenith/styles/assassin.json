@@ -1,0 +1,3 @@
+{"master": "hit", "color": "#9A50C0",
+ "slots": {"idle": "style_hit_idle", "walk": "style_hit_walk", "hover": "style_hit_hover", "fast_flight": "style_hit_fast", "fight_stance": "style_hit_fight", "fight_steps": "style_hit_steps"},
+ "requirements": {"battle_power": 200000, "affinity": 7, "training_minutes": 20}}

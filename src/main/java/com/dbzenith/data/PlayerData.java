@@ -1447,6 +1447,142 @@ public class PlayerData {
             markPoolsDirty();
         }
     }
+
+    // fighting styles (CX-20): the styles learned, the style chosen for each animation slot, and for each master the
+    // affinity, the seconds trained with them, the day they were last talked to and the gifts given that day (saved);
+    // the master being trained with right now (not saved)
+    private final java.util.Set<String> learnedStyles = new java.util.TreeSet<>();
+    private final java.util.Map<String, String> styleSlots = new java.util.TreeMap<>();
+    private final java.util.Map<String, Integer> masterAffinity = new java.util.TreeMap<>(), masterTraining = new java.util.TreeMap<>(),
+            masterGifts = new java.util.TreeMap<>();
+    private final java.util.Map<String, Long> masterDay = new java.util.TreeMap<>();
+    private String trainingWith = "";
+
+    public boolean hasStyle(String id) {
+        return learnedStyles.contains(id);
+    }
+
+    public java.util.Set<String> learnedStylesView() {
+        return java.util.Collections.unmodifiableSet(learnedStyles);
+    }
+
+    public void learnStyle(String id, boolean on) {
+        if (on ? learnedStyles.add(id) : learnedStyles.remove(id)) {
+            if (!on) styleSlots.values().removeIf(id::equals);
+            markDirty();
+        }
+    }
+
+    /** The style chosen for a slot ({@link com.dbzenith.style.StyleSlot} id), or "" for the default. */
+    public String getStyleSlot(String slot) {
+        return styleSlots.getOrDefault(slot, "");
+    }
+
+    public void setStyleSlot(String slot, String style) {
+        if (style == null || style.isEmpty()) {
+            if (styleSlots.remove(slot) != null) markDirty();
+        } else if (!style.equals(styleSlots.put(slot, style))) {
+            markDirty();
+        }
+    }
+
+    public java.util.Map<String, String> styleSlotsView() {
+        return java.util.Collections.unmodifiableMap(styleSlots);
+    }
+
+    /** The slots as one string ("slot=style,..."), for the clients that draw this player. */
+    public String styleSlotsCode() {
+        StringBuilder b = new StringBuilder();
+        styleSlots.forEach((k, v) -> b.append(b.length() == 0 ? "" : ",").append(k).append('=').append(v));
+        return b.toString();
+    }
+
+    public int getAffinity(String master) {
+        return masterAffinity.getOrDefault(master, 0);
+    }
+
+    public void setAffinity(String master, int value) {
+        int v = Math.max(0, Math.min(com.dbzenith.style.StyleLogic.MAX_AFFINITY, value));
+        if (v != getAffinity(master)) {
+            masterAffinity.put(master, v);
+            markDirty();
+        }
+    }
+
+    public int getTrainedSeconds(String master) {
+        return masterTraining.getOrDefault(master, 0);
+    }
+
+    public void addTrainedSeconds(String master, int seconds) {
+        masterTraining.merge(master, seconds, Integer::sum);
+        markDirty();
+    }
+
+    public long getMasterDay(String master) {
+        return masterDay.getOrDefault(master, -1L);
+    }
+
+    public void setMasterDay(String master, long day) {
+        masterDay.put(master, day);
+        masterGifts.remove(master);
+        markDirty();
+    }
+
+    public int getGiftsToday(String master) {
+        return masterGifts.getOrDefault(master, 0);
+    }
+
+    public void addGiftToday(String master) {
+        masterGifts.merge(master, 1, Integer::sum);
+        markDirty();
+    }
+
+    public String getTrainingWith() {
+        return trainingWith;
+    }
+
+    public void setTrainingWith(String master) {
+        trainingWith = master == null ? "" : master;
+        markDirty();
+    }
+
+    private static net.minecraft.nbt.CompoundTag intMap(java.util.Map<String, Integer> m) {
+        net.minecraft.nbt.CompoundTag t = new net.minecraft.nbt.CompoundTag();
+        m.forEach(t::putInt);
+        return t;
+    }
+
+    private void saveStyles(CompoundTag tag) {
+        CompoundTag s = new CompoundTag();
+        s.putString("learned", String.join(",", learnedStyles));
+        CompoundTag slots = new CompoundTag();
+        styleSlots.forEach(slots::putString);
+        s.put("slots", slots);
+        s.put("affinity", intMap(masterAffinity));
+        s.put("trained", intMap(masterTraining));
+        s.put("gifts", intMap(masterGifts));
+        CompoundTag days = new CompoundTag();
+        masterDay.forEach(days::putLong);
+        s.put("days", days);
+        tag.put("styles", s);
+    }
+
+    private void loadStyles(CompoundTag tag) {
+        learnedStyles.clear();
+        styleSlots.clear();
+        masterAffinity.clear();
+        masterTraining.clear();
+        masterGifts.clear();
+        masterDay.clear();
+        CompoundTag s = tag.getCompound("styles");
+        for (String id : s.getString("learned").split(",")) if (!id.isEmpty()) learnedStyles.add(id);
+        CompoundTag slots = s.getCompound("slots");
+        for (String k : slots.getAllKeys()) styleSlots.put(k, slots.getString(k));
+        for (String k : s.getCompound("affinity").getAllKeys()) masterAffinity.put(k, s.getCompound("affinity").getInt(k));
+        for (String k : s.getCompound("trained").getAllKeys()) masterTraining.put(k, s.getCompound("trained").getInt(k));
+        for (String k : s.getCompound("gifts").getAllKeys()) masterGifts.put(k, s.getCompound("gifts").getInt(k));
+        for (String k : s.getCompound("days").getAllKeys()) masterDay.put(k, s.getCompound("days").getLong(k));
+    }
     // guard meter (combat.GuardRules): 0..100, empties under blocked hits and breaks the guard
     private double guardMeter = 100;
     private long guardStartTick = Long.MIN_VALUE / 2;   // when the guard last went up (parry window); not saved
@@ -1725,6 +1861,7 @@ public class PlayerData {
         tag.putDouble("special", special);
         tag.putDouble("formMeter", formMeter);
         tag.putDouble("techMeter", techMeter);
+        saveStyles(tag);
         net.minecraft.nbt.ListTag customs = new net.minecraft.nbt.ListTag();
         for (int i = 0; i < customSpecs.length; i++) {
             if (customSpecs[i] == null) continue;
@@ -1861,6 +1998,7 @@ public class PlayerData {
         special = tag.getDouble("special");
         formMeter = tag.getDouble("formMeter");
         techMeter = tag.getDouble("techMeter");
+        loadStyles(tag);
         java.util.Arrays.fill(customSpecs, null);
         java.util.Arrays.fill(customBuilt, null);
         net.minecraft.nbt.ListTag customs = tag.getList("customTechniques", net.minecraft.nbt.Tag.TAG_COMPOUND);
@@ -1961,6 +2099,7 @@ public class PlayerData {
         combat.save(cs);
         tag.put("combat", cs);
         tag.putInt("risingCharge", risingCharge);
+        tag.putString("trainingWith", trainingWith);
         tag.putString("racialActive", String.join(",", racialActive));
         tag.putString("racialAfter", String.join(",", racialAfter));
         return tag;
@@ -1987,6 +2126,7 @@ public class PlayerData {
         kaiokenStage = tag.getInt("kaioken");
         combat.load(tag.getCompound("combat"));
         risingCharge = tag.getInt("risingCharge");
+        trainingWith = tag.getString("trainingWith");
         racialActive.clear();
         for (String s : tag.getString("racialActive").split(",")) if (!s.isEmpty()) racialActive.add(s);
         racialAfter.clear();

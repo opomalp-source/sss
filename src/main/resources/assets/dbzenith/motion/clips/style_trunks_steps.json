@@ -1,0 +1,5 @@
+{"_doc": "Future Trunks: moving with the hands on the hilt.", "base": "fight_walk",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-150, -10, 18], "bend": 96}],
+  "leftArm":  [{"t": 0.0, "rot": [-128, 34, -6], "bend": 112}],
+  "torso":    [{"t": 0.0, "rot": [8, -22, 0]}]}}

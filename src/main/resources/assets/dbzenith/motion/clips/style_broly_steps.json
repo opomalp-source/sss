@@ -1,0 +1,5 @@
+{"_doc": "Broly: stomping in, arms wide.", "base": "fight_walk", "speed": 0.9,
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-34, 0, 40], "bend": 50}],
+  "leftArm":  [{"t": 0.0, "rot": [-30, 0, -42], "bend": 54}],
+  "torso":    [{"t": 0.0, "rot": [20, -4, 0]}]}}

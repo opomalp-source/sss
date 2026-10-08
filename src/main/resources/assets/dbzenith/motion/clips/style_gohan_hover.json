@@ -1,0 +1,4 @@
+{"_doc": "Gohan: calm in the air, legs together, arms relaxed.", "base": "hover",
+ "bones": {
+  "rightLeg": [{"t": 0.0, "rot": [-2, 0, 1], "bend": 8}, {"t": 0.5, "rot": [-3, 0, 1], "bend": 10}],
+  "leftLeg":  [{"t": 0.0, "rot": [0, 0, -1], "bend": 6}, {"t": 0.5, "rot": [-1, 0, -1], "bend": 8}]}}

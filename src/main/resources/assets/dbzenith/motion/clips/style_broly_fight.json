@@ -1,0 +1,10 @@
+{"_doc": "Broly: wide and low, arms spread with the hands clawed, leaning in to crush.",
+ "sync": "time", "length": 22, "loop": true,
+ "bones": {
+  "torso":    [{"t": 0.0, "rot": [20, -6, 0]}, {"t": 0.5, "rot": [22, -6, 0]}],
+  "head":     [{"t": 0.0, "rot": [-20, 4, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [-34, 0, 40], "bend": 50}, {"t": 0.5, "rot": [-30, 0, 42], "bend": 54}],
+  "leftArm":  [{"t": 0.0, "rot": [-30, 0, -42], "bend": 54}, {"t": 0.5, "rot": [-34, 0, -40], "bend": 50}],
+  "rightLeg": [{"t": 0.0, "rot": [10, 0, 16], "bend": 40}],
+  "leftLeg":  [{"t": 0.0, "rot": [-12, 0, -16], "bend": 42}],
+  "body":     [{"t": 0.0, "pos": [0, 2.4, 0]}, {"t": 0.5, "pos": [0, 2.8, 0]}]}}

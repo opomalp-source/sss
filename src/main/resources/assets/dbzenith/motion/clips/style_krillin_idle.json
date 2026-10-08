@@ -1,0 +1,2 @@
+{"_doc": "Krillin (Turtle School): alert and ready, light on the feet.", "base": "idle", "speed": 1.4,
+ "offset": {"rightArm": {"rot": [-6, 0, 2], "bend": 14}, "leftArm": {"rot": [-6, 0, -2], "bend": 14}, "body": {"pos": [0, 0.4, 0]}}}

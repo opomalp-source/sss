@@ -223,6 +223,6 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - [x] 20d (v0.64.0) The crosshair: a round dot in PvP at the real aim point (shoulder view), a four-pointed star out of PvP; size, colour, opacity, dot always or in PvP only
   - [x] 20e (v0.65.0) The bars (visuals): two studded bars bottom right in PvP, the form bar in the aura colour, the technique bar in the technique's; steps from unlocked forms, Kaioken and Ultra Instinct; /dbz meter
   - [x] 20f (v0.66.0) The bars (logic): filling from fighting, J and O gated in PvP, drains and drops, Ultra Instinct a technique on O, data-driven rules synced to clients; /dbz unlockform
-  - [ ] 20g Styles from masters (data, learning, affinity, Goku and Vegeta, the equip screen, NPC styles)
+  - [x] 20g (v0.67.0) Styles from masters: 16 masters (NPCs, skins, spawn eggs), 16 styles over nine animation slots (100 clips, clip inheritance), requirements, affinity, training, the K menu Styles page (each slot on its own), NPC styles; /dbz style
   - [ ] 20h Polish, the guide, the asset list
 - Paused for CX-19: 17d (the robot dojo), 18b (the combat animations as data; folded into 19b)

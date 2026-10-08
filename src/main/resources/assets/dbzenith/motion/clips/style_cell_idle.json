@@ -1,0 +1,2 @@
+{"_doc": "Cell (Perfect Warrior): arms crossed, head cocked, smug.", "base": "idle_crossed",
+ "bones": {"head": [{"t": 0.0, "rot": [-4, 0, 7]}, {"t": 0.5, "rot": [-5, 0, 7]}]}}

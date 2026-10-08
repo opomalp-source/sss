@@ -1,0 +1,2 @@
+{"_doc": "Goku (Wild Saiyan): loose and easy, weight rocking from foot to foot, arms hanging free.", "base": "idle_loose", "speed": 0.75,
+ "offset": {"torso": {"rot": [-6, 0, 0]}}}

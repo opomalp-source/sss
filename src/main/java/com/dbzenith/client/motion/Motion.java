@@ -21,7 +21,7 @@ public final class Motion {
     final Clip[] fightClips = new Clip[State.COUNT];   // the fighting set (CX-20): PvP on, or an NPC in a fight
     float fight, fightO;                              // how far into the fighting set, 0..1, eased
     int clipsVersion = -1;
-    String raceKey, formKey;
+    String raceKey, formKey, styleKey = "";
 
     // ---------------------------------------------------------------- what the entity is doing (sensors)
     double speed, speedPrev, vy, forward, lateral;

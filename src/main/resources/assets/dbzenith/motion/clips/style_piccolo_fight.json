@@ -1,0 +1,10 @@
+{"_doc": "Piccolo: tall and side-on, the lead arm out long with the hand open, the rear hand back by the chest.",
+ "sync": "time", "length": 32, "loop": true,
+ "bones": {
+  "torso":    [{"t": 0.0, "rot": [4, -28, 0]}, {"t": 0.5, "rot": [5, -27, 0]}],
+  "head":     [{"t": 0.0, "rot": [-2, 20, 0]}],
+  "leftArm":  [{"t": 0.0, "rot": [-88, 22, -6], "bend": 14}, {"t": 0.5, "rot": [-86, 22, -6], "bend": 16}],
+  "rightArm": [{"t": 0.0, "rot": [-48, -24, 16], "bend": 100}, {"t": 0.5, "rot": [-46, -24, 16], "bend": 102}],
+  "rightLeg": [{"t": 0.0, "rot": [18, 0, 8], "bend": 16}],
+  "leftLeg":  [{"t": 0.0, "rot": [-16, 0, -6], "bend": 20}],
+  "body":     [{"t": 0.0, "pos": [0, 0.8, 0]}, {"t": 0.5, "pos": [0, 1.0, 0]}]}}

@@ -1,0 +1,5 @@
+{"_doc": "Android 17: easy steps in his loose guard.", "base": "fight_walk",
+ "bones": {
+  "leftArm":  [{"t": 0.0, "rot": [-44, 12, -10], "bend": 40}],
+  "rightArm": [{"t": 0.0, "rot": [-18, -10, 14], "bend": 64}],
+  "torso":    [{"t": 0.0, "rot": [4, -10, 0]}]}}

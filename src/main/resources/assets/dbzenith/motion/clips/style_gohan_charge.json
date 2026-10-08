@@ -1,0 +1,2 @@
+{"_doc": "Gohan: screaming his power up, fists tight, arms bent out.", "base": "charge",
+ "offset": {"rightArm": {"rot": [0, 0, 10], "bend": 20}, "leftArm": {"rot": [0, 0, -10], "bend": 20}, "head": {"rot": [-8, 0, 0]}}}

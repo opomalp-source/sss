@@ -1,0 +1,4 @@
+{"master": "android_17", "color": "#3A9A6A",
+ "slots": {"idle": "style_android17_idle", "walk": "style_android17_walk", "hover": "style_android17_hover", "flight": "style_android17_flight", "fight_stance": "style_android17_fight", "fight_steps": "style_android17_steps"},
+ "requirements": {"battle_power": 30000, "affinity": 4, "training_minutes": 8},
+ "npcs": ["dbzenith:android_unit"]}

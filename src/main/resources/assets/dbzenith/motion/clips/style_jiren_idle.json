@@ -1,0 +1,5 @@
+{"_doc": "Jiren (Pride Trooper): arms crossed, feet planted wide, almost motionless.", "base": "idle_crossed", "speed": 0.6,
+ "bones": {
+  "rightLeg": [{"t": 0.0, "rot": [0, 0, 7]}],
+  "leftLeg":  [{"t": 0.0, "rot": [0, 0, -7]}],
+  "body":     [{"t": 0.0, "pos": [0, 0.3, 0]}, {"t": 0.5, "pos": [0, 0.15, 0]}]}}

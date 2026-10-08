@@ -1,0 +1,3 @@
+{"master": "yamcha", "color": "#C87A30",
+ "slots": {"idle": "style_yamcha_idle", "walk": "style_yamcha_walk", "sprint": "style_yamcha_sprint", "fight_stance": "style_yamcha_fight", "fight_steps": "style_yamcha_steps"},
+ "requirements": {"battle_power": 1500, "affinity": 3, "training_minutes": 5}}

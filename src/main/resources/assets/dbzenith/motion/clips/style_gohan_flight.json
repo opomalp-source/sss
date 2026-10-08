@@ -1,0 +1,4 @@
+{"_doc": "Gohan: smooth flight, legs together, arms along the body.", "base": "cruise",
+ "bones": {
+  "rightLeg": [{"t": 0.0, "rot": [6, 0, 1], "bend": 4}],
+  "leftLeg":  [{"t": 0.0, "rot": [6, 0, -1], "bend": 4}]}}

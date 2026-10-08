@@ -1,0 +1,2 @@
+{"_doc": "Yamcha (Wolf Fang): easy-going, one hand behind the head.", "base": "idle",
+ "bones": {"rightArm": [{"t": 0.0, "rot": [-150, -40, 10], "bend": 130}, {"t": 0.45, "rot": [-151, -40, 10], "bend": 130}]}}

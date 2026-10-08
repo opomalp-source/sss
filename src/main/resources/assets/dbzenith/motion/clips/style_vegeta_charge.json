@@ -1,0 +1,5 @@
+{"_doc": "Vegeta: roaring his power up, arms out wide, head thrown back.", "base": "charge",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-4, 0, 46], "bend": 40}, {"t": 0.5, "rot": [-4, 0, 42], "bend": 42}],
+  "leftArm":  [{"t": 0.0, "rot": [-4, 0, -42], "bend": 42}, {"t": 0.5, "rot": [-4, 0, -46], "bend": 40}],
+  "head":     [{"t": 0.0, "rot": [-26, 2, 0]}, {"t": 0.5, "rot": [-25, -2, 0]}]}}

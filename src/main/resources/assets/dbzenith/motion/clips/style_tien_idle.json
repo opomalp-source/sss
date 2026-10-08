@@ -1,0 +1,2 @@
+{"_doc": "Tien (Crane School): upright and stern, fists at the sides.", "base": "idle", "speed": 0.8,
+ "offset": {"torso": {"rot": [-2, 0, 0]}, "rightArm": {"rot": [0, 0, 2], "bend": 6}, "leftArm": {"rot": [0, 0, -2], "bend": 6}}}

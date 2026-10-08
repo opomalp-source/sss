@@ -1,0 +1,5 @@
+{"_doc": "Broly: roaring, arms thrown out wide, head back.", "base": "charge",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-14, 0, 62], "bend": 30}, {"t": 0.5, "rot": [-14, 0, 58], "bend": 34}],
+  "leftArm":  [{"t": 0.0, "rot": [-14, 0, -58], "bend": 34}, {"t": 0.5, "rot": [-14, 0, -62], "bend": 30}],
+  "head":     [{"t": 0.0, "rot": [-28, 3, 0]}, {"t": 0.5, "rot": [-27, -3, 0]}]}}

@@ -101,6 +101,16 @@ public final class ClientEvents {
             mc.setScreen(new com.dbzenith.client.screen.MoveListScreen(null).onTab(name.length() > 8 && Character.isDigit(name.charAt(8)) ? name.charAt(8) - '0' : 0));
             delayTicks = Math.max(delayTicks, 6);
         }
+        if (name.startsWith("styles_") && !(mc.screen instanceof com.dbzenith.client.screen.StyleScreen)) {               // CX-20
+            mc.setScreen(new com.dbzenith.client.screen.StyleScreen(null));
+            delayTicks = Math.max(delayTicks, 6);
+        }
+        if (name.startsWith("master_") && mc.player != null && !(mc.screen instanceof com.dbzenith.client.screen.MasterScreen)) {   // the nearest master
+            var near = mc.player.level().getEntitiesOfClass(com.dbzenith.style.StyleMaster.class, mc.player.getBoundingBox().inflate(12));
+            near.sort(java.util.Comparator.comparingDouble(m -> m.distanceTo(mc.player)));
+            if (!near.isEmpty()) mc.setScreen(new com.dbzenith.client.screen.MasterScreen(near.get(0).getId(), near.get(0).masterId()));
+            delayTicks = Math.max(delayTicks, 6);
+        }
         if (name.contains("callout_")) com.dbzenith.client.ui.CalloutOverlay.show("message.dbzenith.counter", 0xFFAA00);
         if (name.contains("hitboxes")) com.dbzenith.config.DBZConfig.CLIENT.hitboxOverlay.set(true);                     // phase 9
         if (name.contains("nohitbox")) com.dbzenith.config.DBZConfig.CLIENT.hitboxOverlay.set(false);

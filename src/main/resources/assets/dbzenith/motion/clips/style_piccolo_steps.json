@@ -1,0 +1,5 @@
+{"_doc": "Piccolo: long, deliberate steps in stance.", "base": "fight_walk", "speed": 0.85,
+ "bones": {
+  "leftArm":  [{"t": 0.0, "rot": [-88, 22, -6], "bend": 14}],
+  "rightArm": [{"t": 0.0, "rot": [-48, -24, 16], "bend": 100}],
+  "torso":    [{"t": 0.0, "rot": [4, -26, 0]}]}}

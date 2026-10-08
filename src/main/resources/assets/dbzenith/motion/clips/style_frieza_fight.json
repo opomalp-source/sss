@@ -1,0 +1,10 @@
+{"_doc": "Frieza: unbothered, one hand raised with a finger out, the other still behind the back.",
+ "sync": "time", "length": 40, "loop": true,
+ "bones": {
+  "torso":    [{"t": 0.0, "rot": [-2, -10, 0]}, {"t": 0.5, "rot": [-2, -9, 0]}],
+  "head":     [{"t": 0.0, "rot": [2, 8, 4]}],
+  "rightArm": [{"t": 0.0, "rot": [-74, -12, 10], "bend": 34}, {"t": 0.5, "rot": [-72, -12, 10], "bend": 36}],
+  "leftArm":  [{"t": 0.0, "rot": [24, -28, -6], "bend": 70}],
+  "rightLeg": [{"t": 0.0, "rot": [6, 0, 4], "bend": 6}],
+  "leftLeg":  [{"t": 0.0, "rot": [-6, 0, -4], "bend": 8}],
+  "body":     [{"t": 0.0, "pos": [0, 0.2, 0]}, {"t": 0.5, "pos": [0, 0.3, 0]}]}}

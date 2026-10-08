@@ -1,0 +1,4 @@
+{"_doc": "Majin Buu: a tantrum, both arms thrown straight up.", "base": "charge",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-170, 0, 12], "bend": 10}, {"t": 0.5, "rot": [-166, 0, 16], "bend": 14}],
+  "leftArm":  [{"t": 0.0, "rot": [-166, 0, -16], "bend": 14}, {"t": 0.5, "rot": [-170, 0, -12], "bend": 10}]}}

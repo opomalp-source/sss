@@ -1,0 +1,5 @@
+{"_doc": "Master Roshi: Max Power, flexing both arms like a bodybuilder.", "base": "charge",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-14, 0, 72], "bend": 110}, {"t": 0.5, "rot": [-14, 0, 68], "bend": 114}],
+  "leftArm":  [{"t": 0.0, "rot": [-14, 0, -68], "bend": 114}, {"t": 0.5, "rot": [-14, 0, -72], "bend": 110}],
+  "torso":    [{"t": 0.0, "rot": [-4, 0, 0]}]}}

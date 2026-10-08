@@ -1,0 +1,6 @@
+{"_doc": "Frieza: strolling forward, one hand raised.", "base": "fight_walk", "speed": 1.2,
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-74, -12, 10], "bend": 34}],
+  "leftArm":  [{"t": 0.0, "rot": [24, -28, -6], "bend": 70}],
+  "torso":    [{"t": 0.0, "rot": [-2, -8, 0]}],
+  "body":     [{"t": 0.0, "pos": [0, 0.3, 0]}, {"t": 0.5, "pos": [0, 0.2, 0]}]}}

@@ -1,0 +1,6 @@
+{"_doc": "Vegeta: stalking forward in his stance.", "base": "fight_walk",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-62, -18, 14], "bend": 120}],
+  "leftArm":  [{"t": 0.0, "rot": [-76, 18, -12], "bend": 112}],
+  "torso":    [{"t": 0.0, "rot": [16, -16, 0]}, {"t": 0.5, "rot": [16, -14, 0]}],
+  "body":     [{"t": 0.00, "pos": [0, 2.0, 0]}, {"t": 0.25, "pos": [0, 1.7, 0]}, {"t": 0.50, "pos": [0, 2.0, 0]}, {"t": 0.75, "pos": [0, 1.7, 0]}]}}

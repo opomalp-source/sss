@@ -1,0 +1,10 @@
+{"_doc": "Vegeta: low and coiled, leaning in, both fists up close to the face.",
+ "sync": "time", "length": 26, "loop": true,
+ "bones": {
+  "torso":    [{"t": 0.0, "rot": [16, -18, 0]}, {"t": 0.5, "rot": [17, -17, 0]}],
+  "head":     [{"t": 0.0, "rot": [-14, 10, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [-62, -18, 14], "bend": 120}, {"t": 0.5, "rot": [-60, -18, 15], "bend": 122}],
+  "leftArm":  [{"t": 0.0, "rot": [-76, 18, -12], "bend": 112}, {"t": 0.5, "rot": [-74, 18, -12], "bend": 114}],
+  "rightLeg": [{"t": 0.0, "rot": [20, 0, 12], "bend": 34}, {"t": 0.5, "rot": [21, 0, 12], "bend": 38}],
+  "leftLeg":  [{"t": 0.0, "rot": [-22, 0, -10], "bend": 36}, {"t": 0.5, "rot": [-23, 0, -10], "bend": 40}],
+  "body":     [{"t": 0.0, "pos": [0, 2.0, 0]}, {"t": 0.5, "pos": [0, 2.3, 0]}]}}

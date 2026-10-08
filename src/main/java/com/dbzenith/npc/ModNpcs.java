@@ -106,6 +106,18 @@ public final class ModNpcs {
         }
     }
 
+    // ------------------------------------------------------------------ the style masters (CX-20)
+
+    public static final java.util.Map<com.dbzenith.style.MasterRoster, RegistryObject<EntityType<com.dbzenith.style.StyleMaster>>> MASTERS = new java.util.EnumMap<>(com.dbzenith.style.MasterRoster.class);
+
+    static {
+        for (com.dbzenith.style.MasterRoster m : com.dbzenith.style.MasterRoster.values()) {
+            MASTERS.put(m, TYPES.register(m.id(), () -> EntityType.Builder.<com.dbzenith.style.StyleMaster>of(
+                    (t, l) -> new com.dbzenith.style.StyleMaster(t, l, m), MobCategory.CREATURE)
+                    .sized(0.6f * Math.max(1f, m.scale), m.height).clientTrackingRange(10).build(m.id())));
+        }
+    }
+
     public static EntityType<com.dbzenith.tournament.TournamentFighter> tournamentFighter(com.dbzenith.tournament.Roster r) {
         return TOURNAMENT_FIGHTERS.get(r).get();
     }
@@ -126,6 +138,7 @@ public final class ModNpcs {
         event.put(RAMPAGE_BRUTE.get(), KiFighter.attributes(500, 9, 0.27).add(Attributes.KNOCKBACK_RESISTANCE, 0.9).build());
         event.put(NAMEKIAN_WARRIOR.get(), KiFighter.attributes(50, 5, 0.25).build());
         event.put(MASTER.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2).add(Attributes.MAX_HEALTH, 100).build());
+        for (var m : MASTERS.values()) event.put(m.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2).add(Attributes.MAX_HEALTH, 200).build());   // CX-20
         event.put(PATROL_OFFICER.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2).add(Attributes.MAX_HEALTH, 100).build());
         var resident = net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2).add(Attributes.MAX_HEALTH, 200).build();
         for (var t : List.of(ENMA, OGRE_CLERK_RED, OGRE_CLERK_BLUE, NORTH_KAI, GRAND_KAI, BEERUS, WHIS, TOURNAMENT_ANNOUNCER)) event.put(t.get(), resident);

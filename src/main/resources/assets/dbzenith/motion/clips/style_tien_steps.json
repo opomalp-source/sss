@@ -1,0 +1,5 @@
+{"_doc": "Tien: setting the foot down to move, then the crane again.", "base": "fight_walk",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-160, -6, 22], "bend": 70}],
+  "leftArm":  [{"t": 0.0, "rot": [-46, 12, -10], "bend": 50}],
+  "torso":    [{"t": 0.0, "rot": [2, -16, 0]}]}}

@@ -1,0 +1,2 @@
+{"_doc": "Hit: still in the air, hands in the pockets, legs straight.", "base": "style_android17_hover",
+ "bones": {"rightLeg": [{"t": 0.0, "rot": [2, 0, 1], "bend": 2}], "leftLeg": [{"t": 0.0, "rot": [2, 0, -1], "bend": 2}]}}

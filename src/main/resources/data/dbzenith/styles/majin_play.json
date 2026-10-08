@@ -1,0 +1,3 @@
+{"master": "majin_buu", "color": "#F0A0C8",
+ "slots": {"idle": "style_buu_idle", "walk": "style_buu_walk", "hover": "style_buu_hover", "flight": "style_buu_flight", "charge": "style_buu_charge", "fight_stance": "style_buu_fight", "fight_steps": "style_buu_steps"},
+ "requirements": {"battle_power": 40000, "affinity": 6, "items": [{"item": "minecraft:cake", "count": 1}, {"item": "minecraft:cookie", "count": 8}]}}

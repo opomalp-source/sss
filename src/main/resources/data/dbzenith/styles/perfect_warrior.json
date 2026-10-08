@@ -1,0 +1,3 @@
+{"master": "cell", "color": "#7ABA48",
+ "slots": {"idle": "style_cell_idle", "walk": "style_cell_walk", "hover": "style_cell_hover", "charge": "style_cell_charge", "fight_stance": "style_cell_fight", "fight_steps": "style_cell_steps"},
+ "requirements": {"battle_power": 80000, "affinity": 5, "training_minutes": 12}}

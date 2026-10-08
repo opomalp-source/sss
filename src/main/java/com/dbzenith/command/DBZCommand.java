@@ -398,6 +398,50 @@ public final class DBZCommand {
                                     ctx.getSource().sendSuccess(() -> Component.literal("Special meter set to " + v), true);
                                     return 1;
                                 }))))
+                .then(Commands.literal("style")                                     // CX-20: fighting styles
+                        .then(Commands.literal("grant").then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("style", StringArgumentType.word()).suggests(DBZCommand::suggestStyles)
+                                        .executes(ctx -> styleGrant(ctx, true)))))
+                        .then(Commands.literal("revoke").then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("style", StringArgumentType.word()).suggests(DBZCommand::suggestStyles)
+                                        .executes(ctx -> styleGrant(ctx, false)))))
+                        .then(Commands.literal("equip").then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("slot", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(Arrays.stream(com.dbzenith.style.StyleSlot.ALL).map(s -> s.id), b))
+                                        .then(Commands.argument("style", StringArgumentType.word()).suggests(DBZCommand::suggestStyles).executes(ctx -> {
+                                            String slot = StringArgumentType.getString(ctx, "slot"), style = StringArgumentType.getString(ctx, "style");
+                                            int n = 0;
+                                            for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
+                                                PlayerData d = ModCapabilities.getOrThrow(p);
+                                                if (com.dbzenith.style.StyleLogic.equip(p, d, slot, style.equals("default") ? "" : style)) n++;
+                                            }
+                                            int count = n;
+                                            ctx.getSource().sendSuccess(() -> Component.literal("Set " + slot + " to " + style + " for " + count + " player(s)"), true);
+                                            return count;
+                                        })))))
+                        .then(Commands.literal("affinity").then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("master", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(Arrays.stream(com.dbzenith.style.MasterRoster.values()).map(com.dbzenith.style.MasterRoster::id), b))
+                                        .then(Commands.argument("value", IntegerArgumentType.integer(0, com.dbzenith.style.StyleLogic.MAX_AFFINITY)).executes(ctx -> {
+                                            String m = StringArgumentType.getString(ctx, "master");
+                                            int v = IntegerArgumentType.getInteger(ctx, "value");
+                                            for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) ModCapabilities.getOrThrow(p).setAffinity(m, v);
+                                            ctx.getSource().sendSuccess(() -> Component.literal("Affinity with " + m + " set to " + v), true);
+                                            return 1;
+                                        })))))
+                        .then(Commands.literal("training").then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("master", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(Arrays.stream(com.dbzenith.style.MasterRoster.values()).map(com.dbzenith.style.MasterRoster::id), b))
+                                        .then(Commands.argument("minutes", IntegerArgumentType.integer(0, 100000)).executes(ctx -> {
+                                            String m = StringArgumentType.getString(ctx, "master");
+                                            int v = IntegerArgumentType.getInteger(ctx, "minutes");
+                                            for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
+                                                PlayerData d = ModCapabilities.getOrThrow(p);
+                                                d.addTrainedSeconds(m, v * 60 - d.getTrainedSeconds(m));
+                                            }
+                                            ctx.getSource().sendSuccess(() -> Component.literal("Training with " + m + " set to " + v + " min"), true);
+                                            return 1;
+                                        }))))))
                 .then(Commands.literal("unlockform")                                // CX-20: unlock a form outright (past level, mastery, flags)
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("form", StringArgumentType.word())
@@ -704,6 +748,32 @@ public final class DBZCommand {
     }
 
     /** Dev: a combat-engine press for players, as if from their keys (CX-19). */
+    private static java.util.concurrent.CompletableFuture<com.mojang.brigadier.suggestion.Suggestions> suggestStyles(
+            CommandContext<CommandSourceStack> ctx, com.mojang.brigadier.suggestion.SuggestionsBuilder b) {
+        java.util.List<String> ids = new java.util.ArrayList<>(List.of("all", "default"));
+        for (com.dbzenith.style.Styles.Style s : com.dbzenith.style.Styles.all()) ids.add(s.id());
+        return SharedSuggestionProvider.suggest(ids, b);
+    }
+
+    /** /dbz style grant|revoke: one style, or all. */
+    private static int styleGrant(CommandContext<CommandSourceStack> ctx, boolean on) throws CommandSyntaxException {
+        String id = StringArgumentType.getString(ctx, "style");
+        java.util.List<String> ids = id.equals("all") ? com.dbzenith.style.Styles.all().stream().map(com.dbzenith.style.Styles.Style::id).toList() : List.of(id);
+        if (!id.equals("all") && com.dbzenith.style.Styles.style(id) == null) {
+            ctx.getSource().sendFailure(Component.literal("Unknown style: " + id));
+            return 0;
+        }
+        for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
+            PlayerData d = ModCapabilities.getOrThrow(p);
+            for (String s : ids) {
+                if (on) com.dbzenith.style.StyleLogic.grant(d, s);
+                else d.learnStyle(s, false);
+            }
+        }
+        ctx.getSource().sendSuccess(() -> Component.literal((on ? "Granted " : "Revoked ") + id), true);
+        return 1;
+    }
+
     /** /dbz unlockform: sets or clears a form's unlock flag (CX-20, for testing the form bar). */
     private static int unlockForm(CommandContext<CommandSourceStack> ctx, boolean on) throws CommandSyntaxException {
         String id = StringArgumentType.getString(ctx, "form");

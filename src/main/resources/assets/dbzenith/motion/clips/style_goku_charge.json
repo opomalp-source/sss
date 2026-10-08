@@ -1,0 +1,4 @@
+{"_doc": "Goku: powering up with fists clenched, arms angled down and out, knees bent.", "base": "charge",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [6, 0, 34], "bend": 50}, {"t": 0.5, "rot": [6, 0, 30], "bend": 52}],
+  "leftArm":  [{"t": 0.0, "rot": [6, 0, -30], "bend": 52}, {"t": 0.5, "rot": [6, 0, -34], "bend": 50}]}}

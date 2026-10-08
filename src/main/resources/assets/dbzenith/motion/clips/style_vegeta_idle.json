@@ -1,0 +1,3 @@
+{"_doc": "Vegeta (Saiyan Prince): arms crossed, chin up, looking down on you.", "base": "idle_crossed",
+ "bones": {"head": [{"t": 0.0, "rot": [-7, -6, 0]}, {"t": 0.5, "rot": [-8, -6, 0]}]},
+ "offset": {"torso": {"rot": [-3, 0, 0]}}}

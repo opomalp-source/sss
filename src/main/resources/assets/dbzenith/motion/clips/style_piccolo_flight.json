@@ -1,0 +1,4 @@
+{"_doc": "Piccolo: flying with the arms crossed and the cape streaming.", "base": "cruise",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-72, -48, 0], "bend": 112}],
+  "leftArm":  [{"t": 0.0, "rot": [-66, 52, 0], "bend": 108}]}}

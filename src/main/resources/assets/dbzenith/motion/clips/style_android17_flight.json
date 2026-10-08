@@ -1,0 +1,4 @@
+{"_doc": "Android 17: flying with the hands in the pockets.", "base": "cruise",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [8, -8, 6], "bend": 30}],
+  "leftArm":  [{"t": 0.0, "rot": [8, 8, -6], "bend": 30}]}}

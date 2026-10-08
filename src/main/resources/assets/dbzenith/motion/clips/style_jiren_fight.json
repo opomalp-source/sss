@@ -1,0 +1,10 @@
+{"_doc": "Jiren: he fights with his arms crossed, legs wide, waiting.",
+ "sync": "time", "length": 60, "loop": true,
+ "bones": {
+  "torso":    [{"t": 0.0, "rot": [0, -6, 0]}, {"t": 0.5, "rot": [-1, -6, 0]}],
+  "head":     [{"t": 0.0, "rot": [2, 4, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [-72, -48, 0], "bend": 112}],
+  "leftArm":  [{"t": 0.0, "rot": [-66, 52, 0], "bend": 108}],
+  "rightLeg": [{"t": 0.0, "rot": [6, 0, 10], "bend": 10}],
+  "leftLeg":  [{"t": 0.0, "rot": [-6, 0, -10], "bend": 10}],
+  "body":     [{"t": 0.0, "pos": [0, 0.6, 0]}, {"t": 0.5, "pos": [0, 0.5, 0]}]}}

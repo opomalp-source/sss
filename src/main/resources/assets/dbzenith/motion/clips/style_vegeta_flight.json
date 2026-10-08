@@ -1,0 +1,4 @@
+{"_doc": "Vegeta: rigid flight, the arms straight back along the sides, fists clenched.", "base": "cruise",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [34, 0, 6], "bend": 0}, {"t": 0.5, "rot": [36, 0, 6], "bend": 2}],
+  "leftArm":  [{"t": 0.0, "rot": [36, 0, -6], "bend": 2}, {"t": 0.5, "rot": [34, 0, -6], "bend": 0}]}}

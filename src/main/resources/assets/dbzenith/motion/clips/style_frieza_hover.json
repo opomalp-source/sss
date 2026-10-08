@@ -1,0 +1,7 @@
+{"_doc": "Frieza: floating upright and still, legs together, hands behind the back.", "base": "hover",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [24, 28, 6], "bend": 70}],
+  "leftArm":  [{"t": 0.0, "rot": [24, -28, -6], "bend": 70}],
+  "rightLeg": [{"t": 0.0, "rot": [2, 0, 1], "bend": 2}],
+  "leftLeg":  [{"t": 0.0, "rot": [2, 0, -1], "bend": 2}],
+  "torso":    [{"t": 0.0, "rot": [-4, 0, 0]}]}}

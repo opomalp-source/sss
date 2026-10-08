@@ -73,6 +73,14 @@ public final class PlayerDataEvents {
         if (event.getEntity() instanceof ServerPlayer player) sync(player);
     }
 
+    /** The style slots last sent for each player (CX-20). */
+    private static final java.util.Map<java.util.UUID, String> LAST_STYLES = new java.util.concurrent.ConcurrentHashMap<>();
+
+    @SubscribeEvent
+    public static void forgetStyles(PlayerEvent.PlayerLoggedOutEvent event) {
+        LAST_STYLES.remove(event.getEntity().getUUID());
+    }
+
     @SubscribeEvent
     public static void tick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
@@ -82,6 +90,11 @@ public final class PlayerDataEvents {
             if (state.stateHash() != data.getLastPublicStateHash()) {
                 data.setLastPublicStateHash(state.stateHash());
                 ModNetwork.sendToTrackingAndSelf(player, state);
+            }
+            String styles = data.styleSlotsCode();                                    // fighting styles (CX-20): what others see
+            if (!styles.equals(LAST_STYLES.get(player.getUUID()))) {
+                LAST_STYLES.put(player.getUUID(), styles);
+                ModNetwork.sendToTrackingAndSelf(player, new com.dbzenith.style.StylePackets.Slots(player.getId(), styles));
             }
             int sync = data.tickSyncTimer(DBZConfig.SERVER.syncIntervalTicks.get());
             if (sync == PlayerData.SYNC_FULL) ModNetwork.sendTo(player, new SyncPlayerDataPacket(data.writeSyncTag()));
@@ -93,7 +106,10 @@ public final class PlayerDataEvents {
     @SubscribeEvent
     public static void startTracking(PlayerEvent.StartTracking event) {
         if (event.getTarget() instanceof ServerPlayer target && event.getEntity() instanceof ServerPlayer viewer) {
-            ModCapabilities.get(target).ifPresent(d -> ModNetwork.sendTo(viewer, PublicStatePacket.of(target.getId(), d)));
+            ModCapabilities.get(target).ifPresent(d -> {
+                ModNetwork.sendTo(viewer, PublicStatePacket.of(target.getId(), d));
+                ModNetwork.sendTo(viewer, new com.dbzenith.style.StylePackets.Slots(target.getId(), d.styleSlotsCode()));   // CX-20
+            });
         }
     }
 

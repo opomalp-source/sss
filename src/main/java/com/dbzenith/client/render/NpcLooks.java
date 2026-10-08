@@ -61,6 +61,22 @@ public final class NpcLooks {
             Map.entry("nam", look(null, 0, RaceTraits.Feature.NONE, false, 0, -1, false)),
             Map.entry("ranfan", look(HairCode.Preset.PONYTAIL, 0x1A1418, RaceTraits.Feature.NONE, false, 0, -1, false)),
             Map.entry("yamu", look(null, 0, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("goku", look(HairCode.Preset.SPIKY, 0x141418, RaceTraits.Feature.NONE, false, 0, -1, false)),            // the style masters (CX-20)
+            Map.entry("vegeta", look(HairCode.Preset.PRINCE, 0x141418, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("master_roshi", look(null, 0, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.SHELL)),
+            Map.entry("krillin", look(null, 0, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("piccolo", look(null, 0, RaceTraits.Feature.ANTENNAE, true, 0x5AA040, -1, false, Extra.NAMEK_PADS, Extra.CAPE)),
+            Map.entry("tien", look(null, 0, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("gohan", look(HairCode.Preset.TEEN, 0x141418, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("future_trunks", look(HairCode.Preset.CURTAINS, 0xB8A8E0, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("frieza", look(null, 0, RaceTraits.Feature.NONE, false, 0, 0xF0EEF4, false)),
+            Map.entry("cell", look(null, 0, RaceTraits.Feature.NONE, false, 0, 0x6AAA40, false)),
+            Map.entry("android_17", look(HairCode.Preset.CURTAINS, 0x141418, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("hit", look(null, 0, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("jiren", look(null, 0, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("broly", look(HairCode.Preset.WILD, 0x141418, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("yamcha", look(HairCode.Preset.SWEPT, 0x141418, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("majin_buu", look(null, 0, RaceTraits.Feature.TENTACLE, false, 0xF0A0C8, -1, false, Extra.CAPE)),
             Map.entry("training_monkey", look(null, 0, RaceTraits.Feature.NONE, false, 0, 0x8A5A30, false)),
             Map.entry("damned_warrior", look(HairCode.Preset.WILD, 0x2A2430, RaceTraits.Feature.NONE, false, 0, -1, false)));
 

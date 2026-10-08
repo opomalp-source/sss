@@ -1,0 +1,5 @@
+{"_doc": "Frieza: one finger raised to the sky gathering a Supernova, the other hand behind the back.", "base": "charge",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-176, 0, -4], "bend": 0}, {"t": 0.5, "rot": [-177, 0, -4], "bend": 2}],
+  "leftArm":  [{"t": 0.0, "rot": [24, -28, -6], "bend": 70}],
+  "head":     [{"t": 0.0, "rot": [-8, 0, 0]}]}}

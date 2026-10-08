@@ -1,0 +1,2 @@
+{"_doc": "Vegeta: flat out with both arms swept back.", "base": "fast",
+ "bones": {"rightArm": [{"t": 0.0, "rot": [26, 0, 10], "bend": 6}, {"t": 0.5, "rot": [24, 0, 11], "bend": 6}]}}

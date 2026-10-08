@@ -1,0 +1,10 @@
+{"_doc": "Goku: wide and low, the lead hand open and forward, the rear fist chambered at the hip, bouncing.",
+ "sync": "time", "length": 18, "loop": true,
+ "bones": {
+  "torso":    [{"t": 0.0, "rot": [10, -22, 0]}, {"t": 0.5, "rot": [12, -21, 0]}],
+  "head":     [{"t": 0.0, "rot": [-4, 14, 0]}],
+  "leftArm":  [{"t": 0.0, "rot": [-70, 14, -10], "bend": 40}, {"t": 0.5, "rot": [-66, 14, -11], "bend": 44}],
+  "rightArm": [{"t": 0.0, "rot": [8, -10, 24], "bend": 104}, {"t": 0.5, "rot": [10, -10, 25], "bend": 108}],
+  "rightLeg": [{"t": 0.0, "rot": [18, 0, 12], "bend": 30}, {"t": 0.5, "rot": [20, 0, 12], "bend": 36}],
+  "leftLeg":  [{"t": 0.0, "rot": [-24, 0, -8], "bend": 30}, {"t": 0.5, "rot": [-26, 0, -8], "bend": 36}],
+  "body":     [{"t": 0.0, "pos": [0, 1.6, 0]}, {"t": 0.5, "pos": [0, 2.2, 0]}]}}
