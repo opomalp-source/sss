@@ -1,0 +1,6 @@
+{"_doc": "Future Trunks: the swordsman's dash, torso pitched low, both arms trailing straight back.", "base": "sprint",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [62, 0, 12], "bend": 4}, {"t": 0.5, "rot": [64, 0, 12], "bend": 6}],
+  "leftArm":  [{"t": 0.0, "rot": [64, 0, -12], "bend": 6}, {"t": 0.5, "rot": [62, 0, -12], "bend": 4}],
+  "head":     [{"t": 0.0, "rot": [-24, 0, 0]}]},
+ "offset": {"torso": {"rot": [22, 0, 0]}, "body": {"pos": [0, 0.8, 0]}}}

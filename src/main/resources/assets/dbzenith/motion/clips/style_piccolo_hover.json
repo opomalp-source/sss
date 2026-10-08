@@ -1,10 +1,10 @@
-{"_doc": "Piccolo: meditating in the air, legs crossed, arms crossed.",
- "sync": "time", "length": 80, "loop": true,
+{"_doc": "Piccolo: meditating in mid-air, legs crossed in a lotus, arms folded, head bowed, rising and sinking with each breath.",
+ "sync": "time", "length": 100, "loop": true,
  "bones": {
-  "rightLeg": [{"t": 0.0, "rot": [-84, 24, 8], "bend": 112}],
-  "leftLeg":  [{"t": 0.0, "rot": [-84, -24, -8], "bend": 112}],
-  "rightArm": [{"t": 0.0, "rot": [-72, -48, 0], "bend": 112}],
-  "leftArm":  [{"t": 0.0, "rot": [-66, 52, 0], "bend": 108}],
-  "torso":    [{"t": 0.0, "rot": [0, 0, 0]}, {"t": 0.5, "rot": [-1, 0, 0]}],
-  "head":     [{"t": 0.0, "rot": [8, 0, 0]}],
-  "body":     [{"t": 0.0, "pos": [0, 0.2, 0]}, {"t": 0.5, "pos": [0, -0.6, 0]}]}}
+  "rightLeg": [{"t": 0.0, "rot": [-86, 28, 10], "bend": 116}],
+  "leftLeg":  [{"t": 0.0, "rot": [-86, -28, -10], "bend": 116}],
+  "rightArm": [{"t": 0.0, "rot": [-20, -48, 14], "bend": 114}],
+  "leftArm":  [{"t": 0.0, "rot": [-26, 48, -14], "bend": 110}],
+  "torso":    [{"t": 0.0, "rot": [0, 0, 0]}, {"t": 0.5, "rot": [-2, 0, 0]}],
+  "head":     [{"t": 0.0, "rot": [14, 0, 0]}],
+  "body":     [{"t": 0.0, "pos": [0, 0.4, 0]}, {"t": 0.5, "pos": [0, -0.8, 0]}]}}

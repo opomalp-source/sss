@@ -1,7 +1,10 @@
-{"_doc": "Vegeta: hovering with the arms crossed and the legs straight together.", "base": "hover",
+{"_doc": "Vegeta: suspended upright, legs straight and together, arms folded, looking down at whoever is below.",
+ "sync": "time", "length": 90, "loop": true,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [-72, -48, 0], "bend": 112}],
-  "leftArm":  [{"t": 0.0, "rot": [-66, 52, 0], "bend": 108}],
-  "rightLeg": [{"t": 0.0, "rot": [3, 0, 1], "bend": 4}, {"t": 0.5, "rot": [4, 0, 1], "bend": 6}],
-  "leftLeg":  [{"t": 0.0, "rot": [3, 0, -1], "bend": 4}, {"t": 0.5, "rot": [4, 0, -1], "bend": 6}],
-  "head":     [{"t": 0.0, "rot": [-6, 0, 0]}]}}
+  "rightArm": [{"t": 0.0, "rot": [-20, -48, 14], "bend": 114}],
+  "leftArm":  [{"t": 0.0, "rot": [-26, 48, -14], "bend": 110}],
+  "rightLeg": [{"t": 0.0, "rot": [4, 0, 1], "bend": 2}, {"t": 0.5, "rot": [5, 0, 1], "bend": 4}],
+  "leftLeg":  [{"t": 0.0, "rot": [5, 0, -1], "bend": 4}, {"t": 0.5, "rot": [4, 0, -1], "bend": 2}],
+  "torso":    [{"t": 0.0, "rot": [-4, 0, 0]}],
+  "head":     [{"t": 0.0, "rot": [4, 0, 0]}],
+  "body":     [{"t": 0.0, "pos": [0, 0.2, 0]}, {"t": 0.5, "pos": [0, -0.6, 0]}]}}

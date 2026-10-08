@@ -1,10 +1,10 @@
-{"_doc": "Broly: wide and low, arms spread with the hands clawed, leaning in to crush.",
- "sync": "time", "length": 22, "loop": true,
+{"_doc": "Broly: a wide, low crouch, arms spread with the hands clawed, leaning in, rocking side to side like he is about to crush you.",
+ "sync": "time", "length": 24, "loop": true,
  "bones": {
-  "torso":    [{"t": 0.0, "rot": [20, -6, 0]}, {"t": 0.5, "rot": [22, -6, 0]}],
-  "head":     [{"t": 0.0, "rot": [-20, 4, 0]}],
-  "rightArm": [{"t": 0.0, "rot": [-34, 0, 40], "bend": 50}, {"t": 0.5, "rot": [-30, 0, 42], "bend": 54}],
-  "leftArm":  [{"t": 0.0, "rot": [-30, 0, -42], "bend": 54}, {"t": 0.5, "rot": [-34, 0, -40], "bend": 50}],
-  "rightLeg": [{"t": 0.0, "rot": [10, 0, 16], "bend": 40}],
-  "leftLeg":  [{"t": 0.0, "rot": [-12, 0, -16], "bend": 42}],
-  "body":     [{"t": 0.0, "pos": [0, 2.4, 0]}, {"t": 0.5, "pos": [0, 2.8, 0]}]}}
+  "torso":    [{"t": 0.0, "rot": [22, -4, -4]}, {"t": 0.5, "rot": [24, -4, 4]}],
+  "head":     [{"t": 0.0, "rot": [-24, 4, 4]}, {"t": 0.5, "rot": [-24, 4, -4]}],
+  "rightArm": [{"t": 0.0, "rot": [-40, 0, 46], "bend": 58}, {"t": 0.5, "rot": [-36, 0, 50], "bend": 62}],
+  "leftArm":  [{"t": 0.0, "rot": [-36, 0, -50], "bend": 62}, {"t": 0.5, "rot": [-40, 0, -46], "bend": 58}],
+  "rightLeg": [{"t": 0.0, "rot": [6, 0, 20], "bend": 46}],
+  "leftLeg":  [{"t": 0.0, "rot": [-10, 0, -20], "bend": 48}],
+  "body":     [{"t": 0.0, "pos": [-0.6, 2.8, 0]}, {"t": 0.5, "pos": [0.6, 3.0, 0]}]}}

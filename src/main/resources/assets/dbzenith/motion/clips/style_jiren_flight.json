@@ -1,1 +1,8 @@
-{"_doc": "Jiren: flying with the arms crossed.", "base": "style_piccolo_flight"}
+{"_doc": "Jiren: flying with the arms folded, as if the air were not worth the effort of moving them.",
+ "sync": "time", "length": 20, "loop": true,
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-20, -48, 14], "bend": 114}],
+  "leftArm":  [{"t": 0.0, "rot": [-26, 48, -14], "bend": 110}],
+  "rightLeg": [{"t": 0.0, "rot": [2, 0, 1], "bend": 2}],
+  "leftLeg":  [{"t": 0.0, "rot": [2, 0, -1], "bend": 2}],
+  "head":     [{"t": 0.0, "rot": [-6, 0, 0]}]}}

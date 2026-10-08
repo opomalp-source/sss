@@ -1,2 +1,9 @@
-{"_doc": "Krillin: knees tucked up while hovering.", "base": "hover",
- "offset": {"rightLeg": {"rot": [-14, 0, 0], "bend": 24}, "leftLeg": {"rot": [-18, 0, 0], "bend": 30}}}
+{"_doc": "Krillin: knees tucked up to his chest, arms out to keep his balance, bobbing.",
+ "sync": "time", "length": 50, "loop": true,
+ "bones": {
+  "rightLeg": [{"t": 0.0, "rot": [-54, 0, 6], "bend": 90}, {"t": 0.5, "rot": [-58, 0, 6], "bend": 96}],
+  "leftLeg":  [{"t": 0.0, "rot": [-58, 0, -6], "bend": 96}, {"t": 0.5, "rot": [-54, 0, -6], "bend": 90}],
+  "rightArm": [{"t": 0.0, "rot": [-20, 0, 34], "bend": 30}, {"t": 0.5, "rot": [-24, 0, 38], "bend": 34}],
+  "leftArm":  [{"t": 0.0, "rot": [-24, 0, -38], "bend": 34}, {"t": 0.5, "rot": [-20, 0, -34], "bend": 30}],
+  "torso":    [{"t": 0.0, "rot": [8, 0, 0]}],
+  "body":     [{"t": 0.0, "pos": [0, 0.6, 0]}, {"t": 0.5, "pos": [0, -0.8, 0]}]}}

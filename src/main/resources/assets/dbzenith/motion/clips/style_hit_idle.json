@@ -1,2 +1,10 @@
-{"_doc": "Hit (Assassin): hands in the pockets, upright, utterly still.", "base": "style_android17_idle", "speed": 0.6,
- "bones": {"torso": [{"t": 0.0, "rot": [-1, 0, 0]}], "head": [{"t": 0.0, "rot": [2, 0, 0]}], "body": [{"t": 0.0, "pos": [0, 0, 0]}]}}
+{"_doc": "Hit (Assassin): hands in his coat pockets, perfectly upright, perfectly still; only the slowest breath.",
+ "sync": "time", "length": 160, "loop": true,
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [6, -22, 8], "bend": 40}],
+  "leftArm":  [{"t": 0.0, "rot": [6, 22, -8], "bend": 40}],
+  "torso":    [{"t": 0.0, "rot": [-2, 0, 0]}, {"t": 0.5, "rot": [-2.6, 0, 0]}],
+  "head":     [{"t": 0.0, "rot": [3, 0, 0]}],
+  "rightLeg": [{"t": 0.0, "rot": [0, 0, 3], "bend": 0}],
+  "leftLeg":  [{"t": 0.0, "rot": [0, 0, -3], "bend": 0}],
+  "body":     [{"t": 0.0, "pos": [0, 0, 0]}, {"t": 0.5, "pos": [0, -0.1, 0]}]}}

@@ -1,2 +1,10 @@
-{"_doc": "Gohan: screaming his power up, fists tight, arms bent out.", "base": "charge",
- "offset": {"rightArm": {"rot": [0, 0, 10], "bend": 20}, "leftArm": {"rot": [0, 0, -10], "bend": 20}, "head": {"rot": [-8, 0, 0]}}}
+{"_doc": "Gohan: the Masenko; both hands raised above the head, palms forward and together, leaning back to throw it.",
+ "sync": "time", "length": 6, "loop": true, "ease": "linear",
+ "bones": {
+  "body":     [{"t": 0.0, "pos": [0.2, 1.6, 0]}, {"t": 0.5, "pos": [-0.2, 1.6, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [-158, -18, 0], "bend": 40}],
+  "leftArm":  [{"t": 0.0, "rot": [-158, 18, 0], "bend": 40}],
+  "torso":    [{"t": 0.0, "rot": [-12, 0, 0]}],
+  "head":     [{"t": 0.0, "rot": [-14, 0, 0]}],
+  "rightLeg": [{"t": 0.0, "rot": [16, 0, 12], "bend": 24}],
+  "leftLeg":  [{"t": 0.0, "rot": [-20, 0, -10], "bend": 30}]}}

@@ -1,6 +1,8 @@
-{"_doc": "Frieza: strolling forward, one hand raised.", "base": "fight_walk", "speed": 1.2,
+{"_doc": "Frieza: a leisurely stroll towards you, finger still raised.", "sync": "stride", "loop": true, "symmetric": true, "stride": 1.6,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [-74, -12, 10], "bend": 34}],
-  "leftArm":  [{"t": 0.0, "rot": [24, -28, -6], "bend": 70}],
-  "torso":    [{"t": 0.0, "rot": [-2, -8, 0]}],
-  "body":     [{"t": 0.0, "pos": [0, 0.3, 0]}, {"t": 0.5, "pos": [0, 0.2, 0]}]}}
+  "rightLeg": [{"t": 0.00, "rot": [-16, 4, -2], "bend": 4}, {"t": 0.30, "rot": [-2, 4, -2], "bend": 4}, {"t": 0.50, "rot": [14, 4, -2], "bend": 6}, {"t": 0.70, "rot": [4, 4, -2], "bend": 18}],
+  "rightArm": [{"t": 0.0, "rot": [-82, -10, 8], "bend": 18}],
+  "leftArm":  [{"t": 0.0, "rot": [35, -30, 10], "bend": 60}],
+  "torso":    [{"t": 0.00, "rot": [-4, -12, -2]}, {"t": 0.50, "rot": [-4, -10, 2]}],
+  "head":     [{"t": 0.0, "rot": [-2, 10, 6]}],
+  "body":     [{"t": 0.00, "pos": [-0.4, 0.1, 0]}, {"t": 0.50, "pos": [0.4, 0.1, 0]}]}}

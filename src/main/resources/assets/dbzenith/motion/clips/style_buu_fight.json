@@ -1,10 +1,10 @@
-{"_doc": "Majin Buu: goofy, arms flung out to the sides, bouncing.",
+{"_doc": "Majin Buu: goofy and bouncy, arms flung wide, head wobbling, hopping from foot to foot.",
  "sync": "time", "length": 14, "loop": true,
  "bones": {
-  "torso":    [{"t": 0.0, "rot": [6, -6, 4]}, {"t": 0.5, "rot": [6, -6, -4]}],
-  "head":     [{"t": 0.0, "rot": [-4, 6, 6]}, {"t": 0.5, "rot": [-4, 6, -6]}],
-  "rightArm": [{"t": 0.0, "rot": [-40, 0, 62], "bend": 20}, {"t": 0.5, "rot": [-46, 0, 58], "bend": 24}],
-  "leftArm":  [{"t": 0.0, "rot": [-46, 0, -58], "bend": 24}, {"t": 0.5, "rot": [-40, 0, -62], "bend": 20}],
-  "rightLeg": [{"t": 0.0, "rot": [10, 0, 10], "bend": 20}, {"t": 0.5, "rot": [12, 0, 10], "bend": 30}],
-  "leftLeg":  [{"t": 0.0, "rot": [-10, 0, -10], "bend": 30}, {"t": 0.5, "rot": [-12, 0, -10], "bend": 20}],
-  "body":     [{"t": 0.0, "pos": [0, 0.6, 0]}, {"t": 0.25, "pos": [0, -0.8, 0]}, {"t": 0.5, "pos": [0, 0.6, 0]}, {"t": 0.75, "pos": [0, -0.8, 0]}]}}
+  "torso":    [{"t": 0.0, "rot": [6, -6, 5]}, {"t": 0.5, "rot": [6, -6, -5]}],
+  "head":     [{"t": 0.0, "rot": [-4, 6, 8]}, {"t": 0.5, "rot": [-4, 6, -8]}],
+  "rightArm": [{"t": 0.0, "rot": [-40, 0, 66], "bend": 20}, {"t": 0.5, "rot": [-50, 0, 60], "bend": 26}],
+  "leftArm":  [{"t": 0.0, "rot": [-50, 0, -60], "bend": 26}, {"t": 0.5, "rot": [-40, 0, -66], "bend": 20}],
+  "rightLeg": [{"t": 0.0, "rot": [8, 0, 10], "bend": 18}, {"t": 0.5, "rot": [-14, 0, 10], "bend": 40}],
+  "leftLeg":  [{"t": 0.0, "rot": [-14, 0, -10], "bend": 40}, {"t": 0.5, "rot": [8, 0, -10], "bend": 18}],
+  "body":     [{"t": 0.0, "pos": [0, 0.8, 0]}, {"t": 0.25, "pos": [0, -0.8, 0]}, {"t": 0.5, "pos": [0, 0.8, 0]}, {"t": 0.75, "pos": [0, -0.8, 0]}]}}

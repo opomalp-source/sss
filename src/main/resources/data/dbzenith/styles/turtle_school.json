@@ -1,3 +1,3 @@
 {"master": "krillin", "color": "#E8783A",
- "slots": {"idle": "style_krillin_idle", "sprint": "style_krillin_sprint", "hover": "style_krillin_hover", "fight_stance": "style_krillin_fight", "fight_steps": "style_krillin_steps"},
+ "slots": {"idle": "style_krillin_idle", "sprint": "style_krillin_sprint", "hover": "style_krillin_hover", "flight": "style_krillin_flight", "charge": "style_krillin_charge", "fight_stance": "style_krillin_fight", "fight_steps": "style_krillin_steps"},
  "requirements": {"battle_power": 600, "affinity": 2, "training_minutes": 4}}

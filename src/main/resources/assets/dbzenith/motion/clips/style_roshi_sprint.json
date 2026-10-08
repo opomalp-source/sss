@@ -1,0 +1,5 @@
+{"_doc": "Master Roshi: a surprisingly quick old-man scurry, bent over, elbows pumping, little steps.", "base": "sprint", "speed": 1.5,
+ "bones": {
+  "rightArm": [{"t": 0.00, "rot": [30, 0, 14], "bend": 70}, {"t": 0.50, "rot": [-30, 0, 14], "bend": 96}],
+  "head":     [{"t": 0.0, "rot": [-26, 0, 0]}]},
+ "offset": {"torso": {"rot": [20, 0, 0]}, "body": {"pos": [0, 0.6, 0]}}}

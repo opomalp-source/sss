@@ -1,2 +1,9 @@
-{"_doc": "Majin Buu (Majin Play): bouncing happily on the spot.", "base": "idle_loose", "speed": 1.8,
- "offset": {"body": {"pos": [0, -0.3, 0]}, "rightArm": {"rot": [0, 0, 8]}, "leftArm": {"rot": [0, 0, -8]}}}
+{"_doc": "Majin Buu (Majin Play): can't keep still; bouncing on the spot, swaying side to side, arms swinging like a child waiting for cake.",
+ "sync": "time", "length": 28, "loop": true,
+ "bones": {
+  "body":     [{"t": 0.0, "pos": [-0.8, 0.2, 0], "rot": [0, 0, -4]}, {"t": 0.25, "pos": [0, -0.9, 0], "rot": [0, 0, 0]}, {"t": 0.5, "pos": [0.8, 0.2, 0], "rot": [0, 0, 4]}, {"t": 0.75, "pos": [0, -0.9, 0], "rot": [0, 0, 0]}],
+  "head":     [{"t": 0.0, "rot": [-4, 0, 8]}, {"t": 0.5, "rot": [-4, 0, -8]}],
+  "rightArm": [{"t": 0.0, "rot": [-24, 0, 26], "bend": 20}, {"t": 0.5, "rot": [10, 0, 14], "bend": 14}],
+  "leftArm":  [{"t": 0.0, "rot": [10, 0, -14], "bend": 14}, {"t": 0.5, "rot": [-24, 0, -26], "bend": 20}],
+  "rightLeg": [{"t": 0.0, "rot": [0, 0, 8], "bend": 8}, {"t": 0.5, "rot": [-4, 0, 6], "bend": 14}],
+  "leftLeg":  [{"t": 0.0, "rot": [-4, 0, -6], "bend": 14}, {"t": 0.5, "rot": [0, 0, -8], "bend": 8}]}}

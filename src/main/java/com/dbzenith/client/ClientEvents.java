@@ -102,6 +102,28 @@ public final class ClientEvents {
             mc.setScreen(new com.dbzenith.client.screen.MoveListScreen(null).onTab(name.length() > 8 && Character.isDigit(name.charAt(8)) ? name.charAt(8) - '0' : 0));
             delayTicks = Math.max(delayTicks, 6);
         }
+        if (name.startsWith("posesheet") && !(mc.screen instanceof com.dbzenith.client.screen.PoseSheetScreen ps && ps.key.equals(name))) {
+            boolean npc = name.startsWith("posesheetnpc_");                     // posesheet[npc]_<slot | clips_<prefix>>_<phase%>[_<turn>]
+            String[] parts = name.substring(name.indexOf('_') + 1).split("_");
+            boolean clips = parts.length > 0 && parts[0].equals("clips");
+            StringBuilder id = new StringBuilder();
+            int k = clips ? 1 : 0;
+            while (k < parts.length && !parts[k].matches("[0-9]+")) id.append(id.length() == 0 ? "" : "_").append(parts[k++]);
+            float phase = k < parts.length ? Integer.parseInt(parts[k]) / 100f : 0f;
+            float turn = k + 1 < parts.length && parts[k + 1].matches("[0-9]+") ? Integer.parseInt(parts[k + 1]) : 30f;
+            net.minecraft.world.entity.LivingEntity subject = null;
+            if (npc && mc.player != null) {
+                var near = mc.player.level().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, mc.player.getBoundingBox().inflate(24));
+                near.sort(java.util.Comparator.comparingDouble(m -> m.distanceTo(mc.player)));
+                if (!near.isEmpty()) subject = near.get(0);
+            }
+            com.dbzenith.style.StyleSlot slot = clips ? null : com.dbzenith.style.StyleSlot.byId(id.toString());
+            var cells = clips ? com.dbzenith.client.screen.PoseSheetScreen.prefixCells(id.toString())
+                    : slot == null ? java.util.List.<String[]>of() : com.dbzenith.client.screen.PoseSheetScreen.slotCells(slot);
+            float pitch = slot == null ? 0f : com.dbzenith.client.screen.PoseSheetScreen.pitchFor(slot);
+            mc.setScreen(new com.dbzenith.client.screen.PoseSheetScreen(name, (clips ? "clips " : "") + id, cells, phase, turn, pitch, subject));
+            delayTicks = Math.max(delayTicks, 4);
+        }
         if (name.startsWith("styles_") && !(mc.screen instanceof com.dbzenith.client.screen.StyleScreen)) {               // CX-20
             mc.setScreen(new com.dbzenith.client.screen.StyleScreen(null));
             delayTicks = Math.max(delayTicks, 6);

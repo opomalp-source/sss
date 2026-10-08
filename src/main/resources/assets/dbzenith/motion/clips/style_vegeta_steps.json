@@ -1,6 +1,8 @@
-{"_doc": "Vegeta: stalking forward in his stance.", "base": "fight_walk",
+{"_doc": "Vegeta: stalking forward low in his stance, the fists never leaving his face.", "sync": "stride", "loop": true, "symmetric": true, "stride": 1.6,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [-62, -18, 14], "bend": 120}],
-  "leftArm":  [{"t": 0.0, "rot": [-76, 18, -12], "bend": 112}],
-  "torso":    [{"t": 0.0, "rot": [16, -16, 0]}, {"t": 0.5, "rot": [16, -14, 0]}],
-  "body":     [{"t": 0.00, "pos": [0, 2.0, 0]}, {"t": 0.25, "pos": [0, 1.7, 0]}, {"t": 0.50, "pos": [0, 2.0, 0]}, {"t": 0.75, "pos": [0, 1.7, 0]}]}}
+  "rightLeg": [{"t": 0.00, "rot": [-24, 0, 12], "bend": 44}, {"t": 0.30, "rot": [-2, 0, 12], "bend": 40}, {"t": 0.50, "rot": [22, 0, 12], "bend": 42}, {"t": 0.70, "rot": [6, 0, 12], "bend": 62}],
+  "rightArm": [{"t": 0.0, "rot": [-34, -22, 8], "bend": 132}],
+  "leftArm":  [{"t": 0.0, "rot": [-52, 20, -6], "bend": 124}],
+  "torso":    [{"t": 0.0, "rot": [20, -16, 0]}, {"t": 0.5, "rot": [20, -14, 0]}],
+  "head":     [{"t": 0.0, "rot": [-20, 12, 0]}],
+  "body":     [{"t": 0.00, "pos": [0, 2.8, 0]}, {"t": 0.25, "pos": [0, 2.4, 0]}, {"t": 0.50, "pos": [0, 2.8, 0]}, {"t": 0.75, "pos": [0, 2.4, 0]}]}}

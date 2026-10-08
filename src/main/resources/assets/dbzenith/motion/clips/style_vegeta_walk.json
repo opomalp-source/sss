@@ -1,6 +1,7 @@
-{"_doc": "Vegeta: a proud walk with the arms crossed, chest out.", "base": "walk",
+{"_doc": "Vegeta: a stiff, upright strut with the arms folded and the chest out; no bounce, no sway, all pride.", "base": "walk",
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [-72, -48, 0], "bend": 112}],
-  "leftArm":  [{"t": 0.0, "rot": [-66, 52, 0], "bend": 108}],
-  "torso":    [{"t": 0.00, "rot": [-3, -3, 0]}, {"t": 0.50, "rot": [-3, 3, 0]}],
-  "head":     [{"t": 0.0, "rot": [-6, 0, 0]}]}}
+  "rightArm": [{"t": 0.0, "rot": [-20, -48, 14], "bend": 114}],
+  "leftArm":  [{"t": 0.0, "rot": [-26, 48, -14], "bend": 110}],
+  "torso":    [{"t": 0.00, "rot": [-5, -3, 0]}, {"t": 0.50, "rot": [-5, 3, 0]}],
+  "head":     [{"t": 0.0, "rot": [-8, 0, 0]}],
+  "body":     [{"t": 0.00, "pos": [0, 0.15, 0]}, {"t": 0.25, "pos": [0, -0.2, 0]}, {"t": 0.50, "pos": [0, 0.15, 0]}, {"t": 0.75, "pos": [0, -0.2, 0]}]}}

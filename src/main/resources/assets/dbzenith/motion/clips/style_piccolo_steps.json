@@ -1,5 +1,8 @@
-{"_doc": "Piccolo: long, deliberate steps in stance.", "base": "fight_walk", "speed": 0.85,
+{"_doc": "Piccolo: long, deliberate steps, the reaching hand never wavering.", "sync": "stride", "loop": true, "symmetric": true, "stride": 2.2,
  "bones": {
-  "leftArm":  [{"t": 0.0, "rot": [-88, 22, -6], "bend": 14}],
-  "rightArm": [{"t": 0.0, "rot": [-48, -24, 16], "bend": 100}],
-  "torso":    [{"t": 0.0, "rot": [4, -26, 0]}]}}
+  "rightLeg": [{"t": 0.00, "rot": [-26, 0, 12], "bend": 20}, {"t": 0.30, "rot": [0, 0, 12], "bend": 14}, {"t": 0.50, "rot": [22, 0, 12], "bend": 20}, {"t": 0.70, "rot": [8, 0, 12], "bend": 38}],
+  "leftArm":  [{"t": 0.0, "rot": [-92, 26, -10], "bend": 30}],
+  "rightArm": [{"t": 0.0, "rot": [-40, -30, 22], "bend": 118}],
+  "torso":    [{"t": 0.0, "rot": [4, -32, 0]}],
+  "head":     [{"t": 0.0, "rot": [-4, 24, 0]}],
+  "body":     [{"t": 0.00, "pos": [0, 1.0, 0]}, {"t": 0.25, "pos": [0, 0.6, 0]}, {"t": 0.50, "pos": [0, 1.0, 0]}, {"t": 0.75, "pos": [0, 0.6, 0]}]}}

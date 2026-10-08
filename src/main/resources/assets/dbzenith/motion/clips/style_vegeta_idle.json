@@ -1,3 +1,10 @@
-{"_doc": "Vegeta (Saiyan Prince): arms crossed, chin up, looking down on you.", "base": "idle_crossed",
- "bones": {"head": [{"t": 0.0, "rot": [-7, -6, 0]}, {"t": 0.5, "rot": [-8, -6, 0]}]},
- "offset": {"torso": {"rot": [-3, 0, 0]}}}
+{"_doc": "Vegeta (Saiyan Prince): arms folded tight, chin up, weight back on one leg, glaring down his nose; perfectly still but for an impatient tap of the foot.",
+ "sync": "time", "length": 100, "loop": true,
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-20, -48, 14], "bend": 114}, {"t": 0.5, "rot": [-21, -48, 14], "bend": 114}],
+  "leftArm":  [{"t": 0.0, "rot": [-26, 48, -14], "bend": 110}, {"t": 0.5, "rot": [-27, 48, -14], "bend": 110}],
+  "torso":    [{"t": 0.0, "rot": [-5, 6, 0]}, {"t": 0.5, "rot": [-6, 6, 0]}],
+  "head":     [{"t": 0.0, "rot": [-8, -10, 0]}, {"t": 0.5, "rot": [-9, -10, 0]}],
+  "rightLeg": [{"t": 0.0, "rot": [4, 0, 6], "bend": 0}],
+  "leftLeg":  [{"t": 0.0, "rot": [-8, 0, -4], "bend": 10}, {"t": 0.7, "rot": [-8, 0, -4], "bend": 10}, {"t": 0.75, "rot": [-14, 0, -4], "bend": 14}, {"t": 0.8, "rot": [-8, 0, -4], "bend": 10}, {"t": 0.85, "rot": [-14, 0, -4], "bend": 14}, {"t": 0.9, "rot": [-8, 0, -4], "bend": 10}],
+  "body":     [{"t": 0.0, "pos": [0.5, 0, 0]}, {"t": 0.5, "pos": [0.5, -0.15, 0]}]}}

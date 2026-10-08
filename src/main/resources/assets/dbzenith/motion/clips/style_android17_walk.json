@@ -1,4 +1,6 @@
-{"_doc": "Android 17: strolling with the hands in the pockets.", "base": "walk",
+{"_doc": "Android 17: an easy slouching walk with his hands in his pockets, shoulders loose.", "base": "walk", "speed": 0.95,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [8, -8, 6], "bend": 30}],
-  "leftArm":  [{"t": 0.0, "rot": [8, 8, -6], "bend": 30}]}}
+  "rightArm": [{"t": 0.0, "rot": [8, -25, 10], "bend": 45}],
+  "leftArm":  [{"t": 0.0, "rot": [8, 25, -10], "bend": 45}],
+  "torso":    [{"t": 0.00, "rot": [3, -6, 2]}, {"t": 0.50, "rot": [3, 6, -2]}],
+  "head":     [{"t": 0.0, "rot": [2, 0, 3]}]}}

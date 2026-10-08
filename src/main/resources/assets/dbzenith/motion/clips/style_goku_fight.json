@@ -1,10 +1,10 @@
-{"_doc": "Goku: wide and low, the lead hand open and forward, the rear fist chambered at the hip, bouncing.",
- "sync": "time", "length": 18, "loop": true,
+{"_doc": "Goku: wide and low, bouncing on the balls of his feet, the lead hand open and reaching, the rear fist cocked at the hip, chin tucked, grinning.",
+ "sync": "time", "length": 16, "loop": true,
  "bones": {
-  "torso":    [{"t": 0.0, "rot": [10, -22, 0]}, {"t": 0.5, "rot": [12, -21, 0]}],
-  "head":     [{"t": 0.0, "rot": [-4, 14, 0]}],
-  "leftArm":  [{"t": 0.0, "rot": [-70, 14, -10], "bend": 40}, {"t": 0.5, "rot": [-66, 14, -11], "bend": 44}],
-  "rightArm": [{"t": 0.0, "rot": [8, -10, 24], "bend": 104}, {"t": 0.5, "rot": [10, -10, 25], "bend": 108}],
-  "rightLeg": [{"t": 0.0, "rot": [18, 0, 12], "bend": 30}, {"t": 0.5, "rot": [20, 0, 12], "bend": 36}],
-  "leftLeg":  [{"t": 0.0, "rot": [-24, 0, -8], "bend": 30}, {"t": 0.5, "rot": [-26, 0, -8], "bend": 36}],
-  "body":     [{"t": 0.0, "pos": [0, 1.6, 0]}, {"t": 0.5, "pos": [0, 2.2, 0]}]}}
+  "torso":    [{"t": 0.0, "rot": [12, -26, 0]}, {"t": 0.5, "rot": [14, -24, 0]}],
+  "head":     [{"t": 0.0, "rot": [-8, 20, 0]}, {"t": 0.5, "rot": [-7, 18, 0]}],
+  "leftArm":  [{"t": 0.0, "rot": [-78, 18, -14], "bend": 34}, {"t": 0.5, "rot": [-72, 18, -16], "bend": 40}],
+  "rightArm": [{"t": 0.0, "rot": [14, -14, 26], "bend": 112}, {"t": 0.5, "rot": [16, -14, 27], "bend": 116}],
+  "rightLeg": [{"t": 0.0, "rot": [22, 0, 16], "bend": 34}, {"t": 0.5, "rot": [24, 0, 16], "bend": 42}],
+  "leftLeg":  [{"t": 0.0, "rot": [-30, 0, -10], "bend": 36}, {"t": 0.5, "rot": [-32, 0, -10], "bend": 44}],
+  "body":     [{"t": 0.0, "pos": [0, 1.8, 0]}, {"t": 0.5, "pos": [0, 2.6, 0]}]}}

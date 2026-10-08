@@ -1,5 +1,7 @@
-{"_doc": "Krillin: quick little steps in stance.", "base": "fight_walk", "speed": 1.15,
+{"_doc": "Krillin: quick shuffles in the front stance.", "sync": "stride", "loop": true, "symmetric": true, "stride": 1.4,
  "bones": {
-  "leftArm":  [{"t": 0.0, "rot": [-84, 16, -8], "bend": 24}],
-  "rightArm": [{"t": 0.0, "rot": [-22, -14, 18], "bend": 116}],
-  "torso":    [{"t": 0.0, "rot": [8, -22, 0]}]}}
+  "rightLeg": [{"t": 0.00, "rot": [-20, 0, 8], "bend": 30}, {"t": 0.30, "rot": [0, 0, 8], "bend": 24}, {"t": 0.50, "rot": [20, 0, 8], "bend": 26}, {"t": 0.70, "rot": [6, 0, 8], "bend": 46}],
+  "leftArm":  [{"t": 0.0, "rot": [-90, 22, -6], "bend": 14}],
+  "rightArm": [{"t": 0.0, "rot": [20, -20, 18], "bend": 104}],
+  "torso":    [{"t": 0.0, "rot": [6, -28, 0]}],
+  "body":     [{"t": 0.00, "pos": [0, 2.0, 0]}, {"t": 0.25, "pos": [0, 1.4, 0]}, {"t": 0.50, "pos": [0, 2.0, 0]}, {"t": 0.75, "pos": [0, 1.4, 0]}]}}

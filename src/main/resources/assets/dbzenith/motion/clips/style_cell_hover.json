@@ -1,6 +1,9 @@
-{"_doc": "Cell: arms crossed in the air, legs straight.", "base": "hover",
+{"_doc": "Cell: arms folded, legs straight, floating with a satisfied little drift.",
+ "sync": "time", "length": 90, "loop": true,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [-72, -48, 0], "bend": 112}],
-  "leftArm":  [{"t": 0.0, "rot": [-66, 52, 0], "bend": 108}],
-  "rightLeg": [{"t": 0.0, "rot": [3, 0, 1], "bend": 4}],
-  "leftLeg":  [{"t": 0.0, "rot": [3, 0, -1], "bend": 4}]}}
+  "rightArm": [{"t": 0.0, "rot": [-20, -48, 14], "bend": 114}],
+  "leftArm":  [{"t": 0.0, "rot": [-26, 48, -14], "bend": 110}],
+  "rightLeg": [{"t": 0.0, "rot": [3, 0, 2], "bend": 4}],
+  "leftLeg":  [{"t": 0.0, "rot": [3, 0, -2], "bend": 4}],
+  "head":     [{"t": 0.0, "rot": [-4, 0, 6]}],
+  "body":     [{"t": 0.0, "pos": [0, 0.2, 0]}, {"t": 0.5, "pos": [0, -0.8, 0]}]}}

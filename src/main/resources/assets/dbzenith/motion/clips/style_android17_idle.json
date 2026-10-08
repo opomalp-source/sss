@@ -1,10 +1,10 @@
-{"_doc": "Android 17 (Park Ranger): hands in the pockets, weight on one leg.",
- "sync": "time", "length": 90, "loop": true,
+{"_doc": "Android 17 (Park Ranger): hands in his pockets, slouched on one leg, head tilted, idly looking around and shifting his weight.",
+ "sync": "time", "length": 140, "loop": true,
  "bones": {
-  "torso":    [{"t": 0.0, "rot": [0, 0, 3]}, {"t": 0.5, "rot": [-1, 0, 3]}],
-  "head":     [{"t": 0.0, "rot": [0, -6, 2]}, {"t": 0.5, "rot": [0, 6, 2]}],
-  "rightArm": [{"t": 0.0, "rot": [8, -8, 6], "bend": 30}],
-  "leftArm":  [{"t": 0.0, "rot": [8, 8, -6], "bend": 30}],
-  "rightLeg": [{"t": 0.0, "rot": [0, 0, 4], "bend": 0}],
-  "leftLeg":  [{"t": 0.0, "rot": [-8, 0, -6], "bend": 14}],
-  "body":     [{"t": 0.0, "pos": [0.6, 0, 0]}, {"t": 0.5, "pos": [0.6, -0.2, 0]}]}}
+  "rightArm": [{"t": 0.0, "rot": [8, -25, 10], "bend": 45}],
+  "leftArm":  [{"t": 0.0, "rot": [8, 25, -10], "bend": 45}],
+  "torso":    [{"t": 0.0, "rot": [2, 0, 4]}, {"t": 0.45, "rot": [2, 0, 4]}, {"t": 0.55, "rot": [2, 0, -4]}, {"t": 0.95, "rot": [2, 0, -4]}],
+  "head":     [{"t": 0.0, "rot": [2, -14, 4]}, {"t": 0.25, "rot": [0, 10, 4]}, {"t": 0.5, "rot": [2, -8, -4]}, {"t": 0.75, "rot": [0, 16, -4]}],
+  "rightLeg": [{"t": 0.0, "rot": [0, 0, 5], "bend": 0}, {"t": 0.45, "rot": [0, 0, 5], "bend": 0}, {"t": 0.55, "rot": [-8, 0, 6], "bend": 14}, {"t": 0.95, "rot": [-8, 0, 6], "bend": 14}],
+  "leftLeg":  [{"t": 0.0, "rot": [-8, 0, -6], "bend": 14}, {"t": 0.45, "rot": [-8, 0, -6], "bend": 14}, {"t": 0.55, "rot": [0, 0, -5], "bend": 0}, {"t": 0.95, "rot": [0, 0, -5], "bend": 0}],
+  "body":     [{"t": 0.0, "pos": [0.7, 0.1, 0]}, {"t": 0.45, "pos": [0.7, 0.1, 0]}, {"t": 0.55, "pos": [-0.7, 0.1, 0]}, {"t": 0.95, "pos": [-0.7, 0.1, 0]}]}}

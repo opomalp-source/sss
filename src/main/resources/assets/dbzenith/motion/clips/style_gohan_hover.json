@@ -1,4 +1,8 @@
-{"_doc": "Gohan: calm in the air, legs together, arms relaxed.", "base": "hover",
+{"_doc": "Gohan: calm in the air, legs together and softly bent, arms relaxed a little away from the body, drifting.",
+ "sync": "time", "length": 80, "loop": true,
  "bones": {
-  "rightLeg": [{"t": 0.0, "rot": [-2, 0, 1], "bend": 8}, {"t": 0.5, "rot": [-3, 0, 1], "bend": 10}],
-  "leftLeg":  [{"t": 0.0, "rot": [0, 0, -1], "bend": 6}, {"t": 0.5, "rot": [-1, 0, -1], "bend": 8}]}}
+  "rightLeg": [{"t": 0.0, "rot": [-6, 0, 1], "bend": 14}, {"t": 0.5, "rot": [-8, 0, 1], "bend": 18}],
+  "leftLeg":  [{"t": 0.0, "rot": [-2, 0, -1], "bend": 10}, {"t": 0.5, "rot": [-4, 0, -1], "bend": 14}],
+  "rightArm": [{"t": 0.0, "rot": [-4, 0, 14], "bend": 16}, {"t": 0.5, "rot": [-6, 0, 16], "bend": 20}],
+  "leftArm":  [{"t": 0.0, "rot": [-6, 0, -16], "bend": 20}, {"t": 0.5, "rot": [-4, 0, -14], "bend": 16}],
+  "body":     [{"t": 0.0, "pos": [0, 0.3, 0], "rot": [0, 0, -1]}, {"t": 0.5, "pos": [0, -1.0, 0], "rot": [0, 0, 1]}]}}

@@ -1,2 +1,9 @@
-{"_doc": "Goku: one fist out ahead, the other arm along the side.", "base": "cruise",
- "bones": {"rightArm": [{"t": 0.0, "rot": [-160, 0, -6], "bend": 0}, {"t": 0.5, "rot": [-162, 0, -7], "bend": 2}]}}
+{"_doc": "Goku: one fist driven out ahead, the other arm tight along his side, legs together and trailing.",
+ "sync": "time", "length": 20, "loop": true,
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-168, -4, -6], "bend": 0}, {"t": 0.5, "rot": [-170, -4, -7], "bend": 2}],
+  "leftArm":  [{"t": 0.0, "rot": [16, 0, -6], "bend": 4}, {"t": 0.5, "rot": [18, 0, -7], "bend": 6}],
+  "rightLeg": [{"t": 0.0, "rot": [6, 0, 1], "bend": 6}, {"t": 0.5, "rot": [8, 0, 1], "bend": 10}],
+  "leftLeg":  [{"t": 0.0, "rot": [10, 0, -1], "bend": 14}, {"t": 0.5, "rot": [7, 0, -1], "bend": 8}],
+  "torso":    [{"t": 0.0, "rot": [0, 4, 0]}],
+  "head":     [{"t": 0.0, "rot": [-8, 0, 0]}]}}

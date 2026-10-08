@@ -1,5 +1,10 @@
-{"_doc": "Piccolo: charging the Special Beam Cannon, two fingers to the forehead.", "base": "charge",
+{"_doc": "Piccolo: charging the Special Beam Cannon; two fingers pressed to the forehead, the other hand gripping that wrist, feet wide, crackling.",
+ "sync": "time", "length": 6, "loop": true, "ease": "linear",
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [-150, -34, 0], "bend": 124}, {"t": 0.5, "rot": [-151, -34, 0], "bend": 126}],
-  "leftArm":  [{"t": 0.0, "rot": [10, 0, -20], "bend": 40}, {"t": 0.5, "rot": [10, 0, -24], "bend": 40}],
-  "head":     [{"t": 0.0, "rot": [4, 0, 0]}]}}
+  "body":     [{"t": 0.0, "pos": [0.15, 1.8, 0]}, {"t": 0.5, "pos": [-0.15, 1.8, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [-150, -36, 0], "bend": 126}],
+  "leftArm":  [{"t": 0.0, "rot": [-70, 50, -10], "bend": 120}],
+  "torso":    [{"t": 0.0, "rot": [2, -10, 0]}],
+  "head":     [{"t": 0.0, "rot": [6, 4, 0]}],
+  "rightLeg": [{"t": 0.0, "rot": [6, 0, 18], "bend": 24}],
+  "leftLeg":  [{"t": 0.0, "rot": [-14, 0, -16], "bend": 28}]}}

@@ -1,1 +1,5 @@
-{"_doc": "Goku: leaning hard into the run.", "base": "sprint", "offset": {"torso": {"rot": [8, 0, 0]}, "head": {"rot": [-6, 0, 0]}}}
+{"_doc": "Goku: all-out, chest low over the knees, fists pumping hard and high.", "base": "sprint",
+ "bones": {
+  "rightArm": [{"t": 0.00, "rot": [52, 0, 6], "bend": 40}, {"t": 0.25, "rot": [0, 0, 8], "bend": 70}, {"t": 0.50, "rot": [-62, 0, 4], "bend": 96}, {"t": 0.75, "rot": [0, 0, 8], "bend": 70}],
+  "head":     [{"t": 0.0, "rot": [-14, 0, 0]}, {"t": 0.5, "rot": [-12, 0, 0]}]},
+ "offset": {"torso": {"rot": [12, 0, 0]}}}

@@ -1,1 +1,5 @@
-{"_doc": "Broly: a heavy, rolling walk.", "base": "walk_heavy", "speed": 0.9, "offset": {"torso": {"rot": [6, 0, 0]}}}
+{"_doc": "Broly: a heavy, rolling stomp, hunched, arms swinging wide and slow.", "base": "walk_heavy", "speed": 0.85,
+ "bones": {
+  "rightArm": [{"t": 0.00, "rot": [16, 0, 22], "bend": 26}, {"t": 0.50, "rot": [-22, 0, 20], "bend": 34}],
+  "head":     [{"t": 0.0, "rot": [-16, 0, 0]}]},
+ "offset": {"torso": {"rot": [14, 0, 0]}, "body": {"pos": [0, 0.8, 0]}}}

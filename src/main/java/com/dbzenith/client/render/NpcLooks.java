@@ -82,6 +82,21 @@ public final class NpcLooks {
 
     private NpcLooks() {}
 
+    private static final Map<String, Integer> BUILDS = Map.ofEntries(
+            Map.entry("broly", BodyShape.BULKY), Map.entry("jiren", BodyShape.BULKY), Map.entry("majin_buu", BodyShape.BULKY),
+            Map.entry("rampage_brute", BodyShape.BULKY), Map.entry("spopovich", BodyShape.BULKY), Map.entry("enma", BodyShape.BULKY),
+            Map.entry("ogre_guard", BodyShape.BULKY), Map.entry("mr_satan", BodyShape.BULKY), Map.entry("tyrant_lord", BodyShape.LEAN),
+            Map.entry("frieza", BodyShape.LEAN), Map.entry("krillin", BodyShape.LEAN), Map.entry("master_roshi", BodyShape.LEAN),
+            Map.entry("martial_arts_master", BodyShape.LEAN), Map.entry("beerus", BodyShape.LEAN), Map.entry("whis", BodyShape.LEAN),
+            Map.entry("north_kai", BodyShape.LEAN), Map.entry("grand_kai", BodyShape.LEAN), Map.entry("sproutling", BodyShape.LEAN),
+            Map.entry("hit", BodyShape.LEAN), Map.entry("tournament_announcer", BodyShape.LEAN), Map.entry("training_monkey", BodyShape.LEAN),
+            Map.entry("yamu", BodyShape.LEAN), Map.entry("jewel", BodyShape.LEAN), Map.entry("ranfan", BodyShape.LEAN));
+
+    /** The build an NPC's body is shaped to (BodyShape): athletic unless said otherwise. */
+    public static int build(String skin) {
+        return BUILDS.getOrDefault(skin, BodyShape.ATHLETIC);
+    }
+
     /** How long an NPC's race parts are (1 classic): Beerus's great cat ears. */
     public static float featureLength(String skin) {
         return "beerus".equals(skin) ? 2.1f : 1f;

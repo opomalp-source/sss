@@ -1982,3 +1982,29 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 
   203 GameTests.
 - **Checked in the dev client:** a heavy rush smashed the training dummy into a stone wall, leaving a dug-out hole ringed with cracked cobblestone; a Wave Beam held on the wall carved a tunnel through it.
+
+## 2026-10-08 — CX-22: proportions, the floating torso, and every style redone (v0.70.0)
+- **The floating torso** (user: "the NPCs' torsos are sometimes hovering over their legs"):
+  - The model's torso turns about the neck, so any lean swings the hips off the legs. The motion engine corrected its own leans, but the combat layer's moves and hit reactions lean the torso too, uncorrected, which is why it happened only sometimes (in fights).
+  - A new last layer in every animation stack (`client/anim/RigFix`, players and NPCs) reads the torso's final lean and twist, whichever layer made it, and moves the torso, neck and shoulders so it all turns about the waist. The motion engine leaves the positions to it.
+- **Proportions** (user: "the chest is too big for the belly, the arms and legs skinny"; "I don't want the NPCs to look like Minecraft characters too much"):
+  - The torso tapers: a smaller chest block above, a slimmer waist block below, instead of a box on a stick.
+  - Fuller arms (1.18–1.4×) and sturdier legs, which gain mostly depth (1.12–1.3×) so they never merge into one block from the front.
+  - Three builds: lean, athletic, bulky.
+  - NPCs now get the same shaping as players (they had vanilla's thin limbs and flat torso). Each has a build: Broly, Jiren, Buu and the brutes bulky; Frieza, Krillin, Roshi, Hit and the Kais lean; the rest athletic.
+- **Every style redone** (user: "they all look the same kind of and a little lame"):
+  - **Poses that work:** a dev pose sheet (below) showed several were wrong on this rig: crossed arms came out at the face, hands behind the back pointed forward, hands in pockets looked like a plain idle. Working values were found by testing sign variants and are now in the guide. The old Namekian and Frost Demon race idles had the same bugs and are fixed too.
+  - **Rewritten from scratch:** all 16 styles (108 clips), each with its own posture, rhythm, bob and arm language. For example:
+    - Goku: loose and bouncy, scratching his head now and then, a deep horse-stance charge, a fist-forward flight.
+    - Vegeta: folded arms, an impatient foot tap, a coiled guard with the fists at the face.
+    - Roshi: stooped with his hands behind his back, nodding, the Max Power double-biceps flex.
+    - Piccolo: lotus meditation in the air, the Special Beam Cannon charge.
+    - Tien: a soldier's stillness, palms together in the air, the one-legged crane.
+    - Gohan and Cell: a hand (or both) on the hip.
+    - Hit and Android 17: hands in pockets, Hit dead still, 17 slouching and looking around.
+    - Frieza: gliding steps, ankles crossed in the air, a Supernova finger.
+    - Jiren: fighting with his arms folded. Broly: hunched and heaving. Yamcha: a hand behind his head and the Wolf Fang crouch. Buu: skipping, cross-legged rocking, aeroplane flight, a tantrum charge.
+  - **More slots:** several styles fill more slots now (Roshi's scurry, Krillin's Destructo Disc and flight, Gohan's walk, Trunks's sprint and Burning Attack, Cell's flight, Yamcha's Spirit Ball).
+- **Dev, the pose sheet** (`PoseSheetScreen`, devshots `posesheet_<slot>_<phase>[_<turn>]`, `posesheet_clips_<prefix>_...`, `posesheetnpc_...`): one figure drawn once per clip, frozen at a phase and turned to an angle, through the real animation pipeline (`MotionEngine.devClip`). Every style's version of a slot can be compared at a glance.
+- **Tests:** 203 GameTests.
+- **Checked in the dev client:** pose sheets of every slot for the player and an NPC, and the masters in the world: tapered torsos and fuller limbs, Goku scratching his head, Frieza's hands behind his back, Piccolo's folded arms.

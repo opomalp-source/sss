@@ -169,16 +169,29 @@ Rules of thumb on the player model:
 |---|---|
 | Arm forward or up | Negative pitch (`-90` straight ahead, `-170` overhead) |
 | Arm outward | Positive roll for the right arm, negative for the left |
-| Arms crossed | right `[-72, -48, 0]` bend 112, left `[-66, 52, 0]` bend 108 |
-| Hands behind the back | right `[24, 28, 6]` bend 70, left `[24, -28, -6]` bend 70 |
-| Hands in the pockets | right `[8, -8, 6]` bend 30, left `[8, 8, -6]` bend 30 |
+| Arms crossed | right `[-20, -48, 14]` bend 114, left `[-26, 48, -14]` bend 110 |
+| Hands behind the back | right `[35, 30, -10]` bend 60, left `[35, -30, 10]` bend 60 |
+| Hands in the pockets | right `[8, -25, 10]` bend 45, left `[8, 25, -10]` bend 45 |
+| Hand on the hip | right `[5, -60, 45]` bend 100, left `[5, 60, -45]` bend 100 |
+| Hand behind the head | right `[-160, 40, 20]` bend 130 |
+| A bent arm's forearm turned inward | negative yaw on the right arm, positive on the left |
 | Crouch | `body` pos y positive (2 is a deep crouch), knees bent 30–60 |
+
+
+**Checking poses:** the dev pose sheet draws a figure once per clip, frozen, so poses can be compared side by side. Take a devshot named:
+- `posesheet_<slot>_<phase%>[_<turn>]`: every style's clip for a slot, plus the default (for example `posesheet_fight_stance_0_40`);
+- `posesheet_clips_<prefix>_<phase%>[_<turn>]`: every clip whose id starts with the prefix;
+- `posesheetnpc_...`: the same on the nearest NPC.
+
+The turn is in degrees: 0 faces you, 90 is side-on, 160 shows the back.
+
+**Rig:** the torso turns about the waist whatever the layer (`client/anim/RigFix`, the last layer of every animation stack), so a clip only keys the torso's lean and twist.
 
 **Inheritance** keeps style clips short:
 
 ```json
 {"base": "walk", "speed": 1.3,
- "bones": {"rightArm": [{"t": 0.0, "rot": [24, 28, 6], "bend": 70}], "leftArm": [{"t": 0.0, "rot": [24, -28, -6], "bend": 70}]},
+ "bones": {"rightArm": [{"t": 0.0, "rot": [35, 30, -10], "bend": 60}], "leftArm": [{"t": 0.0, "rot": [35, -30, 10], "bend": 60}]},
  "offset": {"torso": {"rot": [18, 0, 0]}}}
 ```
 

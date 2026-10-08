@@ -1,1 +1,2 @@
-{"_doc": "Broly: charging forward in great bounds.", "base": "lope"}
+{"_doc": "Broly: charging in great bounding leaps, low and wild.", "base": "lope", "speed": 0.95,
+ "bones": {"head": [{"t": 0.0, "rot": [-24, 0, 0]}]}}

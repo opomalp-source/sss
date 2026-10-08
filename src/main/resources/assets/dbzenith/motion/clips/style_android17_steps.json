@@ -1,5 +1,7 @@
-{"_doc": "Android 17: easy steps in his loose guard.", "base": "fight_walk",
+{"_doc": "Android 17: easy, light steps in his loose guard.", "sync": "stride", "loop": true, "symmetric": true, "stride": 1.8,
  "bones": {
-  "leftArm":  [{"t": 0.0, "rot": [-44, 12, -10], "bend": 40}],
-  "rightArm": [{"t": 0.0, "rot": [-18, -10, 14], "bend": 64}],
-  "torso":    [{"t": 0.0, "rot": [4, -10, 0]}]}}
+  "rightLeg": [{"t": 0.00, "rot": [-20, 0, 6], "bend": 18}, {"t": 0.30, "rot": [0, 0, 6], "bend": 14}, {"t": 0.50, "rot": [18, 0, 6], "bend": 18}, {"t": 0.70, "rot": [6, 0, 6], "bend": 36}],
+  "leftArm":  [{"t": 0.0, "rot": [-46, 14, -12], "bend": 36}],
+  "rightArm": [{"t": 0.0, "rot": [-14, -12, 16], "bend": 70}],
+  "torso":    [{"t": 0.0, "rot": [6, -12, 0]}],
+  "body":     [{"t": 0.00, "pos": [0, 0.8, 0]}, {"t": 0.25, "pos": [0, 0.4, 0]}, {"t": 0.50, "pos": [0, 0.8, 0]}, {"t": 0.75, "pos": [0, 0.4, 0]}]}}

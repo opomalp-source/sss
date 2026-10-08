@@ -1,1 +1,6 @@
-{"_doc": "Tien: a stiff, upright march.", "base": "walk", "offset": {"torso": {"rot": [-3, 0, 0]}}}
+{"_doc": "Tien: a precise, upright march, arms swinging straight from the shoulder, no wasted motion.", "base": "walk",
+ "bones": {
+  "rightArm": [{"t": 0.00, "rot": [26, 0, 3], "bend": 0}, {"t": 0.25, "rot": [0, 0, 3], "bend": 0}, {"t": 0.50, "rot": [-26, 0, 3], "bend": 4}, {"t": 0.75, "rot": [0, 0, 3], "bend": 0}],
+  "torso":    [{"t": 0.0, "rot": [-4, 0, 0]}],
+  "head":     [{"t": 0.0, "rot": [-2, 0, 0]}],
+  "body":     [{"t": 0.00, "pos": [0, 0.1, 0]}, {"t": 0.25, "pos": [0, -0.2, 0]}, {"t": 0.50, "pos": [0, 0.1, 0]}, {"t": 0.75, "pos": [0, -0.2, 0]}]}}

@@ -1,4 +1,8 @@
-{"_doc": "Gohan: smooth flight, legs together, arms along the body.", "base": "cruise",
+{"_doc": "Gohan: streamlined, arms close along the body, legs together, head up.",
+ "sync": "time", "length": 20, "loop": true,
  "bones": {
+  "rightArm": [{"t": 0.0, "rot": [10, 0, 6], "bend": 6}, {"t": 0.5, "rot": [12, 0, 7], "bend": 8}],
+  "leftArm":  [{"t": 0.0, "rot": [12, 0, -7], "bend": 8}, {"t": 0.5, "rot": [10, 0, -6], "bend": 6}],
   "rightLeg": [{"t": 0.0, "rot": [6, 0, 1], "bend": 4}],
-  "leftLeg":  [{"t": 0.0, "rot": [6, 0, -1], "bend": 4}]}}
+  "leftLeg":  [{"t": 0.0, "rot": [6, 0, -1], "bend": 4}],
+  "head":     [{"t": 0.0, "rot": [-10, 0, 0]}]}}

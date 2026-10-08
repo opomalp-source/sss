@@ -1,5 +1,10 @@
-{"_doc": "Jiren: fists down at the sides, every muscle tensed.", "base": "charge",
+{"_doc": "Jiren: every muscle locked, fists clenched down at his sides, chest swelling, legs wide, a deep tremor running through him.",
+ "sync": "time", "length": 5, "loop": true, "ease": "linear",
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [8, 0, 12], "bend": 10}, {"t": 0.5, "rot": [8, 0, 11], "bend": 10}],
-  "leftArm":  [{"t": 0.0, "rot": [8, 0, -11], "bend": 10}, {"t": 0.5, "rot": [8, 0, -12], "bend": 10}],
-  "head":     [{"t": 0.0, "rot": [-4, 0, 0]}]}}
+  "body":     [{"t": 0.0, "pos": [0.15, 1.6, 0]}, {"t": 0.5, "pos": [-0.15, 1.6, 0]}],
+  "torso":    [{"t": 0.0, "rot": [-6, 0, 0]}],
+  "head":     [{"t": 0.0, "rot": [-8, 0, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [6, 0, 20], "bend": 12}],
+  "leftArm":  [{"t": 0.0, "rot": [6, 0, -20], "bend": 12}],
+  "rightLeg": [{"t": 0.0, "rot": [-4, 0, 18], "bend": 24}],
+  "leftLeg":  [{"t": 0.0, "rot": [-4, 0, -18], "bend": 24}]}}

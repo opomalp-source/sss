@@ -1,2 +1,10 @@
-{"_doc": "Broly (Legendary Berserker): hulking and hunched, arms hanging heavy, breathing hard.", "base": "idle_heavy", "speed": 1.3,
- "offset": {"torso": {"rot": [10, 0, 0]}, "body": {"pos": [0, 0.6, 0]}}}
+{"_doc": "Broly (Legendary Berserker): hunched and heaving, shoulders rolled forward, heavy arms hanging, head low with the eyes up, breathing hard.",
+ "sync": "time", "length": 34, "loop": true,
+ "bones": {
+  "torso":    [{"t": 0.0, "rot": [18, 0, 0]}, {"t": 0.5, "rot": [14, 0, 0]}],
+  "head":     [{"t": 0.0, "rot": [-20, 0, 0]}, {"t": 0.5, "rot": [-16, 0, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [-14, 0, 18], "bend": 28}, {"t": 0.5, "rot": [-10, 0, 22], "bend": 24}],
+  "leftArm":  [{"t": 0.0, "rot": [-14, 0, -18], "bend": 28}, {"t": 0.5, "rot": [-10, 0, -22], "bend": 24}],
+  "rightLeg": [{"t": 0.0, "rot": [-6, 0, 12], "bend": 18}],
+  "leftLeg":  [{"t": 0.0, "rot": [-6, 0, -12], "bend": 18}],
+  "body":     [{"t": 0.0, "pos": [0, 1.4, 0]}, {"t": 0.5, "pos": [0, 0.9, 0]}]}}

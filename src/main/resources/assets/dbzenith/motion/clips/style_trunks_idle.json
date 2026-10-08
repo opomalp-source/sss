@@ -1,2 +1,10 @@
-{"_doc": "Future Trunks (Future Swordsman): one hand on the sword strap across the chest.", "base": "idle",
- "bones": {"rightArm": [{"t": 0.0, "rot": [-42, -38, 0], "bend": 118}, {"t": 0.45, "rot": [-43, -38, 0], "bend": 118}]}}
+{"_doc": "Future Trunks (Future Swordsman): serious and watchful, one hand resting on the sword strap at his chest, the other at his side, weight even.",
+ "sync": "time", "length": 90, "loop": true,
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-38, -42, 4], "bend": 120}, {"t": 0.5, "rot": [-39, -42, 4], "bend": 120}],
+  "leftArm":  [{"t": 0.0, "rot": [0, 0, -5], "bend": 6}, {"t": 0.5, "rot": [-1, 0, -6], "bend": 8}],
+  "torso":    [{"t": 0.0, "rot": [-1, -4, 0]}, {"t": 0.5, "rot": [-2, -4, 0]}],
+  "head":     [{"t": 0.0, "rot": [2, 6, 0]}, {"t": 0.5, "rot": [2, -4, 0]}],
+  "rightLeg": [{"t": 0.0, "rot": [0, 0, 4], "bend": 0}],
+  "leftLeg":  [{"t": 0.0, "rot": [-3, 0, -4], "bend": 6}],
+  "body":     [{"t": 0.0, "pos": [0, 0, 0]}, {"t": 0.5, "pos": [0, -0.2, 0]}]}}

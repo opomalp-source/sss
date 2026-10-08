@@ -1,10 +1,10 @@
-{"_doc": "Frieza: unbothered, one hand raised with a finger out, the other still behind the back.",
- "sync": "time", "length": 40, "loop": true,
+{"_doc": "Frieza: barely a stance at all; upright, one hand raised at chest height with a finger pointed, the other still behind his back, a mocking tilt of the head.",
+ "sync": "time", "length": 44, "loop": true,
  "bones": {
-  "torso":    [{"t": 0.0, "rot": [-2, -10, 0]}, {"t": 0.5, "rot": [-2, -9, 0]}],
-  "head":     [{"t": 0.0, "rot": [2, 8, 4]}],
-  "rightArm": [{"t": 0.0, "rot": [-74, -12, 10], "bend": 34}, {"t": 0.5, "rot": [-72, -12, 10], "bend": 36}],
-  "leftArm":  [{"t": 0.0, "rot": [24, -28, -6], "bend": 70}],
-  "rightLeg": [{"t": 0.0, "rot": [6, 0, 4], "bend": 6}],
-  "leftLeg":  [{"t": 0.0, "rot": [-6, 0, -4], "bend": 8}],
-  "body":     [{"t": 0.0, "pos": [0, 0.2, 0]}, {"t": 0.5, "pos": [0, 0.3, 0]}]}}
+  "torso":    [{"t": 0.0, "rot": [-4, -12, 0]}, {"t": 0.5, "rot": [-4, -11, 0]}],
+  "head":     [{"t": 0.0, "rot": [-2, 10, 7]}, {"t": 0.5, "rot": [-2, 10, 5]}],
+  "rightArm": [{"t": 0.0, "rot": [-82, -10, 8], "bend": 18}, {"t": 0.5, "rot": [-80, -10, 8], "bend": 22}],
+  "leftArm":  [{"t": 0.0, "rot": [35, -30, 10], "bend": 60}],
+  "rightLeg": [{"t": 0.0, "rot": [6, 0, 4], "bend": 4}],
+  "leftLeg":  [{"t": 0.0, "rot": [-8, 4, -3], "bend": 8}],
+  "body":     [{"t": 0.0, "pos": [0, 0.1, 0]}, {"t": 0.5, "pos": [0, 0.2, 0]}]}}

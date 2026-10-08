@@ -1,2 +1,10 @@
-{"_doc": "Cell (Perfect Warrior): arms crossed, head cocked, smug.", "base": "idle_crossed",
- "bones": {"head": [{"t": 0.0, "rot": [-4, 0, 7]}, {"t": 0.5, "rot": [-5, 0, 7]}]}}
+{"_doc": "Cell (Perfect Warrior): both hands on his hips, chest out, chin high, head cocked; the very picture of smugness.",
+ "sync": "time", "length": 100, "loop": true,
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [5, -60, 45], "bend": 100}, {"t": 0.5, "rot": [4, -60, 46], "bend": 102}],
+  "leftArm":  [{"t": 0.0, "rot": [5, 60, -45], "bend": 100}, {"t": 0.5, "rot": [4, 60, -46], "bend": 102}],
+  "torso":    [{"t": 0.0, "rot": [-6, 0, 0]}, {"t": 0.5, "rot": [-7, 0, 0]}],
+  "head":     [{"t": 0.0, "rot": [-6, 0, 8]}, {"t": 0.5, "rot": [-6, 0, 7]}],
+  "rightLeg": [{"t": 0.0, "rot": [0, 0, 8], "bend": 0}],
+  "leftLeg":  [{"t": 0.0, "rot": [0, 0, -8], "bend": 0}],
+  "body":     [{"t": 0.0, "pos": [0, 0, 0]}, {"t": 0.5, "pos": [0, -0.2, 0]}]}}

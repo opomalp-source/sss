@@ -1,2 +1,8 @@
-{"_doc": "Future Trunks: flying with a hand on the strap.", "base": "cruise",
- "bones": {"rightArm": [{"t": 0.0, "rot": [-42, -38, 0], "bend": 118}]}}
+{"_doc": "Future Trunks: flying with one hand back on the sword's hilt over his shoulder, the other arm along his side.",
+ "sync": "time", "length": 20, "loop": true,
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-150, 20, 10], "bend": 120}],
+  "leftArm":  [{"t": 0.0, "rot": [14, 0, -6], "bend": 6}, {"t": 0.5, "rot": [16, 0, -7], "bend": 8}],
+  "rightLeg": [{"t": 0.0, "rot": [6, 0, 1], "bend": 8}],
+  "leftLeg":  [{"t": 0.0, "rot": [8, 0, -1], "bend": 12}],
+  "head":     [{"t": 0.0, "rot": [-8, 0, 0]}]}}

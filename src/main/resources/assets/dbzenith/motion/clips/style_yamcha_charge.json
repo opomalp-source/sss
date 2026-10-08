@@ -1,0 +1,9 @@
+{"_doc": "Yamcha: the Spirit Ball; one hand held up and forward, palm up, guiding it, the other held out for balance.",
+ "sync": "time", "length": 8, "loop": true, "ease": "linear",
+ "bones": {
+  "body":     [{"t": 0.0, "pos": [0.2, 1.4, 0]}, {"t": 0.5, "pos": [-0.2, 1.4, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [-96, -8, 6], "bend": 40}],
+  "leftArm":  [{"t": 0.0, "rot": [-30, 0, -34], "bend": 20}],
+  "head":     [{"t": 0.0, "rot": [-8, -6, 0]}],
+  "rightLeg": [{"t": 0.0, "rot": [12, 0, 12], "bend": 22}],
+  "leftLeg":  [{"t": 0.0, "rot": [-16, 0, -12], "bend": 26}]}}

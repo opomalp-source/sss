@@ -1,4 +1,10 @@
-{"_doc": "Android 17: hovering with the hands in the pockets.", "base": "hover",
+{"_doc": "Android 17: lounging in the air, hands in his pockets, one knee bent.",
+ "sync": "time", "length": 90, "loop": true,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [8, -8, 6], "bend": 30}],
-  "leftArm":  [{"t": 0.0, "rot": [8, 8, -6], "bend": 30}]}}
+  "rightArm": [{"t": 0.0, "rot": [8, -25, 10], "bend": 45}],
+  "leftArm":  [{"t": 0.0, "rot": [8, 25, -10], "bend": 45}],
+  "rightLeg": [{"t": 0.0, "rot": [-20, 0, 4], "bend": 40}],
+  "leftLeg":  [{"t": 0.0, "rot": [4, 0, -3], "bend": 8}],
+  "torso":    [{"t": 0.0, "rot": [-4, 0, 3]}],
+  "head":     [{"t": 0.0, "rot": [0, 0, 5]}],
+  "body":     [{"t": 0.0, "pos": [0, 0.2, 0]}, {"t": 0.5, "pos": [0, -0.8, 0]}]}}

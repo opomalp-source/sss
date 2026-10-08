@@ -1,4 +1,8 @@
-{"_doc": "Frieza: gliding through the air with the hands behind the back.", "base": "cruise",
+{"_doc": "Frieza: gliding through the air upright-ish, hands still behind his back, the tail trailing.",
+ "sync": "time", "length": 24, "loop": true,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [24, 28, 6], "bend": 70}],
-  "leftArm":  [{"t": 0.0, "rot": [24, -28, -6], "bend": 70}]}}
+  "rightArm": [{"t": 0.0, "rot": [35, 30, -10], "bend": 60}],
+  "leftArm":  [{"t": 0.0, "rot": [35, -30, 10], "bend": 60}],
+  "rightLeg": [{"t": 0.0, "rot": [4, -6, -3], "bend": 4}],
+  "leftLeg":  [{"t": 0.0, "rot": [6, 6, 3], "bend": 8}],
+  "head":     [{"t": 0.0, "rot": [-14, 0, 0]}]}}

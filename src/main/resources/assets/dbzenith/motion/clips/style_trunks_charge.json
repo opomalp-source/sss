@@ -1,0 +1,9 @@
+{"_doc": "Future Trunks: the Burning Attack; arms thrust forward with the hands framing a window at eye height, legs braced wide.",
+ "sync": "time", "length": 6, "loop": true, "ease": "linear",
+ "bones": {
+  "body":     [{"t": 0.0, "pos": [0.2, 2.0, 0]}, {"t": 0.5, "pos": [-0.2, 2.0, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [-100, -20, 0], "bend": 30}],
+  "leftArm":  [{"t": 0.0, "rot": [-100, 20, 0], "bend": 30}],
+  "torso":    [{"t": 0.0, "rot": [4, 0, 0]}],
+  "rightLeg": [{"t": 0.0, "rot": [16, 0, 14], "bend": 28}],
+  "leftLeg":  [{"t": 0.0, "rot": [-20, 0, -12], "bend": 32}]}}

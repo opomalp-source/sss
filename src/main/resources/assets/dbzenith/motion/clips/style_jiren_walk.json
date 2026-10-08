@@ -1,1 +1,5 @@
-{"_doc": "Jiren: heavy, deliberate steps.", "base": "walk_heavy", "speed": 0.9}
+{"_doc": "Jiren: heavy, unhurried, inevitable steps, arms hanging thick at his sides.", "base": "walk_heavy", "speed": 0.85,
+ "bones": {
+  "rightArm": [{"t": 0.00, "rot": [10, 0, 14], "bend": 14}, {"t": 0.50, "rot": [-10, 0, 13], "bend": 18}],
+  "torso":    [{"t": 0.00, "rot": [0, -4, 0]}, {"t": 0.50, "rot": [0, 4, 0]}],
+  "head":     [{"t": 0.0, "rot": [2, 0, 0]}]}}

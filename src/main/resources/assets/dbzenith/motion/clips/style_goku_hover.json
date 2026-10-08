@@ -1,6 +1,10 @@
-{"_doc": "Goku: hanging loose in the air, knees soft, arms easy at the sides.", "base": "hover",
+{"_doc": "Goku: hanging in the air like it is nothing, one knee up, arms loose and out, a lazy drift.",
+ "sync": "time", "length": 70, "loop": true,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [-2, 0, 8], "bend": 14}, {"t": 0.5, "rot": [-5, 0, 10], "bend": 18}],
-  "leftArm":  [{"t": 0.0, "rot": [-2, 0, -8], "bend": 14}, {"t": 0.5, "rot": [-5, 0, -10], "bend": 18}],
-  "rightLeg": [{"t": 0.0, "rot": [-8, 0, 3], "bend": 22}, {"t": 0.5, "rot": [-12, 0, 3], "bend": 28}],
-  "leftLeg":  [{"t": 0.0, "rot": [-4, 0, -3], "bend": 18}, {"t": 0.5, "rot": [-6, 0, -3], "bend": 22}]}}
+  "body":     [{"t": 0.0, "pos": [0, 0.4, 0], "rot": [0, 0, -2]}, {"t": 0.5, "pos": [0, -1.2, 0], "rot": [0, 0, 2]}],
+  "torso":    [{"t": 0.0, "rot": [-3, 0, 0]}, {"t": 0.5, "rot": [-1, 0, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [-6, 0, 22], "bend": 26}, {"t": 0.5, "rot": [-10, 0, 28], "bend": 32}],
+  "leftArm":  [{"t": 0.0, "rot": [-10, 0, -28], "bend": 32}, {"t": 0.5, "rot": [-6, 0, -22], "bend": 26}],
+  "rightLeg": [{"t": 0.0, "rot": [-34, 0, 6], "bend": 62}, {"t": 0.5, "rot": [-40, 0, 8], "bend": 70}],
+  "leftLeg":  [{"t": 0.0, "rot": [6, 0, -4], "bend": 18}, {"t": 0.5, "rot": [4, 0, -5], "bend": 24}],
+  "head":     [{"t": 0.0, "rot": [-2, -4, 0]}, {"t": 0.5, "rot": [0, 4, 0]}]}}

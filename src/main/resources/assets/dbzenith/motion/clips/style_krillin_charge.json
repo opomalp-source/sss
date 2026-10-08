@@ -1,0 +1,9 @@
+{"_doc": "Krillin: the Destructo Disc, one arm thrust straight up with the hand open, the other braced at the hip, feet apart.",
+ "sync": "time", "length": 8, "loop": true, "ease": "linear",
+ "bones": {
+  "body":     [{"t": 0.0, "pos": [0.2, 1.4, 0]}, {"t": 0.5, "pos": [-0.2, 1.4, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [-176, 0, -6], "bend": 4}, {"t": 0.5, "rot": [-178, 0, -6], "bend": 2}],
+  "leftArm":  [{"t": 0.0, "rot": [5, 60, -45], "bend": 100}],
+  "head":     [{"t": 0.0, "rot": [-24, 0, 0]}],
+  "rightLeg": [{"t": 0.0, "rot": [-4, 0, 14], "bend": 20}],
+  "leftLeg":  [{"t": 0.0, "rot": [-4, 0, -14], "bend": 20}]}}

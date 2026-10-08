@@ -1,4 +1,9 @@
-{"_doc": "Majin Buu: flying like an aeroplane, arms straight out to the sides.", "base": "cruise",
+{"_doc": "Majin Buu: flying like a toy aeroplane, arms straight out to the sides, wobbling.",
+ "sync": "time", "length": 24, "loop": true,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [0, 0, 84], "bend": 4}, {"t": 0.5, "rot": [0, 0, 80], "bend": 4}],
-  "leftArm":  [{"t": 0.0, "rot": [0, 0, -80], "bend": 4}, {"t": 0.5, "rot": [0, 0, -84], "bend": 4}]}}
+  "rightArm": [{"t": 0.0, "rot": [0, 0, 86], "bend": 4}, {"t": 0.5, "rot": [0, 0, 80], "bend": 4}],
+  "leftArm":  [{"t": 0.0, "rot": [0, 0, -80], "bend": 4}, {"t": 0.5, "rot": [0, 0, -86], "bend": 4}],
+  "rightLeg": [{"t": 0.0, "rot": [10, 0, 6], "bend": 20}],
+  "leftLeg":  [{"t": 0.0, "rot": [14, 0, -6], "bend": 26}],
+  "body":     [{"t": 0.0, "rot": [0, 0, -8]}, {"t": 0.5, "rot": [0, 0, 8]}],
+  "head":     [{"t": 0.0, "rot": [-10, 0, 0]}]}}

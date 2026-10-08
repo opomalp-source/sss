@@ -1,6 +1,8 @@
-{"_doc": "Goku: light, springy steps in his stance.", "base": "fight_walk", "stride": 1.8,
+{"_doc": "Goku: springy hops in and out, the guard bouncing with them.", "sync": "stride", "loop": true, "symmetric": true, "stride": 1.8,
  "bones": {
-  "leftArm":  [{"t": 0.0, "rot": [-70, 14, -10], "bend": 40}, {"t": 0.5, "rot": [-64, 14, -10], "bend": 44}],
-  "rightArm": [{"t": 0.0, "rot": [8, -10, 24], "bend": 104}, {"t": 0.5, "rot": [12, -10, 24], "bend": 108}],
-  "torso":    [{"t": 0.0, "rot": [10, -20, 0]}, {"t": 0.5, "rot": [10, -18, 0]}],
-  "body":     [{"t": 0.00, "pos": [0, 1.6, 0]}, {"t": 0.25, "pos": [0, 1.1, 0]}, {"t": 0.50, "pos": [0, 1.6, 0]}, {"t": 0.75, "pos": [0, 1.1, 0]}]}}
+  "rightLeg": [{"t": 0.00, "rot": [-26, 0, 12], "bend": 30}, {"t": 0.30, "rot": [0, 0, 12], "bend": 26}, {"t": 0.50, "rot": [22, 0, 12], "bend": 30}, {"t": 0.70, "rot": [8, 0, 12], "bend": 52}],
+  "leftArm":  [{"t": 0.0, "rot": [-78, 18, -14], "bend": 34}, {"t": 0.5, "rot": [-70, 18, -16], "bend": 42}],
+  "rightArm": [{"t": 0.0, "rot": [14, -14, 26], "bend": 112}, {"t": 0.5, "rot": [18, -14, 27], "bend": 116}],
+  "torso":    [{"t": 0.0, "rot": [12, -24, 0]}, {"t": 0.5, "rot": [12, -22, 0]}],
+  "head":     [{"t": 0.0, "rot": [-8, 18, 0]}],
+  "body":     [{"t": 0.00, "pos": [0, 1.8, 0]}, {"t": 0.25, "pos": [0, 0.8, 0]}, {"t": 0.50, "pos": [0, 1.8, 0]}, {"t": 0.75, "pos": [0, 0.8, 0]}]}}

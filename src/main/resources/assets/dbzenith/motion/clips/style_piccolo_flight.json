@@ -1,4 +1,8 @@
-{"_doc": "Piccolo: flying with the arms crossed and the cape streaming.", "base": "cruise",
+{"_doc": "Piccolo: cutting through the air with the arms still folded, legs straight, the cape streaming behind.",
+ "sync": "time", "length": 20, "loop": true,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [-72, -48, 0], "bend": 112}],
-  "leftArm":  [{"t": 0.0, "rot": [-66, 52, 0], "bend": 108}]}}
+  "rightArm": [{"t": 0.0, "rot": [-20, -48, 14], "bend": 114}],
+  "leftArm":  [{"t": 0.0, "rot": [-26, 48, -14], "bend": 110}],
+  "rightLeg": [{"t": 0.0, "rot": [3, 0, 1], "bend": 2}, {"t": 0.5, "rot": [4, 0, 1], "bend": 4}],
+  "leftLeg":  [{"t": 0.0, "rot": [4, 0, -1], "bend": 4}, {"t": 0.5, "rot": [3, 0, -1], "bend": 2}],
+  "head":     [{"t": 0.0, "rot": [-4, 0, 0]}]}}

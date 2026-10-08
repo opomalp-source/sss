@@ -1,5 +1,10 @@
-{"_doc": "Cell: hands cupped at the right hip, gathering a Kamehameha.", "base": "charge",
+{"_doc": "Cell: a Kamehameha drawn back to the hip; torso twisted away, both hands cupped together low at his side, knees bent.",
+ "sync": "time", "length": 6, "loop": true, "ease": "linear",
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [14, -14, 18], "bend": 100}, {"t": 0.5, "rot": [14, -14, 19], "bend": 102}],
-  "leftArm":  [{"t": 0.0, "rot": [-24, 52, 0], "bend": 118}, {"t": 0.5, "rot": [-24, 52, 0], "bend": 120}],
-  "torso":    [{"t": 0.0, "rot": [8, 26, 0]}]}}
+  "body":     [{"t": 0.0, "pos": [0.2, 2.2, 0]}, {"t": 0.5, "pos": [-0.2, 2.2, 0]}],
+  "torso":    [{"t": 0.0, "rot": [10, 34, 0]}],
+  "head":     [{"t": 0.0, "rot": [-4, -28, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [24, -20, 20], "bend": 96}],
+  "leftArm":  [{"t": 0.0, "rot": [-10, 64, -6], "bend": 112}],
+  "rightLeg": [{"t": 0.0, "rot": [18, 0, 12], "bend": 30}],
+  "leftLeg":  [{"t": 0.0, "rot": [-22, 0, -12], "bend": 36}]}}

@@ -11,13 +11,23 @@ import net.minecraft.resources.ResourceLocation;
 public class FighterRenderer<T extends net.minecraft.world.entity.Mob> extends HumanoidMobRenderer<T, net.minecraft.client.model.PlayerModel<T>> {
     private final ResourceLocation texture;
     private final float scale;
+    /** The body's build (BodyShape: lean, athletic, bulky), from the skin (NpcLooks). */
+    private final int build;
 
     public FighterRenderer(EntityRendererProvider.Context ctx, String skin, float scale) {
         // The player model: outer layers (capes, helmets, sleeves) and separately painted left limbs.
         super(ctx, new com.dbzenith.client.motion.MotionModel<>(ctx.bakeLayer(ModelLayers.PLAYER), false), 0.5f * scale);
         this.texture = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/fighter/" + skin + ".png");
         this.scale = scale;
+        this.build = NpcLooks.build(skin);
+        BodyShape.attach(getModel());                                              // anime proportions, as players have (CX-22)
         addLayer(new NpcPartsLayer<>(this, ctx.getModelSet(), skin));
+    }
+
+    @Override
+    public void render(T fighter, float yaw, float partialTick, PoseStack pose, net.minecraft.client.renderer.MultiBufferSource buffers, int light) {
+        BodyShape.apply(getModel(), build, 0);                                       // a tapered torso and fuller limbs (CX-22)
+        super.render(fighter, yaw, partialTick, pose, buffers, light);
     }
 
     /** The motion engine tips and moves the whole figure (flight pitch, banking, leaning, crouching on landing), as playerAnimator does for players. */

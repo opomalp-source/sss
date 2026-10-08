@@ -1,10 +1,10 @@
-{"_doc": "Yamcha: the Wolf Fang crouch, hands up like claws, one ahead of the other.",
- "sync": "time", "length": 16, "loop": true,
+{"_doc": "Yamcha: the Wolf Fang crouch; low and coiled, both hands up like claws, one ahead of the other, ready to pounce.",
+ "sync": "time", "length": 14, "loop": true,
  "bones": {
-  "torso":    [{"t": 0.0, "rot": [20, -14, 0]}, {"t": 0.5, "rot": [22, -13, 0]}],
-  "head":     [{"t": 0.0, "rot": [-18, 10, 0]}],
-  "leftArm":  [{"t": 0.0, "rot": [-74, 8, -12], "bend": 54}, {"t": 0.5, "rot": [-70, 8, -12], "bend": 58}],
-  "rightArm": [{"t": 0.0, "rot": [-52, -8, 14], "bend": 46}, {"t": 0.5, "rot": [-48, -8, 14], "bend": 50}],
-  "rightLeg": [{"t": 0.0, "rot": [20, 0, 12], "bend": 50}, {"t": 0.5, "rot": [22, 0, 12], "bend": 56}],
-  "leftLeg":  [{"t": 0.0, "rot": [-30, 0, -10], "bend": 56}, {"t": 0.5, "rot": [-32, 0, -10], "bend": 62}],
-  "body":     [{"t": 0.0, "pos": [0, 2.6, 0]}, {"t": 0.5, "pos": [0, 3.1, 0]}]}}
+  "torso":    [{"t": 0.0, "rot": [24, -16, 0]}, {"t": 0.5, "rot": [26, -15, 0]}],
+  "head":     [{"t": 0.0, "rot": [-24, 12, 0]}],
+  "leftArm":  [{"t": 0.0, "rot": [-80, 10, -14], "bend": 60}, {"t": 0.5, "rot": [-76, 10, -14], "bend": 64}],
+  "rightArm": [{"t": 0.0, "rot": [-58, -10, 16], "bend": 52}, {"t": 0.5, "rot": [-54, -10, 16], "bend": 56}],
+  "rightLeg": [{"t": 0.0, "rot": [14, 0, 14], "bend": 60}, {"t": 0.5, "rot": [16, 0, 14], "bend": 66}],
+  "leftLeg":  [{"t": 0.0, "rot": [-34, 0, -10], "bend": 64}, {"t": 0.5, "rot": [-36, 0, -10], "bend": 70}],
+  "body":     [{"t": 0.0, "pos": [0, 3.2, 0]}, {"t": 0.5, "pos": [0, 3.8, 0]}]}}

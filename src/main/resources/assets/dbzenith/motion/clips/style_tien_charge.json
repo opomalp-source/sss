@@ -1,5 +1,10 @@
-{"_doc": "Tien: the Tri-Beam, hands joined in a triangle out in front.", "base": "charge",
+{"_doc": "Tien: the Tri-Beam; arms straight out in front, the hands joined into a triangle at chest height, a wide braced stance.",
+ "sync": "time", "length": 6, "loop": true, "ease": "linear",
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [-86, -26, 0], "bend": 22}, {"t": 0.5, "rot": [-87, -26, 0], "bend": 22}],
-  "leftArm":  [{"t": 0.0, "rot": [-86, 26, 0], "bend": 22}, {"t": 0.5, "rot": [-87, 26, 0], "bend": 22}],
-  "head":     [{"t": 0.0, "rot": [-4, 0, 0]}]}}
+  "body":     [{"t": 0.0, "pos": [0.2, 2.2, 0]}, {"t": 0.5, "pos": [-0.2, 2.2, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [-84, -24, 0], "bend": 20}],
+  "leftArm":  [{"t": 0.0, "rot": [-84, 24, 0], "bend": 20}],
+  "torso":    [{"t": 0.0, "rot": [6, 0, 0]}],
+  "head":     [{"t": 0.0, "rot": [-6, 0, 0]}],
+  "rightLeg": [{"t": 0.0, "rot": [14, 0, 14], "bend": 30}],
+  "leftLeg":  [{"t": 0.0, "rot": [-22, 0, -12], "bend": 34}]}}

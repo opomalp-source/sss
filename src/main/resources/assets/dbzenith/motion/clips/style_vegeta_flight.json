@@ -1,4 +1,8 @@
-{"_doc": "Vegeta: rigid flight, the arms straight back along the sides, fists clenched.", "base": "cruise",
+{"_doc": "Vegeta: rigid as an arrow, the arms locked straight back along his sides with the fists clenched, legs together.",
+ "sync": "time", "length": 16, "loop": true,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [34, 0, 6], "bend": 0}, {"t": 0.5, "rot": [36, 0, 6], "bend": 2}],
-  "leftArm":  [{"t": 0.0, "rot": [36, 0, -6], "bend": 2}, {"t": 0.5, "rot": [34, 0, -6], "bend": 0}]}}
+  "rightArm": [{"t": 0.0, "rot": [22, 0, 10], "bend": 0}, {"t": 0.5, "rot": [24, 0, 10], "bend": 0}],
+  "leftArm":  [{"t": 0.0, "rot": [24, 0, -10], "bend": 0}, {"t": 0.5, "rot": [22, 0, -10], "bend": 0}],
+  "rightLeg": [{"t": 0.0, "rot": [4, 0, 1], "bend": 2}],
+  "leftLeg":  [{"t": 0.0, "rot": [4, 0, -1], "bend": 2}],
+  "head":     [{"t": 0.0, "rot": [-6, 0, 0]}]}}

@@ -1,7 +1,10 @@
-{"_doc": "Frieza: floating upright and still, legs together, hands behind the back.", "base": "hover",
+{"_doc": "Frieza: floating upright and effortless, legs together with the ankles crossed, hands behind his back, a slow drift.",
+ "sync": "time", "length": 110, "loop": true,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [24, 28, 6], "bend": 70}],
-  "leftArm":  [{"t": 0.0, "rot": [24, -28, -6], "bend": 70}],
-  "rightLeg": [{"t": 0.0, "rot": [2, 0, 1], "bend": 2}],
-  "leftLeg":  [{"t": 0.0, "rot": [2, 0, -1], "bend": 2}],
-  "torso":    [{"t": 0.0, "rot": [-4, 0, 0]}]}}
+  "rightArm": [{"t": 0.0, "rot": [35, 30, -10], "bend": 60}],
+  "leftArm":  [{"t": 0.0, "rot": [35, -30, 10], "bend": 60}],
+  "rightLeg": [{"t": 0.0, "rot": [4, -8, -4], "bend": 6}],
+  "leftLeg":  [{"t": 0.0, "rot": [6, 8, 4], "bend": 10}],
+  "torso":    [{"t": 0.0, "rot": [-6, 0, 0]}],
+  "head":     [{"t": 0.0, "rot": [6, 0, 0]}],
+  "body":     [{"t": 0.0, "pos": [0, 0.2, 0], "rot": [0, 0, -1]}, {"t": 0.5, "pos": [0, -0.7, 0], "rot": [0, 0, 1]}]}}

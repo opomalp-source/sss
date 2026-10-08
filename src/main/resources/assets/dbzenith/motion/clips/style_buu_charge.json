@@ -1,4 +1,9 @@
-{"_doc": "Majin Buu: a tantrum, both arms thrown straight up.", "base": "charge",
+{"_doc": "Majin Buu: a tantrum; both arms thrown straight up, stamping, the whole body shaking with steam.",
+ "sync": "time", "length": 6, "loop": true, "ease": "linear",
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [-170, 0, 12], "bend": 10}, {"t": 0.5, "rot": [-166, 0, 16], "bend": 14}],
-  "leftArm":  [{"t": 0.0, "rot": [-166, 0, -16], "bend": 14}, {"t": 0.5, "rot": [-170, 0, -12], "bend": 10}]}}
+  "body":     [{"t": 0.0, "pos": [0.4, 0.8, 0]}, {"t": 0.5, "pos": [-0.4, 0.4, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [-170, 0, 14], "bend": 10}, {"t": 0.5, "rot": [-164, 0, 20], "bend": 16}],
+  "leftArm":  [{"t": 0.0, "rot": [-164, 0, -20], "bend": 16}, {"t": 0.5, "rot": [-170, 0, -14], "bend": 10}],
+  "head":     [{"t": 0.0, "rot": [-20, 0, 6]}, {"t": 0.5, "rot": [-20, 0, -6]}],
+  "rightLeg": [{"t": 0.0, "rot": [-20, 0, 8], "bend": 30}, {"t": 0.5, "rot": [0, 0, 8], "bend": 4}],
+  "leftLeg":  [{"t": 0.0, "rot": [0, 0, -8], "bend": 4}, {"t": 0.5, "rot": [-20, 0, -8], "bend": 30}]}}

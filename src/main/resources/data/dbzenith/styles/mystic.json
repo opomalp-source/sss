@@ -1,3 +1,3 @@
 {"master": "gohan", "color": "#8A4AD0",
- "slots": {"idle": "style_gohan_idle", "hover": "style_gohan_hover", "flight": "style_gohan_flight", "charge": "style_gohan_charge", "fight_stance": "style_gohan_fight", "fight_steps": "style_gohan_steps"},
+ "slots": {"idle": "style_gohan_idle", "walk": "style_gohan_walk", "hover": "style_gohan_hover", "flight": "style_gohan_flight", "charge": "style_gohan_charge", "fight_stance": "style_gohan_fight", "fight_steps": "style_gohan_steps"},
  "requirements": {"battle_power": 20000, "affinity": 5, "training_minutes": 10, "items": [{"item": "minecraft:book", "count": 4}]}}

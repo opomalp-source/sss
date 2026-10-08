@@ -1,5 +1,10 @@
-{"_doc": "Majin Buu: floating cross-legged, hands on the knees.", "base": "style_piccolo_hover", "speed": 1.6,
+{"_doc": "Majin Buu: sitting cross-legged on nothing, hands on his knees, rocking happily side to side.",
+ "sync": "time", "length": 40, "loop": true,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [-44, 0, 10], "bend": 30}],
-  "leftArm":  [{"t": 0.0, "rot": [-44, 0, -10], "bend": 30}],
-  "head":     [{"t": 0.0, "rot": [-4, 0, 6]}, {"t": 0.5, "rot": [-4, 0, -6]}]}}
+  "rightLeg": [{"t": 0.0, "rot": [-86, 28, 10], "bend": 116}],
+  "leftLeg":  [{"t": 0.0, "rot": [-86, -28, -10], "bend": 116}],
+  "rightArm": [{"t": 0.0, "rot": [-46, -6, 14], "bend": 30}],
+  "leftArm":  [{"t": 0.0, "rot": [-46, 6, -14], "bend": 30}],
+  "torso":    [{"t": 0.0, "rot": [6, 0, 0]}],
+  "head":     [{"t": 0.0, "rot": [-4, 0, 8]}, {"t": 0.5, "rot": [-4, 0, -8]}],
+  "body":     [{"t": 0.0, "pos": [0, 0.3, 0], "rot": [0, 0, -6]}, {"t": 0.5, "pos": [0, -0.6, 0], "rot": [0, 0, 6]}]}}

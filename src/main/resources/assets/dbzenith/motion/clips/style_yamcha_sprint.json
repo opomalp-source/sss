@@ -1,1 +1,2 @@
-{"_doc": "Yamcha: running like a wolf, low and bounding.", "base": "lope", "speed": 1.1}
+{"_doc": "Yamcha: running like a wolf, low and bounding, hands clawed.", "base": "lope", "speed": 1.1,
+ "bones": {"head": [{"t": 0.0, "rot": [-20, 0, 0]}]}}

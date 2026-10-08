@@ -1,0 +1,5 @@
+{"_doc": "Gohan: an easy, natural walk with a little hip sway and a modest arm swing.", "base": "walk",
+ "bones": {
+  "rightArm": [{"t": 0.00, "rot": [18, 0, 5], "bend": 10}, {"t": 0.25, "rot": [2, 0, 5], "bend": 12}, {"t": 0.50, "rot": [-18, 0, 4], "bend": 18}, {"t": 0.75, "rot": [0, 0, 5], "bend": 12}],
+  "torso":    [{"t": 0.00, "rot": [1, -5, 2]}, {"t": 0.25, "rot": [1, 0, 0]}, {"t": 0.50, "rot": [1, 5, -2]}, {"t": 0.75, "rot": [1, 0, 0]}],
+  "body":     [{"t": 0.00, "pos": [-0.3, 0.3, 0]}, {"t": 0.25, "pos": [0, -0.3, 0]}, {"t": 0.50, "pos": [0.3, 0.3, 0]}, {"t": 0.75, "pos": [0, -0.3, 0]}]}}

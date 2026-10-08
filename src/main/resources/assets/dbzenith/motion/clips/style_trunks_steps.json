@@ -1,5 +1,7 @@
-{"_doc": "Future Trunks: moving with the hands on the hilt.", "base": "fight_walk",
+{"_doc": "Future Trunks: careful sliding steps with the blade kept up.", "sync": "stride", "loop": true, "symmetric": true, "stride": 1.8,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [-150, -10, 18], "bend": 96}],
-  "leftArm":  [{"t": 0.0, "rot": [-128, 34, -6], "bend": 112}],
-  "torso":    [{"t": 0.0, "rot": [8, -22, 0]}]}}
+  "rightLeg": [{"t": 0.00, "rot": [-20, 0, 10], "bend": 30}, {"t": 0.30, "rot": [0, 0, 10], "bend": 26}, {"t": 0.50, "rot": [18, 0, 10], "bend": 30}, {"t": 0.70, "rot": [6, 0, 10], "bend": 46}],
+  "rightArm": [{"t": 0.0, "rot": [-96, -34, 8], "bend": 54}],
+  "leftArm":  [{"t": 0.0, "rot": [-88, 30, -8], "bend": 70}],
+  "torso":    [{"t": 0.0, "rot": [8, -24, 0]}],
+  "body":     [{"t": 0.00, "pos": [0, 1.5, 0]}, {"t": 0.25, "pos": [0, 1.1, 0]}, {"t": 0.50, "pos": [0, 1.5, 0]}, {"t": 0.75, "pos": [0, 1.1, 0]}]}}

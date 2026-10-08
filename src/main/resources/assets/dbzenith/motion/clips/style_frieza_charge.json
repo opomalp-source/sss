@@ -1,5 +1,10 @@
-{"_doc": "Frieza: one finger raised to the sky gathering a Supernova, the other hand behind the back.", "base": "charge",
+{"_doc": "Frieza: one finger raised straight to the sky gathering a Supernova, the other hand still behind his back, perfectly calm.",
+ "sync": "time", "length": 30, "loop": true,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [-176, 0, -4], "bend": 0}, {"t": 0.5, "rot": [-177, 0, -4], "bend": 2}],
-  "leftArm":  [{"t": 0.0, "rot": [24, -28, -6], "bend": 70}],
-  "head":     [{"t": 0.0, "rot": [-8, 0, 0]}]}}
+  "rightArm": [{"t": 0.0, "rot": [-178, 0, -4], "bend": 0}, {"t": 0.5, "rot": [-176, 0, -4], "bend": 2}],
+  "leftArm":  [{"t": 0.0, "rot": [35, -30, 10], "bend": 60}],
+  "torso":    [{"t": 0.0, "rot": [-6, 0, 0]}],
+  "head":     [{"t": 0.0, "rot": [-6, 0, 4]}],
+  "rightLeg": [{"t": 0.0, "rot": [2, 0, 2], "bend": 0}],
+  "leftLeg":  [{"t": 0.0, "rot": [-4, 4, -2], "bend": 8}],
+  "body":     [{"t": 0.0, "pos": [0, 0, 0]}, {"t": 0.5, "pos": [0, -0.1, 0]}]}}

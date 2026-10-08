@@ -1,10 +1,10 @@
-{"_doc": "Krillin: the classic Turtle School stance, the lead palm out at chest height, the rear hand cocked by the ribs, crouched.",
- "sync": "time", "length": 20, "loop": true,
+{"_doc": "Krillin: the classic Turtle School stance, a deep front stance, the lead palm thrust out at shoulder height, the rear hand chambered at the hip palm up, weight forward.",
+ "sync": "time", "length": 24, "loop": true,
  "bones": {
-  "torso":    [{"t": 0.0, "rot": [8, -24, 0]}, {"t": 0.5, "rot": [9, -23, 0]}],
-  "head":     [{"t": 0.0, "rot": [0, 16, 0]}],
-  "leftArm":  [{"t": 0.0, "rot": [-84, 16, -8], "bend": 24}, {"t": 0.5, "rot": [-80, 16, -8], "bend": 28}],
-  "rightArm": [{"t": 0.0, "rot": [-22, -14, 18], "bend": 116}, {"t": 0.5, "rot": [-20, -14, 18], "bend": 118}],
-  "rightLeg": [{"t": 0.0, "rot": [20, 0, 10], "bend": 28}, {"t": 0.5, "rot": [22, 0, 10], "bend": 34}],
-  "leftLeg":  [{"t": 0.0, "rot": [-20, 0, -8], "bend": 28}, {"t": 0.5, "rot": [-22, 0, -8], "bend": 34}],
-  "body":     [{"t": 0.0, "pos": [0, 1.5, 0]}, {"t": 0.5, "pos": [0, 2.0, 0]}]}}
+  "torso":    [{"t": 0.0, "rot": [6, -30, 0]}, {"t": 0.5, "rot": [7, -29, 0]}],
+  "head":     [{"t": 0.0, "rot": [-4, 24, 0]}],
+  "leftArm":  [{"t": 0.0, "rot": [-90, 22, -6], "bend": 14}, {"t": 0.5, "rot": [-88, 22, -6], "bend": 18}],
+  "rightArm": [{"t": 0.0, "rot": [20, -20, 18], "bend": 104}, {"t": 0.5, "rot": [21, -20, 18], "bend": 106}],
+  "rightLeg": [{"t": 0.0, "rot": [30, 0, 10], "bend": 6}],
+  "leftLeg":  [{"t": 0.0, "rot": [-34, 0, -6], "bend": 44}, {"t": 0.5, "rot": [-35, 0, -6], "bend": 48}],
+  "body":     [{"t": 0.0, "pos": [0, 2.0, 0]}, {"t": 0.5, "pos": [0, 2.3, 0]}]}}

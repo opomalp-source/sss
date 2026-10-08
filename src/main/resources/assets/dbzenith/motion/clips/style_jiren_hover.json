@@ -1,1 +1,9 @@
-{"_doc": "Jiren: arms crossed in the air, upright and still.", "base": "style_vegeta_hover", "speed": 0.6}
+{"_doc": "Jiren: suspended upright with the arms folded, legs together, unmoving.",
+ "sync": "time", "length": 160, "loop": true,
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-20, -48, 14], "bend": 114}],
+  "leftArm":  [{"t": 0.0, "rot": [-26, 48, -14], "bend": 110}],
+  "rightLeg": [{"t": 0.0, "rot": [2, 0, 2], "bend": 2}],
+  "leftLeg":  [{"t": 0.0, "rot": [2, 0, -2], "bend": 2}],
+  "head":     [{"t": 0.0, "rot": [6, 0, 0]}],
+  "body":     [{"t": 0.0, "pos": [0, 0, 0]}, {"t": 0.5, "pos": [0, -0.3, 0]}]}}

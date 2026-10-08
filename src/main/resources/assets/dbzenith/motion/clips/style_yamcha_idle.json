@@ -1,2 +1,10 @@
-{"_doc": "Yamcha (Wolf Fang): easy-going, one hand behind the head.", "base": "idle",
- "bones": {"rightArm": [{"t": 0.0, "rot": [-150, -40, 10], "bend": 130}, {"t": 0.45, "rot": [-151, -40, 10], "bend": 130}]}}
+{"_doc": "Yamcha (Wolf Fang): cocky and relaxed, one hand behind his head, the other on his hip, weight on one leg, a confident grin.",
+ "sync": "time", "length": 90, "loop": true,
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-160, 40, 22], "bend": 128}, {"t": 0.5, "rot": [-158, 40, 22], "bend": 130}],
+  "leftArm":  [{"t": 0.0, "rot": [5, 60, -45], "bend": 100}],
+  "torso":    [{"t": 0.0, "rot": [-2, -6, 3]}, {"t": 0.5, "rot": [-3, -6, 3]}],
+  "head":     [{"t": 0.0, "rot": [-2, 8, -4]}],
+  "rightLeg": [{"t": 0.0, "rot": [-6, 0, 4], "bend": 14}],
+  "leftLeg":  [{"t": 0.0, "rot": [0, 0, -6], "bend": 0}],
+  "body":     [{"t": 0.0, "pos": [0.6, 0, 0]}, {"t": 0.5, "pos": [0.6, -0.2, 0]}]}}

@@ -1,5 +1,7 @@
-{"_doc": "Broly: stomping in, arms wide.", "base": "fight_walk", "speed": 0.9,
+{"_doc": "Broly: lumbering, stomping steps, arms spread.", "sync": "stride", "loop": true, "symmetric": true, "stride": 2.0,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [-34, 0, 40], "bend": 50}],
-  "leftArm":  [{"t": 0.0, "rot": [-30, 0, -42], "bend": 54}],
-  "torso":    [{"t": 0.0, "rot": [20, -4, 0]}]}}
+  "rightLeg": [{"t": 0.00, "rot": [-24, 0, 16], "bend": 46}, {"t": 0.30, "rot": [0, 0, 16], "bend": 40}, {"t": 0.50, "rot": [20, 0, 16], "bend": 46}, {"t": 0.70, "rot": [6, 0, 16], "bend": 66}],
+  "rightArm": [{"t": 0.0, "rot": [-40, 0, 46], "bend": 58}],
+  "leftArm":  [{"t": 0.0, "rot": [-36, 0, -50], "bend": 62}],
+  "torso":    [{"t": 0.00, "rot": [22, -4, -6]}, {"t": 0.50, "rot": [22, -4, 6]}],
+  "body":     [{"t": 0.00, "pos": [-0.8, 2.8, 0]}, {"t": 0.25, "pos": [0, 2.2, 0]}, {"t": 0.50, "pos": [0.8, 2.8, 0]}, {"t": 0.75, "pos": [0, 2.2, 0]}]}}

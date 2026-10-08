@@ -1,10 +1,10 @@
-{"_doc": "Hit: the hands stay in the pockets even in a fight, side-on, knees just bent.",
- "sync": "time", "length": 48, "loop": true,
+{"_doc": "Hit: still the hands in his pockets, turned side-on, knees just soft, swaying a hair forward and back, waiting for the moment to skip.",
+ "sync": "time", "length": 50, "loop": true,
  "bones": {
-  "torso":    [{"t": 0.0, "rot": [2, -18, 0]}],
-  "head":     [{"t": 0.0, "rot": [0, 14, 0]}, {"t": 0.5, "rot": [1, 14, 0]}],
-  "rightArm": [{"t": 0.0, "rot": [8, -8, 6], "bend": 30}],
-  "leftArm":  [{"t": 0.0, "rot": [8, 8, -6], "bend": 30}],
-  "rightLeg": [{"t": 0.0, "rot": [12, 0, 6], "bend": 14}],
-  "leftLeg":  [{"t": 0.0, "rot": [-12, 0, -6], "bend": 16}],
-  "body":     [{"t": 0.0, "pos": [0, 0.5, 0]}, {"t": 0.5, "pos": [0, 0.55, 0]}]}}
+  "rightArm": [{"t": 0.0, "rot": [6, -22, 8], "bend": 40}],
+  "leftArm":  [{"t": 0.0, "rot": [6, 22, -8], "bend": 40}],
+  "torso":    [{"t": 0.0, "rot": [2, -24, 0]}, {"t": 0.5, "rot": [4, -24, 0]}],
+  "head":     [{"t": 0.0, "rot": [0, 20, 0]}],
+  "rightLeg": [{"t": 0.0, "rot": [14, 0, 8], "bend": 16}],
+  "leftLeg":  [{"t": 0.0, "rot": [-14, 0, -6], "bend": 18}],
+  "body":     [{"t": 0.0, "pos": [0, 0.6, -0.3]}, {"t": 0.5, "pos": [0, 0.6, 0.3]}]}}

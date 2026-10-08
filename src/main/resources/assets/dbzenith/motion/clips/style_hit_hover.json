@@ -1,2 +1,9 @@
-{"_doc": "Hit: still in the air, hands in the pockets, legs straight.", "base": "style_android17_hover",
- "bones": {"rightLeg": [{"t": 0.0, "rot": [2, 0, 1], "bend": 2}], "leftLeg": [{"t": 0.0, "rot": [2, 0, -1], "bend": 2}]}}
+{"_doc": "Hit: hanging motionless in the air, hands in pockets, legs straight.",
+ "sync": "time", "length": 160, "loop": true,
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [6, -22, 8], "bend": 40}],
+  "leftArm":  [{"t": 0.0, "rot": [6, 22, -8], "bend": 40}],
+  "rightLeg": [{"t": 0.0, "rot": [2, 0, 2], "bend": 2}],
+  "leftLeg":  [{"t": 0.0, "rot": [2, 0, -2], "bend": 2}],
+  "head":     [{"t": 0.0, "rot": [4, 0, 0]}],
+  "body":     [{"t": 0.0, "pos": [0, 0, 0]}, {"t": 0.5, "pos": [0, -0.4, 0]}]}}

@@ -28,7 +28,7 @@ import java.util.Iterator;
  */
 @Mod.EventBusSubscriber(modid = DBZenith.MOD_ID, value = Dist.CLIENT)
 public final class NpcActions {
-    private static final int MOTION = 1000, STANCE = 1200, ACTION = 1500;
+    private static final int MOTION = 1000, STANCE = 1200, ACTION = 1500, RIG = 9000;
 
     private static final class Track {
         final LivingEntity entity;
@@ -44,6 +44,7 @@ public final class NpcActions {
             this.entity = entity;
             stack.addAnimLayer(STANCE, stance);
             stack.addAnimLayer(ACTION, action);
+            stack.addAnimLayer(RIG, new RigFix(() -> stack));                 // keeps the upper body on the hips
         }
     }
 

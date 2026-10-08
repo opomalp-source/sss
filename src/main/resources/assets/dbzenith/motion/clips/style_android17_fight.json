@@ -1,10 +1,10 @@
-{"_doc": "Android 17: a casual, low guard, the lead hand loose in front, the other at the waist.",
- "sync": "time", "length": 34, "loop": true,
+{"_doc": "Android 17: a loose, low guard, the lead hand hanging open in front, the other fist relaxed by the hip, shifting easily on his feet.",
+ "sync": "time", "length": 30, "loop": true,
  "bones": {
-  "torso":    [{"t": 0.0, "rot": [4, -12, 0]}, {"t": 0.5, "rot": [5, -12, 0]}],
-  "head":     [{"t": 0.0, "rot": [0, 8, 2]}],
-  "leftArm":  [{"t": 0.0, "rot": [-44, 12, -10], "bend": 40}, {"t": 0.5, "rot": [-42, 12, -10], "bend": 42}],
-  "rightArm": [{"t": 0.0, "rot": [-18, -10, 14], "bend": 64}, {"t": 0.5, "rot": [-16, -10, 14], "bend": 66}],
-  "rightLeg": [{"t": 0.0, "rot": [10, 0, 6], "bend": 14}],
-  "leftLeg":  [{"t": 0.0, "rot": [-10, 0, -6], "bend": 16}],
-  "body":     [{"t": 0.0, "pos": [0, 0.6, 0]}, {"t": 0.5, "pos": [0, 0.8, 0]}]}}
+  "torso":    [{"t": 0.0, "rot": [6, -14, 0]}, {"t": 0.5, "rot": [6, -12, 0]}],
+  "head":     [{"t": 0.0, "rot": [-2, 10, 3]}],
+  "leftArm":  [{"t": 0.0, "rot": [-46, 14, -12], "bend": 36}, {"t": 0.5, "rot": [-42, 14, -12], "bend": 40}],
+  "rightArm": [{"t": 0.0, "rot": [-14, -12, 16], "bend": 70}, {"t": 0.5, "rot": [-12, -12, 16], "bend": 72}],
+  "rightLeg": [{"t": 0.0, "rot": [10, 0, 8], "bend": 16}],
+  "leftLeg":  [{"t": 0.0, "rot": [-12, 0, -6], "bend": 18}],
+  "body":     [{"t": 0.0, "pos": [-0.3, 0.7, 0]}, {"t": 0.5, "pos": [0.3, 0.9, 0]}]}}

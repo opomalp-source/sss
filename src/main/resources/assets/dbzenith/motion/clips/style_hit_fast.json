@@ -1,4 +1,4 @@
-{"_doc": "Hit: even flat out, the hands stay in the pockets.", "base": "fast",
+{"_doc": "Hit: even flat out, the hands stay in his pockets.", "base": "fast",
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [8, -8, 6], "bend": 30}],
-  "leftArm":  [{"t": 0.0, "rot": [8, 8, -6], "bend": 30}]}}
+  "rightArm": [{"t": 0.0, "rot": [6, -22, 8], "bend": 40}],
+  "leftArm":  [{"t": 0.0, "rot": [6, 22, -8], "bend": 40}]}}

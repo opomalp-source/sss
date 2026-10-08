@@ -1,0 +1,8 @@
+{"_doc": "Krillin: both fists out ahead, tucked in tight, legs together.",
+ "sync": "time", "length": 16, "loop": true,
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-150, -12, -4], "bend": 24}, {"t": 0.5, "rot": [-152, -12, -4], "bend": 22}],
+  "leftArm":  [{"t": 0.0, "rot": [-152, 12, 4], "bend": 22}, {"t": 0.5, "rot": [-150, 12, 4], "bend": 24}],
+  "rightLeg": [{"t": 0.0, "rot": [6, 0, 1], "bend": 10}],
+  "leftLeg":  [{"t": 0.0, "rot": [8, 0, -1], "bend": 14}],
+  "head":     [{"t": 0.0, "rot": [-10, 0, 0]}]}}

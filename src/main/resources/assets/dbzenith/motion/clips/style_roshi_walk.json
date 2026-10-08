@@ -1,6 +1,8 @@
-{"_doc": "Master Roshi: a short, stooped shuffle with the hands behind the back.", "base": "walk", "speed": 1.3,
+{"_doc": "Master Roshi: a short, stooped shuffle, hands behind his back, little steps and a nodding head.", "sync": "stride", "loop": true, "symmetric": true, "stride": 1.4,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [24, 28, 6], "bend": 70}],
-  "leftArm":  [{"t": 0.0, "rot": [24, -28, -6], "bend": 70}],
-  "head":     [{"t": 0.0, "rot": [-14, 0, 0]}]},
- "offset": {"torso": {"rot": [18, 0, 0]}, "body": {"pos": [0, 0.8, 0]}}}
+  "rightLeg": [{"t": 0.00, "rot": [-16, 0, 3], "bend": 12}, {"t": 0.30, "rot": [-2, 0, 3], "bend": 8}, {"t": 0.50, "rot": [14, 0, 3], "bend": 10}, {"t": 0.70, "rot": [4, 0, 3], "bend": 26}],
+  "rightArm": [{"t": 0.0, "rot": [35, 30, -10], "bend": 60}],
+  "leftArm":  [{"t": 0.0, "rot": [35, -30, 10], "bend": 60}],
+  "torso":    [{"t": 0.00, "rot": [22, -3, 2]}, {"t": 0.50, "rot": [22, 3, -2]}],
+  "head":     [{"t": 0.00, "rot": [-20, 0, 0]}, {"t": 0.25, "rot": [-16, 0, 0]}, {"t": 0.50, "rot": [-20, 0, 0]}, {"t": 0.75, "rot": [-16, 0, 0]}],
+  "body":     [{"t": 0.00, "pos": [0, 0.9, 0]}, {"t": 0.25, "pos": [0, 0.5, 0]}, {"t": 0.50, "pos": [0, 0.9, 0]}, {"t": 0.75, "pos": [0, 0.5, 0]}]}}

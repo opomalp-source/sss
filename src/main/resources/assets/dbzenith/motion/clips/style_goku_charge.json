@@ -1,4 +1,10 @@
-{"_doc": "Goku: powering up with fists clenched, arms angled down and out, knees bent.", "base": "charge",
+{"_doc": "Goku: a deep horse stance, fists clenched and pulled back to the hips, chest out, head thrown back with a yell; the whole body trembles.",
+ "sync": "time", "length": 6, "loop": true, "ease": "linear",
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [6, 0, 34], "bend": 50}, {"t": 0.5, "rot": [6, 0, 30], "bend": 52}],
-  "leftArm":  [{"t": 0.0, "rot": [6, 0, -30], "bend": 52}, {"t": 0.5, "rot": [6, 0, -34], "bend": 50}]}}
+  "body":     [{"t": 0.0, "pos": [0.25, 3.0, 0]}, {"t": 0.25, "pos": [-0.25, 3.1, 0]}, {"t": 0.5, "pos": [0.25, 3.0, 0]}, {"t": 0.75, "pos": [-0.25, 3.1, 0]}],
+  "torso":    [{"t": 0.0, "rot": [-6, 0, 0]}],
+  "head":     [{"t": 0.0, "rot": [-24, 2, 0]}, {"t": 0.5, "rot": [-23, -2, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [22, 0, 18], "bend": 96}, {"t": 0.5, "rot": [22, 0, 16], "bend": 98}],
+  "leftArm":  [{"t": 0.0, "rot": [22, 0, -16], "bend": 98}, {"t": 0.5, "rot": [22, 0, -18], "bend": 96}],
+  "rightLeg": [{"t": 0.0, "rot": [-10, 0, 24], "bend": 46}],
+  "leftLeg":  [{"t": 0.0, "rot": [-10, 0, -24], "bend": 46}]}}

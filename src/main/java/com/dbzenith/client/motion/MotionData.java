@@ -55,6 +55,11 @@ public final class MotionData extends SimplePreparableReloadListener<MotionData.
         return version;
     }
 
+    /** Every clip id (dev: the pose sheet). */
+    public static java.util.Set<String> clipIds() {
+        return current.clips.keySet();
+    }
+
     public static Clip clip(String id) {
         return id == null ? null : current.clips.get(id);
     }

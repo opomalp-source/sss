@@ -371,12 +371,27 @@ public final class MotionEngine {
 
     // ------------------------------------------------------------------ sampling
 
+    /** Dev, the pose sheet: a clip forced onto the local player's figure at a phase, with a whole-figure pitch (flight). */
+    public static Clip devClip;
+    public static float devPhase, devPitch;
+    /** The figure the pose sheet forces (the local player when null). */
+    public static LivingEntity devEntity;
+
     /**
      * Fills {@code m.pose} for this frame: the clips cross-faded, the procedural layers on top, and the rig coupled (the
      * arms and head ride on the torso's lean and twist). Values in degrees and pixels; the whole figure's offset ("body"
      * position) already includes the pivot correction, in blocks (y up).
      */
     public static Pose sample(Motion m, float pt) {
+        if (devClip != null && m.entity == (devEntity != null ? devEntity : net.minecraft.client.Minecraft.getInstance().player)) {   // the pose sheet: no caching
+            Pose p = m.pose;
+            p.zero();
+            devClip.sample(devPhase, p, 1f);
+            p.add(Bone.BODY, Bone.PITCH, devPitch);
+            couple(m, p, pt);
+            m.sampledFrame = Long.MIN_VALUE;
+            return p;
+        }
         long frame = m.entity.level().getGameTime();
         if (m.sampledFrame == frame && m.sampledAt == pt) return m.pose;
         m.sampledFrame = frame;
@@ -473,18 +488,8 @@ public final class MotionEngine {
      */
     private static void couple(Motion m, Pose p, float pt) {
         float lean = p.get(Bone.TORSO, Bone.PITCH), twist = p.get(Bone.TORSO, Bone.YAW);
-        float lr = lean * Mth.DEG_TO_RAD, tr = twist * Mth.DEG_TO_RAD;
-        float neckY = 12f - 12f * Mth.cos(lr), neckZ = -12f * Mth.sin(lr);         // the neck swings forward and down
-        float shY = 12f - 10f * Mth.cos(lr) - 2f, shZ = -10f * Mth.sin(lr);
-        p.add(Bone.TORSO, Bone.Y, neckY);
-        p.add(Bone.TORSO, Bone.Z, neckZ);
-        p.add(Bone.HEAD, Bone.Y, neckY);
-        p.add(Bone.HEAD, Bone.Z, neckZ);
+        // the shoulders turn with the torso; RigFix (the stack's last layer) moves them, the neck and the hips with it
         for (Bone arm : ARMS) {
-            float x0 = arm == Bone.RIGHT_ARM ? -5f : 5f;
-            p.add(arm, Bone.Y, shY);
-            p.add(arm, Bone.Z, shZ + x0 * Mth.sin(tr));
-            p.add(arm, Bone.X, x0 * (Mth.cos(tr) - 1f));
             p.add(arm, Bone.PITCH, lean);
             p.add(arm, Bone.YAW, twist);
         }

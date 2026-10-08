@@ -1,10 +1,10 @@
-{"_doc": "Cell: a wide, open guard, both hands open and spread, inviting the attack.",
- "sync": "time", "length": 30, "loop": true,
+{"_doc": "Cell: a wide, open-handed guard, both arms spread with the palms out as if inviting the attack, head cocked, a small rocking sway.",
+ "sync": "time", "length": 32, "loop": true,
  "bones": {
-  "torso":    [{"t": 0.0, "rot": [6, -10, 0]}, {"t": 0.5, "rot": [7, -10, 0]}],
-  "head":     [{"t": 0.0, "rot": [-2, 8, 4]}],
-  "rightArm": [{"t": 0.0, "rot": [-50, -14, 32], "bend": 60}, {"t": 0.5, "rot": [-48, -14, 32], "bend": 62}],
-  "leftArm":  [{"t": 0.0, "rot": [-56, 14, -32], "bend": 58}, {"t": 0.5, "rot": [-54, 14, -32], "bend": 60}],
-  "rightLeg": [{"t": 0.0, "rot": [14, 0, 14], "bend": 24}],
-  "leftLeg":  [{"t": 0.0, "rot": [-14, 0, -14], "bend": 26}],
-  "body":     [{"t": 0.0, "pos": [0, 1.2, 0]}, {"t": 0.5, "pos": [0, 1.4, 0]}]}}
+  "torso":    [{"t": 0.0, "rot": [4, -8, -3]}, {"t": 0.5, "rot": [4, -8, 3]}],
+  "head":     [{"t": 0.0, "rot": [-4, 6, 8]}, {"t": 0.5, "rot": [-4, 6, 6]}],
+  "rightArm": [{"t": 0.0, "rot": [-54, -10, 40], "bend": 50}, {"t": 0.5, "rot": [-52, -10, 42], "bend": 54}],
+  "leftArm":  [{"t": 0.0, "rot": [-58, 10, -40], "bend": 48}, {"t": 0.5, "rot": [-56, 10, -42], "bend": 52}],
+  "rightLeg": [{"t": 0.0, "rot": [10, 0, 16], "bend": 24}],
+  "leftLeg":  [{"t": 0.0, "rot": [-12, 0, -16], "bend": 26}],
+  "body":     [{"t": 0.0, "pos": [-0.4, 1.4, 0]}, {"t": 0.5, "pos": [0.4, 1.4, 0]}]}}

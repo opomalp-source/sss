@@ -1,2 +1,10 @@
-{"_doc": "Tien (Crane School): upright and stern, fists at the sides.", "base": "idle", "speed": 0.8,
- "offset": {"torso": {"rot": [-2, 0, 0]}, "rightArm": {"rot": [0, 0, 2], "bend": 6}, "leftArm": {"rot": [0, 0, -2], "bend": 6}}}
+{"_doc": "Tien (Crane School): a soldier's discipline; heels together, back straight, fists closed at his sides, chin level, not a twitch.",
+ "sync": "time", "length": 120, "loop": true,
+ "bones": {
+  "torso":    [{"t": 0.0, "rot": [-3, 0, 0]}, {"t": 0.5, "rot": [-4, 0, 0]}],
+  "head":     [{"t": 0.0, "rot": [-2, 0, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [2, 0, 3], "bend": 4}],
+  "leftArm":  [{"t": 0.0, "rot": [2, 0, -3], "bend": 4}],
+  "rightLeg": [{"t": 0.0, "rot": [0, 0, 1], "bend": 0}],
+  "leftLeg":  [{"t": 0.0, "rot": [0, 0, -1], "bend": 0}],
+  "body":     [{"t": 0.0, "pos": [0, 0, 0]}, {"t": 0.5, "pos": [0, -0.15, 0]}]}}

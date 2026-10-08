@@ -1,10 +1,10 @@
-{"_doc": "Vegeta: low and coiled, leaning in, both fists up close to the face.",
- "sync": "time", "length": 26, "loop": true,
+{"_doc": "Vegeta: coiled low with his weight forward, elbows tucked and both fists close in front of his face, shoulders hunched, glaring through them.",
+ "sync": "time", "length": 22, "loop": true,
  "bones": {
-  "torso":    [{"t": 0.0, "rot": [16, -18, 0]}, {"t": 0.5, "rot": [17, -17, 0]}],
-  "head":     [{"t": 0.0, "rot": [-14, 10, 0]}],
-  "rightArm": [{"t": 0.0, "rot": [-62, -18, 14], "bend": 120}, {"t": 0.5, "rot": [-60, -18, 15], "bend": 122}],
-  "leftArm":  [{"t": 0.0, "rot": [-76, 18, -12], "bend": 112}, {"t": 0.5, "rot": [-74, 18, -12], "bend": 114}],
-  "rightLeg": [{"t": 0.0, "rot": [20, 0, 12], "bend": 34}, {"t": 0.5, "rot": [21, 0, 12], "bend": 38}],
-  "leftLeg":  [{"t": 0.0, "rot": [-22, 0, -10], "bend": 36}, {"t": 0.5, "rot": [-23, 0, -10], "bend": 40}],
-  "body":     [{"t": 0.0, "pos": [0, 2.0, 0]}, {"t": 0.5, "pos": [0, 2.3, 0]}]}}
+  "torso":    [{"t": 0.0, "rot": [20, -18, 0]}, {"t": 0.5, "rot": [21, -17, 0]}],
+  "head":     [{"t": 0.0, "rot": [-20, 12, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [-34, -22, 8], "bend": 132}, {"t": 0.5, "rot": [-32, -22, 8], "bend": 134}],
+  "leftArm":  [{"t": 0.0, "rot": [-52, 20, -6], "bend": 124}, {"t": 0.5, "rot": [-50, 20, -6], "bend": 126}],
+  "rightLeg": [{"t": 0.0, "rot": [24, 0, 14], "bend": 42}, {"t": 0.5, "rot": [25, 0, 14], "bend": 46}],
+  "leftLeg":  [{"t": 0.0, "rot": [-28, 0, -10], "bend": 46}, {"t": 0.5, "rot": [-29, 0, -10], "bend": 50}],
+  "body":     [{"t": 0.0, "pos": [0, 2.8, 0]}, {"t": 0.5, "pos": [0, 3.1, 0]}]}}

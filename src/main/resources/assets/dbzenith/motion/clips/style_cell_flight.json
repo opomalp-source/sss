@@ -1,0 +1,8 @@
+{"_doc": "Cell: flying with the arms spread a little behind him like folded wings, legs together.",
+ "sync": "time", "length": 20, "loop": true,
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [30, 0, 30], "bend": 10}, {"t": 0.5, "rot": [32, 0, 32], "bend": 12}],
+  "leftArm":  [{"t": 0.0, "rot": [32, 0, -32], "bend": 12}, {"t": 0.5, "rot": [30, 0, -30], "bend": 10}],
+  "rightLeg": [{"t": 0.0, "rot": [4, 0, 1], "bend": 4}],
+  "leftLeg":  [{"t": 0.0, "rot": [4, 0, -1], "bend": 4}],
+  "head":     [{"t": 0.0, "rot": [-10, 0, 0]}]}}

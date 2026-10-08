@@ -1,5 +1,10 @@
-{"_doc": "Broly: roaring, arms thrown out wide, head back.", "base": "charge",
+{"_doc": "Broly: a bellowing roar, arms flung wide and up, chest thrown out, head back, legs braced.",
+ "sync": "time", "length": 5, "loop": true, "ease": "linear",
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [-14, 0, 62], "bend": 30}, {"t": 0.5, "rot": [-14, 0, 58], "bend": 34}],
-  "leftArm":  [{"t": 0.0, "rot": [-14, 0, -58], "bend": 34}, {"t": 0.5, "rot": [-14, 0, -62], "bend": 30}],
-  "head":     [{"t": 0.0, "rot": [-28, 3, 0]}, {"t": 0.5, "rot": [-27, -3, 0]}]}}
+  "body":     [{"t": 0.0, "pos": [0.4, 2.0, 0]}, {"t": 0.5, "pos": [-0.4, 2.0, 0]}],
+  "torso":    [{"t": 0.0, "rot": [-14, 0, 0]}],
+  "head":     [{"t": 0.0, "rot": [-36, 3, 0]}, {"t": 0.5, "rot": [-35, -3, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [-40, 0, 70], "bend": 30}, {"t": 0.5, "rot": [-40, 0, 66], "bend": 34}],
+  "leftArm":  [{"t": 0.0, "rot": [-40, 0, -66], "bend": 34}, {"t": 0.5, "rot": [-40, 0, -70], "bend": 30}],
+  "rightLeg": [{"t": 0.0, "rot": [-6, 0, 22], "bend": 30}],
+  "leftLeg":  [{"t": 0.0, "rot": [-6, 0, -22], "bend": 30}]}}

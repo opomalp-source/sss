@@ -33,7 +33,7 @@ public final class MotionAnimation implements IAnimation {
 
     @Override
     public boolean isActive() {
-        return MotionEngine.enabled() && (motion.engine > 0.001f || motion.engineO > 0.001f);
+        return MotionEngine.enabled() && (motion.engine > 0.001f || motion.engineO > 0.001f || MotionEngine.devClip != null);
     }
 
     @Override
@@ -45,7 +45,7 @@ public final class MotionAnimation implements IAnimation {
             if (cur.animation == null) cur.animation = this;
         }
         pt = tickDelta;
-        weight = motion.engineWeight(tickDelta);
+        weight = MotionEngine.devClip != null && motion.entity == (MotionEngine.devEntity != null ? MotionEngine.devEntity : net.minecraft.client.Minecraft.getInstance().player) ? 1f : motion.engineWeight(tickDelta);
         weight = weight * weight * (3f - 2f * weight);
         pose = MotionEngine.sample(motion, tickDelta);
     }

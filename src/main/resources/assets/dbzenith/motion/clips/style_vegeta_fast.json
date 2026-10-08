@@ -1,2 +1,4 @@
-{"_doc": "Vegeta: flat out with both arms swept back.", "base": "fast",
- "bones": {"rightArm": [{"t": 0.0, "rot": [26, 0, 10], "bend": 6}, {"t": 0.5, "rot": [24, 0, 11], "bend": 6}]}}
+{"_doc": "Vegeta: flat out, both arms swept far back, fists clenched, legs locked.", "base": "fast",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [34, 0, 16], "bend": 4}, {"t": 0.5, "rot": [32, 0, 17], "bend": 4}],
+  "leftArm":  [{"t": 0.0, "rot": [32, 0, -17], "bend": 4}, {"t": 0.5, "rot": [34, 0, -16], "bend": 4}]}}

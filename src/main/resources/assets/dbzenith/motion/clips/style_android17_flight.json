@@ -1,4 +1,8 @@
-{"_doc": "Android 17: flying with the hands in the pockets.", "base": "cruise",
+{"_doc": "Android 17: flying hands in pockets, as relaxed as if he were walking.",
+ "sync": "time", "length": 20, "loop": true,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [8, -8, 6], "bend": 30}],
-  "leftArm":  [{"t": 0.0, "rot": [8, 8, -6], "bend": 30}]}}
+  "rightArm": [{"t": 0.0, "rot": [8, -25, 10], "bend": 45}],
+  "leftArm":  [{"t": 0.0, "rot": [8, 25, -10], "bend": 45}],
+  "rightLeg": [{"t": 0.0, "rot": [6, 0, 1], "bend": 10}],
+  "leftLeg":  [{"t": 0.0, "rot": [10, 0, -1], "bend": 16}],
+  "head":     [{"t": 0.0, "rot": [-10, 0, 0]}]}}

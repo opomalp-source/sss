@@ -1,4 +1,7 @@
-{"_doc": "Majin Buu: a skipping, bouncy walk with the arms swinging wide.", "base": "walk",
+{"_doc": "Majin Buu: a skipping hop, knees high, arms flung out wide with each bounce.", "sync": "stride", "loop": true, "symmetric": true, "stride": 2.4,
  "bones": {
-  "body": [{"t": 0.00, "pos": [0, 0.4, 0]}, {"t": 0.12, "pos": [0, -1.4, 0]}, {"t": 0.30, "pos": [0, 0.6, 0]}, {"t": 0.50, "pos": [0, 0.4, 0]}, {"t": 0.62, "pos": [0, -1.4, 0]}, {"t": 0.80, "pos": [0, 0.6, 0]}]},
- "offset": {"rightArm": {"rot": [0, 0, 14]}, "leftArm": {"rot": [0, 0, -14]}}}
+  "rightLeg": [{"t": 0.00, "rot": [-40, 0, 6], "bend": 50}, {"t": 0.20, "rot": [-20, 0, 6], "bend": 20}, {"t": 0.40, "rot": [10, 0, 6], "bend": 8}, {"t": 0.60, "rot": [16, 0, 6], "bend": 30}, {"t": 0.80, "rot": [-10, 0, 6], "bend": 70}],
+  "rightArm": [{"t": 0.00, "rot": [-30, 0, 40], "bend": 16}, {"t": 0.50, "rot": [20, 0, 24], "bend": 10}],
+  "torso":    [{"t": 0.00, "rot": [-2, -6, 4]}, {"t": 0.50, "rot": [-2, 6, -4]}],
+  "head":     [{"t": 0.00, "rot": [-4, 0, 6]}, {"t": 0.50, "rot": [-4, 0, -6]}],
+  "body":     [{"t": 0.00, "pos": [0, 0.4, 0]}, {"t": 0.15, "pos": [0, -2.2, 0]}, {"t": 0.35, "pos": [0, 0.6, 0]}, {"t": 0.50, "pos": [0, 0.4, 0]}, {"t": 0.65, "pos": [0, -2.2, 0]}, {"t": 0.85, "pos": [0, 0.6, 0]}]}}

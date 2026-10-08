@@ -1,5 +1,7 @@
-{"_doc": "Cell: stepping in with the hands open.", "base": "fight_walk",
+{"_doc": "Cell: stepping in with the arms still open.", "sync": "stride", "loop": true, "symmetric": true, "stride": 2.0,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [-50, -14, 32], "bend": 60}],
-  "leftArm":  [{"t": 0.0, "rot": [-56, 14, -32], "bend": 58}],
-  "torso":    [{"t": 0.0, "rot": [6, -8, 0]}]}}
+  "rightLeg": [{"t": 0.00, "rot": [-20, 0, 12], "bend": 24}, {"t": 0.30, "rot": [0, 0, 12], "bend": 20}, {"t": 0.50, "rot": [18, 0, 12], "bend": 24}, {"t": 0.70, "rot": [6, 0, 12], "bend": 40}],
+  "rightArm": [{"t": 0.0, "rot": [-54, -10, 40], "bend": 50}],
+  "leftArm":  [{"t": 0.0, "rot": [-58, 10, -40], "bend": 48}],
+  "torso":    [{"t": 0.0, "rot": [4, -8, 0]}],
+  "body":     [{"t": 0.00, "pos": [0, 1.4, 0]}, {"t": 0.25, "pos": [0, 1.0, 0]}, {"t": 0.50, "pos": [0, 1.4, 0]}, {"t": 0.75, "pos": [0, 1.0, 0]}]}}

@@ -1,2 +1,6 @@
-{"_doc": "Yamcha: strolling with a hand behind the head.", "base": "walk",
- "bones": {"rightArm": [{"t": 0.0, "rot": [-150, -40, 10], "bend": 130}]}}
+{"_doc": "Yamcha: a swaggering strut with a hand behind his head and a bounce in his shoulders.", "base": "walk",
+ "bones": {
+  "rightArm": [{"t": 0.0, "rot": [-160, 40, 22], "bend": 128}],
+  "leftArm":  [{"t": 0.00, "rot": [-24, 0, -8], "bend": 14}, {"t": 0.50, "rot": [24, 0, -8], "bend": 8}],
+  "torso":    [{"t": 0.00, "rot": [-2, -7, 3]}, {"t": 0.50, "rot": [-2, 7, -3]}],
+  "body":     [{"t": 0.00, "pos": [0, 0.4, 0]}, {"t": 0.12, "pos": [0, 0.8, 0]}, {"t": 0.32, "pos": [0, -0.6, 0]}, {"t": 0.50, "pos": [0, 0.4, 0]}, {"t": 0.62, "pos": [0, 0.8, 0]}, {"t": 0.82, "pos": [0, -0.6, 0]}]}}

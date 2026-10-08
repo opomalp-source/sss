@@ -1,10 +1,10 @@
-{"_doc": "Tien: the crane, standing on one leg with the other knee drawn up, the rear arm raised over the head like a beak, the lead hand low.",
- "sync": "time", "length": 44, "loop": true,
+{"_doc": "Tien: the crane; balanced on one leg with the other knee drawn high, the rear arm raised over the head and bent down like a beak, the lead hand low and open.",
+ "sync": "time", "length": 48, "loop": true,
  "bones": {
-  "torso":    [{"t": 0.0, "rot": [2, -18, 0]}, {"t": 0.5, "rot": [2, -18, 1]}],
-  "head":     [{"t": 0.0, "rot": [0, 14, 0]}],
-  "rightArm": [{"t": 0.0, "rot": [-160, -6, 22], "bend": 70}, {"t": 0.5, "rot": [-158, -6, 22], "bend": 72}],
-  "leftArm":  [{"t": 0.0, "rot": [-46, 12, -10], "bend": 50}, {"t": 0.5, "rot": [-44, 12, -10], "bend": 52}],
-  "leftLeg":  [{"t": 0.0, "rot": [-72, 0, -4], "bend": 104}, {"t": 0.5, "rot": [-70, 0, -4], "bend": 102}],
-  "rightLeg": [{"t": 0.0, "rot": [2, 0, 2], "bend": 10}],
-  "body":     [{"t": 0.0, "pos": [0, 0.5, 0]}, {"t": 0.5, "pos": [0, 0.6, 0]}]}}
+  "torso":    [{"t": 0.0, "rot": [0, -20, 0]}, {"t": 0.5, "rot": [0, -20, 1]}],
+  "head":     [{"t": 0.0, "rot": [0, 16, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [-166, -10, 20], "bend": 76}, {"t": 0.5, "rot": [-164, -10, 20], "bend": 80}],
+  "leftArm":  [{"t": 0.0, "rot": [-40, 14, -16], "bend": 46}, {"t": 0.5, "rot": [-38, 14, -16], "bend": 50}],
+  "leftLeg":  [{"t": 0.0, "rot": [-84, 0, -4], "bend": 110}, {"t": 0.5, "rot": [-82, 0, -4], "bend": 108}],
+  "rightLeg": [{"t": 0.0, "rot": [2, 0, 3], "bend": 12}],
+  "body":     [{"t": 0.0, "pos": [0, 0.7, 0]}, {"t": 0.5, "pos": [0, 0.8, 0]}]}}

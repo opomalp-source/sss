@@ -1,6 +1,9 @@
-{"_doc": "Tien: hovering upright, arms crossed, legs straight.", "base": "hover",
+{"_doc": "Tien: floating upright with the palms pressed together in front of his chest, eyes closed, legs straight.",
+ "sync": "time", "length": 120, "loop": true,
  "bones": {
-  "rightArm": [{"t": 0.0, "rot": [-72, -48, 0], "bend": 112}],
-  "leftArm":  [{"t": 0.0, "rot": [-66, 52, 0], "bend": 108}],
-  "rightLeg": [{"t": 0.0, "rot": [2, 0, 1], "bend": 3}],
-  "leftLeg":  [{"t": 0.0, "rot": [2, 0, -1], "bend": 3}]}}
+  "rightArm": [{"t": 0.0, "rot": [-56, -40, 0], "bend": 70}],
+  "leftArm":  [{"t": 0.0, "rot": [-56, 40, 0], "bend": 70}],
+  "rightLeg": [{"t": 0.0, "rot": [2, 0, 1], "bend": 2}],
+  "leftLeg":  [{"t": 0.0, "rot": [2, 0, -1], "bend": 2}],
+  "head":     [{"t": 0.0, "rot": [6, 0, 0]}],
+  "body":     [{"t": 0.0, "pos": [0, 0.2, 0]}, {"t": 0.5, "pos": [0, -0.6, 0]}]}}

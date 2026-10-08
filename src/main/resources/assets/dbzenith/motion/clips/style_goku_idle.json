@@ -1,2 +1,11 @@
-{"_doc": "Goku (Wild Saiyan): loose and easy, weight rocking from foot to foot, arms hanging free.", "base": "idle_loose", "speed": 0.75,
- "offset": {"torso": {"rot": [-6, 0, 0]}}}
+{"_doc": "Goku (Wild Saiyan): easy and loose, rocking from foot to foot, arms swinging free; now and then a hand goes up to scratch the back of his head with a grin.",
+ "sync": "time", "length": 120, "loop": true,
+ "bones": {
+  "body":     [{"t": 0.0, "pos": [-0.5, 0.4, 0]}, {"t": 0.25, "pos": [0.5, 0.2, 0]}, {"t": 0.5, "pos": [-0.5, 0.4, 0]}, {"t": 0.75, "pos": [0.5, 0.2, 0]}],
+  "torso":    [{"t": 0.0, "rot": [-2, 4, 2]}, {"t": 0.25, "rot": [-1, -4, -2]}, {"t": 0.5, "rot": [-2, 4, 2]}, {"t": 0.75, "rot": [-1, -4, -2]}],
+  "head":     [{"t": 0.0, "rot": [-3, -6, 0]}, {"t": 0.3, "rot": [-2, 8, 0]}, {"t": 0.55, "rot": [4, 10, 6]}, {"t": 0.8, "rot": [3, 8, 6]}, {"t": 0.9, "rot": [-3, -6, 0]}],
+  "rightArm": [{"t": 0.0, "rot": [4, 0, 12], "bend": 18}, {"t": 0.25, "rot": [-6, 0, 10], "bend": 22}, {"t": 0.5, "rot": [4, 0, 12], "bend": 18},
+               {"t": 0.58, "rot": [-160, 40, 22], "bend": 128}, {"t": 0.66, "rot": [-158, 36, 20], "bend": 134}, {"t": 0.74, "rot": [-160, 40, 22], "bend": 128}, {"t": 0.84, "rot": [4, 0, 12], "bend": 18}],
+  "leftArm":  [{"t": 0.0, "rot": [-6, 0, -10], "bend": 22}, {"t": 0.25, "rot": [4, 0, -12], "bend": 18}, {"t": 0.5, "rot": [-6, 0, -10], "bend": 22}, {"t": 0.75, "rot": [4, 0, -12], "bend": 18}],
+  "rightLeg": [{"t": 0.0, "rot": [-3, 0, 6], "bend": 8}, {"t": 0.25, "rot": [0, 0, 5], "bend": 2}, {"t": 0.5, "rot": [-3, 0, 6], "bend": 8}, {"t": 0.75, "rot": [0, 0, 5], "bend": 2}],
+  "leftLeg":  [{"t": 0.0, "rot": [0, 0, -5], "bend": 2}, {"t": 0.25, "rot": [-3, 0, -6], "bend": 8}, {"t": 0.5, "rot": [0, 0, -5], "bend": 2}, {"t": 0.75, "rot": [-3, 0, -6], "bend": 8}]}}

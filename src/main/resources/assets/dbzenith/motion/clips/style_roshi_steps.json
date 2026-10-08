@@ -1,5 +1,7 @@
-{"_doc": "Master Roshi: shuffling in the Turtle Hermit stance.", "base": "fight_walk", "speed": 1.2,
+{"_doc": "Master Roshi: gliding sideways steps in the Turtle Hermit stance.", "sync": "stride", "loop": true, "symmetric": true, "stride": 1.4,
  "bones": {
-  "leftArm":  [{"t": 0.0, "rot": [-120, 10, -14], "bend": 50}],
-  "rightArm": [{"t": 0.0, "rot": [-38, -12, 18], "bend": 34}],
-  "torso":    [{"t": 0.0, "rot": [12, -18, 0]}]}}
+  "rightLeg": [{"t": 0.00, "rot": [-14, 0, 14], "bend": 46}, {"t": 0.30, "rot": [0, 0, 14], "bend": 40}, {"t": 0.50, "rot": [14, 0, 14], "bend": 46}, {"t": 0.70, "rot": [4, 0, 14], "bend": 60}],
+  "leftArm":  [{"t": 0.0, "rot": [-128, 14, -16], "bend": 40}],
+  "rightArm": [{"t": 0.0, "rot": [-46, -16, 20], "bend": 30}],
+  "torso":    [{"t": 0.0, "rot": [6, -20, 0]}],
+  "body":     [{"t": 0.0, "pos": [0, 2.2, 0]}, {"t": 0.5, "pos": [0, 2.0, 0]}]}}
