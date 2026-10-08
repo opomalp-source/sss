@@ -227,7 +227,9 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue specialPerHit, specialPerHeavy, specialPerHitTaken, specialPerPerfectGuard, specialPerVanish;
         public final ForgeConfigSpec.DoubleValue hitstopScale, critBehindBonus, critPunishBonus;
         public final ForgeConfigSpec.DoubleValue vanishKiPercent, burstKiPercent, superDashKiPercent, superDashRange, superDashSpeed, guardArcDegrees;
-        public final ForgeConfigSpec.BooleanValue pvpRules;
+        public final ForgeConfigSpec.BooleanValue pvpRules, pvpScaling;
+        public final ForgeConfigSpec.DoubleValue pvpPowerExponent, pvpDominanceCap, pvpMaxHitFraction, pvpComboCapFraction;
+        public final ForgeConfigSpec.IntValue pvpEqualJabsToKo;
         public final ForgeConfigSpec.IntValue pvpToggleCooldown;
         public final ForgeConfigSpec.IntValue pvpCombatTag;
         public final ForgeConfigSpec.BooleanValue pvpRequireBoth;
@@ -651,6 +653,13 @@ public final class DBZConfig {
             pvpSpawnSafeRadius = b.comment("No PvP within this many blocks of world spawn (0 = none)").defineInRange("spawnSafeRadius", 32, 0, 100_000);
             pvpSafeOtherworld = b.comment("No PvP in the other world (King Yemma's station, Snake Way, King Kai's and the Grand Kai's planets); Hell is not safe").define("safeOtherworld", true);
             pvpSafeTournament = b.comment("No PvP on the tournament grounds, except between the two fighters of a match").define("safeTournament", true);
+            b.comment("The balance curve (CX-19): how much a gap in battle power counts between players. See docs/COMBAT_GUIDE.md");
+            pvpScaling = b.comment("Use the balance curve for player-vs-player damage").define("balanceCurve", true);
+            pvpPowerExponent = b.comment("The power ratio (how much harder one side's blows land) counts as ratio^this. 1 = in full (five times harder wins about 25 times faster), 0.5 = about 5 times faster, 0 = power does not matter").defineInRange("powerExponent", 0.5, 0.0, 1.0);
+            pvpDominanceCap = b.comment("However great the gap, it counts as no more than this (and the weaker side as no less than 1/this)").defineInRange("dominanceCap", 4.0, 1.0, 1000.0);
+            pvpEqualJabsToKo = b.comment("The length of a fight: between equal players, this many jabs knock one out, at any level (heavies, combos and ki scale from there)").defineInRange("equalJabsToKo", 40, 5, 1000);
+            pvpMaxHitFraction = b.comment("No single blow takes more than this share of the foe's health").defineInRange("maxHitFraction", 0.35, 0.01, 1.0);
+            pvpComboCapFraction = b.comment("Once a combo has taken this share of the foe's health, the rest of it lands at a quarter").defineInRange("comboCapFraction", 0.6, 0.05, 10.0);
             b.pop();
 
             b.comment("Enemy fighters and bosses scale to the strongest nearby player").push("enemies");

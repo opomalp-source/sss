@@ -241,3 +241,16 @@ Constants are in `CombatMoves`.
   | Champion | 3000 | 4, and the World Champion title |
 
 - **Between matches:** full body, ki and stamina. A knockout leaves you at 10% body.
+
+## Player vs player (CX-19, balance revision 3)
+
+Blows between players go through the PvP balance curve (`combat/PvpBalance`; the knobs are in `[pvp]`, and the
+full guide is in [docs/COMBAT_GUIDE.md](docs/COMBAT_GUIDE.md#4-balancing-characters)). The report's player-vs-player
+table models jabs to knock out, both ways:
+
+| Target | Now |
+|---|---|
+| Equals knock each other out in 30-50 jabs, at every level | 40-41 (was 46 at level 50, rising to 178 at 800) |
+| At four times the level, the stronger wins in fewer | 11-25 against 73-85 (was 10-17 against 393-818) |
+| The gap counts at most the dominance cap squared (16x) | 3.4-6.6x |
+| Nobody falls in under three blows | the 35% per-blow cap |

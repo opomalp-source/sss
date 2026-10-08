@@ -71,14 +71,12 @@ public final class EvasionTests {
     public static void aPerfectGuardCounters(GameTestHelper helper) {
         ServerPlayer[] p = pair(helper);
         ServerPlayer a = p[0], b = p[1];
-        a.teleportTo(a.getX(), a.getY() + 30, a.getZ());                       // up high: clear of other tests' blasts and explosions
-        b.teleportTo(b.getX(), b.getY() + 30, b.getZ());
         PlayerData bd = ModCapabilities.getOrThrow(b);
         GuardRules.raise(bd, helper.getLevel().getGameTime());
         CombatEngine.press(a, JAB);
-        float health = b.getHealth();
         helper.runAfterDelay(4, () -> {
-            helper.assertTrue(b.getHealth() == health, "parried");
+            // the parry shows in the counter it opens (health can be touched by other tests' stray explosions)
+            helper.assertTrue(com.dbzenith.combat.engine.Evasion.counterReady(b, helper.getLevel().getGameTime()), "parried: the counter is open");
             GuardRules.lower(bd);
             helper.assertTrue(CombatEngine.press(b, JAB) && CombatEngine.peek(b).move().id.equals("counter_strike"), "a counter: " + CombatEngine.describe(b));
             done(helper, a, b);

@@ -113,6 +113,11 @@ public final class CombatEvents {
             if (isKi && !afterimage) raw *= RacePassives.absorbKiHit(victimData, raw, victim.level().getGameTime());
             dealt = afterimage ? 0 : DamageCalculator.againstPlayer(raw, victimData, source.getEntity() != null && !isThrow, victim.getRandom());
             dealt *= 1 - victimData.getGearReduction();                          // a full gi or armour set
+            if (attackerData != null && attacker != victim && attacker instanceof Player) {   // the PvP balance curve (CX-19 phase 10)
+                com.dbzenith.combat.engine.Fighter g = com.dbzenith.combat.engine.CombatEngine.peek(victim);
+                double comboSoFar = g != null && g.comboFrom() == attacker.getId() ? g.comboDamage() : 0;
+                dealt = PvpBalance.apply(attackerData, victimData, dealt, comboSoFar, isKi);
+            }
             if (afterimage) impact = -1;                                         // dodged: nothing landed
             else if (impact >= 0 && victimData.isGuarding()) impact = ImpactPacket.GUARD;
             if (victimData.isGuarding() && dealt > 0) {

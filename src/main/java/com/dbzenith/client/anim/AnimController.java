@@ -112,7 +112,7 @@ public final class AnimController {
         ModifierLayer<IAnimation> layer = layer(player, STATE_LAYER);
         if (layer == null) return;
         layer.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(5, Ease.INOUTSINE),
-                want == null ? null : new KeyframeAnimationPlayer(want));
+                want == null ? null : new KeyframeAnimationPlayer(Anims.custom(want)));
         t.loop = want;
         t.candidate = null;
     }
@@ -120,10 +120,10 @@ public final class AnimController {
     private static KeyframeAnimation chooseStance(AbstractClientPlayer player, PublicStatePacket state, Track t, long now) {
         if (state == null || player.isPassenger() || player.isSleeping() || player.isFallFlying() || player.isSwimming()
                 || player.getPose() == Pose.SWIMMING || isApe(state.form())) return null;
-        if (state.has(PublicStatePacket.DOWNED)) return Anims.DOWNED;
+        if (state.has(PublicStatePacket.DOWNED)) return Anims.custom("downed", Anims.DOWNED);
         com.dbzenith.combat.engine.Fighter.State fs = FighterStates.get(player.getId());   // the engine's states (CX-19e)
-        if (fs == com.dbzenith.combat.engine.Fighter.State.LAUNCHED) return Anims.LAUNCHED;
-        if (fs == com.dbzenith.combat.engine.Fighter.State.STUNNED) return Anims.STUNNED;
+        if (fs == com.dbzenith.combat.engine.Fighter.State.LAUNCHED) return Anims.custom("launched", Anims.LAUNCHED);
+        if (fs == com.dbzenith.combat.engine.Fighter.State.STUNNED) return Anims.custom("stunned", Anims.STUNNED);
         if (state.has(PublicStatePacket.MEDITATING)) return Anims.MEDITATE;
         if (state.has(PublicStatePacket.GUARDING)) return Anims.GUARD;
         if (state.has(PublicStatePacket.HEAVY)) return Anims.HEAVY_WINDUP;
@@ -206,13 +206,13 @@ public final class AnimController {
             t.lastHurtTick = now;
             double dx = player.getX() - player.xo, dz = player.getZ() - player.zo;
             boolean big = dx * dx + dz * dz > 0.25;
-            play(player, t, big ? Anims.HIT_HEAVY : Anims.HIT_LIGHT, now, 0);
+            play(player, t, big ? Anims.custom("hit_heavy", Anims.HIT_HEAVY) : Anims.custom("hit_light", Anims.HIT_LIGHT), now, 0);
         }
         t.lastHurtTime = player.hurtTime;
 
         // back on your feet after being floored
         boolean downed = state != null && state.has(PublicStatePacket.DOWNED);
-        if (t.wasDowned && !downed && now - t.lastEventTick > 2 && player.isAlive()) play(player, t, Anims.GET_UP, now, 0);
+        if (t.wasDowned && !downed && now - t.lastEventTick > 2 && player.isAlive()) play(player, t, Anims.custom("get_up", Anims.GET_UP), now, 0);
         t.wasDowned = downed;
     }
 
@@ -314,6 +314,7 @@ public final class AnimController {
 
     private static void play(AbstractClientPlayer player, Track t, KeyframeAnimation anim, long now, int lockTicks) {
         if (now < t.actionLockUntil && lockTicks == 0) return;
+        anim = Anims.custom(anim);                                             // an artist's file in its place (CX-19 phase 10)
         ModifierLayer<IAnimation> layer = layer(player, ACTION_LAYER);
         if (layer == null) return;
         layer.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(2, Ease.OUTQUAD), new KeyframeAnimationPlayer(anim));
@@ -373,7 +374,7 @@ public final class AnimController {
     public static void playClip(int entityId, String clip) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return;
-        KeyframeAnimation anim = CLIPS.computeIfAbsent(clip.toUpperCase(java.util.Locale.ROOT), AnimController::devAnimation);
+        KeyframeAnimation anim = Anims.custom(clip, CLIPS.computeIfAbsent(clip.toUpperCase(java.util.Locale.ROOT), AnimController::devAnimation));   // an artist's file wins (phase 10)
         if (anim == null) return;
         if (!(mc.level.getEntity(entityId) instanceof AbstractClientPlayer player)) {          // an NPC's move (CX-19e)
             if (mc.level.getEntity(entityId) instanceof net.minecraft.world.entity.LivingEntity npc) NpcActions.play(npc, anim);

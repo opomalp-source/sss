@@ -79,6 +79,7 @@ public final class NpcActions {
 
     /** A one-shot on the action layer: a move, a reaction. */
     public static void play(LivingEntity e, KeyframeAnimation anim) {
+        anim = Anims.custom(anim);
         Track t = track(e);
         t.action.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(2, Ease.OUTQUAD), new KeyframeAnimationPlayer(anim));
         if (Minecraft.getInstance().level != null) t.actionAt = Minecraft.getInstance().level.getGameTime();
@@ -125,7 +126,7 @@ public final class NpcActions {
             stance(t, FighterStates.get(e.getId()));
             if (e.hurtTime > t.lastHurtTime && e.isAlive() && now - t.actionAt > 1) {     // struck: reel (unless its own move just began)
                 boolean heavy = now <= t.heavyHintUntil || t.shown == Fighter.State.LAUNCHED || t.shown == Fighter.State.KNOCKDOWN;
-                play(e, heavy ? Anims.HIT_HEAVY : Anims.HIT_LIGHT);
+                play(e, heavy ? Anims.custom("hit_heavy", Anims.HIT_HEAVY) : Anims.custom("hit_light", Anims.HIT_LIGHT));
             }
             t.lastHurtTime = e.hurtTime;
             t.stack.tick();
@@ -137,13 +138,13 @@ public final class NpcActions {
         Fighter.State was = t.shown;
         t.shown = s;
         KeyframeAnimation loop = switch (s) {
-            case KNOCKDOWN -> Anims.DOWNED;
-            case STUNNED -> Anims.STUNNED;
-            case LAUNCHED -> Anims.LAUNCHED;
-            case GUARDING -> Anims.GUARD;
+            case KNOCKDOWN -> Anims.custom("downed", Anims.DOWNED);
+            case STUNNED -> Anims.custom("stunned", Anims.STUNNED);
+            case LAUNCHED -> Anims.custom("launched", Anims.LAUNCHED);
+            case GUARDING -> Anims.custom("guard", Anims.GUARD);
             default -> null;
         };
         t.stance.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(4, Ease.INOUTSINE), loop == null ? null : new KeyframeAnimationPlayer(loop));
-        if (was == Fighter.State.KNOCKDOWN && s != Fighter.State.KNOCKDOWN && t.entity.isAlive()) play(t.entity, Anims.GET_UP);
+        if (was == Fighter.State.KNOCKDOWN && s != Fighter.State.KNOCKDOWN && t.entity.isAlive()) play(t.entity, Anims.custom("get_up", Anims.GET_UP));
     }
 }

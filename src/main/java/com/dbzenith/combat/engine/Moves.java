@@ -67,7 +67,11 @@ public final class Moves extends SimpleJsonResourceReloadListener {
     }
 
     /** What a press asks for: the button, which way the fighter pushes, and whether they look up or (in the air) down. */
-    public record Input(Move.Button button, Move.Dir push, boolean lookUp, boolean lookDown, boolean ground) {}
+    public record Input(Move.Button button, Move.Dir push, boolean lookUp, boolean lookDown, boolean ground, String form) {
+        public Input(Move.Button button, Move.Dir push, boolean lookUp, boolean lookDown, boolean ground) {
+            this(button, push, lookUp, lookDown, ground, "");
+        }
+    }
 
     /**
      * The move for {@code input} after {@code previous} ("start" for none). A move naming the exact direction beats one
@@ -93,6 +97,7 @@ public final class Moves extends SimpleJsonResourceReloadListener {
         int bestScore = Integer.MIN_VALUE;
         for (Move m : from) {
             if (m.button != in.button() || !m.follows(previous)) continue;
+            if (!m.allowsForm(in.form() == null ? "" : in.form())) continue;  // a move for some forms only (phase 10)
             if (m.where == Move.Where.GROUND && !in.ground() || m.where == Move.Where.AIR && in.ground()) continue;
             int score;
             switch (m.dir) {

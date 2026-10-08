@@ -76,6 +76,11 @@ public final class Fighter {
         return comboFrom;
     }
 
+    /** What the running combo has done so far. */
+    public double comboDamage() {
+        return comboDamage;
+    }
+
     public String lastMove() {
         return lastMove;
     }

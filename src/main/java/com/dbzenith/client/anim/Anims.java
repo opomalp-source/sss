@@ -28,6 +28,45 @@ import java.util.function.Consumer;
 public final class Anims {
     private Anims() {}
 
+    /**
+     * An artist's animation in place of a built-in clip (CX-19 phase 10): a playerAnimator emote file at
+     * {@code assets/dbzenith/player_animation/<name>.json} (in the mod or a resource pack) replaces the clip of that
+     * name (lower case: {@code hit_heavy}, {@code uppercut}...). Without one, {@code fallback}.
+     */
+    private static java.util.Map<KeyframeAnimation, String> names;
+
+    /** A built-in clip's name (its field: {@code HIT_HEAVY}), or null. */
+    public static String nameOf(KeyframeAnimation anim) {
+        if (names == null) {
+            java.util.Map<KeyframeAnimation, String> m = new java.util.IdentityHashMap<>();
+            for (java.lang.reflect.Field f : Anims.class.getFields()) {
+                if (f.getType() != KeyframeAnimation.class || !java.lang.reflect.Modifier.isStatic(f.getModifiers())) continue;
+                try {
+                    m.put((KeyframeAnimation) f.get(null), f.getName());
+                } catch (IllegalAccessException ignored) {
+                }
+            }
+            names = m;
+        }
+        return names.get(anim);
+    }
+
+    /** A built-in clip, or an artist's file in its place. */
+    public static KeyframeAnimation custom(KeyframeAnimation builtIn) {
+        String name = builtIn == null ? null : nameOf(builtIn);
+        return name == null ? builtIn : custom(name, builtIn);
+    }
+
+    public static KeyframeAnimation custom(String name, KeyframeAnimation fallback) {
+        try {
+            KeyframeAnimation a = dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry.getAnimation(
+                    new net.minecraft.resources.ResourceLocation(com.dbzenith.DBZenith.MOD_ID, name.toLowerCase(java.util.Locale.ROOT)));
+            return a != null ? a : fallback;
+        } catch (RuntimeException e) {
+            return fallback;
+        }
+    }
+
     // ------------------------------------------------------------------ poses
 
     private static final String[] PARTS = {"head", "torso", "rightArm", "leftArm", "rightLeg", "leftLeg"};

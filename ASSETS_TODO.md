@@ -34,3 +34,7 @@ Reference material (for drawing originals, or for adding art yourself for **priv
 | `textures/entity/space_pod` + `client/render/SpacePodRenderer` | Space Pod entity: place it, climb in, it launches with flames and a pod lands at the destination | **drawn** | |
 | Namek terrain | Namek trees (pale log, round teal leaves) and white dome houses (world feature) in new chunks; grass and water tinted by the biome | **drawn** | The Northern Planet is still plain grass |
 | Spawn eggs | Vanilla template, tinted | fine | |
+
+## Combat v4 (CX-19)
+
+The combat textures, sounds, particles and animations, with exact specs and what to make first: [docs/COMBAT_ASSETS.md](docs/COMBAT_ASSETS.md).

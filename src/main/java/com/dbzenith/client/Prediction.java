@@ -108,7 +108,8 @@ public final class Prediction {
             default -> Move.Dir.NEUTRAL;
         };
         float pitch = p.getXRot();
-        Move m = Moves.select(moves, new Moves.Input(heavy ? Move.Button.HEAVY : Move.Button.LIGHT, dir, pitch < -35, pitch > 40, p.onGround()), previous);
+        Move m = Moves.select(moves, new Moves.Input(heavy ? Move.Button.HEAVY : Move.Button.LIGHT, dir, pitch < -35, pitch > 40, p.onGround(),
+                ClientPlayerData.get().getFormId()), previous);
         if (m == null) return;
         start(m, now);
         pending = true;

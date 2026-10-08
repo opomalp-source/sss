@@ -352,6 +352,7 @@ public final class CombatEngine {
         double scale = Math.max(c.comboMinDamage.get(), 1.0 - c.comboDamageDecay.get() * n);
         double stunScale = Math.max(c.hitstunMin.get(), 1.0 - c.hitstunDecay.get() * n);
         double raw = base(a) * m.damage * scale;
+        if (a instanceof Player fp) raw *= m.formMultiplier(ModCapabilities.get(fp).map(d -> d.getFormId()).orElse(""));   // a form's own bonus (phase 10)
         boolean zhit = false;
         if (a instanceof Player p) {
             PlayerData ad = ModCapabilities.get(p).orElse(null);

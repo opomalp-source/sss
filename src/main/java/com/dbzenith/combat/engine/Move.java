@@ -56,6 +56,9 @@ public final class Move {
     public final String impact;
     public final int hitstop;                      // freeze frames on landing (-1: by the impact kind)
     public final String sound;
+    /** Transformations (phase 10): the forms the move exists in (empty: any), and damage multipliers per form. */
+    public final List<String> forms;
+    public final java.util.Map<String, Double> formDamage;
 
     private Move(String id, JsonObject j) {
         this.id = id;
@@ -94,6 +97,10 @@ public final class Move {
         impact = GsonHelper.getAsString(j, "impact", "punch");
         hitstop = GsonHelper.getAsInt(j, "hitstop", -1);
         sound = GsonHelper.getAsString(j, "sound", "whoosh");
+        forms = j.has("forms") ? list(GsonHelper.getAsJsonArray(j, "forms")) : List.of();
+        java.util.Map<String, Double> fd = new java.util.HashMap<>();
+        if (j.has("form_damage")) GsonHelper.getAsJsonObject(j, "form_damage").entrySet().forEach(e -> fd.put(e.getKey(), e.getValue().getAsDouble()));
+        formDamage = fd;
     }
 
     public static Move parse(String id, JsonObject j) {
@@ -111,6 +118,16 @@ public final class Move {
 
     public boolean follows(String previous) {
         return after.contains(previous);
+    }
+
+    /** Whether a fighter in {@code form} (a form id; "" for none or an NPC) may throw it. */
+    public boolean allowsForm(String form) {
+        return forms.isEmpty() || forms.contains(form);
+    }
+
+    /** Its damage multiplier in {@code form}. */
+    public double formMultiplier(String form) {
+        return formDamage.getOrDefault(form, 1.0);
     }
 
     static List<String> list(JsonArray a) {

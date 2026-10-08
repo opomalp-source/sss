@@ -1707,3 +1707,29 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   - The combat log ("Dev fired Death Ball!") and the results screen.
   - The Smash knocked the dummy 16 blocks away, hence the return home.
   - Duels themselves need two players; the tests cover them.
+
+## 2026-10-08 — CX-19 Combat v4, phase 10: the balance pass, the guide, the asset list (v0.60.0)
+- **The PvP balance curve** (`combat/PvpBalance`, applied in `CombatEvents` to every blow one player lands on another, after defense, before the guard meter):
+  - **The model first.** `BalanceReport` now models player-vs-player jabs to knock out, both ways, for reference characters. It showed two problems:
+    - **Fights grew long with level:** 46 jabs between equals at level 50, 89 at 200, 178 at 800, because health outgrows damage.
+    - **A gap counted twice:** at four times the level, 10-17 jabs against 393-818, because the stronger both hits harder and takes less.
+  - **A first curve on battle-power ratios** (`ratio^0.5`, cap 4) helped only partly (still 51-92 for equals, 262 against 25), because damage gaps run steeper than BP gaps.
+  - **The power ratio now comes from the blows themselves:** the attacker's jab-sized blow on the defender against the defender's own on themselves, melee or ki to match the blow.
+  - **Fight length is set directly:** between equals a jab takes 1/`equalJabsToKo` (40) of the foe's health at every level. The move, heavies, Z-hits, criticals, combo scaling and the guard keep their weight on top.
+  - **The ratio counts as** `clamp(x ^ powerExponent, 1/dominanceCap, dominanceCap)` (0.5, 4).
+  - **Caps:** one blow takes at most `maxHitFraction` (35%), and past `comboCapFraction` (60%) in one combo the rest lands at a quarter (time to Burst).
+  - **Result:** equals take 40-41 jabs at every level. At four times the level: 11-25 jabs for the stronger, 73-85 for the weaker (it was 10-17 against 393-818).
+  - Config `[pvp]`: balanceCurve, powerExponent, dominanceCap, equalJabsToKo, maxHitFraction, comboCapFraction.
+  - **The targets are now part of the balance test** (`defaultsMeetTheBalanceTargets`): equals 30-50 jabs at every level; the stronger always fewer; the gap at most the cap squared; never under three blows.
+- **Transformations in move data:** `forms` (the move only exists in those forms) and `form_damage` (a multiplier per form) on any move. `Moves.Input` carries the fighter's form (players; the client predicts with the same rule), and `CombatEngine.hit` applies the form's multiplier.
+- **Artist animations replace built-in clips:** `Anims.custom` looks up playerAnimator's registry (`assets/dbzenith/player_animation/*.json`, from the mod or a resource pack) by the clip's name.
+  - It applies to move clips (and new clip names that exist only as files), reactions and stances for players and NPCs, and every one-shot and stance through `AnimController.play` and `NpcActions`.
+  - Tested in the dev client with a throwaway `jab_right` file (both arms raised), then removed. That test found that playerAnimator keys the file by its `"name"` field, and that a name with a space stops the game loading the resource pack; the asset list warns about it.
+- **docs/COMBAT_GUIDE.md:**
+  - the system's map;
+  - adding a move (a worked example and how to test and judge it);
+  - transformation interactions (form moves, technique tiers, and a table of the code hooks with a worked example);
+  - balancing (the model, the report table, every knob, recipes, workflow).
+- **docs/COMBAT_ASSETS.md:** every texture (path, size, use, generator), sound (variants, length, character), the particles worth making, and every animation clip (name, ticks, use) in the format the game reads, plus the order to make them in.
+- **Tests:** `BalanceTests` (the curve, no one-shots, the combo cap, the weaker side's share, form moves) and the PvP targets in the balance report. The perfect-guard test now checks the parry by the counter it opens (other tests' stray explosions can touch the defender's health). 184 GameTests.
+- **CX-19 is complete:** PvP mode, melee from data, guard and evasion, ki and the special meter, hit feedback, lock-on, netcode, the combat HUD, duels and training tools, and the balance pass.

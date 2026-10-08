@@ -33,7 +33,8 @@ public record MeleeInputPacket(boolean heavy, byte push) {
             default -> Move.Dir.NEUTRAL;
         };
         float pitch = p.getXRot();
-        CombatEngine.press(p, new Moves.Input(m.heavy ? Move.Button.HEAVY : Move.Button.LIGHT, push, pitch < -35, pitch > 40, p.onGround()));
+        String form = com.dbzenith.data.ModCapabilities.get(p).map(d -> d.getFormId()).orElse("");
+        CombatEngine.press(p, new Moves.Input(m.heavy ? Move.Button.HEAVY : Move.Button.LIGHT, push, pitch < -35, pitch > 40, p.onGround(), form));
     }
 
     /** The push from movement input: 0 neutral, 1 forward, 2 back, 3 sideways. */

@@ -208,3 +208,15 @@ Bare-handed melee runs through the combat engine (`combat/engine`), for players 
 - A frame bar for your own moves showing the cancel point.
 
 **Combat log** (Settings → Combat): knockouts, big combos (5+), guard breaks, bursts, ultimates and duels near you.
+
+## Balance (phase 10)
+
+- **Between players**, every blow goes through the balance curve.
+  - Fights between equals last about 40 jabs at every level (`[pvp] equalJabsToKo`).
+  - A power gap counts, but softened: `powerExponent` 0.5, at most `dominanceCap` 4. A fighter four times the level wins in roughly a fifth of the blows the other needs.
+  - No blow takes more than 35% of a player's health, and a combo past 60% lands the rest at a quarter.
+- **Forms** can have their own moves (`forms`) and hit harder with any move (`form_damage`).
+- **Artists** can replace any combat animation with a playerAnimator file.
+
+How to add moves, make forms matter, and tune it all: **[COMBAT_GUIDE.md](COMBAT_GUIDE.md)**. Art, sounds and
+animations you can provide: **[COMBAT_ASSETS.md](COMBAT_ASSETS.md)**.
