@@ -160,6 +160,7 @@ public final class ClientEvents {
             delayTicks = Math.max(delayTicks, 6);
         }
         com.dbzenith.config.DBZConfig.CLIENT.auraRenderer.set(name.contains("auraplain") ? 2 : 0);              // CX-24
+        com.dbzenith.client.aura.AuraSystem.devFromShot(name);
         if (name.contains("hudzenith")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(0);
         if (name.contains("hudclassic")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(1);
         if (name.contains("hudminimal")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(2);

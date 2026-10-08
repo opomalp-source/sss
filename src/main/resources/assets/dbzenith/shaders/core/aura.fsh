@@ -13,7 +13,8 @@ uniform vec4 AuraEdge;    // rgb, opacity at the edge
 uniform vec4 AuraRim;     // rgb, strength of the rim tint
 uniform vec4 AuraShape;   // spike depth (share of the radius), sharpness 0..1, spikes round, rim width
 uniform vec4 AuraMotion;  // time in seconds, scroll speed, streaks, flicker
-uniform vec4 AuraMode;    // 0 shell / 1 glow, seed, opacity, lean of the spikes
+uniform vec4 AuraMode;    // 0 shell / 1 glow / 2 haze, seed, opacity, lean of the spikes
+uniform vec4 AuraBoost;   // extra brightness (charging, a hit, a burst), unused
 uniform float FogStart;
 uniform float FogEnd;
 
@@ -57,7 +58,7 @@ void main() {
         float band = max(0.005, AuraShape.w);
         float g = pow(smoothstep(0.0, band, depth), 1.5) * (1.0 - 0.8 * smoothstep(band, band * 4.0, depth));
         float wobble = 0.7 + 0.3 * pnoise(vec2(surface.x * 8.0, surface.y * 3.0 - t * 0.8 + seed), 8.0);
-        float a = g * wobble * fade;
+        float a = min(1.0, g * wobble * fade * (1.0 + AuraBoost.x));
         if (a < 0.003) discard;
         fragColor = vec4(mix(AuraRim.rgb, vec3(1.0), 0.35 * smoothstep(band * 0.5, band, depth)), a);
         return;
@@ -87,7 +88,8 @@ void main() {
     col = mix(col, AuraCore.rgb, AuraMotion.z * smoothstep(0.55, 0.95, streak) * smoothstep(0.02, 0.15, e));
     float tint = AuraRim.a * (0.5 + 0.5 * pnoise(vec2(surface.x * 6.0, surface.y * 4.0 - t * 0.5 + seed * 2.0), 6.0));
     col = mix(col, AuraRim.rgb, rim * tint);
-    float alpha = mix(AuraEdge.a, AuraCore.a, smoothstep(0.1, 0.5, depth));
+    col = mix(col, AuraCore.rgb, clamp(AuraBoost.x * 0.3, 0.0, 0.6) * smoothstep(0.0, 0.25, e));
+    float alpha = mix(AuraEdge.a, AuraCore.a, smoothstep(0.1, 0.5, depth)) * (1.0 + 0.25 * AuraBoost.x);
     if (AuraMode.x > 1.5) alpha *= smoothstep(0.0, 0.3, e);                 // the inner layer: a soft haze, no hard outline
-    fragColor = vec4(col, alpha * body * fade);
+    fragColor = vec4(col, min(1.0, alpha * body * fade));
 }

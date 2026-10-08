@@ -37,9 +37,12 @@ final class AuraShell {
 
     /**
      * Builds the shell: {@code radius} at its widest and {@code height} tall (blocks), starting {@code bottom} above
-     * the feet; {@code t} in seconds; {@code lobes} and {@code sway} scale the data's bulges and lean.
+     * the feet; {@code t} in seconds; {@code lobes} and {@code sway} scale the data's bulges and lean; {@code peak}
+     * stretches the top into one tall flame (share of the height); {@code tx, ty, tz} is how far the top streams
+     * away (blocks) when the fighter moves fast, the back of the shell going further than the front.
      */
-    void build(AuraDef d, float radius, float height, float bottom, float t, float seed, int rings, int segs, float lobes, float sway) {
+    void build(AuraDef d, float radius, float height, float bottom, float t, float seed, int rings, int segs, float lobes, float sway,
+               float peak, float tx, float ty, float tz) {
         this.rings = Math.min(rings, MAX_RINGS);
         this.segs = Math.min(segs, MAX_SEGS);
         if (trigSegs != this.segs) {
@@ -54,12 +57,17 @@ final class AuraShell {
         int c0 = d.lobeCount, c1 = d.lobeCount + 2, c2 = d.lobeCount * 2 + 1;   // whole numbers round, so no seam
         float rise = d.lobeRise * t;
         float leanX = sway * height * Mth.sin(t * 0.9f + seed), leanZ = sway * height * Mth.cos(t * 0.7f + seed * 1.3f);
+        float th = Mth.sqrt(tx * tx + tz * tz);
+        float hx = th > 1e-4f ? tx / th : 0, hz = th > 1e-4f ? tz / th : 0;
         for (int i = 0; i <= this.rings; i++) {
             float s = i / (float) this.rings;
             float base = profile(d, s) * radius;
+            if (d.flare > 0) base *= 1 + d.flare * (1 - AuraShell.smooth(0, Math.max(0.05f, d.widest), s));
             float env = Mth.sqrt(Math.max(0, Mth.sin(Mth.PI * s)));
-            float yy = bottom + s * height;
+            float q = Mth.clamp((s - 0.6f) / 0.4f, 0, 1);
+            float yy = bottom + (s + peak * q * q) * height;
             float lean = s * s;
+            float drag = 0.15f + 0.85f * (float) Math.pow(s, 1.3);
             float w0 = Mth.TWO_PI * (1.2f * s - rise), w1 = Mth.TWO_PI * (2.0f * s - rise * 1.3f), w2 = Mth.TWO_PI * (3.1f * s - rise * 1.7f);
             for (int j = 0; j < this.segs; j++) {
                 float a = j * Mth.TWO_PI / this.segs;
@@ -68,9 +76,11 @@ final class AuraShell {
                         + 0.2f * Mth.sin(c2 * a + seed * 3.3f + 0.5f * t) * Mth.sin(w2 + seed * 2.9f);
                 float r = base * (1 + lobes * env * l);
                 int k = i * MAX_SEGS + j;
-                x[k] = cos[j] * r + leanX * lean;
-                y[k] = yy;
-                z[k] = sin[j] * r + leanZ * lean;
+                float back = 0.55f + 0.45f * Math.max(0, cos[j] * hx + sin[j] * hz);
+                float w = drag * back;
+                x[k] = cos[j] * r + leanX * lean + tx * w;
+                y[k] = yy + ty * w;
+                z[k] = sin[j] * r + leanZ * lean + tz * w;
             }
         }
         for (int i = 0; i <= this.rings; i++) {                                      // normals from the neighbours

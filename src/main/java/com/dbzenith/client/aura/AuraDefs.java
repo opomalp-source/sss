@@ -17,7 +17,8 @@ import java.util.Map;
 
 /**
  * The auras, loaded from {@code assets/<namespace>/auras/*.json} with the resource packs (CX-24): a resource pack can
- * change any aura or add one, and F3+T reloads them. A form wears the aura that lists it under {@code forms}.
+ * change any aura or add one, and F3+T reloads them. A form wears the aura that lists it under {@code forms}. Files
+ * may start from another with {@code "extends"}; /dbzaura set swaps in a changed copy until the next reload.
  */
 public final class AuraDefs extends SimplePreparableReloadListener<Map<String, AuraDef>> {
     public static final AuraDefs INSTANCE = new AuraDefs();
@@ -40,18 +41,36 @@ public final class AuraDefs extends SimplePreparableReloadListener<Map<String, A
         return byId.keySet();
     }
 
+    /** Swaps in a changed aura (live tweaking) for everyone wearing it, until the next reload. */
+    static void replace(AuraDef d) {
+        Map<String, AuraDef> ids = new HashMap<>(byId);
+        ids.put(d.id, d);
+        Map<String, AuraDef> forms = new HashMap<>(byForm);
+        for (String f : d.forms) forms.put(f, d);
+        byId = Map.copyOf(ids);
+        byForm = Map.copyOf(forms);
+    }
+
     @Override
     protected Map<String, AuraDef> prepare(ResourceManager rm, ProfilerFiller profiler) {
-        Map<String, AuraDef> out = new HashMap<>();
+        Map<String, JsonObject> raw = new HashMap<>();
         for (Map.Entry<ResourceLocation, Resource> e : rm.listResources("auras", f -> f.getPath().endsWith(".json")).entrySet()) {
             String path = e.getKey().getPath();
             String name = path.substring("auras/".length(), path.length() - ".json".length());
+            name = name.substring(name.lastIndexOf('/') + 1);                  // sub-folders (techniques/, families/) only sort files
             String id = e.getKey().getNamespace().equals(DBZenith.MOD_ID) ? name : e.getKey().getNamespace() + ":" + name;
             try (Reader r = e.getValue().openAsReader()) {
-                JsonObject json = JsonParser.parseReader(r).getAsJsonObject();
-                out.put(id, AuraDef.parse(id, json));
+                raw.put(id, JsonParser.parseReader(r).getAsJsonObject());
             } catch (Exception ex) {
                 LOG.error("Bad aura {}: {}", e.getKey(), ex.toString());
+            }
+        }
+        Map<String, AuraDef> out = new HashMap<>();
+        for (String id : raw.keySet()) {
+            try {
+                out.put(id, AuraDef.parse(id, AuraDef.resolve(id, raw, LOG::error)));
+            } catch (Exception ex) {
+                LOG.error("Bad aura {}: {}", id, ex.toString());
             }
         }
         return out;
