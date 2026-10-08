@@ -174,7 +174,7 @@ FAMILIES = {
              "motion": {"scroll": 0.8, "flicker": 0.1, "streaks": 0.1, "warp": 0.6}},
             {"kind": "tongues", "colors": {"core": "$core", "mid": "$mid", "edge": "$edge"}, "alpha": {"core": 0.7, "edge": 0.6},
              "spikes": {"sharpness": 0.0},
-             "tongues": {"count": 12, "length": 0.22, "width": 0.7, "life": 1.0, "top": 0.5, "rise": 0.5, "wave": 0.4, "inset": 0.2},
+             "tongues": {"count": 12, "length": 0.24, "width": 0.45, "life": 1.0, "top": 0.5, "rise": 0.5, "wave": 0.4, "inset": 0.2},
              "motion": {"scroll": 0.7}},
             {"kind": "haze", "scale": 0.7, "colors": {"core": "$white", "mid": "$core", "edge": "$mid"}, "alpha": {"core": 0.25, "edge": 0.3}},
         ],

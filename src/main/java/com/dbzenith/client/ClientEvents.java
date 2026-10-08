@@ -27,6 +27,8 @@ public final class ClientEvents {
     private static int ticksInWorld;
     private static String pendingShot;
     private static int pendingShotTicks;
+    private static String seqName;
+    private static int seqLeft, seqFrame;
 
     private ClientEvents() {}
 
@@ -51,10 +53,22 @@ public final class ClientEvents {
         if (mc.level == null || mc.player == null) return;
         ClientHooks.maybeOpenCreation();
         ticksInWorld++;
+        if (seqLeft > 0) {                                                       // a clip: one frame a tick (dev only)
+            Screenshot.grab(mc.gameDirectory, String.format("dbz_%s_f%03d.png", seqName, seqFrame++), mc.getMainRenderTarget(),
+                    msg -> {});
+            if (--seqLeft == 0) mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON);
+        }
         if (pendingShot != null && --pendingShotTicks <= 0) {
             String shot = pendingShot;
             pendingShot = null;
             devScreenshot(shot, 0);
+            java.util.regex.Matcher seq = java.util.regex.Pattern.compile("seq(\\d+)").matcher(shot);
+            if (seq.find()) {                                                    // ..seq40..: 40 more frames, a tick apart
+                seqName = shot.replaceAll("[^a-zA-Z0-9_-]", "_");
+                seqLeft = Math.min(400, Integer.parseInt(seq.group(1)));
+                seqFrame = 0;
+                return;
+            }
             if (mc.screen instanceof com.dbzenith.client.screen.StatScreen || mc.screen instanceof com.dbzenith.client.screen.FormScreen
                     || mc.screen instanceof com.dbzenith.client.screen.CharacterCreationScreen
                     || mc.screen instanceof com.dbzenith.client.screen.DeckScreen || mc.screen instanceof com.dbzenith.client.screen.QuestScreen
