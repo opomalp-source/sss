@@ -2042,3 +2042,27 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   - charging a Kamehameha-style beam (hands cupped at the hip, blue glow), then a wide charged beam carving a trench;
   - the Supernova as a glowing sun over the head;
   - the gauge in first person (CHARGING x1.9 3.7s) with the view clear.
+
+## 2026-10-08 — CX-24 phase 1: the aura shell and Super Saiyan Blue (v0.72.0)
+- **The ask:** auras that are animated, volumetric and alive, looking like the user's Godot prototype "Aura Testing" (known only from two screen recordings; frames pulled from them with the Windows media API).
+- **What the prototype shows:**
+  - The aura is a 3D egg round the body: about 2.2 times the body's height and 1.4 times as wide, rounded under the feet, widest low down. From above it is a wavy disc.
+  - Only its far half shows: the body inside is never tinted.
+  - The colour depends on how squarely it faces you: white-hot in the middle, light cyan, then a thin saturated blue edge and a gold rim.
+- **The aura system** (`client/aura`, one renderer for every fighter; NPCs join in a later phase):
+  - `AuraShell`: an egg of up to 32 rings × 48 segments, built each frame into fixed arrays (no allocations), with slow bulges rising through it, a sway and a pulse. Its outside faces are wound to be culled, so only the far half is drawn and the fighter stays clean.
+  - **Its own shader** (`shaders/core/aura.vsh/.fsh`, programs `aura` and `aura_glow`), per pixel:
+    - how squarely the point faces the eye gives its depth in from the outline;
+    - the colour runs edge → mid → core by that depth, with a rim tint;
+    - the outline is cut by wrapping value noise into soft lobes or sharp spikes that lean and stream upward and flicker, with faint upward streaks.
+  - **Layers:** a thin bright glow band just outside the outline (added on), the shell, then a paler, smaller inner haze moving faster, and star-dust sparkles rising through it. Every fighter's aura has its own seed, so no two move alike.
+  - **Order and cost:** drawn after the particles, far to near, up to 64 auras within 160 blocks, with fewer rings at a distance. Your own aura isn't drawn from your own eyes (the screen-edge glow does that), and it thins out when the camera sits inside a shell.
+  - **Shader packs:** with an Oculus/Iris pack on, auras switch to the plain built-in shaders: the same shell with colours worked out per corner, no noise cut. The setting `auraRenderer` (Settings → Effects → Aura shader) picks auto, own shader or plain.
+- **Data-driven** (`assets/<ns>/auras/<id>.json`, `AuraDefs`, reloaded with resource packs and F3+T): forms, silhouette (lobed or jagged), colours (core, mid, edge, rim), opacities, rim, shape (width, height, bottom, widest, taper, tip), lobes, spikes (count, size, sharpness, lean), motion (scroll, flicker, pulse, streaks, sway), glow, inner layer, particles, light, ground. A form wears the aura that lists it. Forms without a file still burn the old way (`AuraRenderer` leaves the new ones alone).
+- **Super Saiyan Blue** (`auras/super_saiyan_blue.json`): white core, light cyan, a #1FA2FF edge, a gold rim, three slow cloud-like bulges, sparkles. With Kaioken it still burns the old way until Kaioken's own layer (phase 3).
+- **Dev:**
+  - `/dbzaura <id>` (client) wears any aura whatever your form; `/dbzaura off` stops.
+  - Devshots with `auraplain` draw with the plain shaders.
+  - The shot helper takes `@<command>` steps between shots, for example to turn the camera to look down from above.
+- **Tests:** `AuraTests` (every shipped aura file reads, wears real forms, keeps sane sizes, opacities and spikes; Blue is lobed and blue). 207 GameTests.
+- **Checked in the dev client:** Blue from the front, side, behind and above, by day and night, frame to frame (the bulges rise and the outline moves), and the plain fallback.

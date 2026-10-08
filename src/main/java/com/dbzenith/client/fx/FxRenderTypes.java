@@ -46,4 +46,36 @@ public final class FxRenderTypes extends RenderType {
     public static RenderType soft(ResourceLocation texture) {
         return SOFT.apply(texture);
     }
+
+    /** The aura shell on the plain built-in shaders (CX-24): culled, so only its far half shows. */
+    private static final Function<ResourceLocation, RenderType> AURA_PLAIN = Util.memoize(tex -> create("dbzenith_aura_plain",
+            DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 4096, false, false,
+            CompositeState.builder()
+                    .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER)
+                    .setTextureState(new TextureStateShard(tex, false, false))
+                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                    .setCullState(CULL)
+                    .setWriteMaskState(COLOR_WRITE)
+                    .setOverlayState(OVERLAY)
+                    .createCompositeState(false)));
+
+    /** Its glow, added on. */
+    private static final Function<ResourceLocation, RenderType> AURA_PLAIN_GLOW = Util.memoize(tex -> create("dbzenith_aura_plain_glow",
+            DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 4096, false, false,
+            CompositeState.builder()
+                    .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER)
+                    .setTextureState(new TextureStateShard(tex, false, false))
+                    .setTransparencyState(LIGHTNING_TRANSPARENCY)
+                    .setCullState(CULL)
+                    .setWriteMaskState(COLOR_WRITE)
+                    .setOverlayState(OVERLAY)
+                    .createCompositeState(false)));
+
+    public static RenderType auraPlain(ResourceLocation texture) {
+        return AURA_PLAIN.apply(texture);
+    }
+
+    public static RenderType auraPlainGlow(ResourceLocation texture) {
+        return AURA_PLAIN_GLOW.apply(texture);
+    }
 }

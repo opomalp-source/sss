@@ -2038,5 +2038,13 @@
   "hud.dbzenith.charge_max": "FULL POWER  x%s",
   "message.dbzenith.charge_fizzled": "Your charge fizzled out",
   "message.dbzenith.charge_no_ki": "Not enough ki for that",
-  "message.dbzenith.transform_faded": "Your power-up faded"
+  "message.dbzenith.transform_faded": "Your power-up faded",
+  "message.dbzenith.aura_preview": "Wearing the %s aura (/dbzaura off to stop)",
+  "message.dbzenith.aura_preview_off": "Aura preview off",
+  "message.dbzenith.aura_unknown": "No aura called %s",
+  "settings.dbzenith.aura_renderer": "Aura shader",
+  "settings.dbzenith.aura_renderer.desc": "Auto draws auras with their own shader, and with the plain one while a shader pack is on. Plain looks simpler but works everywhere.",
+  "settings.dbzenith.aura_renderer.auto": "Auto",
+  "settings.dbzenith.aura_renderer.shader": "Own shader",
+  "settings.dbzenith.aura_renderer.plain": "Plain"
 }

@@ -758,6 +758,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue firstPersonAura;
         public final ForgeConfigSpec.DoubleValue hudScale;
         public final ForgeConfigSpec.IntValue auraDetail;
+        public final ForgeConfigSpec.IntValue auraRenderer;
         public final ForgeConfigSpec.BooleanValue fovEffects;
         public final ForgeConfigSpec.BooleanValue speedLines;
         public final ForgeConfigSpec.BooleanValue hairPhysics;
@@ -825,6 +826,8 @@ public final class DBZConfig {
                     .define("firstPersonAura", true);
             auraDetail = b.comment("Aura detail: 0 low (fewer flame tongues, no licks), 1 normal, 2 high")
                     .defineInRange("auraDetail", 1, 0, 2);
+            auraRenderer = b.comment("How auras are drawn: 0 auto (their own shader, the plain one while a shader pack is on), 1 always their own shader, 2 always the plain one")
+                    .defineInRange("auraRenderer", 0, 0, 2);
             fovEffects = b.comment("Zoom punch on heavy blows and the widening rush on dashes")
                     .define("fovEffects", true);
             speedLines = b.comment("Anime speed lines at the edges of the screen when flying flat out or dashing (first person)")

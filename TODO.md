@@ -228,4 +228,12 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [x] CX-21 (v0.69.0) Knockback and destruction: combos and hard blows send fighters flying by force; craters sized by force and impact speed on walls and ground; ki blasts and beams leave craters and carve; a Craters/Calm toggle in the Ki creator; [destruction] config
 - [x] CX-22 (v0.70.0) Proportions (tapered torso, fuller limbs, NPCs shaped too), the floating torso fixed for every layer (RigFix), all 16 styles redone (108 clips) with verified poses, the dev pose sheet
 - [x] CX-23 (v0.71.0) Charged ki attacks (hold R: up to 30 s for beams, longer for ultimates, bigger and stronger, ki drain, orb and pose, gauge) and held transformations (hold J, the bar falls back when let go, paid on completion)
+- [ ] CX-24 Auras reworked (animated, volumetric, data-driven), after the user's Godot prototype
+  - [x] phase 1 (v0.72.0) The shell (own shader, glow, inner haze, sparkles, plain fallback for shader packs), data files, Super Saiyan Blue; /dbzaura
+  - [ ] phase 2 Animation and states (idle, charging, flying trail, hit flare)
+  - [ ] phase 3 Kaioken (X2-X10, X20-X100 tiers) over other auras, stacking
+  - [ ] phase 4 Super Saiyan and Super Saiyan God from data (and the other forms)
+  - [ ] phase 5 Ultra Instinct (silver shimmer, afterimages)
+  - [ ] phase 6 Transformation burst, ground effects, light
+  - [ ] phase 7 Performance and config (quality, light, ground, own aura, intensity), live tweaking
 - Paused for CX-19: 17d (the robot dojo), 18b (the combat animations as data; folded into 19b)

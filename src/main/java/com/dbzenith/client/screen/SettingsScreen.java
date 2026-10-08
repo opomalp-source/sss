@@ -59,6 +59,7 @@ public class SettingsScreen extends Screen {
             }
             case EFFECTS -> {
                 o.add(new Option("aura_detail", c.auraDetail, 0, 2, new String[]{"low", "normal", "high"}));
+                o.add(new Option("aura_renderer", c.auraRenderer, 0, 2, new String[]{"auto", "shader", "plain"}));
                 o.add(new Option("first_person_aura", c.firstPersonAura, 0, 0, null));
                 o.add(new Option("afterimages", c.afterimages, 0, 0, null));
                 o.add(new Option("hitstop", c.hitstop, 0, 0, null));

@@ -35,6 +35,7 @@ public final class ClientSetup {
     @SubscribeEvent
     public static void reloadListeners(net.minecraftforge.client.event.RegisterClientReloadListenersEvent event) {
         event.registerReloadListener(com.dbzenith.client.motion.MotionData.INSTANCE);
+        event.registerReloadListener(com.dbzenith.client.aura.AuraDefs.INSTANCE);                // CX-24
     }
 
     @SubscribeEvent

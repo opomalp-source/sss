@@ -105,6 +105,7 @@ public final class AuraRenderer {
         if (player.isInvisible() || player.isSpectator()) return;
         PublicStatePacket state = ClientPublicStates.get(player.getId());
         if (state == null) return;
+        if (com.dbzenith.client.aura.AuraSystem.handles(player, state)) return;   // drawn by the aura system (CX-24)
         float partial = event.getPartialTick();
         float t = player.tickCount + partial;
         boolean powering = state.powering();
