@@ -574,7 +574,7 @@
   "settings.dbzenith.tab.controls": "Controls",
   "settings.dbzenith.reset": "Reset this tab",
   "settings.dbzenith.keybinds": "Key bindings...",
-  "settings.dbzenith.controls_help": "Every Dragon Block Zenith key is in the \"Dragon Block Zenith\" section of the key bindings. Defaults: G charge, Left Alt guard (tap just before a hit to parry), R ki attack, Y next technique, H heavy, B dash, V fly, J transform (Shift+J power down), O Kaioken, U racial skill, I universal skill, K training, X action wheel.",
+  "settings.dbzenith.controls_help": "Every Dragon Block Zenith key is in the \"Dragon Block Zenith\" section of the key bindings. Defaults: G charge, Left Alt guard (tap just before a hit to parry), R ki attack, Y next technique, H heavy, B dash, V fly, J transform (Shift+J power down), O Kaioken and Ultra Instinct, U racial skill, I universal skill, K training, X action wheel.",
   "settings.dbzenith.hud_scale": "HUD size",
   "settings.dbzenith.hud_scale.desc": "Size of the portrait, bars and readouts in the top left.",
   "settings.dbzenith.custom_hotbar": "Cloud hotbar",
@@ -1018,7 +1018,7 @@
   "racial.dbzenith.dark_aura": "Dark Aura",
   "racial.dbzenith.dark_aura.desc": "For 15 seconds a dark aura weakens everyone near you and strengthens you.",
   "key.dbzenith.skill": "Universal skill (shift: browse)",
-  "key.dbzenith.kaioken": "Kaioken up (shift: release)",
+  "key.dbzenith.kaioken": "Kaioken up, then Ultra Instinct (shift: release)",
   "screen.dbzenith.tab_racial": "Racial",
   "hud.dbzenith.downed": "DOWNED - dash to roll up",
   "hud.dbzenith.chase": "CHASE! [dash]",
@@ -1904,5 +1904,10 @@
   "meter.dbzenith.kaioken_2": "Kaioken x2",
   "meter.dbzenith.kaioken_4": "Kaioken x4",
   "meter.dbzenith.kaioken_10": "Kaioken x10",
-  "meter.dbzenith.kaioken_20": "Kaioken x20"
+  "meter.dbzenith.kaioken_20": "Kaioken x20",
+  "message.dbzenith.meter_form_low": "The form bar must reach %s%% first",
+  "message.dbzenith.meter_tech_low": "The technique bar must reach %s%% first",
+  "message.dbzenith.meter_form_fades": "Your form bar ran low: you drop a form",
+  "message.dbzenith.meter_tech_fades": "Your technique bar ran low: it gives out",
+  "message.dbzenith.ultra_instinct_already": "You are already in Ultra Instinct"
 }

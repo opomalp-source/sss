@@ -176,6 +176,8 @@ public final class ModNetwork {
                 .encoder(ImpactPacket::encode).decoder(ImpactPacket::decode).consumerMainThread(ImpactPacket::handle).add();
         CHANNEL.messageBuilder(AnimEventPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(AnimEventPacket::encode).decoder(AnimEventPacket::decode).consumerMainThread(AnimEventPacket::handle).add();
+        CHANNEL.messageBuilder(MeterRulesPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)          // CX-20
+                .encoder(MeterRulesPacket::encode).decoder(MeterRulesPacket::decode).consumerMainThread(MeterRulesPacket::handle).add();
         CHANNEL.messageBuilder(UpgradeAttributePacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(UpgradeAttributePacket::encode)
                 .decoder(UpgradeAttributePacket::decode)

@@ -222,7 +222,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - [x] 20c (v0.63.0) Auto-tag: any hit by a player, NPC or mob tags and switches PvP on; the tag blocks switching off; tagForcesPvp, hurtOutOfPvp; /dbz pvptag
   - [x] 20d (v0.64.0) The crosshair: a round dot in PvP at the real aim point (shoulder view), a four-pointed star out of PvP; size, colour, opacity, dot always or in PvP only
   - [x] 20e (v0.65.0) The bars (visuals): two studded bars bottom right in PvP, the form bar in the aura colour, the technique bar in the technique's; steps from unlocked forms, Kaioken and Ultra Instinct; /dbz meter
-  - [ ] 20f The bars (logic): form and technique meters, J and O in PvP, Ultra Instinct as a technique
+  - [x] 20f (v0.66.0) The bars (logic): filling from fighting, J and O gated in PvP, drains and drops, Ultra Instinct a technique on O, data-driven rules synced to clients; /dbz unlockform
   - [ ] 20g Styles from masters (data, learning, affinity, Goku and Vegeta, the equip screen, NPC styles)
   - [ ] 20h Polish, the guide, the asset list
 - Paused for CX-19: 17d (the robot dojo), 18b (the combat animations as data; folded into 19b)

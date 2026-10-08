@@ -19,6 +19,9 @@ import java.util.List;
  * Server-side transformation rules: requirements, entering/leaving forms, per-tick drain and mastery.
  */
 public final class FormHandler {
+    /** A flag that unlocks one form outright, past its level, mastery and flag requirements: {@code form_unlocked:<id>}. */
+    public static final String UNLOCK_FLAG = "form_unlocked:";
+
     private FormHandler() {}
 
     /** Why {@code form} can't be entered manually right now, or null if it can. */
@@ -27,6 +30,7 @@ public final class FormHandler {
         if (!form.races().contains(data.getRace())) return Component.translatable("form.dbzenith.problem.race");
         if (!form.allows(data.getVariant())) return Component.translatable("form.dbzenith.problem.variant");
         if (form.trigger() != Form.Trigger.MANUAL) return Component.translatable("form.dbzenith.problem.trigger");
+        if (data.hasFlag(UNLOCK_FLAG + form.id())) return null;                    // unlocked by hand (/dbz unlockform, CX-20)
         if (form.requiredFlag() != null && !data.hasFlag(form.requiredFlag())) {
             return Component.translatable("form.dbzenith.problem.flag." + form.requiredFlag());
         }
@@ -62,23 +66,27 @@ public final class FormHandler {
         Form next = null;
         if (Forms.exists(data.getTargetForm())) {
             Form target = Forms.byId(data.getTargetForm());
-            if (target != current && Forms.isOnPath(current.id(), target) && pathUnlocked(data, current, target)) next = target;
+            if (target != current && !com.dbzenith.combat.meter.Meters.isTechnique(target) && Forms.isOnPath(current.id(), target)
+                    && pathUnlocked(data, current, target)) next = target;
         }
         if (next == null) {
             for (Form child : Forms.children(current.id(), data.getRace(), data.getVariant())) {
-                if (problem(data, child) == null) {
+                if (problem(data, child) == null && !com.dbzenith.combat.meter.Meters.isTechnique(child)) {   // Ultra Instinct is on O (CX-20)
                     next = child;
                     break;
                 }
             }
         }
         if (next == null) {
-            List<Form> children = Forms.children(current.id(), data.getRace(), data.getVariant());
+            List<Form> children = Forms.children(current.id(), data.getRace(), data.getVariant()).stream()
+                    .filter(f -> !com.dbzenith.combat.meter.Meters.isTechnique(f)).toList();
             Component reason = children.isEmpty() ? Component.translatable("form.dbzenith.problem.none")
                     : problem(data, children.get(0));
             player.displayClientMessage(reason == null ? Component.translatable("form.dbzenith.problem.none") : reason, true);
             return false;
         }
+        next = com.dbzenith.combat.meter.MeterLogic.gateForm(player, data, next);   // in PvP, the form bar (CX-20)
+        if (next == null) return false;
         double cost = data.getDerived().maxKi() * DBZConfig.SERVER.transformKiCostPercent.get() / 100.0;
         if (data.getKi() < cost && !player.getAbilities().instabuild) {
             player.displayClientMessage(Component.translatable("message.dbzenith.no_ki_to_transform"), true);

@@ -196,6 +196,7 @@ public final class PvpRules {
         PlayerData d = ModCapabilities.get(p).orElse(null);
         if (d == null) return;
         d.setPvp(on);
+        com.dbzenith.combat.meter.MeterLogic.onPvp(p, d, on);                   // the meters: brought in, or emptied (CX-20)
         if (!on) {                                                              // back to plain Minecraft: no guard up, no lock (CX-20)
             GuardRules.lower(d);
             com.dbzenith.combat.engine.Targeting.set(p, -1);

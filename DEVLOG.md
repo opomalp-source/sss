@@ -1855,3 +1855,42 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   - with PvP off, no bars.
 
   The first try drew the glows as hard blobs, because a flush of the GUI batch had turned blending off. Each draw now turns it back on.
+
+## 2026-10-08 — CX-20 phase 6: the PvP meters at work (v0.66.0)
+- **Filling** (`combat/meter/MeterLogic`, server only, PvP mode only):
+  - **Form bar:** +1 per 1% of the foe's health you take off, +1.5 per 1% of your own you lose, +5 per perfect guard.
+  - **Technique bar:** +10 per perfect guard, +6 per vanish, +8 per counter that lands, +4 every fifth hit of a combo, +2%/s while charging.
+  - Blows count against NPCs and mobs too, not only players. Hooks: `CombatEvents` (blows, counters, combos), `Evasion` (vanishes, perfect guards), `KiTicker` (the tick).
+- **Gating** (user: "once they're tagged with PvP, they can only transform once they've dealt or gotten enough damage"; `[pvp] meterGate`, on):
+  - **J in PvP:** goes to a form only once its stud is reached. If the next form (or the target form) is out of reach, J goes to the highest form above yours whose stud is reached. Otherwise it tells you how far the bar must fill.
+  - **O in PvP:** raises Kaioken only to a reached stage (x2 at 25; x3 and x4 at 40; up to x10 at 60; up to x20 at 80). It enters Ultra Instinct straight away once its stud (100) is reached.
+  - **Outside PvP** you transform freely, as before.
+- **Ultra Instinct is a technique** (user): J never goes there any more, even as the target form; O does.
+  - O climbs Kaioken stage by stage; once Kaioken can go no higher (or isn't learned), the next press is Ultra Instinct (Mastered once mastered).
+  - Shift+O leaves Ultra Instinct (or stops Kaioken).
+  - Entering Ultra Instinct ends Kaioken.
+- **Draining:**
+  - The form bar drains while you hold a form on it (1%/s plus 0.25%/s a tier). The technique bar drains 2%/s while Kaioken or Ultra Instinct is on.
+  - Both decay 3%/s after 10 s without fighting.
+  - A form holds while the bar stays above the stud below it; at that stud you drop to the form below (at 0, to base). Kaioken likewise drops a band.
+  - Ultra Instinct, which isn't layered on Kaioken, holds until the technique bar empties.
+- **Switching PvP:** going into PvP already transformed (or in Kaioken or Ultra Instinct) fills the bars to cover what you hold, and it drains from there. Leaving PvP empties them.
+- **Data-driven** (`data/<ns>/combat/meters/*.json`, `MeterRules`):
+  - every amount, drain and decay;
+  - where Kaioken's stages and Ultra Instinct sit;
+  - the technique colours;
+  - optional fixed places for forms (`form.steps`; otherwise spread evenly).
+
+  Files merge in name order, `default` first, a later file overriding only what it gives. Clients get the merged rules on joining and after `/reload` (`MeterRulesPacket`), so they draw the same studs the server checks.
+- **Dev:** `/dbz unlockform <player> <form> [true|false]` unlocks a form outright, past its level, mastery and flag requirements (the flag `form_unlocked:<id>`). This joins `/dbz meter`, `/dbz pvp` and `/dbz pvptag`.
+- **Tests** (`MeterTests`, 4 new):
+  - Blows dealt and taken, guards, vanishes, counters and combos fill the right bars; nothing fills out of PvP; leaving PvP empties them.
+  - J needs the form bar, goes to the highest reachable form rather than an out-of-reach target, drops a form at the stud below and to base at 0. A held form drains the bar. Free outside PvP. Entering PvP transformed covers the form.
+  - O needs the technique bar for each Kaioken band, which drops back a band and then off. Ultra Instinct is never on the form bar or reached by J, comes from a full technique bar, and gives out when it empties.
+  - The rules merge, a later file overriding only what it gives.
+
+  The older form and Kaioken tests now run outside PvP, where the meters don't apply. One of them re-asserts PvP off before its last transformation, since a stray blow from a nearby test can tag it in. 193 GameTests.
+- **Checked in the dev client:**
+  - in PvP with empty bars, J refused;
+  - four punches on the training dummy filled the form bar to about a quarter;
+  - with the bar full, J went Super Saiyan, and the bar then drained (the form's drain plus the out-of-combat decay).

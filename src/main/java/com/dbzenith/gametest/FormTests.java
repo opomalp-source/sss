@@ -35,6 +35,7 @@ public final class FormTests {
         p.setGameMode(GameType.SURVIVAL);
         PlayerData d = ModCapabilities.getOrThrow(p);
         d.setRace(Race.SAIYAN);
+        d.setPvp(false);                                                         // outside PvP, transforming needs no meter (CX-20)
         d.setAttribute(Attribute.STRENGTH, d.getAttribute(Attribute.STRENGTH) + level);
         d.recomputeIfStale();
         d.refill();
@@ -89,8 +90,9 @@ public final class FormTests {
         d.refill();
         d.setMastery("super_saiyan", 80);
         helper.assertTrue(FormHandler.transformTime(d, Forms.SUPER_SAIYAN) == 0, "mastered past 75%: instant");
+        d.setPvp(false);                                                         // a stray blow from a nearby test may have tagged it into PvP
         FormHandler.transformUp(p);
-        helper.assertTrue("super_saiyan".equals(d.getFormId()), "instant transformation");
+        helper.assertTrue("super_saiyan".equals(d.getFormId()), "instant transformation, got " + d.getFormId() + (d.isTransforming() ? " (powering up)" : ""));
         TestPlayers.remove(helper, p);
         helper.succeed();
     }

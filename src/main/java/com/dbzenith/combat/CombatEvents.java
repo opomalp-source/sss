@@ -200,6 +200,13 @@ public final class CombatEvents {
             if (victim instanceof com.dbzenith.npc.TrainingDummy td) td.record(dealt);   // its string of blows
         }
 
+        if (dealt > 0 && !evaded && source.getEntity() instanceof net.minecraft.world.entity.LivingEntity foe && foe != victim) {   // the PvP meters (CX-20)
+            double share = victimData != null ? dealt / Math.max(1, victimData.getDerived().maxBody()) : event.getAmount() / Math.max(1f, victim.getMaxHealth());
+            com.dbzenith.combat.meter.MeterLogic.onBlow(foe, victim, share);
+            if ((feel & ImpactPacket.COUNTER) != 0) com.dbzenith.combat.meter.MeterLogic.onCounter(foe);
+            com.dbzenith.combat.engine.Fighter fg = isStrike ? com.dbzenith.combat.engine.CombatEngine.peek(victim) : null;
+            if (fg != null && fg.comboFrom() == foe.getId()) com.dbzenith.combat.meter.MeterLogic.onComboHit(foe, fg.comboHits());
+        }
         if (attackerData != null && dealt > 0) attackerData.markCombat(victim.level().getGameTime());
         if (attackerData != null && attacker instanceof net.minecraft.server.level.ServerPlayer sp && attacker != victim) {
             com.dbzenith.race.RacialSkillEffects.afterHit(sp, attackerData, dealt);

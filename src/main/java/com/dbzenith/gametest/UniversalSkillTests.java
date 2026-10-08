@@ -37,6 +37,7 @@ public final class UniversalSkillTests {
         p.setGameMode(GameType.SURVIVAL);
         PlayerData d = ModCapabilities.getOrThrow(p);
         CharacterCreation.applyRace(d, race);
+        d.setPvp(false);                                                         // outside PvP, Kaioken needs no meter (CX-20)
         d.setAttribute(Attribute.STRENGTH, d.getAttribute(Attribute.STRENGTH) + levels);
         d.recomputeIfStale();
         d.refill();

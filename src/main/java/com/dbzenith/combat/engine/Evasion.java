@@ -88,6 +88,7 @@ public final class Evasion {
         victim.fallDistance = 0;
         openCounter(g, attacker, now);
         SpecialMeter.gain(victim, c.specialPerVanish.get());
+        com.dbzenith.combat.meter.MeterLogic.onVanish(victim);                  // the technique bar (CX-20)
         com.dbzenith.duel.Duels.onDefense(victim, false);
         level.playSound(null, dest.x, dest.y, dest.z, ModSounds.VANISH.get(), SoundSource.PLAYERS, 0.8f, 1.6f);
         tell(victim, "message.dbzenith.vanish", ChatFormatting.AQUA);
@@ -117,6 +118,7 @@ public final class Evasion {
     public static void onPerfectGuard(LivingEntity defender, Entity attacker, long now) {
         if (attacker instanceof LivingEntity a) openCounter(CombatEngine.of(defender), a, now);
         SpecialMeter.gain(defender, DBZConfig.SERVER.specialPerPerfectGuard.get());
+        com.dbzenith.combat.meter.MeterLogic.onPerfectGuard(defender);          // both bars (CX-20)
         com.dbzenith.duel.Duels.onDefense(defender, true);
         tell(defender, "message.dbzenith.perfect_guard", ChatFormatting.GOLD);
         tell(attacker, "message.dbzenith.parried", ChatFormatting.RED);

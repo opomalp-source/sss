@@ -45,8 +45,8 @@ public record InputPacket(Action action) {
                 case TRANSFORM_DOWN -> FormHandler.revertOne(player);
                 case RACIAL_USE -> com.dbzenith.race.RacialSkillEffects.use(player);
                 case SKILL_USE -> com.dbzenith.race.RacialSkillEffects.useSkill(player);
-                case KAIOKEN_UP -> com.dbzenith.transform.Kaioken.raise(player, data);
-                case KAIOKEN_OFF -> com.dbzenith.transform.Kaioken.stop(player, data, false);
+                case KAIOKEN_UP -> com.dbzenith.combat.meter.MeterLogic.techniqueUp(player, data);          // Kaioken, then Ultra Instinct (CX-20)
+                case KAIOKEN_OFF -> com.dbzenith.combat.meter.MeterLogic.techniqueOff(player, data);
             }
         });
     }

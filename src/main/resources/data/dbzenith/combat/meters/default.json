@@ -1,0 +1,37 @@
+{
+  "form": {
+    "per_percent_dealt": 1.0,
+    "per_percent_taken": 1.5,
+    "perfect_guard": 5,
+    "drain_per_second": 1.0,
+    "drain_per_tier": 0.25,
+    "decay_after_seconds": 10,
+    "decay_per_second": 3,
+    "steps": {}
+  },
+  "technique": {
+    "per_percent_dealt": 0.0,
+    "per_percent_taken": 0.0,
+    "perfect_guard": 10,
+    "vanish": 6,
+    "counter": 8,
+    "combo_every": 5,
+    "combo": 4,
+    "charging_per_second": 2,
+    "drain_per_second": 2,
+    "decay_after_seconds": 10,
+    "decay_per_second": 3,
+    "kaioken": [
+      { "stage": 2, "at": 25 },
+      { "stage": 4, "at": 40 },
+      { "stage": 10, "at": 60 },
+      { "stage": 20, "at": 80 }
+    ],
+    "ultra_instinct_at": 100,
+    "colors": {
+      "kaioken": "#FF2A1E",
+      "ultra_instinct_sign": "#A9B1BD",
+      "ultra_instinct": "#F4F8FF"
+    }
+  }
+}

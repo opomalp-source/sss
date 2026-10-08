@@ -398,6 +398,13 @@ public final class DBZCommand {
                                     ctx.getSource().sendSuccess(() -> Component.literal("Special meter set to " + v), true);
                                     return 1;
                                 }))))
+                .then(Commands.literal("unlockform")                                // CX-20: unlock a form outright (past level, mastery, flags)
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("form", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(Forms.all().stream().map(Form::id), b))
+                                        .executes(ctx -> unlockForm(ctx, true))
+                                        .then(Commands.argument("on", BoolArgumentType.bool())
+                                                .executes(ctx -> unlockForm(ctx, BoolArgumentType.getBool(ctx, "on")))))))
                 .then(Commands.literal("meter")                                     // the PvP meters (CX-20): set a bar's value
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("bar", StringArgumentType.word())
@@ -697,6 +704,20 @@ public final class DBZCommand {
     }
 
     /** Dev: a combat-engine press for players, as if from their keys (CX-19). */
+    /** /dbz unlockform: sets or clears a form's unlock flag (CX-20, for testing the form bar). */
+    private static int unlockForm(CommandContext<CommandSourceStack> ctx, boolean on) throws CommandSyntaxException {
+        String id = StringArgumentType.getString(ctx, "form");
+        if (!Forms.exists(id)) {
+            ctx.getSource().sendFailure(Component.literal("Unknown form: " + id));
+            return 0;
+        }
+        for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
+            ModCapabilities.get(p).ifPresent(d -> d.setFlag(com.dbzenith.transform.FormHandler.UNLOCK_FLAG + id, on));
+        }
+        ctx.getSource().sendSuccess(() -> Component.literal((on ? "Unlocked " : "Locked again ") + id), true);
+        return 1;
+    }
+
     private static int strike(CommandContext<CommandSourceStack> ctx, String direction) throws CommandSyntaxException {
         var button = "heavy".equals(StringArgumentType.getString(ctx, "button")) ? com.dbzenith.combat.engine.Move.Button.HEAVY : com.dbzenith.combat.engine.Move.Button.LIGHT;
         var push = switch (direction) {

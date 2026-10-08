@@ -58,6 +58,10 @@ public final class Kaioken {
             player.displayClientMessage(Component.translatable("message.dbzenith.kaioken_max", max), true);
             return false;
         }
+        if (d.getKaiokenStage() + 1 > com.dbzenith.combat.meter.MeterLogic.kaiokenCap(d)) {   // in PvP, the technique bar (CX-20)
+            com.dbzenith.combat.meter.MeterLogic.tellKaiokenLow(player, d, d.getKaiokenStage() + 1);
+            return false;
+        }
         if (d.getBody() < d.getDerived().maxBody() * 0.15) {
             player.displayClientMessage(Component.translatable("message.dbzenith.kaioken_weak"), true);
             return false;
