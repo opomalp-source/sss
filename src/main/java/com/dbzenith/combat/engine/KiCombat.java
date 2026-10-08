@@ -133,6 +133,7 @@ public final class KiCombat {
 
     /** The Ki Blast key went down or up. */
     public static void key(ServerPlayer p, boolean down) {
+        if (down && !com.dbzenith.combat.PvpRules.combatOn(p)) return;      // PvP off: no ki blasts (CX-20)
         long now = p.level().getGameTime();
         if (com.dbzenith.skill.BeamStruggle.isStruggling(p)) {                  // in a beam clash: the key is a surge
             if (down) com.dbzenith.skill.BeamStruggle.surge(p);

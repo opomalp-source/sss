@@ -32,6 +32,7 @@
     "form:final_form": {"idle": "idle_regal"},
     "form:beast_awakening": {"idle": "idle_powered"},
     "form:potential_unleashed": {"idle": "idle_powered"},
-    "form:ultimate": {"idle": "idle_powered"}
+    "form:ultimate": {"idle": "idle_powered"},
+    "mode:fighting": {"idle": "fight_idle", "walk": "fight_walk"}
   }
 }

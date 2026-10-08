@@ -156,6 +156,16 @@ public final class PvpRules {
     // ------------------------------------------------------------------ toggling
 
     /**
+     * Whether {@code e} fights with the combat system (CX-20): players only in PvP mode (off, it is plain Minecraft:
+     * vanilla hits, no combat moves), NPCs always.
+     */
+    public static boolean combatOn(net.minecraft.world.entity.LivingEntity e) {
+        if (!(e instanceof net.minecraft.world.entity.player.Player p)) return true;
+        PlayerData d = ModCapabilities.get(p).orElse(null);
+        return d != null && d.isPvp();
+    }
+
+    /**
      * Turns PvP mode on or off ({@code want} null: the other way), as the player asked: a plain switch, no sound, light or
      * message (change request, phase 1). Silently refused during the toggle cooldown (0 by default), or turning it off
      * while combat-tagged. Returns whether it changed.
@@ -177,6 +187,11 @@ public final class PvpRules {
         PlayerData d = ModCapabilities.get(p).orElse(null);
         if (d == null) return;
         d.setPvp(on);
+        if (!on) {                                                              // back to plain Minecraft: no guard up, no lock (CX-20)
+            GuardRules.lower(d);
+            com.dbzenith.combat.engine.Targeting.set(p, -1);
+            com.dbzenith.network.ModNetwork.sendTo(p, new com.dbzenith.network.LockOnPacket(-1));
+        }
         if (!forced) d.setPvpReadyAt(p.level().getGameTime() + DBZConfig.SERVER.pvpToggleCooldown.get() * 20L);
     }
 }

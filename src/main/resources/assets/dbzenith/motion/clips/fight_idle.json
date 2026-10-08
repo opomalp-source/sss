@@ -1,0 +1,13 @@
+{
+  "_doc": "The default fighting stance (CX-20, PvP on): side-on, fists up (the right high and back, the left out front), knees bent, a light bounce on the balls of the feet.",
+  "sync": "time", "length": 24, "loop": true,
+  "bones": {
+    "torso":    [{"t": 0.0, "rot": [5, -16, 0]}, {"t": 0.5, "rot": [7, -15, 0]}],
+    "head":     [{"t": 0.0, "rot": [2, 6, 0]}],
+    "rightArm": [{"t": 0.0, "rot": [-36, -8, 12], "bend": 110}, {"t": 0.5, "rot": [-33, -8, 13], "bend": 112}],
+    "leftArm":  [{"t": 0.0, "rot": [-60, 10, -8], "bend": 88}, {"t": 0.5, "rot": [-56, 10, -9], "bend": 90}],
+    "rightLeg": [{"t": 0.0, "rot": [14, 0, 8], "bend": 20}, {"t": 0.5, "rot": [16, 0, 8], "bend": 26}],
+    "leftLeg":  [{"t": 0.0, "rot": [-16, 0, -5], "bend": 22}, {"t": 0.5, "rot": [-18, 0, -5], "bend": 28}],
+    "body":     [{"t": 0.0, "pos": [0, 1.0, 0]}, {"t": 0.5, "pos": [0, 1.45, 0]}]
+  }
+}

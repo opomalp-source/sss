@@ -122,7 +122,9 @@ public final class MotionEngine {
         m.takeoffO = m.takeoff;
         m.flyBlendO = m.flyBlend;
         m.walkAmpO = m.walkAmp;
+        m.fightO = m.fight;
         resolveClips(m);
+        m.fight = approach(m.fight, fighting(e) ? 1f : 0f, dt / Math.max(1f, Tuning.blendFight));   // into the fighting set and out, blended
         sense(m);
 
         // ---- the engine against vanilla: off for swimming, riding, sleeping, crouching, dying, the Great Ape
@@ -305,6 +307,19 @@ public final class MotionEngine {
         return State.WALK;
     }
 
+
+    /**
+     * Whether a figure is in the fighting set (CX-20): a player in PvP mode; a training dummy that isn't just standing;
+     * any other mob while it is aggressive (in a fight).
+     */
+    static boolean fighting(LivingEntity e) {
+        if (e instanceof Player) {
+            PublicStatePacket ps = ClientPublicStates.get(e.getId());
+            return ps != null && ps.has(PublicStatePacket.PVP);
+        }
+        if (e instanceof com.dbzenith.npc.TrainingDummy d) return d.mode() != com.dbzenith.npc.TrainingDummy.Mode.STAND;
+        return e instanceof net.minecraft.world.entity.Mob mob && mob.isAggressive();
+    }
     /** Looks each state's clip up again when the data reloads or the figure's race or form changes. */
     private static void resolveClips(Motion m) {
         LivingEntity e = m.entity;
@@ -327,6 +342,12 @@ public final class MotionEngine {
         for (State s : State.ALL) {
             String id = set == null ? null : set.clipFor(s, keys, MotionData.sets(), 0);
             m.clips[s.ordinal()] = MotionData.clip(id);
+        }
+        String[] fightKeys = {"mode:fighting", keys[0], keys[1], keys[2]};   // the fighting stance wins over a race's or form's idle
+        for (State s : State.ALL) {
+            String id = set == null ? null : set.clipFor(s, fightKeys, MotionData.sets(), 0);
+            Clip c = MotionData.clip(id);
+            m.fightClips[s.ordinal()] = c == m.clips[s.ordinal()] ? null : c;   // null: the same clip either way
         }
     }
 
@@ -353,11 +374,12 @@ public final class MotionEngine {
         for (State s : State.ALL) {
             int i = s.ordinal();
             float w = smooth(Mth.lerp(pt, m.weightO[i], m.weight[i])) / total;
-            Clip c = m.clips[i];
+            Clip c = m.clips[i], fc = m.fightClips[i];
             if (w <= 0f || c == null) continue;
-            float t = c.sync == Clip.Sync.STRIDE ? gait : Mth.lerp(pt, m.timeO[i], m.time[i]) / c.length;
             if (s == State.WALK) w *= amp;                                    // slow walks swing less
-            c.sample(t, p, w);
+            float f = fc == null ? 0f : smooth(Mth.lerp(pt, m.fightO, m.fight));
+            if (f < 1f) c.sample(c.sync == Clip.Sync.STRIDE ? gait : Mth.lerp(pt, m.timeO[i], m.time[i]) / c.length, p, w * (1f - f));
+            if (f > 0f) fc.sample(fc.sync == Clip.Sync.STRIDE ? gait : Mth.lerp(pt, m.timeO[i], m.time[i]) / fc.length, p, w * f);   // the fighting stance (CX-20)
         }
         if (!m.simple) procedural(m, p, pt);
         couple(m, p, pt);

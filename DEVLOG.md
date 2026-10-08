@@ -1756,3 +1756,33 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   - Lock-on no longer reads anyone's PvP state (other players are simply foes).
   - The toggle cooldown defaults to 0.
   - Seven strings removed. The PvP test now checks the switch flips straight back. 184 GameTests.
+
+## 2026-10-08 — CX-20 phase 2: PvP off is plain Minecraft, PvP on is the fighting stance and the shoulder camera (v0.62.0)
+- **PvP off = plain Minecraft** (`PvpRules.combatOn`: players only in PvP mode, NPCs always). The server refuses, with PvP off:
+  - engine presses (lights, heavies, counters);
+  - the Dash key's combat moves (vanish window, super dash, chase, Burst, side step, spot dodge, rolls, air recovery). The plain dash stays, without its afterimage dodge or Z-hit;
+  - guard;
+  - Ki Blast key presses;
+  - techniques that attack (self techniques such as healing and ki sense stay; the admin path is exempt);
+  - lock-on.
+
+  Melee with PvP off is vanilla's own swing and vanilla's own damage (`plain`), outside the PvP balance curve. Flying, charging, transforming, Kaioken, skills, mining and the rest are untouched.
+- **The client agrees** (`ClientPvp`): the attack key is a vanilla punch with PvP off, nothing is predicted, and lock-on won't lock (and lets go when PvP goes off).
+- **PvP on = the combat system,** as before.
+  - Switching PvP off lowers the guard and lets go of a lock.
+  - Duels and tournament matches switch their fighters into PvP mode.
+- **The fighting stance follows PvP mode:**
+  - The motion engine has a fighting set (`mode:fighting` overrides in `motion/sets/fighter.json`: `fight_idle`, side-on with fists up and a light bounce; `fight_walk`, short steps with the guard held).
+  - Each figure has a fighting weight that eases in and out over 5 ticks (`Tuning.blendFight`), sampled together with the normal clips, so switching blends and never pops.
+  - Players are in it while in PvP mode, the training dummy unless it is just standing, and other mobs while aggressive.
+  - The stance after punching or being hit with PvP off is gone: a relaxed idle. With the motion engine off, the keyframe stance follows PvP mode instead.
+- **The PvP camera** (user's addition; `client/ShoulderCam`):
+  - PvP on switches to third person, and the camera eases over the right shoulder (`Camera.move` by reflection, during the camera-angle event, with a wall check so it never enters blocks).
+  - PvP off goes back to the view you had.
+  - Client config `pvpCamera`, `shoulderOffset` (0.8), `shoulderHeight` (0.15), also in Settings → Camera.
+  - Lock-on's own left-turn framing is skipped while it is active.
+- **Tests:**
+  - Test players start in PvP mode (where the older combat tests fight).
+  - `PvpModeTests`: PvP off means no combos, a weak plain punch, no ki blasts or attack techniques, and a dash without the dodge; PvP on means the engine's blows and no vanilla punch. Turning PvP off lowers the guard.
+  - 186 GameTests.
+- **Checked in the dev client** (empty hand): a relaxed first-person idle with PvP off; on, third person over the shoulder in the fighting stance (from behind and from the side), the guard held while walking; off again, back to first person.

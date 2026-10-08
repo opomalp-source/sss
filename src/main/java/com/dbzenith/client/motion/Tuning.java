@@ -21,6 +21,7 @@ public final class Tuning {
     public static float blendLand = 2f;
     public static float blendAir = 4f;
     public static float blendEngine = 6f;          // the whole engine fading in or out (vanilla poses, items, swimming)
+    public static float blendFight = 5f;           // into the fighting set and out of it (CX-20: PvP on or off)
 
     // ---------------------------------------------------------------- thresholds
     public static float moveThreshold = 0.012f;    // slower than this is standing

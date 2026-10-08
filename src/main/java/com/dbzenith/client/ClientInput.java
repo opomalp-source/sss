@@ -131,6 +131,7 @@ public final class ClientInput {
     public static void onAttackKey(net.minecraftforge.client.event.InputEvent.InteractionKeyMappingTriggered event) {
         Minecraft mc = Minecraft.getInstance();
         if (!event.isAttack() || mc.player == null || !mc.player.getMainHandItem().isEmpty() || mc.player.isSpectator()) return;
+        if (!ClientPvp.on()) return;                                     // PvP off: a plain vanilla punch (CX-20)
         if (mc.hitResult != null && mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK && !foeAhead(mc)) return;
         event.setCanceled(true);
         event.setSwingHand(false);

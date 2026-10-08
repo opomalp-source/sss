@@ -1,0 +1,17 @@
+{
+  "_doc": "Moving in the fighting stance (CX-20, PvP on): short, light steps with the knees bent and the guard held up, the fists barely moving. Stride-synced, symmetric.",
+  "sync": "stride", "loop": true, "symmetric": true, "stride": 2.0,
+  "bones": {
+    "rightLeg": [
+      {"t": 0.00, "rot": [-22, 0, 4], "bend": 16},
+      {"t": 0.30, "rot": [-2, 0, 4], "bend": 14},
+      {"t": 0.50, "rot": [18, 0, 4], "bend": 18},
+      {"t": 0.65, "rot": [8, 0, 4], "bend": 40},
+      {"t": 0.85, "rot": [-16, 0, 4], "bend": 26}
+    ],
+    "rightArm": [{"t": 0.00, "rot": [-36, -8, 12], "bend": 108}, {"t": 0.50, "rot": [-32, -8, 13], "bend": 112}],
+    "leftArm":  [{"t": 0.00, "rot": [-58, 10, -8], "bend": 88}, {"t": 0.50, "rot": [-62, 10, -8], "bend": 86}],
+    "torso":    [{"t": 0.00, "rot": [6, -14, 0]}, {"t": 0.50, "rot": [6, -12, 0]}],
+    "body":     [{"t": 0.00, "pos": [0, 1.1, 0]}, {"t": 0.25, "pos": [0, 0.8, 0]}, {"t": 0.50, "pos": [0, 1.1, 0]}, {"t": 0.75, "pos": [0, 0.8, 0]}]
+  }
+}

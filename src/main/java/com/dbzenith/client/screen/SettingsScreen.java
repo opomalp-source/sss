@@ -72,6 +72,8 @@ public class SettingsScreen extends Screen {
                 o.add(new Option("lock_camera", c.lockOnCameraSpeed, 0, 3, null));                // lock-on (CX-19)
                 o.add(new Option("lock_free_look", c.lockOnFreeLook, 0, 90, null, "\u00b0"));
                 o.add(new Option("lock_range", c.lockOnRange, 8, 80, null, "m"));
+                o.add(new Option("pvp_camera", c.pvpCamera, 0, 0, null));                         // CX-20
+                o.add(new Option("shoulder_offset", c.shoulderOffset, 0, 3, null, "b"));
             }
             case COMBAT -> {                                                    // CX-19
                 o.add(new Option("damage_popups", c.damagePopups, 0, 0, null));
@@ -128,13 +130,14 @@ public class SettingsScreen extends Screen {
                     protected void updateMessage() {
                         double v = opt.min + value * (opt.max - opt.min);
                         setMessage(Component.literal(opt.unit.equals("%") ? String.format("%.0f%%", v * 100)
-                                : opt.unit.equals("m") ? Component.translatable("settings.dbzenith.blocks", Math.round(v)).getString() : Math.round(v) + opt.unit));
+                                : opt.unit.equals("m") ? Component.translatable("settings.dbzenith.blocks", Math.round(v)).getString()
+                                : opt.unit.equals("b") ? Component.translatable("settings.dbzenith.blocks", String.format("%.1f", v)).getString() : Math.round(v) + opt.unit));
                     }
 
                     @Override
                     protected void applyValue() {
                         double v = opt.min + value * (opt.max - opt.min);
-                        dbl.set(opt.unit.equals("%") ? Math.round(v * 100) / 100.0 : Math.round(v));
+                        dbl.set(opt.unit.equals("%") ? Math.round(v * 100) / 100.0 : opt.unit.equals("b") ? Math.round(v * 10) / 10.0 : Math.round(v));
                         save();
                     }
                 };

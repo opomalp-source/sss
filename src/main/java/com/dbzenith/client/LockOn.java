@@ -82,6 +82,7 @@ public final class LockOn {
     public static void keyPressed(boolean next) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
+        if (!ClientPvp.on()) return;                                           // PvP off: no lock-on (CX-20)
         if (target != null && !next) {
             release(true);
             return;
@@ -184,6 +185,10 @@ public final class LockOn {
         if (event.phase != TickEvent.Phase.END || target == null) return;
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer p = mc.player;
+        if (p != null && !ClientPvp.on()) {                                  // PvP switched off: let go (CX-20)
+            target = null;
+            return;
+        }
         if (p == null || mc.level == null || !p.isAlive() || target.level() != mc.level) {
             target = null;
             return;
@@ -242,7 +247,7 @@ public final class LockOn {
         appliedPitch = pitch;
         // third person: over the shoulder. The view turns a little left and down for this frame only, so the camera,
         // which orbits behind, sees the foe up and to the right of you instead of hidden behind your back
-        boolean behind = mc.options.getCameraType() == net.minecraft.client.CameraType.THIRD_PERSON_BACK;
+        boolean behind = mc.options.getCameraType() == net.minecraft.client.CameraType.THIRD_PERSON_BACK && !ShoulderCam.active();   // the PvP camera is already over the shoulder
         shoulder += ((behind ? 1f : 0f) - shoulder) * (1 - (float) Math.exp(-dt * 6.0));
         float steep = Math.max(0.45f, Mth.cos(pitch * Mth.DEG_TO_RAD));               // looking far up or down, a turn shows less
         renderYaw = yaw - SHOULDER_YAW / steep * shoulder;

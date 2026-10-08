@@ -79,6 +79,7 @@ public final class CombatEngine {
 
     /** A press from a fighter. Returns whether a move started now (false: refused, or buffered for later). */
     public static boolean press(LivingEntity e, Moves.Input in) {
+        if (!com.dbzenith.combat.PvpRules.combatOn(e)) return false;          // PvP off: no combat moves (CX-20)
         Fighter f = of(e);
         long now = e.level().getGameTime();
         if (now == f.lastPressTick && f.move != null && f.moveTick == 0) return false;   // one new move per tick
@@ -155,7 +156,7 @@ public final class CombatEngine {
     /** Players throw blows through the engine, not vanilla's punch: a bare-handed vanilla attack does nothing. */
     @SubscribeEvent
     public static void onVanillaAttack(AttackEntityEvent event) {
-        if (event.getEntity().getMainHandItem().isEmpty() && Moves.loaded()) event.setCanceled(true);
+        if (event.getEntity().getMainHandItem().isEmpty() && Moves.loaded() && com.dbzenith.combat.PvpRules.combatOn(event.getEntity())) event.setCanceled(true);   // PvP off: a plain punch (CX-20)
     }
 
     // ------------------------------------------------------------------ ticking

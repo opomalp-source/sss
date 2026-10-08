@@ -292,6 +292,7 @@ public final class Tournament {
                 f.setNoAi(false);
                 f.setOpponent(fighters[1 - i]);
             }
+            if (fighters[i] instanceof net.minecraft.server.level.ServerPlayer sp) com.dbzenith.combat.PvpRules.set(sp, true, true);   // a match is a fight (CX-20)
         }
         actionbar(Component.translatable("tournament.dbzenith.fight").withStyle(ChatFormatting.RED, ChatFormatting.BOLD));
         level.playSound(null, ring, SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.PLAYERS, 1.4f, 1.4f);

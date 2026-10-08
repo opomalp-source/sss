@@ -18,6 +18,8 @@ public final class Motion {
     State state = State.IDLE, candidate = State.IDLE;
     int candidateTicks;
     final Clip[] clips = new Clip[State.COUNT];
+    final Clip[] fightClips = new Clip[State.COUNT];   // the fighting set (CX-20): PvP on, or an NPC in a fight
+    float fight, fightO;                              // how far into the fighting set, 0..1, eased
     int clipsVersion = -1;
     String raceKey, formKey;
 

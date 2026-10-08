@@ -172,6 +172,8 @@ public final class Duels {
         d.starts[0] = new Vec3(d.center.x - dir.x * SPACING, a.getY(), d.center.z - dir.z * SPACING);
         d.starts[1] = new Vec3(d.center.x + dir.x * SPACING, b.getY(), d.center.z + dir.z * SPACING);
         ACTIVE.add(d);
+        com.dbzenith.combat.PvpRules.set(a, true, true);                        // a duel is a fight: both in PvP mode (CX-20)
+        com.dbzenith.combat.PvpRules.set(b, true, true);
         CombatLog.near(d.level, d.center, Component.translatable("log.dbzenith.duel_start", a.getDisplayName(), b.getDisplayName(), d.bestOf));
         beginRound(d);
         return d;

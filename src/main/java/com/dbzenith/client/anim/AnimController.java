@@ -129,10 +129,7 @@ public final class AnimController {
         if (state.has(PublicStatePacket.HEAVY)) return Anims.HEAVY_WINDUP;
         if (state.has(PublicStatePacket.CHARGING) || state.has(PublicStatePacket.TRANSFORMING)) return Anims.CHARGE;
         if (com.dbzenith.client.motion.MotionEngine.enabled()) {                    // the motion engine moves the body now
-            double mx = player.getX() - player.xo, mz = player.getZ() - player.zo;
-            boolean bare = player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty();
-            boolean fresh = now - t.lastPunch < 100 || now - t.lastHurtTick < 100;
-            return bare && fresh && player.onGround() && mx * mx + mz * mz < 0.0225 ? Anims.COMBAT_STANCE : null;
+            return null;                                                       // the fighting stance is the motion engine's, by PvP mode (CX-20)
         }
         if (state.has(PublicStatePacket.FLYING) && !player.onGround()) {
             double dx = player.getX() - player.xo, dz = player.getZ() - player.zo;
@@ -153,7 +150,7 @@ public final class AnimController {
         if (player.isSprinting() && horizontal > 0.24) return Anims.SPRINT;
         boolean bareHands = player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty();
         if (!bareHands) return null;                                                   // items keep vanilla's arms
-        if ((now - t.lastPunch < 100 || now - t.lastHurtTick < 100) && horizontal < 0.15) return Anims.COMBAT_STANCE;
+        if (state.has(PublicStatePacket.PVP) && horizontal < 0.15) return Anims.COMBAT_STANCE;   // PvP on: the fighting stance; off: a relaxed idle (CX-20)
         if (horizontal < 0.01) return Anims.idleFor(state.raceEnum());
         return null;
     }

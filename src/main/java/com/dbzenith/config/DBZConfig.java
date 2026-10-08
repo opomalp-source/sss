@@ -718,7 +718,8 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue showDebugOverlay;
         public final ForgeConfigSpec.BooleanValue customHotbar;
         public final ForgeConfigSpec.BooleanValue hideVanillaHearts;
-        public final ForgeConfigSpec.BooleanValue transformCutIn, ultimateCinematic, damagePopups, prediction, enemyPanel, combatCallouts, comboCounter, combatLog, hitboxOverlay;
+        public final ForgeConfigSpec.BooleanValue transformCutIn, ultimateCinematic, damagePopups, prediction, enemyPanel, combatCallouts, comboCounter, combatLog, hitboxOverlay, pvpCamera;
+        public final ForgeConfigSpec.DoubleValue shoulderOffset, shoulderHeight;
         public final ForgeConfigSpec.DoubleValue lockOnRange, lockOnCameraSpeed, lockOnFreeLook;
         public final ForgeConfigSpec.DoubleValue screenShake;
         public final ForgeConfigSpec.BooleanValue hitstop;
@@ -762,6 +763,10 @@ public final class DBZConfig {
                     .define("combatLog", true);
             hitboxOverlay = b.comment("Training aid: draw every move's hitbox (yellow: startup, red: active, blue: recovery) and a frame bar for your own moves. Also /dbzhitbox")
                     .define("hitboxOverlay", false);
+            pvpCamera = b.comment("PvP on: third person, over the right shoulder (and back to your view when PvP goes off)")
+                    .define("pvpCamera", true);
+            shoulderOffset = b.comment("PvP camera: blocks to the right of your character").defineInRange("shoulderOffset", 0.8, 0.0, 3.0);
+            shoulderHeight = b.comment("PvP camera: blocks up").defineInRange("shoulderHeight", 0.15, -1.0, 2.0);
             lockOnRange = b.comment("Lock-on (key N): how far away a foe can be locked onto, in blocks")
                     .defineInRange("lockOnRange", 48.0, 8.0, 80.0);
             lockOnCameraSpeed = b.comment("Lock-on: how quickly the camera turns to keep the foe framed (0 = it doesn't; only the marker shows)")

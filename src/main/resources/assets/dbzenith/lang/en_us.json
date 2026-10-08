@@ -1874,5 +1874,9 @@
   "settings.dbzenith.combat_log": "Combat log",
   "settings.dbzenith.combat_log.desc": "A feed on the right of knockouts, big combos, guard breaks, bursts, ultimates and duels near you.",
   "settings.dbzenith.hitbox_overlay": "Hitboxes & frame data",
-  "settings.dbzenith.hitbox_overlay.desc": "Training aid: every move's hitbox (yellow startup, red active, blue recovery), everyone's hurtbox, and a frame bar for your own moves. Also /dbzhitbox."
+  "settings.dbzenith.hitbox_overlay.desc": "Training aid: every move's hitbox (yellow startup, red active, blue recovery), everyone's hurtbox, and a frame bar for your own moves. Also /dbzhitbox.",
+  "settings.dbzenith.pvp_camera": "PvP camera",
+  "settings.dbzenith.pvp_camera.desc": "In PvP mode, third person over your right shoulder; back to your own view when PvP goes off.",
+  "settings.dbzenith.shoulder_offset": "Shoulder offset",
+  "settings.dbzenith.shoulder_offset.desc": "How far to the right of your character the PvP camera sits."
 }

@@ -32,7 +32,7 @@ public final class Targeting {
             return true;
         }
         Entity e = p.level().getEntity(entityId);
-        if (!valid(p, e)) {
+        if (!valid(p, e) || !com.dbzenith.combat.PvpRules.combatOn(p)) {   // PvP off: no lock-on (CX-20)
             LOCKS.remove(p.getUUID());
             return false;
         }

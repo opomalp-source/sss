@@ -83,7 +83,7 @@ public final class Prediction {
 
     /** Can this client's own fighter act at all, as far as it knows? */
     private static boolean free(Minecraft mc, LocalPlayer p) {
-        if (!enabled() || mc.screen != null || !p.isAlive() || p.isSpectator() || mc.level == null) return false;
+        if (!enabled() || mc.screen != null || !p.isAlive() || p.isSpectator() || mc.level == null || !ClientPvp.on()) return false;   // PvP off: nothing to predict (CX-20)
         Fighter.State s = FighterStates.get(p.getId());
         if (s == Fighter.State.STUNNED || s == Fighter.State.LAUNCHED || s == Fighter.State.KNOCKDOWN) return false;
         PlayerData d = ClientPlayerData.get();

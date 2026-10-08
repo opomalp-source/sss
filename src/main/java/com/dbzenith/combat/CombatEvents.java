@@ -54,10 +54,14 @@ public final class CombatEvents {
 
         // 1) raw DBZ damage
         double raw;
+        boolean plain = false;                                                   // PvP off: vanilla damage (CX-20)
         int impact = -1; // which hit effect the clients draw (ImpactPacket), -1 for none
         if (isKi || isThrow || isStrike) {
             raw = event.getAmount(); // ki blasts, throws and the engine's blows deal raw DBZ damage
             if (isStrike) impact = com.dbzenith.combat.engine.CombatEngine.pendingImpact >= 0 ? com.dbzenith.combat.engine.CombatEngine.pendingImpact : ImpactPacket.PUNCH;
+        } else if (isMelee && attackerData != null && !attackerData.isPvp()) {   // PvP off: a plain, weak hit, vanilla's own damage (CX-20)
+            plain = true;
+            raw = DamageCalculator.fromVanilla(event.getAmount());
         } else if (isMelee && attackerData != null) {                       // a weapon: vanilla's swing, with DBZ strength behind it
             attackerData.recomputeIfStale();
             DBZConfig.Server c = DBZConfig.SERVER;
@@ -113,7 +117,7 @@ public final class CombatEvents {
             if (isKi && !afterimage) raw *= RacePassives.absorbKiHit(victimData, raw, victim.level().getGameTime());
             dealt = afterimage ? 0 : DamageCalculator.againstPlayer(raw, victimData, source.getEntity() != null && !isThrow, victim.getRandom());
             dealt *= 1 - victimData.getGearReduction();                          // a full gi or armour set
-            if (attackerData != null && attacker != victim && attacker instanceof Player) {   // the PvP balance curve (CX-19 phase 10)
+            if (!plain && attackerData != null && attacker != victim && attacker instanceof Player) {   // the PvP balance curve (CX-19 phase 10)
                 com.dbzenith.combat.engine.Fighter g = com.dbzenith.combat.engine.CombatEngine.peek(victim);
                 double comboSoFar = g != null && g.comboFrom() == attacker.getId() ? g.comboDamage() : 0;
                 dealt = PvpBalance.apply(attackerData, victimData, dealt, comboSoFar, isKi);
@@ -169,7 +173,7 @@ public final class CombatEvents {
                 }
                 guarded = gd > 0;
             }
-            float amount = isKi || isThrow || isMelee || isStrike ? DamageCalculator.toVanilla(raw) : event.getAmount();
+            float amount = !plain && (isKi || isThrow || isMelee || isStrike) ? DamageCalculator.toVanilla(raw) : event.getAmount();
             if (victim instanceof com.dbzenith.npc.KiFighter fighter) amount /= (float) fighter.toughness(); // leveled foes
             event.setAmount(amount);
         }

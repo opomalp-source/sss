@@ -38,6 +38,7 @@ public final class TechniqueHandler {
         if (com.dbzenith.registry.ModEffects.isKiSealed(player)) return Result.SEALED;
         if (BeamStruggle.isStruggling(player)) return Result.INVALID;     // both hands are busy
         if (!com.dbzenith.duel.Duels.kiAllowed(player)) return Result.INVALID;   // a melee-only duel (CX-19 phase 9)
+        if (!bypassDeck && technique.style() != Technique.Style.SELF && !com.dbzenith.combat.PvpRules.combatOn(player)) return Result.INVALID;   // PvP off: no attacks (CX-20)
         if (!bypassDeck && !(data.knows(technique.id()) && data.deckView().contains(technique.id()))) return Result.NOT_EQUIPPED;
         if (technique.effect() == Technique.Effect.SPIRIT_BOMB && KiBlastEntity.releaseSpiritBomb(player)) {   // cast again: thrown
             com.dbzenith.network.ModNetwork.sendToTrackingAndSelf(player,
