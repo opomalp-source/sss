@@ -11,12 +11,51 @@ default shown in `client/aura/AuraDef.java`.
 
 | Command | What it does |
 |---|---|
-| `/dbzaura <id>` | Wear that aura yourself, whatever your form. F5 to look at it. |
+| `/dbzaura <id> [stage]` | Wear that aura yourself, whatever your form (a technique's, like `kaioken 20`, goes over it). F5 to look at it. |
 | `/dbzaura off` | Stop. |
 | `/dbzaura state idle\|charge\|fly\|hit\|burst` | Hold your aura in a state. `hit` and `burst` repeat; `hithold`, `bursthold` freeze them. |
 | `/dbzaura set <path> <value>` | Change one value live, e.g. `/dbzaura set layers.2.spikes.size 0.2` or `/dbzaura set shape.peak 0.3`. Colours as `#RRGGBB`. |
 | `/dbzaura dump` | Save the aura you are looking at, with your changes, to `aura_tweaks/<id>.json` in the game folder. Copy it over the real file when you like it. |
 | `/dbzaura reload` | Read the aura files again (F3+T also works, but reloads everything). |
+
+## Where the files are
+
+| Folder | What |
+|---|---|
+| `auras/families/` | The ten family templates (flame, roar, divine, wisp, dark, tech, majin, regal, ssj4, base). |
+| `auras/forms/` | One file per form, made by `tools/gen_auras.py` (re-run it after changing its tables). |
+| `auras/techniques/` | Technique auras worn over the form's: `kaioken.json`. |
+| `auras/base.json`, `super_saiyan_blue.json` | The base form's charging aura; Blue, made by hand. |
+
+## Colours from a tint
+
+Any colour can be a `$` token made from the file's `"tint"`: `$c` (the tint), `$edge` (more saturated), `$mid`,
+`$core`, `$rim`, `$glow` (paler), `$deep`, `$dark` (darker), `$white`, `$black`. Families use them, so a form only sets
+its `tint`. With `"followFighter": true` the tint is the fighter's own aura colour instead (the base aura).
+`"idle": false` shows the aura only while charging.
+
+## Adding a technique's aura (or a Kaioken tier)
+
+A technique's file has `"technique": "<id>"` instead of `forms`, and is worn over the form's aura:
+
+```json
+{
+  "technique": "kaioken", "tint": "#FF2A1E",
+  "wrap": { "scale": 1.35, "height": 1.5 },
+  "grow": { "scale": 0.025, "height": 0.03, "wild": 0.06 },
+  "tiers": [ { "from": 1 }, { "from": 11, "wrap": { "scale": 1.55, "height": 1.8 }, "shape": { "peak": 0.7 } } ]
+}
+```
+
+`wrap` is its size against the form's aura (alone, it uses its own `shape`). Each `tiers` entry applies from its stage
+up: its values replace the file's (a `layers` list replaces the whole list). `grow` adds that much size, height and
+wildness for each stage past the tier's first. To add a tier, add an entry with a higher `from`.
+Preview: `/dbzaura kaioken 20` (over whatever aura you wear).
+
+## Lightning
+
+`"lightning": { "rate": 3, "size": 1.0, "color": "#F4FBFF" }`: about `rate` jagged bolts at a time flashing over the
+aura, more while charging.
 
 ## Adding a form's aura
 
@@ -64,7 +103,7 @@ Drawn in order: put the outermost first. One to six layers.
 
 | Key | Meaning |
 |---|---|
-| `kind` | `shell` (the flame body), `glow` (a bright band just outside another layer) or `haze` (a soft inner fill, no hard outline). |
+| `kind` | `shell` (the flame body), `glow` (a bright band just outside another layer), `haze` (a soft inner fill, no hard outline) or `tongues` (flame licks on the outline that rise and break off). |
 | `blend` | `normal` keeps colour in daylight; `add` adds light (glows, white-hot cores). Glows default to `add`. |
 | `scale`, `heightScale`, `lift` | Size and height against the aura's shape, and how far up it sits. A glow's scale is against the layer it wraps (1.03..1.1). |
 | `wraps` | For a glow: the index of the layer whose outline it follows (default: the next shell). |
@@ -75,6 +114,8 @@ Drawn in order: put the outermost first. One to six layers.
 | `spikes.count/size/sharpness/lean` | The outline cut into flames: how many round, how deep, 0 soft .. 1 sharp, how much they lean upward. |
 | `motion.scroll/flicker/streaks/speed` | Flames rising, spikes flickering, light streaks, and this layer's pace. |
 | `lobes`, `sway`, `seed` | How much of the body's bulges and sway it takes, and its own seed so it moves differently. |
+| `motion.warp/tallFlames/stretch/streakSpeed` | How much the flames twist, how much taller they are near the top, how long the noise is drawn out upward, how fast the light streaks climb. |
+| `tongues.count/length/width/life/top/rise/wave/inset/low` | For a `tongues` layer: how many at once, length (share of the height), width (share of their length), seconds each lives, share off the top, how far they climb, how much they wave, how far in from the outline they start, how low they start. |
 
 ### `particles` and `motes`
 
@@ -103,5 +144,4 @@ Packs with strong bloom (Complementary, BSL) can make auras look brighter.
 
 ## Coming in later phases
 
-Technique auras over form auras (Kaioken tiers), the other forms, Ultra Instinct, the transformation sequence, ground
-effects and light, NPC auras, and the quality settings. This guide grows with them.
+Ultra Instinct's afterimages, the transformation sequence, dynamic light, NPC auras, and the quality settings.

@@ -2085,3 +2085,39 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **Tests:** `AuraTests` checks layers, glows, reactions; `auraExtendsMerges`. 208 GameTests (two timing tests, guard meter and super dash, failed once on a slow first run and passed on the rerun).
 - **Checked in a dev client** (cloud container, Xvfb + llvmpipe): Blue idle (frame to frame), charging, hit flare, burst, flying sideways, side, back, top (a lobed disc), night, and the plain fallback.
 
+## 2026-10-08 — CX-24 phase 3: flames, every form, Kaioken, charge lock, auto-deploy (v0.74.0)
+- **The ask:** auras that burn like Dragon Ball Z flames, for every form and technique, each one different; flames that
+  stream back when moving; standing still while powering up; new builds landing in the mods folder by themselves.
+- **Bug fixed:** auras were drawing solid. A shader's blend mode is skipped when it was the last one applied, even after
+  something turned blending off; `AuraSystem.blend` now sets it by hand before every draw.
+- **Flame tongues** (`AuraFlames`, layer kind `tongues`): ribbons set on the aura's outline as the camera sees it (left,
+  right, over the top), shooting out, climbing, waving, letting go at the base and fading; drawn by the aura shader's
+  tongue mode (a tapered lick eaten by rising noise, white down the middle), or the old flame texture on shader packs.
+  Ribbons keep one facing so they never twist. Moving fast streams them out behind.
+- **Shell fire:** twisting upward noise (`warp`), flames taller near the top (`tallFlames`), streak speed and stretch per
+  layer. Moving sideways pulls the back of the shell out like a comet while the front stays round the fighter.
+- **Every form** (`tools/gen_auras.py`): ten families in `auras/families/` (flame, roar, divine, wisp, dark, tech, majin,
+  regal, SSJ4, base) using `$` colours made from each file's `tint`; one file per form in `auras/forms/` with its tint,
+  sizes grown by tier, more tongues by tier, and extras (lightning, embers, sparkles, colour accents). Blue keeps its own
+  file and gains soft wisps. The Great Apes burn none.
+- **Base form:** `base.json` follows the fighter's aura colour (`followFighter`) and only burns while charging (`idle`).
+- **Kaioken** (`auras/techniques/kaioken.json`, `technique`): worn over the form's aura (`wrap` 1.35 wide, 1.5 tall),
+  jagged red flames, pink to near-white inside, fast streaks, flecks; tiers by stage (x2-x10, then x20 and up: wider,
+  taller, wilder, lightning) with growth per stage; a stage up flares. The stage rides in the public state flags (bits
+  20-27); protocol 34.
+- **Lightning** (`lightning` block): jagged bolts flashing over the aura, a glow round a white core. **Ground:** a ring
+  lit under a charging fighter and one thrown out by a burst.
+- **Old renderer retired** (`AuraRenderer` is no longer subscribed).
+- **Charge lock** (`client.ChargeLock`): while charging ki or holding a transformation the movement keys do nothing and
+  speed dies away.
+- **Auto-deploy:** `tools/deploy.sh` publishes the jar on the `builds` branch (one commit, replaced each time; GitHub
+  releases are not allowed from these sessions). `tools/windows/Install DBZ auto-update.bat` installs the updater and a
+  scheduled task (every 10 minutes): it swaps the newest jar into `%APPDATA%\.minecraft-dbz\mods` and, when DBZ is in
+  it, `%APPDATA%\.minecraft\mods`, removes old `dbzenith-*.jar`, and retries later if Minecraft holds the file.
+- **Dev:** `/dbzaura <id> [stage]` (a technique goes over your aura), `auratech.` devshots, several `auraset.` per
+  shot, a clip mode (`seq<N>`), devshot names up to 256 characters, `tools/devshots.sh`.
+- **Tests:** every form's aura reads (with `extends`) and is sane; the base aura follows the fighter; Kaioken's tiers.
+  209 GameTests.
+- **Checked in a dev client:** SSJ, SSJ2, SSJ3, God, Blue (with wisps), UI, LSSJ3, SSJ4, Golden Frieza, Pure Majin,
+  Super Android, Elder Blood, Beast, the base aura charging, Kaioken alone and x10 / x20 over Blue, flying, and clips.
+

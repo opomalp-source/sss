@@ -231,8 +231,8 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [ ] CX-24 Auras reworked (animated, volumetric, data-driven), after the user's Godot prototype
   - [x] phase 1 (v0.72.0) The shell (own shader, glow, inner haze, sparkles, plain fallback for shader packs), data files, Super Saiyan Blue; /dbzaura
   - [x] phase 2 (v0.73.0) Layers as data, animation and states (idle, charging, flying trail, hit flare, burst), extends, live tweaking
-  - [ ] phase 3 Kaioken (X2-X10, X20-X100 tiers) over other auras, stacking
-  - [ ] phase 4 Super Saiyan and Super Saiyan God from data (and the other forms)
+  - [x] phase 3 (v0.74.0) Kaioken (X2-X10, X20+ tiers) over other auras, stacking; flame tongues; every form from data; charge lock; auto-deploy
+  - [x] phase 4 (v0.74.0) Super Saiyan and Super Saiyan God from data (and the other forms)
   - [ ] phase 5 Ultra Instinct (silver shimmer, afterimages)
   - [ ] phase 6 Transformation burst, ground effects, light
   - [ ] phase 7 Performance and config (quality, light, ground, own aura, intensity), live tweaking
