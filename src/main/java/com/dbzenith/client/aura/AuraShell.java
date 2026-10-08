@@ -59,6 +59,7 @@ final class AuraShell {
         float leanX = sway * height * Mth.sin(t * 0.9f + seed), leanZ = sway * height * Mth.cos(t * 0.7f + seed * 1.3f);
         float th = Mth.sqrt(tx * tx + tz * tz);
         float hx = th > 1e-4f ? tx / th : 0, hz = th > 1e-4f ? tz / th : 0;
+        float across = th / Math.max(1e-4f, Mth.sqrt(tx * tx + ty * ty + tz * tz));   // how much of the motion is sideways
         for (int i = 0; i <= this.rings; i++) {
             float s = i / (float) this.rings;
             float base = profile(d, s) * radius;
@@ -78,8 +79,10 @@ final class AuraShell {
                 if (d.lobeBillow > 0) l = Mth.lerp(d.lobeBillow, l, 2.2f * Math.abs(l) - 0.45f);   // round puffs, creased between
                 float r = base * (1 + lobes * env * l);
                 int k = i * MAX_SEGS + j;
-                float back = 0.55f + 0.45f * Math.max(0, cos[j] * hx + sin[j] * hz);
-                float w = drag * back;
+                // a comet: sideways motion pulls the back of the shell out behind while the front stays round the
+                // fighter; up or down motion streams the top (or the bottom) the other way
+                float back = Math.max(0, cos[j] * hx + sin[j] * hz);
+                float w = Mth.lerp(across, drag, 0.12f * drag + 1.05f * back * back * (0.35f + 0.65f * env));
                 x[k] = cos[j] * r + leanX * lean + tx * w;
                 y[k] = yy + ty * w;
                 z[k] = sin[j] * r + leanZ * lean + tz * w;

@@ -1,0 +1,118 @@
+{
+  "silhouette": "jagged",
+  "shape": {
+    "width": 1.55,
+    "height": 2.2,
+    "bottom": -0.06,
+    "widest": 0.3,
+    "taper": 1.45,
+    "tip": 0.6,
+    "peak": 0.25,
+    "flare": 0.14
+  },
+  "lobes": {
+    "count": 5,
+    "size": 0.09,
+    "rise": 0.9,
+    "rows": 3.0
+  },
+  "motion": {
+    "pulse": 0.04,
+    "pulseSpeed": 3.0,
+    "sway": 0.04
+  },
+  "layers": [
+    {
+      "kind": "glow",
+      "scale": 1.07,
+      "opacity": 0.65,
+      "colors": {
+        "rim": "$edge"
+      }
+    },
+    {
+      "kind": "shell",
+      "colors": {
+        "core": "$dark",
+        "mid": "$deep",
+        "edge": "$edge",
+        "rim": "$rim"
+      },
+      "alpha": {
+        "core": 0.55,
+        "edge": 0.95
+      },
+      "rim": {
+        "width": 0.05,
+        "strength": 0.7
+      },
+      "spikes": {
+        "count": 24,
+        "size": 0.22,
+        "sharpness": 0.85,
+        "lean": 1.8
+      },
+      "motion": {
+        "scroll": 1.6,
+        "flicker": 0.3,
+        "streaks": 0.35,
+        "streakSpeed": 2.5,
+        "stretch": 0.28,
+        "tallFlames": 0.7,
+        "warp": 0.7
+      }
+    },
+    {
+      "kind": "tongues",
+      "colors": {
+        "core": "$deep",
+        "mid": "$c",
+        "edge": "$dark"
+      },
+      "alpha": {
+        "core": 0.9,
+        "edge": 0.85
+      },
+      "spikes": {
+        "sharpness": 0.9
+      },
+      "tongues": {
+        "count": 22,
+        "length": 0.33,
+        "width": 0.28,
+        "life": 0.5,
+        "top": 0.35,
+        "rise": 0.3,
+        "wave": 0.25
+      },
+      "motion": {
+        "scroll": 1.8
+      }
+    }
+  ],
+  "particles": {
+    "type": "ember",
+    "rate": 1.2,
+    "size": 0.9,
+    "color": "$rim"
+  },
+  "motes": {
+    "rate": 1.2,
+    "color": "$c"
+  },
+  "react": {
+    "charge": {
+      "scale": 0.25,
+      "height": 0.3,
+      "wild": 1.4,
+      "glow": 0.35,
+      "shake": 0.035
+    },
+    "move": {
+      "trail": 1.6,
+      "max": 0.45
+    }
+  },
+  "light": 8,
+  "ground": "dust"
+}

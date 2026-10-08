@@ -35,7 +35,8 @@ import java.util.Map;
  * spiky gold flame, roaring rage, calm god ki, Blue's sparkle, silver wisps, a dark evil burn. Starting to charge
  * bursts out in a shockwave and flash; charging on the ground kicks up dust and lifts rocks (see {@link AuraDebris}).
  */
-@Mod.EventBusSubscriber(modid = DBZenith.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+// Retired by the aura system (CX-24): every form, the base form's charge and Kaioken now have aura files, so this is
+// no longer subscribed. Kept for reference until the new auras have been played with for a while.
 public final class AuraRenderer {
     private static final ResourceLocation TONGUE = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/aura_tongue.png");
     private static final ResourceLocation SPIKE = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/aura_spike.png");

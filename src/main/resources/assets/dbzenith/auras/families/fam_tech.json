@@ -1,0 +1,123 @@
+{
+  "silhouette": "jagged",
+  "shape": {
+    "width": 1.4,
+    "height": 2.05,
+    "bottom": -0.05,
+    "widest": 0.32,
+    "taper": 1.6,
+    "tip": 0.75,
+    "peak": 0.06,
+    "flare": 0.04
+  },
+  "lobes": {
+    "count": 4,
+    "size": 0.04,
+    "rise": 0.6,
+    "rows": 2.0
+  },
+  "motion": {
+    "pulse": 0.025,
+    "pulseSpeed": 6.0,
+    "sway": 0.01
+  },
+  "layers": [
+    {
+      "kind": "glow",
+      "scale": 1.05,
+      "opacity": 0.8,
+      "colors": {
+        "rim": "$glow"
+      }
+    },
+    {
+      "kind": "shell",
+      "colors": {
+        "core": "$core",
+        "mid": "$mid",
+        "edge": "$edge",
+        "rim": "$white"
+      },
+      "alpha": {
+        "core": 0.45,
+        "edge": 1.0
+      },
+      "rim": {
+        "width": 0.03,
+        "strength": 0.6
+      },
+      "spikes": {
+        "count": 42,
+        "size": 0.09,
+        "sharpness": 0.95,
+        "lean": 0.6
+      },
+      "motion": {
+        "scroll": 3.0,
+        "flicker": 0.6,
+        "streaks": 0.9,
+        "streakSpeed": 6.0,
+        "stretch": 0.5,
+        "warp": 0.1
+      }
+    },
+    {
+      "kind": "tongues",
+      "blend": "add",
+      "colors": {
+        "core": "$white",
+        "mid": "$mid",
+        "edge": "$edge"
+      },
+      "alpha": {
+        "core": 0.9,
+        "edge": 0.7
+      },
+      "spikes": {
+        "sharpness": 1.0
+      },
+      "tongues": {
+        "count": 12,
+        "length": 0.18,
+        "width": 0.18,
+        "life": 0.25,
+        "top": 0.25,
+        "rise": 0.2,
+        "wave": 0.05
+      },
+      "motion": {
+        "scroll": 3.0
+      }
+    }
+  ],
+  "particles": {
+    "type": "sparkle",
+    "rate": 1.0,
+    "size": 0.6,
+    "color": "$white"
+  },
+  "motes": {
+    "rate": 1.4,
+    "color": "$mid"
+  },
+  "lightning": {
+    "rate": 1.5,
+    "size": 0.6,
+    "color": "$core"
+  },
+  "react": {
+    "charge": {
+      "scale": 0.18,
+      "height": 0.2,
+      "wild": 1.2,
+      "glow": 0.6,
+      "shake": 0.02
+    },
+    "move": {
+      "trail": 1.4,
+      "max": 0.4
+    }
+  },
+  "light": 12,
+  "ground": "dust"
+}

@@ -1,0 +1,103 @@
+{
+  "extends": "fam_divine",
+  "forms": [
+    "surge_overflow"
+  ],
+  "tint": "#F8EAC0",
+  "shape": {
+    "width": 1.703,
+    "height": 2.3
+  },
+  "lightning": {
+    "rate": 1.0,
+    "size": 0.6
+  },
+  "layers": [
+    {
+      "kind": "glow",
+      "scale": 1.07,
+      "opacity": 0.75,
+      "colors": {
+        "rim": "$glow"
+      }
+    },
+    {
+      "kind": "shell",
+      "colors": {
+        "core": "$white",
+        "mid": "$mid",
+        "edge": "$edge",
+        "rim": "$core"
+      },
+      "alpha": {
+        "core": 0.8,
+        "edge": 1.0
+      },
+      "rim": {
+        "width": 0.05,
+        "strength": 0.5
+      },
+      "spikes": {
+        "count": 10,
+        "size": 0.08,
+        "sharpness": 0.15,
+        "lean": 0.8
+      },
+      "motion": {
+        "scroll": 0.4,
+        "flicker": 0.06,
+        "streaks": 0.15,
+        "warp": 0.3
+      }
+    },
+    {
+      "kind": "tongues",
+      "colors": {
+        "core": "$white",
+        "mid": "$mid",
+        "edge": "$edge"
+      },
+      "alpha": {
+        "core": 0.7,
+        "edge": 0.55
+      },
+      "spikes": {
+        "sharpness": 0.1
+      },
+      "tongues": {
+        "count": 15,
+        "length": 0.28,
+        "width": 0.45,
+        "life": 1.1,
+        "top": 0.45,
+        "rise": 0.4,
+        "wave": 0.35,
+        "inset": 0.18
+      },
+      "motion": {
+        "scroll": 0.8
+      }
+    },
+    {
+      "kind": "haze",
+      "scale": 0.7,
+      "colors": {
+        "core": "$white",
+        "mid": "$core",
+        "edge": "$core"
+      },
+      "alpha": {
+        "core": 0.22,
+        "edge": 0.25
+      },
+      "motion": {
+        "speed": 1.6
+      }
+    }
+  ],
+  "react": {
+    "charge": {
+      "shake": 0.022
+    }
+  }
+}

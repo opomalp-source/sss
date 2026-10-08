@@ -12,14 +12,14 @@ rcon() { java "$ROOT/tools/Rcon.java" 25575 dbzdev "$@" >/dev/null 2>&1; }
 
 cd "$ROOT"
 mkdir -p run-clienttest/screenshots; rm -f run-clienttest/screenshots/dbz_*.png
-if ! pgrep -f serverRunProgramArgs >/dev/null; then
+if ! pgrep -f '^[^ ]*java[^ ]* .*serverRunProgramArgs' >/dev/null; then
   ./gradlew runServer --console=plain > "$S/server.log" 2>&1 &
   for i in $(seq 1 600); do grep -q "Done (" "$S/server.log" && break; sleep 1; done
 fi
 grep -q "Done (" "$S/server.log" || { echo "SERVER FAILED"; tail -30 "$S/server.log"; exit 1; }
 echo "server up"
 
-if pgrep -f clientTestRunProgramArgs >/dev/null; then echo "client reused"; else
+if pgrep -f '^[^ ]*java[^ ]* .*clientTestRunProgramArgs' >/dev/null; then echo "client reused"; else
 J0=$(grep -c "Dev joined the game" "$S/server.log")
 xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClientTest --console=plain -PdevScreenshots=99999 -PdevQuitAfter=99999 > "$S/client.log" 2>&1 &
 for i in $(seq 1 900); do [ $(grep -c "Dev joined the game" "$S/server.log") -gt $J0 ] && break; sleep 1; done

@@ -1,0 +1,133 @@
+{
+  "silhouette": "lobed",
+  "shape": {
+    "width": 1.5,
+    "height": 2.0,
+    "bottom": -0.06,
+    "widest": 0.32,
+    "taper": 1.4,
+    "tip": 0.7,
+    "peak": 0.1,
+    "flare": 0.06
+  },
+  "lobes": {
+    "count": 3,
+    "size": 0.15,
+    "rise": 0.35,
+    "rows": 2.6,
+    "billow": 0.75
+  },
+  "motion": {
+    "pulse": 0.03,
+    "pulseSpeed": 1.8,
+    "sway": 0.03
+  },
+  "layers": [
+    {
+      "kind": "glow",
+      "scale": 1.07,
+      "opacity": 0.75,
+      "colors": {
+        "rim": "$glow"
+      }
+    },
+    {
+      "kind": "shell",
+      "colors": {
+        "core": "$white",
+        "mid": "$mid",
+        "edge": "$edge",
+        "rim": "$core"
+      },
+      "alpha": {
+        "core": 0.8,
+        "edge": 1.0
+      },
+      "rim": {
+        "width": 0.05,
+        "strength": 0.5
+      },
+      "spikes": {
+        "count": 10,
+        "size": 0.08,
+        "sharpness": 0.15,
+        "lean": 0.8
+      },
+      "motion": {
+        "scroll": 0.4,
+        "flicker": 0.06,
+        "streaks": 0.15,
+        "warp": 0.3
+      }
+    },
+    {
+      "kind": "tongues",
+      "colors": {
+        "core": "$white",
+        "mid": "$mid",
+        "edge": "$edge"
+      },
+      "alpha": {
+        "core": 0.7,
+        "edge": 0.55
+      },
+      "spikes": {
+        "sharpness": 0.1
+      },
+      "tongues": {
+        "count": 9,
+        "length": 0.28,
+        "width": 0.45,
+        "life": 1.1,
+        "top": 0.45,
+        "rise": 0.4,
+        "wave": 0.35,
+        "inset": 0.18
+      },
+      "motion": {
+        "scroll": 0.8
+      }
+    },
+    {
+      "kind": "haze",
+      "scale": 0.7,
+      "colors": {
+        "core": "$white",
+        "mid": "$core",
+        "edge": "$core"
+      },
+      "alpha": {
+        "core": 0.22,
+        "edge": 0.25
+      },
+      "motion": {
+        "speed": 1.6
+      }
+    }
+  ],
+  "particles": {
+    "type": "ember",
+    "rate": 0.9,
+    "size": 0.8,
+    "color": "$core"
+  },
+  "motes": {
+    "rate": 0.8,
+    "color": "$core"
+  },
+  "react": {
+    "charge": {
+      "scale": 0.2,
+      "height": 0.25,
+      "wild": 0.9,
+      "glow": 0.45,
+      "shake": 0.015
+    },
+    "move": {
+      "trail": 1.6,
+      "max": 0.5
+    }
+  },
+  "light": 12,
+  "ground": "dust"
+}

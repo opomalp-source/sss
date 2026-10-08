@@ -1,0 +1,86 @@
+{
+  "extends": "fam_wisp",
+  "forms": [
+    "grand_kai_mantle"
+  ],
+  "tint": "#FFFFFF",
+  "shape": {
+    "width": 1.652,
+    "height": 2.46
+  },
+  "layers": [
+    {
+      "kind": "glow",
+      "scale": 1.05,
+      "opacity": 0.55,
+      "colors": {
+        "rim": "$glow"
+      }
+    },
+    {
+      "kind": "shell",
+      "colors": {
+        "core": "$white",
+        "mid": "$core",
+        "edge": "$rim",
+        "rim": "$white"
+      },
+      "alpha": {
+        "core": 0.18,
+        "edge": 0.75
+      },
+      "rim": {
+        "width": 0.035,
+        "strength": 0.6
+      },
+      "spikes": {
+        "count": 16,
+        "size": 0.12,
+        "sharpness": 0.3,
+        "lean": 2.2
+      },
+      "motion": {
+        "scroll": 0.9,
+        "flicker": 0.15,
+        "streaks": 0.6,
+        "streakSpeed": 3.5,
+        "stretch": 0.2,
+        "warp": 0.9
+      }
+    },
+    {
+      "kind": "tongues",
+      "blend": "add",
+      "colors": {
+        "core": "$white",
+        "mid": "$core",
+        "edge": "$rim"
+      },
+      "alpha": {
+        "core": 0.8,
+        "edge": 0.5
+      },
+      "spikes": {
+        "sharpness": 0.2
+      },
+      "tongues": {
+        "count": 26,
+        "length": 0.42,
+        "width": 0.14,
+        "life": 1.0,
+        "top": 0.4,
+        "rise": 0.45,
+        "wave": 0.6,
+        "inset": 0.05
+      },
+      "motion": {
+        "scroll": 1.0
+      }
+    }
+  ],
+  "react": {
+    "charge": {
+      "shake": 0.0
+    }
+  }
+}

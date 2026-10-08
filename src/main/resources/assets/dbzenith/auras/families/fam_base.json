@@ -1,0 +1,27 @@
+{
+  "extends": "fam_flame",
+  "followFighter": true,
+  "idle": false,
+  "shape": {
+    "width": 1.35,
+    "height": 2.0,
+    "peak": 0.18,
+    "flare": 0.08
+  },
+  "lobes": {
+    "size": 0.08,
+    "rise": 1.0
+  },
+  "particles": {
+    "type": "none"
+  },
+  "react": {
+    "charge": {
+      "scale": 0.15,
+      "height": 0.2,
+      "wild": 1.2,
+      "glow": 0.3,
+      "shake": 0.03
+    }
+  }
+}

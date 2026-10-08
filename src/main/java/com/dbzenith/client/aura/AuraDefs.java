@@ -25,6 +25,7 @@ public final class AuraDefs extends SimplePreparableReloadListener<Map<String, A
     private static final Logger LOG = DBZenith.LOGGER;
     private static volatile Map<String, AuraDef> byId = Map.of();
     private static volatile Map<String, AuraDef> byForm = Map.of();
+    private static volatile Map<String, AuraDef> byTechnique = Map.of();
 
     private AuraDefs() {}
 
@@ -35,6 +36,11 @@ public final class AuraDefs extends SimplePreparableReloadListener<Map<String, A
     /** The aura a form wears, or null when it has none (yet). */
     public static AuraDef forForm(String formId) {
         return byForm.get(formId);
+    }
+
+    /** The aura a technique wears over the form's (e.g. "kaioken"), or null. */
+    public static AuraDef forTechnique(String technique) {
+        return byTechnique.get(technique);
     }
 
     public static Collection<String> ids() {
@@ -49,6 +55,11 @@ public final class AuraDefs extends SimplePreparableReloadListener<Map<String, A
         for (String f : d.forms) forms.put(f, d);
         byId = Map.copyOf(ids);
         byForm = Map.copyOf(forms);
+        if (d.technique != null) {
+            Map<String, AuraDef> tech = new HashMap<>(byTechnique);
+            tech.put(d.technique, d);
+            byTechnique = Map.copyOf(tech);
+        }
     }
 
     /** Reads every aura file again now, without reloading the other resources (/dbzaura reload). */
@@ -87,9 +98,14 @@ public final class AuraDefs extends SimplePreparableReloadListener<Map<String, A
     @Override
     protected void apply(Map<String, AuraDef> loaded, ResourceManager rm, ProfilerFiller profiler) {
         Map<String, AuraDef> forms = new HashMap<>();
-        for (AuraDef d : loaded.values()) for (String f : d.forms) forms.put(f, d);
+        Map<String, AuraDef> tech = new HashMap<>();
+        for (AuraDef d : loaded.values()) {
+            for (String f : d.forms) forms.put(f, d);
+            if (d.technique != null) tech.put(d.technique, d);
+        }
         byId = Map.copyOf(loaded);
         byForm = Map.copyOf(forms);
+        byTechnique = Map.copyOf(tech);
         LOG.info("Loaded {} auras", loaded.size());
     }
 }

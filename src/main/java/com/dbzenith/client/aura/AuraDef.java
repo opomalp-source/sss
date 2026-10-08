@@ -46,14 +46,65 @@ public final class AuraDef {
     // later phases: light and the ground
     public final int light;
     public final String ground;
+    /** For a technique's aura (worn over a form's): its id, e.g. "kaioken"; null for a form's. */
+    public final String technique;
+    /** A technique's size against the form's aura it wraps (width, height). */
+    public final float wrapScale, wrapHeight;
+    /** A technique tier's growth for each stage past the tier's first ({@code stageFrom}): size, height, wildness. */
+    public final float growScale, growHeight, growWild;
+    public final int stageFrom;
+    private final java.util.Map<Integer, AuraDef> stages = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * This technique's aura at a stage: the {@code tiers} entry with the highest {@code from} not above it laid over the
+     * file (its values replacing the file's), read once and kept.
+     */
+    public AuraDef forStage(int stage) {
+        JsonArray tiers = GsonHelper.getAsJsonArray(source, "tiers", null);
+        if (tiers == null || tiers.isEmpty()) return this;
+        JsonObject best = null;
+        int from = Integer.MIN_VALUE;
+        for (JsonElement e : tiers) {
+            JsonObject t = e.getAsJsonObject();
+            int f = GsonHelper.getAsInt(t, "from", 1);
+            if (f <= stage && f > from) {
+                best = t;
+                from = f;
+            }
+        }
+        if (best == null) return this;
+        final JsonObject tier = best;
+        final int start = from;
+        return stages.computeIfAbsent(start, k -> {
+            JsonObject base = source.deepCopy();
+            base.remove("tiers");
+            JsonObject top = tier.deepCopy();
+            top.remove("from");
+            JsonObject merged = merge(base, top);
+            merged.addProperty("stageFrom", start);
+            return parse(id, merged, tint);
+        });
+    }
+
+    /** The colour its {@code $} colours were made from; whether it takes the fighter's aura colour instead. */
+    public final int tint;
+    public final boolean followsFighter;
+    /** Burns while the fighter holds the form; false: only while charging or powering up (the base aura). */
+    public final boolean idle;
+    /** Lightning crawling over the aura (bolts a second, size, colour). */
+    public final float lightningRate, lightningSize;
+    public final int lightningColor;
     /** The colour the aura reads as (the edge of its first shell), for tests and tints. */
     public final int edge;
     public final boolean jagged;
 
     /** One shell of the aura. */
     public static final class Layer {
-        public static final int SHELL = 0, GLOW = 1, HAZE = 2;
-        /** shell: the flame body; glow: a bright band just outside the shell it wraps; haze: a soft inner fill, no hard outline. */
+        public static final int SHELL = 0, GLOW = 1, HAZE = 2, TONGUES = 3;
+        /**
+         * shell: the flame body; glow: a bright band just outside the shell it wraps; haze: a soft inner fill, no hard
+         * outline; tongues: flame licks on the aura's outline as you see it, growing, rising, breaking off and fading.
+         */
         public final int kind;
         /** Added onto what is behind it (light), or blended over it (keeps colour in daylight). */
         public final boolean additive;
@@ -76,7 +127,7 @@ public final class AuraDef {
 
         Layer(JsonObject j, AuraDef d, int index, int count) {
             String k = GsonHelper.getAsString(j, "kind", "shell");
-            kind = k.equals("glow") ? GLOW : k.equals("haze") ? HAZE : SHELL;
+            kind = k.equals("glow") ? GLOW : k.equals("haze") ? HAZE : k.equals("tongues") ? TONGUES : SHELL;
             additive = "add".equals(GsonHelper.getAsString(j, "blend", kind == GLOW ? "add" : "normal"));
             scale = GsonHelper.getAsFloat(j, "scale", kind == GLOW ? 1.05f : kind == HAZE ? 0.72f : 1f);
             heightScale = GsonHelper.getAsFloat(j, "heightScale", kind == HAZE ? 0.5f + 0.5f * scale : scale);
@@ -114,6 +165,34 @@ public final class AuraDef {
             flicker = GsonHelper.getAsFloat(m, "flicker", jagged ? 0.35f : 0.08f);
             streaks = GsonHelper.getAsFloat(m, "streaks", jagged ? 0.45f : 0.2f);
             speed = GsonHelper.getAsFloat(m, "speed", kind == HAZE ? 1.7f : 1f);
+            streakSpeed = GsonHelper.getAsFloat(m, "streakSpeed", 2.5f);
+            stretch = GsonHelper.getAsFloat(m, "stretch", 0.35f);
+            tallFlames = GsonHelper.getAsFloat(m, "tallFlames", jagged ? 0.6f : 0f);
+            warp = GsonHelper.getAsFloat(m, "warp", jagged ? 0.5f : 0.2f);
+            tongues(j);
+        }
+
+        /** Light streaks' speed up the shell; how long the noise is drawn out upward (lower: longer flames); how much
+         *  deeper the spikes cut near the top; how much the flames twist (domain warp). */
+        public final float streakSpeed, stretch, tallFlames, warp;
+
+        // tongues: how many at once, length (share of the aura's height), width (share of their length), seconds each
+        // lives, share that rise off the top, how far they climb while they live, how much they wave, and where they
+        // start (share of the radius in from the outline)
+        public int tongueCount;
+        public float tongueLength, tongueWidth, tongueLife, tongueTop, tongueRise, tongueWave, tongueInset, tongueLow;
+
+        private void tongues(JsonObject j) {
+            JsonObject t = GsonHelper.getAsJsonObject(j, "tongues", new JsonObject());
+            tongueCount = Math.max(0, Math.min(64, GsonHelper.getAsInt(t, "count", 18)));
+            tongueLength = GsonHelper.getAsFloat(t, "length", 0.32f);
+            tongueWidth = GsonHelper.getAsFloat(t, "width", 0.32f);
+            tongueLife = Math.max(0.05f, GsonHelper.getAsFloat(t, "life", 0.55f));
+            tongueTop = GsonHelper.getAsFloat(t, "top", 0.3f);
+            tongueRise = GsonHelper.getAsFloat(t, "rise", 0.3f);
+            tongueWave = GsonHelper.getAsFloat(t, "wave", 0.25f);
+            tongueInset = GsonHelper.getAsFloat(t, "inset", 0.12f);
+            tongueLow = GsonHelper.getAsFloat(t, "low", 0.15f);
         }
 
         /** For a glow, whose scale is against the layer it wraps: how far in from its own outline that layer's lies. */
@@ -141,8 +220,8 @@ public final class AuraDef {
             chargeGlow = GsonHelper.getAsFloat(c, "glow", 0.35f);
             chargeShake = GsonHelper.getAsFloat(c, "shake", 0.025f);
             JsonObject m = GsonHelper.getAsJsonObject(j, "move", new JsonObject());
-            trail = GsonHelper.getAsFloat(m, "trail", 1.6f);
-            trailMax = GsonHelper.getAsFloat(m, "max", 0.9f);
+            trail = GsonHelper.getAsFloat(m, "trail", 1.8f);
+            trailMax = GsonHelper.getAsFloat(m, "max", 0.7f);
             JsonObject h = GsonHelper.getAsJsonObject(j, "hit", new JsonObject());
             hitScale = GsonHelper.getAsFloat(h, "scale", 0.1f);
             hitBright = GsonHelper.getAsFloat(h, "bright", 0.7f);
@@ -152,9 +231,25 @@ public final class AuraDef {
         }
     }
 
-    private AuraDef(String id, JsonObject j) {
+    private AuraDef(String id, JsonObject j, int tint) {
         this.id = id;
         this.source = j;
+        this.tint = tint;
+        followsFighter = GsonHelper.getAsBoolean(j, "followFighter", false);
+        technique = j.has("technique") ? GsonHelper.getAsString(j, "technique") : null;
+        JsonObject wr = GsonHelper.getAsJsonObject(j, "wrap", new JsonObject());
+        wrapScale = GsonHelper.getAsFloat(wr, "scale", 1.35f);
+        wrapHeight = GsonHelper.getAsFloat(wr, "height", 1.5f);
+        JsonObject gr = GsonHelper.getAsJsonObject(j, "grow", new JsonObject());
+        growScale = GsonHelper.getAsFloat(gr, "scale", 0f);
+        growHeight = GsonHelper.getAsFloat(gr, "height", 0f);
+        growWild = GsonHelper.getAsFloat(gr, "wild", 0f);
+        stageFrom = GsonHelper.getAsInt(j, "stageFrom", 1);
+        idle = GsonHelper.getAsBoolean(j, "idle", true);
+        JsonObject lt = GsonHelper.getAsJsonObject(j, "lightning", new JsonObject());
+        lightningRate = GsonHelper.getAsFloat(lt, "rate", 0f);
+        lightningSize = GsonHelper.getAsFloat(lt, "size", 1f);
+        lightningColor = color(lt, "color", mix(tint, 0xFFFFFF, 0.6f));
         List<String> f = new ArrayList<>();
         JsonArray arr = GsonHelper.getAsJsonArray(j, "forms", new JsonArray());
         for (JsonElement e : arr) f.add(e.getAsString());
@@ -219,15 +314,31 @@ public final class AuraDef {
     }
 
     public static AuraDef parse(String id, JsonObject json) {
-        return new AuraDef(id, json);
+        return parse(id, json, -1);
+    }
+
+    /** Reads an aura, its {@code $} colours made from {@code tint} (or, given -1, from the file's own {@code tint}). */
+    public static AuraDef parse(String id, JsonObject json, int tint) {
+        int was = TINT.get();
+        try {
+            TINT.set(tint >= 0 ? tint : json.has("tint") ? color(json, "tint", 0x40A0FF) : 0x40A0FF);
+            return new AuraDef(id, json, tint >= 0 ? tint : TINT.get());
+        } finally {
+            TINT.set(was);
+        }
+    }
+
+    /** This aura in another colour (for one that follows the fighter's aura colour). */
+    public AuraDef tinted(int rgb) {
+        return parse(id, source, rgb & 0xFFFFFF);
     }
 
     /** The layer a glow follows: the one it names, else the next shell after it, else the one before. */
     public Layer wrapped(int glowIndex) {
         Layer g = layers.get(glowIndex);
-        if (g.wraps >= 0 && g.wraps < layers.size() && g.wraps != glowIndex) return layers.get(g.wraps);
-        for (int i = glowIndex + 1; i < layers.size(); i++) if (layers.get(i).kind != Layer.GLOW) return layers.get(i);
-        for (int i = glowIndex - 1; i >= 0; i--) if (layers.get(i).kind != Layer.GLOW) return layers.get(i);
+        if (g.wraps >= 0 && g.wraps < layers.size() && g.wraps != glowIndex && layers.get(g.wraps).kind != Layer.TONGUES) return layers.get(g.wraps);
+        for (int i = glowIndex + 1; i < layers.size(); i++) if (layers.get(i).kind == Layer.SHELL || layers.get(i).kind == Layer.HAZE) return layers.get(i);
+        for (int i = glowIndex - 1; i >= 0; i--) if (layers.get(i).kind == Layer.SHELL || layers.get(i).kind == Layer.HAZE) return layers.get(i);
         return null;
     }
 
@@ -284,8 +395,43 @@ public final class AuraDef {
         JsonElement e = o.get(key);
         if (e.isJsonPrimitive() && e.getAsJsonPrimitive().isNumber()) return e.getAsInt() & 0xFFFFFF;
         String s = e.getAsString().trim();
+        if (s.startsWith("$")) return token(s.substring(1), TINT.get());
         if (s.startsWith("#")) s = s.substring(1);
         return Integer.parseInt(s, 16) & 0xFFFFFF;
+    }
+
+    /** The tint while a file is read: its own {@code tint}, or the fighter's aura colour for one that follows it. */
+    private static final ThreadLocal<Integer> TINT = ThreadLocal.withInitial(() -> 0x40A0FF);
+
+    /**
+     * Colours made from the tint, so one family file serves every colour: {@code $c} the tint itself, {@code $edge}
+     * it saturated, {@code $mid}, {@code $core} and {@code $rim} paler, {@code $glow} a touch paler, {@code $deep} and
+     * {@code $dark} darker, {@code $white}, {@code $black}.
+     */
+    static int token(String name, int c) {
+        return switch (name) {
+            case "c" -> c;
+            case "edge" -> saturate(c, 0.25f);
+            case "mid" -> mix(c, 0xFFFFFF, 0.55f);
+            case "core" -> mix(c, 0xFFFFFF, 0.88f);
+            case "rim" -> mix(c, 0xFFFFFF, 0.4f);
+            case "glow" -> mix(c, 0xFFFFFF, 0.2f);
+            case "deep" -> mix(c, 0x000000, 0.35f);
+            case "dark" -> mix(c, 0x000000, 0.7f);
+            case "white" -> 0xFFFFFF;
+            case "black" -> 0x000000;
+            default -> throw new IllegalArgumentException("no colour $" + name);
+        };
+    }
+
+    /** Pushes a colour away from grey by {@code k}. */
+    static int saturate(int c, float k) {
+        int r = (c >> 16) & 255, g = (c >> 8) & 255, b = c & 255;
+        float avg = (r + g + b) / 3f;
+        r = Math.max(0, Math.min(255, Math.round(r + (r - avg) * k)));
+        g = Math.max(0, Math.min(255, Math.round(g + (g - avg) * k)));
+        b = Math.max(0, Math.min(255, Math.round(b + (b - avg) * k)));
+        return r << 16 | g << 8 | b;
     }
 
     static int mix(int a, int b, float t) {

@@ -66,11 +66,47 @@ public final class AuraSystem {
     private static final ResourceLocation WHITE = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/aura_white.png");
     private static final ResourceLocation STAR = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/impact_star.png");
     private static final ResourceLocation DOT = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/ki_glow.png");
+    private static final ResourceLocation RING = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/shock_ring.png");
     private static final Supplier<ShaderInstance> SHELL_SHADER = () -> AuraShaders.shell, GLOW_SHADER = () -> AuraShaders.glow;
     private static final int MAX_DRAWN = 64;
     private static final float MAX_DISTANCE = 160;
     /** At most this many particles a frame, for every aura together. */
     private static final int MAX_PARTICLES = 900;
+
+    /** One aura a fighter wears: the form's, or a technique's over it. */
+    static final class Slot {
+        /** As worn: tinted to the fighter or set to the technique's stage. */
+        AuraDef def;
+        float strength, strengthO;
+        /** A new aura (or a stage up) bursting out: 1, dying away. */
+        float burst, burstO;
+        int stage;
+        // worked out while drawing, for the particles after
+        float x, y, z, radius, height, bottom, body, fade, charge, phase, wild, seed, flash;
+        boolean shells, drawn;
+
+        void tick() {
+            strengthO = strength;
+            burstO = burst;
+        }
+
+        /** Moves towards wearing {@code want} at {@code vis}; a different aura waits for this one to go. */
+        void follow(AuraDef want, float vis) {
+            if (want != null && def != null && def != want && def.id.equals(want.id)) {   // the same aura, re-tinted or a new stage
+                if (want.stageFrom != def.stageFrom || stage > 0) burst = Math.max(burst, 0.5f);
+                def = want;
+            }
+            if (want != null && (def == null || def == want || strength <= 0.02f)) {
+                if (def != want) {
+                    def = want;
+                    burst = 1;
+                }
+                strength = strength < vis ? Math.min(vis, strength + 0.14f) : Math.max(vis, strength - 0.12f);
+            } else {
+                strength = Math.max(0, strength - 0.12f);
+            }
+        }
+    }
 
     /** What one fighter's aura is doing. */
     static final class State {
@@ -78,29 +114,30 @@ public final class AuraSystem {
         final float seed;
         /** Each fighter's aura runs a little faster or slower, so two of the same never keep time. */
         final float pace;
-        AuraDef def;
-        float strength, strengthO;
+        final Slot form = new Slot(), tech = new Slot();
         /** 0 calm .. 1 charging flat out. */
         float charge, chargeO;
         /** A hit or a swing: 1, dying away within a few ticks. */
         float flare, flareO;
-        /** A new aura bursting out: 1, dying away. */
-        float burst, burstO;
         /** The aura's own clock (seconds), running faster the wilder it is, so speeding up never jumps. */
         float phase, phaseO;
         /** Smoothed movement, blocks a tick. */
         float vx, vy, vz, vxO, vyO, vzO;
-        int lastHurt;
+        int lastHurt, lastStage;
         boolean lastSwing;
         long seen;
-        // worked out while drawing, for the particles after
-        float drawX, drawY, drawZ, drawRadius, drawHeight, drawBottom, drawBody, drawFade, drawCharge, drawPhase;
-        boolean shellsDrawn;
+        /** The fighter's aura colour the form's aura was last tinted to, and that aura. */
+        int tintColor = -1;
+        AuraDef tintFrom, tinted;
 
         State(int id) {
             this.id = id;
             this.seed = (id * 0.6180339f) % 1f * 97f;
             this.pace = 0.9f + 0.2f * ((id * 0.7548777f) % 1f);
+        }
+
+        boolean active() {
+            return form.strength > 0 || form.strengthO > 0 || tech.strength > 0 || tech.strengthO > 0;
         }
     }
 
@@ -111,32 +148,34 @@ public final class AuraSystem {
     private static final float[] DRAW_DIST = new float[MAX_DRAWN];
     private static final Vector3f LEFT = new Vector3f(), UP = new Vector3f();
 
-    /** /dbzaura: wear this aura yourself, whatever your form (null: off). */
-    static AuraDef preview;
+    /** /dbzaura: wear this aura yourself, whatever your form (null: off), and a technique's at a stage over it. */
+    static AuraDef preview, previewTech;
+    static int previewStage;
     /** /dbzaura state: hold your own aura in a state to look at it (idle, charge, fly, hit, burst). */
     static String devState = "idle";
     private static int devTicks;
 
     private AuraSystem() {}
 
-    /** The aura a fighter's synced state asks for, or null. Kaioken still burns the old way until it has its layer. */
+    /** The aura a fighter's form wears (the base form's only shows while charging), or null. */
     public static AuraDef wanted(PublicStatePacket state) {
-        if (state == null || state.has(PublicStatePacket.KAIOKEN)) return null;
+        if (state == null) return null;
         return AuraDefs.forForm(state.form());
+    }
+
+    /** The technique aura a fighter wears over the form's (Kaioken), or null. */
+    public static AuraDef wantedTechnique(PublicStatePacket state) {
+        if (state == null || state.kaiokenStage() <= 0) return null;
+        AuraDef k = AuraDefs.forTechnique("kaioken");
+        return k == null ? null : k.forStage(state.kaiokenStage());
     }
 
     /** Is this fighter's aura drawn here (so the old renderer leaves it alone)? */
     public static boolean handles(Player player, PublicStatePacket state) {
-        if (player == Minecraft.getInstance().player && preview != null) return true;
-        if (wanted(state) != null) return true;
+        if (player == Minecraft.getInstance().player && (preview != null || previewTech != null)) return true;
+        if (wanted(state) != null || wantedTechnique(state) != null) return true;
         State s = STATES.get(player.getId());
-        return s != null && s.strength > 0;
-    }
-
-    private static AuraDef wantedBy(AbstractClientPlayer p, Minecraft mc) {
-        if (p.isSpectator()) return null;
-        if (p == mc.player && preview != null) return preview;
-        return wanted(ClientPublicStates.get(p.getId()));
+        return s != null && s.active();
     }
 
     // ------------------------------------------------------------------ each tick: follow what every fighter does
@@ -153,48 +192,62 @@ public final class AuraSystem {
         long now = mc.level.getGameTime();
         devTicks++;
         for (AbstractClientPlayer p : mc.level.players()) {
-            AuraDef want = wantedBy(p, mc);
+            if (p.isSpectator()) continue;
+            boolean self = p == mc.player;
+            PublicStatePacket state = ClientPublicStates.get(p.getId());
+            AuraDef form = self && preview != null ? preview : wanted(state);
+            AuraDef tech = self && previewTech != null ? previewTech.forStage(previewStage) : wantedTechnique(state);
             State s = STATES.get(p.getId());
             if (s == null) {
-                if (want == null) continue;
+                if (form == null && tech == null) continue;
                 s = new State(p.getId());
                 STATES.put(p.getId(), s);
             }
             s.seen = now;
-            follow(s, p, want, ClientPublicStates.get(p.getId()), p == mc.player);
+            if (form != null && form.followsFighter && state != null) form = tintedFor(s, form, state.auraColor());
+            int stage = self && previewTech != null ? previewStage : state == null ? 0 : state.kaiokenStage();
+            follow(s, p, form, tech, stage, state, self);
         }
         ObjectIterator<State> it = STATES.values().iterator();
         while (it.hasNext()) {
             State s = it.next();
-            if (now - s.seen > 2 || (s.strength <= 0 && s.strengthO <= 0)) it.remove();
+            if (now - s.seen > 2 || !s.active() && s.seen != now) it.remove();
         }
     }
 
-    private static void follow(State s, LivingEntity e, AuraDef want, PublicStatePacket state, boolean self) {
-        s.strengthO = s.strength;
+    /** The form's aura in the fighter's own aura colour, made once per colour. */
+    private static AuraDef tintedFor(State s, AuraDef def, int rgb) {
+        if (s.tintFrom != def || s.tintColor != rgb || s.tinted == null) {
+            s.tinted = def.tinted(rgb);
+            s.tintFrom = def;
+            s.tintColor = rgb;
+        }
+        return s.tinted;
+    }
+
+    private static void follow(State s, LivingEntity e, AuraDef form, AuraDef tech, int stage, PublicStatePacket state, boolean self) {
+        s.form.tick();
+        s.tech.tick();
         s.chargeO = s.charge;
         s.flareO = s.flare;
-        s.burstO = s.burst;
         s.phaseO = s.phase;
         s.vxO = s.vx;
         s.vyO = s.vy;
         s.vzO = s.vz;
 
-        if (want != null && (s.def == null || s.def == want || s.strength <= 0.02f)) {   // a new aura waits for the old to go
-            if (s.def != want) {
-                s.def = want;
-                s.burst = 1;
-            }
-            s.strength = Math.min(1, s.strength + 0.14f);
-        } else {
-            s.strength = Math.max(0, s.strength - 0.12f);
-        }
-
-        boolean dev = self && preview != null;
+        boolean dev = self && (preview != null || previewTech != null);
         boolean charging = state != null && (state.powering() || state.has(PublicStatePacket.TRANSFORMING));
         if (dev && devState.equals("charge")) charging = true;
         float target = charging ? 1 : 0;
         s.charge += (target - s.charge) * (target > s.charge ? 0.2f : 0.09f);
+
+        // the base form's aura only burns while charging
+        float vis = form == null || form.idle ? 1 : Mth.clamp(s.charge * 1.6f, 0, 1);
+        s.form.follow(form, vis);
+        s.tech.follow(tech, 1);
+        if (stage > s.lastStage && s.lastStage > 0) s.tech.burst = Math.max(s.tech.burst, 0.6f);   // a Kaioken stage up flares
+        s.lastStage = stage;
+        s.tech.stage = stage;
 
         float dx = (float) (e.getX() - e.xo), dy = (float) (e.getY() - e.yo), dz = (float) (e.getZ() - e.zo);
         if (dev && devState.equals("fly")) {                                    // as if flying fast
@@ -212,15 +265,20 @@ public final class AuraSystem {
         if (e.swinging && !s.lastSwing) s.flare = Math.max(s.flare, 0.6f);      // just swung
         s.lastSwing = e.swinging;
         if (dev && devState.equals("hit") && devTicks % 20 == 0) s.flare = 1;
-        if (dev && devState.equals("burst") && devTicks % 40 == 0) s.burst = 1;
+        if (dev && devState.equals("burst") && devTicks % 40 == 0) s.form.burst = s.tech.burst = 1;
         if (dev && devState.equals("hithold")) s.flare = 0.8f;
         else s.flare *= 0.72f;
-        if (dev && devState.equals("bursthold")) s.burst = 0.55f;
-        else s.burst = Math.max(0, s.burst - 0.06f);
+        if (dev && devState.equals("bursthold")) s.form.burst = s.tech.burst = 0.55f;
+        else {
+            s.form.burst = Math.max(0, s.form.burst - 0.06f);
+            s.tech.burst = Math.max(0, s.tech.burst - 0.06f);
+        }
 
-        if (s.def != null) {
-            float wild = 1 + s.def.react.chargeWild * s.charge + 0.8f * s.flare + s.burst;
-            s.phase += 0.05f * wild * s.pace * s.def.speed;
+        AuraDef lead = s.tech.def != null && s.tech.strength > 0 ? s.tech.def : s.form.def;
+        if (lead != null) {
+            float wild = 1 + lead.react.chargeWild * s.charge + 0.8f * s.flare + Math.max(s.form.burst, s.tech.burst)
+                    + lead.growWild * Math.max(0, stage - lead.stageFrom);
+            s.phase += 0.05f * wild * s.pace * lead.speed;
             if (s.phase > 3600) {                                               // keep the clock small enough to stay smooth
                 s.phase -= 3600;
                 s.phaseO -= 3600;
@@ -241,8 +299,9 @@ public final class AuraSystem {
 
         int n = 0;
         for (State s : STATES.values()) {
-            float k = Mth.lerp(pt, s.strengthO, s.strength);
-            if (k <= 0.001f || s.def == null || n >= MAX_DRAWN) continue;
+            s.form.drawn = s.tech.drawn = false;
+            float k = Math.max(Mth.lerp(pt, s.form.strengthO, s.form.strength), Mth.lerp(pt, s.tech.strengthO, s.tech.strength));
+            if (k <= 0.001f || n >= MAX_DRAWN) continue;
             Entity e = mc.level.getEntity(s.id);
             if (!(e instanceof LivingEntity le) || e.isInvisible()) continue;
             double dx = Mth.lerp(pt, e.xo, e.getX()) - cx, dy = Mth.lerp(pt, e.yo, e.getY()) - cy, dz = Mth.lerp(pt, e.zo, e.getZ()) - cz;
@@ -295,25 +354,44 @@ public final class AuraSystem {
             }
         }
 
-        // every particle in one batch, with the plain view again
+        // every particle in one batch per texture, with the plain view again
         int budget = MAX_PARTICLES;
         int detail = DBZConfig.CLIENT.auraDetail.get();
         VertexConsumer stars = buffers.getBuffer(FxRenderTypes.additive(STAR));
         for (int i = 0; i < n && budget > 0; i++) {
-            State s = DRAW[i];
-            if (s.drawFade > 0.01f && s.shellsDrawn && DRAW_DIST[i] < 64) budget -= sparkles(pose, stars, s, budget, detail);
+            if (DRAW_DIST[i] >= 64) continue;
+            for (Slot sl : slots(DRAW[i])) if (sl.drawn && sl.shells && sl.fade > 0.01f) budget -= sparkles(pose, stars, sl, budget, detail);
         }
         buffers.endBatch(FxRenderTypes.additive(STAR));
         VertexConsumer dots = buffers.getBuffer(FxRenderTypes.additive(DOT));
         for (int i = 0; i < n && budget > 0; i++) {
-            State s = DRAW[i];
-            if (s.drawFade > 0.01f && s.drawCharge > 0.02f && DRAW_DIST[i] < 64) budget -= motes(pose, dots, s, budget, detail, camera);
+            if (DRAW_DIST[i] >= 64) continue;
+            for (Slot sl : slots(DRAW[i])) {
+                if (!sl.drawn || sl.fade <= 0.01f) continue;
+                if (sl.charge > 0.02f) budget -= motes(pose, dots, sl, budget, detail);
+                if (sl.shells && sl.def.lightningRate > 0) budget -= lightning(pose, dots, sl, t, budget, detail);
+            }
         }
         buffers.endBatch(FxRenderTypes.additive(DOT));
+        VertexConsumer rings = buffers.getBuffer(FxRenderTypes.additive(RING));
+        for (int i = 0; i < n; i++) {
+            Slot sl = DRAW[i].form.drawn ? DRAW[i].form : DRAW[i].tech;
+            if (sl.drawn && DRAW_DIST[i] < 48) ground(pose, rings, DRAW[i], sl, t);
+        }
+        buffers.endBatch(FxRenderTypes.additive(RING));
         for (int i = 0; i < n; i++) {
             DRAW[i] = null;
             DRAW_ENTITY[i] = null;
         }
+    }
+
+    private static final Slot[] SLOTS = new Slot[2];
+
+    /** A fighter's two auras, technique first (no list is made). */
+    private static Slot[] slots(State s) {
+        SLOTS[0] = s.tech;
+        SLOTS[1] = s.form;
+        return SLOTS;
     }
 
     /** How tall the fighter stands, unscaled by crouching. */
@@ -322,37 +400,40 @@ public final class AuraSystem {
         return e.getBbHeight();
     }
 
+    /**
+     * One fighter: works out both auras' sizes (a technique's wraps the form's), then draws the technique's (outside)
+     * and the form's.
+     */
     private static void draw(State s, LivingEntity e, float pt, float ox, float oy, float oz, float t, float dist, boolean shader,
                              boolean eyes, PoseStack pose, MultiBufferSource.BufferSource buffers) {
-        AuraDef d = s.def;
-        AuraDef.React rc = d.react;
-        float k = Mth.lerp(pt, s.strengthO, s.strength);
         float charge = Mth.lerp(pt, s.chargeO, s.charge);
         float flare = Mth.lerp(pt, s.flareO, s.flare);
-        float burst = Mth.lerp(pt, s.burstO, s.burst);
         float ph = Mth.lerp(pt, s.phaseO, s.phase);
         float vx = Mth.lerp(pt, s.vxO, s.vx), vy = Mth.lerp(pt, s.vyO, s.vy), vz = Mth.lerp(pt, s.vzO, s.vz);
         float body = bodyHeight(e);
+        float formK = s.form.def == null ? 0 : Mth.lerp(pt, s.form.strengthO, s.form.strength);
+        float techK = s.tech.def == null ? 0 : Mth.lerp(pt, s.tech.strengthO, s.tech.strength);
+        if (formK > 0.001f) measure(s, s.form, formK, Mth.lerp(pt, s.form.burstO, s.form.burst), charge, flare, ph, body, 1, 1, 0, 0, 0);
+        if (techK > 0.001f) {
+            int over = Math.max(0, s.tech.stage - s.tech.def.stageFrom);
+            float grow = 1 + s.tech.def.growScale * over, growH = 1 + s.tech.def.growHeight * over;
+            // round the form's aura when there is one, else its own size
+            float r = formK > 0.001f ? Mth.lerp(formK, 1f, s.form.radius * s.tech.def.wrapScale / (s.tech.def.width * 0.5f * body)) : 1f;
+            float h = formK > 0.001f ? Mth.lerp(formK, 1f, s.form.height * s.tech.def.wrapHeight / (s.tech.def.height * body)) : 1f;
+            measure(s, s.tech, techK, Mth.lerp(pt, s.tech.burstO, s.tech.burst), charge, flare, ph, body, r * grow, h * growH,
+                    0.03f * over, 0, 0);
+        }
 
-        float pulse = 1 + d.pulse * Mth.sin(ph * d.pulseSpeed + s.seed);
-        float grow = 0.55f + 0.45f * k;                                            // it swells out as it comes
-        float size = pulse * grow * (1 + rc.chargeScale * charge + rc.hitScale * flare + rc.burstScale * burst);
-        float tall = pulse * (0.65f + 0.35f * k) * (1 + rc.chargeHeight * charge + rc.hitScale * flare + rc.burstScale * burst);
-        float wild = 1 + rc.chargeWild * charge + 0.8f * flare + burst;
-        float bright = rc.chargeGlow * charge + rc.hitBright * flare + rc.burstBright * burst;
-        float radius = d.width * 0.5f * body * size;
-        float height = d.height * body * tall;
-        float bottom = d.bottom * body;
-        float peak = d.peak * (1 + 0.15f * Mth.sin(ph * 6.1f + s.seed) + 0.1f * Mth.sin(ph * 13.7f + s.seed * 2) + 0.35f * charge);
-
-        // charging shakes it
+        // charging shakes them, moving fast streams them back
+        AuraDef lead = techK > 0.001f ? s.tech.def : s.form.def;
+        if (lead == null) return;
+        AuraDef.React rc = lead.react;
         float shake = (rc.chargeShake * charge + 0.012f * flare) * body;
         if (shake > 0) {
             ox += shake * (0.6f * Mth.sin(t * 37f + s.seed) + 0.4f * Mth.sin(t * 23.7f + s.seed * 2));
             oy += shake * 0.4f * Mth.sin(t * 29.3f + s.seed * 3);
             oz += shake * (0.6f * Mth.cos(t * 33f + s.seed) + 0.4f * Mth.sin(t * 19.1f + s.seed * 5));
         }
-        // moving fast streams it back
         float speed = Mth.sqrt(vx * vx + vy * vy + vz * vz);
         float tx = 0, ty = 0, tz = 0;
         if (speed > 0.12f) {
@@ -361,32 +442,64 @@ public final class AuraSystem {
             ty = -vy / speed * len;
             tz = -vz / speed * len;
         }
+        if (techK > 0.001f) drawSlot(s, s.tech, ox, oy, oz, ph, dist, tx, ty, tz, shader, eyes, pose, buffers);
+        if (formK > 0.001f) drawSlot(s, s.form, ox, oy, oz, ph, dist, tx, ty, tz, shader, eyes, pose, buffers);
+    }
 
+    /** Works out one aura's size and mood this frame into its slot. */
+    private static void measure(State s, Slot sl, float k, float burst, float charge, float flare, float ph, float body,
+                                float widthMul, float heightMul, float extraWild, float unused1, float unused2) {
+        AuraDef d = sl.def;
+        AuraDef.React rc = d.react;
+        float pulse = 1 + d.pulse * Mth.sin(ph * d.pulseSpeed + s.seed);
+        float grow = 0.55f + 0.45f * k;                                          // it swells out as it comes
+        float size = pulse * grow * (1 + rc.chargeScale * charge + rc.hitScale * flare + rc.burstScale * burst);
+        float tall = pulse * (0.65f + 0.35f * k) * (1 + rc.chargeHeight * charge + rc.hitScale * flare + rc.burstScale * burst);
+        sl.wild = 1 + rc.chargeWild * charge + 0.8f * flare + burst + extraWild;
+        sl.charge = charge;
+        sl.radius = d.width * 0.5f * body * size * widthMul;
+        sl.height = d.height * body * tall * heightMul;
+        sl.bottom = d.bottom * body;
+        sl.body = body;
+        sl.fade = k;
+        sl.phase = ph;
+        sl.seed = s.seed + (sl == s.tech ? 41.7f : 0);
+        sl.flash = burst;
+    }
+
+    private static void drawSlot(State s, Slot sl, float ox, float oy, float oz, float ph, float dist, float tx, float ty, float tz,
+                                 boolean shader, boolean eyes, PoseStack pose, MultiBufferSource.BufferSource buffers) {
+        AuraDef d = sl.def;
+        AuraDef.React rc = d.react;
+        float radius = sl.radius, height = sl.height, bottom = sl.bottom;
+        float wild = sl.wild;
+        float bright = rc.chargeGlow * sl.charge + rc.hitBright * s.flare + rc.burstBright * sl.flash;
+        float peak = d.peak * (1 + 0.15f * Mth.sin(ph * 6.1f + sl.seed) + 0.1f * Mth.sin(ph * 13.7f + sl.seed * 2) + 0.35f * sl.charge);
         int detail = DBZConfig.CLIENT.auraDetail.get();
         float lod = dist < 14 ? 1f : dist < 36 ? 0.62f : 0.4f;
         if (detail == 0) lod *= 0.65f;
         if (detail == 2) lod = Math.min(1f, lod * 1.3f);
         int rings = Math.max(8, Math.round(28 * lod)), segs = Math.max(12, Math.round(40 * lod));
-        float fade = k;
+        float fade = sl.fade;
         if (ox * ox + oz * oz < radius * radius * 1.2f && -oy > bottom && -oy < bottom + height) fade *= 0.25f;   // the eye inside the shell
 
-        s.drawX = ox;
-        s.drawY = oy;
-        s.drawZ = oz;
-        s.drawRadius = radius;
-        s.drawHeight = height;
-        s.drawBottom = bottom;
-        s.drawBody = body;
-        s.drawFade = eyes ? k * 0.5f : fade;
-        s.drawCharge = charge;
-        s.drawPhase = ph;
-        s.shellsDrawn = !eyes;
+        sl.x = ox;
+        sl.y = oy;
+        sl.z = oz;
+        sl.fade = eyes ? sl.fade * 0.5f : fade;
+        sl.shells = !eyes;
+        sl.drawn = true;
         if (eyes) return;
 
         List<AuraDef.Layer> layers = d.layers;
         int built = -1;
         for (int i = 0; i < layers.size(); i++) {
             AuraDef.Layer l = layers.get(i);
+            if (l.kind == AuraDef.Layer.TONGUES) {
+                tongues(d, l, sl.seed, ox, oy, oz, radius, height, bottom, ph * l.speed, wild, bright, tx, ty, tz, Mth.clamp(l.opacity * fade, 0, 1),
+                        dist, detail, shader, pose, buffers);
+                continue;
+            }
             boolean glow = l.kind == AuraDef.Layer.GLOW;
             AuraDef.Layer g = glow ? d.wrapped(i) : l;                            // whose outline it is
             if (g == null) continue;
@@ -396,7 +509,7 @@ public final class AuraSystem {
                 boolean haze = g.kind == AuraDef.Layer.HAZE;
                 float lr = radius * g.scale, lh = height * g.heightScale, lb = bottom * g.scale + g.lift * height;
                 int lrings = haze ? Math.max(8, rings * 3 / 4) : rings, lsegs = haze ? Math.max(12, segs * 3 / 4) : segs;
-                SHELL.build(d, lr, lh, lb, ph * g.speed, s.seed + g.seed, lrings, lsegs, d.lobeSize * g.lobes * (1 + 0.4f * (wild - 1)),
+                SHELL.build(d, lr, lh, lb, ph * g.speed, sl.seed + g.seed, lrings, lsegs, d.lobeSize * g.lobes * (1 + 0.4f * (wild - 1)),
                         d.sway * g.sway, peak, tx * g.scale, ty * g.scale, tz * g.scale);
                 built = gi;
             }
@@ -404,7 +517,7 @@ public final class AuraSystem {
             float opacity = Mth.clamp(l.opacity * fade, 0, 1);
             if (shader) {
                 ShaderInstance sh = l.additive ? AuraShaders.glow : AuraShaders.shell;
-                uniforms(sh, l, g, s.seed + g.seed, opacity, ph * g.speed, wild, bright);
+                uniforms(sh, l, g, sl.seed + g.seed, opacity, ph * g.speed, wild, bright);
                 drawShell(l.additive ? GLOW_SHADER : SHELL_SHADER, ox, oy, oz, scale);
             } else {
                 var type = l.additive ? FxRenderTypes.auraPlainGlow(WHITE) : FxRenderTypes.auraPlain(WHITE);
@@ -421,7 +534,46 @@ public final class AuraSystem {
         }
     }
 
+    private static final ResourceLocation TONGUE_TEX = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/aura_tongue.png");
+
+    /** A layer of flame tongues: through the aura shader, or the old flame texture on the plain shaders. */
+    private static void tongues(AuraDef d, AuraDef.Layer l, float seed, float ox, float oy, float oz, float radius, float height, float bottom,
+                                float t, float wild, float bright, float tx, float ty, float tz, float opacity, float dist, int detail,
+                                boolean shader, PoseStack pose, MultiBufferSource.BufferSource buffers) {
+        if (dist > 48 || (detail == 0 && dist > 20)) return;
+        int budget = detail == 0 ? Math.max(4, l.tongueCount / 2) : 64;
+        if (shader) {
+            uniforms(l.additive ? AuraShaders.glow : AuraShaders.shell, l, l, seed + l.seed, opacity, t, wild, bright);
+            blend(l.additive);
+            RenderSystem.setShader(l.additive ? GLOW_SHADER : SHELL_SHADER);
+            RenderSystem.disableCull();
+            BufferBuilder bb = Tesselator.getInstance().getBuilder();
+            bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
+            AuraFlames.emit(bb, null, d, l, ox, oy, oz, radius, height, bottom, t, wild, seed + l.seed, tx, ty, tz, 1f, 0, 0, budget);
+            BufferBuilder.RenderedBuffer done = bb.endOrDiscardIfEmpty();
+            if (done != null) BufferUploader.drawWithShader(done);
+            RenderSystem.enableCull();
+        } else {
+            var type = l.additive ? FxRenderTypes.additive(TONGUE_TEX) : FxRenderTypes.soft(TONGUE_TEX);
+            AuraFlames.emit(buffers.getBuffer(type), pose.last().pose(), d, l, ox, oy, oz, radius, height, bottom, t, wild, seed + l.seed,
+                    tx, ty, tz, opacity * (1 + 0.3f * bright), AuraDef.mix(l.edge, l.mid, 0.35f), 16, budget);
+            buffers.endBatch(type);
+        }
+    }
+
+    /**
+     * Sets the blending by hand: a shader's own blend mode is skipped when it was the last one applied, even if
+     * something has turned blending off since, and then the aura would draw solid.
+     */
+    private static void blend(boolean additive) {
+        RenderSystem.enableBlend();
+        if (additive) RenderSystem.blendFunc(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA,
+                com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE);
+        else RenderSystem.defaultBlendFunc();
+    }
+
     private static void drawShell(Supplier<ShaderInstance> shader, float ox, float oy, float oz, float scale) {
+        blend(shader == GLOW_SHADER);
         RenderSystem.setShader(shader);
         BufferBuilder bb = Tesselator.getInstance().getBuilder();
         bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
@@ -440,7 +592,8 @@ public final class AuraSystem {
         sh.safeGetUniform("AuraShape").set(g.spikeSize * spikes, g.spikeSharpness, (float) g.spikeCount, glow ? l.band() : l.rimWidth);
         sh.safeGetUniform("AuraMotion").set(t, g.scroll, l.streaks, l.flicker * wild);
         sh.safeGetUniform("AuraMode").set((float) l.kind, seed, opacity, g.spikeLean);
-        sh.safeGetUniform("AuraBoost").set(bright, 0f, 0f, 0f);
+        sh.safeGetUniform("AuraBoost").set(bright, g.tallFlames, g.streakSpeed, g.stretch);
+        sh.safeGetUniform("AuraFlow").set(g.warp, 0f, 0f, 0f);
     }
 
     private static void set(ShaderInstance sh, String name, int rgb, float a) {
@@ -453,14 +606,14 @@ public final class AuraSystem {
      * Points of light through the aura while it burns. Sparkles: star dust rising through the shell, twinkling and
      * winking out. Embers: sparks drifting up and out past the top, fading as they cool. Returns how many it drew.
      */
-    private static int sparkles(PoseStack pose, VertexConsumer vc, State st, int budget, int detail) {
+    private static int sparkles(PoseStack pose, VertexConsumer vc, Slot st, int budget, int detail) {
         AuraDef d = st.def;
         boolean ember = "ember".equals(d.particles);
         if (!ember && !"sparkle".equals(d.particles) || d.particleRate <= 0) return 0;
         Matrix4f m = pose.last().pose();
         Matrix3f nm = pose.last().normal();
-        float t = st.drawPhase, seed = st.seed, fade = st.drawFade;
-        int count = Math.min(budget, Math.round(18 * d.particleRate * (1 + st.drawCharge) * (detail == 0 ? 0.5f : detail == 2 ? 1.4f : 1f)));
+        float t = st.phase, seed = st.seed, fade = st.fade;
+        int count = Math.min(budget, Math.round(18 * d.particleRate * (1 + st.charge) * (detail == 0 ? 0.5f : detail == 2 ? 1.4f : 1f)));
         int r = (d.particleColor >> 16) & 255, g = (d.particleColor >> 8) & 255, b = d.particleColor & 255;
         int drawn = 0;
         for (int i = 0; i < count; i++) {
@@ -473,10 +626,10 @@ public final class AuraSystem {
             float in = 0.25f + 0.7f * ((h >>> 10) & 1023) / 1023f;
             float s0 = 0.05f + 0.35f * ((h >>> 20) & 1023) / 1023f;
             float s = ember ? s0 + life * 1.1f : Math.min(1f, s0 + life * 0.75f);
-            float rr = AuraShell.profile(d, Math.min(1f, s)) * st.drawRadius * in * (ember ? 1 + 0.5f * life : 1);
+            float rr = AuraShell.profile(d, Math.min(1f, s)) * st.radius * in * (ember ? 1 + 0.5f * life : 1);
             a += ember ? 0.6f * Mth.sin(life * 5 + i) : 0;
-            float px = st.drawX + Mth.cos(a) * rr, py = st.drawY + st.drawBottom + s * st.drawHeight, pz = st.drawZ + Mth.sin(a) * rr;
-            float size = st.drawBody * 0.045f * d.particleSize * (0.6f + 0.8f * ((h >>> 5) & 255) / 255f) * (ember ? 1 - 0.6f * life : 1);
+            float px = st.x + Mth.cos(a) * rr, py = st.y + st.bottom + s * st.height, pz = st.z + Mth.sin(a) * rr;
+            float size = st.body * (ember ? 0.03f : 0.022f) * d.particleSize * (0.6f + 0.8f * ((h >>> 5) & 255) / 255f) * (ember ? 1 - 0.6f * life : 1);
             float twinkle = ember ? 0.8f + 0.2f * Mth.sin(t * 23f + i) : 0.6f + 0.4f * Mth.sin(t * 17f + i * 2.3f);
             int alpha = Mth.clamp((int) (255 * Mth.sin(Mth.PI * life) * twinkle * fade), 0, 255);
             if (alpha < 4) continue;
@@ -487,17 +640,17 @@ public final class AuraSystem {
     }
 
     /** Energy motes rising from the ground round a charging fighter, stretched by their speed. Returns how many it drew. */
-    private static int motes(PoseStack pose, VertexConsumer vc, State st, int budget, int detail, Camera camera) {
+    private static int motes(PoseStack pose, VertexConsumer vc, Slot st, int budget, int detail) {
         AuraDef d = st.def;
         if (d.moteRate <= 0) return 0;
         Matrix4f m = pose.last().pose();
         Matrix3f nm = pose.last().normal();
-        float t = st.drawPhase, seed = st.seed;
-        float c = st.drawCharge;
+        float t = st.phase, seed = st.seed;
+        float c = st.charge;
         int count = Math.min(budget, Math.round(22 * d.moteRate * c * (detail == 0 ? 0.5f : detail == 2 ? 1.5f : 1f)));
         int r = (d.moteColor >> 16) & 255, g = (d.moteColor >> 8) & 255, b = d.moteColor & 255;
         int drawn = 0;
-        boolean eyes = !st.shellsDrawn;
+        boolean eyes = !st.shells;
         for (int i = 0; i < count; i++) {
             float period = 0.7f + (i % 7) * 0.12f;
             float phase = (t * 1.3f + i * 0.377f + seed * 0.5f) / period;
@@ -505,13 +658,13 @@ public final class AuraSystem {
             float life = phase - cycle;
             int h = hash((int) (seed * 977) + i * 6151 + cycle * 92821);
             float a = (h & 1023) / 1023f * Mth.TWO_PI;
-            float out = (0.55f + 0.75f * ((h >>> 10) & 1023) / 1023f) * st.drawRadius * (1 - 0.35f * life);
-            if (eyes) out = Math.max(out, st.drawBody * 0.55f);                  // never through your own eyes
-            float px = st.drawX + Mth.cos(a) * out, pz = st.drawZ + Mth.sin(a) * out;
-            float py = st.drawY + st.drawBottom + life * life * st.drawHeight * 1.1f;
-            float w = st.drawBody * 0.018f * d.moteSize * (0.7f + 0.6f * ((h >>> 20) & 255) / 255f);
+            float out = (0.55f + 0.75f * ((h >>> 10) & 1023) / 1023f) * st.radius * (1 - 0.35f * life);
+            if (eyes) out = Math.max(out, st.body * 0.55f);                      // never through your own eyes
+            float px = st.x + Mth.cos(a) * out, pz = st.z + Mth.sin(a) * out;
+            float py = st.y + st.bottom + life * life * st.height * 1.1f;
+            float w = st.body * 0.018f * d.moteSize * (0.7f + 0.6f * ((h >>> 20) & 255) / 255f);
             float len = w * (3 + 9 * life);                                       // they speed up as they rise
-            int alpha = Mth.clamp((int) (230 * Mth.sin(Mth.PI * life) * st.drawFade * Math.min(1, c * 1.5f)), 0, 255);
+            int alpha = Mth.clamp((int) (230 * Mth.sin(Mth.PI * life) * st.fade * Math.min(1, c * 1.5f)), 0, 255);
             if (alpha < 4) continue;
             float sx = pz, sz = -px;                                              // across the line of sight, level
             float sl = Mth.sqrt(sx * sx + sz * sz);
@@ -525,6 +678,97 @@ public final class AuraSystem {
             drawn++;
         }
         return drawn;
+    }
+
+    private static final float[] BX = new float[8], BY = new float[8], BZ = new float[8];
+
+    /**
+     * Lightning crawling over the aura (Super Saiyan 2 and the like): jagged bolts that flash for a few frames at a
+     * time somewhere on the shell, each a bright core in a wider glow. Returns how many quads it drew.
+     */
+    private static int lightning(PoseStack pose, VertexConsumer vc, Slot st, float time, int budget, int detail) {
+        AuraDef d = st.def;
+        Matrix4f m = pose.last().pose();
+        Matrix3f nm = pose.last().normal();
+        int bolts = Math.min(budget / 14, Math.round(d.lightningRate * (1 + st.charge) * (detail == 0 ? 0.5f : 1f)));
+        int r = (d.lightningColor >> 16) & 255, g = (d.lightningColor >> 8) & 255, b = d.lightningColor & 255;
+        int drawn = 0;
+        float view = (float) Math.atan2(-st.z, -st.x);
+        for (int i = 0; i < bolts; i++) {
+            float rate = 9f + (i % 3) * 3f;                                       // a new bolt this many times a second
+            float phase = time * rate + i * 0.53f + st.seed;
+            int cycle = Mth.floor(phase);
+            int h = hash((int) (st.seed * 331) + i * 2654435 + cycle * 40503);
+            if ((h & 3) == 0) continue;                                           // a gap now and then: it flickers
+            float life = phase - cycle;
+            float r0 = (h & 1023) / 1023f, r1 = ((h >>> 10) & 1023) / 1023f, r2 = ((h >>> 20) & 1023) / 1023f;
+            float s = 0.15f + 0.75f * r1;
+            float a = view + (r0 < 0.5f ? 1 : -1) * (Mth.HALF_PI * (0.55f + 0.5f * r2)) + (r0 - 0.5f) * 0.6f;
+            float rr = AuraShell.profile(d, s) * st.radius * (0.65f + 0.3f * r2);
+            float x = st.x + Mth.cos(a) * rr, y = st.y + st.bottom + s * st.height, z = st.z + Mth.sin(a) * rr;
+            float len = st.body * 0.55f * d.lightningSize * (0.6f + 0.8f * r0);
+            float dir = (r2 - 0.5f) * 2.4f + (r1 < 0.5f ? 0 : Mth.PI);
+            int pts = 6;
+            for (int k = 0; k < pts; k++) {                                       // a jagged walk
+                int hk = hash(h + k * 7919);
+                float jx = ((hk & 255) / 255f - 0.5f) * 0.5f, jy = (((hk >>> 8) & 255) / 255f - 0.5f) * 0.5f;
+                float q = k / (float) (pts - 1);
+                BX[k] = x + (Mth.cos(a + Mth.HALF_PI) * Mth.cos(dir) * q + jx * 0.4f) * len;
+                BY[k] = y + (Mth.sin(dir) * q + jy * 0.4f) * len;
+                BZ[k] = z + (Mth.sin(a + Mth.HALF_PI) * Mth.cos(dir) * q + jx * 0.4f) * len;
+            }
+            int alpha = Mth.clamp((int) (255 * st.fade * (1 - life * 0.6f)), 0, 255);
+            for (int pass = 0; pass < 2; pass++) {                                // a wide glow, then the white-hot core
+                float w = st.body * (pass == 0 ? 0.05f : 0.014f);
+                int cr = pass == 0 ? r : 255, cg = pass == 0 ? g : 255, cb = pass == 0 ? b : 255;
+                int ca = pass == 0 ? alpha / 2 : alpha;
+                for (int k = 0; k < pts - 1; k++) {
+                    float sx = BY[k + 1] - BY[k], sy = -(BX[k + 1] - BX[k]);          // across the segment, roughly in the view plane
+                    float ex = BX[k] - BX[k + 1], ez = BZ[k] - BZ[k + 1];
+                    float cx2 = (BY[k] - BY[k + 1]) * BZ[k] - ez * BY[k], cy2 = ez * BX[k] - ex * BZ[k], cz2 = ex * BY[k] - (BY[k] - BY[k + 1]) * BX[k];
+                    float cl = Mth.sqrt(cx2 * cx2 + cy2 * cy2 + cz2 * cz2);
+                    if (cl < 1e-5f) continue;
+                    cx2 = cx2 / cl * w;
+                    cy2 = cy2 / cl * w;
+                    cz2 = cz2 / cl * w;
+                    corner(vc, m, nm, BX[k] - cx2, BY[k] - cy2, BZ[k] - cz2, 0, 0.5f, cr, cg, cb, ca);
+                    corner(vc, m, nm, BX[k] + cx2, BY[k] + cy2, BZ[k] + cz2, 1, 0.5f, cr, cg, cb, ca);
+                    corner(vc, m, nm, BX[k + 1] + cx2, BY[k + 1] + cy2, BZ[k + 1] + cz2, 1, 0.5f, cr, cg, cb, ca);
+                    corner(vc, m, nm, BX[k + 1] - cx2, BY[k + 1] - cy2, BZ[k + 1] - cz2, 0, 0.5f, cr, cg, cb, ca);
+                    drawn++;
+                }
+            }
+        }
+        return drawn;
+    }
+
+    /**
+     * The ground lit under a charging fighter (a ring of the aura's colour that pulses) and the ring a new aura throws
+     * out as it bursts.
+     */
+    private static void ground(PoseStack pose, VertexConsumer vc, State s, Slot sl, float time) {
+        Matrix4f m = pose.last().pose();
+        Matrix3f nm = pose.last().normal();
+        int c = sl.def.edge;
+        int r = (c >> 16) & 255, g = (c >> 8) & 255, b = c & 255;
+        float y = sl.y + 0.03f;
+        if (sl.charge > 0.02f && !"none".equals(sl.def.ground)) {
+            float size = sl.radius * (1.15f + 0.08f * Mth.sin(time * 6f + s.seed));
+            flat(vc, m, nm, sl.x, y, sl.z, size, time * 0.8f, r, g, b, Mth.clamp((int) (140 * sl.charge * sl.fade), 0, 255));
+        }
+        float burst = Math.max(s.form.flash, s.tech.flash);
+        if (burst > 0.02f) {
+            float size = sl.radius * (1.2f + 3.5f * (1 - burst));
+            flat(vc, m, nm, sl.x, y + 0.02f, sl.z, size, 0, r, g, b, Mth.clamp((int) (220 * burst), 0, 255));
+        }
+    }
+
+    private static void flat(VertexConsumer vc, Matrix4f m, Matrix3f nm, float x, float y, float z, float size, float turn, int r, int g, int b, int a) {
+        float c = Mth.cos(turn) * size, s = Mth.sin(turn) * size;
+        corner(vc, m, nm, x - c + s, y, z - s - c, 0, 0, r, g, b, a);
+        corner(vc, m, nm, x - c - s, y, z - s + c, 0, 1, r, g, b, a);
+        corner(vc, m, nm, x + c - s, y, z + s + c, 1, 1, r, g, b, a);
+        corner(vc, m, nm, x + c + s, y, z + s - c, 1, 0, r, g, b, a);
     }
 
     private static void billboard(VertexConsumer vc, Matrix4f m, Matrix3f nm, float px, float py, float pz, float size, int r, int g, int b, int alpha) {
@@ -556,7 +800,7 @@ public final class AuraSystem {
     public static void onCommands(RegisterClientCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("dbzaura")
                 .then(Commands.literal("off").executes(ctx -> {
-                    preview = null;
+                    preview = previewTech = null;
                     devState = "idle";
                     tell(Component.translatable("message.dbzenith.aura_preview_off"));
                     return 1;
@@ -581,21 +825,37 @@ public final class AuraSystem {
                 }))
                 .then(Commands.argument("aura", StringArgumentType.word())
                         .suggests((ctx, b) -> SharedSuggestionProvider.suggest(AuraDefs.ids(), b))
-                        .executes(ctx -> {
-                            String id = StringArgumentType.getString(ctx, "aura");
-                            AuraDef d = AuraDefs.byId(id);
-                            if (d == null) {
-                                tell(Component.translatable("message.dbzenith.aura_unknown", id));
-                                return 0;
-                            }
-                            preview = d;
-                            tell(Component.translatable("message.dbzenith.aura_preview", id));
-                            return 1;
-                        })));
+                        .executes(ctx -> wear(StringArgumentType.getString(ctx, "aura"), -1))
+                        .then(Commands.argument("stage", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 255))
+                                .executes(ctx -> wear(StringArgumentType.getString(ctx, "aura"),
+                                        com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "stage"))))));
+    }
+
+    /** Whether /dbzaura set and dump work on the technique you preview rather than the form's aura. */
+    private static boolean focusTech;
+
+    /** /dbzaura <id> [stage]: a form's aura replaces yours; a technique's (Kaioken) goes over it, at that stage. */
+    private static int wear(String id, int stage) {
+        AuraDef d = AuraDefs.byId(id);
+        if (d == null) {
+            tell(Component.translatable("message.dbzenith.aura_unknown", id));
+            return 0;
+        }
+        if (d.technique != null) {
+            previewTech = d;
+            previewStage = stage > 0 ? stage : 2;
+            focusTech = true;
+        } else {
+            preview = d;
+            focusTech = false;
+        }
+        tell(Component.translatable("message.dbzenith.aura_preview", id));
+        return 1;
     }
 
     /** The aura you are looking at: the one you preview, else the one your form wears. */
     private static AuraDef current() {
+        if (focusTech && previewTech != null) return previewTech;
         if (preview != null) return preview;
         Minecraft mc = Minecraft.getInstance();
         return mc.player == null ? null : wanted(ClientPublicStates.get(mc.player.getId()));
@@ -605,6 +865,7 @@ public final class AuraSystem {
     private static int tweak(String path, String value) {
         AuraDef d = current();
         if (d == null) {
+            DBZenith.LOGGER.warn("[aura] no aura to tweak ({})", path);
             tell(Component.literal("No aura to tweak: wear one with /dbzaura <id>"));
             return 0;
         }
@@ -617,11 +878,13 @@ public final class AuraSystem {
             AuraDef changed = AuraDef.parse(d.id, json);
             AuraDefs.replace(changed);
             if (preview == d) preview = changed;
-            for (State s : STATES.values()) if (s.def == d) s.def = changed;
+            if (previewTech == d) previewTech = changed;
             tell(Component.literal(d.id + ": " + path + " = " + value));
+            DBZenith.LOGGER.info("[aura] {}: {} = {}", d.id, path, value);
             return 1;
         } catch (Exception ex) {
             tell(Component.literal("Can't set " + path + ": " + ex.getMessage()));
+            DBZenith.LOGGER.warn("[aura] can't set {} on {}: {}", path, d.id, ex.toString());
             return 0;
         }
     }
@@ -691,7 +954,7 @@ public final class AuraSystem {
     static int reload() {
         int n = AuraDefs.reloadNow();
         if (preview != null) preview = AuraDefs.byId(preview.id);
-        for (State s : STATES.values()) if (s.def != null && AuraDefs.byId(s.def.id) != null) s.def = AuraDefs.byId(s.def.id);
+        if (previewTech != null) previewTech = AuraDefs.byId(previewTech.id);
         return n;
     }
 
@@ -712,9 +975,19 @@ public final class AuraSystem {
             String[] parts = name.substring(at + 7).split("\\.");
             devPreview(parts.length > 0 ? parts[0] : "off");
             devState = parts.length > 1 && !parts[1].isEmpty() ? parts[1].replaceAll("_.*", "") : "idle";
+            focusTech = false;
         }
-        int set = name.indexOf("auraset.");
-        if (set >= 0) {
+        int tech = name.indexOf("auratech.");
+        if (tech >= 0) {
+            String[] parts = name.substring(tech + 9).split("\\.");
+            AuraDef d = parts.length > 0 ? AuraDefs.byId(parts[0]) : null;
+            previewTech = d != null && d.technique != null ? d : null;
+            previewStage = parts.length > 1 ? Integer.parseInt(parts[1].replaceAll("\\D.*", "")) : 2;
+            focusTech = previewTech != null;
+        } else if (at >= 0) {
+            previewTech = null;
+        }
+        for (int set = name.indexOf("auraset."); set >= 0; set = name.indexOf("auraset.", set + 8)) {
             String spec = name.substring(set + 8).split("_")[0];
             int eq = spec.indexOf('+');
             if (eq > 0) tweak(spec.substring(0, eq).replace('-', '.'), spec.substring(eq + 1));
