@@ -4,21 +4,20 @@
   ],
   "silhouette": "lobed",
   "shape": {
-    "width": 1.5,
-    "height": 1.95,
-    "bottom": -0.06,
-    "widest": 0.32,
+    "width": 1.43,
+    "height": 1.8,
+    "bottom": -0.05,
+    "widest": 0.36,
     "taper": 1.4,
-    "tip": 0.7,
-    "peak": 0.08,
-    "flare": 0.06
+    "tip": 0.9,
+    "peak": 0.2,
+    "flare": 0.03
   },
   "lobes": {
     "count": 3,
-    "size": 0.16,
-    "rise": 0.3,
-    "rows": 2.6,
-    "billow": 0.75
+    "size": 0.02,
+    "rise": 0.5,
+    "rows": 1.5
   },
   "motion": {
     "pulse": 0.025,
@@ -61,15 +60,18 @@
         "strength": 0.7
       },
       "spikes": {
-        "count": 10,
-        "size": 0.08,
-        "sharpness": 0.1,
-        "lean": 0.8
+        "count": 5,
+        "size": 0.28,
+        "sharpness": 0.55,
+        "lean": 0.9
       },
       "motion": {
-        "scroll": 0.3,
-        "flicker": 0.06,
-        "streaks": 0.1
+        "scroll": 1.0,
+        "flicker": 0.15,
+        "streaks": 0.35,
+        "stretch": 0.26,
+        "tallFlames": 0.5,
+        "warp": 0.3
       }
     },
     {
@@ -88,8 +90,8 @@
       },
       "tongues": {
         "count": 12,
-        "length": 0.26,
-        "width": 0.42,
+        "length": 0.42,
+        "width": 0.16,
         "life": 1.0,
         "top": 0.45,
         "rise": 0.4,
@@ -113,16 +115,19 @@
         "edge": 0.25
       },
       "spikes": {
-        "count": 10,
-        "size": 0.08,
-        "sharpness": 0.1,
-        "lean": 0.8
+        "count": 5,
+        "size": 0.18,
+        "sharpness": 0.55,
+        "lean": 0.9
       },
       "motion": {
-        "scroll": 0.3,
-        "flicker": 0.06,
-        "streaks": 0.15,
-        "speed": 1.8
+        "scroll": 1.0,
+        "flicker": 0.15,
+        "streaks": 0.35,
+        "speed": 1.8,
+        "stretch": 0.26,
+        "tallFlames": 0.5,
+        "warp": 0.3
       }
     }
   ],

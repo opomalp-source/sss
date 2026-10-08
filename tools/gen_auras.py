@@ -24,18 +24,18 @@ FAMILIES = {
     # Super Saiyan style: sharp golden flames licking upward, a tall peak, a white-hot middle
     "fam_flame": {
         "silhouette": "jagged",
-        "shape": {"width": 1.45, "height": 2.15, "bottom": -0.06, "widest": 0.3, "taper": 1.5, "tip": 0.6, "peak": 0.28, "flare": 0.1},
-        "lobes": {"count": 5, "size": 0.07, "rise": 1.1, "rows": 3.2},
+        "shape": {"width": 1.05, "height": 2.05, "bottom": -0.05, "widest": 0.36, "taper": 1.1, "tip": 1.15, "peak": 0.32, "flare": 0.03},
+        "lobes": {"count": 3, "size": 0.02, "rise": 1.1, "rows": 1.5},
         "motion": {"pulse": 0.035, "pulseSpeed": 5.0, "sway": 0.03},
         "layers": [
             glow(1.06, 0.7),
             {"kind": "shell", "colors": {"core": "$core", "mid": "$mid", "edge": "$edge", "rim": "$white"},
              "alpha": {"core": 0.7, "edge": 1.0}, "rim": {"width": 0.04, "strength": 0.3},
-             "spikes": {"count": 22, "size": 0.2, "sharpness": 0.85, "lean": 1.6},
-             "motion": {"scroll": 2.0, "flicker": 0.35, "streaks": 0.45, "streakSpeed": 3.0, "stretch": 0.3, "tallFlames": 0.7, "warp": 0.6}},
+             "spikes": {"count": 6, "size": 0.32, "sharpness": 0.75, "lean": 1.0},
+             "motion": {"scroll": 1.8, "flicker": 0.35, "streaks": 0.5, "streakSpeed": 3.0, "stretch": 0.3, "tallFlames": 0.7, "warp": 0.35}},
             {"kind": "tongues", "colors": {"core": "$white", "mid": "$mid", "edge": "$edge"}, "alpha": {"core": 0.95, "edge": 0.9},
              "spikes": {"sharpness": 0.8},
-             "tongues": {"count": 22, "length": 0.3, "width": 0.3, "life": 0.45, "top": 0.35, "rise": 0.3, "wave": 0.2},
+             "tongues": {"count": 22, "length": 0.39, "width": 0.165, "life": 0.45, "top": 0.35, "rise": 0.3, "wave": 0.2},
              "motion": {"scroll": 2.2}},
             {"kind": "haze", "scale": 0.62, "blend": "add", "colors": {"core": "$white", "mid": "$core", "edge": "$mid"},
              "alpha": {"core": 0.3, "edge": 0.25}, "motion": {"speed": 2.0}},
@@ -48,18 +48,18 @@ FAMILIES = {
     # Rage and legendary power: huge, roaring, ragged tongues thrown high, embers, the ground shaking
     "fam_roar": {
         "silhouette": "jagged",
-        "shape": {"width": 1.75, "height": 2.5, "bottom": -0.08, "widest": 0.28, "taper": 1.35, "tip": 0.55, "peak": 0.4, "flare": 0.22},
-        "lobes": {"count": 6, "size": 0.1, "rise": 1.6, "rows": 3.6},
+        "shape": {"width": 1.25, "height": 2.35, "bottom": -0.06, "widest": 0.34, "taper": 1.05, "tip": 1.2, "peak": 0.45, "flare": 0.06},
+        "lobes": {"count": 3, "size": 0.025, "rise": 1.6, "rows": 1.5},
         "motion": {"pulse": 0.05, "pulseSpeed": 7.0, "sway": 0.05},
         "layers": [
             glow(1.08, 0.75),
             {"kind": "shell", "colors": {"core": "$core", "mid": "$mid", "edge": "$edge", "rim": "$deep"},
              "alpha": {"core": 0.6, "edge": 1.0}, "rim": {"width": 0.05, "strength": 0.5},
-             "spikes": {"count": 30, "size": 0.27, "sharpness": 0.9, "lean": 2.0},
-             "motion": {"scroll": 2.8, "flicker": 0.5, "streaks": 0.55, "streakSpeed": 4.0, "stretch": 0.26, "tallFlames": 0.9, "warp": 0.8}},
+             "spikes": {"count": 7, "size": 0.38, "sharpness": 0.85, "lean": 1.2},
+             "motion": {"scroll": 2.6, "flicker": 0.5, "streaks": 0.6, "streakSpeed": 4.0, "stretch": 0.34, "tallFlames": 0.9, "warp": 0.45}},
             {"kind": "tongues", "colors": {"core": "$white", "mid": "$mid", "edge": "$edge"}, "alpha": {"core": 0.95, "edge": 0.92},
              "spikes": {"sharpness": 1.0},
-             "tongues": {"count": 30, "length": 0.38, "width": 0.28, "life": 0.38, "top": 0.35, "rise": 0.35, "wave": 0.25},
+             "tongues": {"count": 30, "length": 0.494, "width": 0.154, "life": 0.38, "top": 0.35, "rise": 0.35, "wave": 0.25},
              "motion": {"scroll": 2.8}},
             {"kind": "haze", "scale": 0.6, "blend": "add", "colors": {"core": "$white", "mid": "$core", "edge": "$mid"},
              "alpha": {"core": 0.35, "edge": 0.3}, "motion": {"speed": 2.4}},
@@ -72,18 +72,18 @@ FAMILIES = {
     # God ki: calm, rounded, billowing like Blue, slow soft licks, embers drifting up
     "fam_divine": {
         "silhouette": "lobed",
-        "shape": {"width": 1.5, "height": 2.0, "bottom": -0.06, "widest": 0.32, "taper": 1.4, "tip": 0.7, "peak": 0.1, "flare": 0.06},
-        "lobes": {"count": 3, "size": 0.15, "rise": 0.35, "rows": 2.6, "billow": 0.75},
+        "shape": {"width": 1.1, "height": 2.05, "bottom": -0.05, "widest": 0.36, "taper": 1.1, "tip": 1.05, "peak": 0.25, "flare": 0.03},
+        "lobes": {"count": 3, "size": 0.02, "rise": 0.5, "rows": 1.5},
         "motion": {"pulse": 0.03, "pulseSpeed": 1.8, "sway": 0.03},
         "layers": [
             glow(1.07, 0.75),
             {"kind": "shell", "colors": {"core": "$white", "mid": "$mid", "edge": "$edge", "rim": "$core"},
              "alpha": {"core": 0.8, "edge": 1.0}, "rim": {"width": 0.05, "strength": 0.5},
-             "spikes": {"count": 10, "size": 0.08, "sharpness": 0.15, "lean": 0.8},
-             "motion": {"scroll": 0.4, "flicker": 0.06, "streaks": 0.15, "warp": 0.3}},
+             "spikes": {"count": 5, "size": 0.26, "sharpness": 0.5, "lean": 0.8},
+             "motion": {"scroll": 0.9, "flicker": 0.12, "streaks": 0.35, "stretch": 0.25, "tallFlames": 0.5, "warp": 0.3}},
             {"kind": "tongues", "colors": {"core": "$white", "mid": "$mid", "edge": "$edge"}, "alpha": {"core": 0.7, "edge": 0.55},
              "spikes": {"sharpness": 0.1},
-             "tongues": {"count": 9, "length": 0.28, "width": 0.45, "life": 1.1, "top": 0.45, "rise": 0.4, "wave": 0.35, "inset": 0.18},
+             "tongues": {"count": 9, "length": 0.364, "width": 0.2, "life": 1.1, "top": 0.45, "rise": 0.4, "wave": 0.35, "inset": 0.18},
              "motion": {"scroll": 0.8}},
             {"kind": "haze", "scale": 0.7, "colors": {"core": "$white", "mid": "$core", "edge": "$core"},
              "alpha": {"core": 0.22, "edge": 0.25}, "motion": {"speed": 1.6}},
@@ -96,18 +96,18 @@ FAMILIES = {
     # Silver calm (Ultra Instinct, the ego and eye forms): thin, see-through, shimmering, wisps curling up
     "fam_wisp": {
         "silhouette": "lobed",
-        "shape": {"width": 1.4, "height": 2.05, "bottom": -0.04, "widest": 0.34, "taper": 1.3, "tip": 0.6, "peak": 0.18, "flare": 0.0},
-        "lobes": {"count": 4, "size": 0.1, "rise": 0.6, "rows": 4.0, "billow": 0.3},
+        "shape": {"width": 1.0, "height": 2.1, "bottom": -0.04, "widest": 0.38, "taper": 1.1, "tip": 1.1, "peak": 0.3, "flare": 0.0},
+        "lobes": {"count": 3, "size": 0.02, "rise": 0.6, "rows": 1.5},
         "motion": {"pulse": 0.02, "pulseSpeed": 1.4, "sway": 0.05},
         "layers": [
             glow(1.05, 0.55),
             {"kind": "shell", "colors": {"core": "$white", "mid": "$core", "edge": "$rim", "rim": "$white"},
              "alpha": {"core": 0.18, "edge": 0.75}, "rim": {"width": 0.035, "strength": 0.6},
-             "spikes": {"count": 16, "size": 0.12, "sharpness": 0.3, "lean": 2.2},
-             "motion": {"scroll": 0.9, "flicker": 0.15, "streaks": 0.6, "streakSpeed": 3.5, "stretch": 0.2, "warp": 0.9}},
+             "spikes": {"count": 6, "size": 0.24, "sharpness": 0.6, "lean": 1.2},
+             "motion": {"scroll": 1.0, "flicker": 0.15, "streaks": 0.7, "streakSpeed": 3.5, "stretch": 0.25, "tallFlames": 0.5, "warp": 0.5}},
             {"kind": "tongues", "blend": "add", "colors": {"core": "$white", "mid": "$core", "edge": "$rim"}, "alpha": {"core": 0.8, "edge": 0.5},
              "spikes": {"sharpness": 0.2},
-             "tongues": {"count": 18, "length": 0.42, "width": 0.14, "life": 1.0, "top": 0.4, "rise": 0.45, "wave": 0.6, "inset": 0.05},
+             "tongues": {"count": 18, "length": 0.546, "width": 0.077, "life": 1.0, "top": 0.4, "rise": 0.45, "wave": 0.6, "inset": 0.05},
              "motion": {"scroll": 1.0}},
         ],
         "particles": {"type": "sparkle", "rate": 1.6, "size": 0.8, "color": "$white"},
@@ -118,18 +118,18 @@ FAMILIES = {
     # Evil and blood: a dark smouldering flame lit at its edge, embers
     "fam_dark": {
         "silhouette": "jagged",
-        "shape": {"width": 1.55, "height": 2.2, "bottom": -0.06, "widest": 0.3, "taper": 1.45, "tip": 0.6, "peak": 0.25, "flare": 0.14},
-        "lobes": {"count": 5, "size": 0.09, "rise": 0.9, "rows": 3.0},
+        "shape": {"width": 1.1, "height": 2.15, "bottom": -0.05, "widest": 0.35, "taper": 1.1, "tip": 1.15, "peak": 0.32, "flare": 0.04},
+        "lobes": {"count": 3, "size": 0.02, "rise": 0.9, "rows": 1.5},
         "motion": {"pulse": 0.04, "pulseSpeed": 3.0, "sway": 0.04},
         "layers": [
             glow(1.07, 0.65, '$edge'),
             {"kind": "shell", "colors": {"core": "$dark", "mid": "$deep", "edge": "$edge", "rim": "$rim"},
              "alpha": {"core": 0.55, "edge": 0.95}, "rim": {"width": 0.05, "strength": 0.7},
-             "spikes": {"count": 24, "size": 0.22, "sharpness": 0.85, "lean": 1.8},
-             "motion": {"scroll": 1.6, "flicker": 0.3, "streaks": 0.35, "streakSpeed": 2.5, "stretch": 0.28, "tallFlames": 0.7, "warp": 0.7}},
+             "spikes": {"count": 6, "size": 0.34, "sharpness": 0.8, "lean": 1.1},
+             "motion": {"scroll": 1.5, "flicker": 0.3, "streaks": 0.4, "streakSpeed": 2.5, "stretch": 0.3, "tallFlames": 0.7, "warp": 0.4}},
             {"kind": "tongues", "colors": {"core": "$deep", "mid": "$c", "edge": "$dark"}, "alpha": {"core": 0.9, "edge": 0.85},
              "spikes": {"sharpness": 0.9},
-             "tongues": {"count": 22, "length": 0.33, "width": 0.28, "life": 0.5, "top": 0.35, "rise": 0.3, "wave": 0.25},
+             "tongues": {"count": 22, "length": 0.429, "width": 0.154, "life": 0.5, "top": 0.35, "rise": 0.3, "wave": 0.25},
              "motion": {"scroll": 1.8}},
         ],
         "particles": {"type": "ember", "rate": 1.2, "size": 0.9, "color": "$rim"},
@@ -140,18 +140,18 @@ FAMILIES = {
     # Machines: clean and steady, fine crackling teeth, data streaming up, sparks
     "fam_tech": {
         "silhouette": "jagged",
-        "shape": {"width": 1.4, "height": 2.05, "bottom": -0.05, "widest": 0.32, "taper": 1.6, "tip": 0.75, "peak": 0.06, "flare": 0.04},
-        "lobes": {"count": 4, "size": 0.04, "rise": 0.6, "rows": 2.0},
+        "shape": {"width": 1.05, "height": 2.0, "bottom": -0.05, "widest": 0.38, "taper": 1.2, "tip": 1.1, "peak": 0.2, "flare": 0.02},
+        "lobes": {"count": 3, "size": 0.015, "rise": 0.6, "rows": 1.5},
         "motion": {"pulse": 0.025, "pulseSpeed": 6.0, "sway": 0.01},
         "layers": [
             glow(1.05, 0.8),
             {"kind": "shell", "colors": {"core": "$core", "mid": "$mid", "edge": "$edge", "rim": "$white"},
              "alpha": {"core": 0.45, "edge": 1.0}, "rim": {"width": 0.03, "strength": 0.6},
-             "spikes": {"count": 42, "size": 0.09, "sharpness": 0.95, "lean": 0.6},
-             "motion": {"scroll": 3.0, "flicker": 0.6, "streaks": 0.9, "streakSpeed": 6.0, "stretch": 0.5, "warp": 0.1}},
+             "spikes": {"count": 8, "size": 0.24, "sharpness": 0.95, "lean": 0.6},
+             "motion": {"scroll": 3.0, "flicker": 0.5, "streaks": 0.9, "streakSpeed": 6.0, "stretch": 0.45, "tallFlames": 0.4, "warp": 0.1}},
             {"kind": "tongues", "blend": "add", "colors": {"core": "$white", "mid": "$mid", "edge": "$edge"}, "alpha": {"core": 0.9, "edge": 0.7},
              "spikes": {"sharpness": 1.0},
-             "tongues": {"count": 12, "length": 0.18, "width": 0.18, "life": 0.25, "top": 0.25, "rise": 0.2, "wave": 0.05},
+             "tongues": {"count": 12, "length": 0.36, "width": 0.099, "life": 0.25, "top": 0.25, "rise": 0.2, "wave": 0.05},
              "motion": {"scroll": 3.0}},
         ],
         "particles": {"type": "sparkle", "rate": 1.0, "size": 0.6, "color": "$white"},
@@ -163,18 +163,18 @@ FAMILIES = {
     # Majin: pink steam, round puffs boiling up
     "fam_majin": {
         "silhouette": "lobed",
-        "shape": {"width": 1.6, "height": 2.0, "bottom": -0.08, "widest": 0.35, "taper": 1.3, "tip": 0.8, "peak": 0.05, "flare": 0.15},
-        "lobes": {"count": 4, "size": 0.15, "rise": 0.7, "rows": 2.8, "billow": 0.8},
+        "shape": {"width": 1.15, "height": 2.05, "bottom": -0.05, "widest": 0.36, "taper": 1.1, "tip": 1.0, "peak": 0.25, "flare": 0.05},
+        "lobes": {"count": 3, "size": 0.02, "rise": 0.7, "rows": 1.5},
         "motion": {"pulse": 0.05, "pulseSpeed": 2.2, "sway": 0.04},
         "layers": [
             glow(1.06, 0.6),
             {"kind": "shell", "colors": {"core": "$core", "mid": "$mid", "edge": "$edge", "rim": "$white"},
              "alpha": {"core": 0.55, "edge": 0.9}, "rim": {"width": 0.06, "strength": 0.4},
-             "spikes": {"count": 8, "size": 0.12, "sharpness": 0.0, "lean": 0.5},
-             "motion": {"scroll": 0.8, "flicker": 0.1, "streaks": 0.1, "warp": 0.6}},
+             "spikes": {"count": 5, "size": 0.3, "sharpness": 0.35, "lean": 0.9},
+             "motion": {"scroll": 1.2, "flicker": 0.2, "streaks": 0.3, "stretch": 0.28, "tallFlames": 0.6, "warp": 0.5}},
             {"kind": "tongues", "colors": {"core": "$core", "mid": "$mid", "edge": "$edge"}, "alpha": {"core": 0.7, "edge": 0.6},
              "spikes": {"sharpness": 0.0},
-             "tongues": {"count": 12, "length": 0.24, "width": 0.45, "life": 1.0, "top": 0.5, "rise": 0.5, "wave": 0.4, "inset": 0.2},
+             "tongues": {"count": 12, "length": 0.36, "width": 0.2, "life": 1.0, "top": 0.5, "rise": 0.5, "wave": 0.4, "inset": 0.2},
              "motion": {"scroll": 0.7}},
             {"kind": "haze", "scale": 0.7, "colors": {"core": "$white", "mid": "$core", "edge": "$mid"}, "alpha": {"core": 0.25, "edge": 0.3}},
         ],
@@ -186,18 +186,18 @@ FAMILIES = {
     # Frost demons and perfect forms: sleek and tall, fine sharp spikes, a sheen running up
     "fam_regal": {
         "silhouette": "jagged",
-        "shape": {"width": 1.3, "height": 2.25, "bottom": -0.05, "widest": 0.28, "taper": 1.7, "tip": 0.5, "peak": 0.2, "flare": 0.05},
-        "lobes": {"count": 4, "size": 0.05, "rise": 0.8, "rows": 2.5},
+        "shape": {"width": 0.98, "height": 2.2, "bottom": -0.05, "widest": 0.36, "taper": 1.05, "tip": 1.3, "peak": 0.35, "flare": 0.02},
+        "lobes": {"count": 3, "size": 0.015, "rise": 0.8, "rows": 1.5},
         "motion": {"pulse": 0.025, "pulseSpeed": 2.5, "sway": 0.02},
         "layers": [
             glow(1.05, 0.8),
             {"kind": "shell", "colors": {"core": "$white", "mid": "$mid", "edge": "$edge", "rim": "$white"},
              "alpha": {"core": 0.6, "edge": 1.0}, "rim": {"width": 0.03, "strength": 0.6},
-             "spikes": {"count": 34, "size": 0.12, "sharpness": 0.75, "lean": 2.4},
-             "motion": {"scroll": 1.4, "flicker": 0.2, "streaks": 0.7, "streakSpeed": 3.5, "stretch": 0.22, "tallFlames": 0.5, "warp": 0.3}},
+             "spikes": {"count": 7, "size": 0.3, "sharpness": 0.9, "lean": 1.4},
+             "motion": {"scroll": 1.4, "flicker": 0.2, "streaks": 0.7, "streakSpeed": 3.5, "stretch": 0.27, "tallFlames": 0.6, "warp": 0.25}},
             {"kind": "tongues", "colors": {"core": "$white", "mid": "$mid", "edge": "$edge"}, "alpha": {"core": 0.95, "edge": 0.85},
              "spikes": {"sharpness": 0.9},
-             "tongues": {"count": 14, "length": 0.36, "width": 0.17, "life": 0.6, "top": 0.4, "rise": 0.35, "wave": 0.12},
+             "tongues": {"count": 14, "length": 0.468, "width": 0.094, "life": 0.6, "top": 0.4, "rise": 0.35, "wave": 0.12},
              "motion": {"scroll": 1.6}},
         ],
         "particles": {"type": "sparkle", "rate": 1.2, "size": 0.9, "color": "$white"},
@@ -208,16 +208,16 @@ FAMILIES = {
     # Super Saiyan 4: red flames round a gold heart
     "fam_ssj4": {
         "extends": "fam_flame",
-        "shape": {"width": 1.55, "height": 2.25, "peak": 0.3, "flare": 0.15},
+        "shape": {"width": 1.15, "height": 2.15, "peak": 0.35, "flare": 0.04},
         "layers": [
             glow(1.07, 0.75, '$c'),
             {"kind": "shell", "colors": {"core": "#FFF2C8", "mid": "#FF9A3A", "edge": "$edge", "rim": "#FFD060"},
              "alpha": {"core": 0.65, "edge": 1.0}, "rim": {"width": 0.05, "strength": 0.6},
-             "spikes": {"count": 24, "size": 0.22, "sharpness": 0.85, "lean": 1.7},
-             "motion": {"scroll": 2.1, "flicker": 0.35, "streaks": 0.4, "streakSpeed": 3.0, "stretch": 0.3, "tallFlames": 0.7, "warp": 0.6}},
+             "spikes": {"count": 6, "size": 0.34, "sharpness": 0.8, "lean": 1.1},
+             "motion": {"scroll": 1.9, "flicker": 0.35, "streaks": 0.45, "streakSpeed": 3.0, "stretch": 0.3, "tallFlames": 0.7, "warp": 0.35}},
             {"kind": "tongues", "colors": {"core": "#FFF4D0", "mid": "#FF7A30", "edge": "$edge"}, "alpha": {"core": 0.95, "edge": 0.9},
              "spikes": {"sharpness": 0.85},
-             "tongues": {"count": 24, "length": 0.32, "width": 0.3, "life": 0.45, "top": 0.35, "rise": 0.3, "wave": 0.2},
+             "tongues": {"count": 24, "length": 0.416, "width": 0.165, "life": 0.45, "top": 0.35, "rise": 0.3, "wave": 0.2},
              "motion": {"scroll": 2.2}},
             {"kind": "haze", "scale": 0.62, "blend": "add", "colors": {"core": "#FFF8E0", "mid": "#FFD080", "edge": "#FFA050"},
              "alpha": {"core": 0.3, "edge": 0.25}, "motion": {"speed": 2.0}},
@@ -228,8 +228,8 @@ FAMILIES = {
     "fam_base": {
         "extends": "fam_flame",
         "followFighter": True, "idle": False,
-        "shape": {"width": 1.35, "height": 2.0, "peak": 0.18, "flare": 0.08},
-        "lobes": {"size": 0.08, "rise": 1.0},
+        "shape": {"width": 1.0, "height": 1.95, "peak": 0.25, "flare": 0.03},
+        "lobes": {"size": 0.02, "rise": 1.0},
         "particles": {"type": "none"},
         "react": {"charge": {"scale": 0.15, "height": 0.2, "wild": 1.2, "glow": 0.3, "shake": 0.03}},
     },
@@ -246,12 +246,12 @@ def form(fid, fam, tint, tier, **extra):
 GOLD, LEGEND, SSJ4 = '#FFD23C', '#7CFF4A', '#FF3A2A'
 # Saiyan line
 form('super_saiyan', 'fam_flame', GOLD, 1, lightning={"rate": 0.5, "size": 0.45, "color": "#FFFBD8"})
-form('super_saiyan_g2', 'fam_flame', '#FFCF30', 2, shape={"width": 1.65, "height": 2.2}, lobes={"size": 0.1})
-form('super_saiyan_g3', 'fam_roar', '#FFC828', 3, shape={"width": 1.95, "height": 2.35, "peak": 0.25}, motion={"pulseSpeed": 3.5},
+form('super_saiyan_g2', 'fam_flame', '#FFCF30', 2, shape={"width": 1.2, "height": 2.15})
+form('super_saiyan_g3', 'fam_roar', '#FFC828', 3, shape={"width": 1.4, "height": 2.3, "peak": 0.35}, motion={"pulseSpeed": 3.5},
      particles={"type": "sparkle", "rate": 0.5})
 form('super_saiyan_2', 'fam_flame', '#FFD840', 2, lightning={"rate": 3.5, "size": 1.0, "color": "#F4FBFF"},
-     layers_mod={1: {"spikes": {"count": 26, "size": 0.24}, "motion": {"streaks": 0.6}}})
-form('super_saiyan_3', 'fam_flame', '#FFDA48', 3, shape={"height": 2.55, "peak": 0.5, "flare": 0.18},
+     layers_mod={1: {"spikes": {"count": 7, "size": 0.36, "sharpness": 0.85}, "motion": {"streaks": 0.65}}})
+form('super_saiyan_3', 'fam_flame', '#FFDA48', 3, shape={"height": 2.45, "peak": 0.55, "flare": 0.04},
      lightning={"rate": 5, "size": 1.2, "color": "#F4FBFF"}, tongues={"length": 0.4, "count": 30},
      react={"charge": {"shake": 0.05, "wild": 1.8}})
 form('super_saiyan_god', 'fam_divine', '#FF3B3B', 4, layers_mod={1: {"colors": {"edge": "#E81E3A", "mid": "#FF8A7A", "rim": "#FFD0A0"}}},
@@ -268,23 +268,23 @@ form('beast_awakening', 'fam_roar', '#D070FF', 5, lightning={"rate": 3.5, "size"
      layers_mod={1: {"colors": {"core": "#FFFFFF", "mid": "#F0D8FF", "edge": "#B040FF", "rim": "#FF3A6A"}}},
      particles={"type": "ember", "color": "#FF6A8A"})
 # Legendary
-form('wrathful', 'fam_roar', '#B8FF6A', 1, shape={"width": 1.55, "height": 2.25})
+form('wrathful', 'fam_roar', '#B8FF6A', 1, shape={"width": 1.15, "height": 2.2})
 form('lssj', 'fam_roar', LEGEND, 1)
 form('lssj2', 'fam_roar', LEGEND, 2, lightning={"rate": 3, "size": 1.0, "color": "#E8FFD0"})
 form('lssj3', 'fam_roar', '#6AFF3A', 3, lightning={"rate": 4.5, "size": 1.2, "color": "#E8FFD0"}, shape={"peak": 0.6})
 form('lssj_c_type', 'fam_flame', LEGEND, 2)
 form('lssj_full_power', 'fam_roar', LEGEND, 3, lightning={"rate": 4, "size": 1.1, "color": "#E8FFD0"})
 form('lssj_controlled', 'fam_divine', LEGEND, 4, lightning={"rate": 2, "size": 0.9, "color": "#E8FFD0"})
-form('lssj4', 'fam_ssj4', SSJ4, 5, shape={"width": 1.8, "height": 2.5})
-form('lssj4_full_power', 'fam_ssj4', '#FF5A3A', 6, shape={"width": 1.9, "height": 2.6}, lightning={"rate": 3, "size": 1.0, "color": "#FFE0A0"})
-form('lssj4_limit_breaker', 'fam_divine', '#FF8AE0', 7, shape={"width": 1.8}, lightning={"rate": 2.5, "size": 1.0, "color": "#FFE8FA"})
+form('lssj4', 'fam_ssj4', SSJ4, 5, shape={"width": 1.35, "height": 2.45})
+form('lssj4_full_power', 'fam_ssj4', '#FF5A3A', 6, shape={"width": 1.4, "height": 2.55}, lightning={"rate": 3, "size": 1.0, "color": "#FFE0A0"})
+form('lssj4_limit_breaker', 'fam_divine', '#FF8AE0', 7, shape={"width": 1.3}, lightning={"rate": 2.5, "size": 1.0, "color": "#FFE8FA"})
 # Ultra Instinct
 form('ultra_instinct_sign', 'fam_wisp', '#CFE0FF', 5, layers_mod={1: {"colors": {"edge": "#7FA8FF", "rim": "#E8F0FF"}}})
 form('ultra_instinct', 'fam_wisp', '#EEF4FF', 6, layers_mod={1: {"alpha": {"core": 0.28}, "colors": {"edge": "#B8D0FF"}}},
      particles={"rate": 2.4}, tongues={"count": 26})
 # Human
 form('full_power', 'fam_flame', '#F2F6FF', 1)
-form('buffed', 'fam_roar', '#FFE8C0', 2, shape={"width": 1.6, "height": 2.2}, particles={"type": "sparkle", "rate": 0.4})
+form('buffed', 'fam_roar', '#FFE8C0', 2, shape={"width": 1.2, "height": 2.15}, particles={"type": "sparkle", "rate": 0.4})
 form('potential_unleashed', 'fam_divine', '#FFFFFF', 3, layers_mod={1: {"colors": {"edge": "#D8E4FF"}}})
 form('transcendent', 'fam_wisp', '#E0F0FF', 4)
 form('surge', 'fam_divine', '#F0E6C8', 2)
@@ -319,7 +319,7 @@ form('metal_god_core', 'fam_tech', '#E8F0FF', 3, lightning={"rate": 3.5, "size":
 form('evil_majin', 'fam_majin', '#C05080', 1)
 form('super_majin', 'fam_majin', '#FF70B0', 2)
 form('pure_majin', 'fam_majin', '#FF4FA0', 3, react={"charge": {"wild": 1.6, "shake": 0.04}}, motion={"pulseSpeed": 4.0})
-form('primordial_majin', 'fam_majin', '#FF2080', 4, lobes={"size": 0.18, "rise": 1.2})
+form('primordial_majin', 'fam_majin', '#FF2080', 4, lobes={"rise": 1.2})
 form('pure_corruption', 'fam_dark', '#9A70C0', 3, lightning={"rate": 2.5, "size": 0.9})
 # Android and cyborg
 form('upgrade_mk2', 'fam_tech', '#9AD0FF', 1)
@@ -337,7 +337,7 @@ form('nightborn', 'fam_dark', '#8A0A20', 2)
 form('elder_blood', 'fam_dark', '#600818', 3, lightning={"rate": 2.5, "size": 0.9, "color": "#FF4060"})
 form('crimson_sovereign', 'fam_divine', '#FF1838', 4, layers_mod={1: {"colors": {"core": "#FFE0E4"}}})
 form('blood_moon_monarch', 'fam_dark', '#FF0030', 5, lightning={"rate": 3.5, "size": 1.1, "color": "#FF8090"},
-     shape={"width": 1.8, "height": 2.5})
+     shape={"width": 1.35, "height": 2.45})
 # Bio-android
 form('cell_surge', 'fam_flame', '#7ADA60', 1)
 form('semi_perfect', 'fam_flame', '#9AFF70', 2)
@@ -370,7 +370,7 @@ form('demon_mark', 'fam_dark', '#FF5050', 2)
 form('dark_evolution', 'fam_dark', '#D02040', 2)
 form('demon_lord', 'fam_roar', '#A01030', 3, lightning={"rate": 3, "size": 1.0, "color": "#FF6070"},
      layers_mod={1: {"colors": {"core": "#3A0810", "mid": "#801020"}}})
-form('demon_god', 'fam_dark', '#6A0A20', 4, lightning={"rate": 3.5, "size": 1.1, "color": "#FF4060"}, shape={"width": 1.75, "height": 2.4})
+form('demon_god', 'fam_dark', '#6A0A20', 4, lightning={"rate": 3.5, "size": 1.1, "color": "#FF4060"}, shape={"width": 1.3, "height": 2.35})
 
 
 def deep_merge(base, top):
@@ -398,7 +398,18 @@ def build(fid, fam, tint, tier, extra):
     shape = dict(extra.get('shape', {}))
     w = shape.get('width', famj['shape']['width'])
     h = shape.get('height', famj['shape']['height'])
-    shape['width'] = round(w * (1 + 0.045 * tier), 3)
+    if 'shape' in extra and 'width' in extra['shape']:
+        w = w * 1.3                                    # (the family's own width is scaled when its file is written)
+    if 'shape' in extra and 'height' in extra['shape']:
+        h = h * 0.86
+    if 'peak' in shape:
+        shape['peak'] = round(shape['peak'] * 0.7, 3)
+    fam_w, fam_h = famj['shape']['width'], famj['shape']['height']
+    if 'shape' not in extra or 'width' not in extra['shape']:
+        w = fam_w * 1.3
+    if 'shape' not in extra or 'height' not in extra['shape']:
+        h = fam_h * 0.86
+    shape['width'] = round(w * (1 + 0.02 * tier), 3)
     shape['height'] = round(h * (1 + 0.05 * tier), 3)
     out['shape'] = shape
     for key in ('lobes', 'motion', 'react', 'lightning'):
@@ -432,36 +443,36 @@ def kaioken():
             {"kind": "shell", "silhouette": "jagged",
              "colors": {"core": "#FFE6EA", "mid": "#FF8C9C", "edge": "$edge", "rim": "#FF1030"},
              "alpha": {"core": 0.22, "edge": 1.0}, "rim": {"width": 0.06, "strength": 0.8},
-             "spikes": {"count": spikes, "size": size, "sharpness": 0.95, "lean": 2.2},
-             "motion": {"scroll": scroll, "flicker": flicker, "streaks": 0.85, "streakSpeed": 6.0, "stretch": 0.22,
+             "spikes": {"count": spikes, "size": size, "sharpness": 0.9, "lean": 1.2},
+             "motion": {"scroll": scroll, "flicker": flicker, "streaks": 0.85, "streakSpeed": 6.0, "stretch": 0.34,
                         "tallFlames": 1.0, "warp": 0.7}},
             {"kind": "tongues", "silhouette": "jagged",
              "colors": {"core": "#FFF0F2", "mid": "#FF6A80", "edge": "$edge"}, "alpha": {"core": 0.95, "edge": 0.95},
              "spikes": {"sharpness": 1.0},
-             "tongues": {"count": tongues, "length": length, "width": 0.24, "life": 0.33, "top": 0.4, "rise": 0.35, "wave": 0.2},
+             "tongues": {"count": tongues, "length": length, "width": 0.132, "life": 0.33, "top": 0.4, "rise": 0.35, "wave": 0.2},
              "motion": {"scroll": scroll}},
             {"kind": "shell", "blend": "add", "scale": 0.9, "silhouette": "lobed",
              "colors": {"core": "#FFF4F6", "mid": "#FFB0C0", "edge": "#FF5068"}, "alpha": {"core": 0.12, "edge": 0.3},
-             "rim": {"strength": 0.0}, "spikes": {"count": 12, "size": 0.05, "sharpness": 0.2},
+             "rim": {"strength": 0.0}, "spikes": {"count": 6, "size": 0.2, "sharpness": 0.6},
              "motion": {"scroll": scroll * 0.8, "flicker": 0.2, "streaks": 0.6, "streakSpeed": 6.0}, "seed": 9.1},
         ]
     return {
         "technique": "kaioken", "tint": "#FF2A1E",
-        "wrap": {"scale": 1.35, "height": 1.5},
+        "wrap": {"scale": 1.3, "height": 1.35},
         "silhouette": "jagged",
-        "shape": {"width": 1.6, "height": 2.3, "bottom": -0.1, "widest": 0.26, "taper": 1.3, "tip": 0.5, "peak": 0.45, "flare": 0.25},
-        "lobes": {"count": 6, "size": 0.08, "rise": 1.8, "rows": 3.4},
+        "shape": {"width": 1.3, "height": 2.4, "bottom": -0.08, "widest": 0.34, "taper": 1.05, "tip": 1.2, "peak": 0.5, "flare": 0.08},
+        "lobes": {"count": 3, "size": 0.02, "rise": 1.8, "rows": 1.5},
         "motion": {"pulse": 0.05, "pulseSpeed": 7.0, "sway": 0.04},
-        "layers": layers(30, 0.26, 0.5, 3.0, 26, 0.35),
+        "layers": layers(7, 0.38, 0.5, 2.6, 26, 0.4),
         "particles": {"type": "ember", "rate": 1.6, "size": 0.8, "color": "#FFD8DE"},
         "motes": {"rate": 1.6, "color": "#FF8090"},
         "react": {"charge": {"scale": 0.25, "height": 0.3, "wild": 1.8, "glow": 0.5, "shake": 0.05}, "move": {"trail": 1.8, "max": 0.5}},
         "grow": {"scale": 0.025, "height": 0.03, "wild": 0.06},
         "tiers": [
             {"from": 1},
-            {"from": 11, "wrap": {"scale": 1.55, "height": 1.8},
-             "shape": {"peak": 0.7, "flare": 0.35}, "motion": {"pulse": 0.07, "pulseSpeed": 9.0},
-             "layers": layers(36, 0.32, 0.75, 4.0, 40, 0.45),
+            {"from": 11, "wrap": {"scale": 1.45, "height": 1.6},
+             "shape": {"peak": 0.75, "flare": 0.1}, "motion": {"pulse": 0.07, "pulseSpeed": 9.0},
+             "layers": layers(8, 0.42, 0.7, 3.4, 36, 0.5),
              "particles": {"rate": 2.6}, "lightning": {"rate": 2.5, "size": 1.0, "color": "#FFE0E6"},
              "react": {"charge": {"wild": 2.4, "shake": 0.08}},
              "grow": {"scale": 0.012, "height": 0.015, "wild": 0.05}},
@@ -470,8 +481,24 @@ def kaioken():
     }
 
 
+def flame_proportions(obj):
+    """The aura's outline around a Minecraft fighter: about twice the body wide, a flame top that narrows to a point."""
+    sh = obj.get('shape')
+    if isinstance(sh, dict):
+        if 'width' in sh: sh['width'] = round(sh['width'] * 1.3, 3)
+        if 'height' in sh: sh['height'] = round(sh['height'] * 0.86, 3)
+        if 'peak' in sh: sh['peak'] = round(sh['peak'] * 0.7, 3)
+        if 'taper' in sh: sh['taper'] = 1.4
+        if 'tip' in sh: sh['tip'] = 0.9
+    for t in obj.get('tiers', []):
+        flame_proportions(t)
+    return obj
+
+
 def write(path, obj):
     os.makedirs(os.path.dirname(path), exist_ok=True)
+    if 'auras' in path and 'families' in path or os.path.basename(path) == 'kaioken.json':
+        obj = flame_proportions(json.loads(json.dumps(obj)))
     with open(path, 'w') as f:
         json.dump(obj, f, indent=2)
         f.write('\n')

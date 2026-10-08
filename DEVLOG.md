@@ -2143,3 +2143,23 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **Checked in a dev client:** the full gallery (Kaioken over Blue x10/x20, base, SSJ 1-3, God, UI, LSSJ3, SSJ4, Golden,
   Majin idle and charging, Android, Elder Blood, Beast, flying, charging) and clips. 209 GameTests.
 
+## 2026-10-08 — CX-24: Dragon Ball flame silhouettes instead of bubbles (v0.76.0)
+- **The ask:** v0.75 looked bubbly, blobby and inflated, like clouds or liquid. Wanted: tall, slim, vertically flowing
+  ki flames with a few long tapered tongues and pointed tips, vertical energy streaks, rising and flickering, not
+  breathing like a balloon.
+- **What made it bubbly, and what replaced it:**
+  - **Outline** (`aura.fsh`, `flameCut`): rounded smoothstep crests are gone. The edge is now cut into flame teeth: a
+    few tongues round (`spikes.count`, at most 8), several up the height (`motion.stretch` x 10), each running from a
+    deep root out to a pointed tip and snapping back in just above it, so every tip points up. They climb with
+    `motion.scroll`, each has its own length that flickers, and `sharpness` makes the points longer and slimmer.
+    The glow layers follow the same flame edge instead of a smooth oval round it.
+  - **Mesh** (`AuraShell`): the round bulges and billows are dropped from every aura (lobe size about 0.02, no billow).
+  - **Proportions:** narrower than before (about twice the body wide), widest at the chest, a flame top narrowing to a
+    point (taper 1.4, tip 0.9), a short peak; Grade 2/3, the LSSJ and other bulky forms stay a little wider.
+  - **Animation** (`AuraSystem.measure`): the pulse no longer scales the width; it stretches the aura upward, and a
+    charge mostly makes it taller (width +35% of the old amount).
+  - **Inside:** energy streaks drawn long and thin straight up; the rim tint follows them instead of round patches.
+  - **Inner flames:** slim, drawn to a point, a gentler sway.
+- All families, Blue and Kaioken (both tiers) re-proportioned in `tools/gen_auras.py` (`flame_proportions`).
+- **Checked in a dev client:** the full gallery and clips (the tongues climb, the width holds still). 209 GameTests.
+

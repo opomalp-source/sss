@@ -453,8 +453,10 @@ public final class AuraSystem {
         AuraDef.React rc = d.react;
         float pulse = 1 + d.pulse * Mth.sin(ph * d.pulseSpeed + s.seed);
         float grow = 0.55f + 0.45f * k;                                          // it swells out as it comes
-        float size = pulse * grow * (1 + rc.chargeScale * charge + rc.hitScale * flare + rc.burstScale * burst);
-        float tall = pulse * (0.65f + 0.35f * k) * (1 + rc.chargeHeight * charge + rc.hitScale * flare + rc.burstScale * burst);
+        // it never breathes in and out like a balloon: the pulse and most of a charge stretch it upward, the width
+        // barely moves
+        float size = grow * (1 + 0.35f * rc.chargeScale * charge + 0.4f * rc.hitScale * flare + 0.5f * rc.burstScale * burst);
+        float tall = (1 + 2.5f * (pulse - 1)) * (0.65f + 0.35f * k) * (1 + rc.chargeHeight * charge + rc.hitScale * flare + rc.burstScale * burst);
         sl.wild = 1 + rc.chargeWild * charge + 0.8f * flare + burst + extraWild;
         sl.charge = charge;
         sl.radius = d.width * 0.5f * body * size * widthMul;

@@ -111,10 +111,10 @@ Drawn in order: put the outermost first. One to six layers.
 | `alpha.core/edge` | Opacity in the middle and at the edge. `opacity` scales the whole layer. |
 | `rim.width/strength` | The bright band at the edge, and how strongly the rim tint shows. |
 | `silhouette` | `lobed` or `jagged`, for this layer's spike defaults. |
-| `spikes.count/size/sharpness/lean` | The outline's flowing flame crests: how many round (at most 10 are used), how deep (at most 0.12 of the radius), 0 gentle .. 1 fuller crests (always rounded), how much they lean upward. |
+| `spikes.count/size/sharpness/lean` | The outline's flame tongues: how many round (at most 8), how far in their roots lie (share of the radius, at most 0.42), 0 short broad points .. 1 long slim ones, how much they lean. |
 | `motion.scroll/flicker/streaks/speed` | Flames rising, spikes flickering, light streaks, and this layer's pace. |
 | `lobes`, `sway`, `seed` | How much of the body's bulges and sway it takes, and its own seed so it moves differently. |
-| `motion.warp/tallFlames/stretch/streakSpeed` | How much the flames twist, how much taller they are near the top, how long the noise is drawn out upward, how fast the light streaks climb. |
+| `motion.warp/tallFlames/stretch/streakSpeed` | How much the tongues sway, how much longer they are near the top, how many stack up the height (stretch x 10, 1.5 to 6), how fast the light streaks climb. `scroll` is how fast the tongues climb. |
 | `tongues.count/length/width/life/top/rise/wave/inset/low` | For a `tongues` layer: how many at once, length (share of the height), width (share of their length), seconds each lives, share off the top, how far they climb, how much they wave, how far in from the outline they start, how low they start. |
 
 ### `particles` and `motes`

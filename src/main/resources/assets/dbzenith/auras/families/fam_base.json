@@ -3,13 +3,13 @@
   "followFighter": true,
   "idle": false,
   "shape": {
-    "width": 1.35,
-    "height": 2.0,
-    "peak": 0.18,
-    "flare": 0.08
+    "width": 1.3,
+    "height": 1.677,
+    "peak": 0.175,
+    "flare": 0.03
   },
   "lobes": {
-    "size": 0.08,
+    "size": 0.02,
     "rise": 1.0
   },
   "particles": {

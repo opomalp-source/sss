@@ -5,8 +5,8 @@
   ],
   "tint": "#FF70B0",
   "shape": {
-    "width": 1.744,
-    "height": 2.2
+    "width": 1.555,
+    "height": 1.939
   },
   "layers": [
     {
@@ -34,16 +34,18 @@
         "strength": 0.4
       },
       "spikes": {
-        "count": 8,
-        "size": 0.12,
-        "sharpness": 0.0,
-        "lean": 0.5
+        "count": 5,
+        "size": 0.3,
+        "sharpness": 0.35,
+        "lean": 0.9
       },
       "motion": {
-        "scroll": 0.8,
-        "flicker": 0.1,
-        "streaks": 0.1,
-        "warp": 0.6
+        "scroll": 1.2,
+        "flicker": 0.2,
+        "streaks": 0.3,
+        "stretch": 0.28,
+        "tallFlames": 0.6,
+        "warp": 0.5
       }
     },
     {
@@ -62,8 +64,8 @@
       },
       "tongues": {
         "count": 16,
-        "length": 0.24,
-        "width": 0.45,
+        "length": 0.36,
+        "width": 0.2,
         "life": 1.0,
         "top": 0.5,
         "rise": 0.5,
