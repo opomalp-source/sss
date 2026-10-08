@@ -38,3 +38,4 @@ Reference material (for drawing originals, or for adding art yourself for **priv
 ## Combat v4 (CX-19)
 
 The combat textures, sounds, particles and animations, with exact specs and what to make first: [docs/COMBAT_ASSETS.md](docs/COMBAT_ASSETS.md).
+The PvP meters, the masters' skins and the fighting styles' animations (CX-20), with sizes: [docs/PVP_ASSETS.md](docs/PVP_ASSETS.md); how to add a master, a style or a form threshold: [docs/PVP_GUIDE.md](docs/PVP_GUIDE.md).

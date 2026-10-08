@@ -1948,3 +1948,12 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   - the Styles page with mixed slots, its preview showing Dev live in Vegeta's and then Tien's fighting stance.
 
   Long style names shrink to fit between the arrows.
+
+## 2026-10-08 — CX-20 phase 8: polish, the guide and the asset list (v0.68.0). CX-20 complete
+- **Styles are purely cosmetic** (user: no buffs or debuffs). They only ever changed animations; now it is said where players choose them (the master's screen: "looks only, no buffs or debuffs"; the Styles page) and checked by a test: every style learned and worn leaves every derived stat and the battle power exactly as they were.
+- **Data checks** (test): every style has a name and a description and every clip it names exists; every master has a name, a greeting, a spawn egg name and a skin; every slot and every Kaioken step on the technique bar has a name.
+- **Clean-up:** the clients forget other players' styles on leaving a world.
+- **Deliverables:**
+  - `docs/PVP_GUIDE.md`: PvP mode and its options, the meters (what fills, gates and drains them, the rules file field by field), adding a form threshold or a technique step, styles and slots, the style file, clips and their inheritance with pose values that work on the player model, adding a master step by step, and every debug command;
+  - `docs/PVP_ASSETS.md`: every texture with its size, on-screen size and maker, and every style's clips slot by slot with what each inherits from (generated from the data).
+- **Tests:** 199 GameTests.

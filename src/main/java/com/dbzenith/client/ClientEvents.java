@@ -36,6 +36,7 @@ public final class ClientEvents {
         ClientCombatState.clear();
         ClientStruggle.clear();
         ClientPublicStates.clear();
+        ClientStyles.clear();                                                        // CX-20
         ClientRadar.clear();
         ClientHooks.resetCreationPrompt();
         ticksInWorld = 0;

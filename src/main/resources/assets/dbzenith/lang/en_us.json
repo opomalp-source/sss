@@ -2021,7 +2021,7 @@
   "master.dbzenith.button_learned": "Learned",
   "master.dbzenith.trained": "Trained together: %s min",
   "master.dbzenith.likes": "Likes: %s (right-click holding one to give it)",
-  "master.dbzenith.slots": "Changes: %s",
+  "master.dbzenith.slots": "Changes how you move (looks only, no buffs or debuffs): %s",
   "master.dbzenith.nothing": "Nothing to teach you right now.",
   "screen.dbzenith.menu_styles": "Styles",
   "screen.dbzenith.styles": "Styles",
@@ -2029,5 +2029,5 @@
   "screen.dbzenith.styles_default": "Default",
   "screen.dbzenith.styles_default_desc": "The default animation. Masters teach styles: right-click one, train together and win their affinity, then set any slot here.",
   "screen.dbzenith.styles_from": "Taught by %s",
-  "screen.dbzenith.styles_count": "%s of %s styles learned"
+  "screen.dbzenith.styles_count": "%s of %s styles learned. Purely cosmetic: no buffs or debuffs"
 }

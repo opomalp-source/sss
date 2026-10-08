@@ -141,4 +141,50 @@ public final class StyleTests {
         TestPlayers.remove(helper, p);
         helper.succeed();
     }
+
+    @GameTest(template = EMPTY)
+    public static void stylesArePurelyCosmetic(GameTestHelper helper) {
+        ServerPlayer p = student(helper);
+        PlayerData d = ModCapabilities.getOrThrow(p);
+        for (Attribute a : Attribute.values()) d.setAttribute(a, 300);
+        d.invalidateDerived();
+        d.recomputeIfStale();
+        String before = d.getDerived().save().toString();
+        long bp = com.dbzenith.stats.StatCalculator.battlePower(d);
+        StyleLogic.grant(d, "pride_trooper");
+        for (Styles.Style s : Styles.all()) {
+            StyleLogic.grant(d, s.id());
+            for (StyleSlot slot : s.clips().keySet()) StyleLogic.equip(p, d, slot.id, s.id());
+        }
+        d.invalidateDerived();
+        d.recomputeIfStale();
+        helper.assertTrue(d.getDerived().save().toString().equals(before), "every style learned and worn: the same stats");
+        helper.assertTrue(com.dbzenith.stats.StatCalculator.battlePower(d) == bp, "and the same battle power");
+        TestPlayers.remove(helper, p);
+        helper.succeed();
+    }
+
+    @GameTest(template = EMPTY)
+    public static void everyStyleHasItsClipsAndNames(GameTestHelper helper) {
+        com.google.gson.JsonObject lang;
+        try (var in = StyleTests.class.getResourceAsStream("/assets/dbzenith/lang/en_us.json")) {
+            lang = com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
+        } catch (Exception e) {
+            helper.fail("no lang file: " + e);
+            return;
+        }
+        for (Styles.Style s : Styles.all()) {
+            helper.assertTrue(lang.has(s.nameKey()) && lang.has(s.descKey()), s.id() + " has a name and a description");
+            for (String clip : s.clips().values()) {
+                helper.assertTrue(StyleTests.class.getResource("/assets/dbzenith/motion/clips/" + clip + ".json") != null, s.id() + ": the clip " + clip + " exists");
+            }
+        }
+        for (Styles.Master m : Styles.masters()) {
+            helper.assertTrue(lang.has(m.nameKey()) && lang.has(m.greetKey()) && lang.has("item.dbzenith." + m.id() + "_spawn_egg"), m.id() + " has a name, a greeting and an egg name");
+            helper.assertTrue(StyleTests.class.getResource("/assets/dbzenith/textures/entity/fighter/" + m.id() + ".png") != null, m.id() + " has a skin");
+        }
+        for (StyleSlot slot : StyleSlot.ALL) helper.assertTrue(lang.has(slot.nameKey()), "the slot " + slot.id + " has a name");
+        for (var k : com.dbzenith.combat.meter.MeterRules.get().kaioken()) helper.assertTrue(lang.has("meter.dbzenith.kaioken_" + k.stage()), "Kaioken x" + k.stage() + " has a name");
+        helper.succeed();
+    }
 }

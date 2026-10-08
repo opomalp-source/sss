@@ -25,7 +25,7 @@ All PNG with alpha, `assets/dbzenith/textures/...`.
 | `entity/spirit_bomb.png` | 128x128 | The Spirit Bomb sphere | ArtGen |
 | `gui/hud/*.png` (`portrait_ring`, `release_tab`, `main_bar`, `health_frame`, `health_fill`, `stamina_frame`, `stamina_fill`) | Drawn at 4x their on-screen size (see `SagaHud` constants) | The Saga HUD's frames and fills | ArtGen |
 | `gui/hud/meter_*.png`, `form_meter_fill`, `tech_meter_fill` (CX-20) | 4x on screen: `meter_frame` 44x448, `meter_back` and the fills 28x416 (greyscale, tinted when drawn), `meter_stud`/`meter_stud_lit` 52x12, `meter_stud_glow` 64x32 (white, tinted, added) | The PvP meters, bottom right (`MeterBars`) | ArtGen (`only meters`) |
-| `entity/fighter/<master>.png` (16, CX-20) | 64x64 player layout, both layers (drawn at 128) | The style masters: goku, vegeta, master_roshi, krillin, piccolo, tien, gohan, future_trunks, frieza, cell, android_17, hit, jiren, broly, yamcha, majin_buu | ArtGen (`only masters`) |
+| `entity/fighter/<master>.png` (16, CX-20) | 128x128: the player layout at twice the resolution, both layers | The style masters: goku, vegeta, master_roshi, krillin, piccolo, tien, gohan, future_trunks, frieza, cell, android_17, hit, jiren, broly, yamcha, majin_buu | ArtGen (`only masters`) |
 | `motion/clips/style_*.json` (100, CX-20) | Clips, most inheriting (`base`) from the stock ones | The styles' animations, one set per master | hand-written |
 
 **Drawn in code, no texture (tell me if you want a texture slot):**
