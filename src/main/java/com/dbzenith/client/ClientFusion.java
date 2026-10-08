@@ -85,6 +85,11 @@ public final class ClientFusion {
 
     /** A stand-in the view rides on during the dance: in front of the pair, looking back at both of them. */
     private static Entity camera;
+
+    /** A fusion cinematic owns the view (no crosshair then). */
+    public static boolean cinematic() {
+        return camera != null;
+    }
     private static boolean devCamera;
 
     private static void startCamera() {

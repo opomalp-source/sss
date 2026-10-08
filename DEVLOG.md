@@ -1808,3 +1808,18 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 
   186 GameTests.
 - **Checked in the dev client:** with PvP off and an empty hand, a husk's hit switched Dev into PvP at once (the shoulder camera, the stance, the husk in the enemy panel). Switching off was undone as the husk kept hitting. The first try at night turned Dev into a Great Ape under the full moon, so it was redone in daylight.
+
+## 2026-10-08 — CX-20 phase 4: the crosshair (v0.64.0)
+- **Our crosshair replaces vanilla's** (`client/ui/Crosshair`, an overlay above everything; vanilla's is cancelled):
+  - **In PvP:** a small round dot with a faint dark rim, so it reads on sky and on dark blocks alike. In the shoulder view it sits where the character is really aiming (what they look at, projected from the camera with the real field of view), not at the screen's middle, since the camera is off to the right.
+  - **Out of PvP** (user's addition, "something fitting"): a small four-pointed star like the stars on a Dragon Ball, with tapered points.
+  - Both are drawn on real screen pixels rather than the GUI's coarse grid, so the dot is round and the star's points are fine at any GUI scale.
+  - Hidden with F1, behind screens and during fusion cinematics. Out of PvP, third person shows none, as before. With the F3 screen up, vanilla's axes stay.
+- **Client config** (also in Settings → Style):
+  - `crosshairDotMode`: the dot in PvP only (default) or always;
+  - `crosshairStyle`: out of PvP, the star (default), the dot or vanilla's;
+  - `crosshairSize` (1–8, 3): the dot's width or the star's reach;
+  - `crosshairColor`: white, gold, red, cyan, green, pink;
+  - `crosshairOpacity` (0.9).
+- **Settings fix:** choice options whose values start above 0 (the size) now cycle and label properly.
+- **Checked in the dev client:** the star in first person out of PvP; in PvP, the dot on the training dummy Dev was facing, left of the screen's middle in the shoulder view.

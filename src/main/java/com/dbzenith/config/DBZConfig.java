@@ -719,6 +719,8 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue customHotbar;
         public final ForgeConfigSpec.BooleanValue hideVanillaHearts;
         public final ForgeConfigSpec.BooleanValue transformCutIn, ultimateCinematic, damagePopups, prediction, enemyPanel, combatCallouts, comboCounter, combatLog, hitboxOverlay, pvpCamera;
+        public final ForgeConfigSpec.IntValue crosshairDotMode, crosshairStyle, crosshairSize, crosshairColor;
+        public final ForgeConfigSpec.DoubleValue crosshairOpacity;
         public final ForgeConfigSpec.DoubleValue shoulderOffset, shoulderHeight;
         public final ForgeConfigSpec.DoubleValue lockOnRange, lockOnCameraSpeed, lockOnFreeLook;
         public final ForgeConfigSpec.DoubleValue screenShake;
@@ -767,6 +769,11 @@ public final class DBZConfig {
                     .define("pvpCamera", true);
             shoulderOffset = b.comment("PvP camera: blocks to the right of your character").defineInRange("shoulderOffset", 0.8, 0.0, 3.0);
             shoulderHeight = b.comment("PvP camera: blocks up").defineInRange("shoulderHeight", 0.15, -1.0, 2.0);
+            crosshairDotMode = b.comment("The dot crosshair: 0 = in PvP only (out of PvP, crosshairStyle), 1 = always").defineInRange("crosshairDotMode", 0, 0, 1);
+            crosshairStyle = b.comment("The crosshair out of PvP: 0 = a four-pointed star, 1 = the dot, 2 = vanilla's").defineInRange("crosshairStyle", 0, 0, 2);
+            crosshairSize = b.comment("Crosshair size in pixels").defineInRange("crosshairSize", 3, 1, 8);
+            crosshairColor = b.comment("Crosshair colour: 0 white, 1 gold, 2 red, 3 cyan, 4 green, 5 pink").defineInRange("crosshairColor", 0, 0, 5);
+            crosshairOpacity = b.comment("Crosshair opacity, 0-1").defineInRange("crosshairOpacity", 0.9, 0.0, 1.0);
             lockOnRange = b.comment("Lock-on (key N): how far away a foe can be locked onto, in blocks")
                     .defineInRange("lockOnRange", 48.0, 8.0, 80.0);
             lockOnCameraSpeed = b.comment("Lock-on: how quickly the camera turns to keep the foe framed (0 = it doesn't; only the marker shows)")

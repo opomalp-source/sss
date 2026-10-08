@@ -88,6 +88,11 @@ public class SettingsScreen extends Screen {
             case STYLE -> {
                 o.add(new Option("ui_style", c.uiStyle, 0, 1, new String[]{"zenith", "classic"}));
                 o.add(new Option("art_style", c.artStyle, 0, 2, new String[]{"painted", "hd", "classic"}));
+                o.add(new Option("crosshair_out", c.crosshairStyle, 0, 2, new String[]{"star", "dot", "vanilla"}));   // CX-20
+                o.add(new Option("crosshair_dot", c.crosshairDotMode, 0, 1, new String[]{"pvp", "always"}));
+                o.add(new Option("crosshair_size", c.crosshairSize, 1, 8, new String[]{"1", "2", "3", "4", "5", "6", "7", "8"}));
+                o.add(new Option("crosshair_color", c.crosshairColor, 0, 5, com.dbzenith.client.ui.Crosshair.COLOR_NAMES));
+                o.add(new Option("crosshair_opacity", c.crosshairOpacity, 0, 1, null));
             }
             case CONTROLS -> { }
         }
@@ -145,7 +150,8 @@ public class SettingsScreen extends Screen {
                 addRenderableWidget(s);
             } else if (opt.value instanceof ForgeConfigSpec.IntValue in && opt.choices != null) {
                 ThemedButton b = ThemedButton.of(choice(opt, in.get()), x -> {
-                    in.set((in.get() + 1) % opt.choices.length);
+                    int lo = (int) opt.min;                                   // choices count from the option's minimum
+                    in.set((in.get() - lo + 1) % opt.choices.length + lo);
                     save();
                     x.setMessage(choice(opt, in.get()));
                 }).bounds(wx, y, 150, 16).tooltip(tip).build();
@@ -182,7 +188,8 @@ public class SettingsScreen extends Screen {
     }
 
     private static Component choice(Option o, int i) {
-        return Component.translatable("settings.dbzenith." + o.key + "." + o.choices[Math.max(0, Math.min(o.choices.length - 1, i))]);
+        String c = o.choices[Math.max(0, Math.min(o.choices.length - 1, i - (int) o.min))];
+        return Component.translatableWithFallback("settings.dbzenith." + o.key + "." + c, c);
     }
 
     private static void save() {
