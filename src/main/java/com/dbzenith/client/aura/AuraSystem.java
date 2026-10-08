@@ -256,9 +256,9 @@ public final class AuraSystem {
             dy = 0;
             dz = (float) look.z * 1.4f;
         }
-        s.vx += (dx - s.vx) * 0.35f;
-        s.vy += (dy - s.vy) * 0.35f;
-        s.vz += (dz - s.vz) * 0.35f;
+        s.vx += (dx - s.vx) * 0.6f;                                             // quick, so it never lags behind
+        s.vy += (dy - s.vy) * 0.6f;
+        s.vz += (dz - s.vz) * 0.6f;
 
         if (e.hurtTime > s.lastHurt) s.flare = 1;                               // just hit
         s.lastHurt = e.hurtTime;
@@ -435,10 +435,11 @@ public final class AuraSystem {
             oy += shake * 0.4f * Mth.sin(t * 29.3f + s.seed * 3);
             oz += shake * (0.6f * Mth.cos(t * 33f + s.seed) + 0.4f * Mth.sin(t * 19.1f + s.seed * 5));
         }
+        // only real speed (flying, dashing) streams it back, a little; walking and running leave it upright round you
         float speed = Mth.sqrt(vx * vx + vy * vy + vz * vz);
         float tx = 0, ty = 0, tz = 0;
-        if (speed > 0.12f) {
-            float len = Math.min((speed - 0.12f) * rc.trail * body, rc.trailMax * body);
+        if (speed > 0.45f) {
+            float len = Math.min((speed - 0.45f) * rc.trail * 0.6f * body, rc.trailMax * 0.5f * body);
             tx = -vx / speed * len;
             ty = -vy / speed * len;
             tz = -vz / speed * len;
@@ -484,7 +485,12 @@ public final class AuraSystem {
         if (detail == 2) lod = Math.min(1f, lod * 1.3f);
         int rings = Math.max(8, Math.round(40 * lod)), segs = Math.max(12, Math.round(64 * lod));   // fine enough up close that the outline shows no facets
         float fade = sl.fade;
-        if (ox * ox + oz * oz < radius * radius * 1.2f && -oy > bottom && -oy < bottom + height) fade *= 0.25f;   // the eye inside the shell
+        if (-oy > bottom && -oy < bottom + height) {                            // the eye inside the shell: thin it out, smoothly
+            float near = Mth.sqrt(ox * ox + oz * oz) / Math.max(0.1f, radius);
+            fade *= 0.45f + 0.55f * AuraShell.smooth(0.6f, 1.05f, near);
+        }
+        centerX = ox;
+        centerZ = oz;
 
         sl.x = ox;
         sl.y = oy;
@@ -596,6 +602,9 @@ public final class AuraSystem {
         BufferUploader.drawWithShader(bb.end());
     }
 
+    /** The aura being drawn: its feet relative to the eye, for the shader to lay its flames out from the eye's side. */
+    private static float centerX, centerZ;
+
     /** One layer's look: {@code l} the layer drawn, {@code g} the shell whose outline it takes (itself, or a glow's). */
     private static void uniforms(ShaderInstance sh, AuraDef.Layer l, AuraDef.Layer g, float seed, float opacity, float t, float wild, float bright) {
         boolean glow = l.kind == AuraDef.Layer.GLOW;
@@ -609,6 +618,7 @@ public final class AuraSystem {
         sh.safeGetUniform("AuraMode").set((float) l.kind, seed, opacity, g.spikeLean);
         sh.safeGetUniform("AuraBoost").set(bright, g.tallFlames, g.streakSpeed, g.stretch);
         sh.safeGetUniform("AuraFlow").set(g.warp, l.kind == AuraDef.Layer.SHELL ? l.band : 0f, 0f, 0f);
+        sh.safeGetUniform("AuraCenter").set(centerX, 0f, centerZ, 0f);
     }
 
     private static void set(ShaderInstance sh, String name, int rgb, float a) {

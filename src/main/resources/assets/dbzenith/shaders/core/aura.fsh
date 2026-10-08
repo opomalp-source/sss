@@ -49,6 +49,13 @@ float pnoise(vec2 p, float period) {
     return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
 }
 
+uniform vec4 AuraCenter;  // the aura's middle at its feet, relative to the eye (xyz), unused
+
+// Where round the aura a point lies, measured from the side facing the eye (0..1, 0 and 1 straight towards it). The
+// flames are laid out by this rather than by the shell's own angle, so the outline keeps the same flames as the camera
+// moves round instead of sliding and melting as other parts of the shell turn to the edge.
+float viewU;
+
 // Flame teeth up the outline (the classic Dragon Ball silhouette): a few long tongues round the aura, each rising up the
 // edge from a deep root, leaning out to a pointed tip, then snapping back in just above it. The pattern climbs over
 // time, every tongue has its own length that flickers, and nothing about it is round. Returns how far in from the
@@ -56,7 +63,7 @@ float pnoise(vec2 p, float period) {
 float flameCut(float depth, float t, float seed) {
     float count = clamp(floor(AuraShape.z + 0.5), 2.0, 8.0);                    // tongues round
     float rows = clamp(AuraBoost.w * 10.0, 1.5, 6.0);                           // tongues up the height
-    float ang = surface.x * count;
+    float ang = viewU * count;
     float sway = AuraFlow.x * (pnoise(vec2(ang, surface.y * 2.0 - t * 0.7 + seed), count) - 0.5);
     float phase = 1.6 * pnoise(vec2(ang, seed * 1.7), count);          // each column out of step with the next
     float v = surface.y * rows + depth * AuraMode.w * 0.5 - t * AuraMotion.y * 0.5 + phase + sway;
@@ -75,7 +82,12 @@ void main() {
     float depth = 1.0 - sqrt(max(0.0, 1.0 - facing * facing));
     float t = AuraMotion.x;
     float seed = AuraMode.y;
-    float fade = AuraMode.z * vertexColor.a * linear_fog_fade(vertexDistance, FogStart, FogEnd);
+    // no fog: an aura glows, and the fog settings when it is drawn can be the sky's or the clouds' (it vanished there)
+    float fade = AuraMode.z * vertexColor.a;
+    vec2 rel = worldPos.xz - AuraCenter.xz;
+    vec2 eye = -AuraCenter.xz;
+    float a0 = length(eye) > 0.05 ? atan(eye.y, eye.x) : 0.0;
+    viewU = fract((atan(rel.y, rel.x) - a0) / 6.2831853 + 1.0);
 
     if (AuraMode.x > 0.5 && AuraMode.x < 1.5) {
         // the glow: a thin bright band hugging the outline (AuraShape.w: how far in the shell's own outline lies)
@@ -85,7 +97,7 @@ void main() {
         float edge = band + flameCut(depth, t, seed) * (1.0 - band);
         float w = max(band, 0.035);
         float g = pow(smoothstep(edge - w, edge, depth), 1.5) * (1.0 - 0.85 * smoothstep(edge, edge + w * 2.5, depth));
-        float wobble = 0.8 + 0.2 * pnoise(vec2(surface.x * 8.0, surface.y * 1.5 - t * 1.5 + seed), 8.0);
+        float wobble = 0.8 + 0.2 * pnoise(vec2(viewU * 8.0, surface.y * 1.5 - t * 1.5 + seed), 8.0);
         float a = min(1.0, g * wobble * fade * (1.0 + AuraBoost.x));
         if (a < 0.003) discard;
         fragColor = vec4(mix(AuraRim.rgb, vec3(1.0), 0.35 * smoothstep(edge - w * 0.5, edge, depth)), a);
@@ -109,7 +121,7 @@ void main() {
         col = mix(col, AuraCore.rgb, smoothstep(0.4, 0.85, heat));
         col = mix(col, AuraCore.rgb, clamp(AuraBoost.x * 0.25, 0.0, 0.5));
         float alpha = mix(AuraEdge.a, AuraCore.a, heat) * smoothstep(0.0, 0.12, v) * vertexColor.a;
-        fragColor = vec4(col, min(1.0, alpha * body * AuraMode.z * linear_fog_fade(vertexDistance, FogStart, FogEnd) * (1.0 + 0.25 * AuraBoost.x)));
+        fragColor = vec4(col, min(1.0, alpha * body * AuraMode.z * (1.0 + 0.25 * AuraBoost.x)));
         return;
     }
 
@@ -119,7 +131,7 @@ void main() {
     if (body <= 0.003) discard;
     float scroll = t * AuraMotion.y;
     float period = clamp(floor(AuraShape.z + 0.5), 2.0, 8.0);
-    float warp = AuraFlow.x * (pnoise(vec2(surface.x * period, surface.y * period * 0.2 - t * 0.9 + seed * 1.3), period) - 0.5);
+    float warp = AuraFlow.x * (pnoise(vec2(viewU * period, surface.y * period * 0.2 - t * 0.9 + seed * 1.3), period) - 0.5);
 
     float e = depth - cut;
     float rimWidth = AuraShape.w;
@@ -129,9 +141,9 @@ void main() {
         // inside, streaked with fast upward blur, and the middle left almost clear so the fighter shows through.
         float inBand = 1.0 - smoothstep(band * 0.7, band * 1.5, e);
         vec3 c = mix(AuraEdge.rgb, AuraMid.rgb, smoothstep(0.0, band * 0.55, e));
-        float blur = pnoise(vec2(surface.x * 64.0 + warp * 4.0, surface.y * 0.9 - t * AuraMotion.y * AuraBoost.z * 0.5 + seed), 64.0);
+        float blur = pnoise(vec2(viewU * 64.0 + warp * 4.0, surface.y * 0.9 - t * AuraMotion.y * AuraBoost.z * 0.5 + seed), 64.0);
         c = mix(c, AuraCore.rgb, AuraMotion.z * smoothstep(0.5, 0.9, blur) * inBand);
-        float tintB = AuraRim.a * (0.5 + 0.5 * pnoise(vec2(surface.x * 16.0, surface.y * 1.2 - t * 0.8 + seed * 2.0), 16.0));
+        float tintB = AuraRim.a * (0.5 + 0.5 * pnoise(vec2(viewU * 16.0, surface.y * 1.2 - t * 0.8 + seed * 2.0), 16.0));
         c = mix(c, AuraRim.rgb, (1.0 - smoothstep(0.0, rimWidth, e)) * tintB);
         c = mix(c, AuraCore.rgb, clamp(AuraBoost.x * 0.3, 0.0, 0.6) * inBand);
         float a = mix(AuraCore.a, AuraEdge.a, inBand) * (0.9 + 0.3 * blur * inBand) * (1.0 + 0.25 * AuraBoost.x);
@@ -143,9 +155,9 @@ void main() {
     col = mix(col, AuraCore.rgb, smoothstep(0.16, 0.48, depth));
     // light streaks racing up through it, bending with the flames
     // long thin streaks of energy racing straight up (stretched far up, narrow round)
-    float streak = pnoise(vec2(surface.x * 48.0 + warp * 4.0, surface.y * 1.1 - t * AuraMotion.y * AuraBoost.z * 0.5 + seed), 48.0);
+    float streak = pnoise(vec2(viewU * 48.0 + warp * 4.0, surface.y * 1.1 - t * AuraMotion.y * AuraBoost.z * 0.5 + seed), 48.0);
     col = mix(col, AuraCore.rgb, AuraMotion.z * smoothstep(0.55, 0.95, streak) * smoothstep(0.02, 0.15, e));
-    float tint = AuraRim.a * (0.5 + 0.5 * pnoise(vec2(surface.x * 16.0, surface.y * 1.2 - t * 0.8 + seed * 2.0), 16.0));
+    float tint = AuraRim.a * (0.5 + 0.5 * pnoise(vec2(viewU * 16.0, surface.y * 1.2 - t * 0.8 + seed * 2.0), 16.0));
     col = mix(col, AuraRim.rgb, rim * tint);
     col = mix(col, AuraCore.rgb, clamp(AuraBoost.x * 0.3, 0.0, 0.6) * smoothstep(0.0, 0.25, e));
     float alpha = mix(AuraEdge.a, AuraCore.a, smoothstep(0.1, 0.5, depth)) * (1.0 + 0.25 * AuraBoost.x);

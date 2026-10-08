@@ -2182,3 +2182,20 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - A 3D shell was kept rather than flat 2D sprites: the band reads the same from every angle (side, behind, above).
 - **Checked in a dev client** against the video, by night and day, with clips. 209 GameTests.
 
+## 2026-10-08 — CX-24: steady auras when the camera moves (v0.78.0)
+- **The report:** fine while standing still with the camera still; moving the camera made auras melt into themselves or
+  vanish (especially looking towards clouds), and they did not move well with the player.
+- **Causes and fixes:**
+  - **Melting:** the flame tongues were laid out by the shell's own angle round the fighter, while what you see is the
+    outline as seen from the eye; turning the camera brought other parts of the shell to the edge, so the tongues slid,
+    merged and reshaped. The shader now lays them out by the angle measured from the eye's side (`viewU`, from the new
+    `AuraCenter` uniform), so the outline keeps its flames from every angle, like a drawn aura.
+  - **Vanishing:** the aura shader faded with Minecraft's fog, whose settings when the aura is drawn could be the sky's
+    or the clouds'. Auras glow and no longer take fog.
+  - **Not following well:** movement was smoothed slowly (0.35 a tick) and any walk streamed the aura back, so it lagged
+    and sheared like jelly. Now 0.6 a tick, and only real speed (over 0.45 blocks a tick: flying, dashing) leans it,
+    a little (half the old maximum).
+  - The camera close up or inside the (now wider) aura faded it to a quarter at once; now a smooth fade to 45% at most.
+- **Checked in a dev client:** an orbit in 20 degree steps (the same silhouette all round), looking up into sky and
+  clouds, from behind and above, flying. 209 GameTests.
+
