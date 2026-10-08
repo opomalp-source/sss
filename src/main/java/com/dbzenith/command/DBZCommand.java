@@ -398,6 +398,20 @@ public final class DBZCommand {
                                     ctx.getSource().sendSuccess(() -> Component.literal("Special meter set to " + v), true);
                                     return 1;
                                 }))))
+                .then(Commands.literal("meter")                                     // the PvP meters (CX-20): set a bar's value
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("bar", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.List.of("form", "tech", "both"), b))
+                                        .then(Commands.argument("value", com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg(0, 100)).executes(ctx -> {
+                                            String bar = StringArgumentType.getString(ctx, "bar");
+                                            double v = com.mojang.brigadier.arguments.DoubleArgumentType.getDouble(ctx, "value");
+                                            for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) ModCapabilities.get(p).ifPresent(d -> {
+                                                if (!bar.equals("tech")) d.setFormMeter(v);
+                                                if (!bar.equals("form")) d.setTechMeter(v);
+                                            });
+                                            ctx.getSource().sendSuccess(() -> Component.literal("Meter " + bar + " set to " + v), true);
+                                            return 1;
+                                        })))))
                 .then(Commands.literal("netstats")                                  // netcode (CX-19 phase 7)
                         .then(Commands.argument("targets", EntityArgument.players()).executes(ctx -> {
                             for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {

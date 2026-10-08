@@ -24,6 +24,7 @@ All PNG with alpha, `assets/dbzenith/textures/...`.
 | `entity/ki_beam.png`, `entity/beam_flow.png` | 32x32 / 32x64, white, tileable along the length | Beams and their flowing core | AssetGen / ArtGen |
 | `entity/spirit_bomb.png` | 128x128 | The Spirit Bomb sphere | ArtGen |
 | `gui/hud/*.png` (`portrait_ring`, `release_tab`, `main_bar`, `health_frame`, `health_fill`, `stamina_frame`, `stamina_fill`) | Drawn at 4x their on-screen size (see `SagaHud` constants) | The Saga HUD's frames and fills | ArtGen |
+| `gui/hud/meter_*.png`, `form_meter_fill`, `tech_meter_fill` (CX-20) | 4x on screen: `meter_frame` 44x448, `meter_back` and the fills 28x416 (greyscale, tinted when drawn), `meter_stud`/`meter_stud_lit` 52x12, `meter_stud_glow` 64x32 (white, tinted, added) | The PvP meters, bottom right (`MeterBars`) | ArtGen (`only meters`) |
 
 **Drawn in code, no texture (tell me if you want a texture slot):**
 - the special-meter segments;

@@ -1828,3 +1828,30 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - User feedback: both crosshairs grey, the dot much smaller.
 - Grey is the new first colour and the default (the choices are now grey, white, gold, red, cyan, green, pink).
 - The dot is a third of its old size (size 3 is about one GUI pixel across, plus the rim). The star is unchanged apart from its colour.
+
+## 2026-10-08 — CX-20 phase 5: the PvP meters, visuals (v0.65.0)
+- **Two upright bars, bottom right, only in PvP mode** (`client/ui/MeterBars`), after the user's reference: dark gunmetal frames with a bolt in each end cap, a near-black backing with faint marks every tenth, and the fill rising from the bottom.
+  - **Right, the form meter:** filled in your aura colour.
+  - **Left, the technique meter:** filled in the technique's colour: Kaioken red, the Ultra Instinct Sign grey, Mastered Ultra Instinct white. Ultra Instinct is a technique here, not a form.
+  - **Studs mark the steps:** a metal clamp across the bar with a bolt on each rail. A reached one lights up (white-hot bolts, a bright line across) with a soft glow in the bar's colour that breathes slowly. A full bar breathes too.
+  - The fill is the texture cut at the value, never stretched, and eases to new values. A bright rim marks its top.
+  - Hidden out of PvP, with F1 and during fusion cinematics.
+- **The steps** (`combat/meter/Meters`, shared by server and client):
+  - **Form bar:** the forms you have unlocked, in the order J climbs them (following your chosen target form), spread evenly up the bar (two forms: 50 and 100).
+  - **Technique bar:** the Kaioken stages you know (x2 at 25, x4 at 40, x10 at 60, x20 at 80), then Ultra Instinct at 100 once you have it.
+- **The values** (`PlayerData.formMeter`, `techMeter`, 0..100): saved, and synced in the small pools packet. Nothing fills them yet; that is phase 6.
+- **Dev:** `/dbz meter <player> form|tech|both <0..100>` sets a bar.
+- **Textures** (ArtGen `only meters`, 4x their size on screen):
+  - `meter_frame`, `meter_back`;
+  - `form_meter_fill`, `tech_meter_fill` (greyscale, tinted when drawn);
+  - `meter_stud`, `meter_stud_lit`, `meter_stud_glow`.
+
+  Listed in docs/COMBAT_ASSETS.md.
+- **Tests:** `MeterTests` checks that values clamp, sync and save; that the technique bar holds Kaioken's learned stages and Ultra Instinct, with the right colours; and that the form bar holds the unlocked forms, evenly spaced, Super Saiyan first, without Ultra Instinct. 189 GameTests.
+- **Checked in the dev client:**
+  - a red technique bar at 45 with the x2 and x4 studs lit;
+  - the form bar in the aura colour at 62 with its first stud lit;
+  - both full: the Ultra Instinct Sign bar grey, every stud glowing;
+  - with PvP off, no bars.
+
+  The first try drew the glows as hard blobs, because a flush of the GUI batch had turned blending off. Each draw now turns it back on.

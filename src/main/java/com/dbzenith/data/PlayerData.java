@@ -1417,6 +1417,36 @@ public class PlayerData {
         }
     }
 
+
+    /**
+     * The PvP meters (CX-20), 0..100: the form meter (the right bar; its studs are the forms you have unlocked) and the
+     * technique meter (the left bar; Kaioken's stages, Ultra Instinct). See combat.meter.Meters.
+     */
+    private double formMeter, techMeter;
+
+    public double getFormMeter() {
+        return formMeter;
+    }
+
+    public void setFormMeter(double v) {
+        double c = Math.max(0, Math.min(100, v));
+        if (Math.abs(c - formMeter) > 1e-6) {
+            formMeter = c;
+            markPoolsDirty();
+        }
+    }
+
+    public double getTechMeter() {
+        return techMeter;
+    }
+
+    public void setTechMeter(double v) {
+        double c = Math.max(0, Math.min(100, v));
+        if (Math.abs(c - techMeter) > 1e-6) {
+            techMeter = c;
+            markPoolsDirty();
+        }
+    }
     // guard meter (combat.GuardRules): 0..100, empties under blocked hits and breaks the guard
     private double guardMeter = 100;
     private long guardStartTick = Long.MIN_VALUE / 2;   // when the guard last went up (parry window); not saved
@@ -1607,7 +1637,7 @@ public class PlayerData {
     }
 
     /**
-     * The pools (body, ki, stamina, special and guard meters) change nearly every tick: they go in a small packet of their
+     * The pools (body, ki, stamina, the special and guard meters, the PvP meters) change nearly every tick: they go in a small packet of their
      * own (CX-19 phase 7), and the whole state only when something else changed.
      */
     public void markPoolsDirty() {
@@ -1628,7 +1658,9 @@ public class PlayerData {
     }
 
     /** The client: the pools from a {@code PoolsSyncPacket}, as they are (the server already clamped them). */
-    public void applyPools(double body, double ki, double stamina, double special, double guardMeter) {
+    public void applyPools(double body, double ki, double stamina, double special, double guardMeter, double formMeter, double techMeter) {
+        this.formMeter = formMeter;
+        this.techMeter = techMeter;
         this.body = body;
         this.ki = ki;
         this.stamina = stamina;
@@ -1691,6 +1723,8 @@ public class PlayerData {
         tag.putString("destiny", destiny);
         tag.putDouble("guardMeter", guardMeter);
         tag.putDouble("special", special);
+        tag.putDouble("formMeter", formMeter);
+        tag.putDouble("techMeter", techMeter);
         net.minecraft.nbt.ListTag customs = new net.minecraft.nbt.ListTag();
         for (int i = 0; i < customSpecs.length; i++) {
             if (customSpecs[i] == null) continue;
@@ -1825,6 +1859,8 @@ public class PlayerData {
         destiny = tag.getString("destiny");
         guardMeter = tag.contains("guardMeter") ? tag.getDouble("guardMeter") : 100;
         special = tag.getDouble("special");
+        formMeter = tag.getDouble("formMeter");
+        techMeter = tag.getDouble("techMeter");
         java.util.Arrays.fill(customSpecs, null);
         java.util.Arrays.fill(customBuilt, null);
         net.minecraft.nbt.ListTag customs = tag.getList("customTechniques", net.minecraft.nbt.Tag.TAG_COMPOUND);

@@ -1900,5 +1900,9 @@
   "settings.dbzenith.crosshair_color.green": "Green",
   "settings.dbzenith.crosshair_color.pink": "Pink",
   "settings.dbzenith.crosshair_opacity": "Crosshair opacity",
-  "settings.dbzenith.crosshair_opacity.desc": "How solid the crosshair is."
+  "settings.dbzenith.crosshair_opacity.desc": "How solid the crosshair is.",
+  "meter.dbzenith.kaioken_2": "Kaioken x2",
+  "meter.dbzenith.kaioken_4": "Kaioken x4",
+  "meter.dbzenith.kaioken_10": "Kaioken x10",
+  "meter.dbzenith.kaioken_20": "Kaioken x20"
 }

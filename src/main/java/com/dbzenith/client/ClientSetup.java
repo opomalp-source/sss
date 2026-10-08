@@ -45,6 +45,7 @@ public final class ClientSetup {
         event.registerAboveAll("callouts", new com.dbzenith.client.ui.CalloutOverlay());
         event.registerAboveAll("combat_log", new com.dbzenith.client.ui.CombatLogOverlay());       // CX-19 phase 9
         event.registerAboveAll("crosshair", new com.dbzenith.client.ui.Crosshair());               // CX-20
+        event.registerAboveAll("pvp_meters", new com.dbzenith.client.ui.MeterBars());
         event.registerAboveAll("frame_data", new com.dbzenith.client.fx.HitboxOverlay.FrameBar());
         event.registerAboveAll("transform_cut_in", new com.dbzenith.client.ui.CutInOverlay());
         event.registerAboveAll("beam_struggle", new com.dbzenith.client.ui.StruggleOverlay());

@@ -17,6 +17,7 @@ public class ArtGen {
     public static void main(String[] args) throws IOException {
         if (args.length > 1 && args[0].equals("only")) {                       // one piece, without touching the rest
             if (args[1].equals("training_dummy")) TrainingDummy.make();
+            if (args[1].equals("meters")) MeterArt.all();
             System.out.println("ArtGen done: " + args[1]);
             return;
         }
@@ -41,6 +42,7 @@ public class ArtGen {
         HudHd.all();
         Metals.all();
         SagaHud.all();
+        MeterArt.all();
         Originals.all();
         System.out.println("ArtGen done");
     }
@@ -3883,6 +3885,139 @@ public class ArtGen {
                 c.set(x, y, col);
             }
             c.save("entity/spirit_bomb.png");
+        }
+    }
+
+    // ================================================================== the PvP meters (CX-20)
+
+    /**
+     * Textures for client.ui.MeterBars, at four times their size on screen: the bar's frame (dark gunmetal, bevelled,
+     * a bolt in each end cap, open in the middle), the dark backing behind the fill, the two fills (greyscale, tinted at
+     * render time: the form bar by the aura colour, the technique bar by the technique's), and the studs that mark the
+     * steps (a metal clamp across the bar with a bolt on each rail; a lit one with glowing bolts) and the glow round a
+     * reached stud (white, tinted).
+     */
+    static final class MeterArt {
+        /** On screen (GUI pixels): the bar, and the opening inside the frame. */
+        static final int W = 11, H = 112, IX = 2, IY = 4, IW = 7, IH = 104, S = 4;
+
+        static void all() throws IOException {
+            frame();
+            back();
+            fill("form_meter_fill", false);
+            fill("tech_meter_fill", true);
+            stud("meter_stud", false);
+            stud("meter_stud_lit", true);
+            glow();
+        }
+
+        static int grey(double v, int a) {
+            int c = (int) Math.round(Math.max(0, Math.min(1, v)) * 255);
+            return a << 24 | c << 16 | c << 8 | c;
+        }
+
+        /** The frame: an outline, bevelled gunmetal lit from the top left, a dark lip round the opening, bolts in the caps. */
+        static void frame() throws IOException {
+            int tw = W * S, th = H * S, ox = IX * S, oy = IY * S, ow = IW * S, oh = IH * S, cham = 6;
+            Canvas c = new Canvas(tw, th);
+            for (int y = 0; y < th; y++) for (int x = 0; x < tw; x++) {
+                int cx = Math.min(x, tw - 1 - x), cy = Math.min(y, th - 1 - y);
+                if (cx + cy < cham) continue;                                                 // chamfered corners
+                boolean open = x >= ox && x < ox + ow && y >= oy && y < oy + oh;
+                if (open) continue;
+                int dOut = Math.min(Math.min(cx, cy), cx + cy - cham);
+                int dIn = Math.max(Math.max(ox - 1 - x, x - (ox + ow)), Math.max(oy - 1 - y, y - (oy + oh)));
+                int col;
+                if (dOut < 2) col = 0xFF050608;                                               // the outline
+                else if (dIn < 1) col = 0xFF08090C;                                           // the lip round the opening
+                else if (dIn < 3) col = 0xFF1A1D23;
+                else {
+                    double brushed = 0.6 * Hd.smooth(x * 3.0, y * 0.25, 5, 71) + 0.4 * Hd.smooth(x * 5.0, y * 0.5, 3, 72);
+                    double v = 0.25 + 0.12 * brushed;
+                    boolean lit = x < tw / 2 && cx < 6 || y < th / 2 && cy < 6;               // the top and left bevels catch the light
+                    boolean shade = x >= tw / 2 && cx < 6 || y >= th / 2 && cy < 6;
+                    if (dOut < 5 && lit) v += 0.22 * (1 - (dOut - 2) / 3.0);
+                    if (dOut < 5 && shade) v -= 0.1 * (1 - (dOut - 2) / 3.0);
+                    if (dIn < 5) v -= 0.07;                                                   // the rail curves down into the lip
+                    col = mix(0xFF1C2028, 0xFF9AA2B0, v);
+                }
+                c.set(x, y, col);
+            }
+            bolt(c, tw / 2.0, oy / 2.0, 4.5, false);
+            bolt(c, tw / 2.0, th - oy / 2.0, 4.5, false);
+            c.save("gui/hud/meter_frame.png");
+        }
+
+        /** A round bolt head, lit from the top left; a lit one glows white. */
+        static void bolt(Canvas c, double bx, double by, double r, boolean lit) {
+            for (int y = (int) (by - r - 1); y <= by + r + 1; y++) for (int x = (int) (bx - r - 1); x <= bx + r + 1; x++) {
+                double dx = x + 0.5 - bx, dy = y + 0.5 - by, d = Math.hypot(dx, dy);
+                if (d > r) continue;
+                if (d > r - 1) { c.set(x, y, 0xFF050608); continue; }
+                double l = 0.5 - 0.35 * (dx + dy) / r;                                        // light from the top left
+                c.set(x, y, lit ? mix(0xFFD8DDE6, 0xFFFFFFFF, l) : mix(0xFF2A2E36, 0xFFB4BCC8, l));
+            }
+        }
+
+        /** The backing: near black, darker at the sides, with faint marks every tenth. */
+        static void back() throws IOException {
+            int tw = IW * S, th = IH * S;
+            Canvas c = new Canvas(tw, th);
+            for (int y = 0; y < th; y++) for (int x = 0; x < tw; x++) {
+                double u = (x + 0.5) / tw, side = Math.pow(Math.abs(u - 0.5) * 2, 2);
+                int col = mix(0xF0161A24, 0xF0050609, side);
+                if (y > 0 && y % (th / 10) == 0 || y % (th / 10) == 1) col = mix(col, 0xF0262B36, 0.7);
+                c.set(x, y, col);
+            }
+            c.save("gui/hud/meter_back.png");
+        }
+
+        /** A fill, in grey to be tinted: rounded like a tube, a highlight down one side, slow streaks of energy. */
+        static void fill(String name, boolean diagonal) throws IOException {
+            int tw = IW * S, th = IH * S;
+            Canvas c = new Canvas(tw, th);
+            for (int y = 0; y < th; y++) for (int x = 0; x < tw; x++) {
+                double u = (x + 0.5) / tw, v = (y + 0.5) / th;
+                double tube = 0.42 + 0.58 * Math.pow(Math.sin(Math.PI * u), 0.75);
+                double shine = 0.22 * Math.exp(-Math.pow((u - 0.3) / 0.09, 2));
+                double streak = diagonal ? Hd.smooth(x * 1.6 + y * 0.8, y * 0.5, 7, 81) : Hd.smooth(x * 1.8, y * 0.3, 6, 82);
+                double l = tube + shine + 0.14 * (streak - 0.5) + 0.06 * (1 - v);
+                c.set(x, y, grey(l, 255));
+            }
+            c.save("gui/hud/" + name + ".png");
+        }
+
+        /** A stud: a metal clamp over each rail with a bolt, a thin dark groove across the opening between them. */
+        static void stud(String name, boolean lit) throws IOException {
+            int tw = (W + 2) * S, th = 3 * S, rail = (IX + 1) * S;                                // 13 x 3 on screen
+            Canvas c = new Canvas(tw, th);
+            for (int y = 0; y < th; y++) for (int x = 0; x < tw; x++) {
+                boolean clamp = x < rail || x >= tw - rail;
+                if (!clamp) {
+                    if (y == th / 2 - 1 || y == th / 2) c.set(x, y, lit ? 0x90FFFFFF : 0xB0050608);  // the groove (lit: a bright line)
+                    continue;
+                }
+                int ex = Math.min(x, tw - 1 - x), ey = Math.min(y, th - 1 - y);
+                if (ex + ey < 2) continue;
+                if (ex < 1 || ey < 1) { c.set(x, y, 0xFF050608); continue; }
+                double l = 0.45 + 0.35 * (1 - y / (double) th);
+                c.set(x, y, mix(0xFF22262E, 0xFFA8B0BE, l));
+            }
+            bolt(c, rail / 2.0, th / 2.0, 4, lit);
+            bolt(c, tw - rail / 2.0, th / 2.0, 4, lit);
+            c.save("gui/hud/" + name + ".png");
+        }
+
+        /** The glow round a reached stud: a soft white ellipse, tinted and added at render time. */
+        static void glow() throws IOException {
+            int tw = 64, th = 32;                                                                 // 16 x 8 on screen
+            Canvas c = new Canvas(tw, th);
+            for (int y = 0; y < th; y++) for (int x = 0; x < tw; x++) {
+                double dx = (x + 0.5 - tw / 2.0) / (tw / 2.0), dy = (y + 0.5 - th / 2.0) / (th / 2.0), d = Math.hypot(dx, dy);
+                if (d >= 1) continue;
+                c.set(x, y, grey(1, (int) Math.round(255 * Math.pow(1 - d, 3))));
+            }
+            c.save("gui/hud/meter_stud_glow.png");
         }
     }
 
