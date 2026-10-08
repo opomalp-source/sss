@@ -91,7 +91,7 @@ public class SettingsScreen extends Screen {
                 o.add(new Option("crosshair_out", c.crosshairStyle, 0, 2, new String[]{"star", "dot", "vanilla"}));   // CX-20
                 o.add(new Option("crosshair_dot", c.crosshairDotMode, 0, 1, new String[]{"pvp", "always"}));
                 o.add(new Option("crosshair_size", c.crosshairSize, 1, 8, new String[]{"1", "2", "3", "4", "5", "6", "7", "8"}));
-                o.add(new Option("crosshair_color", c.crosshairColor, 0, 5, com.dbzenith.client.ui.Crosshair.COLOR_NAMES));
+                o.add(new Option("crosshair_color", c.crosshairColor, 0, 6, com.dbzenith.client.ui.Crosshair.COLOR_NAMES));
                 o.add(new Option("crosshair_opacity", c.crosshairOpacity, 0, 1, null));
             }
             case CONTROLS -> { }

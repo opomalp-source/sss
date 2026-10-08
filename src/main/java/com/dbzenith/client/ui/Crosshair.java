@@ -33,8 +33,8 @@ import org.joml.Vector3f;
 @Mod.EventBusSubscriber(modid = DBZenith.MOD_ID, value = Dist.CLIENT)
 public final class Crosshair implements IGuiOverlay {
     /** The colour choices (Settings → Style). */
-    public static final int[] COLORS = {0xFFFFFF, 0xFFD34A, 0xFF5A4A, 0x7CE0FF, 0x7CE07C, 0xFF8AE0};
-    public static final String[] COLOR_NAMES = {"white", "gold", "red", "cyan", "green", "pink"};
+    public static final int[] COLORS = {0xB4B4B4, 0xFFFFFF, 0xFFD34A, 0xFF5A4A, 0x7CE0FF, 0x7CE07C, 0xFF8AE0};
+    public static final String[] COLOR_NAMES = {"grey", "white", "gold", "red", "cyan", "green", "pink"};
     public static final int STAR = 0, DOT = 1, VANILLA = 2;
 
     private static double fov = 70;
@@ -102,7 +102,7 @@ public final class Crosshair implements IGuiOverlay {
         g.pose().scale((float) (1 / gs), (float) (1 / gs), 1);
         int cx = (int) Math.round(x * gs), cy = (int) Math.round(y * gs);
         int rimColor = (int) (a * 0.4f) << 24 | 0x101018;
-        if (s == Shape.DOT) dot(g, cx, cy, size * gs / 2, color, rimColor);
+        if (s == Shape.DOT) dot(g, cx, cy, Math.max(1, size * gs / 6), color, rimColor);   // a small dot: size 3 is about one GUI pixel across
         else star(g, cx, cy, size * gs, gs, color, rimColor);
         g.pose().popPose();
     }

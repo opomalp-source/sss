@@ -772,7 +772,7 @@ public final class DBZConfig {
             crosshairDotMode = b.comment("The dot crosshair: 0 = in PvP only (out of PvP, crosshairStyle), 1 = always").defineInRange("crosshairDotMode", 0, 0, 1);
             crosshairStyle = b.comment("The crosshair out of PvP: 0 = a four-pointed star, 1 = the dot, 2 = vanilla's").defineInRange("crosshairStyle", 0, 0, 2);
             crosshairSize = b.comment("Crosshair size in pixels").defineInRange("crosshairSize", 3, 1, 8);
-            crosshairColor = b.comment("Crosshair colour: 0 white, 1 gold, 2 red, 3 cyan, 4 green, 5 pink").defineInRange("crosshairColor", 0, 0, 5);
+            crosshairColor = b.comment("Crosshair colour: 0 grey, 1 white, 2 gold, 3 red, 4 cyan, 5 green, 6 pink").defineInRange("crosshairColor", 0, 0, 6);
             crosshairOpacity = b.comment("Crosshair opacity, 0-1").defineInRange("crosshairOpacity", 0.9, 0.0, 1.0);
             lockOnRange = b.comment("Lock-on (key N): how far away a foe can be locked onto, in blocks")
                     .defineInRange("lockOnRange", 48.0, 8.0, 80.0);

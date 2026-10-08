@@ -1892,6 +1892,7 @@
   "settings.dbzenith.crosshair_size.desc": "The dot's width, or the star's reach, in pixels.",
   "settings.dbzenith.crosshair_color": "Crosshair colour",
   "settings.dbzenith.crosshair_color.desc": "The crosshair's colour (it keeps a faint dark rim, so it reads on anything).",
+  "settings.dbzenith.crosshair_color.grey": "Grey",
   "settings.dbzenith.crosshair_color.white": "White",
   "settings.dbzenith.crosshair_color.gold": "Gold",
   "settings.dbzenith.crosshair_color.red": "Red",

@@ -1823,3 +1823,8 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   - `crosshairOpacity` (0.9).
 - **Settings fix:** choice options whose values start above 0 (the size) now cycle and label properly.
 - **Checked in the dev client:** the star in first person out of PvP; in PvP, the dot on the training dummy Dev was facing, left of the screen's middle in the shoulder view.
+
+## 2026-10-08 — CX-20 phase 4 follow-up: grey and a smaller dot (v0.64.1)
+- User feedback: both crosshairs grey, the dot much smaller.
+- Grey is the new first colour and the default (the choices are now grey, white, gold, red, cyan, green, pink).
+- The dot is a third of its old size (size 3 is about one GUI pixel across, plus the rim). The star is unchanged apart from its colour.
