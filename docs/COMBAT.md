@@ -6,7 +6,7 @@ transformation interactions, balancing characters) is completed in the balance p
 ## PvP mode (phase 1)
 
 - **Toggling:** PvP mode is off on joining and after death. Toggle it with **P** or `/pvp [on|off]`: a plain switch, no sound, light, message or marker (CX-20).
-- **Fights:** both players must be in PvP mode. A player in PvP mode who strikes one who isn't pulls them in; that first blow does no harm.
+- **Fights (CX-20):** any hit that reaches a player (from a player, an NPC or a mob) tags them into PvP mode for 15 s (`combatTagSeconds`); they can't switch off while tagged, and stay in PvP mode after until they switch it off. Server options `tagForcesPvp` and `hurtOutOfPvp`.
 - **Limits:** a cooldown between toggles, and no switching off while in a fight.
 - **Safe zones:** around spawn, the other world (not Hell), the tournament grounds (except between the two fighters of a match), and `/dbz pvpzone add|remove|list`.
 - **Config:** server config `[pvp]`.

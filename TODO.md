@@ -219,7 +219,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [ ] CX-20 PvP change request (user: a plain switch, normal Minecraft out of PvP, the fighting stance in it, auto-tag, a dot crosshair, form and technique meters in two bottom-right bars, styles from masters; phase by phase, stopping for feedback)  - [x] 20a (v0.61.0) A plain switch: every PvP indicator and effect removed, no toggle cooldown by default  - [ ] 20b PvP off = normal Minecraft (weak plain hits, no combat moves), PvP on = the fighting stance  - [ ] 20c Auto-tag (any hit by a player or NPC turns PvP on; tag timer; options)  - [ ] 20d The dot crosshair  - [ ] 20e The bars (visuals)  - [ ] 20f The bars (logic): form and technique meters, J and O in PvP, Ultra Instinct as a technique  - [ ] 20g Styles from masters (data, learning, affinity, Goku and Vegeta, the equip screen, NPC styles)  - [ ] 20h Polish, the guide, the asset list
   - [x] 20a (v0.61.0) A plain switch: every PvP indicator and effect removed, no toggle cooldown by default
   - [x] 20b (v0.62.0) PvP off = plain Minecraft (vanilla hits, no combat moves), PvP on = the fighting stance (blended), and the PvP camera over the right shoulder
-  - [ ] 20c Auto-tag (any hit by a player or NPC turns PvP on; tag timer; options)
+  - [x] 20c (v0.63.0) Auto-tag: any hit by a player, NPC or mob tags and switches PvP on; the tag blocks switching off; tagForcesPvp, hurtOutOfPvp; /dbz pvptag
   - [ ] 20d The dot crosshair
   - [ ] 20e The bars (visuals)
   - [ ] 20f The bars (logic): form and technique meters, J and O in PvP, Ultra Instinct as a technique

@@ -1786,3 +1786,25 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   - `PvpModeTests`: PvP off means no combos, a weak plain punch, no ki blasts or attack techniques, and a dash without the dodge; PvP on means the engine's blows and no vanilla punch. Turning PvP off lowers the guard.
   - 186 GameTests.
 - **Checked in the dev client** (empty hand): a relaxed first-person idle with PvP off; on, third person over the shoulder in the fighting stance (from behind and from the side), the guard held while walking; off again, back to first person.
+
+## 2026-10-08 — CX-20 phase 3: auto-tag (v0.63.0)
+- **Tagging** (`PvpRules.tag`):
+  - Any hit that reaches a player tags them: by another player (melee, ki, throws, beams, harmful effects through `mayAffect`), or by an NPC, a mob or its projectile (`onMobHit`, lowest priority, so only hits that went through).
+  - Between players both are tagged.
+  - A tag sets the combat timer (`[pvp] combatTagSeconds`, 15), during which P can't switch PvP off, silently. With `tagForcesPvp` (on), it switches a player out of PvP into it: the fighting stance and the shoulder camera at once.
+  - After the tag the player stays in PvP mode until they switch it off.
+  - Creative and spectator players aren't tagged by mobs.
+- **The blow lands:**
+  - With `hurtOutOfPvp` (on), a player's blow on a player out of PvP mode does its damage and tags them in. The CX-19 pull-in (a harmless first blow) is gone, with its verdict.
+  - Off, both must already be in PvP mode (the attacker hears why).
+  - The options replace `requireBoth` and `autoEnableWhenHit`.
+- **Dev:** `/dbz pvptag <player>` forces a tag.
+- **Tests:** the PvP rules test covers:
+  - a blow out of PvP mode lands and tags both in;
+  - no switching off while tagged;
+  - still on after the tag until switched off;
+  - a mob's hit tags;
+  - with `hurtOutOfPvp` off, no harm, no tag, and effects judged like blows.
+
+  186 GameTests.
+- **Checked in the dev client:** with PvP off and an empty hand, a husk's hit switched Dev into PvP at once (the shoulder camera, the stance, the husk in the enemy panel). Switching off was undone as the husk kept hitting. The first try at night turned Dev into a Great Ape under the full moon, so it was redone in daylight.

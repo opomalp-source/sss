@@ -232,8 +232,8 @@ public final class DBZConfig {
         public final ForgeConfigSpec.IntValue pvpEqualJabsToKo;
         public final ForgeConfigSpec.IntValue pvpToggleCooldown;
         public final ForgeConfigSpec.IntValue pvpCombatTag;
-        public final ForgeConfigSpec.BooleanValue pvpRequireBoth;
-        public final ForgeConfigSpec.BooleanValue pvpAutoEnable;
+        public final ForgeConfigSpec.BooleanValue pvpTagForcesOn;
+        public final ForgeConfigSpec.BooleanValue pvpHurtOutOfPvp;
         public final ForgeConfigSpec.IntValue pvpSpawnSafeRadius;
         public final ForgeConfigSpec.BooleanValue pvpSafeOtherworld;
         public final ForgeConfigSpec.BooleanValue pvpSafeTournament;
@@ -647,9 +647,9 @@ public final class DBZConfig {
             b.comment("PvP mode (CX-19): players fight each other only in PvP mode (key P, or /pvp)").push("pvp");
             pvpRules = b.comment("Use the PvP mode rules. Off: only the vanilla server pvp setting decides").define("enabled", true);
             pvpToggleCooldown = b.comment("Seconds between toggles (0 = none: the key is a plain switch)").defineInRange("toggleCooldownSeconds", 0, 0, 3600);
-            pvpCombatTag = b.comment("After hitting or being hit by a player, PvP mode cannot be turned off for this many seconds").defineInRange("combatTagSeconds", 15, 0, 3600);
-            pvpRequireBoth = b.comment("Both players must be in PvP mode to hurt each other").define("requireBoth", true);
-            pvpAutoEnable = b.comment("A player in PvP mode who strikes someone who is not pulls them into PvP mode (that first blow does no harm)").define("autoEnableWhenHit", true);
+            pvpCombatTag = b.comment("The combat tag: after being hit (by a player, an NPC or a mob) or hitting a player, PvP mode cannot be switched off for this many seconds").defineInRange("combatTagSeconds", 15, 0, 3600);
+            pvpTagForcesOn = b.comment("Being tagged switches a player into PvP mode (they stay in it after the tag until they switch it off)").define("tagForcesPvp", true);
+            pvpHurtOutOfPvp = b.comment("Players can hurt players who are not in PvP mode (who are then tagged into it). Off: both must be in PvP mode").define("hurtOutOfPvp", true);
             pvpSpawnSafeRadius = b.comment("No PvP within this many blocks of world spawn (0 = none)").defineInRange("spawnSafeRadius", 32, 0, 100_000);
             pvpSafeOtherworld = b.comment("No PvP in the other world (King Yemma's station, Snake Way, King Kai's and the Grand Kai's planets); Hell is not safe").define("safeOtherworld", true);
             pvpSafeTournament = b.comment("No PvP on the tournament grounds, except between the two fighters of a match").define("safeTournament", true);

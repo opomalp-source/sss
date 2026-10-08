@@ -31,8 +31,7 @@ import net.minecraftforge.fml.common.Mod;
  */
 @Mod.EventBusSubscriber(modid = DBZenith.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class PvpRules {
-    public enum Verdict { ALLOW, BLOCK_SAFE, BLOCK_ATTACKER_OFF, BLOCK_VICTIM_OFF, PULL_IN, BLOCK_DUEL }
-
+    public enum Verdict { ALLOW, BLOCK_SAFE, BLOCK_ATTACKER_OFF, BLOCK_VICTIM_OFF, BLOCK_DUEL }
 
     /** GameTest players: two of them fight whatever the rules (the PvP tests take theirs out). */
     public static final java.util.Set<java.util.UUID> TEST_BYPASS = java.util.concurrent.ConcurrentHashMap.newKeySet();
@@ -80,9 +79,9 @@ public final class PvpRules {
         if (bypass(attacker) && bypass(victim)) return Verdict.ALLOW;
         if (com.dbzenith.tournament.Tournament.isFighter(attacker) && com.dbzenith.tournament.Tournament.isFighter(victim)) return Verdict.ALLOW;
         if (inSafeZone(attacker) || inSafeZone(victim)) return Verdict.BLOCK_SAFE;
-        if (!isPvp(attacker)) return Verdict.BLOCK_ATTACKER_OFF;
-        if (isPvp(victim) || !DBZConfig.SERVER.pvpRequireBoth.get()) return Verdict.ALLOW;
-        return DBZConfig.SERVER.pvpAutoEnable.get() ? Verdict.PULL_IN : Verdict.BLOCK_VICTIM_OFF;
+        boolean aOn = isPvp(attacker), vOn = isPvp(victim);
+        if ((aOn && vOn) || DBZConfig.SERVER.pvpHurtOutOfPvp.get()) return Verdict.ALLOW;   // out of PvP: the blow lands, and tags them in (CX-20)
+        return aOn ? Verdict.BLOCK_VICTIM_OFF : Verdict.BLOCK_ATTACKER_OFF;
     }
 
     /**
@@ -103,12 +102,6 @@ public final class PvpRules {
                 tag(victim, now);
                 return true;
             }
-            case PULL_IN -> {
-                set(victim, true, true);
-                tag(attacker, now);
-                tag(victim, now);
-                return false;
-            }
             case BLOCK_SAFE -> attacker.displayClientMessage(Component.translatable("message.dbzenith.pvp_safe_zone"), true);
             case BLOCK_DUEL -> attacker.displayClientMessage(Component.translatable("message.dbzenith.duel_no_interfere"), true);
             case BLOCK_ATTACKER_OFF -> attacker.displayClientMessage(Component.translatable("message.dbzenith.pvp_you_off"), true);
@@ -117,8 +110,24 @@ public final class PvpRules {
         return false;
     }
 
-    private static void tag(ServerPlayer p, long now) {
-        ModCapabilities.get(p).ifPresent(d -> d.setPvpCombatUntil(now + DBZConfig.SERVER.pvpCombatTag.get() * 20L));
+    /**
+     * A combat tag (CX-20): for {@code combatTagSeconds} PvP mode cannot be switched off, and (with {@code tagForcesPvp})
+     * a player out of PvP mode is switched into it. After the tag they stay in PvP mode until they switch it off.
+     */
+    public static void tag(ServerPlayer p, long now) {
+        PlayerData d = ModCapabilities.get(p).orElse(null);
+        if (d == null) return;
+        d.setPvpCombatUntil(now + DBZConfig.SERVER.pvpCombatTag.get() * 20L);
+        if (!d.isPvp() && DBZConfig.SERVER.pvpTagForcesOn.get() && !p.isSpectator()) set(p, true, true);
+    }
+
+    /** Hit by anything that isn't a player (an NPC, a mob, its arrow): tagged too, once the hit goes through. */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onMobHit(LivingAttackEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer victim) || victim.isCreative() || victim.isSpectator()) return;
+        Entity by = event.getSource().getEntity();
+        if (!(by instanceof net.minecraft.world.entity.LivingEntity) || by instanceof net.minecraft.world.entity.player.Player || by == victim) return;
+        tag(victim, victim.level().getGameTime());
     }
 
     /** Every blow between two players: melee, ki, throws, beams, explosions they own. */

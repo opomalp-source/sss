@@ -441,6 +441,12 @@ public final class DBZCommand {
                                     ctx.getSource().sendSuccess(() -> Component.literal(fired + " blast(s) fired"), true);
                                     return fired;
                                 }))))
+                .then(Commands.literal("pvptag")                                    // CX-20: force a combat tag
+                        .then(Commands.argument("targets", EntityArgument.players()).executes(ctx -> {
+                            for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) com.dbzenith.combat.PvpRules.tag(p, p.level().getGameTime());
+                            ctx.getSource().sendSuccess(() -> Component.literal("Tagged"), true);
+                            return 1;
+                        })))
                 .then(Commands.literal("pvpzone")
                         .then(Commands.literal("add").then(Commands.argument("name", StringArgumentType.word())
                                 .then(Commands.argument("from", net.minecraft.commands.arguments.coordinates.BlockPosArgument.blockPos())

@@ -50,31 +50,45 @@ public final class PvpTests {
     private static void rules(GameTestHelper helper, ServerPlayer[] p) {
         ServerPlayer a = p[0], b = p[1];
         PlayerData da = ModCapabilities.getOrThrow(a), db = ModCapabilities.getOrThrow(b);
+        helper.assertTrue(PvpRules.toggle(a, true) && PvpRules.toggle(a, false) && !da.isPvp(), "a plain switch: on and straight back off (no cooldown by default)");
+
+        // CX-20: a blow lands even out of PvP mode, and tags both into it
         float body = b.getHealth();
         b.invulnerableTime = 0;
         b.hurt(com.dbzenith.combat.ModDamageTypes.absorbed(b.level(), a), 2f);   // test players never wear off their spawn protection: a blow that ignores it
-        helper.assertTrue(b.getHealth() == body && !db.isPvp(), "out of PvP mode: no harm, and the victim stays out");
+        helper.assertTrue(b.getHealth() < body, "the blow lands: " + b.getHealth() + " < " + body);
+        helper.assertTrue(db.isPvp() && da.isPvp(), "and both are tagged into PvP mode");
+        helper.assertTrue(!PvpRules.toggle(b, false) && db.isPvp(), "no switching off while tagged");
+        db.setPvpCombatUntil(0);                                                // the tag runs out
+        helper.assertTrue(db.isPvp(), "still in PvP mode after the tag");
+        helper.assertTrue(PvpRules.toggle(b, false) && !db.isPvp(), "until they switch it off");
 
-        helper.assertTrue(PvpRules.toggle(a, true) && da.isPvp(), "the attacker turns PvP mode on");
-        helper.assertTrue(PvpRules.toggle(a, false) && !da.isPvp() && PvpRules.toggle(a, true) && da.isPvp(), "a plain switch: straight back off and on (no cooldown by default)");
+        // hit by a mob: tagged in too
+        var zombie = net.minecraft.world.entity.EntityType.ZOMBIE.create(helper.getLevel());
+        zombie.moveTo(b.position());
         b.invulnerableTime = 0;
-        b.hurt(com.dbzenith.combat.ModDamageTypes.absorbed(b.level(), a), 2f);   // test players never wear off their spawn protection: a blow that ignores it
-        helper.assertTrue(db.isPvp(), "a blow pulls the victim into PvP mode");
-        helper.assertTrue(b.getHealth() == body, "harmlessly: " + b.getHealth() + " vs " + body);
-        b.invulnerableTime = 0;
-        b.hurt(com.dbzenith.combat.ModDamageTypes.absorbed(b.level(), a), 2f);   // test players never wear off their spawn protection: a blow that ignores it
-        helper.assertTrue(b.getHealth() < body, "then the fight is on: " + b.getHealth() + " < " + body);
-        helper.assertTrue(!PvpRules.toggle(b, false) && db.isPvp(), "no leaving in the middle of a fight");
+        b.hurt(b.damageSources().mobAttack(zombie), 1f);
+        helper.assertTrue(db.isPvp() && db.getPvpCombatUntil() > helper.getLevel().getGameTime(), "a mob's hit tags too");
+        zombie.discard();
 
-        a.addEffect(new MobEffectInstance(ModEffects.STUN.get(), 20, 0));
-        a.removeAllEffects();
-        db.setPvp(false);
-        db.setPvpCombatUntil(0);
-        da.setPvp(false);
-        PvpRules.actor(a);                                                   // a technique's stun on someone out of PvP mode
-        b.addEffect(new MobEffectInstance(ModEffects.STUN.get(), 40, 0));
-        PvpRules.actor(null);
-        helper.assertTrue(!b.hasEffect(ModEffects.STUN.get()), "effects are judged like blows");
+        // the server may say players out of PvP mode can't be hurt by players at all
+        com.dbzenith.config.DBZConfig.SERVER.pvpHurtOutOfPvp.set(false);
+        try {
+            da.setPvp(false);
+            db.setPvp(false);
+            da.setPvpCombatUntil(0);
+            db.setPvpCombatUntil(0);
+            float before = b.getHealth();
+            b.invulnerableTime = 0;
+            b.hurt(com.dbzenith.combat.ModDamageTypes.absorbed(b.level(), a), 2f);
+            helper.assertTrue(b.getHealth() == before && !db.isPvp(), "then no harm, and nobody is tagged");
+            PvpRules.actor(a);                                                   // a technique's stun on someone out of PvP mode
+            b.addEffect(new MobEffectInstance(ModEffects.STUN.get(), 40, 0));
+            PvpRules.actor(null);
+            helper.assertTrue(!b.hasEffect(ModEffects.STUN.get()), "effects are judged like blows");
+        } finally {
+            com.dbzenith.config.DBZConfig.SERVER.pvpHurtOutOfPvp.set(true);
+        }
         TestPlayers.remove(helper, a);
         TestPlayers.remove(helper, b);
         helper.succeed();
