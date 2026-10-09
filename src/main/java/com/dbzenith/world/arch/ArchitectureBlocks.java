@@ -66,12 +66,55 @@ public final class ArchitectureBlocks {
 
     private static Block base(ArchitectureBlockList.Spec s) {
         BlockBehaviour.Properties p = props(s);
+        boolean sky = s.id().startsWith(SKY_PREFIX);
         return switch (s.shape()) {
-            case PILLAR -> new RotatedPillarBlock(p);
+            case PILLAR -> sky ? new SkyPillar(p) : new RotatedPillarBlock(p);
             case GLASS -> new GlassBlock(p.noOcclusion().isViewBlocking((st, l, pos) -> false).isSuffocating((st, l, pos) -> false));
-            case LAMP -> new Block(p.lightLevel(st -> s.material() == ArchitectureBlockList.Material.GLASS ? 7 : 15));
-            default -> new Block(p);
+            case LAMP -> {
+                p = p.lightLevel(st -> s.material() == ArchitectureBlockList.Material.GLASS ? 7 : 15);
+                yield sky ? new SkyBlock(p) : new Block(p);
+            }
+            default -> sky ? new SkyBlock(p) : new Block(p);
         };
+    }
+
+    /**
+     * Kami's Lookout's blocks let daylight through (CX-33): the island is a hundred blocks across, and solid it would
+     * leave the land under it in endless night, full of monsters, with its own underside black. They are still
+     * solid and opaque to the eye.
+     */
+    static final String SKY_PREFIX = "lookout_";
+
+    static final class SkyBlock extends Block {
+        SkyBlock(Properties p) {
+            super(p);
+        }
+
+        @Override
+        public boolean propagatesSkylightDown(BlockState state, net.minecraft.world.level.BlockGetter level, net.minecraft.core.BlockPos pos) {
+            return true;
+        }
+
+        @Override
+        public int getLightBlock(BlockState state, net.minecraft.world.level.BlockGetter level, net.minecraft.core.BlockPos pos) {
+            return 0;
+        }
+    }
+
+    static final class SkyPillar extends RotatedPillarBlock {
+        SkyPillar(Properties p) {
+            super(p);
+        }
+
+        @Override
+        public boolean propagatesSkylightDown(BlockState state, net.minecraft.world.level.BlockGetter level, net.minecraft.core.BlockPos pos) {
+            return true;
+        }
+
+        @Override
+        public int getLightBlock(BlockState state, net.minecraft.world.level.BlockGetter level, net.minecraft.core.BlockPos pos) {
+            return 0;
+        }
     }
 
     /** Hardness, sound and tool by material: worked stone a little tougher than vanilla's, Korin's stone tougher still. */

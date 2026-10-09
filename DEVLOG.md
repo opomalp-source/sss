@@ -2370,3 +2370,24 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   is gone. In the dev world (seed 8675309) the first arena is ~1,700 blocks out.
 - TournamentTests stage their match on a floor over the test (`TournamentGrounds.useRing`); the ring search is cached
   when it finds nothing. 209 GameTests.
+
+## 2026-10-09 — CX-33b: Korin Tower and Kami's Lookout (v0.87.0)
+- **`KamiLookout`** (replaces the stub): Korin Tower rises from a round carved plinth (standing stones with slab caps)
+  as a 13-wide shaft of ribbed, panelled Korin stone banded every 16 blocks, to Korin's sanctuary at y 170: a
+  swelling banded underside, a balcony with a lantern-posted balustrade, a round room (windows, wall lanterns, four
+  doors, lamps, a gold-topped pedestal) under a dome and a spire. A stone stair winds round the whole tower from the
+  ground (railing posts on the outside, lit where it tunnels up through the sanctuary's underside into the room).
+- High above it (deck at y 276, 113 blocks across) the Lookout: a red patterned band, a white band with long glowing
+  windows, a red band, then a teal hull with trim rings drawing in to a gold-banded pole pointing down at Korin's spire.
+  On the deck: marble walks, a lamp-posted balustrade, fourteen tall white lamp towers, a cypress avenue to the palace
+  steps, a palm grove on a lawn and a palm-shaded pool. Kami's palace on a marble platform: a round hall (glowing
+  windows, inner colonnade with lamps, a gold floor ring, a dais) ringed by a pink awning on columns, a red drum and a
+  gold onion dome; two round towers with pink awnings, an upper floor and small onion domes; wings with windows and
+  awnings, passages joining all of it. Piccolo (the style master) keeps the Lookout.
+- **Daylight through the Lookout:** `lookout_*` blocks pass skylight (`propagatesSkylightDown`, light block 0) while
+  staying solid and opaque, so the land under a 113-block island isn't in permanent darkness spawning monsters, and
+  the underside is lit teal instead of black.
+- `Shapes`: `inDisc`/`onRim`/`arc` (watertight circular walls, spacing round a circle) and `circleWall` (a joined-up
+  circular balustrade with posts).
+- Spacing 2048, forest/plains/savanna/jungle/meadow/taiga biomes, ground dry and fairly level, below y 100.
+  `/landmark tp lookout` puts you on the deck; the dev world's first is at (-797, 858).

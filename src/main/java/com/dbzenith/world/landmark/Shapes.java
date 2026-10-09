@@ -113,6 +113,48 @@ public final class Shapes {
             }
     }
 
+    /** Whether (dx, dz) lies in the disc of radius r round the origin. */
+    public static boolean inDisc(int dx, int dz, double r) {
+        return dx * dx + dz * dz <= (r + 0.5) * (r + 0.5);
+    }
+
+    /**
+     * Whether (dx, dz) is on the rim of that disc: in it, with a neighbour (diagonals too) outside. The rim is
+     * unbroken side to side, so a wall drawn on it is watertight and a balustrade on it joins up.
+     */
+    public static boolean onRim(int dx, int dz, double r) {
+        if (!inDisc(dx, dz, r)) return false;
+        for (int i = -1; i <= 1; i++)
+            for (int j = -1; j <= 1; j++) if (!inDisc(dx + i, dz + j, r)) return true;
+        return false;
+    }
+
+    /** Where (dx, dz) lies round the circle, as a distance along a circle of radius r (for spacing windows, posts). */
+    public static int arc(int dx, int dz, double r) {
+        return (int) Math.floor((Math.atan2(dz, dx) + Math.PI) * r);
+    }
+
+    /**
+     * A balustrade on the rim of the disc of radius r at height y, its walls joined to each other; every
+     * {@code postEvery} blocks round it a post carrying {@code postTop} (null for none).
+     */
+    public static void circleWall(Canvas c, int cx, int cz, int y, double r, BlockState wall, int postEvery, BlockState postTop) {
+        int R = (int) Math.ceil(r) + 1;
+        if (!c.intersects(cx - R, cz - R, cx + R, cz + R)) return;
+        for (int x = Math.max(cx - R, c.minX); x <= Math.min(cx + R, c.maxX); x++)
+            for (int z = Math.max(cz - R, c.minZ); z <= Math.min(cz + R, c.maxZ); z++) {
+                int dx = x - cx, dz = z - cz;
+                if (!onRim(dx, dz, r)) continue;
+                boolean n = onRim(dx, dz - 1, r), s = onRim(dx, dz + 1, r), w = onRim(dx - 1, dz, r), e = onRim(dx + 1, dz, r);
+                boolean straight = (n && s && !w && !e) || (w && e && !n && !s);
+                boolean post = postEvery > 0 && Math.floorMod(arc(dx, dz, r), postEvery) == 0;
+                c.set(x, y, z, wall.setValue(WallBlock.UP, !straight || post)
+                        .setValue(WallBlock.NORTH_WALL, n ? WallSide.LOW : WallSide.NONE).setValue(WallBlock.SOUTH_WALL, s ? WallSide.LOW : WallSide.NONE)
+                        .setValue(WallBlock.WEST_WALL, w ? WallSide.LOW : WallSide.NONE).setValue(WallBlock.EAST_WALL, e ? WallSide.LOW : WallSide.NONE));
+                if (post && postTop != null) c.set(x, y + 1, z, postTop);
+            }
+    }
+
     // ------------------------------------------------------------------ plants and furniture
 
     static BlockState leaves(BlockState l) {
