@@ -576,12 +576,12 @@ public final class DBZCommand {
                             com.dbzenith.tournament.Tournament.cancel();
                             return 1;
                         }))
-                        .then(Commands.literal("build").then(Commands.argument("pos", net.minecraft.commands.arguments.coordinates.BlockPosArgument.blockPos()).executes(ctx -> {
-                            var at = com.dbzenith.tournament.TournamentGrounds.build(ctx.getSource().getServer().overworld(),
-                                    net.minecraft.commands.arguments.coordinates.BlockPosArgument.getLoadedBlockPos(ctx, "pos"));
-                            ctx.getSource().sendSuccess(() -> Component.literal("Tournament ring at " + at.toShortString()), true);
-                            return 1;
-                        }))))
+                        .then(Commands.literal("where").executes(ctx -> {                     // CX-33: the arena is generated with the world
+                            var at = com.dbzenith.tournament.TournamentGrounds.ring(ctx.getSource().getServer().overworld());
+                            ctx.getSource().sendSuccess(() -> Component.literal(at == null ? "No tournament arena found near spawn"
+                                    : "Tournament ring at " + at.toShortString()), false);
+                            return at == null ? 0 : 1;
+                        })))
                 .then(Commands.literal("build")
                         .then(Commands.argument("kind", StringArgumentType.word())
                                 .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.List.of("dojo", "outpost"), b))

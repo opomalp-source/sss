@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "dbzenith:block/lookout_marble",
+    "top": "dbzenith:block/lookout_marble",
+    "side": "dbzenith:block/lookout_marble"
+  }
+}

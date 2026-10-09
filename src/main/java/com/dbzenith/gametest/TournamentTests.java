@@ -34,8 +34,13 @@ public final class TournamentTests {
         Tournament.cancel();
         ServerPlayer p = TestPlayers.create(helper);
         p.setGameMode(GameType.SURVIVAL);
-        TournamentGrounds.placeIfNeeded(p.server.overworld());
-        helper.assertTrue(TournamentGrounds.ring(p.server.overworld()) != null, "the grounds are built");
+        // the match is staged on a floor high over this test (the real arena is a landmark far off in the world, its
+        // chunks not generated; high up, its no-PvP grounds leave the tests round it alone)
+        net.minecraft.core.BlockPos centre = helper.absolutePos(new net.minecraft.core.BlockPos(1, 120, 1));
+        for (int dx = -12; dx <= 12; dx++)
+            for (int dz = -4; dz <= 4; dz++)
+                p.server.overworld().setBlock(centre.offset(dx, -1, dz), net.minecraft.world.level.block.Blocks.BARRIER.defaultBlockState(), 3);
+        TournamentGrounds.useRing(p.server.overworld(), centre);
         PlayerData d = ModCapabilities.getOrThrow(p);
         d.setCooldown(Tournament.COOLDOWN, 0);
         helper.assertTrue(Tournament.join(p), "entered");
@@ -58,6 +63,7 @@ public final class TournamentTests {
             helper.assertTrue(foe.isRemoved(), "the fighter leaves the ring");
             Tournament.cancel();
             TestPlayers.remove(helper, p);
+            TournamentGrounds.useRing(p.server.overworld(), null);
         });
     }
 }

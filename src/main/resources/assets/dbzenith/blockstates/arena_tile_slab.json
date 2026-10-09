@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "dbzenith:block/arena_tile_slab"
+    },
+    "type=top": {
+      "model": "dbzenith:block/arena_tile_slab_top"
+    },
+    "type=double": {
+      "model": "dbzenith:block/arena_tile"
+    }
+  }
+}

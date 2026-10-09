@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "bottom": "dbzenith:block/wasteland_rock",
+    "top": "dbzenith:block/wasteland_rock",
+    "side": "dbzenith:block/wasteland_rock"
+  }
+}

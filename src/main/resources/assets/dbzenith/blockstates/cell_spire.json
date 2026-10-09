@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "dbzenith:block/cell_spire"
+    },
+    "axis=z": {
+      "model": "dbzenith:block/cell_spire_horizontal",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "dbzenith:block/cell_spire_horizontal",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

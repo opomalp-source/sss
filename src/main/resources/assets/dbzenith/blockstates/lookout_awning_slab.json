@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "dbzenith:block/lookout_awning_slab"
+    },
+    "type=top": {
+      "model": "dbzenith:block/lookout_awning_slab_top"
+    },
+    "type=double": {
+      "model": "dbzenith:block/lookout_awning"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "dbzenith:block/arena_tile",
+    "top": "dbzenith:block/arena_tile",
+    "side": "dbzenith:block/arena_tile"
+  }
+}

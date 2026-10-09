@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "dbzenith:block/strata_tan_slab"
+    },
+    "type=top": {
+      "model": "dbzenith:block/strata_tan_slab_top"
+    },
+    "type=double": {
+      "model": "dbzenith:block/strata_tan"
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "dbzenith:block/lookout_marble_pillar_top",
+    "side": "dbzenith:block/lookout_marble_pillar"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "replace": false,
+  "values": [
+    "dbzenith:tournament_stone_slab",
+    "dbzenith:tournament_tiles_slab",
+    "dbzenith:arena_tile_slab",
+    "dbzenith:temple_plaster_slab",
+    "dbzenith:clay_roof_tiles_slab",
+    "dbzenith:lookout_marble_slab",
+    "dbzenith:lookout_deck_tiles_slab",
+    "dbzenith:lookout_gold_dome_slab",
+    "dbzenith:lookout_awning_slab",
+    "dbzenith:korin_stone_slab",
+    "dbzenith:cell_tile_slab",
+    "dbzenith:wasteland_rock_slab",
+    "dbzenith:strata_red_slab",
+    "dbzenith:strata_brown_slab",
+    "dbzenith:strata_tan_slab",
+    "dbzenith:strata_cream_slab",
+    "dbzenith:city_concrete_slab",
+    "dbzenith:city_roof_red_slab",
+    "dbzenith:city_roof_orange_slab",
+    "dbzenith:city_road_slab",
+    "dbzenith:city_sidewalk_slab",
+    "dbzenith:city_pier_deck_slab"
+  ]
+}

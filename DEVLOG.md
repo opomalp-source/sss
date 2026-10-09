@@ -2339,3 +2339,34 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - At the user's request, flying leaves no afterimages at all: full-speed flight no longer starts a trail (motion
   engine and the old flight clips), and a dash in the air leaves none either. Dashes on the ground and the fusion
   dance keep theirs. 209 GameTests.
+
+## 2026-10-09 — CX-33a: landmarks framework, architecture blocks, the tournament arena (v0.86.0)
+- **The ask:** rebuild every structure from scratch, anime scale, out of our own blocks: the tournament arena, Korin
+  Tower + Kami's Lookout, the Cell Games ring, the Frypan Mountains, West City. This phase: the block set, the
+  framework, and the tournament arena. The old hand-built grounds (`TournamentGrounds.build`) are deleted.
+- **Blocks (`tools/gen_architecture.py`)**: 48 base blocks in six families (tournament stone/tiles/trim/red band,
+  temple plaster/red pillar/gold/lantern/clay roof tiles, Lookout tiles/hull/bands/dome gold/awnings/lamps, Korin
+  stone, Cell Games tiles/rock, strata sandstones, city plaster/window strips/domes/asphalt...), plus 17 stairs, 22
+  slabs and 5 walls. The script draws the 16x16 textures and writes blockstates, models, item models, loot tables,
+  tool/stairs/slabs/walls tags, lang and `world/arch/ArchitectureBlockList.java`; `ArchitectureBlocks` registers them
+  under their own creative tab ("Architecture"). Re-run the script after editing its tables.
+- **Landmarks (`world/landmark/`)**: not vanilla structures (their pieces can't reach 160+ blocks from the start
+  chunk). `Landmark` lists each kind (grid spacing, radius, biomes); `LandmarkSites` picks one seeded site per grid
+  cell and asks the plan if the biome and the terrain (generator base heights, so every thread agrees) suit it; plans
+  are immutable and cached. `LandmarkFeature` (a `top_layer_modification` feature in every overworld biome) builds,
+  per chunk, only the blocks inside that chunk through a clipped `Canvas` (`ground` levels and blends a column), then
+  sweeps natural leaves/logs that neighbouring chunks' trees hung into the landmark. `Shapes`: hip roofs with
+  upturned corners, domes, onion domes, palms, cypresses, banner poles.
+- **Tournament arena (`TournamentArena`)**: a 268-block-square levelled field eased into the land round it; a 41-block
+  tiled ring with a trim skirt, rails and lanterns; stands on all four sides (15 tiers of seats, aisle stairs, a red
+  band rail) over a lit, pillared concourse with doorways into four gate tunnels; a 24-high back wall with arches,
+  windows, a red triple band, merlons and banner poles in four colours; a south gatehouse; behind the north stand a
+  raised temple: a great hall (red lacquer columns with lamps, windows, a gold throne dais, banners) under a
+  two-storey brown tile roof with gold ridges and upturned corners, flanked by three-tier pagodas; palms and lamp
+  posts round the grounds; the Announcer by the ring. Spacing 1024, plains/meadow/savanna/forest biomes, on fairly
+  level ground.
+- **Finding them:** `/landmark locate <tournament|lookout|cell_games|frypan_mountains|west_city>` and `/landmark tp
+  <name>` (ops). The tournament uses the arena nearest spawn (`/dbz tournament where`); the old `build` subcommand
+  is gone. In the dev world (seed 8675309) the first arena is ~1,700 blocks out.
+- TournamentTests stage their match on a floor over the test (`TournamentGrounds.useRing`); the ring search is cached
+  when it finds nothing. 209 GameTests.

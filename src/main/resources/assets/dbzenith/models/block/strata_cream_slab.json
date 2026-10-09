@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "dbzenith:block/strata_cream",
+    "top": "dbzenith:block/strata_cream",
+    "side": "dbzenith:block/strata_cream"
+  }
+}

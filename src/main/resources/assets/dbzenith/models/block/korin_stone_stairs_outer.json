@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "bottom": "dbzenith:block/korin_stone",
+    "top": "dbzenith:block/korin_stone",
+    "side": "dbzenith:block/korin_stone"
+  }
+}
