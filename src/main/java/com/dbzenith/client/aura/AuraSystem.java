@@ -290,7 +290,8 @@ public final class AuraSystem {
 
     @SubscribeEvent
     public static void onRender(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES || STATES.isEmpty()) return;
+        // after the clouds and the weather: drawn before them, the clouds were painted over the aura and showed through
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER || STATES.isEmpty()) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return;
         Camera camera = event.getCamera();
@@ -322,14 +323,15 @@ public final class AuraSystem {
 
         LEFT.set(camera.getLeftVector());
         UP.set(camera.getUpVector());
-        PoseStack pose = event.getPoseStack();
+        // At this stage Minecraft has already put the camera's turn on its model-view matrix (for the clouds and the
+        // weather), so everything here is drawn with an identity pose; multiplying the stage's pose in again turned
+        // the camera twice and threw the aura off the screen.
+        PoseStack pose = IDENTITY;
         MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
         float t = ((mc.level.getGameTime() % 72000L) + pt) / 20f;
         boolean shader = AuraShaders.use();
         if (shader) {
-            PoseStack mv = RenderSystem.getModelViewStack();
-            mv.pushPose();
-            mv.mulPoseMatrix(pose.last().pose());
+            RenderSystem.getModelViewStack().pushPose();
             RenderSystem.applyModelViewMatrix();
             RenderSystem.enableDepthTest();
             RenderSystem.depthMask(false);
@@ -386,6 +388,7 @@ public final class AuraSystem {
         }
     }
 
+    private static final PoseStack IDENTITY = new PoseStack();
     private static final Slot[] SLOTS = new Slot[2];
 
     /** A fighter's two auras, technique first (no list is made). */
@@ -458,7 +461,7 @@ public final class AuraSystem {
         // it never breathes in and out like a balloon: the pulse and most of a charge stretch it upward, the width
         // barely moves
         float size = grow * (1 + 0.35f * rc.chargeScale * charge + 0.4f * rc.hitScale * flare + 0.5f * rc.burstScale * burst);
-        float tall = (1 + 2.5f * (pulse - 1)) * (0.65f + 0.35f * k) * (1 + rc.chargeHeight * charge + rc.hitScale * flare + rc.burstScale * burst);
+        float tall = (1 + 1.5f * (pulse - 1)) * (0.65f + 0.35f * k) * (1 + rc.chargeHeight * charge + rc.hitScale * flare + rc.burstScale * burst);
         sl.wild = 1 + rc.chargeWild * charge + 0.8f * flare + burst + extraWild;
         sl.charge = charge;
         sl.radius = d.width * 0.5f * body * size * widthMul;

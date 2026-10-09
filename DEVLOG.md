@@ -2218,3 +2218,15 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - `layers_mod {1: ...}` in the generator now means every flame shell (glows come first now).
 - **Checked in a dev client** against the video (night and day), every family, and clips. 209 GameTests.
 
+
+## 2026-10-09 — CX-25: clouds, a calmer Kaioken, a tinted middle (v0.80.0)
+- **Clouds showed through the aura:** clouds are drawn after the stage the aura used (AFTER_PARTICLES). Auras now draw
+  at AFTER_WEATHER, after clouds and rain. At that stage the model-view stack already holds the camera's rotation, so
+  the aura is drawn with an identity pose (applying the camera again hid it in third person and floated it in front).
+- **Kaioken too wobbly:** smaller pulse (0.015), slower motion (3), less sway and flicker, slower scroll, smaller growth
+  per stage, calmer charge and tier-2 reactions, no ghost shell, and drawn at 10 a second like Blue.
+- **Vanishing from above:** a hollow aura seen from above is only its band. The middle now carries a light tint
+  (core alpha 0.12, up from near clear), and a little more (+0.18) as the camera looks down on it.
+- Height breathing reduced (pulse factor 1.5, was 2.5).
+- **Checked in a dev client:** every angle including straight down, against clouds, Kaioken 1/10/20. 209 GameTests.
+- Known: from about 30° above, the tip can show as small arcs above the head.

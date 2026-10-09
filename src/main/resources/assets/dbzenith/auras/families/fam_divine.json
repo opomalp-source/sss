@@ -47,7 +47,7 @@
         "rim": "$core"
       },
       "alpha": {
-        "core": 0.0,
+        "core": 0.12,
         "edge": 1.0
       },
       "rim": {
@@ -81,7 +81,7 @@
         "rim": "$core"
       },
       "alpha": {
-        "core": 0.0,
+        "core": 0.12,
         "edge": 1.0
       },
       "rim": {

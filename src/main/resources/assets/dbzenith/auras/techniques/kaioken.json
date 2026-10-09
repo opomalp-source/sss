@@ -23,9 +23,9 @@
     "rows": 1.5
   },
   "motion": {
-    "pulse": 0.05,
-    "pulseSpeed": 7.0,
-    "sway": 0.04
+    "pulse": 0.015,
+    "pulseSpeed": 3.0,
+    "sway": 0.015
   },
   "layers": [
     {
@@ -54,7 +54,7 @@
         "rim": "#FF1030"
       },
       "alpha": {
-        "core": 0.0,
+        "core": 0.12,
         "edge": 1.0
       },
       "rim": {
@@ -68,57 +68,17 @@
         "lean": 1.2
       },
       "motion": {
-        "scroll": 2.6,
-        "flicker": 0.5,
+        "scroll": 2.2,
+        "flicker": 0.3,
         "streaks": 0.85,
         "streakSpeed": 6.0,
         "stretch": 0.5,
         "tallFlames": 1.0,
         "warp": 0.7,
-        "fps": 15,
+        "fps": 10,
         "smear": 0.1
       },
       "band": 0.17
-    },
-    {
-      "kind": "shell",
-      "silhouette": "jagged",
-      "colors": {
-        "core": "#FFE6EA",
-        "mid": "#FF8C9C",
-        "edge": "$edge",
-        "rim": "#FF1030"
-      },
-      "alpha": {
-        "core": 0.0,
-        "edge": 1.0
-      },
-      "rim": {
-        "width": 0.06,
-        "strength": 0.8
-      },
-      "spikes": {
-        "count": 7,
-        "size": 0.323,
-        "sharpness": 0.9,
-        "lean": 1.2
-      },
-      "motion": {
-        "scroll": 3.38,
-        "flicker": 0.5,
-        "streaks": 0.85,
-        "streakSpeed": 6.0,
-        "stretch": 0.5,
-        "tallFlames": 1.0,
-        "warp": 0.7,
-        "fps": 15,
-        "smear": 0.1
-      },
-      "band": 0.12,
-      "scale": 0.84,
-      "heightScale": 0.9,
-      "seed": 23.7,
-      "opacity": 0.5
     }
   ],
   "particles": {
@@ -135,9 +95,9 @@
     "charge": {
       "scale": 0.25,
       "height": 0.3,
-      "wild": 1.8,
+      "wild": 1.4,
       "glow": 0.5,
-      "shake": 0.05
+      "shake": 0.03
     },
     "move": {
       "trail": 1.8,
@@ -145,9 +105,9 @@
     }
   },
   "grow": {
-    "scale": 0.025,
-    "height": 0.03,
-    "wild": 0.06
+    "scale": 0.02,
+    "height": 0.025,
+    "wild": 0.03
   },
   "tiers": [
     {
@@ -165,8 +125,8 @@
         "bottom": -0.08
       },
       "motion": {
-        "pulse": 0.07,
-        "pulseSpeed": 9.0
+        "pulse": 0.02,
+        "pulseSpeed": 3.5
       },
       "layers": [
         {
@@ -195,7 +155,7 @@
             "rim": "#FF1030"
           },
           "alpha": {
-            "core": 0.0,
+            "core": 0.12,
             "edge": 1.0
           },
           "rim": {
@@ -209,57 +169,17 @@
             "lean": 1.2
           },
           "motion": {
-            "scroll": 3.4,
-            "flicker": 0.7,
+            "scroll": 2.8,
+            "flicker": 0.4,
             "streaks": 0.85,
             "streakSpeed": 6.0,
             "stretch": 0.5,
             "tallFlames": 1.0,
             "warp": 0.7,
-            "fps": 15,
+            "fps": 10,
             "smear": 0.1
           },
           "band": 0.17
-        },
-        {
-          "kind": "shell",
-          "silhouette": "jagged",
-          "colors": {
-            "core": "#FFE6EA",
-            "mid": "#FF8C9C",
-            "edge": "$edge",
-            "rim": "#FF1030"
-          },
-          "alpha": {
-            "core": 0.0,
-            "edge": 1.0
-          },
-          "rim": {
-            "width": 0.06,
-            "strength": 0.8
-          },
-          "spikes": {
-            "count": 8,
-            "size": 0.357,
-            "sharpness": 0.9,
-            "lean": 1.2
-          },
-          "motion": {
-            "scroll": 4.42,
-            "flicker": 0.7,
-            "streaks": 0.85,
-            "streakSpeed": 6.0,
-            "stretch": 0.5,
-            "tallFlames": 1.0,
-            "warp": 0.7,
-            "fps": 15,
-            "smear": 0.1
-          },
-          "band": 0.12,
-          "scale": 0.84,
-          "heightScale": 0.9,
-          "seed": 23.7,
-          "opacity": 0.5
         }
       ],
       "particles": {
@@ -275,14 +195,14 @@
       },
       "react": {
         "charge": {
-          "wild": 2.4,
-          "shake": 0.08
+          "wild": 1.8,
+          "shake": 0.04
         }
       },
       "grow": {
-        "scale": 0.012,
-        "height": 0.015,
-        "wild": 0.05
+        "scale": 0.01,
+        "height": 0.012,
+        "wild": 0.02
       }
     }
   ],

@@ -469,20 +469,20 @@ def kaioken():
         "silhouette": "jagged",
         "shape": {"width": 1.3, "height": 2.4, "bottom": -0.08, "widest": 0.34, "taper": 1.05, "tip": 1.2, "peak": 0.5, "flare": 0.08},
         "lobes": {"count": 3, "size": 0.02, "rise": 1.8, "rows": 1.5},
-        "motion": {"pulse": 0.05, "pulseSpeed": 7.0, "sway": 0.04},
-        "layers": layers(7, 0.38, 0.5, 2.6, 26, 0.4),
+        "motion": {"pulse": 0.015, "pulseSpeed": 3.0, "sway": 0.015},
+        "layers": layers(7, 0.38, 0.3, 2.2, 26, 0.4),
         "particles": {"type": "ember", "rate": 1.6, "size": 0.8, "color": "#FFD8DE"},
         "motes": {"rate": 1.6, "color": "#FF8090"},
-        "react": {"charge": {"scale": 0.25, "height": 0.3, "wild": 1.8, "glow": 0.5, "shake": 0.05}, "move": {"trail": 1.8, "max": 0.5}},
-        "grow": {"scale": 0.025, "height": 0.03, "wild": 0.06},
+        "react": {"charge": {"scale": 0.25, "height": 0.3, "wild": 1.4, "glow": 0.5, "shake": 0.03}, "move": {"trail": 1.8, "max": 0.5}},
+        "grow": {"scale": 0.02, "height": 0.025, "wild": 0.03},
         "tiers": [
             {"from": 1},
             {"from": 11, "wrap": {"scale": 1.25, "height": 1.35},
-             "shape": {"peak": 0.75, "flare": 0.1}, "motion": {"pulse": 0.07, "pulseSpeed": 9.0},
-             "layers": layers(8, 0.42, 0.7, 3.4, 36, 0.5),
+             "shape": {"peak": 0.75, "flare": 0.1}, "motion": {"pulse": 0.02, "pulseSpeed": 3.5},
+             "layers": layers(8, 0.42, 0.4, 2.8, 36, 0.5),
              "particles": {"rate": 2.6}, "lightning": {"rate": 2.5, "size": 1.0, "color": "#FFE0E6"},
-             "react": {"charge": {"wild": 2.4, "shake": 0.08}},
-             "grow": {"scale": 0.012, "height": 0.015, "wild": 0.05}},
+             "react": {"charge": {"wild": 1.8, "shake": 0.04}},
+             "grow": {"scale": 0.01, "height": 0.012, "wild": 0.02}},
         ],
         "light": 13, "ground": "dust",
     }
@@ -494,10 +494,10 @@ WIDTH_K, HEIGHT_K = 1.5, 0.75    # about as wide as the fighter is tall, about 1
 # How each family moves, drawn like anime: drawings a second (0: smooth) and how far its tongues smear upward.
 TIMING = {'fam_flame': (15, 0.085), 'fam_roar': (15, 0.1), 'fam_divine': (10, 0.07), 'fam_wisp': (0, 0.14),
           'fam_dark': (12, 0.085), 'fam_tech': (20, 0.05), 'fam_majin': (10, 0.08), 'fam_regal': (12, 0.08),
-          'fam_ssj4': (15, 0.085), 'fam_base': (15, 0.085), 'kaioken': (15, 0.1)}
+          'fam_ssj4': (15, 0.085), 'fam_base': (15, 0.085), 'kaioken': (10, 0.1)}
 
 
-def anime(fam, keep_particles=False, timing=(15, 0.12)):
+def anime(fam, keep_particles=False, timing=(15, 0.12), ghost=True):
     """The hollow anime look (after the user's reference video): each flame shell becomes a bright band behind its
     flame edge with an almost clear middle; the layers that fill the middle (inner flames, hazes, added light shells)
     go; small streaks of light rise inside instead of sparkles or embers."""
@@ -508,7 +508,7 @@ def anime(fam, keep_particles=False, timing=(15, 0.12)):
         if l['kind'] == 'shell':
             l = json.loads(json.dumps(l))
             l['band'] = 0.17
-            l.setdefault('alpha', {})['core'] = 0.0
+            l.setdefault('alpha', {})['core'] = 0.12                         # a light tint in the middle, not a fill
             l['alpha']['edge'] = 1.0
             cols = l.setdefault('colors', {})
             if cols.get('mid') in ('$mid', '$rim', '$glow'):
@@ -530,7 +530,9 @@ def anime(fam, keep_particles=False, timing=(15, 0.12)):
         # a wide, soft bloom round everything, outermost
         main = shells[0]
         layers.insert(0, {"kind": "glow", "scale": 1.24, "opacity": 0.38, "colors": {"rim": main['colors'].get('edge', '$c')}})
+    if shells and ghost:
         # ghost flames: a smaller, dimmer copy of the band inside the first, out of step with it, for depth
+        main = shells[0]
         ghost = json.loads(json.dumps(main))
         ghost.update({"scale": 0.84, "heightScale": 0.9, "band": 0.12, "seed": 23.7, "opacity": 0.5})
         ghost['motion'] = dict(main['motion'])
@@ -579,9 +581,11 @@ def main():
         write(os.path.join(ROOT, 'forms', fid + '.json'), build(fid, fam, tint, tier, extra))
     write(os.path.join(ROOT, 'base.json'), {"extends": "fam_base", "forms": ["base"], "tint": "#7FC8FF"})
     k = kaioken()
-    anime(k, timing=TIMING['kaioken'])
+    # Kaioken goes over another aura: no ghost copy of its own (four bands snapping read as jitter), and it keeps
+    # time with the calm god auras it is mostly worn over
+    anime(k, timing=TIMING['kaioken'], ghost=False)
     for t in k['tiers']:
-        anime(t, timing=TIMING['kaioken'])
+        anime(t, timing=TIMING['kaioken'], ghost=False)
     write(os.path.join(ROOT, 'techniques', 'kaioken.json'), k)
     print(len(FAMILIES), 'families,', len(FORMS), 'forms')
 

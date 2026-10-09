@@ -172,7 +172,11 @@ void main() {
         float tintB = AuraRim.a * (0.5 + 0.5 * pnoise(vec2(viewU * 16.0, surface.y * 1.2 - t * 0.8 + seed * 2.0), 16.0));
         c = mix(c, AuraRim.rgb, (1.0 - smoothstep(0.0, rimWidth, e)) * tintB);
         c = mix(c, AuraCore.rgb, clamp(AuraBoost.x * 0.3, 0.0, 0.6) * inBand);
-        float a = mix(AuraCore.a, AuraEdge.a, inBand) * (0.9 + 0.3 * blur * inBand) * (1.0 + 0.25 * AuraBoost.x);
+        // the middle keeps a light tint of the form's colour, a little more the more steeply you look down on it, so
+        // from above the aura reads as a glowing pool round the fighter instead of vanishing
+        float down = smoothstep(0.35, 0.9, normalize(-worldPos).y);
+        float middle = AuraCore.a + 0.18 * down;
+        float a = mix(middle, AuraEdge.a, inBand) * (0.9 + 0.3 * blur * inBand) * (1.0 + 0.25 * AuraBoost.x);
         fragColor = vec4(c, min(1.0, a * body * fade));
         return;
     }
