@@ -59,11 +59,6 @@ public final class FirstPersonBody {
     public static void onRenderArm(RenderArmEvent event) {
         AbstractClientPlayer player = event.getPlayer();
         PublicStatePacket state = ClientPublicStates.get(player.getId());
-        if (Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player) instanceof PlayerRenderer pr) {
-            // your own fist and forearm in 3D (CX-27); a vanilla armour chestplate hides the forearm muscles only
-            Physique.show(pr.getModel(), BodyShape.build(state), !BodyShape.armour(player, net.minecraft.world.entity.EquipmentSlot.CHEST), true, true);
-            Physique.spread = 0f;
-        }
         if (!hasOwnBody(state)) return;
         EntityRenderer<?> r = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
         if (!(r instanceof PlayerRenderer renderer)) return;

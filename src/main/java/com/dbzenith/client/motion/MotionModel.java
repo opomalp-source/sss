@@ -32,7 +32,6 @@ public class MotionModel<T extends LivingEntity> extends PlayerModel<T> {
         IMutableModel mutable = (IMutableModel) this;
         if (!MotionEngine.enabled()) {
             mutable.getEmoteSupplier().set(null);
-            com.dbzenith.client.render.Physique.spreadArms(this);              // arms hang out past the lats (CX-27)
             return;
         }
         Motion m = MotionEngine.get(entity);
@@ -41,11 +40,9 @@ public class MotionModel<T extends LivingEntity> extends PlayerModel<T> {
         a.setTickDelta(Math.max(0f, Math.min(1f, pt)));
         if (!a.isActive()) {
             mutable.getEmoteSupplier().set(null);
-            com.dbzenith.client.render.Physique.spreadArms(this);
             return;
         }
         for (String part : PARTS) a.updatePart(part, partOf(part));
-        com.dbzenith.client.render.Physique.spreadArms(this);
         hat.copyFrom(head);
         jacket.copyFrom(body);
         leftSleeve.copyFrom(leftArm);

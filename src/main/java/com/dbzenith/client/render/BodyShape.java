@@ -40,13 +40,12 @@ public final class BodyShape {
     static final float[][] WAIST = {{0.06f, 0f, 0.12f}, {0.16f, 0.02f, 0.22f}, {0.38f, 0.06f, 0.48f}};
     /** Each build's body width and depth, arm thickness, and leg width and depth (scales over vanilla's; the legs mostly gain
      * depth, so they never merge into one block from the front). */
-    static final float[][] LIMBS = {{1.02f, 1.02f, 1.04f, 1.02f, 1.06f}, {1.05f, 1.06f, 1.1f, 1.04f, 1.1f}, {1.1f, 1.12f, 1.18f, 1.08f, 1.16f}};   // the muscles add the rest (CX-27)
+    static final float[][] LIMBS = {{1.02f, 1.02f, 1.18f, 1.04f, 1.12f}, {1.05f, 1.06f, 1.28f, 1.08f, 1.2f}, {1.1f, 1.12f, 1.4f, 1.14f, 1.3f}};
 
     private BodyShape() {}
 
     /** Adds the chest and waist blocks to a player-shaped model's body (once). */
     public static void attach(PlayerModel<?> model) {
-        Physique.attach(model);                                                  // the muscles, fists and feet in 3D (CX-27)
         Map<String, ModelPart> children = childrenOf(model.body);
         if (children == null || children.containsKey(NAMES[0])) return;
         for (int i = 0; i < NAMES.length; i++) {
@@ -98,15 +97,11 @@ public final class BodyShape {
         return null;
     }
 
-    /**
-     * The build whose shape a player shows, or -1 for vanilla's (the Classic art style). Players drawn with their own
-     * Minecraft skin get the athletic physique (CX-27: every player model is a fighter's).
-     */
+    /** The build whose shape a player shows, or -1 for none (players drawn with their own Minecraft skin). */
     public static int build(PublicStatePacket state) {
-        if (ArtStyle.get() == ArtStyle.CLASSIC) return -1;
-        if (state == null) return ATHLETIC;
+        if (state == null) return -1;
         boolean modLook = BodySkinLayer.active(state) || (state.raceLook() && RaceSkinLayer.texture(state) != null);
-        if (!modLook) return ATHLETIC;
+        if (!modLook || ArtStyle.get() == ArtStyle.CLASSIC) return -1;
         return Math.max(0, Math.min(NAMES.length - 1, state.bodyType()));
     }
 
@@ -125,14 +120,6 @@ public final class BodyShape {
         if (fat) build = BULKY;
         else if (thin) build = LEAN;
         apply(model, build, bulk);
-        net.minecraft.world.entity.player.Player player = event.getEntity();
-        Physique.grounded = player.onGround() || player.isPassenger();
-        if (build >= 0) {
-            // vanilla armour would have the muscles poke through it (gi is painted on the body, so it keeps them)
-            boolean far = player.distanceToSqr(net.minecraft.client.Minecraft.getInstance().gameRenderer.getMainCamera().getPosition()) > 32 * 32;
-            Physique.show(model, far ? -1 : build, !armour(player, net.minecraft.world.entity.EquipmentSlot.CHEST),
-                    !armour(player, net.minecraft.world.entity.EquipmentSlot.LEGS), !armour(player, net.minecraft.world.entity.EquipmentSlot.FEET));
-        }
         if (fat) shape(model, 1.45f, 1.75f, 1.3f, 1.32f);                            // a botched fusion (12c): round as a barrel...
         else if (thin) shape(model, 0.8f, 0.78f, 0.7f, 0.74f);                        // ...or a bag of bones
         Map<String, ModelPart> children = childrenOf(model.body);
@@ -143,14 +130,6 @@ public final class BodyShape {
     @SubscribeEvent
     public static void post(RenderPlayerEvent.Post event) {
         shape(event.getRenderer().getModel(), 1f, 1f, 1f, 1f);                       // the model is shared: back to vanilla
-        Physique.show(event.getRenderer().getModel(), -1, true, true, true);
-        Physique.grounded = true;
-    }
-
-    /** Whether a vanilla armour piece (not a gi, which is painted on the body) is worn in that slot. */
-    static boolean armour(net.minecraft.world.entity.LivingEntity e, net.minecraft.world.entity.EquipmentSlot slot) {
-        net.minecraft.world.item.ItemStack stack = e.getItemBySlot(slot);
-        return stack.getItem() instanceof net.minecraft.world.item.ArmorItem && !(stack.getItem() instanceof com.dbzenith.item.GiArmorItem);
     }
 
     /**
@@ -162,11 +141,10 @@ public final class BodyShape {
         if (children != null) {
             for (int i = 0; i < NAMES.length; i++) {
                 ModelPart chest = children.get(NAMES[i]), waist = children.get(WAISTS[i]);
-                if (chest != null) chest.visible = false;                         // retired: the 3D physique has the chest now
-                if (waist != null) waist.visible = false;
+                if (chest != null) chest.visible = i == build;
+                if (waist != null) waist.visible = i == build;
             }
         }
-        Physique.show(m, build, true, true, true);
         if (build < 0) {
             shape(m, 1f, 1f, 1f, 1f);
             return;

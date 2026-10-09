@@ -2273,3 +2273,19 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **Known:** a Minecraft skin's outer layer (jacket/sleeves) stays flat, so muscles push through it.
 - **Checked in a dev client:** pose sheets at 0/35/90/160 degrees (idle, fight, charge, heavy walk with knee bend),
   in-world front/back/above, first person, an NPC. 209 GameTests.
+
+## 2026-10-09 — CX-28: the 3D physique reverted; muscles painted in high detail instead (v0.83.0)
+- **The ask:** "revert the 3d muscles completely, just make them highly textured on the model. no 3d at all", and
+  hands and feet natural, nothing extra. CX-27's geometry is gone (`Physique`, `PhysiqueModel` deleted;
+  `BodyShape`, `FighterRenderer`, `FirstPersonBody`, `ClientSetup`, `MotionModel` back to v0.81.0): the model is the
+  plain blocks again (with CX-22's chest and waist blocks and limb proportions as before).
+- **`tools/gen_body.py`** paints the generated bodies (lean, athletic, bulky) at 256x256 (four texture pixels per
+  model pixel, twice the old resolution) into `body_painted/` and `body_hd/`: each face is a height map of muscles
+  (smooth bumps that blend into each other), lit from above by its slope, darker in the valleys between muscles,
+  with ink only where anime draws it (under the pecs, between the abs, the sternum, the hip V, the calves) and soft
+  skin grain. Pecs, six-pack, serratus, obliques, traps, shoulder blades, lats, erectors; deltoids, biceps, triceps,
+  forearms; quads with the teardrop, kneecaps, hamstrings, two-headed calves, Achilles. Hands are painted as a
+  relaxed fist (knuckles, curled fingers, thumb with its nail), feet as bare feet (five toes with nails and gaps,
+  ankle bones, arch, heel, sole) on the vanilla blocks. Leg tops (inside the shorts) are painted in shadow.
+- Note: `tools/ArtGen.java` (Painted.all / Hd) also writes these files; run `python3 tools/gen_body.py` after it.
+- **Checked in a dev client:** front, sides, back, above, guard pose, walk pose sheets. 209 GameTests.
