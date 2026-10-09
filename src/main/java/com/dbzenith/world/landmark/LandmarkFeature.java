@@ -35,8 +35,12 @@ public class LandmarkFeature extends Feature<NoneFeatureConfiguration> {
         Canvas canvas = new Canvas(ctx.level(), chunkX, chunkZ);
         boolean[] any = {false};
         LandmarkSites.forChunk(ctx.level().getSeed(), t, chunkX, chunkZ, plan -> {
-            plan.build(canvas);
-            sweep(ctx.level(), plan, chunkX, chunkZ);
+            try {
+                plan.build(canvas);
+                sweep(ctx.level(), plan, chunkX, chunkZ);
+            } catch (RuntimeException e) {                                      // a broken landmark must never stop the world generating
+                com.dbzenith.DBZenith.LOGGER.error("Landmark {} failed in chunk {} {}", plan.type.id, chunkX, chunkZ, e);
+            }
             any[0] = true;
         });
         return any[0];

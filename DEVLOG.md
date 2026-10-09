@@ -2391,3 +2391,16 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   circular balustrade with posts).
 - Spacing 2048, forest/plains/savanna/jungle/meadow/taiga biomes, ground dry and fairly level, below y 100.
   `/landmark tp lookout` puts you on the deck; the dev world's first is at (-797, 858).
+
+## 2026-10-09 — CX-33c: Cell Games arena, findable landmarks (v0.88.0, deployed early at the user's request)
+- **`CellGamesArena`** (replaces the stub): a 101-block-square ring of white tiles, 6 high, bevelled all round with
+  stepped stairs, a carved band at its foot, a faint seam grid, steps up the south side; a tall carved spire on each
+  corner (plinth, tiers narrowing between round flanges, to a point). Round it a levelled rocky wasteland (wasteland
+  rock with gravel and pale sand patches, rubble) eased into the land, ringed by eroded formations: tall pillars with
+  overhanging caps, flat-topped buttes on talus with dead bushes, sometimes an arch, all in wasteland rock with wavy
+  tan strata, and boulders strewn about. Cell (the style master) waits in the middle. Not yet checked in a client.
+- **Findability:** every grid cell now tries up to four spots in turn (`LandmarkSites.ATTEMPTS`; the first spot is
+  the old one, so existing sites stay put); Cell Games spacing 1536 and also on savanna/plains, Frypan spacing 1792 and
+  also on savannas. `/landmark survey <name>` (ops, dev) counts, round you, cells that hold one and why the rest don't.
+- A landmark that throws while building is logged and skipped instead of stopping world generation.
+- The GameTest server doesn't search for a tournament arena (tests stage their own ring). 209 GameTests.

@@ -28,12 +28,23 @@ public final class LandmarkCommand {
     public static void register(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("landmark").requires(s -> s.hasPermission(2))
                 .then(Commands.literal("locate").then(name().executes(ctx -> find(ctx, false))))
-                .then(Commands.literal("tp").then(name().executes(ctx -> find(ctx, true)))));
+                .then(Commands.literal("tp").then(name().executes(ctx -> find(ctx, true))))
+                .then(Commands.literal("survey").then(name().executes(LandmarkCommand::survey))));
     }
 
     private static com.mojang.brigadier.builder.RequiredArgumentBuilder<CommandSourceStack, String> name() {
         return Commands.argument("name", StringArgumentType.word())
                 .suggests((ctx, b) -> SharedSuggestionProvider.suggest(Arrays.stream(Landmark.ALL).map(l -> l.id), b));
+    }
+
+    /** How the sites round you fare (tuning rarity): wrong biome, crowded out, unsuitable ground, landmark. */
+    private static int survey(CommandContext<CommandSourceStack> ctx) {
+        Landmark type = Landmark.byId(StringArgumentType.getString(ctx, "name"));
+        if (type == null) return 0;
+        ServerLevel level = ctx.getSource().getServer().overworld();
+        int[] n = LandmarkSites.survey(type, level.getSeed(), LandmarkSites.Terrain.of(level), BlockPos.containing(ctx.getSource().getPosition()), 3);
+        ctx.getSource().sendSuccess(() -> Component.literal(type.id + ": biome " + n[0] + ", crowded " + n[1] + ", ground " + n[2] + ", built " + n[3]), false);
+        return 1;
     }
 
     private static int find(CommandContext<CommandSourceStack> ctx, boolean go) {

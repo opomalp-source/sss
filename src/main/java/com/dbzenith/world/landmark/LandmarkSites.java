@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Where the landmarks stand (CX-33). Purely from the world seed and the terrain noise, so any chunk, on any thread,
  * at any time, works out the same answer without anything being saved: the world is cut into {@code spacing}-sized
- * cells per landmark, each cell has one candidate spot, and the spot holds the landmark if the biome fits, the ground
+ * cells per landmark, each cell tries a few candidate spots in turn, and a spot holds the landmark if the biome fits, the ground
  * suits its plan, and no earlier landmark is too close. Plans are cached.
  */
 public final class LandmarkSites {
@@ -46,9 +46,18 @@ public final class LandmarkSites {
         }
     }
 
-    /** The candidate spot of a cell: anywhere in its middle part, so neighbouring landmarks keep apart. */
+    /** How many spots each cell tries, in turn, before it goes without (the first that suits holds the landmark). */
+    static final int ATTEMPTS = 4;
+
+    /** The cell's first candidate spot. */
     public static Site site(Landmark type, long worldSeed, int cellX, int cellZ) {
+        return site(type, worldSeed, cellX, cellZ, 0);
+    }
+
+    /** A candidate spot of a cell: anywhere in its middle part, so neighbouring landmarks keep apart. */
+    static Site site(Landmark type, long worldSeed, int cellX, int cellZ, int attempt) {
         long s = mix(worldSeed ^ type.salt, cellX, cellZ);
+        if (attempt > 0) s = mix(s, attempt, 0x5eedL);
         int margin = Math.min(type.spacing / 2 - 1, type.radius + 64);
         int span = Math.max(1, type.spacing - 2 * margin);
         int x = cellX * type.spacing + margin + (int) Math.floorMod(s, span);
@@ -58,22 +67,31 @@ public final class LandmarkSites {
 
     private static final ConcurrentHashMap<String, Optional<LandmarkPlan>> PLANS = new ConcurrentHashMap<>();
 
-    /** The landmark planned at a site, or null when the site does not hold one. */
-    public static LandmarkPlan plan(Site site, long worldSeed, Terrain terrain) {
-        String key = worldSeed + ":" + site.type().ordinal() + ":" + site.cellX() + ":" + site.cellZ();
+    /** The landmark of a cell (at the first of its spots that suits), or null when the cell goes without. */
+    public static LandmarkPlan plan(Landmark type, long worldSeed, int cellX, int cellZ, Terrain terrain) {
+        String key = worldSeed + ":" + type.ordinal() + ":" + cellX + ":" + cellZ;
         Optional<LandmarkPlan> cached = PLANS.get(key);
         if (cached != null) return cached.orElse(null);
-        if (PLANS.size() > 512) PLANS.clear();
-        Optional<LandmarkPlan> made = Optional.ofNullable(make(site, worldSeed, terrain));
-        PLANS.putIfAbsent(key, made);
-        return made.orElse(null);
+        if (PLANS.size() > 1024) PLANS.clear();
+        LandmarkPlan made = null;
+        for (int a = 0; a < ATTEMPTS && made == null; a++) made = make(site(type, worldSeed, cellX, cellZ, a), worldSeed, terrain);
+        PLANS.putIfAbsent(key, Optional.ofNullable(made));
+        return made;
     }
 
     private static LandmarkPlan make(Site site, long worldSeed, Terrain t) {
-        Landmark type = site.type();
+        if (!biomeFits(site, t) || crowded(site, worldSeed, t)) return null;
+        return shape(site, t);
+    }
+
+    private static boolean biomeFits(Site site, Terrain t) {
         int y = Math.max(t.height(site.x(), site.z()), t.seaLevel());
-        if (!t.biome(site.x(), y, site.z()).is(k -> type.biomes.contains(k))) return null;
-        // no earlier landmark (higher in the list) may come within reach
+        return t.biome(site.x(), y, site.z()).is(k -> site.type().biomes.contains(k));
+    }
+
+    /** Whether an earlier landmark (higher in the list) stands within reach. */
+    private static boolean crowded(Site site, long worldSeed, Terrain t) {
+        Landmark type = site.type();
         for (Landmark other : Landmark.ALL) {
             if (other.ordinal() >= type.ordinal()) break;
             int reach = other.radius + type.radius + 32;
@@ -81,11 +99,30 @@ public final class LandmarkSites {
             int c0z = Math.floorDiv(site.z() - reach, other.spacing), c1z = Math.floorDiv(site.z() + reach, other.spacing);
             for (int cx = c0x; cx <= c1x; cx++)
                 for (int cz = c0z; cz <= c1z; cz++) {
-                    Site o = site(other, worldSeed, cx, cz);
-                    if (Math.abs(o.x() - site.x()) > reach || Math.abs(o.z() - site.z()) > reach) continue;
-                    if (plan(o, worldSeed, t) != null) return null;
+                    LandmarkPlan o = plan(other, worldSeed, cx, cz, t);
+                    if (o != null && Math.abs(o.x - site.x()) <= reach && Math.abs(o.z - site.z()) <= reach) return true;
                 }
         }
+        return false;
+    }
+
+    /** For tuning: of the cells within {@code cells} cells, how many hold a landmark, and why the rest don't (first spot's reason). */
+    public static int[] survey(Landmark type, long worldSeed, Terrain t, BlockPos from, int cells) {
+        int fx = Math.floorDiv(from.getX(), type.spacing), fz = Math.floorDiv(from.getZ(), type.spacing);
+        int[] n = new int[4];
+        for (int cx = fx - cells; cx <= fx + cells; cx++)
+            for (int cz = fz - cells; cz <= fz + cells; cz++) {
+                Site s = site(type, worldSeed, cx, cz);
+                if (plan(type, worldSeed, cx, cz, t) != null) n[3]++;
+                else if (!biomeFits(s, t)) n[0]++;
+                else if (crowded(s, worldSeed, t)) n[1]++;
+                else n[2]++;
+            }
+        return n;
+    }
+
+    private static LandmarkPlan shape(Site site, Terrain t) {
+        Landmark type = site.type();
         return switch (type) {
             case TOURNAMENT -> TournamentArena.plan(site, t);
             case LOOKOUT -> KamiLookout.plan(site, t);
@@ -104,10 +141,8 @@ public final class LandmarkSites {
             int c0z = Math.floorDiv(bz - reach, type.spacing), c1z = Math.floorDiv(bz + reach, type.spacing);
             for (int cx = c0x; cx <= c1x; cx++)
                 for (int cz = c0z; cz <= c1z; cz++) {
-                    Site s = site(type, worldSeed, cx, cz);
-                    if (Math.abs(s.x() - bx) > reach || Math.abs(s.z() - bz) > reach) continue;
-                    LandmarkPlan p = plan(s, worldSeed, t);
-                    if (p != null) out.accept(p);
+                    LandmarkPlan p = plan(type, worldSeed, cx, cz, t);
+                    if (p != null && Math.abs(p.x - bx) <= reach && Math.abs(p.z - bz) <= reach) out.accept(p);
                 }
         }
     }
@@ -121,7 +156,7 @@ public final class LandmarkSites {
             for (int cx = fx - r; cx <= fx + r; cx++)
                 for (int cz = fz - r; cz <= fz + r; cz++) {
                     if (Math.max(Math.abs(cx - fx), Math.abs(cz - fz)) != r) continue;
-                    LandmarkPlan p = plan(site(type, worldSeed, cx, cz), worldSeed, t);
+                    LandmarkPlan p = plan(type, worldSeed, cx, cz, t);
                     if (p == null) continue;
                     double d = from.distSqr(new BlockPos(p.x, from.getY(), p.z));
                     if (d < bestD) {

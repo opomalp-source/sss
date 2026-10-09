@@ -72,6 +72,8 @@ public final class TournamentGrounds extends SavedData {
         TournamentGrounds g = of(overworld);
         if (g.ring != null || g.searched) return;
         g.searched = true;
+        // the GameTest server stages its own ring (a real arena near its tests would make them PvP-safe)
+        if (overworld.getServer() instanceof net.minecraft.gametest.framework.GameTestServer) return;
         var plan = com.dbzenith.world.landmark.LandmarkSites.nearest(com.dbzenith.world.landmark.Landmark.TOURNAMENT, overworld.getSeed(),
                 com.dbzenith.world.landmark.LandmarkSites.Terrain.of(overworld), overworld.getSharedSpawnPos(), 16);
         if (plan instanceof com.dbzenith.world.landmark.TournamentArena arena) {

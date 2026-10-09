@@ -155,6 +155,27 @@ public final class Shapes {
             }
     }
 
+    /** Smooth value noise in -1..1 over a lattice of {@code cell}-block steps (for rough rock that agrees across chunks). */
+    public static double noise(long seed, double x, double y, double z, double cell) {
+        x /= cell;
+        y /= cell;
+        z /= cell;
+        int x0 = (int) Math.floor(x), y0 = (int) Math.floor(y), z0 = (int) Math.floor(z);
+        double fx = fade(x - x0), fy = fade(y - y0), fz = fade(z - z0);
+        double v = 0;
+        for (int i = 0; i <= 1; i++)
+            for (int j = 0; j <= 1; j++)
+                for (int k = 0; k <= 1; k++) {
+                    double w = (i == 0 ? 1 - fx : fx) * (j == 0 ? 1 - fy : fy) * (k == 0 ? 1 - fz : fz);
+                    v += w * (Canvas.hash(seed, x0 + i, y0 + j, z0 + k) / (double) Integer.MAX_VALUE * 2 - 1);
+                }
+        return v;
+    }
+
+    private static double fade(double t) {
+        return t * t * (3 - 2 * t);
+    }
+
     // ------------------------------------------------------------------ plants and furniture
 
     static BlockState leaves(BlockState l) {

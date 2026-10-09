@@ -17,9 +17,10 @@ public enum Landmark {
             Biomes.FOREST, Biomes.FLOWER_FOREST, Biomes.BIRCH_FOREST)),
     LOOKOUT("lookout", 2048, 90, 0x10c0L, Set.of(Biomes.FOREST, Biomes.FLOWER_FOREST, Biomes.BIRCH_FOREST, Biomes.PLAINS, Biomes.SAVANNA,
             Biomes.JUNGLE, Biomes.SPARSE_JUNGLE, Biomes.MEADOW, Biomes.TAIGA, Biomes.DARK_FOREST)),
-    CELL_GAMES("cell_games", 1792, 130, 0xce11L, Set.of(Biomes.BADLANDS, Biomes.ERODED_BADLANDS, Biomes.WOODED_BADLANDS, Biomes.DESERT,
-            Biomes.SAVANNA_PLATEAU, Biomes.WINDSWEPT_SAVANNA)),
-    FRYPAN("frypan_mountains", 2048, 240, 0xf7a9L, Set.of(Biomes.BADLANDS, Biomes.ERODED_BADLANDS, Biomes.WOODED_BADLANDS, Biomes.DESERT)),
+    CELL_GAMES("cell_games", 1536, 130, 0xce11L, Set.of(Biomes.BADLANDS, Biomes.ERODED_BADLANDS, Biomes.WOODED_BADLANDS, Biomes.DESERT,
+            Biomes.SAVANNA, Biomes.SAVANNA_PLATEAU, Biomes.WINDSWEPT_SAVANNA, Biomes.PLAINS)),
+    FRYPAN("frypan_mountains", 1792, 240, 0xf7a9L, Set.of(Biomes.BADLANDS, Biomes.ERODED_BADLANDS, Biomes.WOODED_BADLANDS, Biomes.DESERT,
+            Biomes.SAVANNA, Biomes.SAVANNA_PLATEAU, Biomes.WINDSWEPT_SAVANNA)),
     WEST_CITY("west_city", 1792, 200, 0x3e57L, Set.of(Biomes.BEACH));
 
     public static final Landmark[] ALL = values();
