@@ -275,22 +275,23 @@ def leg_front(k, inner_right):
     f.muscle(c(0.75), 0.36, 0.22, 0.1, ang=-0.3 * io, depth=0.8 + 0.3 * k, line=0.85)  # the teardrop above the knee
     f.muscle(0.5, 0.47, 0.17, 0.05, depth=0.7, line=0.6)                               # kneecap
     f.muscle(c(0.4), 0.66, 0.2, 0.15, depth=0.5, line=0.4, light=0.8)                  # tibialis down the shin
-    # the foot from the front: the instep's tendons, an ankle crease, then five toes (big toe on the inside), each
-    # rounded with its nail, a clear dark gap between them
-    f.stroke([(0.12, 0.84), (0.88, 0.84)], 0.4, 0.2)
+    # rows 10..12 (v 0.833..1) are the foot block's top, heel to toe tips (LimbSegments): the instep, then five toes
+    # (big toe on the inside), rounded, each with its nail at the tip, a dark gap between them
+    f.tone(f.v > 0.833, 0.02)
+    f.stroke([(0.1, 0.836), (0.9, 0.836)], 0.5, 0.35)                                 # where the shin meets the foot
     for i in range(4):
-        f.stroke([(c(0.62 - i * 0.12), 0.85), (c(0.85 - i * 0.2), 0.89)], 0.35, 0.15)
-    f.tone(f.v > 0.885, -0.015)
-    widths = [0.26, 0.19, 0.18, 0.17, 0.16]
-    edge = 0.995
+        f.stroke([(c(0.62 - i * 0.12), 0.85), (c(0.84 - i * 0.2), 0.905)], 0.35, 0.12)  # tendons over the instep
+    widths = [0.25, 0.19, 0.18, 0.17, 0.16]
+    edge = 0.99
     for i, w in enumerate(widths):
         cu = c(edge - w / 2)
-        top = 0.89 + i * 0.01
-        f.muscle(cu, (top + 1.0) / 2 + 0.01, w / 2 * 0.98, (1.0 - top) / 2 + 0.01, depth=1.0, line=0.85)
-        f.tone(f.ellipse(cu, top + 0.035, w * 0.28, 0.016), 0.09)                      # the nail
+        top = 0.915 + i * 0.006
+        f.muscle(cu, (top + 1.0) / 2, w / 2 * 0.98, (1.0 - top) / 2 + 0.004, depth=1.0, line=0.8)
+        f.tone(f.ellipse(cu, 0.975, w * 0.3, 0.014), 0.1)                               # the nail
+        f.stroke([(cu - w * 0.3, 0.962), (cu + w * 0.3, 0.962)], 0.35, 0.3)
         if i < 4:
             g = c(edge - w - 0.004)
-            f.stroke([(g, top + 0.012), (g, 0.995)], 0.7, 0.75)                          # the gap to the next toe
+            f.stroke([(g, top + 0.01), (g, 0.998)], 0.7, 0.8)                            # the gap to the next toe
         edge -= w + 0.008
     f.edges(0.06, 0.06)
     return f

@@ -78,6 +78,7 @@ public final class ClientSetup {
         for (String skin : event.getSkins()) {
             PlayerRenderer renderer = event.getSkin(skin);
             if (renderer != null) {
+                com.dbzenith.client.render.PhysiqueModel.install(renderer, event.getEntityModels(), "slim".equals(skin));   // CX-29
                 com.dbzenith.client.render.BodyShape.attach(renderer.getModel());
                 var bodySkin = new com.dbzenith.client.render.BodySkinLayer(renderer);
                 var raceSkin = new com.dbzenith.client.render.RaceSkinLayer(renderer);

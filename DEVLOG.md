@@ -2289,3 +2289,18 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   ankle bones, arch, heel, sole) on the vanilla blocks. Leg tops (inside the shorts) are painted in shadow.
 - Note: `tools/ArtGen.java` (Painted.all / Hd) also writes these files; run `python3 tools/gen_body.py` after it.
 - **Checked in a dev client:** front, sides, back, above, guard pose, walk pose sheets. 209 GameTests.
+
+## 2026-10-09 — CX-29: segmented limbs, feet that stick out, longer legs (v0.84.0)
+- **The ask** (with three reference pictures): feet sticking out with toes on top, a bigger chest and smaller belly,
+  arms in three parts and legs in two, the fist a little bigger than the forearm, longer legs.
+- **`LimbSegments`**: plain blocks over the vanilla limbs (no sculpting; the anatomy stays painted): upper arm,
+  forearm, and a fist bigger than the forearm; thigh and shin; a foot block from the ankle to the ground sticking out
+  2.6 px in front. Each face shows the rows of the limb's own texture it covers (any skin paints them); the foot's top
+  and front show the leg front's rows 10..12, where `gen_body.py` now paints the toes (tips at the front, nails, dark
+  gaps). Blocks past the elbow and knee follow bendy-lib's bend; feet stay flat on the ground against the shin's
+  swing (kicks still point). Three builds' block sizes. Vanilla leggings/boots hide the leg blocks/feet.
+- **Proportions:** legs 1.2x longer, the figure standing taller on them (`LimbSegments.pose`, after the model's own
+  pose: `PhysiqueModel` swapped in for players, `MotionModel` for NPCs); a bigger chest block over a smaller belly and
+  a slightly narrower torso; arms hang a little out.
+- Only for the mod's bodies (generated or race looks); a player's own Minecraft skin keeps vanilla's shape.
+- **Checked in a dev client:** pose sheets (idle, guard, hover, heavy walk), in-world front and above. 209 GameTests.

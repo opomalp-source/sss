@@ -36,16 +36,17 @@ public final class BodyShape {
     static final String[] WAISTS = {"dbz_waist_lean", "dbz_waist_athletic", "dbz_waist_bulky"};
     static final String BELLY = "dbz_belly";
     /** How far each build's chest and waist stand out from the body: sideways, up and down, front and back (pixels). */
-    static final float[][] CHEST = {{0.22f, 0.1f, 0.3f}, {0.38f, 0.14f, 0.45f}, {0.62f, 0.2f, 0.7f}};
-    static final float[][] WAIST = {{0.06f, 0f, 0.12f}, {0.16f, 0.02f, 0.22f}, {0.38f, 0.06f, 0.48f}};
+    static final float[][] CHEST = {{0.5f, 0.12f, 0.55f}, {0.75f, 0.18f, 0.75f}, {1.0f, 0.25f, 1.0f}};   // CX-29: a bigger chest...
+    static final float[][] WAIST = {{-0.2f, 0f, -0.05f}, {-0.1f, 0f, 0.05f}, {0.15f, 0.02f, 0.25f}};  // ...over a smaller belly
     /** Each build's body width and depth, arm thickness, and leg width and depth (scales over vanilla's; the legs mostly gain
      * depth, so they never merge into one block from the front). */
-    static final float[][] LIMBS = {{1.02f, 1.02f, 1.18f, 1.04f, 1.12f}, {1.05f, 1.06f, 1.28f, 1.08f, 1.2f}, {1.1f, 1.12f, 1.4f, 1.14f, 1.3f}};
+    static final float[][] LIMBS = {{0.94f, 0.94f, 1.0f, 1.0f, 1.04f}, {0.94f, 0.94f, 1.06f, 1.02f, 1.08f}, {1.0f, 1.0f, 1.16f, 1.08f, 1.16f}};   // the body narrower (the chest block makes the chest), limbs bulked by their blocks
 
     private BodyShape() {}
 
     /** Adds the chest and waist blocks to a player-shaped model's body (once). */
     public static void attach(PlayerModel<?> model) {
+        LimbSegments.attach(model);                                              // three-block arms, two-block legs, feet (CX-29)
         Map<String, ModelPart> children = childrenOf(model.body);
         if (children == null || children.containsKey(NAMES[0])) return;
         for (int i = 0; i < NAMES.length; i++) {
@@ -120,6 +121,13 @@ public final class BodyShape {
         if (fat) build = BULKY;
         else if (thin) build = LEAN;
         apply(model, build, bulk);
+        net.minecraft.world.entity.player.Player player = event.getEntity();
+        if (build >= 0) {
+            LimbSegments.show(model, build, true, !armour(player, net.minecraft.world.entity.EquipmentSlot.LEGS),
+                    !armour(player, net.minecraft.world.entity.EquipmentSlot.FEET));
+            LimbSegments.proportions = true;
+            LimbSegments.grounded = player.onGround() || player.isPassenger();
+        }
         if (fat) shape(model, 1.45f, 1.75f, 1.3f, 1.32f);                            // a botched fusion (12c): round as a barrel...
         else if (thin) shape(model, 0.8f, 0.78f, 0.7f, 0.74f);                        // ...or a bag of bones
         Map<String, ModelPart> children = childrenOf(model.body);
@@ -130,6 +138,14 @@ public final class BodyShape {
     @SubscribeEvent
     public static void post(RenderPlayerEvent.Post event) {
         shape(event.getRenderer().getModel(), 1f, 1f, 1f, 1f);                       // the model is shared: back to vanilla
+        LimbSegments.show(event.getRenderer().getModel(), -1, true, true, true);
+        LimbSegments.reset(event.getRenderer().getModel());
+    }
+
+    /** Whether a vanilla armour piece (not a gi, which is painted on the body) is worn in that slot. */
+    static boolean armour(net.minecraft.world.entity.LivingEntity e, net.minecraft.world.entity.EquipmentSlot slot) {
+        net.minecraft.world.item.ItemStack stack = e.getItemBySlot(slot);
+        return stack.getItem() instanceof net.minecraft.world.item.ArmorItem && !(stack.getItem() instanceof com.dbzenith.item.GiArmorItem);
     }
 
     /**
@@ -145,6 +161,7 @@ public final class BodyShape {
                 if (waist != null) waist.visible = i == build;
             }
         }
+        LimbSegments.show(m, build, true, true, true);
         if (build < 0) {
             shape(m, 1f, 1f, 1f, 1f);
             return;

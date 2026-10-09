@@ -27,7 +27,12 @@ public class FighterRenderer<T extends net.minecraft.world.entity.Mob> extends H
     @Override
     public void render(T fighter, float yaw, float partialTick, PoseStack pose, net.minecraft.client.renderer.MultiBufferSource buffers, int light) {
         BodyShape.apply(getModel(), build, 0);                                       // a tapered torso and fuller limbs (CX-22)
+        LimbSegments.show(getModel(), build, true, !BodyShape.armour(fighter, net.minecraft.world.entity.EquipmentSlot.LEGS),
+                !BodyShape.armour(fighter, net.minecraft.world.entity.EquipmentSlot.FEET));      // segmented limbs, longer legs (CX-29)
+        LimbSegments.proportions = true;
+        LimbSegments.grounded = fighter.onGround() || fighter.isPassenger();
         super.render(fighter, yaw, partialTick, pose, buffers, light);
+        LimbSegments.reset(getModel());
     }
 
     /** The motion engine tips and moves the whole figure (flight pitch, banking, leaning, crouching on landing), as playerAnimator does for players. */
