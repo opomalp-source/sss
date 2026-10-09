@@ -38,6 +38,8 @@ legacyForge {
             client()
             gameDirectory = project.file('run-clienttest')
             programArguments.addAll '--username', 'Dev', '--quickPlayMultiplayer', 'localhost:25565'
+            // a window as big as the Xvfb screen (tools/devshots.sh), so close-ups show detail
+            programArguments.addAll '--width', (project.findProperty('devWidth') ?: '1280').toString(), '--height', (project.findProperty('devHeight') ?: '720').toString()
             systemProperty 'dbzenith.debugSync', 'false'
             systemProperty 'dbzenith.devAutomation', 'true'
             systemProperty 'dbzenith.devScreenshots', project.findProperty('devScreenshots') ?: '400'

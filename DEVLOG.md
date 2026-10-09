@@ -2244,3 +2244,32 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   rises and falls slowly instead of quivering (13.7/s term gone).
 - **Checked in a dev client:** pitch 0/30/45/60/80 idle and charging, looking up, first person, SS2, Blue, Blue +
   Kaioken 20 from above. 209 GameTests.
+
+## 2026-10-09 — CX-27: the fighter's physique in real 3D (v0.82.0)
+- **The ask:** muscular DBZ proportions (user's two reference images) as actual model geometry, not a texture: pecs,
+  abs, obliques, back, neck, shoulders, arms, legs, real fists (fingers, knuckles, thumb) and feet with five toes.
+- **How** (`client/render/Physique.java`): pieces are chamfered blocks (45-degree cut edges and corners; the big
+  muscles get two cuts for a rounder shape) added as children of the player model's six parts, so they follow every
+  animation and every layer draws them. Each face takes the texture of the part face below it (box projection onto
+  the part's own skin layout, sides only), so skins, the generated bodies, gi and form tints run over the muscles. A
+  custom `ModelPart.Cube` (`MeshCube`) draws them:
+  - pieces past the elbow and knee follow bendy-lib's bend (its transform rebuilt from the bent cuboid's angle, axis
+    and centre; `getLastPosMatrix` is null in this version);
+  - feet turn about the ankle against the shin's whole turn (swing and knee bend) while on the ground, so they stay
+    flat and the toes never sink in (big turns, like kicks, are followed less).
+- **Anatomy:** split pecs tilted out at the bottom with a valley between, a 3-row six-pack, lower abs, serratus,
+  obliques, lats flaring into a V, traps, upper back, erectors, a thick neck; deltoid caps, biceps with a peak,
+  triceps, tapering forearms; fists with palm facing back (a straight punch lands palm down), four fingers (first
+  bones form the fist's face, knuckles on the front edge, middle bones folded on the palm), a thumb up the inside and
+  across the fingers; quads with the teardrop, rectus, glutes, hamstrings, kneecaps, two-headed calves, shins;
+  heel, instep, ankle bones, five toes (big toe largest).
+- **Builds:** lean, athletic, bulky (how far muscles stand out). Players with their own Minecraft skin now get the
+  athletic physique too (the Classic art style keeps vanilla). Limb scale-up reduced, since muscles add the bulk.
+- **Arms** hang a little out from the body past the lats (`PhysiqueModel`, swapped in for the player renderers'
+  model; `MotionModel` for NPCs).
+- Vanilla armour hides the muscles it would be poked by (chestplate: torso and upper arms; leggings; boots: feet).
+  Detail is skipped beyond 32 blocks. 3765 quads per figure.
+- First person shows your 3D fist and forearm. Dev: `clientTest` window now 1280x720 (`-PdevWidth/-PdevHeight`).
+- **Known:** a Minecraft skin's outer layer (jacket/sleeves) stays flat, so muscles push through it.
+- **Checked in a dev client:** pose sheets at 0/35/90/160 degrees (idle, fight, charge, heavy walk with knee bend),
+  in-world front/back/above, first person, an NPC. 209 GameTests.
