@@ -44,7 +44,7 @@ public final class LimbSegments {
     /** How much longer the legs are, and how much the rest of the figure rises on them (pixels). */
     static final float LEG_SCALE = 1.2f, RISE = 12 * (LEG_SCALE - 1);
     /** How far each build's blocks stand out from the limb: upper arm, forearm, fist, thigh, shin (pixels). */
-    static final float[][] GROW = {{0.25f, 0.1f, 0.35f, 0.2f, 0.08f}, {0.4f, 0.15f, 0.48f, 0.32f, 0.12f}, {0.6f, 0.25f, 0.65f, 0.48f, 0.2f}};
+    static final float[][] GROW = {{0.12f, 0.1f, 0.35f, 0.2f, 0.08f}, {0.24f, 0.15f, 0.48f, 0.32f, 0.12f}, {0.42f, 0.25f, 0.65f, 0.48f, 0.2f}};   // upper arm trimmed (CX-30)
 
     /** Set per figure before it is drawn: lengthen its legs; whether its feet stand (flattened to the ground). */
     static boolean proportions;

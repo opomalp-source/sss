@@ -2304,3 +2304,7 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   a slightly narrower torso; arms hang a little out.
 - Only for the mod's bodies (generated or race looks); a player's own Minecraft skin keeps vanilla's shape.
 - **Checked in a dev client:** pose sheets (idle, guard, hover, heavy walk), in-world front and above. 209 GameTests.
+
+## 2026-10-09 — CX-30: a slimmer upper arm (v0.84.1)
+- The upper-arm block stands out less (lean 0.12, athletic 0.24, bulky 0.42 px, was 0.25/0.4/0.6), at the user's
+  request ("the bicep part just a little bit smaller"). Checked in a dev client.
