@@ -167,6 +167,8 @@ public final class AuraDef {
             speed = GsonHelper.getAsFloat(m, "speed", kind == HAZE ? 1.7f : 1f);
             streakSpeed = GsonHelper.getAsFloat(m, "streakSpeed", 2.5f);
             band = GsonHelper.getAsFloat(j, "band", 0f);
+            fps = GsonHelper.getAsFloat(m, "fps", 0f);
+            smear = GsonHelper.getAsFloat(m, "smear", 0f);
             stretch = GsonHelper.getAsFloat(m, "stretch", 0.35f);
             tallFlames = GsonHelper.getAsFloat(m, "tallFlames", jagged ? 0.6f : 0f);
             warp = GsonHelper.getAsFloat(m, "warp", jagged ? 0.5f : 0.2f);
@@ -178,6 +180,10 @@ public final class AuraDef {
         public final float streakSpeed, stretch, tallFlames, warp;
         /** A hollow shell: the width (share of the radius) of the bright band behind its flame edge; 0 fills it. */
         public final float band;
+        /** Drawn like anime: the flames hold each drawing and jump to the next this many times a second (0: smooth). */
+        public final float fps;
+        /** How far (share of the height) the flame edge is smeared upward, like motion blur on drawn tongues. */
+        public final float smear;
 
         // tongues: how many at once, length (share of the aura's height), width (share of their length), seconds each
         // lives, share that rise off the top, how far they climb while they live, how much they wave, and where they

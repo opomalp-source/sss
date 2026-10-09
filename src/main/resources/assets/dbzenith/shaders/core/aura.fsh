@@ -60,21 +60,42 @@ float viewU;
 // edge from a deep root, leaning out to a pointed tip, then snapping back in just above it. The pattern climbs over
 // time, every tongue has its own length that flickers, and nothing about it is round. Returns how far in from the
 // outline (share of the radius) the edge lies here.
-float flameCut(float depth, float t, float seed) {
+float flameCut(float y, float depth, float t, float seed) {
     float count = clamp(floor(AuraShape.z + 0.5), 2.0, 8.0);                    // tongues round
     float rows = clamp(AuraBoost.w * 10.0, 1.5, 6.0);                           // tongues up the height
     float ang = viewU * count;
-    float sway = AuraFlow.x * (pnoise(vec2(ang, surface.y * 2.0 - t * 0.7 + seed), count) - 0.5);
+    float sway = AuraFlow.x * (pnoise(vec2(ang, y * 2.0 - t * 0.7 + seed), count) - 0.5);
     float phase = 1.6 * pnoise(vec2(ang, seed * 1.7), count);          // each column out of step with the next
-    float v = surface.y * rows + depth * AuraMode.w * 0.5 - t * AuraMotion.y * 0.5 + phase + sway;
+    float v = y * rows + depth * AuraMode.w * 0.5 - t * AuraMotion.y * 0.5 + phase + sway;
     float f = fract(v);
     float tooth = pow(f, mix(1.1, 2.4, AuraShape.y));                         // sharper: a longer, slimmer point
     tooth *= 1.0 - smoothstep(0.88, 1.0, f);                                  // the quick turn back in above the tip
     float len = 0.55 + 0.45 * pnoise(vec2(ang + floor(v) * 3.1, seed + floor(v) * 1.37), count);
     len *= 1.0 + min(AuraMotion.w, 0.5) * 0.6 * (pnoise(vec2(ang, t * 3.0 + floor(v) * 5.3), count) - 0.5);   // flicker
-    float foot = smoothstep(0.06, 0.34, surface.y);                           // a clean bowl round the feet, tongues from the knees up
-    float tall = 1.0 + 0.5 * AuraBoost.y * surface.y;                         // longer tongues higher up
+    float foot = smoothstep(0.06, 0.34, y);                           // a clean bowl round the feet, tongues from the knees up
+    float tall = 1.0 + 0.5 * AuraBoost.y * y;                         // longer tongues higher up
     return min(AuraShape.x, 0.42) * (1.0 - clamp(tooth * len, 0.0, 1.0)) * foot * tall;
+}
+
+// The flame edge smeared upward, the way a drawn aura's tongues streak: how covered this point is when the outline is
+// also sampled a little below it (up to AuraFlow.w of the height), the lower samples counting less. A tip then trails
+// a soft streak above it instead of ending in a hard cut.
+float smearedCover(float depth, float t, float seed, float feather, out float cutHere) {
+    cutHere = flameCut(surface.y, depth, t, seed);
+    float cover = smoothstep(cutHere, cutHere + feather, depth);
+    if (AuraFlow.w <= 0.0) return cover;
+    // six samples, each pixel's set nudged by its own small offset, so they blend into one streak instead of
+    // showing as separate stepped copies of the edge
+    float jitter = hash(gl_FragCoord.xy) / 6.0;
+    float total = 1.0;
+    for (int k = 1; k <= 6; k++) {
+        float q = (float(k) - jitter) / 6.0;
+        float w = 0.75 * (1.0 - q);
+        float c = flameCut(surface.y - AuraFlow.w * q, depth, t, seed);
+        cover += w * smoothstep(c, c + feather * 1.6, depth);
+        total += w;
+    }
+    return cover / total;
 }
 
 void main() {
@@ -84,6 +105,8 @@ void main() {
     float seed = AuraMode.y;
     // no fog: an aura glows, and the fog settings when it is drawn can be the sky's or the clouds' (it vanished there)
     float fade = AuraMode.z * vertexColor.a;
+    // drawn on twos: the flames hold each drawing, then jump to the next (AuraFlow.z drawings a second; 0 runs smooth)
+    float td = AuraFlow.z > 0.0 ? floor(t * AuraFlow.z) / AuraFlow.z : t;
     vec2 rel = worldPos.xz - AuraCenter.xz;
     vec2 eye = -AuraCenter.xz;
     float a0 = length(eye) > 0.05 ? atan(eye.y, eye.x) : 0.0;
@@ -94,7 +117,9 @@ void main() {
         // it follows the flame edge (the shell's outline lies `band` in from the glow's own mesh), so the halo has the
         // same tongues as the flames instead of a smooth oval round them
         float band = max(0.005, AuraShape.w);
-        float edge = band + flameCut(depth, t, seed) * (1.0 - band);
+        float glowCut = flameCut(surface.y, depth, td, seed);
+        if (AuraFlow.w > 0.0) glowCut = 0.5 * glowCut + 0.5 * flameCut(surface.y - AuraFlow.w * 0.5, depth, td, seed);
+        float edge = band + glowCut * (1.0 - band);
         float w = max(band, 0.035);
         float g = pow(smoothstep(edge - w, edge, depth), 1.5) * (1.0 - 0.85 * smoothstep(edge, edge + w * 2.5, depth));
         float wobble = 0.8 + 0.2 * pnoise(vec2(viewU * 8.0, surface.y * 1.5 - t * 1.5 + seed), 8.0);
@@ -125,9 +150,9 @@ void main() {
         return;
     }
 
-    float cut = flameCut(depth, t, seed);
-    float feather = 0.02 + fwidth(depth) * 1.5;
-    float body = smoothstep(cut, cut + feather, depth);
+    float feather = 0.03 + fwidth(depth) * 1.5;
+    float cut;
+    float body = smearedCover(depth, td, seed, feather, cut);
     if (body <= 0.003) discard;
     float scroll = t * AuraMotion.y;
     float period = clamp(floor(AuraShape.z + 0.5), 2.0, 8.0);
@@ -141,7 +166,8 @@ void main() {
         // inside, streaked with fast upward blur, and the middle left almost clear so the fighter shows through.
         float inBand = 1.0 - smoothstep(band * 0.7, band * 1.5, e);
         vec3 c = mix(AuraEdge.rgb, AuraMid.rgb, smoothstep(0.0, band * 0.55, e));
-        float blur = pnoise(vec2(viewU * 64.0 + warp * 4.0, surface.y * 0.9 - t * AuraMotion.y * AuraBoost.z * 0.5 + seed), 64.0);
+        float blur = pnoise(vec2(viewU * 64.0 + warp * 4.0, surface.y * 0.9 - td * AuraMotion.y * AuraBoost.z * 0.5 + seed), 64.0);
+        c = mix(c, AuraCore.rgb, 0.45 * (1.0 - smoothstep(0.0, band * 0.35, e)));   // a hot highlight hugging the outer edge
         c = mix(c, AuraCore.rgb, AuraMotion.z * smoothstep(0.5, 0.9, blur) * inBand);
         float tintB = AuraRim.a * (0.5 + 0.5 * pnoise(vec2(viewU * 16.0, surface.y * 1.2 - t * 0.8 + seed * 2.0), 16.0));
         c = mix(c, AuraRim.rgb, (1.0 - smoothstep(0.0, rimWidth, e)) * tintB);

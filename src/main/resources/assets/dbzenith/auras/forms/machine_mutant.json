@@ -11,6 +11,14 @@
   "layers": [
     {
       "kind": "glow",
+      "scale": 1.24,
+      "opacity": 0.38,
+      "colors": {
+        "rim": "$edge"
+      }
+    },
+    {
+      "kind": "glow",
       "scale": 1.13,
       "opacity": 1.0,
       "colors": {
@@ -35,7 +43,7 @@
       },
       "spikes": {
         "count": 8,
-        "size": 0.24,
+        "size": 0.27,
         "sharpness": 0.95,
         "lean": 0.6
       },
@@ -46,9 +54,50 @@
         "streakSpeed": 6.0,
         "stretch": 0.5,
         "tallFlames": 0.4,
-        "warp": 0.1
+        "warp": 0.1,
+        "fps": 20,
+        "smear": 0.05
       },
       "band": 0.17
+    },
+    {
+      "kind": "shell",
+      "colors": {
+        "core": "$core",
+        "mid": "$c",
+        "edge": "$edge",
+        "rim": "$white"
+      },
+      "alpha": {
+        "core": 0.0,
+        "edge": 1.0
+      },
+      "rim": {
+        "width": 0.03,
+        "strength": 0.6
+      },
+      "spikes": {
+        "count": 8,
+        "size": 0.27,
+        "sharpness": 0.95,
+        "lean": 0.6
+      },
+      "motion": {
+        "scroll": 3.9,
+        "flicker": 0.5,
+        "streaks": 0.9,
+        "streakSpeed": 6.0,
+        "stretch": 0.5,
+        "tallFlames": 0.4,
+        "warp": 0.1,
+        "fps": 20,
+        "smear": 0.05
+      },
+      "band": 0.12,
+      "scale": 0.84,
+      "heightScale": 0.9,
+      "seed": 23.7,
+      "opacity": 0.5
     }
   ],
   "react": {

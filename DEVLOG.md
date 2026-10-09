@@ -2199,3 +2199,22 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **Checked in a dev client:** an orbit in 20 degree steps (the same silhouette all round), looking up into sky and
   clouds, from behind and above, flying. 209 GameTests.
 
+## 2026-10-09 — CX-24: drawn like anime: timing, smear, ghost flames, bloom (v0.79.0)
+- **The ask:** make every aura far better. Measured against the user's reference video frame by frame:
+  - it is animated on twos: each drawing holds two frames at 30 fps (15 drawings a second, every change a full
+    redraw), cycling through 15 drawings a second;
+  - every tongue tip is smeared upward like motion blur;
+  - a dimmer, blurred copy of the flames sits just inside the band (ghost flames), a wide soft bloom round it all;
+  - the flecks inside are big, soft and blurred.
+- **Drawing timing** (`motion.fps`): the outline, its streaks and the flecks hold each drawing and jump to the next
+  (15 a second for the Super Saiyan style, 10 for calm god ki, 12 dark and regal, 20 machines, smooth for UI's shimmer).
+- **Upward smear** (`motion.smear`, `aura.fsh` `smearedCover`): the flame edge is sampled six times below each point,
+  each pixel's samples nudged by its own offset so they blend into one streak; the glow follows the smeared edge.
+- **Ghost flames:** every family's first shell is copied smaller (0.84 wide, 0.9 tall), dimmer (0.5), with a thinner
+  band, its own seed and a quicker climb. **Bloom:** a wide, soft glow (1.24, 0.38) before the tight one.
+- **Band:** a hot highlight hugging the outer edge. **Flecks:** twice as wide, longer, more of them, on the drawing
+  timing. **Lightning:** thicker glow and core, and a thinner branch forks off each bolt.
+- Beast's band is a rich purple (its hand-set colour was near white). Blue gets the same treatment by hand (10 a second).
+- `layers_mod {1: ...}` in the generator now means every flame shell (glows come first now).
+- **Checked in a dev client** against the video (night and day), every family, and clips. 209 GameTests.
+

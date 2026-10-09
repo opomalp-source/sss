@@ -114,6 +114,7 @@ Drawn in order: put the outermost first. One to six layers.
 | `spikes.count/size/sharpness/lean` | The outline's flame tongues: how many round (at most 8), how far in their roots lie (share of the radius, at most 0.42), 0 short broad points .. 1 long slim ones, how much they lean. |
 | `motion.scroll/flicker/streaks/speed` | Flames rising, spikes flickering, light streaks, and this layer's pace. |
 | `lobes`, `sway`, `seed` | How much of the body's bulges and sway it takes, and its own seed so it moves differently. |
+| `motion.fps`, `motion.smear` | Drawn like anime: the flames hold each drawing and jump to the next this many times a second (0: smooth); how far (share of the height) the flame edge is smeared upward. |
 | `band` | For a shell: the width (share of the radius) of the bright band behind its flame edge, leaving the middle clear (the anime look). 0 fills the whole shell. |
 | `motion.warp/tallFlames/stretch/streakSpeed` | How much the tongues sway, how much longer they are near the top, how many stack up the height (stretch x 10, 1.5 to 6), how fast the light streaks climb. `scroll` is how fast the tongues climb. |
 | `tongues.count/length/width/life/top/rise/wave/inset/low` | For a `tongues` layer: how many at once, length (share of the height), width (share of their length), seconds each lives, share off the top, how far they climb, how much they wave, how far in from the outline they start, how low they start. |

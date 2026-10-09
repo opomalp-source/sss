@@ -105,6 +105,12 @@ public final class AuraTests {
         helper.assertTrue(d.react.chargeScale >= 0 && d.react.chargeScale < 1.5f && d.react.trailMax >= 0, id + ": sane reactions");
     }
 
+    /** An aura's first flame shell (glows may come before it). */
+    private static AuraDef.Layer mainShell(AuraDef d) {
+        for (AuraDef.Layer l : d.layers) if (l.kind == AuraDef.Layer.SHELL) return l;
+        throw new IllegalStateException(d.id + " has no flame shell");
+    }
+
     /** Kaioken wraps the form's aura, and its x20 tier is bigger and wilder than its x2. */
     @GameTest(template = EMPTY)
     public static void kaiokenTiers(GameTestHelper helper) throws Exception {
@@ -115,7 +121,7 @@ public final class AuraTests {
         sound(helper, high);
         helper.assertTrue(low.stageFrom == 1 && high.stageFrom == 11, "x2 is the first tier, x20 the second");
         helper.assertTrue(high.wrapScale > low.wrapScale && high.wrapHeight > low.wrapHeight, "x20 wraps wider and taller");
-        helper.assertTrue(high.layers.get(1).spikeSize > low.layers.get(1).spikeSize && high.peak > low.peak, "x20 is wilder");
+        helper.assertTrue(mainShell(high).spikeSize > mainShell(low).spikeSize && high.peak > low.peak, "x20 is wilder");
         helper.assertTrue(k.forStage(20) == high, "a tier is read once and kept");
         helper.assertTrue(low.wrapScale > 1.1f, "it sits outside the form's aura");
         helper.succeed();

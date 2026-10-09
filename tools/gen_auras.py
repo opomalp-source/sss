@@ -265,7 +265,7 @@ form('ssj4_limit_breaker', 'fam_divine', '#FF8AE0', 7, lightning={"rate": 2.0, "
 form('super_saiyan_rage', 'fam_flame', '#9AD8FF', 5, lightning={"rate": 4.5, "size": 1.1, "color": "#E8F8FF"},
      layers_mod={1: {"colors": {"edge": "#3AA8FF", "rim": "#FFE65C"}}}, react={"charge": {"wild": 1.8}})
 form('beast_awakening', 'fam_roar', '#D070FF', 5, lightning={"rate": 3.5, "size": 1.1, "color": "#FF4A6A"},
-     layers_mod={1: {"colors": {"core": "#FFFFFF", "mid": "#F0D8FF", "edge": "#B040FF", "rim": "#FF3A6A"}}},
+     layers_mod={1: {"colors": {"core": "#FFFFFF", "mid": "#C25CFF", "edge": "#9A2CFF", "rim": "#FF3A6A"}}},
      particles={"type": "ember", "color": "#FF6A8A"})
 # Legendary
 form('wrathful', 'fam_roar', '#B8FF6A', 1, shape={"width": 1.15, "height": 2.2})
@@ -429,7 +429,12 @@ def build(fid, fam, tint, tier, extra):
             if 'tongues' in extra:
                 t.update(extra['tongues'])
     for i, m in mods.items():
-        layers[i] = deep_merge(layers[i], m)
+        if i == 1:
+            for j, l in enumerate(layers):
+                if l['kind'] == 'shell':
+                    layers[j] = deep_merge(l, m)
+        else:
+            layers[i] = deep_merge(layers[i], m)
     out['layers'] = layers
     if tier >= 3:
         r = out.setdefault('react', {}).setdefault('charge', {})
@@ -486,7 +491,13 @@ def kaioken():
 WIDTH_K, HEIGHT_K = 1.5, 0.75    # about as wide as the fighter is tall, about 1.45 times as tall (with the peak)
 
 
-def anime(fam, keep_particles=False):
+# How each family moves, drawn like anime: drawings a second (0: smooth) and how far its tongues smear upward.
+TIMING = {'fam_flame': (15, 0.085), 'fam_roar': (15, 0.1), 'fam_divine': (10, 0.07), 'fam_wisp': (0, 0.14),
+          'fam_dark': (12, 0.085), 'fam_tech': (20, 0.05), 'fam_majin': (10, 0.08), 'fam_regal': (12, 0.08),
+          'fam_ssj4': (15, 0.085), 'fam_base': (15, 0.085), 'kaioken': (15, 0.1)}
+
+
+def anime(fam, keep_particles=False, timing=(15, 0.12)):
     """The hollow anime look (after the user's reference video): each flame shell becomes a bright band behind its
     flame edge with an almost clear middle; the layers that fill the middle (inner flames, hazes, added light shells)
     go; small streaks of light rise inside instead of sparkles or embers."""
@@ -503,9 +514,10 @@ def anime(fam, keep_particles=False):
             if cols.get('mid') in ('$mid', '$rim', '$glow'):
                 cols['mid'] = '$c'                     # the band just inside the edge: the form's full colour
             sp = l.setdefault('spikes', {})
-            sp['size'] = round(min(0.34, max(sp.get('size', 0.3) * 0.75, 0.24)), 3)   # steep tongues, wilder auras still deeper
+            sp['size'] = round(min(0.37, max(sp.get('size', 0.3) * 0.85, 0.27)), 3)   # steep tongues, wilder auras still deeper
             sp['sharpness'] = max(sp.get('sharpness', 0.8), 0.9)               # slim, needle-sharp tips
             l.setdefault('motion', {})['stretch'] = 0.5                      # about five up each side
+            l['motion']['fps'], l['motion']['smear'] = timing
         if l['kind'] == 'glow':
             l = json.loads(json.dumps(l))
             l['scale'] = 1.13
@@ -513,10 +525,21 @@ def anime(fam, keep_particles=False):
             if l.get('colors', {}).get('rim') == '$glow':
                 l['colors']['rim'] = '$c'
         layers.append(l)
+    shells = [l for l in layers if l['kind'] == 'shell']
+    if shells:
+        # a wide, soft bloom round everything, outermost
+        main = shells[0]
+        layers.insert(0, {"kind": "glow", "scale": 1.24, "opacity": 0.38, "colors": {"rim": main['colors'].get('edge', '$c')}})
+        # ghost flames: a smaller, dimmer copy of the band inside the first, out of step with it, for depth
+        ghost = json.loads(json.dumps(main))
+        ghost.update({"scale": 0.84, "heightScale": 0.9, "band": 0.12, "seed": 23.7, "opacity": 0.5})
+        ghost['motion'] = dict(main['motion'])
+        ghost['motion']['scroll'] = round(main['motion'].get('scroll', 1.5) * 1.3, 3)
+        layers.append(ghost)
     if 'layers' in fam:
         fam['layers'] = layers
     if not keep_particles and 'particles' in fam:
-        fam['particles'] = {"type": "flecks", "rate": 1.1, "size": 1.0, "color": fam['particles'].get('color', '$core')}
+        fam['particles'] = {"type": "flecks", "rate": 1.4, "size": 1.0, "color": fam['particles'].get('color', '$core')}
     return fam
 
 
@@ -547,7 +570,7 @@ def write(path, obj):
 
 def main():
     for name, fam in FAMILIES.items():
-        anime(fam, keep_particles=(name == 'fam_wisp'))
+        anime(fam, keep_particles=(name == 'fam_wisp'), timing=TIMING.get(name, (15, 0.12)))
     for name, fam in FAMILIES.items():
         write(os.path.join(ROOT, 'families', name + '.json'), fam)
     for fid, (fam, tint, tier, extra) in FORMS.items():
@@ -556,9 +579,9 @@ def main():
         write(os.path.join(ROOT, 'forms', fid + '.json'), build(fid, fam, tint, tier, extra))
     write(os.path.join(ROOT, 'base.json'), {"extends": "fam_base", "forms": ["base"], "tint": "#7FC8FF"})
     k = kaioken()
-    anime(k)
+    anime(k, timing=TIMING['kaioken'])
     for t in k['tiers']:
-        anime(t)
+        anime(t, timing=TIMING['kaioken'])
     write(os.path.join(ROOT, 'techniques', 'kaioken.json'), k)
     print(len(FAMILIES), 'families,', len(FORMS), 'forms')
 

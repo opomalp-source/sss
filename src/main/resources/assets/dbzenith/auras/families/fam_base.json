@@ -15,7 +15,7 @@
   },
   "particles": {
     "type": "flecks",
-    "rate": 1.1,
+    "rate": 1.4,
     "size": 1.0,
     "color": "$core"
   },

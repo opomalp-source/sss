@@ -617,7 +617,7 @@ public final class AuraSystem {
         sh.safeGetUniform("AuraMotion").set(t, g.scroll, l.streaks, l.flicker * wild);
         sh.safeGetUniform("AuraMode").set((float) l.kind, seed, opacity, g.spikeLean);
         sh.safeGetUniform("AuraBoost").set(bright, g.tallFlames, g.streakSpeed, g.stretch);
-        sh.safeGetUniform("AuraFlow").set(g.warp, l.kind == AuraDef.Layer.SHELL ? l.band : 0f, 0f, 0f);
+        sh.safeGetUniform("AuraFlow").set(g.warp, l.kind == AuraDef.Layer.SHELL ? l.band : 0f, g.fps, g.smear);
         sh.safeGetUniform("AuraCenter").set(centerX, 0f, centerZ, 0f);
     }
 
@@ -717,7 +717,8 @@ public final class AuraSystem {
         if (d.particleRate <= 0) return 0;
         Matrix4f m = pose.last().pose();
         Matrix3f nm = pose.last().normal();
-        float t = st.phase, seed = st.seed;
+        float fps = d.layers.isEmpty() ? 0 : mainFps(d);
+        float t = fps > 0 ? Mth.floor(st.phase * fps) / fps : st.phase, seed = st.seed;   // on the aura's drawing timing
         int count = Math.min(budget, Math.round(20 * d.particleRate * (1 + st.charge) * (detail == 0 ? 0.5f : detail == 2 ? 1.4f : 1f)));
         int r = (d.particleColor >> 16) & 255, g = (d.particleColor >> 8) & 255, b = d.particleColor & 255;
         int drawn = 0;
@@ -733,8 +734,8 @@ public final class AuraSystem {
             float rr = AuraShell.profile(d, sNow) * st.radius * (0.2f + 0.6f * ((h >>> 20) & 255) / 255f);
             float px = st.x + Mth.cos(a) * rr, pz = st.z + Mth.sin(a) * rr;
             float py = st.y + st.bottom + sNow * st.height;
-            float w = st.body * 0.011f * d.particleSize;
-            float len = st.body * 0.06f * d.particleSize * (0.6f + 0.8f * ((h >>> 5) & 255) / 255f);
+            float w = st.body * 0.02f * d.particleSize;                          // soft blurred flecks, like the drawn ones
+            float len = st.body * 0.075f * d.particleSize * (0.6f + 0.8f * ((h >>> 5) & 255) / 255f);
             float flick = (h & (1 << 29)) != 0 ? 1f : 0.55f;
             int alpha = Mth.clamp((int) (235 * Mth.sin(Mth.PI * life) * flick * st.fade), 0, 255);
             if (alpha < 4) continue;
@@ -750,6 +751,12 @@ public final class AuraSystem {
             drawn++;
         }
         return drawn;
+    }
+
+    /** The drawing rate of an aura's main shell (0: smooth). */
+    private static float mainFps(AuraDef d) {
+        int i = mainShell(d);
+        return i < 0 ? 0 : d.layers.get(i).fps;
     }
 
     private static final float[] BX = new float[8], BY = new float[8], BZ = new float[8];
@@ -792,25 +799,45 @@ public final class AuraSystem {
                 BZ[k] = z + (Mth.sin(a + Mth.HALF_PI) * Mth.cos(dir) * q + jx * 0.4f) * len;
             }
             int alpha = Mth.clamp((int) (255 * st.fade * (1 - life * 0.6f)), 0, 255);
-            for (int pass = 0; pass < 2; pass++) {                                // a wide glow, then the white-hot core
-                float w = st.body * (pass == 0 ? 0.05f : 0.014f);
-                int cr = pass == 0 ? r : 255, cg = pass == 0 ? g : 255, cb = pass == 0 ? b : 255;
-                int ca = pass == 0 ? alpha / 2 : alpha;
-                for (int k = 0; k < pts - 1; k++) {
-                    float sx = BY[k + 1] - BY[k], sy = -(BX[k + 1] - BX[k]);          // across the segment, roughly in the view plane
-                    float ex = BX[k] - BX[k + 1], ez = BZ[k] - BZ[k + 1];
-                    float cx2 = (BY[k] - BY[k + 1]) * BZ[k] - ez * BY[k], cy2 = ez * BX[k] - ex * BZ[k], cz2 = ex * BY[k] - (BY[k] - BY[k + 1]) * BX[k];
-                    float cl = Mth.sqrt(cx2 * cx2 + cy2 * cy2 + cz2 * cz2);
-                    if (cl < 1e-5f) continue;
-                    cx2 = cx2 / cl * w;
-                    cy2 = cy2 / cl * w;
-                    cz2 = cz2 / cl * w;
-                    corner(vc, m, nm, BX[k] - cx2, BY[k] - cy2, BZ[k] - cz2, 0, 0.5f, cr, cg, cb, ca);
-                    corner(vc, m, nm, BX[k] + cx2, BY[k] + cy2, BZ[k] + cz2, 1, 0.5f, cr, cg, cb, ca);
-                    corner(vc, m, nm, BX[k + 1] + cx2, BY[k + 1] + cy2, BZ[k + 1] + cz2, 1, 0.5f, cr, cg, cb, ca);
-                    corner(vc, m, nm, BX[k + 1] - cx2, BY[k + 1] - cy2, BZ[k + 1] - cz2, 0, 0.5f, cr, cg, cb, ca);
-                    drawn++;
-                }
+            drawn += bolt(vc, m, nm, pts, st.body, r, g, b, alpha, 1f);
+            // a branch forking off part way along, thinner and shorter
+            int from = 1 + (h >>> 28 & 1) + 1;
+            float bx = BX[from], by = BY[from], bz = BZ[from];
+            float bdir = dir + ((h & 64) != 0 ? 0.9f : -0.9f);
+            for (int k = 0; k < 4; k++) {
+                int hk = hash(h * 31 + k * 4099);
+                float jx = ((hk & 255) / 255f - 0.5f) * 0.5f, jy = (((hk >>> 8) & 255) / 255f - 0.5f) * 0.5f;
+                float q = k / 3f * 0.5f;
+                BX[k] = bx + (Mth.cos(a + Mth.HALF_PI) * Mth.cos(bdir) * q + jx * 0.25f) * len;
+                BY[k] = by + (Mth.sin(bdir) * q + jy * 0.25f) * len;
+                BZ[k] = bz + (Mth.sin(a + Mth.HALF_PI) * Mth.cos(bdir) * q + jx * 0.25f) * len;
+            }
+            drawn += bolt(vc, m, nm, 4, st.body, r, g, b, alpha * 3 / 4, 0.6f);
+        }
+        return drawn;
+    }
+
+    /** One bolt along the first {@code pts} points of BX/BY/BZ: a wide glow in its colour, then a white-hot core. */
+    private static int bolt(VertexConsumer vc, Matrix4f m, Matrix3f nm, int pts, float body, int r, int g, int b, int alpha, float thick) {
+        int drawn = 0;
+        for (int pass = 0; pass < 2; pass++) {
+            float w = body * (pass == 0 ? 0.07f : 0.02f) * thick;
+            int cr = pass == 0 ? r : 255, cg = pass == 0 ? g : 255, cb = pass == 0 ? b : 255;
+            int ca = pass == 0 ? alpha / 2 : alpha;
+            for (int k = 0; k < pts - 1; k++) {
+                float ex = BX[k] - BX[k + 1], ey = BY[k] - BY[k + 1], ez = BZ[k] - BZ[k + 1];
+                // across the segment and the line of sight
+                float cx2 = ey * BZ[k] - ez * BY[k], cy2 = ez * BX[k] - ex * BZ[k], cz2 = ex * BY[k] - ey * BX[k];
+                float cl = Mth.sqrt(cx2 * cx2 + cy2 * cy2 + cz2 * cz2);
+                if (cl < 1e-5f) continue;
+                cx2 = cx2 / cl * w;
+                cy2 = cy2 / cl * w;
+                cz2 = cz2 / cl * w;
+                corner(vc, m, nm, BX[k] - cx2, BY[k] - cy2, BZ[k] - cz2, 0, 0.5f, cr, cg, cb, ca);
+                corner(vc, m, nm, BX[k] + cx2, BY[k] + cy2, BZ[k] + cz2, 1, 0.5f, cr, cg, cb, ca);
+                corner(vc, m, nm, BX[k + 1] + cx2, BY[k + 1] + cy2, BZ[k + 1] + cz2, 1, 0.5f, cr, cg, cb, ca);
+                corner(vc, m, nm, BX[k + 1] - cx2, BY[k + 1] - cy2, BZ[k + 1] - cz2, 0, 0.5f, cr, cg, cb, ca);
+                drawn++;
             }
         }
         return drawn;
