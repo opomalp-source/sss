@@ -62,6 +62,13 @@ public class PoseSheetScreen extends Screen {
         return out;
     }
 
+    /** One clip at {@code frames} moments through it (a film strip), labelled by phase. */
+    public static List<String[]> stripCells(String clip, int frames) {
+        List<String[]> out = new ArrayList<>();
+        for (int i = 0; i < frames; i++) out.add(new String[]{(i * 100 / frames) + "%", clip, String.valueOf(i / (float) frames)});
+        return out;
+    }
+
     /** Every clip whose id starts with {@code prefix}, labelled by id. */
     public static List<String[]> prefixCells(String prefix) {
         List<String[]> out = new ArrayList<>();
@@ -79,10 +86,10 @@ public class PoseSheetScreen extends Screen {
         Ui.text(g, font, heading + " @ " + (int) (phase * 100) + "%", 6, 4, 0xFFFFFFFF, 0.8f);
         LivingEntity e = subject != null && subject.isAlive() ? subject : minecraft.player;
         if (e == null || cells.isEmpty()) return;
-        int cols = Math.min(6, cells.size()), rows = (cells.size() + cols - 1) / cols;
+        int cols = Math.min(cells.size() == 8 && cells.get(0).length > 2 ? 4 : 6, cells.size()), rows = (cells.size() + cols - 1) / cols;
         int cw = width / cols, ch = (height - 14) / rows;
         float size = e.getBbHeight() / 1.8f;
-        int scale = (int) (Math.min(cw * 1.1f, ch) * 0.42f / Math.max(0.6f, size));
+        int scale = (int) (Math.min(cw * 1.1f, ch) * (cells.get(0).length > 2 ? 0.33f : 0.42f) / Math.max(0.6f, size));
         MotionEngine.devEntity = e == minecraft.player ? null : e;
         try {
             for (int i = 0; i < cells.size(); i++) {
@@ -91,7 +98,7 @@ public class PoseSheetScreen extends Screen {
                 Ui.centered(g, font, Component.literal(cells.get(i)[0]), cx, cy + 2, c == null ? 0xFFFF6060 : 0xFFFFFFFF, 0.6f);
                 if (c == null) continue;
                 MotionEngine.devClip = c;
-                MotionEngine.devPhase = phase;
+                MotionEngine.devPhase = cells.get(i).length > 2 ? Float.parseFloat(cells.get(i)[2]) : phase;
                 MotionEngine.devPitch = pitch;
                 figure(g, cx, cy + ch - (int) (ch * 0.1f), scale, turn, e);
             }

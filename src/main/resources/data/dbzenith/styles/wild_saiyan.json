@@ -1,3 +1,4 @@
-{"master": "goku", "color": "#F07818",
- "slots": {"idle": "style_goku_idle", "walk": "style_goku_walk", "sprint": "style_goku_sprint", "hover": "style_goku_hover", "flight": "style_goku_flight", "charge": "style_goku_charge", "fight_stance": "style_goku_fight", "fight_steps": "style_goku_steps"},
+{"master": "goku",
+ "color": "#F07818",
+ "slots": {"idle": "style_goku_idle", "walk": "style_goku_walk", "sprint": "style_goku_sprint", "hover": "style_goku_hover", "flight": "style_goku_flight", "fast_flight": "style_goku_fast", "charge": "style_goku_charge", "fight_stance": "style_goku_fight", "fight_steps": "style_goku_steps"},
  "requirements": {"battle_power": 6000, "affinity": 4, "training_minutes": 10, "items": [{"item": "minecraft:cooked_beef", "count": 16}]}}

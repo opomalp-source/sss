@@ -9,3 +9,5 @@
   Devshot names: `front_`/`third_` camera, `hidegui`, `aurapv.<aura>.<state>`, `auratech.kaioken.<stage>`,
   `auraset.<path-with-dashes>+<value>`, `aurareload`, `seq<N>` for an N-frame clip.
 - **Auras** are data (docs/AURA_GUIDE.md). Form auras come from `tools/gen_auras.py`; re-run it after editing its tables.
+- **Movement animations** are generated: `tools/gen_motion.py` + `tools/gen_styles.py` write motion/clips/*.json (see
+  docs/ANIMATION.md "Generated clips"); re-run after editing. Combat clips live in `client/anim/Anims.java`.

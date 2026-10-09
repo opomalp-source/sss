@@ -1,3 +1,4 @@
-{"master": "cell", "color": "#7ABA48",
- "slots": {"idle": "style_cell_idle", "walk": "style_cell_walk", "hover": "style_cell_hover", "flight": "style_cell_flight", "charge": "style_cell_charge", "fight_stance": "style_cell_fight", "fight_steps": "style_cell_steps"},
+{"master": "cell",
+ "color": "#7ABA48",
+ "slots": {"idle": "style_cell_idle", "walk": "style_cell_walk", "sprint": "style_cell_sprint", "hover": "style_cell_hover", "flight": "style_cell_flight", "fast_flight": "style_cell_fast", "charge": "style_cell_charge", "fight_stance": "style_cell_fight", "fight_steps": "style_cell_steps"},
  "requirements": {"battle_power": 80000, "affinity": 5, "training_minutes": 12}}

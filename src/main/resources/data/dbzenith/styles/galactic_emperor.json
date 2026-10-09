@@ -1,4 +1,5 @@
-{"master": "frieza", "color": "#B060E0",
- "slots": {"idle": "style_frieza_idle", "walk": "style_frieza_walk", "hover": "style_frieza_hover", "flight": "style_frieza_flight", "charge": "style_frieza_charge", "fight_stance": "style_frieza_fight", "fight_steps": "style_frieza_steps"},
+{"master": "frieza",
+ "color": "#B060E0",
+ "slots": {"idle": "style_frieza_idle", "walk": "style_frieza_walk", "sprint": "style_frieza_sprint", "hover": "style_frieza_hover", "flight": "style_frieza_flight", "fast_flight": "style_frieza_fast", "charge": "style_frieza_charge", "fight_stance": "style_frieza_fight", "fight_steps": "style_frieza_steps"},
  "requirements": {"battle_power": 60000, "affinity": 6, "training_minutes": 10, "items": [{"item": "minecraft:gold_ingot", "count": 8}]},
  "npcs": ["dbzenith:tyrant_lord"]}

@@ -1,3 +1,4 @@
-{"master": "vegeta", "color": "#3A70D8",
- "slots": {"idle": "style_vegeta_idle", "walk": "style_vegeta_walk", "hover": "style_vegeta_hover", "flight": "style_vegeta_flight", "fast_flight": "style_vegeta_fast", "charge": "style_vegeta_charge", "fight_stance": "style_vegeta_fight", "fight_steps": "style_vegeta_steps"},
+{"master": "vegeta",
+ "color": "#3A70D8",
+ "slots": {"idle": "style_vegeta_idle", "walk": "style_vegeta_walk", "sprint": "style_vegeta_sprint", "hover": "style_vegeta_hover", "flight": "style_vegeta_flight", "fast_flight": "style_vegeta_fast", "charge": "style_vegeta_charge", "fight_stance": "style_vegeta_fight", "fight_steps": "style_vegeta_steps"},
  "requirements": {"battle_power": 30000, "affinity": 6, "training_minutes": 15}}

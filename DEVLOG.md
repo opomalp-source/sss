@@ -2308,3 +2308,29 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 ## 2026-10-09 — CX-30: a slimmer upper arm (v0.84.1)
 - The upper-arm block stands out less (lean 0.12, athletic 0.24, bulky 0.42 px, was 0.25/0.4/0.6), at the user's
   request ("the bicep part just a little bit smaller"). Checked in a dev client.
+
+## 2026-10-09 — CX-31: every animation reworked (v0.85.0)
+- **The ask:** rework all the animations (styles, fighting, idle, defaults), each distinct, "a million times better".
+- **What was wrong:** most movement clips were two keys swinging between two poses (idle barely moved, the fighting
+  stance was frozen, flight poses rigid); strikes snapped from the hit straight back to the guard.
+- **`tools/gen_motion.py`** now writes every movement clip from shared builders that apply the principles: weight
+  (hips drop on each footfall and rise through the passing pose, sway over the standing leg), counter-rotation of the
+  shoulders, overlap and follow-through (arms, head and floating legs a beat behind), breathing and weight shifts,
+  acting beats in idles, bouncing fighting stances with the guard following the bounce and the lead hand pawing,
+  fluttering flight, trembling and surging charges. Defaults, race and form idles, heavy walk and lope.
+- **`tools/gen_styles.py`**: the sixteen styles, each a character kept through all nine slots (now every style fills
+  every slot, fast flight included): Goku loose and bouncy (scratches his head), Vegeta arms folded and impatient
+  (taps a foot), Piccolo meditating (cross-legged hover), Gohan calm (rubs his head), Krillin nimble, Roshi stooped
+  (strokes his beard, Max Power flex), Tien precise (crane stance on one leg), Yamcha cocky (hand behind the head,
+  wolf crouch), Trunks composed (hand on the strap, sword guard), Frieza regal (hands behind, finger to the sky), Cell
+  smug (hands on hips, laughs), Broly heavy (heaving breath, bounding charge), Buu childish (skipping, aeroplane),
+  Android 17 bored (pockets), Jiren immovable (arms folded even fighting), Hit utterly still (pockets everywhere).
+- **Combat (`Anims.java`)**: `Pose.past` and a shared `strike(...)` give jab, cross, hook, heavy punch, uppercut,
+  launcher, spike, Z-hit and Breaker Wave a deeper wind-up, follow-through past the hit and a settle; the kick
+  follows through and lands its weight; ki blast kicks back; the beam kicks and strains harder; dash and rush are
+  full-body (push, burst, skid); sweep and side steps land into the knees; hits whip the head past and stagger;
+  guard breathes; the power-up loop surges.
+- **Dev tools:** devshots `posestrip_<clip>_<turn>[_<pitch>]` (one clip at eight moments), `motionreload`; the pose
+  sheet's figures sized for strips. StyleTests adjusted (every style now fills every slot).
+- **Checked in a dev client:** film strips of every default clip, side-by-side pose sheets of all styles per slot,
+  frame sequences of the combat clips. 209 GameTests.

@@ -129,6 +129,32 @@ public final class Anims {
             return this;
         }
 
+        /**
+         * This pose carried on past itself, away from {@code from}, by {@code k} of the way between them (CX-31): a
+         * strike's follow-through beyond the target, or a recoil a little past the guard.
+         */
+        Pose past(Pose from, float k) {
+            Pose p = copy();
+            java.util.Set<String> parts = new HashSet<>(rot.keySet());
+            parts.addAll(from.rot.keySet());
+            for (String part : parts) {
+                float[] a = rot.getOrDefault(part, ZERO), f = from.rot.getOrDefault(part, ZERO);
+                p.rot.put(part, new float[]{a[0] + (a[0] - f[0]) * k, a[1] + (a[1] - f[1]) * k, a[2] + (a[2] - f[2]) * k});
+            }
+            java.util.Set<String> bends = new HashSet<>(bend.keySet());
+            bends.addAll(from.bend.keySet());
+            for (String limb : bends) {
+                float a = bend.getOrDefault(limb, 0f), f = from.bend.getOrDefault(limb, 0f);
+                p.bend.put(limb, Math.max(0f, a + (a - f) * k));
+            }
+            p.dx = dx + (dx - from.dx) * k;
+            p.dy = dy + (dy - from.dy) * k;
+            p.dz = dz + (dz - from.dz) * k;
+            p.tilt = tilt + (tilt - from.tilt) * k;
+            p.headSet = headSet || from.headSet;
+            return p;
+        }
+
         /** Leave these parts to vanilla or a lower layer (a stance that should still let you look round and walk). */
         Pose freeing(String... parts) {
             free.addAll(java.util.List.of(parts));
@@ -159,14 +185,16 @@ public final class Anims {
     // ------------------------------------------------------------------ looping states
 
     /** Powering up: a wide, low stance, fists clenched down and out, the head thrown back, the whole body shaking. */
-    public static final KeyframeAnimation CHARGE = loop(8, a -> {
+    public static final KeyframeAnimation CHARGE = loop(24, a -> {
         Pose base = new Pose().at(0, 2.2f, 0).r("torso", 8, 0, 0).r("head", -16, 0, 0)
                 .limb("rightArm", 14, 0, 24, 35).limb("leftArm", 14, 0, -24, 35)
                 .limb("rightLeg", -4, 0, 16, 30).limb("leftLeg", -4, 0, -16, 30);
-        for (int t = 0; t <= 8; t += 2) {
+        for (int t = 0; t <= 24; t += 2) {
             float s = t % 4 == 0 ? 1 : -1;
-            a.pose(t, base.copy().move(0.3f * s, 0, 0).limb("rightArm", 14, 0, 24 + 2 * s, 35).limb("leftArm", 14, 0, -24 + 2 * s, 35)
-                    .r("head", -16 + s, 2 * s, 0), Ease.LINEAR);
+            float surge = (float) Math.pow(Math.max(0, Math.sin(t / 24.0 * Math.PI * 2)), 2);       // two surges of ki a loop
+            a.pose(t, base.copy().move(0.3f * s, 0.8f * surge, 0).r("torso", 8 - 5 * surge, 0, 0)
+                    .limb("rightArm", 14 + 5 * surge, 0, 24 + 2 * s + 8 * surge, 35 + 10 * surge).limb("leftArm", 14 + 5 * surge, 0, -24 + 2 * s - 8 * surge, 35 + 10 * surge)
+                    .r("head", -16 + s - 12 * surge, 2 * s, 0), Ease.LINEAR);
         }
     });
 
@@ -174,7 +202,10 @@ public final class Anims {
     public static final KeyframeAnimation GUARD = loop(20, a -> {
         Pose g = fight().at(0, 1.6f, 0).r("torso", 10, -6, 0).r("head", 8, 4, 0)
                 .limb("rightArm", -108, -40, 0, 78).limb("leftArm", -102, 40, 0, 78);
-        a.pose(0, g, Ease.INOUTSINE).pose(10, g.copy().move(0, 0.4f, 0).r("torso", 12, -6, 0), Ease.INOUTSINE).pose(20, g, Ease.INOUTSINE);
+        a.pose(0, g, Ease.INOUTSINE)
+                .pose(7, g.copy().move(0.2f, 0.5f, 0.1f).r("torso", 13, -8, 1).limb("rightArm", -106, -42, 0, 82).limb("leftArm", -100, 42, 0, 82), Ease.INOUTSINE)
+                .pose(13, g.copy().move(-0.2f, 0.3f, 0).r("torso", 11, -4, -1), Ease.INOUTSINE)
+                .pose(20, g, Ease.INOUTSINE);
     });
 
     /** Charging a blast (CX-23): the lead hand thrust out with the palm open, the other hand gripping that wrist, braced. */
@@ -258,13 +289,27 @@ public final class Anims {
 
     // ------------------------------------------------------------------ melee
 
+    /**
+     * The shape every strike shares (CX-31), the principles of a good hit: from the guard into a wind-up a little
+     * deeper than asked (anticipation), snapped to the hit (OUTEXPO), carried a touch past it (follow-through), pulled
+     * back onto it and held a beat, then back to the guard by way of a small recoil just past it (settle).
+     */
+    private static void strike(Keys a, int end, Pose load, int loadT, Pose hit, int hitT, int holdT) {
+        Pose guard = fight();
+        Pose deep = load.past(guard, 0.25f);
+        a.pose(0, guard, Ease.LINEAR)
+                .pose(loadT, deep, Ease.OUTQUAD)
+                .pose(hitT, hit, Ease.OUTEXPO)
+                .pose(hitT + 1, hit.past(deep, 0.08f), Ease.OUTQUAD)
+                .pose(Math.max(hitT + 2, holdT), hit, Ease.INOUTSINE)
+                .pose(end - 3, guard.past(hit, 0.14f), Ease.INOUTQUAD)
+                .pose(end, guard, Ease.INOUTSINE);
+    }
+
     /** Right straight: a short load, the fist snapping out with the shoulder and a half step behind it, then back to guard. */
-    public static final KeyframeAnimation JAB_RIGHT = once(9, a -> a
-            .pose(0, fight(), Ease.LINEAR)
-            .pose(1, fight().r("torso", 4, -24, 0).limb("rightArm", -50, -14, 18, 115).move(0, 0.2f, 0.4f), Ease.OUTQUAD)
-            .pose(3, strikeRight(-95, -10, 2, 0), Ease.OUTEXPO)
-            .pose(4, strikeRight(-93, -10, 2, 4), Ease.LINEAR)
-            .pose(9, fight(), Ease.INOUTQUAD));
+    public static final KeyframeAnimation JAB_RIGHT = once(11, a -> strike(a, 11,
+            fight().r("torso", 4, -26, 0).limb("rightArm", -48, -14, 20, 118).move(0, 0.3f, 0.5f), 1,
+            strikeRight(-95, -10, 2, 0), 3, 4));
 
     private static Pose strikeRight(float pitch, float yaw, float roll, float bend) {
         return fight().r("torso", 8, 16, 0).limb("rightArm", pitch, yaw, roll, bend).limb("leftArm", -50, 12, -10, 115)
@@ -272,63 +317,50 @@ public final class Anims {
     }
 
     /** Left straight: the lead hand driven through with the whole torso turning behind it. */
-    public static final KeyframeAnimation CROSS_LEFT = once(10, a -> {
+    public static final KeyframeAnimation CROSS_LEFT = once(12, a -> {
         Pose hit = fight().r("torso", 8, -34, 0).limb("leftArm", -96, 8, -2, 0).limb("rightArm", -40, -10, 12, 120)
                 .limb("leftLeg", -26, 0, -5, 30).limb("rightLeg", 22, 0, 6, 4).move(0, 0.4f, -1.6f);
-        a.pose(0, fight(), Ease.LINEAR)
-                .pose(1, fight().r("torso", 4, -4, 0).limb("leftArm", -60, 20, -14, 115).move(0, 0.2f, 0.3f), Ease.OUTQUAD)
-                .pose(3, hit, Ease.OUTEXPO)
-                .pose(4, hit.copy().limb("leftArm", -94, 8, -2, 4), Ease.LINEAR)
-                .pose(10, fight(), Ease.INOUTQUAD);
+        strike(a, 12, fight().r("torso", 4, -2, 0).limb("leftArm", -60, 20, -14, 118).move(0, 0.3f, 0.4f), 1, hit, 3, 4);
     });
 
     /** Hook: elbow lifted wide, then the fist whipped across with the hips, a little past, and back. */
-    public static final KeyframeAnimation HOOK = once(11, a -> {
+    public static final KeyframeAnimation HOOK = once(14, a -> {
         Pose hit = fight().r("torso", 8, 30, 0).limb("rightArm", -90, -38, 10, 85).limb("leftArm", -48, 12, -8, 115)
                 .limb("rightLeg", 18, 0, 10, 8).limb("leftLeg", -20, 0, -6, 26).move(-0.4f, 0.5f, -1.0f);
-        a.pose(0, fight(), Ease.LINEAR)
-                .pose(2, fight().r("torso", 2, -36, 0).limb("rightArm", -70, 40, 50, 95).move(0.3f, 0.3f, 0.3f), Ease.OUTQUAD)
-                .pose(4, hit, Ease.OUTEXPO)
-                .pose(5, hit.copy().r("torso", 8, 38, 0).limb("rightArm", -88, -46, 8, 85), Ease.OUTQUAD)
-                .pose(11, fight(), Ease.INOUTQUAD);
+        strike(a, 14, fight().r("torso", 2, -38, 0).limb("rightArm", -70, 40, 52, 95).move(0.4f, 0.4f, 0.3f), 2,
+                hit.copy().r("torso", 8, 34, 0), 4, 6);
     });
 
     /** Front kick: the knee chambered high, the leg snapped straight out at chest height with the body leaning back, re-chambered, set down. */
-    public static final KeyframeAnimation KICK = once(14, a -> {
+    public static final KeyframeAnimation KICK = once(17, a -> {
         Pose out = fight().r("torso", -18, -8, 0).limb("rightLeg", -100, 0, 8, 0).limb("leftLeg", 4, 0, -4, 14)
                 .limb("rightArm", -20, 0, 30, 70).limb("leftArm", -55, 12, -24, 100).move(0, -0.6f, 0.8f);
         a.pose(0, fight(), Ease.LINEAR)
                 .pose(2, fight().r("torso", -8, -10, 0).limb("rightLeg", -85, 0, 6, 110).limb("leftLeg", 2, 0, -4, 14)
                         .limb("rightArm", -30, 0, 25, 80).move(0, -0.6f, 0.3f), Ease.OUTQUAD)
                 .pose(5, out, Ease.OUTEXPO)
-                .pose(7, out.copy().limb("rightLeg", -98, 0, 8, 4), Ease.LINEAR)
-                .pose(10, fight().r("torso", -6, -12, 0).limb("rightLeg", -70, 0, 6, 95).limb("leftLeg", 2, 0, -4, 14), Ease.INOUTQUAD)
-                .pose(14, fight(), Ease.INOUTQUAD);
+                .pose(6, out.copy().limb("rightLeg", -106, 0, 8, 0).r("torso", -21, -8, 0), Ease.OUTQUAD)   // follow-through
+                .pose(8, out.copy().limb("rightLeg", -98, 0, 8, 4), Ease.INOUTSINE)
+                .pose(11, fight().r("torso", -6, -12, 0).limb("rightLeg", -70, 0, 6, 100).limb("leftLeg", 2, 0, -4, 14), Ease.INOUTQUAD)
+                .pose(14, fight().move(0, 0.5f, 0).limb("rightLeg", 18, 0, 8, 26), Ease.OUTQUAD)       // landing: weight drops in
+                .pose(17, fight(), Ease.INOUTSINE);
     });
 
     /** Heavy punch: loaded deep on the back leg, then a lunging straight right with the other arm torn back for power. */
-    public static final KeyframeAnimation HEAVY_PUNCH = once(15, a -> {
+    public static final KeyframeAnimation HEAVY_PUNCH = once(18, a -> {
         Pose hit = fight().at(0, 1.8f, -3.4f).r("torso", 14, 30, 0).limb("rightArm", -98, -12, 0, 0).limb("leftArm", 25, 10, -25, 95)
                 .limb("leftLeg", -36, 0, -5, 34).limb("rightLeg", 30, 0, 6, 0);
-        a.pose(0, fight(), Ease.LINEAR)
-                .pose(3, heavyLoad(), Ease.OUTQUAD)
-                .pose(5, hit, Ease.OUTEXPO)
-                .pose(7, hit.copy().limb("rightArm", -96, -12, 2, 3).move(0, 0, -0.2f), Ease.LINEAR)
-                .pose(15, fight(), Ease.INOUTQUAD);
+        strike(a, 18, heavyLoad(), 3, hit, 5, 8);
     });
 
     /** A rising uppercut: dropped into a crouch, then the legs drive the whole body up behind a fist that ends overhead. */
     private static KeyframeAnimation uppercut(float depth) {
-        return once(13, a -> {
+        return once(16, a -> {
             Pose up = fight().at(0, 1.0f - depth * 0.7f, -0.8f).r("torso", -22, 18, 0).r("head", -30, -10, 0)
                     .limb("rightArm", -176, -8, -6, 22).limb("leftArm", 10, 10, -30, 60)
                     .limb("rightLeg", 16, 0, 4, 0).limb("leftLeg", -30, 0, -4, 20);
-            a.pose(0, fight(), Ease.LINEAR)
-                    .pose(3, fight().at(0, 1.0f + depth, 0.2f).r("torso", 22, -24, 0).limb("rightArm", 28, 8, 20, 115)
-                            .limb("leftArm", -70, 20, -10, 100).limb("rightLeg", 10, 0, 10, 55).limb("leftLeg", -24, 0, -8, 60), Ease.OUTQUAD)
-                    .pose(5, up, Ease.OUTEXPO)
-                    .pose(7, up.copy().limb("rightArm", -178, -8, -6, 18), Ease.LINEAR)
-                    .pose(13, fight(), Ease.INOUTQUAD);
+            strike(a, 16, fight().at(0, 1.0f + depth, 0.2f).r("torso", 22, -24, 0).limb("rightArm", 28, 8, 20, 115)
+                    .limb("leftArm", -70, 20, -10, 100).limb("rightLeg", 10, 0, 10, 55).limb("leftLeg", -24, 0, -8, 60), 3, up, 5, 8);
         });
     }
 
@@ -338,62 +370,55 @@ public final class Anims {
     public static final KeyframeAnimation UPPERCUT = uppercut(3.2f);
 
     /** Spike: both fists raised overhead with the back arched, then hammered down with the whole body. */
-    public static final KeyframeAnimation SPIKE = once(13, a -> {
+    public static final KeyframeAnimation SPIKE = once(16, a -> {
         Pose smash = fight().at(0, 3.0f, -1.2f).r("torso", 34, 0, 0).r("head", 10, 0, 0)
                 .limb("rightArm", -28, 0, -8, 10).limb("leftArm", -28, 0, 8, 10)
                 .limb("rightLeg", 12, 0, 8, 40).limb("leftLeg", -18, 0, -6, 44);
-        a.pose(0, fight(), Ease.LINEAR)
-                .pose(3, fight().at(0, 0, 0.6f).r("torso", -16, 0, 0).r("head", -20, 0, 0).limb("rightArm", -170, 0, -12, 30)
-                        .limb("leftArm", -170, 0, 12, 30).limb("rightLeg", 8, 0, 6, 6).limb("leftLeg", -10, 0, -6, 8), Ease.OUTQUAD)
-                .pose(5, smash, Ease.OUTEXPO)
-                .pose(7, smash, Ease.LINEAR)
-                .pose(13, fight(), Ease.INOUTQUAD);
+        strike(a, 16, fight().at(0, 0, 0.6f).r("torso", -16, 0, 0).r("head", -20, 0, 0).limb("rightArm", -170, 0, -12, 30)
+                .limb("leftArm", -170, 0, 12, 30).limb("rightLeg", 8, 0, 6, 6).limb("leftLeg", -10, 0, -6, 8), 3, smash, 5, 8);
     });
 
     /** Z-hit: sunk for the spring, then a flying knee with both fists torn back, and a landing into guard. */
-    public static final KeyframeAnimation ZHIT = once(12, a -> {
+    public static final KeyframeAnimation ZHIT = once(15, a -> {
         Pose knee = fight().at(0, -1.8f, -2.8f).r("torso", -14, 0, 0).limb("rightLeg", -115, 0, 6, 125).limb("leftLeg", 20, 0, -4, 10)
                 .limb("rightArm", 40, 0, 25, 60).limb("leftArm", 40, 0, -25, 60);
-        a.pose(0, fight(), Ease.LINEAR)
-                .pose(2, fight().at(0, 2.5f, 0.5f).limb("rightLeg", 6, 0, 8, 45).limb("leftLeg", -10, 0, -5, 45), Ease.OUTQUAD)
-                .pose(4, knee, Ease.OUTEXPO)
-                .pose(6, knee, Ease.LINEAR)
-                .pose(12, fight(), Ease.INOUTQUAD);
+        strike(a, 15, fight().at(0, 2.5f, 0.5f).limb("rightLeg", 6, 0, 8, 45).limb("leftLeg", -10, 0, -5, 45)
+                .limb("rightArm", 30, 0, 20, 70).limb("leftArm", 30, 0, -20, 70), 2, knee, 4, 7);
     });
 
     /** Breaker Wave: curled tight around the gathering ki, then everything flung outward at once. */
-    public static final KeyframeAnimation BREAKER = once(15, a -> {
+    public static final KeyframeAnimation BREAKER = once(17, a -> {
         Pose burst = new Pose().at(0, 0.2f, 0).r("torso", -18, 0, 0).r("head", -30, 0, 0)
                 .limb("rightArm", -20, 0, 118, 0).limb("leftArm", -20, 0, -118, 0)
                 .limb("rightLeg", 0, 0, 20, 8).limb("leftLeg", 0, 0, -20, 8);
-        a.pose(0, fight(), Ease.LINEAR)
-                .pose(3, new Pose().at(0, 2.8f, 0).r("torso", 26, 0, 0).r("head", 24, 0, 0)
-                        .limb("rightArm", -60, -40, -10, 120).limb("leftArm", -60, 40, 10, 120)
-                        .limb("rightLeg", -6, 0, 10, 60).limb("leftLeg", -6, 0, -10, 60), Ease.OUTQUAD)
-                .pose(5, burst, Ease.OUTEXPO)
-                .pose(9, burst.copy().limb("rightArm", -20, 0, 112, 4).limb("leftArm", -20, 0, -112, 4), Ease.LINEAR)
-                .pose(15, fight(), Ease.INOUTQUAD);
+        strike(a, 17, new Pose().at(0, 2.8f, 0).r("torso", 26, 0, 0).r("head", 24, 0, 0)
+                .limb("rightArm", -60, -40, -10, 120).limb("leftArm", -60, 40, 10, 120)
+                .limb("rightLeg", -6, 0, 10, 60).limb("leftLeg", -6, 0, -10, 60), 3, burst, 5, 10);
     });
 
     /** Spot dodge: a sharp sway back and to the side under the blow, guard still up, then back in. */
-    public static final KeyframeAnimation SPOT_DODGE = once(11, a -> {
+    public static final KeyframeAnimation SPOT_DODGE = once(13, a -> {
         Pose sway = fight().tilt(-16).move(1.5f, 1.0f, 1.2f).r("torso", -6, -26, 12)
                 .limb("rightArm", -96, -34, 4, 90).limb("leftArm", -100, 34, -4, 90)
                 .limb("rightLeg", 22, 0, 10, 36).limb("leftLeg", -8, 0, -8, 30);
-        a.pose(0, fight(), Ease.LINEAR).pose(2, sway, Ease.OUTEXPO).pose(7, sway, Ease.LINEAR).pose(11, fight(), Ease.INOUTQUAD);
+        a.pose(0, fight(), Ease.LINEAR).pose(2, sway, Ease.OUTEXPO).pose(3, sway.past(fight(), 0.1f), Ease.OUTQUAD)
+                .pose(7, sway, Ease.INOUTSINE).pose(10, fight().past(sway, 0.15f), Ease.INOUTQUAD).pose(13, fight(), Ease.INOUTSINE);
     });
 
     // ------------------------------------------------------------------ ki
 
     /** Ki blast: the palm chambered at the hip, thrust out with a half step, a kick of recoil, back to guard. */
-    public static final KeyframeAnimation KI_BLAST = once(10, a -> {
+    public static final KeyframeAnimation KI_BLAST = once(13, a -> {
         Pose shot = fight().r("torso", 6, 14, 0).limb("rightArm", -92, -6, 0, 0).limb("leftArm", -48, 12, -10, 115)
                 .limb("leftLeg", -24, 0, -5, 28).move(0, 0.4f, -1.0f);
+        Pose recoil = shot.copy().limb("rightArm", -74, -6, 4, 16).r("torso", 2, 10, 0).move(0, 0.1f, 0.9f);   // the kick of the shot
         a.pose(0, fight(), Ease.LINEAR)
-                .pose(2, fight().r("torso", 2, -30, 0).limb("rightArm", 18, 18, 30, 80).move(0, 0.2f, 0.4f), Ease.OUTQUAD)
+                .pose(2, fight().r("torso", 2, -32, 0).limb("rightArm", 20, 18, 32, 84).move(0, 0.3f, 0.5f), Ease.OUTQUAD)
                 .pose(4, shot, Ease.OUTEXPO)
-                .pose(5, shot.copy().limb("rightArm", -80, -6, 2, 10).move(0, 0, 0.7f), Ease.OUTQUAD)
-                .pose(10, fight(), Ease.INOUTQUAD);
+                .pose(5, recoil, Ease.OUTQUAD)
+                .pose(7, shot.copy().limb("rightArm", -86, -6, 2, 6), Ease.INOUTSINE)
+                .pose(10, fight().past(shot, 0.12f), Ease.INOUTQUAD)
+                .pose(13, fight(), Ease.INOUTSINE);
     });
 
     /** Volley: planted wide, palms firing in turn, each shot kicking the arm back as the other drives out. */
@@ -423,9 +448,13 @@ public final class Anims {
             Pose fire = new Pose().at(0, 2.0f, -1.4f).r("torso", 10, 8, 0)
                     .limb("rightArm", -90, 12, 0, 0).limb("leftArm", -90, -12, 0, 0)
                     .limb("rightLeg", 26, 0, 12, 4).limb("leftLeg", -30, 0, -12, 38);
-            a.pose(0, fight(), Ease.LINEAR).pose(3, gather, Ease.OUTQUAD).pose(5, fire, Ease.OUTEXPO);
-            for (int t = 7; t < end - 4; t += 2) a.pose(t, fire.copy().move(t % 4 == 1 ? 0.25f : -0.25f, 0, 0), Ease.LINEAR);   // straining
-            a.pose(end, fight(), Ease.INOUTQUAD);
+            a.pose(0, fight(), Ease.LINEAR).pose(3, gather.past(fight(), 0.2f), Ease.OUTQUAD).pose(5, fire, Ease.OUTEXPO)
+                    .pose(6, fire.copy().move(0, 0.3f, 0.9f), Ease.OUTQUAD);                                   // the beam's kick
+            for (int t = 8; t < end - 4; t += 2) {                                                            // straining against it
+                float s = t % 4 == 0 ? 1 : -1;
+                a.pose(t, fire.copy().move(0.25f * s, 0.15f, 0.4f).r("torso", 10 + s, 8, s).r("head", -2, -8 + 2 * s, 0), Ease.LINEAR);
+            }
+            a.pose(end - 2, fight().past(fire, 0.1f), Ease.INOUTQUAD).pose(end, fight(), Ease.INOUTSINE);
         });
     }
 
@@ -447,15 +476,16 @@ public final class Anims {
     }
 
     /** Explosive wave: curled around the ki, then arms and chest flung open as it bursts out. */
-    public static final KeyframeAnimation KI_WAVE = once(16, a -> {
+    public static final KeyframeAnimation KI_WAVE = once(18, a -> {
         Pose open = new Pose().at(0, 0.4f, 0).r("torso", -16, 0, 0).r("head", -26, 0, 0)
                 .limb("rightArm", -10, 0, 88, 0).limb("leftArm", -10, 0, -88, 0)
                 .limb("rightLeg", 0, 0, 16, 8).limb("leftLeg", 0, 0, -16, 8);
         a.pose(0, fight(), Ease.LINEAR)
                 .pose(3, new Pose().at(0, 2.6f, 0).r("torso", 24, 0, 0).limb("rightArm", -50, -40, -6, 110).limb("leftArm", -50, 40, 6, 110)
                         .limb("rightLeg", -4, 0, 10, 50).limb("leftLeg", -4, 0, -10, 50), Ease.OUTQUAD)
-                .pose(5, open, Ease.OUTEXPO).pose(11, open, Ease.LINEAR)
-                .pose(16, fight(), Ease.INOUTQUAD);
+                .pose(5, open, Ease.OUTEXPO).pose(6, open.copy().r("torso", -20, 0, 0).limb("rightArm", -10, 0, 96, 0).limb("leftArm", -10, 0, -96, 0), Ease.OUTQUAD)
+                .pose(11, open, Ease.INOUTSINE)
+                .pose(15, fight().past(open, 0.1f), Ease.INOUTQUAD).pose(18, fight(), Ease.INOUTSINE);
     });
 
     /** Self technique (heal, sense, absorb...): feet together, two fingers to the brow, head bowed in focus. */
@@ -491,24 +521,30 @@ public final class Anims {
     });
 
     /** Light hit: the head snaps aside, the torso recoils half a step back, then the guard comes back up. */
-    public static final KeyframeAnimation HIT_LIGHT = once(10, a -> {
+    public static final KeyframeAnimation HIT_LIGHT = once(12, a -> {
         Pose hit = new Pose().at(0, 1.6f, 1.2f).r("torso", -14, 8, 0).r("head", -22, 14, 0)
                 .limb("rightArm", -40, 0, 30, 60).limb("leftArm", -50, 0, -25, 70)
                 .limb("rightLeg", 12, 0, 6, 10).limb("leftLeg", -6, 0, -4, 14);
-        a.pose(0, hit, Ease.OUTEXPO).pose(3, hit.copy().r("torso", -6, 4, 0).r("head", -8, 6, 0), Ease.OUTQUAD).pose(10, fight(), Ease.INOUTQUAD);
+        a.pose(0, fight(), Ease.LINEAR).pose(1, hit, Ease.OUTEXPO)
+                .pose(2, hit.copy().r("torso", -16, 10, 0).r("head", -26, 18, 0), Ease.OUTQUAD)                   // the head whips past
+                .pose(5, hit.copy().r("torso", -4, 2, 0).r("head", -4, 4, 0).move(0, 0.3f, -0.6f), Ease.INOUTSINE)
+                .pose(9, fight().past(hit, 0.12f), Ease.INOUTQUAD).pose(12, fight(), Ease.INOUTSINE);
     });
 
     /** Heavy hit: snapped back off the feet, arms flung, then a stagger forward before the guard returns. */
-    public static final KeyframeAnimation HIT_HEAVY = once(18, a -> {
+    public static final KeyframeAnimation HIT_HEAVY = once(20, a -> {
         Pose blown = new Pose().at(0, 1.0f, 2.8f).r("torso", -32, -10, 0).r("head", -42, -14, 0)
                 .limb("rightArm", -120, 0, 40, 20).limb("leftArm", -110, 0, -45, 20)
                 .limb("rightLeg", -24, 0, 8, 0).limb("leftLeg", 16, 0, -8, 30);
         Pose stagger = new Pose().at(0, 2.2f, 1.0f).r("torso", 18, 6, 0).r("head", 10, 0, 0)
                 .limb("rightArm", 10, 0, 12, 20).limb("leftArm", 10, 0, -12, 20)
                 .limb("rightLeg", 10, 0, 6, 35).limb("leftLeg", -14, 0, -6, 35);
-        a.pose(0, blown, Ease.OUTEXPO).pose(4, blown.copy().r("torso", -36, -10, 0).move(0, 0.4f, 0.4f), Ease.OUTQUAD)
-                .pose(8, stagger, Ease.INOUTQUAD).pose(12, stagger.copy().r("torso", 10, 4, 0), Ease.INOUTQUAD)
-                .pose(18, fight(), Ease.INOUTQUAD);
+        a.pose(0, fight(), Ease.LINEAR).pose(1, blown, Ease.OUTEXPO)
+                .pose(4, blown.copy().r("torso", -38, -12, 0).r("head", -48, -16, 0).move(0, 0.4f, 0.6f), Ease.OUTQUAD)
+                .pose(8, stagger, Ease.INOUTQUAD)
+                .pose(11, stagger.copy().r("torso", 22, 8, 0).move(0, 0.4f, -0.4f), Ease.INOUTSINE)            // nearly falls forward
+                .pose(14, stagger.copy().r("torso", 10, 2, 0), Ease.INOUTSINE)
+                .pose(20, fight(), Ease.INOUTQUAD);
     });
 
     /** Dazed (CX-19e): hunched over, arms slack, swaying on unsteady legs while a stun lasts. */
@@ -533,7 +569,10 @@ public final class Anims {
     public static final KeyframeAnimation COMBAT_STANCE = loop(24, a -> {
         Pose s = fight().freeing("head", "rightLeg", "leftLeg").at(0, 0.5f, 0);
         a.pose(0, s, Ease.INOUTSINE)
-                .pose(12, s.copy().move(0, 0.45f, 0).limb("rightArm", -33, -8, 13, 115).limb("leftArm", -56, 10, -9, 90).r("torso", 7, -16, 0), Ease.INOUTSINE)
+                .pose(6, s.copy().move(0, 0.5f, 0).r("torso", 7, -16, 0), Ease.INOUTSINE)
+                .pose(9, s.copy().move(0, 0.45f, 0).limb("rightArm", -32, -8, 13, 114).limb("leftArm", -55, 10, -9, 88).r("torso", 7, -15, 1), Ease.INOUTSINE)
+                .pose(14, s.copy().move(0, 0.1f, 0).limb("rightArm", -38, -8, 12, 120).limb("leftArm", -62, 10, -8, 94), Ease.INOUTSINE)
+                .pose(18, s.copy().move(0, 0.5f, 0).r("torso", 6, -17, -1), Ease.INOUTSINE)
                 .pose(24, s, Ease.INOUTSINE);
     });
 
@@ -553,27 +592,33 @@ public final class Anims {
         a.rot("leftArm", 0, 0, 0, -5, Ease.INOUTSINE).rot("leftArm", 8, 8, 0, -2, Ease.INOUTSINE).rot("leftArm", 20, 0, 0, -5, Ease.INOUTSINE);
     });
 
-    /** Dash: a burst lean with the arms swept back. */
-    public static final KeyframeAnimation DASH = once(8, a -> {
-        a.rot("torso", 0, 22, 0, 0, Ease.OUTEXPO).rot("torso", 8, 0, 0, 0, Ease.INOUTQUAD);
-        a.rot("rightArm", 0, 45, 0, 18, Ease.OUTEXPO).rot("rightArm", 8, 0, 0, 5, Ease.INOUTQUAD);
-        a.rot("leftArm", 0, 45, 0, -18, Ease.OUTEXPO).rot("leftArm", 8, 0, 0, -5, Ease.INOUTQUAD);
+    /** Dash: a crouch for the push, then a burst lean with the arms swept back and the legs trailing, and a skid back up. */
+    public static final KeyframeAnimation DASH = once(11, a -> {
+        Pose push = new Pose().at(0, 2.0f, 0.4f).r("torso", 18, 0, 0).limb("rightArm", 20, 0, 14, 40).limb("leftArm", 20, 0, -14, 40)
+                .limb("rightLeg", 10, 0, 6, 40).limb("leftLeg", -16, 0, -6, 46);
+        Pose burst = new Pose().at(0, 0.6f, -1.6f).tilt(22).r("torso", 10, 0, 0).r("head", -18, 0, 0)
+                .limb("rightArm", 56, 0, 18, 10).limb("leftArm", 56, 0, -18, 10).limb("rightLeg", 34, 0, 4, 20).limb("leftLeg", -10, 0, -4, 50);
+        a.pose(0, new Pose(), Ease.LINEAR).pose(1, push, Ease.OUTQUAD).pose(3, burst, Ease.OUTEXPO)
+                .pose(4, burst.past(push, 0.08f), Ease.OUTQUAD).pose(7, burst.copy().tilt(8).at(0, 1.2f, 0), Ease.INOUTSINE)
+                .pose(11, new Pose(), Ease.INOUTSINE);
     });
 
 
-    /** Rush: a shoulder-first charge, both fists driven forward. */
-    public static final KeyframeAnimation RUSH = once(12, a -> {
-        a.tilt(0, 0, 0, Ease.LINEAR).tilt(3, 28, 0, Ease.OUTEXPO).tilt(12, 0, 0, Ease.INOUTQUAD);
-        a.pos("body", 0, 0, 0, 0, Ease.LINEAR).pos("body", 3, 0, 0.5f, -4.0f, Ease.OUTEXPO).pos("body", 12, 0, 0, 0, Ease.INOUTQUAD);
-        a.rot("rightArm", 0, 40, 0, 15, Ease.LINEAR).rot("rightArm", 3, -95, 8, -6, Ease.OUTEXPO).rot("rightArm", 12, -20, 0, 6, Ease.INOUTQUAD);
-        a.rot("leftArm", 0, 40, 0, -15, Ease.LINEAR).rot("leftArm", 3, -90, -8, 6, Ease.OUTEXPO).rot("leftArm", 12, -20, 0, -6, Ease.INOUTQUAD);
-        a.rot("rightLeg", 0, 0, 0, 0, Ease.LINEAR).rot("rightLeg", 3, 35, 0, 0, Ease.OUTEXPO).rot("rightLeg", 12, 0, 0, 0, Ease.INOUTQUAD);
+    /** Rush: coiled behind the shoulder, then a shoulder-first charge with both fists driven forward, skidding to a stop. */
+    public static final KeyframeAnimation RUSH = once(14, a -> {
+        Pose coil = new Pose().at(0, 2.2f, 0.8f).r("torso", 16, -24, 0).limb("rightArm", 30, 10, 20, 100).limb("leftArm", -40, 20, -10, 110)
+                .limb("rightLeg", 18, 0, 8, 40).limb("leftLeg", -20, 0, -6, 44);
+        Pose charge = new Pose().at(0, 0.8f, -4.0f).tilt(28).r("torso", 8, 10, 0).r("head", -24, 0, 0)
+                .limb("rightArm", -95, 8, 0, 6).limb("leftArm", -90, -8, 0, 6).limb("rightLeg", 36, 0, 4, 14).limb("leftLeg", -18, 0, -4, 46);
+        a.pose(0, new Pose(), Ease.LINEAR).pose(2, coil, Ease.OUTQUAD).pose(4, charge, Ease.OUTEXPO)
+                .pose(5, charge.past(coil, 0.06f), Ease.OUTQUAD).pose(9, charge.copy().tilt(10).at(0, 1.6f, -1.0f), Ease.INOUTSINE)
+                .pose(14, new Pose(), Ease.INOUTSINE);
     });
 
     /** Sweep: dropped into a crouch, the leg swept round low across the ground. */
-    public static final KeyframeAnimation SWEEP = once(14, a -> {
-        a.pos("body", 0, 0, 0, 0, Ease.LINEAR).pos("body", 3, 0, 8.5f, 0, Ease.OUTEXPO).pos("body", 10, 0, 8.5f, 0, Ease.LINEAR).pos("body", 14, 0, 0, 0, Ease.INOUTQUAD);
-        a.rot("body", 0, 0, 0, 0, Ease.LINEAR).rot("body", 3, 0, -40, 0, Ease.OUTQUAD).rot("body", 9, 0, 120, 0, Ease.OUTEXPO).rot("body", 14, 0, 0, 0, Ease.INOUTQUAD);
+    public static final KeyframeAnimation SWEEP = once(16, a -> {
+        a.pos("body", 0, 0, 0, 0, Ease.LINEAR).pos("body", 3, 0, 8.5f, 0, Ease.OUTEXPO).pos("body", 10, 0, 8.5f, 0, Ease.LINEAR).pos("body", 13, 0, -0.6f, 0, Ease.OUTQUAD).pos("body", 16, 0, 0, 0, Ease.INOUTSINE);
+        a.rot("body", 0, 0, 0, 0, Ease.LINEAR).rot("body", 3, 0, -40, 0, Ease.OUTQUAD).rot("body", 9, 0, 120, 0, Ease.OUTEXPO).rot("body", 10, 0, 128, 0, Ease.OUTQUAD).rot("body", 16, 0, 0, 0, Ease.INOUTQUAD);
         a.rot("rightLeg", 0, 0, 0, 0, Ease.LINEAR).rot("rightLeg", 3, -80, 0, 55, Ease.OUTQUAD).rot("rightLeg", 9, -80, 0, 70, Ease.LINEAR).rot("rightLeg", 14, 0, 0, 0, Ease.INOUTQUAD);
         a.bend("leftLeg", 0, 0, Ease.LINEAR).bend("leftLeg", 3, 110, Ease.OUTQUAD).bend("leftLeg", 10, 110, Ease.LINEAR).bend("leftLeg", 14, 0, Ease.INOUTQUAD);
         a.rot("rightArm", 3, -20, 0, 70, Ease.OUTQUAD).rot("rightArm", 14, 0, 0, 5, Ease.INOUTQUAD);
@@ -584,11 +629,14 @@ public final class Anims {
 
     /** Side step: a hop to one side ({@code side} -1 left, 1 right), the body leaning into it. */
     private static KeyframeAnimation sideStep(int side) {
-        return once(8, a -> {
-            a.rot("body", 0, 0, 0, 0, Ease.LINEAR).rot("body", 2, 0, 0, -28 * side, Ease.OUTEXPO).rot("body", 8, 0, 0, 0, Ease.INOUTQUAD);
-            a.pos("body", 0, 0, 0, 0, Ease.LINEAR).pos("body", 2, -3.0f * side, 1.0f, 0, Ease.OUTEXPO).pos("body", 8, 0, 0, 0, Ease.INOUTQUAD);
+        return once(10, a -> {
+            a.rot("body", 0, 0, 0, 0, Ease.LINEAR).rot("body", 2, 0, 0, -28 * side, Ease.OUTEXPO).rot("body", 10, 0, 0, 0, Ease.INOUTQUAD);
+            a.pos("body", 0, 0, 0, 0, Ease.LINEAR).pos("body", 2, -3.0f * side, 1.0f, 0, Ease.OUTEXPO);
             a.rot("rightArm", 2, -40, 0, 25, Ease.OUTEXPO).rot("rightArm", 8, 0, 0, 5, Ease.INOUTQUAD);
             a.rot("leftArm", 2, -40, 0, -25, Ease.OUTEXPO).rot("leftArm", 8, 0, 0, -5, Ease.INOUTQUAD);
+            a.bend("rightLeg", 0, 0, Ease.LINEAR).bend("rightLeg", 2, 40, Ease.OUTEXPO).bend("rightLeg", 6, 30, Ease.INOUTSINE).bend("rightLeg", 10, 0, Ease.INOUTSINE);
+            a.bend("leftLeg", 0, 0, Ease.LINEAR).bend("leftLeg", 2, 40, Ease.OUTEXPO).bend("leftLeg", 6, 30, Ease.INOUTSINE).bend("leftLeg", 10, 0, Ease.INOUTSINE);
+            a.pos("body", 6, -0.6f * side, 1.4f, 0, Ease.INOUTSINE).pos("body", 10, 0, 0, 0, Ease.INOUTSINE);   // landing into the knees
         });
     }
 

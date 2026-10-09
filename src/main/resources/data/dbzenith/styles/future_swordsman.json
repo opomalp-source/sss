@@ -1,3 +1,4 @@
-{"master": "future_trunks", "color": "#6A8AD8",
- "slots": {"idle": "style_trunks_idle", "walk": "style_trunks_walk", "sprint": "style_trunks_sprint", "charge": "style_trunks_charge", "flight": "style_trunks_flight", "fight_stance": "style_trunks_fight", "fight_steps": "style_trunks_steps"},
+{"master": "future_trunks",
+ "color": "#6A8AD8",
+ "slots": {"idle": "style_trunks_idle", "walk": "style_trunks_walk", "sprint": "style_trunks_sprint", "hover": "style_trunks_hover", "flight": "style_trunks_flight", "fast_flight": "style_trunks_fast", "charge": "style_trunks_charge", "fight_stance": "style_trunks_fight", "fight_steps": "style_trunks_steps"},
  "requirements": {"battle_power": 25000, "affinity": 4, "training_minutes": 10, "items": [{"item": "minecraft:iron_sword", "count": 1}]}}

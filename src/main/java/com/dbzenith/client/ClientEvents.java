@@ -117,6 +117,19 @@ public final class ClientEvents {
             mc.setScreen(new com.dbzenith.client.screen.MoveListScreen(null).onTab(name.length() > 8 && Character.isDigit(name.charAt(8)) ? name.charAt(8) - '0' : 0));
             delayTicks = Math.max(delayTicks, 6);
         }
+        if (name.contains("motionreload")) com.dbzenith.client.motion.MotionData.reloadNow();   // CX-31
+        if (name.startsWith("posestrip_") && !(mc.screen instanceof com.dbzenith.client.screen.PoseSheetScreen ps0 && ps0.key.equals(name))) {
+            // posestrip_<clip>_<turn>[_<pitch>]: one clip at eight moments (a film strip), for judging motion
+            String rest = name.substring("posestrip_".length());
+            String[] parts = rest.split("_");
+            int k = parts.length;
+            while (k > 0 && parts[k - 1].matches("-?[0-9]+")) k--;
+            String clip = String.join("_", java.util.Arrays.copyOfRange(parts, 0, k));
+            float turn = k < parts.length ? Integer.parseInt(parts[k]) : 30f;
+            float pitch = k + 1 < parts.length ? Integer.parseInt(parts[k + 1]) : 0f;
+            mc.setScreen(new com.dbzenith.client.screen.PoseSheetScreen(name, clip, com.dbzenith.client.screen.PoseSheetScreen.stripCells(clip, 8), 0f, turn, pitch, null));
+            delayTicks = Math.max(delayTicks, 4);
+        }
         if (name.startsWith("posesheet") && !(mc.screen instanceof com.dbzenith.client.screen.PoseSheetScreen ps && ps.key.equals(name))) {
             boolean npc = name.startsWith("posesheetnpc_");                     // posesheet[npc]_<slot | clips_<prefix>>_<phase%>[_<turn>]
             String[] parts = name.substring(name.indexOf('_') + 1).split("_");
