@@ -54,12 +54,12 @@
       },
       "motion": {
         "scroll": 1.5,
-        "flicker": 0.3,
+        "flicker": 0.21,
         "streaks": 0.4,
         "streakSpeed": 2.5,
         "stretch": 0.5,
         "tallFlames": 0.7,
-        "warp": 0.4,
+        "warp": 0.3,
         "fps": 12,
         "smear": 0.085
       },
@@ -89,12 +89,12 @@
       },
       "motion": {
         "scroll": 1.95,
-        "flicker": 0.3,
+        "flicker": 0.21,
         "streaks": 0.4,
         "streakSpeed": 2.5,
         "stretch": 0.5,
         "tallFlames": 0.7,
-        "warp": 0.4,
+        "warp": 0.3,
         "fps": 12,
         "smear": 0.085
       },
@@ -107,7 +107,7 @@
   ],
   "react": {
     "charge": {
-      "shake": 0.051
+      "shake": 0.025
     }
   }
 }

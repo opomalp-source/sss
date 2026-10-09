@@ -49,12 +49,12 @@
       },
       "motion": {
         "scroll": 1.8,
-        "flicker": 0.35,
+        "flicker": 0.245,
         "streaks": 0.5,
         "streakSpeed": 3.0,
         "stretch": 0.5,
         "tallFlames": 0.7,
-        "warp": 0.35,
+        "warp": 0.3,
         "fps": 15,
         "smear": 0.085
       },
@@ -84,12 +84,12 @@
       },
       "motion": {
         "scroll": 2.34,
-        "flicker": 0.35,
+        "flicker": 0.245,
         "streaks": 0.5,
         "streakSpeed": 3.0,
         "stretch": 0.5,
         "tallFlames": 0.7,
-        "warp": 0.35,
+        "warp": 0.3,
         "fps": 15,
         "smear": 0.085
       },

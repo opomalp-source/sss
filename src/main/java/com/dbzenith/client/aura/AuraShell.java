@@ -190,9 +190,48 @@ final class AuraShell {
     }
 
     private void put(VertexConsumer vc, int k, float ox, float oy, float oz, float scale, float u, float v, int alpha) {
-        vc.vertex(ox + x[k] * scale, oy + centerY + (y[k] - centerY) * scale, oz + z[k] * scale)
+        float px = ox + x[k] * scale, py = oy + centerY + (y[k] - centerY) * scale, pz = oz + z[k] * scale;
+        float qx = nx[k], qy = ny[k], qz = nz[k];
+        if (tiltSin != 0) {
+            tilt(px - pivotX, py - pivotY, pz - pivotZ);
+            px = pivotX + T[0];
+            py = pivotY + T[1];
+            pz = pivotZ + T[2];
+            tilt(qx, qy, qz);
+            qx = T[0];
+            qy = T[1];
+            qz = T[2];
+        }
+        vc.vertex(px, py, pz)
                 .color(255, 255, 255, alpha).uv(u, v).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(LightTexture.FULL_BRIGHT)
-                .normal(nx[k], ny[k], nz[k]).endVertex();
+                .normal(qx, qy, qz).endVertex();
+    }
+
+    // The lean towards the eye (CX-26): looked down on, a drawn aura still shows its flame outline, so the shell is
+    // turned about a level axis through its middle, its top away from the eye, by part of the angle the eye looks down
+    // at it. Seen from above it then keeps its flames instead of flattening into a ring round the feet. Set per aura
+    // before it is written; tiltSin 0 leaves it upright.
+    private static float pivotX, pivotY, pivotZ, dirX, dirZ, tiltSin, tiltCos = 1;
+    private static final float[] T = new float[3];
+
+    /** Leans the shells written next: pivot camera-relative, (dx, dz) the level direction from the eye, angle in radians. */
+    static void setTilt(float px, float py, float pz, float dx, float dz, float angle) {
+        pivotX = px;
+        pivotY = py;
+        pivotZ = pz;
+        dirX = dx;
+        dirZ = dz;
+        tiltSin = Mth.sin(angle);
+        tiltCos = Mth.cos(angle);
+    }
+
+    /** Turns (x, y, z) in the plane of up and the eye's direction: up goes towards the direction, away from the eye. */
+    private static void tilt(float x, float y, float z) {
+        float d = x * dirX + z * dirZ;
+        float u = y * tiltCos - d * tiltSin, d2 = y * tiltSin + d * tiltCos;
+        T[0] = x + dirX * (d2 - d);
+        T[1] = u;
+        T[2] = z + dirZ * (d2 - d);
     }
 
     /**
@@ -215,8 +254,19 @@ final class AuraShell {
     private void plain(VertexConsumer vc, Matrix4f m, Matrix3f n, int k, float ox, float oy, float oz, float scale, boolean glow,
                        int core, int mid, int edge, float coreAlpha, float edgeAlpha, float fade) {
         float px = ox + x[k] * scale, py = oy + centerY + (y[k] - centerY) * scale, pz = oz + z[k] * scale;
+        float qx = nx[k], qy = ny[k], qz = nz[k];
+        if (tiltSin != 0) {
+            tilt(px - pivotX, py - pivotY, pz - pivotZ);
+            px = pivotX + T[0];
+            py = pivotY + T[1];
+            pz = pivotZ + T[2];
+            tilt(qx, qy, qz);
+            qx = T[0];
+            qy = T[1];
+            qz = T[2];
+        }
         float len = Mth.sqrt(px * px + py * py + pz * pz);
-        float facing = len < 1e-4f ? 1 : Math.abs(nx[k] * px + ny[k] * py + nz[k] * pz) / len;
+        float facing = len < 1e-4f ? 1 : Math.abs(qx * px + qy * py + qz * pz) / len;
         float depth = 1 - Mth.sqrt(Math.max(0, 1 - facing * facing));
         int rgb;
         float a;

@@ -49,7 +49,7 @@
       },
       "motion": {
         "scroll": 3.0,
-        "flicker": 0.5,
+        "flicker": 0.3,
         "streaks": 0.9,
         "streakSpeed": 6.0,
         "stretch": 0.5,
@@ -84,7 +84,7 @@
       },
       "motion": {
         "scroll": 3.9,
-        "flicker": 0.5,
+        "flicker": 0.3,
         "streaks": 0.9,
         "streakSpeed": 6.0,
         "stretch": 0.5,

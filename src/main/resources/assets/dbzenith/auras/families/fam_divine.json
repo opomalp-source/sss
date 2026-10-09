@@ -17,9 +17,9 @@
     "rows": 1.5
   },
   "motion": {
-    "pulse": 0.03,
+    "pulse": 0.025,
     "pulseSpeed": 1.8,
-    "sway": 0.03
+    "sway": 0.025
   },
   "layers": [
     {
@@ -62,7 +62,7 @@
       },
       "motion": {
         "scroll": 0.9,
-        "flicker": 0.12,
+        "flicker": 0.084,
         "streaks": 0.35,
         "stretch": 0.5,
         "tallFlames": 0.5,
@@ -96,7 +96,7 @@
       },
       "motion": {
         "scroll": 1.17,
-        "flicker": 0.12,
+        "flicker": 0.084,
         "streaks": 0.35,
         "stretch": 0.5,
         "tallFlames": 0.5,

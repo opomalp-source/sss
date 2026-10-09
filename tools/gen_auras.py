@@ -561,10 +561,31 @@ def flame_proportions(obj):
     return obj
 
 
+def calm(obj):
+    """No aura wobbles hard (CX-26): caps on breathing, sway, flicker, flame sway and charge shake, so the wild families
+    (roar, majin, dark) stay lively without jelly. Applies to a file's own values and its tiers."""
+    mo = obj.get('motion')
+    if isinstance(mo, dict):
+        if 'pulse' in mo: mo['pulse'] = min(mo['pulse'], 0.025)
+        if 'pulseSpeed' in mo: mo['pulseSpeed'] = min(mo['pulseSpeed'], 3.5)
+        if 'sway' in mo: mo['sway'] = min(mo['sway'], 0.025)
+    for l in obj.get('layers', []):
+        lm = l.get('motion', {})
+        if 'flicker' in lm: lm['flicker'] = round(min(lm['flicker'] * 0.7, 0.3), 3)
+        if 'warp' in lm: lm['warp'] = min(lm['warp'], 0.3)
+    ch = obj.get('react', {}).get('charge', {})
+    if 'shake' in ch: ch['shake'] = min(ch['shake'], 0.025)
+    if 'wild' in ch: ch['wild'] = min(ch['wild'], 1.3)
+    for t in obj.get('tiers', []):
+        calm(t)
+    return obj
+
+
 def write(path, obj):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     if 'auras' in path and 'families' in path or os.path.basename(path) == 'kaioken.json':
         obj = flame_proportions(json.loads(json.dumps(obj)))
+    obj = calm(json.loads(json.dumps(obj)))
     with open(path, 'w') as f:
         json.dump(obj, f, indent=2)
         f.write('\n')

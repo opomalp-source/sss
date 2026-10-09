@@ -52,7 +52,7 @@
       },
       "motion": {
         "scroll": 1.4,
-        "flicker": 0.2,
+        "flicker": 0.14,
         "streaks": 0.7,
         "streakSpeed": 3.5,
         "stretch": 0.5,
@@ -87,7 +87,7 @@
       },
       "motion": {
         "scroll": 1.82,
-        "flicker": 0.2,
+        "flicker": 0.14,
         "streaks": 0.7,
         "streakSpeed": 3.5,
         "stretch": 0.5,
@@ -105,7 +105,7 @@
   ],
   "react": {
     "charge": {
-      "shake": 0.032
+      "shake": 0.025
     }
   }
 }

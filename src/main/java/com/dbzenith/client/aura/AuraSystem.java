@@ -323,6 +323,7 @@ public final class AuraSystem {
 
         LEFT.set(camera.getLeftVector());
         UP.set(camera.getUpVector());
+        LOOK.set(camera.getLookVector());
         // At this stage Minecraft has already put the camera's turn on its model-view matrix (for the clouds and the
         // weather), so everything here is drawn with an identity pose; multiplying the stage's pose in again turned
         // the camera twice and threw the aura off the screen.
@@ -481,7 +482,7 @@ public final class AuraSystem {
         float radius = sl.radius, height = sl.height, bottom = sl.bottom;
         float wild = sl.wild;
         float bright = rc.chargeGlow * sl.charge + rc.hitBright * s.flare + rc.burstBright * sl.flash;
-        float peak = d.peak * (1 + 0.15f * Mth.sin(ph * 6.1f + sl.seed) + 0.1f * Mth.sin(ph * 13.7f + sl.seed * 2) + 0.35f * sl.charge);
+        float peak = d.peak * (1 + 0.08f * Mth.sin(ph * 3.1f + sl.seed) + 0.04f * Mth.sin(ph * 5.3f + sl.seed * 2) + 0.35f * sl.charge);   // a slow rise and fall, no quiver
         int detail = DBZConfig.CLIENT.auraDetail.get();
         float lod = dist < 14 ? 1f : dist < 36 ? 0.62f : 0.4f;
         if (detail == 0) lod *= 0.65f;
@@ -494,6 +495,7 @@ public final class AuraSystem {
         }
         centerX = ox;
         centerZ = oz;
+        lean(radius, bottom, height, ox, oy, oz);
 
         sl.x = ox;
         sl.y = oy;
@@ -604,6 +606,35 @@ public final class AuraSystem {
         SHELL.emit(bb, ox, oy, oz, scale, 255);
         BufferUploader.drawWithShader(bb.end());
     }
+
+    private static final org.joml.Vector3f LOOK = new org.joml.Vector3f();
+
+    /**
+     * Leans the aura away from the eye by part of the angle the eye looks down on it (CX-26), about a level axis through
+     * its middle, so from above it still shows its flame outline round the fighter (upright, it flattened into a ring
+     * round the feet with the tip floating over the head). Nothing goes below the feet: the bottom swings up towards the
+     * eye. Off while the eye is inside or right at the aura, and when looking up at it.
+     */
+    private static void lean(float radius, float bottom, float height, float ox, float oy, float oz) {
+        float my = oy + bottom + height * 0.42f;                                 // the pivot, camera-relative
+        float hd = Mth.sqrt(ox * ox + oz * oz);
+        float dx, dz;
+        if (hd > 0.3f) {
+            dx = ox / hd;
+            dz = oz / hd;
+        } else {                                                                 // straight overhead: the way the camera faces
+            float l = Mth.sqrt(LOOK.x * LOOK.x + LOOK.z * LOOK.z);
+            dx = l > 1e-3f ? LOOK.x / l : 0f;
+            dz = l > 1e-3f ? LOOK.z / l : 1f;
+        }
+        float down = (float) Math.atan2(-my, Math.max(hd, 0.001f));            // how steeply the eye looks down on it
+        float out = AuraShell.smooth(1.4f, 2.4f, Mth.sqrt(ox * ox + my * my + oz * oz) / Math.max(0.1f, radius));
+        float angle = LEAN * Math.max(0f, down) * out;
+        AuraShell.setTilt(ox, my, oz, dx, dz, angle);
+    }
+
+    /** How much of the eye's downward angle the aura leans by. */
+    private static final float LEAN = 0.75f;
 
     /** The aura being drawn: its feet relative to the eye, for the shader to lay its flames out from the eye's side. */
     private static float centerX, centerZ;

@@ -2230,3 +2230,17 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - Height breathing reduced (pulse factor 1.5, was 2.5).
 - **Checked in a dev client:** every angle including straight down, against clouds, Kaioken 1/10/20. 209 GameTests.
 - Known: from about 30° above, the tip can show as small arcs above the head.
+
+## 2026-10-09 — CX-26: the aura leans to the eye, calmer everywhere (v0.81.0)
+- **Looked down on, the aura fell apart** (user's screenshot): an upright 3D egg seen from above shows its outline as a
+  ring round the feet, with the tip as loose arcs over the head and the flame tongues pointing away from the eye. The
+  shell is now turned about a level axis through its middle (42% up), top away from the eye, by 0.75 of the angle the
+  eye looks down at it (`AuraSystem.lean`, `AuraShell.setTilt`; positions and normals both, shader and plain paths).
+  From above it keeps its whole flame outline round the fighter, like a drawn aura; the bottom swings up towards the
+  eye, so nothing sinks into the ground. Off when looking up, and faded out within 1.4–2.4 radii of the eye (first
+  person and close cameras unchanged).
+- **Less wobble:** `gen_auras.py calm()` caps every generated file: breathing 0.025 at most 3.5/s, sway 0.025,
+  flicker x0.7 (max 0.3), flame sway (warp) 0.3, charge shake 0.025 and wildness 1.3. The peak flame's height now
+  rises and falls slowly instead of quivering (13.7/s term gone).
+- **Checked in a dev client:** pitch 0/30/45/60/80 idle and charging, looking up, first person, SS2, Blue, Blue +
+  Kaioken 20 from above. 209 GameTests.
