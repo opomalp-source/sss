@@ -31,7 +31,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Afterimages: fading, aura-tinted copies of a fighter left along the path of a dash or full-speed flight. Each copy
+ * Afterimages: fading, aura-tinted copies of a fighter left along the path of a dash (not in flight: removed in CX-32). Each copy
  * is the player's own model in its current pose, drawn where the player was a few ticks ago.
  */
 @Mod.EventBusSubscriber(modid = DBZenith.MOD_ID, value = Dist.CLIENT)

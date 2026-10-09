@@ -2334,3 +2334,8 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   sheet's figures sized for strips. StyleTests adjusted (every style now fills every slot).
 - **Checked in a dev client:** film strips of every default clip, side-by-side pose sheets of all styles per slot,
   frame sequences of the combat clips. 209 GameTests.
+
+## 2026-10-09 — CX-32: no afterimages in flight (v0.85.1)
+- At the user's request, flying leaves no afterimages at all: full-speed flight no longer starts a trail (motion
+  engine and the old flight clips), and a dash in the air leaves none either. Dashes on the ground and the fusion
+  dance keep theirs. 209 GameTests.
