@@ -1,0 +1,19 @@
+// Offline hair sheets: gradlew -I tools/hair-sheet.init.gradle hairSheet -PhairOut=<folder> [-PhairArgs="only=SPIKY views=4"]
+allprojects {
+    afterEvaluate {
+        tasks.register('compileHairSheet', JavaCompile) {
+            dependsOn tasks.named('classes')
+            source = project.fileTree(project.file('tools')) { include 'HairSheet.java' }
+            classpath = sourceSets.main.runtimeClasspath
+            destinationDirectory = layout.buildDirectory.dir('hair-sheet/classes')
+            javaCompiler = javaToolchains.compilerFor { languageVersion = JavaLanguageVersion.of(17) }
+        }
+        tasks.register('hairSheet', JavaExec) {
+            dependsOn tasks.named('compileHairSheet')
+            classpath = files(layout.buildDirectory.dir('hair-sheet/classes')) + sourceSets.main.runtimeClasspath
+            mainClass = 'com.dbzenith.client.hair.HairSheet'
+            args([project.findProperty('hairOut') ?: project.file('build/hair-sheet').absolutePath] + ((project.findProperty('hairArgs') ?: '').tokenize(' ')))
+            systemProperty 'java.awt.headless', 'true'
+        }
+    }
+}

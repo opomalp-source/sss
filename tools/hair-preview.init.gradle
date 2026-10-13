@@ -10,7 +10,7 @@ allprojects {
         tasks.register('hairPreview', JavaExec) {
             dependsOn tasks.named('compileHairPreview')
             classpath = files(layout.buildDirectory.dir('hair-preview/classes')) + sourceSets.main.runtimeClasspath
-            mainClass = 'com.dbzenith.client.render.HairPreview'
+            mainClass = 'com.dbzenith.client.hair.HairPreview'
             args project.file('../outputs').absolutePath
             systemProperty 'java.awt.headless', 'true'
         }

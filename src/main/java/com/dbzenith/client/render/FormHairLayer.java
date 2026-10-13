@@ -1,13 +1,14 @@
 package com.dbzenith.client.render;
 
 import com.dbzenith.DBZenith;
-import com.dbzenith.appearance.HairCode;
+import com.dbzenith.client.hair.HairCodes;
+import com.dbzenith.client.hair.HairRender;
+import com.dbzenith.client.hair.HairShape;
+import com.dbzenith.client.hair.HairSim;
 import com.dbzenith.client.ClientPublicStates;
 import com.dbzenith.network.PublicStatePacket;
 import com.dbzenith.transform.Form;
 import com.dbzenith.transform.Forms;
-import com.dbzenith.appearance.HairCode;
-import java.util.List;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.PlayerModel;
@@ -21,7 +22,6 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -32,12 +32,6 @@ import java.util.Map;
 public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
     private static final ResourceLocation TEXTURE = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/form_hair.png");
     private static final ResourceLocation TEXTURE_HD = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/form_hair_hd.png");
-    private static final Map<String, String> FORM_HAIR = new LinkedHashMap<>(32, 0.75f, true) {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<String, String> e) {
-            return size() > 64;
-        }
-    };
 
     private final FormHairModel model;
 
@@ -46,11 +40,6 @@ public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         this.model = new FormHairModel(models.bakeLayer(FormHairModel.LAYER));
     }
 
-    /** The hair code shown for a character in a form (cached: deriving it decodes and re-encodes the strands). */
-    public static String hairFor(String baseCode, Form form) {
-        if (form.hairStyle() == Form.HairStyle.NONE) return baseCode;
-        return FORM_HAIR.computeIfAbsent(form.id() + "|" + baseCode, k -> HairCode.forForm(baseCode, form));
-    }
 
     /** When each player began powering up (client ticks), for the flicker. */
     private static final Map<Integer, Float> POWERING_SINCE = new java.util.HashMap<>();
@@ -82,38 +71,29 @@ public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         boolean formHair = form.hairStyle() != Form.HairStyle.NONE && form.hairColor() >= 0;
         HairTransformation.Frame transition = HairTransformation.sample(player, state, partialTick);
         Form shape = transition.target().isEmpty() ? form : Forms.byId(state.form());
-        boolean turban = GearLayer.turban(player);                                // a turban covers the hair
-        HairCode.Preset stock = turban ? null : SculptedHair.presetOf(state.hairCode());
-        List<HairMesh.Segment> mesh;
-        if (turban) mesh = List.of();
-        else if (stock != null) {                                                // a stock style: the character's own look for this form
-            HairLook from = HairLook.of(shape);
-            if (transition.target().isEmpty()) mesh = CharacterHair.mesh(stock, from);
-            else {
-                float p = transition.progress();
-                mesh = CharacterHair.transition(stock, from, HairLook.of(Forms.byId(transition.target())), p * p * (3 - 2 * p));
-            }
-        } else {                                                                  // hair drawn in the editor: raised strand by strand
-            String code = hairFor(state.hairCode(), shape);
-            mesh = HairMesh.of(code);
-            if (!transition.target().isEmpty()) mesh = HairMesh.transition(code, hairFor(state.hairCode(), Forms.byId(transition.target())), transition.progress());
+        HairShape hair;                                                          // the own hair in this form, or on its way to the next
+        if (GearLayer.turban(player)) hair = HairShape.BALD;                     // a turban covers the hair
+        else if (transition.target().isEmpty()) hair = HairCodes.shape(state.hairCode(), shape);
+        else {
+            float p = transition.progress();
+            hair = HairCodes.between(state.hairCode(), shape, Forms.byId(transition.target()), p * p * (3 - 2 * p));
         }
         int hairColor = form.hairColor() >= 0 ? form.hairColor() : state.hairColor();
         boolean goldCharge=state.has(PublicStatePacket.TRANSFORMING)&&HairTransformation.goldTarget(transition.target());
         if(goldCharge) hairColor=HairTransformation.chargeColor(state.hairColor(),Forms.SUPER_SAIYAN.hairColor(),transition.progress(),ageInTicks);
         int eyeColor = form.eyeColor() >= 0 ? form.eyeColor() : state.eyeColor();
-        if (mesh.isEmpty() && eyeColor < 0) return;
+        if (hair.isEmpty() && eyeColor < 0) return;
 
         VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(ArtStyle.hiRes() ? TEXTURE_HD : TEXTURE));
         int hairLight = goldCharge ? (hairColor==state.hairColor()?light:LightTexture.FULL_BRIGHT) : formHair ? LightTexture.FULL_BRIGHT : light;              // transformed hair glows
-        float r = ((hairColor >> 16) & 0xFF) / 255f, g = ((hairColor >> 8) & 0xFF) / 255f, b = (hairColor & 0xFF) / 255f;
-        if (!mesh.isEmpty()) {
-            VertexConsumer hairBuffer = buffers.getBuffer(RenderType.entityCutoutNoCull(HairMesh.MATERIAL));
+        if (!hair.isEmpty()) {
+            VertexConsumer hairBuffer = buffers.getBuffer(RenderType.entityCutoutNoCull(HairRender.MATERIAL));
             pose.pushPose();
             getParentModel().head.translateAndRotate(pose);
-            HairWind.State wind = HairWind.of(player, getParentModel().head, state, formHair, partialTick);
+            float aura = state.powering() ? 1f : formHair ? .3f : 0f;                // an aura lifts the hair
+            float[] live = HairSim.step(player, getParentModel().head, hair, partialTick, aura);
             int tips = !goldCharge && (form.isBase() || form.hairColor() < 0) ? state.highlight() : -1;   // dyed tips, until a form recolours the hair
-            HairMesh.render(pose, hairBuffer, mesh, wind, hairLight, OverlayTexture.NO_OVERLAY, r, g, b, tips);
+            HairRender.render(pose, hairBuffer, hair, live, hairLight, OverlayTexture.NO_OVERLAY, hairColor, tips);
             pose.popPose();
         }
         if (eyeColor >= 0 && !FaceLayer.active(state)) {                         // drawn faces bring their own irises

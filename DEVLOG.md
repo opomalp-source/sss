@@ -2442,3 +2442,36 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   (3,920 cases: built, whole blocks), and its rise check uses the mean height (locks now come and go).
 - **Checked:** the offline sheets of all 19 styles × 7 looks and the growth strips; in the dev client Goku SSJ and
   SSJ2, Vegeta SSJ, Gohan SSJ2, Trunks base and SSJ, Goku SSJ3 front and back.
+
+## 2026-10-13 — CX-35: the hair rebuilt from scratch, and moving (v0.90.0)
+- **The ask** (user: redo the whole hair system from anew, references from the internet; Goku's base was good, the
+  other presets and the transformed hair were not good or accurate; make it dynamic once rebuilt).
+- **References:** the Dragon Ball Wiki (Fandom), above all Yamamuro's Super Saiyan design sheet (Daizenshuu 5: Goku,
+  Gohan, Goten, Vegeta, Future Trunks, Kid Trunks, Vegito, Gotenks) and the infobox art for Goku (base, SSJ2, SSJ3,
+  SSJ4, God, Blue), Vegeta, Gohan, Future Trunks, Broly, Raditz and Beast Gohan, viewed in the browser pane.
+- **New system** (`client/hair`, see docs/HAIR.md); the old one (HairMesh, HairGeometry, HairPresetLibrary,
+  SculptedHair, CharacterHair, HairSculpt, HairWind) is removed:
+  - locks are smooth tapering bands ending in a point (wide across the scalp, thin away from it), their frame carried
+    along the lock; roots darker than tips; over a fitted scalp cut to a real hairline (Vegeta's widow's peak and bare
+    temples, Trunks' sides over the ears, Broly's to the shoulders);
+  - every preset in every look authored again from the references: Super Saiyan Goku a tall flame of tapering spikes
+    with wings and two thin bangs; SSJ2 taller and sharper with the one bang (Gohan's nearly upright); SSJ3 a spiky crest
+    swept back into a waist-length mane with the long bang; SSJ4 the own hair grown wild with a mane; Vegeta a dense
+    flame from the widow's peak, taller as a Super Saiyan and still rigid in the third grade (as in Daima), shaggy with
+    bangs as SSJ4; adult Gohan swept back with his forehead lock; Beast Gohan one towering crest; Broly wild to the
+    shoulders, Legendary a huge mass; Raditz a mane past the knees; Future Trunks straight and parted, spiky with his
+    bangs still hanging as a Super Saiyan; the other cuts rebuilt (a round puff, real long hair, tails that stiffen and
+    flare as a Super Saiyan); Goku's own hair keeps its hand-placed layout;
+  - the look-to-look morph carried over (locks swing round their roots, grow and retract along their paths), now also
+    drawing in along the old path when a lock gets much shorter.
+- **Hair that moves** (`HairSim`): each lock a chain simulated in the head's moving frame, so turning, running,
+  stopping and jumping make it lag, swing and settle; gravity follows the head's tilt; moving air streams it back; an
+  aura lifts it; stiff near the root, looser to the tip, Super Saiyan hair barely giving and long hair swinging;
+  lengths kept; pushed out of the head and the back. Players and NPCs; off with `hairPhysics` and beyond 48 blocks.
+- **Editor hair** becomes a lock per strand on the same renderer and physics; forms still raise it by the code.
+- **Tools:** `tools/HairSheet.java` (`hair-sheet.init.gradle`) renders the sheets from the vertices the renderer
+  emits, lit like Minecraft lights entities; `tools/HairPreview.java` rewritten: 140 looks and 3,920 look-to-look steps
+  draw whole, Super Saiyan 3 grows steadily, editor hair and 18 old saved styles, physics (finite, roots anchored,
+  lengths kept, streaming back when running, settling), the transformation flashes.
+- **Checked:** the sheets for all 19 styles × 7 looks and the growth; in the dev client Vegeta, Future Trunks,
+  Gohan SSJ2 and Raditz (front and back).

@@ -15,7 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 
 /**
  * The fixed parts around the hair: a cap over the skull (hides a Minecraft skin's painted hair under the strands of
- * {@link HairMesh}) and the coloured pupils. Head space: x/z -4..4, y -8..0.
+ * {@link com.dbzenith.client.hair.HairRender}) and the coloured pupils. Head space: x/z -4..4, y -8..0.
  */
 public class FormHairModel {
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(new ResourceLocation(DBZenith.MOD_ID, "form_hair"), "main");

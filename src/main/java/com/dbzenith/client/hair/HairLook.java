@@ -1,4 +1,4 @@
-package com.dbzenith.client.render;
+package com.dbzenith.client.hair;
 
 import com.dbzenith.transform.Form;
 

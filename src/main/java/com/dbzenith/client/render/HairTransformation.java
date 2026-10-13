@@ -15,13 +15,13 @@ public final class HairTransformation {
     private static final class Track { String target="";float time,progress,elapsed; }
     private static final Map<AbstractClientPlayer,Track> TRACKS=new WeakHashMap<>();
     private HairTransformation() {}
-    static boolean goldTarget(String id) {
+    public static boolean goldTarget(String id) {
         return switch(id) {
             case "super_saiyan","super_saiyan_g2","super_saiyan_g3","super_saiyan_2","super_saiyan_3" -> true;
             default -> false;
         };
     }
-    static int chargeColor(int normal,int gold,float progress,float age) {
+    public static int chargeColor(int normal,int gold,float progress,float age) {
         // A readable 0.8-second cycle. Gold holds longer as the transformation stabilizes.
         float duty=3+8*Mth.clamp(progress,0,1);
         return age%16<duty?gold:normal;
