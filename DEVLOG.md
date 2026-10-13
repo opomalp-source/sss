@@ -2558,3 +2558,17 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **Transformation:** all locks move together (no more one-after-another staggering).
 - **Checked:** the sheets of all 19 styles in all 7 looks; in the dev client Goku base, Vegeta, Super Saiyan Goku.
   Hair checks pass.
+
+## 2026-10-13 — CX-35g: model hair, no bald spots (v0.95.0)
+- **The ask** (user: the block hair looked too much like Teardown; in some spots the bald head showed).
+- **Model hair** (`HairRender`): each lock is now a chain of boxes, one per segment, turned along the lock and a step
+  thinner each time, ending in a small square tip, the way Minecraft and the Dragon Block mods build models, instead
+  of hundreds of tiny cubes. A 16 x 16 hair texture at the model's own pixel size (`hair_block.png`, strand columns and
+  gaps, `tools/HairTextureGen.java`) runs along each lock; Minecraft face lighting; roots darker.
+- **No bald spots** (`Sculpt.fill`): every look (including those made by slimming or scaling another, such as God) is
+  walked in 0.55 px steps over the crown and down the brow, sides and back to its hairline, and any spot no lock
+  reaches well over gets a short flat lock underneath. The mohawk keeps its shaved sides. The old crown cover is gone.
+- **Checks:** `HairPreview` now tests 15,246 points over the crown of every look for coverage; the Super Saiyan 3
+  growth check allows short filler locks retracting (within 5%). All pass.
+- **Checked:** offline sheets of the main characters in base, SSJ, SSJ2, SSJ3 and God; in the dev client Goku base and
+  Super Saiyan.

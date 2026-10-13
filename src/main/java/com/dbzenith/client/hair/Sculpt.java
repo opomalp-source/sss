@@ -165,7 +165,66 @@ final class Sculpt {
     boolean dense = true;
 
     HairShape build() {
-        return new HairShape(cap, List.copyOf(locks));
+        List<HairLock> all = new ArrayList<>(locks);
+        if (!locks.isEmpty() && cover) fill(all, cap == HairCap.NONE ? HairCap.of(-7.4, 0, .3, -5.4, -4) : cap);
+        return new HairShape(cap, List.copyOf(all));
+    }
+
+    /** Whether {@link #build} closes every bare spot of the scalp (down to the style's hairline) with short locks. */
+    boolean cover = true;
+
+    /**
+     * Walks the scalp (the top, and the brow, sides and back down to the hairline of {@code line}) in 0.9 px steps and,
+     * wherever no lock covers it, adds a short lock there lying flat along the head: back over the
+     * crown, up from the hairline everywhere else (into the hair above). So no skin ever shows between the locks.
+     */
+    static void fill(List<HairLock> all, HairCap line) {
+        double step = .55, out = .3;                                               // finer than any gap a lock could leave
+        for (double x = -3.6; x <= 3.65; x += step) for (double z = -3.6; z <= 3.65; z += step)       // the top
+            patch(all, x, -8 - out, z, 4, 0);
+        for (double x = -3.6; x <= 3.65; x += step) {                                                 // the brow and the back
+            double mx = Math.abs(x);
+            double front = line.fringe() + line.peak() * Math.max(0, 1 - mx / 1.7) - line.temples() * smooth(1.2, 3.4, mx);
+            for (double y = -7.6; y <= front - .2; y += step) patch(all, x, y, -4 - out, 78, 186);
+            for (double y = -7.6; y <= line.back() - .2; y += step) patch(all, x, y, 4 + out, 74, 6);
+        }
+        for (int s : new int[]{-1, 1}) for (double z = -3.6; z <= 3.65; z += step) {                 // the sides
+            double f = (z + 4) / 8, temple = line.fringe() - line.temples();
+            double end = f < .35 ? temple + (line.sides() - temple) * smooth(0, .35, f) : f < .7 ? line.sides()
+                    : line.sides() + (line.back() - line.sides()) * smooth(.7, 1, f);
+            for (double y = -7.6; y <= end - .2; y += step) patch(all, s * (4 + out), y, z, 74, s * 96);
+        }
+    }
+
+    /** A short flat lock at (x, y, z) unless the hair already covers that spot. */
+    private static void patch(List<HairLock> all, double x, double y, double z, double el, double az) {
+        for (HairLock l : all) if (covers(l, x, y, z, -.3)) return;                 // well inside a lock, or patched
+        Sculpt s = new Sculpt().feel(.9f, .3f);
+        s.lock(x, y, z, el, az, 2.4, 2.8, 0, 0, .35, 1);
+        all.add(0, s.locks.get(0));                                                   // underneath: drawn first
+    }
+
+    /** Whether a lock's boxes come within reach of a point. */
+    static boolean covers(HairLock l, double x, double y, double z) {
+        return covers(l, x, y, z, 0);
+    }
+
+    /** The same with the reach grown (or shrunk) by {@code margin}. */
+    static boolean covers(HairLock l, double x, double y, double z, double margin) {
+        for (int i = 0; i < HairLock.KNOTS - 1; i++) {
+            double ax = l.x(i), ay = l.y(i), az = l.z(i), bx = l.x(i + 1) - ax, by = l.y(i + 1) - ay, bz = l.z(i + 1) - az;
+            double len2 = bx * bx + by * by + bz * bz, t = len2 < 1e-9 ? 0 : ((x - ax) * bx + (y - ay) * by + (z - az) * bz) / len2;
+            t = Math.max(0, Math.min(1, t));
+            double dx = x - (ax + bx * t), dy = y - (ay + by * t), dz = z - (az + bz * t);
+            double reach = Math.max(l.w(i), Math.max(l.t(i), l.w(i) * .6)) * .5 + .15 + margin;
+            if (dx * dx + dy * dy + dz * dz < reach * reach) return true;
+        }
+        return false;
+    }
+
+    private static double smooth(double e0, double e1, double v) {
+        double t = Math.max(0, Math.min(1, (v - e0) / (e1 - e0)));
+        return t * t * (3 - 2 * t);
     }
 
     /**

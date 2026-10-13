@@ -243,4 +243,5 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [x] CX-35d (v0.92.0) Fuller hair without holes (blended locks and underlayers), calmer physics (no shivering against the head), Vegeta's flame and Trunks' cut truer
 - [x] CX-35e (v0.93.0) No holes from any angle (a hair mass under the locks), ridged leaf-shaped locks after the figures, blunt ends for straight cuts, Future Trunks rebuilt
 - [x] CX-35f (v0.94.0) Block hair after the user's Dragon Block references: locks as stepped cube chains, Minecraft lighting, no scalp layer (crown cover only), chunkier Super Saiyan locks, locks transform together
+- [x] CX-35g (v0.95.0) Model hair (a box per segment, stepping thinner, a pixel hair texture) and no bald spots (every look's scalp filled to its hairline, checked)
 - Paused for CX-19: 17d (the robot dojo), 18b (the combat animations as data; folded into 19b)

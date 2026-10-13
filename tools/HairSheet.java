@@ -25,7 +25,7 @@ public final class HairSheet {
     private static BufferedImage tex;
 
     public static void main(String[] args) throws Exception {
-        tex = ImageIO.read(HairSheet.class.getResourceAsStream("/assets/dbzenith/textures/entity/aura_white.png"));
+        tex = ImageIO.read(HairSheet.class.getResourceAsStream("/assets/dbzenith/textures/entity/hair_block.png"));
         File out = new File(args[0]);
         out.mkdirs();
         List<Preset> presets = new ArrayList<>(Arrays.asList(Preset.values()));
@@ -187,8 +187,8 @@ public final class HairSheet {
             if (q.textured) {
                 double u = wa * q.uv[ia * 2] + wb * q.uv[ib * 2] + wc * q.uv[ic * 2];
                 double v = wa * q.uv[ia * 2 + 1] + wb * q.uv[ib * 2 + 1] + wc * q.uv[ic * 2 + 1];
-                int tx = Math.max(0, Math.min(tex.getWidth() - 1, (int) (u * tex.getWidth())));
-                int ty = Math.max(0, Math.min(tex.getHeight() - 1, (int) (v * tex.getHeight())));
+                int tx = Math.floorMod((int) Math.floor(u * tex.getWidth()), tex.getWidth());
+                int ty = Math.floorMod((int) Math.floor(v * tex.getHeight()), tex.getHeight());
                 int texel = tex.getRGB(tx, ty);
                 if ((texel >>> 24) < 26) continue;                                    // cut out, like the game
                 t = (texel & 255) / 255.0;

@@ -7,22 +7,18 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 /**
- * Draws a head of hair in head space (the pose stack at the head) the way Minecraft draws everything: in blocks. Each
- * lock is laid down along its path as a chain of small cubes on a half-pixel grid, big near the root and shrinking to
- * a single half-pixel at the tip, so a slanting lock steps like a staircase and the whole head reads as pixel art next
- * to the skin. The cubes take Minecraft's own face lighting (tops bright, sides darker) and vary a little cube to
- * cube; the roots are a little darker than the tips. No scalp is drawn: the locks cover the head themselves.
- * Lock positions come from {@link HairSim} when the hair moves, else from the rest shape. Render thread only.
+ * Draws a head of hair in head space (the pose stack at the head) the way Minecraft models are built: each lock is a
+ * short chain of boxes, one per segment, each turned along the lock and a step thinner than the one before, ending in
+ * a small square tip. The boxes carry a hair texture at the model's own pixel size (strands running along the lock),
+ * take Minecraft's face lighting, and are darker toward the root. Lock positions come from {@link HairSim} when the
+ * hair moves, else from the rest shape. Render thread only (it reuses scratch arrays).
  */
 public final class HairRender {
-    /** A plain white texture: the hair is coloured per vertex. */
-    public static final ResourceLocation MATERIAL = new ResourceLocation("dbzenith", "textures/entity/aura_white.png");
-    /** The grid the cubes sit on, in head pixels. */
-    static final float UNIT = .5f;
-    /** How far apart along a lock the cubes are laid (smaller than a cube, so they always touch). */
-    private static final float STEP = .35f;
+    /** A 16 x 16 tile of hair strands, greys the hair colour tints; it repeats along each lock. */
+    public static final ResourceLocation MATERIAL = new ResourceLocation("dbzenith", "textures/entity/hair_block.png");
     private static final int N = HairLock.KNOTS;
-    private static final float[] P = new float[N * 3], AT = new float[N];
+    private static final double CX = 0, CY = -4.2, CZ = .6;                        // the middle of the head, for "outward"
+    private static final float[] P = new float[N * 3], S = new float[N * 3], U = new float[N * 3], C = new float[8 * 3];
 
     private HairRender() {}
 
@@ -36,7 +32,7 @@ public final class HairRender {
         Matrix4f m = pose.last().pose();
         Matrix3f n = pose.last().normal();
         float r = ((rgb >> 16) & 255) / 255f, g = ((rgb >> 8) & 255) / 255f, b = (rgb & 255) / 255f;
-        float lift = .24f * (1 - Math.max(r, Math.max(g, b)));                       // black hair reads as dark grey blocks, not a silhouette
+        float lift = .24f * (1 - Math.max(r, Math.max(g, b)));                       // black hair reads as dark grey, not a silhouette
         r += (1 - r) * lift; g += (1 - g) * lift; b += (1 - b) * lift;
         float tr = tips < 0 ? r : ((tips >> 16) & 255) / 255f, tg = tips < 0 ? g : ((tips >> 8) & 255) / 255f, tb = tips < 0 ? b : (tips & 255) / 255f;
 
@@ -48,69 +44,108 @@ public final class HairRender {
                 P[i * 3] = sim ? live[o] : (float) lock.x(i);
                 P[i * 3 + 1] = sim ? live[o + 1] : (float) lock.y(i);
                 P[i * 3 + 2] = sim ? live[o + 2] : (float) lock.z(i);
-                AT[i] = i == 0 ? 0 : AT[i - 1] + dist(i - 1, i);
             }
-            float total = AT[N - 1];
-            float pcx = Float.NaN, pcy = 0, pcz = 0, psz = 0;
-            int seg = 0;
-            for (float d = 0; d <= total + 1e-4f; d += STEP) {
-                while (seg < N - 2 && AT[seg + 1] < d) seg++;
-                float span = AT[seg + 1] - AT[seg], f = span < 1e-6f ? 0 : (d - AT[seg]) / span;
-                float x = lerp(P[seg * 3], P[seg * 3 + 3], f), y = lerp(P[seg * 3 + 1], P[seg * 3 + 4], f), z = lerp(P[seg * 3 + 2], P[seg * 3 + 5], f);
-                float t = total < 1e-6f ? 0 : d / total;
-                float w = (float) (lock.w(seg) + (lock.w(seg + 1) - lock.w(seg)) * f);
-                float size = Math.max(UNIT, Math.round(w * .62f / UNIT) * UNIT);   // the cube, in whole grid steps
-                float cx = snap(x, size), cy = snap(y, size), cz = snap(z, size);
-                if (cx == pcx && cy == pcy && cz == pcz && size == psz) continue;    // the same cube again
-                pcx = cx; pcy = cy; pcz = cz; psz = size;
-                float shade = (.74f + .26f * t) * (1 + .09f * (hash(cx, cy, cz) - .5f));
+            frames();
+            float along = (li * 5.3f) % 16, jitter = 1 + .05f * (float) Math.sin(li * 2.39 + lock.x(0));
+            for (int i = 0; i < N - 1; i++) {
+                float t = (i + .5f) / (N - 1);
+                float shade = (.76f + .24f * t) * jitter;
                 float dye = Math.max(0, Math.min(1, (t - .55f) / .45f));
-                cube(vc, m, n, cx, cy, cz, size * .5f, (r + (tr - r) * dye) * shade, (g + (tg - g) * dye) * shade, (b + (tb - b) * dye) * shade, light, overlay);
+                float cr = Math.min(1, (r + (tr - r) * dye) * shade), cg = Math.min(1, (g + (tg - g) * dye) * shade), cb = Math.min(1, (b + (tb - b) * dye) * shade);
+                along = box(vc, m, n, i, (float) lock.w(i), (float) lock.t(i), along, cr, cg, cb, light, overlay);
             }
             li++;
         }
         pose.popPose();
     }
 
-    /** A cube's centre on the grid: whole steps for an even number of steps across, half steps for an odd one. */
-    private static float snap(float v, float size) {
-        int steps = Math.round(size / UNIT);
-        float off = (steps & 1) == 1 ? UNIT * .5f : 0;
-        return Math.round((v - off) / UNIT) * UNIT + off;
-    }
-
-    private static void cube(VertexConsumer vc, Matrix4f m, Matrix3f n, float x, float y, float z, float h, float r, float g, float b, int light, int overlay) {
-        float x0 = x - h, x1 = x + h, y0 = y - h, y1 = y + h, z0 = z - h, z1 = z + h;
-        r = Math.min(1, r); g = Math.min(1, g); b = Math.min(1, b);
-        face(vc, m, n, 0, -1, 0, r, g, b, light, overlay, x0, y0, z0, x1, y0, z0, x1, y0, z1, x0, y0, z1);   // top (y is down)
-        face(vc, m, n, 0, 1, 0, r, g, b, light, overlay, x0, y1, z1, x1, y1, z1, x1, y1, z0, x0, y1, z0);    // bottom
-        face(vc, m, n, 0, 0, -1, r, g, b, light, overlay, x0, y1, z0, x1, y1, z0, x1, y0, z0, x0, y0, z0);   // front
-        face(vc, m, n, 0, 0, 1, r, g, b, light, overlay, x1, y1, z1, x0, y1, z1, x0, y0, z1, x1, y0, z1);    // back
-        face(vc, m, n, -1, 0, 0, r, g, b, light, overlay, x0, y1, z1, x0, y1, z0, x0, y0, z0, x0, y0, z1);   // right
-        face(vc, m, n, 1, 0, 0, r, g, b, light, overlay, x1, y1, z0, x1, y1, z1, x1, y0, z1, x1, y0, z0);    // left
-    }
-
-    private static void face(VertexConsumer vc, Matrix4f m, Matrix3f n, float nx, float ny, float nz, float r, float g, float b,
-                             int light, int overlay, float... p) {
-        for (int i = 0; i < 4; i++) {
-            vc.vertex(m, p[i * 3], p[i * 3 + 1], p[i * 3 + 2]).color(r, g, b, 1f).uv(.5f, .5f).overlayCoords(overlay).uv2(light)
-                    .normal(n, nx, ny, nz).endVertex();
+    /** Along the lock: the direction across the scalp (S) and away from it (U) at each knot, carried smoothly. */
+    private static void frames() {
+        float px = 0, py = 0, pz = 0;
+        for (int i = 0; i < N; i++) {
+            int a = Math.max(0, i - 1), c = Math.min(N - 1, i + 1);
+            float tx = P[c * 3] - P[a * 3], ty = P[c * 3 + 1] - P[a * 3 + 1], tz = P[c * 3 + 2] - P[a * 3 + 2];
+            float tl = (float) Math.sqrt(tx * tx + ty * ty + tz * tz);
+            if (tl < 1e-5f) { tx = 0; ty = -1; tz = 0; tl = 1; }
+            tx /= tl; ty /= tl; tz /= tl;
+            float ox = (float) (P[i * 3] - CX), oy = (float) (P[i * 3 + 1] - CY), oz = (float) (P[i * 3 + 2] - CZ);
+            if (i > 0) { ox += px * 1.5f; oy += py * 1.5f; oz += pz * 1.5f; }
+            float sx = ty * oz - tz * oy, sy = tz * ox - tx * oz, sz = tx * oy - ty * ox;
+            float sl = (float) Math.sqrt(sx * sx + sy * sy + sz * sz);
+            if (sl < 1e-5f) {
+                if (i > 0) { sx = S[(i - 1) * 3]; sy = S[(i - 1) * 3 + 1]; sz = S[(i - 1) * 3 + 2]; }
+                else { sx = 1; sy = 0; sz = 0; }
+                sl = 1;
+            }
+            sx /= sl; sy /= sl; sz /= sl;
+            if (i > 0 && sx * S[(i - 1) * 3] + sy * S[(i - 1) * 3 + 1] + sz * S[(i - 1) * 3 + 2] < 0) { sx = -sx; sy = -sy; sz = -sz; }
+            float ux = sy * tz - sz * ty, uy = sz * tx - sx * tz, uz = sx * ty - sy * tx;
+            S[i * 3] = sx; S[i * 3 + 1] = sy; S[i * 3 + 2] = sz;
+            U[i * 3] = ux; U[i * 3 + 1] = uy; U[i * 3 + 2] = uz;
+            px = ux; py = uy; pz = uz;
         }
     }
 
-    private static float dist(int a, int b) {
-        float dx = P[b * 3] - P[a * 3], dy = P[b * 3 + 1] - P[a * 3 + 1], dz = P[b * 3 + 2] - P[a * 3 + 2];
-        return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+    /**
+     * One segment as a box from knot i to i + 1, {@code w} wide across the scalp and {@code t} thick, reaching a little
+     * back into the segment before so the joints are closed. Returns how far along the lock the texture has got.
+     */
+    private static float box(VertexConsumer vc, Matrix4f m, Matrix3f n, int i, float w, float t, float along,
+                             float r, float g, float b, int light, int overlay) {
+        float ax = P[i * 3 + 3] - P[i * 3], ay = P[i * 3 + 4] - P[i * 3 + 1], az = P[i * 3 + 5] - P[i * 3 + 2];
+        float len = (float) Math.sqrt(ax * ax + ay * ay + az * az);
+        if (len < 1e-4f) return along;
+        ax /= len; ay /= len; az /= len;
+        // the box's own square frame: across (S made square to the segment) and away (U)
+        float sx = S[i * 3], sy = S[i * 3 + 1], sz = S[i * 3 + 2];
+        float d = sx * ax + sy * ay + sz * az;
+        sx -= ax * d; sy -= ay * d; sz -= az * d;
+        float sl = (float) Math.sqrt(sx * sx + sy * sy + sz * sz);
+        if (sl < 1e-5f) { sx = ay; sy = -ax; sz = 0; sl = Math.max(1e-5f, (float) Math.sqrt(sx * sx + sy * sy)); }
+        sx /= sl; sy /= sl; sz /= sl;
+        float ux = ay * sz - az * sy, uy = az * sx - ax * sz, uz = ax * sy - ay * sx;
+        float hw = Math.max(.5f, w) * .5f, ht = Math.max(.5f, Math.max(t, w * .6f)) * .5f;
+        float back = i == 0 ? 0 : Math.min(.45f, len * .3f);
+        float bx = P[i * 3] - ax * back, by = P[i * 3 + 1] - ay * back, bz = P[i * 3 + 2] - az * back;
+        float ex = P[i * 3 + 3], ey = P[i * 3 + 4], ez = P[i * 3 + 5];
+        for (int c = 0; c < 8; c++) {                                                // 0-3 at the start, 4-7 at the end
+            float qs = ((c & 1) == 0 ? -hw : hw), qu = ((c & 2) == 0 ? -ht : ht);
+            float ox = c < 4 ? bx : ex, oy = c < 4 ? by : ey, oz = c < 4 ? bz : ez;
+            C[c * 3] = ox + sx * qs + ux * qu;
+            C[c * 3 + 1] = oy + sy * qs + uy * qu;
+            C[c * 3 + 2] = oz + sz * qs + uz * qu;
+        }
+        float v0 = along / 16f, v1 = (along + len + back) / 16f, wu = hw * 2 / 16f, tu = ht * 2 / 16f;
+        quad(vc, m, n, 2, 3, 7, 6, 0, v0, wu, v1, r, g, b, light, overlay);          // away from the scalp
+        quad(vc, m, n, 1, 0, 4, 5, 0, v0, wu, v1, r, g, b, light, overlay);          // toward it
+        quad(vc, m, n, 0, 2, 6, 4, 0, v0, tu, v1, r, g, b, light, overlay);          // one side
+        quad(vc, m, n, 3, 1, 5, 7, 0, v0, tu, v1, r, g, b, light, overlay);          // the other
+        quad(vc, m, n, 4, 6, 7, 5, 0, 0, wu, tu, r, g, b, light, overlay);           // the end
+        if (i == 0) quad(vc, m, n, 1, 3, 2, 0, 0, 0, wu, tu, r, g, b, light, overlay);
+        return along + len;
     }
 
-    private static float lerp(float a, float b, float t) {
-        return a + (b - a) * t;
+    private static void quad(VertexConsumer vc, Matrix4f m, Matrix3f n, int a, int b, int c, int d, float u0, float v0, float u1, float v1,
+                             float r, float g, float bl, int light, int overlay) {
+        float ex = C[c * 3] - C[a * 3], ey = C[c * 3 + 1] - C[a * 3 + 1], ez = C[c * 3 + 2] - C[a * 3 + 2];
+        float fx = C[d * 3] - C[b * 3], fy = C[d * 3 + 1] - C[b * 3 + 1], fz = C[d * 3 + 2] - C[b * 3 + 2];
+        float nx = ey * fz - ez * fy, ny = ez * fx - ex * fz, nz = ex * fy - ey * fx;
+        float nl = (float) Math.sqrt(nx * nx + ny * ny + nz * nz);
+        if (nl < 1e-8f) return;
+        nx /= nl; ny /= nl; nz /= nl;
+        float mx = 0, my = 0, mz = 0, fx0 = 0, fy0 = 0, fz0 = 0;                       // face outward from the box's middle
+        for (int k = 0; k < 8; k++) { mx += C[k * 3]; my += C[k * 3 + 1]; mz += C[k * 3 + 2]; }
+        for (int k : new int[]{a, b, c, d}) { fx0 += C[k * 3]; fy0 += C[k * 3 + 1]; fz0 += C[k * 3 + 2]; }
+        if (nx * (fx0 / 4 - mx / 8) + ny * (fy0 / 4 - my / 8) + nz * (fz0 / 4 - mz / 8) < 0) { nx = -nx; ny = -ny; nz = -nz; }
+        vertex(vc, m, n, a, u0, v0, r, g, bl, nx, ny, nz, light, overlay);
+        vertex(vc, m, n, b, u1, v0, r, g, bl, nx, ny, nz, light, overlay);
+        vertex(vc, m, n, c, u1, v1, r, g, bl, nx, ny, nz, light, overlay);
+        vertex(vc, m, n, d, u0, v1, r, g, bl, nx, ny, nz, light, overlay);
     }
 
-    /** 0..1 from a cube's place, the same every frame. */
-    private static float hash(float x, float y, float z) {
-        int h = Float.floatToIntBits(x * 7.1f + y * 13.3f + z * 3.7f);
-        h ^= h >>> 15; h *= 0x2c1b3c6d; h ^= h >>> 12; h *= 0x297a2d39; h ^= h >>> 15;
-        return (h & 1023) / 1023f;
+    private static void vertex(VertexConsumer vc, Matrix4f m, Matrix3f n, int k, float u, float v, float r, float g, float b,
+                               float nx, float ny, float nz, int light, int overlay) {
+        vc.vertex(m, C[k * 3], C[k * 3 + 1], C[k * 3 + 2]).color(r, g, b, 1f).uv(u, v).overlayCoords(overlay).uv2(light)
+                .normal(n, nx, ny, nz).endVertex();
     }
 }

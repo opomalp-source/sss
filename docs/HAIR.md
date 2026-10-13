@@ -1,4 +1,4 @@
-# Hair (CX-35f: block hair)
+# Hair (CX-35g: model hair)
 
 Every stock hairstyle is sculpted per look and drawn in blocks, like the rest of Minecraft (and like the block-hair
 of the Dragon Block mods the user showed as references), and it moves.
@@ -22,7 +22,9 @@ A lock leaves the scalp `el` degrees above the horizontal and `az` degrees round
 
 ## Drawing
 
-`HairRender` walks each lock in 0.35 px steps and puts down a cube on a 0.5 px grid at every step: big near the root
+`HairRender` draws each lock as a chain of boxes, one per segment, turned along the lock and a step thinner each time,
+ending in a small square tip, textured with `hair_block.png` (a 16 x 16 strand tile at the model's own pixel size, made
+by `tools/HairTextureGen.java`). (CX-35f laid tiny cubes on a half-pixel grid, which looked like Teardown:)
 (62% of the lock's width there, in whole grid steps), shrinking to a single half-pixel at the tip, so a slanting lock
 steps like a staircase. Cubes take Minecraft's own face lighting, vary a little cube to cube, and are darker toward
 the root; dark hair is lifted to a dark grey so its blocks read. There is no scalp layer: the locks cover the head,
@@ -48,3 +50,10 @@ following the transformation bar.
 is): the knots lag a little behind the head's motion (14%), are strongly damped, spring back firmly to the style,
 never swing far from it, hang with gravity, stream back a little in moving air, lift in an aura, and keep out of the
 head and the back. Off with `hairPhysics`, and past 48 blocks.
+
+## No bald spots (CX-35g)
+
+`Sculpt.build` (and `HairStyles.author` again, for looks made by slimming or scaling another) walks the scalp in
+0.55 px steps over the top and down the brow, sides and back to the style's hairline; wherever no lock reaches well
+over a point, it adds a short flat lock there (back over the crown, up from the hairline elsewhere), underneath the
+others. The mohawk opts out (`cover = false`). `HairPreview` checks 15,000+ points over the crown of every look.

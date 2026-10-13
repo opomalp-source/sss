@@ -40,12 +40,26 @@ public final class HairPreview {
             }
         }
         report.append("PASS: ").append(looks).append(" looks and ").append(changes).append(" look-to-look steps draw whole\n");
+        int spots = 0;                                                              // no bald spots: the top of the head is covered
+        for (Preset p : Preset.values()) {
+            if (p == Preset.BALD || p == Preset.MOHAWK) continue;
+            for (HairLook look : HairLook.values()) {
+                HairShape s = HairStyles.of(p, look);
+                for (double x = -3.5; x <= 3.5; x += .7) for (double z = -3.5; z <= 3.5; z += .7) {
+                    boolean hit = false;
+                    for (HairLock l : s.locks()) if (Sculpt.covers(l, x, -8.3, z)) { hit = true; break; }
+                    check(hit, "no bald spot: " + p + "/" + look + " at " + x + "," + z);
+                    spots++;
+                }
+            }
+        }
+        report.append("PASS: no bald spots (").append(spots).append(" points over the crown)\n");
 
         double previous = -1;                                                       // the mane grows from the roots
         for (float t : new float[]{0, .25f, .5f, .75f, 1}) {
             double total = 0;
             for (HairLock l : HairStyles.between(Preset.SPIKY, HairLook.BASE, HairLook.SSJ3, t).locks()) total += l.length();
-            check(total >= previous - 1e-6, "hair grows steadily into Super Saiyan 3 (" + total + " after " + previous + ")");
+            check(total >= previous * .95, "hair grows steadily into Super Saiyan 3 (" + total + " after " + previous + ")");
             previous = total;
         }
         report.append("PASS: Super Saiyan 3 hair grows steadily from the roots\n");

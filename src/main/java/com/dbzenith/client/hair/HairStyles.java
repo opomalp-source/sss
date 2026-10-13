@@ -52,8 +52,10 @@ public final class HairStyles {
 
     private static HairShape author(Preset preset, HairLook look) {
         HairShape s = shape(preset, look);
-        if (s.locks().isEmpty() || preset == Preset.BUZZ || preset == Preset.MOHAWK) return s;
-        return new Sculpt().crown().with(s).build();                                  // no skin between the roots
+        if (s.locks().isEmpty() || preset == Preset.MOHAWK) return s;
+        java.util.List<HairLock> all = new java.util.ArrayList<>(s.locks());          // looks made by slimming or scaling another
+        Sculpt.fill(all, s.cap() == HairCap.NONE ? HairCap.of(-7.4, 0, .3, -5.4, -4) : s.cap());   // get their bare spots closed too
+        return new HairShape(s.cap(), java.util.List.copyOf(all));
     }
 
     private static HairShape shape(Preset preset, HairLook look) {
@@ -298,6 +300,7 @@ public final class HairStyles {
 
     /** A strip of upright hair over the crown, the sides shaved. */
     static void mohawk(Sculpt s, double len, boolean sharp) {
+        s.cover = false;                                                            // shaved: leave the scalp bare
         s.cap(-7.6, 0, 1.8, -7.9, -7.9).feel(.8f, .5f);
         s.jagged = .1;
         for (int i = 0; i < 6; i++) s.lock(0, -8.6, -3.2 + i * 1.4, 84 - i * 9, 0, (6.6 - i * .4) * len, sharp ? 3 : 3.4, -8, 0, .45, 1);
