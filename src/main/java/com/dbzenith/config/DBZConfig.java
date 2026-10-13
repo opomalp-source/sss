@@ -798,7 +798,7 @@ public final class DBZConfig {
                     .define("hitboxOverlay", false);
             pvpCamera = b.comment("PvP on: third person, over the right shoulder (and back to your view when PvP goes off)")
                     .define("pvpCamera", true);
-            shoulderOffset = b.comment("Shoulder camera: blocks to the right of your character").defineInRange("shoulderOffset", 0.6, 0.0, 3.0);
+            shoulderOffset = b.comment("Shoulder camera: blocks to the right of your character").defineInRange("shoulderRight", 1.0, 0.0, 3.0);   // renamed from shoulderOffset (CX-37b) so the new default reaches existing configs
             shoulderCamera = b.comment("Third person (behind): the camera a little over your right shoulder, always (walking, flying, fighting), not only in PvP")
                     .define("shoulderCamera", true);
             startThirdPerson = b.comment("Start in third person when you join a world").define("startThirdPerson", true);

@@ -2617,7 +2617,9 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **`ShoulderCam`:** the shoulder view (CX-20, PvP only until now) applies whenever the camera is in third person
   behind: walking, flying, charging, fighting (`shoulderCamera`, on by default). Joining a world switches to third
   person (`startThirdPerson`, on by default; skipped for the scripted dev client so its first-person shots are kept).
-  The default offset is 0.6 blocks to the right (was 0.8); F5 still cycles the views.
+  The default offset is 1.0 block to the right (CX-37b; key `shoulderRight`); F5 still cycles the views.
 - **Crosshair:** in the shoulder view it marks where the character really aims (as in PvP), not the screen centre.
 - **Settings → Camera:** "Start in third person" and "Shoulder camera" toggles beside the offset.
 - **Checked:** third person in the dev client, base and Super Saiyan: the character left of centre.
+- **v0.98.1:** a little further right (user): 1.0 block by default; the setting's key is now `shoulderRight` so the new
+  default replaces the 0.6 already saved in existing configs.
