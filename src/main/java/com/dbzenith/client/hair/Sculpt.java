@@ -13,6 +13,8 @@ final class Sculpt {
     private HairCap cap = HairCap.NONE;
     private final List<HairLock> locks = new ArrayList<>();
     private float stiff = .55f, weight = 1f;
+    /** Straight hair: locks end blunt and rounded instead of in a point. */
+    boolean blunt;
     /** How much fan locks differ in length, one to the next (a ragged outline). */
     double jagged = .3;
 
@@ -54,7 +56,7 @@ final class Sculpt {
             k[o] = px;
             k[o + 1] = py;
             k[o + 2] = pz;
-            double narrow = 1 - .9 * Math.pow(t, 1.15);                               // to a point
+            double narrow = blunt ? 1 - .45 * Math.pow(t, 3) : Math.pow(1 - t, .85) * (1 + .6 * t) + .04;   // straight hair ends blunt; spikes are leaves
             k[o + 3] = w * narrow;
             k[o + 4] = w * thick * (1 - .55 * t);
             double mid = Math.min(1, t + .5 / n);
@@ -196,12 +198,13 @@ final class Sculpt {
 
     /** The volume under a lock: its first half, wider, tucked in toward the head. */
     private static HairLock underlay(HairLock l) {
-        double[] k = HairLock.resample(l.k(), .5);
+        double[] k = HairLock.resample(l.k(), .55);
         for (int i = 0; i < HairLock.KNOTS; i++) {
-            k[i * 5 + 3] *= 1.25;
-            k[i * 5 + 4] *= 1.15;
+            double w = k[i * 5 + 3] * 1.25;
+            k[i * 5 + 3] = w;
+            k[i * 5 + 4] = Math.max(k[i * 5 + 4] * 1.2, w * .5);                    // a body, not a flat band
         }
-        tuck(k, .5);
+        tuck(k, .9);                                                               // well under the locks above
         return new HairLock(k, l.stiff(), l.weight());
     }
 

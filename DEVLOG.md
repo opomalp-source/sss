@@ -2522,3 +2522,20 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   nape, bangs to the eyes.
 - **Checks:** the head-whipping stress test now requires the hair to stay within half a lock's length (passes).
 - **Checked in the dev client:** Vegeta, Future Trunks, Super Saiyan Goku: full, no holes.
+
+## 2026-10-13 — CX-35e: no holes from any angle, lock shape after the figures, Trunks rebuilt (v0.93.0)
+- **The ask** (user screenshots: holes in the preset hair, seen from the side and from below; the design accuracy still
+  not good enough; look for resources across the internet).
+- **References:** the official S.H.Figuarts product photos (dragon-ball-official.com galleries, tamashiiweb.com,
+  toyark.com): Vegeta base and Super Saiyan, Future Trunks, Super Saiyan Gohan, Super Saiyan 2 Goku and Gohan. Lessons:
+  the spikes are broad blades with a ridge down the middle (lit on one side, shadowed on the other), full near the root,
+  layered like flame petals; Future Trunks' hair is a rounded dome of thin strands combed down from a centre parting.
+- **Holes:** the scalp was a thin shell, so between lock roots and from below the sky showed through. It is now a hair
+  mass (a thicker crown, sides and back) the locks grow out of, and the underlayers are bodies, tucked well under.
+  Checked from below, the side and behind (new `pitch=` option of the sheet tool).
+- **Lock shape:** diamond cross-section with a ridge (cel shading lights one side, shadows the other; outline on the
+  edges, gloss on the lit face); spiky locks leaf-shaped; straight cuts end blunt (`Sculpt.blunt`).
+- **Accuracy:** the Super Saiyan flame's spikes are broader blades (fewer, wider); Vegeta's spikes narrower so his
+  Super Saiyan front no longer reads as a hood; Future Trunks rebuilt as seven thin strands a side combed from the
+  parting into a rounded dome, bangs curving down to the brows, the back to the nape.
+- **Checks:** all hair checks pass (including the head-whipping test).

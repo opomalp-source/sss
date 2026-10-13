@@ -4,26 +4,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The fitted scalp under the locks: a thin shell over the top of the head, down the sides and back, ending at a
+ * The hair mass under the locks: a thick layer over the top of the head, down the sides and back (the locks grow out
+ * of it, so nothing shows between their roots), ending at a
  * hairline. {@code fringe} is how far down the forehead it comes (head pixels, -8 is the top of the head),
  * {@code peak} how much deeper it dips in the middle (a widow's peak), {@code temples} how far it recedes at the
  * corners of the brow, {@code sides} where it ends over the ears, {@code back} where it ends at the nape.
  * Built once into quads ({@link #quads}: 4 corners x, y, z then the normal, per face).
  */
 public record HairCap(double fringe, double peak, double temples, double sides, double back, float[] quads) {
-    private static final double OUT = 4.42, IN = 3.98, TOP = -8.45, UNDER = -7.92;
+    private static final double OUT = 4.55, IN = 3.98, TOP = -8.95, UNDER = -7.92, BROW = 4.4;   // a hair mass, not a shell
     /** No scalp at all (bald, or a style that brings its own). */
     public static final HairCap NONE = new HairCap(0, 0, 0, 0, 0, new float[0]);
 
     public static HairCap of(double fringe, double peak, double temples, double sides, double back) {
         List<double[]> boxes = new ArrayList<>();
-        boxes.add(new double[]{-OUT, TOP, -OUT, OUT, UNDER, OUT});                       // the crown
+        boxes.add(new double[]{-OUT, TOP, -BROW, OUT, UNDER, OUT});                      // the crown
         int cols = 8;
         double step = OUT * 2 / cols;
         for (int c = 0; c < cols; c++) {
             double x0 = -OUT + c * step, x1 = x0 + step, mx = Math.abs((x0 + x1) / 2);
             double front = fringe + peak * Math.max(0, 1 - mx / 1.7) - temples * smooth(1.2, 3.4, mx);
-            if (front > UNDER) boxes.add(new double[]{x0, UNDER - .01, -OUT, x1, front, -IN});   // the brow
+            if (front > UNDER) boxes.add(new double[]{x0, UNDER - .01, -BROW, x1, front, -IN});   // the brow, thinner over the face
             double nape = back + ((c & 1) == 0 ? .5 : 0);
             if (nape > UNDER) boxes.add(new double[]{x0, UNDER - .01, IN, x1, nape, OUT});       // the back
         }

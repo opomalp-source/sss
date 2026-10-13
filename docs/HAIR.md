@@ -80,3 +80,17 @@ underlayer (Goku's own hand-placed layout does this).
 
 Hair that rests inside the head or the back (tucked locks, hair lying on the scalp) is not pushed out of it, so it
 doesn't shiver between the spring and the collision.
+
+## Lock shape and the hair mass (CX-35e)
+
+- Locks have a diamond cross-section: an edge either side across the scalp and a ridge away from it, so each spike is
+  lit on one side of its ridge and shadowed on the other, as the S.H.Figuarts sculpts and the anime draw them. The
+  outline sits on the outer edges; the gloss lies on the lit face.
+- Spiky locks are leaves: full near the root, then to a point. Straight cuts (`Sculpt.blunt`: Future Trunks, the
+  parted, long, swept, slicked and bowl cuts) end blunt and rounded.
+- The scalp is a hair mass (the crown 1 px thick, the sides and back half a pixel out from the head) the locks grow out
+  of; the underlayers are bodies rather than flat bands and sit well under the locks above. Seen from below or the
+  side, nothing shows through. `tools/HairSheet.java` takes `pitch=-0.75` to check from below.
+
+References used: the official S.H.Figuarts product photos on dragon-ball-official.com and tamashiiweb.com (Vegeta in
+base and Super Saiyan, Future Trunks, Super Saiyan Gohan), and toy galleries on toyark.com.

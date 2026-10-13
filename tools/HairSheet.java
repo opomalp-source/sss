@@ -21,7 +21,7 @@ public final class HairSheet {
     /** A quad as emitted: corners (x, y, z), colours, texture coordinates, the normal. */
     private record Quad(float[] p, int[] rgb, float[] uv, float nx, float ny, float nz, boolean textured) {}
     private static int W = 230, H = 300;
-    private static double SCALE = 6.2, TOP = 150;
+    private static double SCALE = 6.2, TOP = 150, PITCH = .1;
     private static BufferedImage tex;
 
     public static void main(String[] args) throws Exception {
@@ -39,6 +39,7 @@ public final class HairSheet {
             if (a.startsWith("views=")) views = Integer.parseInt(a.substring(6));
             if (a.equals("big")) { W = 380; H = 470; SCALE = 10; TOP = 250; }
             if (a.equals("grow")) grow = true;
+            if (a.startsWith("pitch=")) PITCH = Double.parseDouble(a.substring(6));
         }
         double[] yaws = views == 1 ? new double[]{-Math.PI / 5} : new double[]{0, -Math.PI / 2, Math.PI, -Math.PI / 5};
         if (grow) {
@@ -64,7 +65,7 @@ public final class HairSheet {
             int row = 0;
             for (Preset p : chunk) {
                 if (across) for (HairLook look : looks) {
-                    for (int c = 0; c < yaws.length; c++) g.drawImage(render(HairStyles.of(p, look), color(look), yaws[c], .1, p + " / " + look), c * W, row * H, null);
+                    for (int c = 0; c < yaws.length; c++) g.drawImage(render(HairStyles.of(p, look), color(look), yaws[c], PITCH, p + " / " + look), c * W, row * H, null);
                     row++;
                 }
                 else {

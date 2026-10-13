@@ -241,4 +241,5 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [x] CX-35b (v0.91.0) Hair shading: a lock texture with outlines and strand lines, a gloss decal, crisp cel tones with hue-shifted shadows, painted rather than lit
 - [x] CX-35c (v0.91.1) Hair physics calmed: one step per world frame (portrait and inventory draws no longer fling it), gentle lag, strong damping, a cap on how far it swings
 - [x] CX-35d (v0.92.0) Fuller hair without holes (blended locks and underlayers), calmer physics (no shivering against the head), Vegeta's flame and Trunks' cut truer
+- [x] CX-35e (v0.93.0) No holes from any angle (a hair mass under the locks), ridged leaf-shaped locks after the figures, blunt ends for straight cuts, Future Trunks rebuilt
 - Paused for CX-19: 17d (the robot dojo), 18b (the combat animations as data; folded into 19b)

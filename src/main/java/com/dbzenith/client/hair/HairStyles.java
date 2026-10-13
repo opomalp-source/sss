@@ -70,7 +70,7 @@ public final class HairStyles {
         Sculpt s = new Sculpt();
         switch (preset) {
             case SPIKY -> goku(s);
-            case PRINCE -> vegeta(s, 1, 0, 1.2);
+            case PRINCE -> vegeta(s, 1, 0, 1);
             case TEEN -> gohanBoy(s);
             case GOHAN_ADULT -> gohanMan(s);
             case WILD -> broly(s);
@@ -208,19 +208,20 @@ public final class HairStyles {
     /** Future Trunks: straight hair parted in the middle, bangs to the eyes, the sides over the ears to the jaw. */
     static void trunks(Sculpt s) {
         s.cap(-6.2, 0, 0, -2.2, -.2).feel(.4f, 1);
-        s.pair(.7, -8.75, -2.4, 12, 115, 4.8, 3.2, -100, 0, .4, .6);               // over from the parting and down
-        s.pair(.9, -8.75, .2, 12, 92, 5.2, 3.4, -104, 0, .4, .6);
-        s.pair(.8, -8.75, 2.6, 12, 58, 5.4, 3.4, -104, 0, .4, .6);
-        s.pair(.8, -8.5, -3.8, -64, 170, 6.2, 3.2, -10, 0, .4, 1);                // bangs, to the eyes
-        s.pair(2.6, -8.3, -3.6, -72, 148, 6.6, 3, -6, 0, .4, 1);
-        s.pair(4.4, -7.9, -1.6, -86, 94, 8.6, 3.2, 0, 0, .4, 1);                  // the sides, past the ears
-        s.pair(4.4, -7.9, .9, -86, 88, 9.2, 3.2, 0, 0, .4, 1);
-        s.pair(4.3, -7.6, 3, -84, 66, 9, 3.2, 0, 0, .4, 1);
-        for (int i = -2; i <= 2; i++) s.lock(i * 1.75, -7.6, 4.4, -86, i * 6, 9.6, 3.1, 0, 0, .4, 1);   // the back, to the nape
+        s.blunt = true;
+        for (int side : new int[]{-1, 1}) for (int i = 0; i < 7; i++) {             // thin strands combed down from the parting
+            double z = -3.3 + i * 1.12;
+            s.lock(side * .5, -9.1, z, 30, side * (104 - i * 10), 10 + Math.max(0, i - 3) * .5, 3.6, -118, 0, .34, .5);
+        }
+        s.lock(-.4, -8.7, -3.7, -20, 176, 5.4, 3.1, -48, 0, .3, .7);                // bangs curving down over the brow
+        s.lock(.6, -8.7, -3.7, -24, 186, 5, 2.9, -46, 0, .3, .7);
+        s.pair(2.2, -8.5, -3.6, -50, 150, 5.8, 2.9, -24, 0, .3, .9);
+        for (int i = -2; i <= 2; i++) s.lock(i * 1.75, -7.6, 4.4, -86, i * 6, 9.6, 3.1, 0, 0, .3, 1);   // the back, to the nape
     }
 
     /** Long hair parted in the middle, falling straight down the back ({@code length}), bangs swept aside. */
     static void parted(Sculpt s, double length, boolean bangs) {
+        s.blunt = true;
         s.cap(-6.6, 0, .3, -3.2, -1).feel(.35f, 1);
         s.pair(.7, -8.75, -2.4, 12, 115, 4.6, 3.2, -100, 0, .4, .6);
         s.pair(.9, -8.75, .2, 12, 92, 5, 3.4, -104, 0, .4, .6);
@@ -242,6 +243,7 @@ public final class HairStyles {
 
     /** Swept back off the face, a little volume on top, ending at the collar. */
     static void swept(Sculpt s) {
+        s.blunt = true;
         s.cap(-7.4, 0, .6, -5, -2.6).feel(.5f, 1);
         for (int i = -2; i <= 2; i++) s.lock(i * 1.7, -8.4, -3.7, 30, i * 4, 8.6, 3.2, -46, 0, .45, 1);
         for (int i = -2; i <= 2; i++) s.lock(i * 1.8, -8.6, -.5, 10, i * 6, 7, 3.2, -50, 0, .45, 1);
@@ -258,6 +260,7 @@ public final class HairStyles {
 
     /** Slicked flat back over the crown. */
     static void slick(Sculpt s) {
+        s.blunt = true;
         s.cap(-7.6, 0, .6, -5.4, -3.4).feel(.7f, .6f);
         for (int i = -2; i <= 2; i++) s.lock(i * 1.8, -8.5, -3.8, 4, i * 3, 8.4, 3, -30, 0, .35, 1);
         s.pair(4.3, -7.6, -1.6, -6, 6, 5, 2.6, -40, 0, .35, 1);
@@ -265,6 +268,7 @@ public final class HairStyles {
 
     /** A bowl cut: a straight fringe on the brow, the sides level with it all round. */
     static void bowl(Sculpt s) {
+        s.blunt = true;
         s.cap(-5.6, 0, 0, -5.2, -4).feel(.55f, 1);
         for (int i = -2; i <= 2; i++) s.lock(i * 1.8, -8.6, -2.4, 20, 180 - i * 8, 3.6, 3.4, -100, 0, .4, .6);
         for (int s1 : new int[]{-1, 1}) for (int i = 0; i < 3; i++) s.lock(s1 * 3, -8.6, -1 + i * 2, 20, s1 * 90, 3.2, 3.4, -100, 0, .4, .6);
@@ -363,7 +367,7 @@ public final class HairStyles {
     static void flame(Sculpt s, double len, double w, double spread, double lean, boolean sharp) {
         s.cap(-7.4, 0, .4, -5.6, -4.2).feel(sharp ? .9f : .85f, .5f);
         double sp = spread;
-        w *= 1.2;                                                                     // wide spikes: a full flame
+        w *= 1.55;                                                                    // broad blades, as the figures sculpt them
         s.fan(-2.4, 0, 6 + lean, 12.4 * len, 4.8 * w, -2);                           // the front row
         s.fan(-2.4, 16 * sp, 7 + lean, 11.8 * len, 4.6 * w, -4);
         s.fan(-2.4, -15 * sp, 7 + lean, 12 * len, 4.6 * w, -4);
@@ -409,7 +413,7 @@ public final class HairStyles {
 
     /** Vegeta as a Super Saiyan: the flame taller and sharper, spikier at the edges, the widow's peak kept. */
     static HairShape vegetaSuper(Sculpt s, double len, boolean two) {
-        vegeta(s, len, two ? 4 : 2, two ? 1.08 : 1.16);
+        vegeta(s, len, two ? 4 : 2, two ? .88 : .95);
         s.feel(.9f, .5f);
         s.jagged = .34;
         s.pair(3.8, -8, 1, 62, 40, 9 * len, 3 * (two ? .86 : .95), -10);
@@ -433,7 +437,7 @@ public final class HairStyles {
     private static HairShape ssj3(Preset preset, HairShape base) {
         Sculpt s = new Sculpt();
         if (preset == Preset.PRINCE) {
-            vegeta(s, 1.42, 4, 1.08);
+            vegeta(s, 1.42, 4, .88);
             s.feel(.9f, .5f);
             return s.build();
         }

@@ -26,7 +26,8 @@ public final class HairRender {
     private static final double CX = 0, CY = -4.2, CZ = .6;                        // the middle of the head, for "outward"
     /** The key light, in head space (y down): above, in front, a little to the wearer's right. */
     private static final float LX = -.28f, LY = -.86f, LZ = -.42f;
-    private static final float[] SIGN = {1, 1, -1, 1, -1, -1, 1, -1};
+    /** The cross-section, a diamond: the edge across the scalp, the ridge away from it, the other edge, the underside. */
+    private static final float[] SIGN = {1, 0, 0, 1, -1, 0, 0, -1};
     private static final float[] P = new float[N * 3], S = new float[N * 3], U = new float[N * 3], C = new float[N * 4 * 3];
     /** The tones this frame: lit, mid, shadow, tip dye (r, g, b each). */
     private static final float[] LIT = new float[3], MID = new float[3], DARK = new float[3], DYE = new float[3], GLOSS = new float[3];
@@ -135,7 +136,7 @@ public final class HairRender {
     }
 
     private static void corners(int i, float w, float t) {
-        float hw = Math.max(.05f, w) * .5f, ht = Math.max(.04f, t) * .5f;
+        float hw = Math.max(.05f, w) * .6f, ht = Math.max(.04f, t) * .62f;          // a diamond: a little wider than the band it replaces
         for (int c = 0; c < 4; c++) {
             int o = (i * 4 + c) * 3;
             float a = SIGN[c * 2] * hw, b = SIGN[c * 2 + 1] * ht;
@@ -159,19 +160,20 @@ public final class HairRender {
         if (nx * mx + ny * my + nz * mz < 0) { nx = -nx; ny = -ny; nz = -nz; }
         float d = nx * LX + ny * LY + nz * LZ;                                       // cel steps: lit, mid, shadow
         float[] tone = d > .12f ? LIT : d > -.5f ? MID : DARK;
-        boolean wide = a == 0 || a == 2;                                              // the broad faces carry the gloss
+        boolean upper = a == 0 || a == 1;                                             // the two faces either side of the ridge, outside
         float u0, u1;
-        if (wide) { u0 = 0; u1 = .5f; } else { u0 = .03f; u1 = .15f; }              // the lock half of the atlas; thin sides edge and strand only
+        u0 = (a & 1) == 0 ? 0 : .25f; u1 = (a & 1) == 0 ? .25f : 0;                // edge (outlined) to ridge, in the lock half of the atlas
         vertex(vc, m, n, p0, u0, t0, tone, jitter, nx, ny, nz, light, overlay);
         vertex(vc, m, n, p1, u1, t0, tone, jitter, nx, ny, nz, light, overlay);
         vertex(vc, m, n, p2, u1, t1, tone, jitter, nx, ny, nz, light, overlay);
         vertex(vc, m, n, p3, u0, t1, tone, jitter, nx, ny, nz, light, overlay);
-        if (wide && tone == LIT && t1 > GLOSS_FROM && t0 < GLOSS_TO) {            // the gloss, laid just over the lit side
+        if (upper && tone == LIT && t1 > GLOSS_FROM && t0 < GLOSS_TO) {           // the gloss, laid just over the lit side
             float o = .05f, v0 = (t0 - GLOSS_FROM) / (GLOSS_TO - GLOSS_FROM), v1 = (t1 - GLOSS_FROM) / (GLOSS_TO - GLOSS_FROM);
-            gloss(vc, m, n, p0, .5f, v0, nx, ny, nz, o, light, overlay);
-            gloss(vc, m, n, p1, 1f, v0, nx, ny, nz, o, light, overlay);
-            gloss(vc, m, n, p2, 1f, v1, nx, ny, nz, o, light, overlay);
-            gloss(vc, m, n, p3, .5f, v1, nx, ny, nz, o, light, overlay);
+            float g0 = (a & 1) == 0 ? .5f : 1f, g1 = (a & 1) == 0 ? 1f : .5f;
+            gloss(vc, m, n, p0, g0, v0, nx, ny, nz, o, light, overlay);
+            gloss(vc, m, n, p1, g1, v0, nx, ny, nz, o, light, overlay);
+            gloss(vc, m, n, p2, g1, v1, nx, ny, nz, o, light, overlay);
+            gloss(vc, m, n, p3, g0, v1, nx, ny, nz, o, light, overlay);
         }
     }
 
