@@ -239,4 +239,5 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [x] CX-34 (v0.89.0) Hair in every form: each stock style sculpted per look (base, Super Saiyan, SSJ2, SSJ3, SSJ4, God, Beast) after the characters, transformations morph lock by lock and grow from the roots; offline look sheets (tools/hair-looks.init.gradle)
 - [x] CX-35 (v0.90.0) The hair rebuilt from scratch after the show's designs (smooth tapering locks over a fitted scalp, every style in every look) and moving (per-lock physics: lag, swing, gravity, wind, aura, collisions); docs/HAIR.md
 - [x] CX-35b (v0.91.0) Hair shading: a lock texture with outlines and strand lines, a gloss decal, crisp cel tones with hue-shifted shadows, painted rather than lit
+- [x] CX-35c (v0.91.1) Hair physics calmed: one step per world frame (portrait and inventory draws no longer fling it), gentle lag, strong damping, a cap on how far it swings
 - Paused for CX-19: 17d (the robot dojo), 18b (the combat animations as data; folded into 19b)

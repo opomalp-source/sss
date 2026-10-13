@@ -19,13 +19,18 @@ import java.util.WeakHashMap;
  * looser to the tip; Super Saiyan hair barely gives, long hair swings), keeps its length, and is pushed out of the
  * head and the back. Units are head pixels and ticks.
  */
+@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = com.dbzenith.DBZenith.MOD_ID, value = net.minecraftforge.api.distmarker.Dist.CLIENT)
 public final class HairSim {
     private static final int N = HairLock.KNOTS;
-    private static final float GRAVITY = .7f, DRAG = .16f, UPDRAFT = 1.1f;
+    private static final float GRAVITY = .7f, DRAG = .08f, UPDRAFT = .8f;
+    /** How much of the head's own motion the hair lags behind (0: none, 1: all of it). */
+    private static final float INERTIA = .3f;
     private static final double SIM_DISTANCE = 48;
+    private static int frameNo;
 
     /** One fighter's hair in motion. */
     private static final class Body {
+        int frameNo = -1;
         HairShape shape;
         float[] p = new float[0], prev = new float[0];
         float time = Float.NaN;
@@ -46,16 +51,24 @@ public final class HairSim {
      */
     public static float[] step(LivingEntity e, ModelPart head, HairShape shape, float partial, float aura) {
         if (!DBZConfig.CLIENT.hairPhysics.get() || shape.locks().isEmpty()) return null;
+        Body known = BODIES.get(e);
+        int need = shape.locks().size() * N * 3;
+        // The same fighter drawn again this frame (the HUD portrait, the inventory): show the hair as it is, and never
+        // let that other pose count as the head having moved, or the next frame would fling the hair round.
+        if (com.dbzenith.client.ui.PortraitRenderer.isDrawing() || (known != null && known.frameNo == frameNo)) {
+            return known != null && known.p.length == need ? known.p : null;
+        }
         Minecraft mc = Minecraft.getInstance();
         if (mc.getCameraEntity() != null && e.distanceToSqr(mc.getCameraEntity()) > SIM_DISTANCE * SIM_DISTANCE) {
             BODIES.remove(e);
             return null;
         }
-        Body b = BODIES.computeIfAbsent(e, k -> new Body());
+        Body b = known != null ? known : new Body();
+        if (known == null) BODIES.put(e, b);
+        b.frameNo = frameNo;
         float t = e.tickCount + partial;
         double ex = Mth.lerp(partial, e.xo, e.getX()), ey = Mth.lerp(partial, e.yo, e.getY()), ez = Mth.lerp(partial, e.zo, e.getZ());
         frame(e, head, partial);                                                    // head space -> world: M
-        int need = shape.locks().size() * N * 3;
         boolean reset = b.p.length != need || Float.isNaN(b.time) || Math.abs(t - b.time) > 20
                 || (ex - b.x) * (ex - b.x) + (ey - b.y) * (ey - b.y) + (ez - b.z) * (ez - b.z) > 16;   // a teleport
         if (reset) {
@@ -64,7 +77,8 @@ public final class HairSim {
             System.arraycopy(b.p, 0, b.prev, 0, need);
         } else if (t > b.time) {
             float dt = Math.min(3, t - b.time);
-            // carry last frame's knots into this frame's head space: the head moved and turned under them
+            // carry last frame's knots part of the way into this frame's head space: the hair lags a little behind a
+            // turn or a step, then follows (all the way would whip it round with every turn of the head)
             M.invert(INV);
             float mx = (float) ((b.x - ex) * 16), my = (float) ((b.y - ey) * 16), mz = (float) ((b.z - ez) * 16);
             carry(b.p, b.frame, mx, my, mz);
@@ -99,8 +113,16 @@ public final class HairSim {
             old.transform(V.set(p[i], p[i + 1], p[i + 2]));
             V.add(mx, my, mz);
             INV.transform(V);
-            p[i] = V.x; p[i + 1] = V.y; p[i + 2] = V.z;
+            p[i] += (V.x - p[i]) * INERTIA;
+            p[i + 1] += (V.y - p[i + 1]) * INERTIA;
+            p[i + 2] += (V.z - p[i + 2]) * INERTIA;
         }
+    }
+
+    /** Counts the frames the world draws, so the hair steps once a frame however often a fighter is drawn. */
+    @net.minecraftforge.eventbus.api.SubscribeEvent
+    public static void onFrame(net.minecraftforge.client.event.RenderLevelStageEvent event) {
+        if (event.getStage() == net.minecraftforge.client.event.RenderLevelStageEvent.Stage.AFTER_SKY) frameNo++;
     }
 
     private static void rest(HairShape shape, float[] out) {
@@ -116,7 +138,7 @@ public final class HairSim {
 
     private static void integrate(HairShape shape, Body b, float h, float aura, float t, int seed) {
         float[] p = b.p, q = b.prev;
-        float damp = (float) Math.pow(.93, h);
+        float damp = (float) Math.pow(.84, h);                                       // hair is heavily damped: it sways, it doesn't ring
         float flutter = aura > 0 ? aura * (.6f + .4f * Mth.sin(t * 1.7f + seed)) : 0;
         int li = 0;
         for (HairLock l : shape.locks()) {
@@ -134,10 +156,23 @@ public final class HairSim {
                     p[o + c] = next;
                 }
                 // spring back towards the style: firm at the root, looser at the tip
-                float k = (float) (1 - Math.pow(1 - Math.min(.95, stiff * (1 - .55 * u) * .6), h));
+                float k = (float) (1 - Math.pow(1 - Math.min(.95, (.12f + stiff) * (1 - .45 * u) * .9), h));
                 p[o] += ((float) l.x(i) - p[o]) * k;
                 p[o + 1] += ((float) l.y(i) - p[o + 1]) * k;
                 p[o + 2] += ((float) l.z(i) - p[o + 2]) * k;
+            }
+            float arc = 0;                                                          // never swing far from the style:
+            for (int i = 1; i < N; i++) {                                           // a stiff lock a little, a loose one more
+                int o = base + i * 3;
+                arc += (float) Math.sqrt(sq(l.x(i) - l.x(i - 1)) + sq(l.y(i) - l.y(i - 1)) + sq(l.z(i) - l.z(i - 1)));
+                float max = (.18f + .42f * (1 - stiff)) * arc;
+                float dx = p[o] - (float) l.x(i), dy = p[o + 1] - (float) l.y(i), dz = p[o + 2] - (float) l.z(i);
+                float d = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+                if (d > max && d > 1e-5f) {
+                    float f = max / d;
+                    p[o] = (float) l.x(i) + dx * f; p[o + 1] = (float) l.y(i) + dy * f; p[o + 2] = (float) l.z(i) + dz * f;
+                    q[o] += (p[o] - q[o]) * .6f; q[o + 1] += (p[o + 1] - q[o + 1]) * .6f; q[o + 2] += (p[o + 2] - q[o + 2]) * .6f;
+                }
             }
             for (int i = 1; i < N; i++) {                                           // keep each segment its length
                 int o = base + i * 3, a = o - 3;
@@ -150,9 +185,19 @@ public final class HairSim {
                     p[o] = p[a] + dx * f; p[o + 1] = p[a + 1] + dy * f; p[o + 2] = p[a + 2] + dz * f;
                 }
                 collide(p, o);
+                dx = p[o] - p[a]; dy = p[o + 1] - p[a + 1]; dz = p[o + 2] - p[a + 2];   // and its length again after the push
+                d = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+                if (d > 1e-5f) {
+                    float f = len / d;
+                    p[o] = p[a] + dx * f; p[o + 1] = p[a + 1] + dy * f; p[o + 2] = p[a + 2] + dz * f;
+                }
             }
             li++;
         }
+    }
+
+    private static double sq(double v) {
+        return v * v;
     }
 
     /** Out of the head (a box) and out of the back (the torso, through the head's turn). */
@@ -194,5 +239,15 @@ public final class HairSim {
         float[] out = new float[shape.locks().size() * N * 3];
         rest(shape, out);
         return out;
+    }
+
+    /** For the offline checks: the head turning {@code degrees} about its vertical axis under the hair, as a frame would. */
+    static void turn(float[] p, float[] prev, float degrees) {
+        float c = (float) Math.cos(Math.toRadians(degrees)), s = (float) Math.sin(Math.toRadians(degrees));
+        for (float[] a : new float[][]{p, prev}) for (int i = 0; i < a.length; i += 3) {
+            float x = a[i] * c - a[i + 2] * s, z = a[i] * s + a[i + 2] * c;
+            a[i] += (x - a[i]) * INERTIA;
+            a[i + 2] += (z - a[i + 2]) * INERTIA;
+        }
     }
 }

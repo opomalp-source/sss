@@ -2492,3 +2492,16 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **Tools:** the sheets sample the texture through the emitted UVs (cutout included), so they match the game.
 - **Checked:** sheets of Goku, Vegeta, Gohan and Trunks base and Super Saiyan; in the dev client Goku base, Super
   Saiyan and Blue, Vegeta and Future Trunks. Hair checks all pass.
+
+## 2026-10-13 — CX-35c: calm hair physics (v0.91.1)
+- **The bug** (user: walking or any movement made the hair rage, wobble and spin far too much; a screenshot showed long
+  locks flung out sideways):
+  - the same fighter is drawn more than once a frame (the HUD portrait, the inventory); each of those draws stored its
+    own head pose as "last frame", so the next world frame saw the head swing from the portrait's angle to the world's
+    and flung the hair round every frame;
+  - turning carried the hair along by the whole turn, and long locks could swing without limit.
+- **Fixed** (`HairSim`): the hair steps once per world frame (counted at `AFTER_SKY`) and other draws of the same
+  fighter just show it as it is; it lags only 30% of the head's own motion; damping much stronger (it sways, it doesn't
+  ring); the spring back firmer; and every knot is kept within a swing of its place in the style (a stiff lock a
+  little, a loose one more); lengths are re-kept after collisions; moving air and the aura lift gentler.
+- **Checks:** a new stress test whips the head ±70° every frame with sideways air: the hair stays near its style.

@@ -40,7 +40,7 @@ progress follows the transformation bar (`HairTransformation`).
 ## Physics
 
 `HairSim` keeps each fighter's knots in head space and steps them every frame (in sub-steps of a third of a tick):
-- last frame's knots are carried into this frame's head frame, so turning, running, stopping and jumping make the hair
+- last frame's knots are carried part of the way (30%) into this frame's head frame, so turning, running, stopping and jumping make the hair
   lag, swing and settle on its own;
 - gravity pulls toward the real down however the head tilts; moving air (the fighter's own speed) streams it back;
   an aura lifts it (powering up fully, a transformed form a little);
@@ -65,3 +65,7 @@ Hair is painted like anime hair rather than lit like a block:
   hair in shade (transformed hair glows).
 
 The sheets (`hairSheet`) sample the texture through the emitted UVs, so they show what the game shows.
+
+The hair steps once per world frame; drawing the same fighter again that frame (the HUD portrait, the inventory)
+shows it as it is. Damping is strong and every knot stays within a swing of its place (`.18 + .42 * (1 - stiff)` of
+its distance along the lock), so it sways and settles rather than whipping about.

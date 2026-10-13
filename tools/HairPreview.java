@@ -102,6 +102,23 @@ public final class HairPreview {
             check(settled < 3, "hair settles after stopping: " + p + "/" + look + " " + settled);
         }
         report.append("PASS: physics finite, roots anchored, lengths kept, streaming back when running, settling\n");
+        for (Preset p : new Preset[]{Preset.SPIKY, Preset.MANE, Preset.LONG}) for (HairLook look : new HairLook[]{HairLook.BASE, HairLook.SSJ}) {
+            HairShape s = HairStyles.of(p, look);                                     // whipping the head about every frame
+            float[] rest = HairSim.restOf(s), pos = rest.clone(), prev = rest.clone();
+            double worst = 0;
+            for (int f = 0; f < 200; f++) {
+                HairSim.turn(pos, prev, (f & 1) == 0 ? 70 : -70);
+                HairSim.simulate(s, pos, prev, new float[]{0, 1, 0}, new float[]{(f & 1) == 0 ? 6 : -6, 0, 4}, 0, .34f, 1);
+                for (int li = 0; li < s.locks().size(); li++) {
+                    HairLock l = s.locks().get(li);
+                    double tip = Math.sqrt(sq(pos[(li * HairLock.KNOTS + 6) * 3] - l.x(6)) + sq(pos[(li * HairLock.KNOTS + 6) * 3 + 1] - l.y(6))
+                            + sq(pos[(li * HairLock.KNOTS + 6) * 3 + 2] - l.z(6)));
+                    worst = Math.max(worst, tip / Math.max(1, l.length()));
+                }
+            }
+            check(worst < .75, "whipping the head about, the hair stays near its style: " + p + "/" + look + " " + worst);
+        }
+        report.append("PASS: hair stays near its style when the head whips about\n");
 
         for (float progress : new float[]{0, .5f, 1}) {
             java.util.Set<Integer> colors = new java.util.HashSet<>();
