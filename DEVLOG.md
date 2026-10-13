@@ -2623,3 +2623,27 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **Checked:** third person in the dev client, base and Super Saiyan: the character left of centre.
 - **v0.98.1:** a little further right (user): 1.0 block by default; the setting's key is now `shoulderRight` so the new
   default replaces the 0.6 already saved in existing configs.
+
+## 2026-10-14 — CX-38: flight rework (v0.99.0)
+- **The ask** (user: a flight rework, more dynamic in the body and the physics, actually immersive).
+- **Physics** (`ki/FlightModel`, pure math; `client/FlightPhysics` drives your own flight): instead of vanilla's
+  instant creative flight, ki flight has momentum:
+  - you fly where you look (forward follows the view up and down, strafing stays level, jump and sneak climb and drop);
+  - speed builds over about a second to cruise (11x the flight speed stat, as before), carries when you let go (a
+    glide to a stop in about two seconds), reversing brakes harder, turns curve;
+  - sprint boosts: a launch on the first tick, then speed building from 2.2x to 3x cruise while held; boosting drains
+    ki at 2.2x (`flightBoostKiMultiplier`);
+  - hovering bobs gently; stunned, you stall; walls stop the speed into them.
+  Vanilla still moves and collides the player (its own push is zeroed for the tick and our velocity handed over), so
+  the server and anti-cheat see ordinary flight.
+- **The body** (`MotionEngine`, every flier: you, other players, NPCs): pitch and bank on springs that overshoot a
+  little and settle; the legs trail with speed, further while speeding up, and swing forward when braking; a
+  flutter at speed, one leg against the other; hovering, a slow bob, the legs dangling out of step, the arms floating;
+  climbing reaches the arms ahead, diving sweeps them back; the head looks into turns.
+- **The feel:** wind in your ears rising in volume and pitch with speed; the view widening with speed (with
+  `fovEffects`); a boost throws a ring of air back across the flight path with a flash and a camera kick (seen on
+  other fliers too); wind streaks past fast fliers; dust off the ground or spray off water when skimming low.
+- **Config** (client): `flightMomentum` (off: vanilla flight), `flightEffects`; Settings → Camera.
+- **Tests:** `FlightTests` (speed builds, reaches cruise, flies where you look, glides then stops, braking beats
+  coasting, the boost launches and builds, looking up climbs, stunned stalls). 210 GameTests.
+- **Checked in the dev client:** hovering (no errors). The movement itself can't be driven from the test harness.

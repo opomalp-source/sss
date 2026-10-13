@@ -197,6 +197,20 @@ public final class ImpactFx {
 
     // ------------------------------------------------------------------ effects other client code asks for
 
+
+    /** A flight boost (CX-38): a ring of air thrown back across the flight path, a puff of light, a jolt. */
+    public static void boostBurst(Entity who, Vec3 dir, int color) {
+        Vec3 c = who.position().add(0, who.getBbHeight() * 0.5, 0);
+        Vec3 d = dir.lengthSqr() < 1e-6 ? UP : dir.normalize();
+        add(Kind.RING, c.subtract(d.scale(0.6)), d, 0xFFFFFF, 0.6f, 3.6f, 9, 210);
+        add(Kind.RING, c.subtract(d.scale(1.4)), d, FxDraw.mix(color, 0xFFFFFF, 0.6f), 0.4f, 2.4f, 12, 150);
+        add(Kind.FLASH, c, UP, FxDraw.mix(color, 0xFFFFFF, 0.7f), 0, 1.6f, 4, 170);
+        Minecraft mc = Minecraft.getInstance();
+        if (who == mc.player) {
+            CameraFx.kick(0.35f);
+            CameraFx.rush();
+        }
+    }
     /** A transformation bursting out: flash, two rings and a shake for whoever is close. */
     public static void transformBurst(Entity who, int color) {
         Vec3 c = who.position().add(0, who.getBbHeight() * 0.55, 0);

@@ -78,6 +78,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue flightKiPercentPerSecond;
         public final ForgeConfigSpec.DoubleValue flightBaseSpeed;
         public final ForgeConfigSpec.DoubleValue flightSpeedPerMoveBonus;
+        public final ForgeConfigSpec.DoubleValue flightBoostKiMultiplier;
 
         // --- combat ---
         public final ForgeConfigSpec.DoubleValue vanillaDamageToBody;
@@ -354,6 +355,8 @@ public final class DBZConfig {
                     .defineInRange("flightKiPercentPerSecond", 1.5, 0.0, 100.0);
             flightBaseSpeed = b.comment("Vanilla creative flight speed is 0.05")
                     .defineInRange("flightBaseSpeed", 0.05, 0.0, 1.0);
+            flightBoostKiMultiplier = b.comment("Ki drain while boosting (sprinting) in flight, times the normal drain")
+                    .defineInRange("flightBoostKiMultiplier", 2.2, 1.0, 20.0);
             flightSpeedPerMoveBonus = b.comment("Flight speed multiplier per unit of DEX move-speed bonus")
                     .defineInRange("flightSpeedPerMoveBonus", 2.0, 0.0, 100.0);
             b.pop();
@@ -752,6 +755,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue crosshairOpacity;
         public final ForgeConfigSpec.DoubleValue shoulderOffset, shoulderHeight;
         public final ForgeConfigSpec.BooleanValue shoulderCamera, startThirdPerson;
+        public final ForgeConfigSpec.BooleanValue flightMomentum, flightEffects;
         public final ForgeConfigSpec.DoubleValue lockOnRange, lockOnCameraSpeed, lockOnFreeLook;
         public final ForgeConfigSpec.DoubleValue screenShake;
         public final ForgeConfigSpec.BooleanValue hitstop;
@@ -802,6 +806,8 @@ public final class DBZConfig {
             shoulderCamera = b.comment("Third person (behind): the camera a little over your right shoulder, always (walking, flying, fighting), not only in PvP")
                     .define("shoulderCamera", true);
             startThirdPerson = b.comment("Start in third person when you join a world").define("startThirdPerson", true);
+            flightMomentum = b.comment("Ki flight with momentum: fly where you look, speed builds and carries, sprint boosts (off: vanilla creative flight)").define("flightMomentum", true);
+            flightEffects = b.comment("Flight effects: wind streaks, dust and spray when skimming low, boost rings").define("flightEffects", true);
             shoulderHeight = b.comment("Shoulder camera: blocks up").defineInRange("shoulderHeight", 0.15, -1.0, 2.0);
             crosshairDotMode = b.comment("The dot crosshair: 0 = in PvP only (out of PvP, crosshairStyle), 1 = always").defineInRange("crosshairDotMode", 0, 0, 1);
             crosshairStyle = b.comment("The crosshair out of PvP: 0 = a four-pointed star, 1 = the dot, 2 = vanilla's").defineInRange("crosshairStyle", 0, 0, 2);

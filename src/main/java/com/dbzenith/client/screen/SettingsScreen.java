@@ -76,6 +76,8 @@ public class SettingsScreen extends Screen {
                 o.add(new Option("pvp_camera", c.pvpCamera, 0, 0, null));                         // CX-20
                 o.add(new Option("start_third_person", c.startThirdPerson, 0, 0, null));
                 o.add(new Option("shoulder_camera", c.shoulderCamera, 0, 0, null));
+                o.add(new Option("flight_momentum", c.flightMomentum, 0, 0, null));
+                o.add(new Option("flight_effects", c.flightEffects, 0, 0, null));
                 o.add(new Option("shoulder_offset", c.shoulderOffset, 0, 3, null, "b"));
             }
             case COMBAT -> {                                                    // CX-19

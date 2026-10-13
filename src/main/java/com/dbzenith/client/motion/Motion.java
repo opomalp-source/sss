@@ -35,6 +35,9 @@ public final class Motion {
     float engine, engineO;                    // the whole engine's weight against vanilla
     float lean, leanO, roll, rollO;           // on the ground: lean into speed, roll into turns
     float flyPitch, flyPitchO, bank, bankO;   // in the air
+    float pitchV, bankV;                      // their springs' speeds: they overshoot a little and settle (CX-38)
+    float legTrail, legTrailO, legTrailV;     // in flight: the legs trailing back with speed, swinging forward when braking
+    float flyH, flyHPrev, flyVy;              // flight speed through the air (blocks per tick) and its climb
     float armLag, armLagO;
     float land, landO;                        // landing crouch, 1 on impact, fading
     float takeoff, takeoffO;                  // takeoff spring, 1 at lift-off, fading

@@ -2140,5 +2140,9 @@
   "settings.dbzenith.start_third_person": "Start in third person",
   "settings.dbzenith.start_third_person.desc": "Join a world in third person, behind your character.",
   "settings.dbzenith.shoulder_camera": "Shoulder camera",
-  "settings.dbzenith.shoulder_camera.desc": "In third person, the camera sits a little over your right shoulder, walking, flying and fighting alike."
+  "settings.dbzenith.shoulder_camera.desc": "In third person, the camera sits a little over your right shoulder, walking, flying and fighting alike.",
+  "settings.dbzenith.flight_momentum": "Flight momentum",
+  "settings.dbzenith.flight_momentum.desc": "Fly where you look; speed builds, carries and glides to a stop; sprint to boost. Off: vanilla creative flight.",
+  "settings.dbzenith.flight_effects": "Flight effects",
+  "settings.dbzenith.flight_effects.desc": "Wind streaks at speed, dust and spray when skimming low, rings of air when boosting."
 }

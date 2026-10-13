@@ -117,6 +117,7 @@ public final class MotionEngine {
         m.rollO = m.roll;
         m.flyPitchO = m.flyPitch;
         m.bankO = m.bank;
+        m.legTrailO = m.legTrail;
         m.armLagO = m.armLag;
         m.landO = m.land;
         m.takeoffO = m.takeoff;
@@ -194,6 +195,7 @@ public final class MotionEngine {
             m.roll += (0 - m.roll) * k;
             m.bank += (0 - m.bank) * k;
             m.armLag += (0 - m.armLag) * k;
+            m.legTrail += (0 - m.legTrail) * k;
         } else {
             float leanTarget = 0, rollTarget = 0, pitchTarget = 0, bankTarget = 0;
             if (m.ground && !air) {
@@ -216,8 +218,31 @@ public final class MotionEngine {
             }
             m.lean += (leanTarget - m.lean) * k;
             m.roll += (rollTarget - m.roll) * k;
-            m.flyPitch += (pitchTarget - m.flyPitch) * k * 0.7f;
-            m.bank += (bankTarget - m.bank) * k * 0.8f;
+            m.flyHPrev = m.flyH;
+            m.flyH = (float) Math.sqrt(m.forward * m.forward + m.lateral * m.lateral);
+            m.flyVy = (float) m.vy;
+            if (air) {
+                // the body pitches and banks on springs: a little past where it is going, then settling (CX-38)
+                for (int s = 0; s < (int) Math.ceil(dt); s++) {
+                    m.pitchV += (pitchTarget - m.flyPitch) * 0.09f - m.pitchV * 0.32f;
+                    m.flyPitch += m.pitchV;
+                    m.bankV += (bankTarget - m.bank) * 0.11f - m.bankV * 0.34f;
+                    m.bank += m.bankV;
+                }
+                // the legs: trailing with speed, further while speeding up, swinging forward when braking
+                float accel = (m.flyH - m.flyHPrev) / Math.max(1f, dt);
+                float trailTarget = Mth.clamp(m.flyH / Tuning.flyFast * 10f + accel * 140f, -26f, 30f);
+                for (int s = 0; s < (int) Math.ceil(dt); s++) {
+                    m.legTrailV += (trailTarget - m.legTrail) * 0.12f - m.legTrailV * 0.26f;
+                    m.legTrail += m.legTrailV;
+                }
+            } else {
+                m.flyPitch += (pitchTarget - m.flyPitch) * k * 0.7f;
+                m.bank += (bankTarget - m.bank) * k * 0.8f;
+                m.pitchV = m.bankV = 0;
+                m.legTrail += (0 - m.legTrail) * k;
+                m.legTrailV = 0;
+            }
             float lagTarget = (float) Mth.clamp(m.yawRate * 0.9f + (m.speedPrev - m.speed) * 90, -22, 22) * Tuning.armLag;
             m.armLag += (lagTarget - m.armLag) * 0.3f * dt;
         }
@@ -436,6 +461,37 @@ public final class MotionEngine {
         p.add(Bone.LEFT_ARM, Bone.ROLL, lag * 0.6f + Math.min(0, lag) * 0.4f);
         p.add(Bone.RIGHT_ARM, Bone.PITCH, Math.abs(lag) * 0.5f);
         p.add(Bone.LEFT_ARM, Bone.PITCH, Math.abs(lag) * 0.5f);
+        // flight (CX-38): the body answers the air
+        if (fly > 0.001f) {
+            float t = m.entity.tickCount + pt;
+            float h = m.flyH, fast = Mth.clamp((h - Tuning.flyCruise) / Math.max(.05f, Tuning.flyFast), 0f, 1f);
+            float hover = 1f - Mth.clamp(h / Math.max(.05f, Tuning.flyCruise * 2f), 0f, 1f);
+            float trail = Mth.lerp(pt, m.legTrailO, m.legTrail) * fly;
+            float seed = m.entity.getId() * .37f;
+            // the legs trail behind, swing forward when braking, and flutter at speed, one against the other
+            float flutter = Mth.sin(t * .55f + seed) * 5f * fast * fly;
+            p.add(Bone.RIGHT_LEG, Bone.PITCH, trail + flutter);
+            p.add(Bone.LEFT_LEG, Bone.PITCH, trail * .85f - flutter);
+            p.add(Bone.RIGHT_LEG, Bone.BEND, Math.max(0, -trail) * .9f + Math.max(0, flutter) * 1.4f);
+            p.add(Bone.LEFT_LEG, Bone.BEND, Math.max(0, -trail) * .7f + Math.max(0, -flutter) * 1.4f);
+            // hovering: a slow bob, the legs dangling out of step, the arms floating
+            if (hover > 0.001f) {
+                float a = hover * fly, b = t * .085f + seed;
+                p.add(Bone.BODY, Bone.Y, Mth.sin(b) * .55f * a);
+                p.add(Bone.RIGHT_LEG, Bone.PITCH, Mth.sin(b * 1.3f) * 4f * a);
+                p.add(Bone.LEFT_LEG, Bone.PITCH, Mth.sin(b * 1.3f + 2.1f) * 4f * a);
+                p.add(Bone.RIGHT_LEG, Bone.BEND, (9f + Mth.sin(b * 1.1f) * 5f) * a);
+                p.add(Bone.LEFT_LEG, Bone.BEND, (4f + Mth.sin(b * 1.1f + 1.7f) * 4f) * a);
+                p.add(Bone.RIGHT_ARM, Bone.ROLL, (3f + Mth.sin(b + .6f) * 2.5f) * a);
+                p.add(Bone.LEFT_ARM, Bone.ROLL, -(3f + Mth.sin(b + 1.4f) * 2.5f) * a);
+            }
+            // climbing reaches the arms ahead, diving sweeps them back along the body
+            float climb = Mth.clamp(m.flyVy * 30f, -14f, 12f) * fly * (1f - hover);
+            p.add(Bone.RIGHT_ARM, Bone.PITCH, -climb);
+            p.add(Bone.LEFT_ARM, Bone.PITCH, -climb);
+            // the head looks into the turn
+            p.add(Bone.HEAD, Bone.YAW, Mth.clamp(m.yawRate * 1.1f, -20f, 20f) * fly);
+        }
         // breathing: deeper after a sprint, only while standing
         float idle = Mth.lerp(pt, m.weightO[State.IDLE.ordinal()], m.weight[State.IDLE.ordinal()]);
         if (idle > 0f && m.fatigue > 0.02f) {
