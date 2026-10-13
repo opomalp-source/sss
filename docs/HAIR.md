@@ -57,3 +57,13 @@ head and the back. Off with `hairPhysics`, and past 48 blocks.
 0.55 px steps over the top and down the brow, sides and back to the style's hairline; wherever no lock reaches well
 over a point, it adds a short flat lock there (back over the crown, up from the hairline elsewhere), underneath the
 others. The mohawk opts out (`cover = false`). `HairPreview` checks 15,000+ points over the crown of every look.
+
+## Volume and flow (CX-35h)
+
+- Every lock is drawn 1.2x as wide as authored (`Sculpt.VOLUME`), at least 70% as thick as it is wide, and tapers
+  from full to a point over its length (Goku's hand-placed proportions); straight cuts end blunt.
+- Fan locks arc: the outer ones bend out and over further (`curl - |theta| * .32`), and each curves round its own
+  way a little (a fixed twist per lock), so the hair flows instead of standing in rows.
+- `HairRender` draws a lock as three long boxes (two knots each), each a step thinner, like the Dragon Block hair
+  models, not six short ones (which read as staircases).
+- Bare-spot fillers (`Sculpt.fill`) are flat, blunt slabs (`Sculpt.flat`) so they don't form steps on the forehead.

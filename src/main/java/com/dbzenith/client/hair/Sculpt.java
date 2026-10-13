@@ -13,8 +13,12 @@ final class Sculpt {
     private HairCap cap = HairCap.NONE;
     private final List<HairLock> locks = new ArrayList<>();
     private float stiff = .55f, weight = 1f;
+    /** Every lock this much bigger than drawn up: full, voluminous hair. */
+    static final double VOLUME = 1.2;
     /** Straight hair: locks end blunt and rounded instead of in a point. */
     boolean blunt;
+    /** Locks lie flat (as thin as given), for the short ones closing bare spots. */
+    boolean flat;
     /** How much fan locks differ in length, one to the next (a ragged outline). */
     double jagged = .3;
 
@@ -56,9 +60,9 @@ final class Sculpt {
             k[o] = px;
             k[o + 1] = py;
             k[o + 2] = pz;
-            double narrow = blunt ? 1 - .45 * Math.pow(t, 3) : Math.pow(1 - t, .85) * (1 + .6 * t) + .04;   // straight hair ends blunt; spikes are leaves
-            k[o + 3] = w * narrow;
-            k[o + 4] = w * thick * (1 - .55 * t);
+            double narrow = blunt ? 1 - .4 * Math.pow(t, 3) : 1 - .84 * Math.pow(t, 1.35);  // full and thick, then drawn to a point
+            k[o + 3] = w * VOLUME * narrow;
+            k[o + 4] = w * VOLUME * (flat ? thick : Math.max(thick, .7)) * (blunt ? 1 - .4 * t : 1 - .75 * Math.pow(t, 1.3));   // thick locks, not flat bands
             double mid = Math.min(1, t + .5 / n);
             double[] d = dir(el + curl * Math.pow(mid, bend), az + swing * mid);
             px += d[0] * step;
@@ -124,7 +128,9 @@ final class Sculpt {
         double el = Math.toDegrees(Math.asin(Math.max(-1, Math.min(1, -dy)))), az = Math.toDegrees(Math.atan2(dx, dz));
         double h = Math.sin(theta * 7.31 + z * 3.7 + lean * .9) * 43758.5453;
         double jag = 1 + jagged * ((h - Math.floor(h)) - .5);
-        return lock(rx, ry, z, el, az, len * jag, w, curl, 0, .5, 1);
+        double flow = curl - Math.abs(theta) * .32;                                     // the outer locks arc out and over, like Goku's
+        double twist = (h - Math.floor(h) - .5) * 26;                                   // each one curving its own way a little
+        return lock(rx, ry, z, el, az, len * jag, w, flow, twist, .7, 1.25);
     }
 
     /** {@link #fan} on both sides. */
@@ -200,7 +206,9 @@ final class Sculpt {
     private static void patch(List<HairLock> all, double x, double y, double z, double el, double az) {
         for (HairLock l : all) if (covers(l, x, y, z, -.3)) return;                 // well inside a lock, or patched
         Sculpt s = new Sculpt().feel(.9f, .3f);
-        s.lock(x, y, z, el, az, 2.4, 2.8, 0, 0, .35, 1);
+        s.blunt = true;
+        s.flat = true;
+        s.lock(x, y, z, el, az, 2.6, 2.6, 0, 0, .3, 1);
         all.add(0, s.locks.get(0));                                                   // underneath: drawn first
     }
 

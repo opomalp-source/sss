@@ -17,6 +17,8 @@ public final class HairRender {
     /** A 16 x 16 tile of hair strands, greys the hair colour tints; it repeats along each lock. */
     public static final ResourceLocation MATERIAL = new ResourceLocation("dbzenith", "textures/entity/hair_block.png");
     private static final int N = HairLock.KNOTS;
+    /** Knots per box: 2, so a lock is three boxes, each a step thinner, like the Dragon Block hair models. */
+    private static final int SPAN = 2;
     private static final double CX = 0, CY = -4.2, CZ = .6;                        // the middle of the head, for "outward"
     private static final float[] P = new float[N * 3], S = new float[N * 3], U = new float[N * 3], C = new float[8 * 3];
 
@@ -47,12 +49,12 @@ public final class HairRender {
             }
             frames();
             float along = (li * 5.3f) % 16, jitter = 1 + .05f * (float) Math.sin(li * 2.39 + lock.x(0));
-            for (int i = 0; i < N - 1; i++) {
-                float t = (i + .5f) / (N - 1);
+            for (int i = 0; i < N - 1; i += SPAN) {                                   // a few long boxes per lock, not a staircase
+                float t = (i + SPAN * .5f) / (N - 1);
                 float shade = (.76f + .24f * t) * jitter;
                 float dye = Math.max(0, Math.min(1, (t - .55f) / .45f));
                 float cr = Math.min(1, (r + (tr - r) * dye) * shade), cg = Math.min(1, (g + (tg - g) * dye) * shade), cb = Math.min(1, (b + (tb - b) * dye) * shade);
-                along = box(vc, m, n, i, (float) lock.w(i), (float) lock.t(i), along, cr, cg, cb, light, overlay);
+                along = box(vc, m, n, i, Math.min(N - 1, i + SPAN), (float) lock.w(i), (float) lock.t(i), along, cr, cg, cb, light, overlay);
             }
             li++;
         }
@@ -90,9 +92,9 @@ public final class HairRender {
      * One segment as a box from knot i to i + 1, {@code w} wide across the scalp and {@code t} thick, reaching a little
      * back into the segment before so the joints are closed. Returns how far along the lock the texture has got.
      */
-    private static float box(VertexConsumer vc, Matrix4f m, Matrix3f n, int i, float w, float t, float along,
+    private static float box(VertexConsumer vc, Matrix4f m, Matrix3f n, int i, int j, float w, float t, float along,
                              float r, float g, float b, int light, int overlay) {
-        float ax = P[i * 3 + 3] - P[i * 3], ay = P[i * 3 + 4] - P[i * 3 + 1], az = P[i * 3 + 5] - P[i * 3 + 2];
+        float ax = P[j * 3] - P[i * 3], ay = P[j * 3 + 1] - P[i * 3 + 1], az = P[j * 3 + 2] - P[i * 3 + 2];
         float len = (float) Math.sqrt(ax * ax + ay * ay + az * az);
         if (len < 1e-4f) return along;
         ax /= len; ay /= len; az /= len;
@@ -107,7 +109,7 @@ public final class HairRender {
         float hw = Math.max(.5f, w) * .5f, ht = Math.max(.5f, Math.max(t, w * .6f)) * .5f;
         float back = i == 0 ? 0 : Math.min(.45f, len * .3f);
         float bx = P[i * 3] - ax * back, by = P[i * 3 + 1] - ay * back, bz = P[i * 3 + 2] - az * back;
-        float ex = P[i * 3 + 3], ey = P[i * 3 + 4], ez = P[i * 3 + 5];
+        float ex = P[j * 3], ey = P[j * 3 + 1], ez = P[j * 3 + 2];
         for (int c = 0; c < 8; c++) {                                                // 0-3 at the start, 4-7 at the end
             float qs = ((c & 1) == 0 ? -hw : hw), qu = ((c & 2) == 0 ? -ht : ht);
             float ox = c < 4 ? bx : ex, oy = c < 4 ? by : ey, oz = c < 4 ? bz : ez;

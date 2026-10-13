@@ -2572,3 +2572,14 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   growth check allows short filler locks retracting (within 5%). All pass.
 - **Checked:** offline sheets of the main characters in base, SSJ, SSJ2, SSJ3 and God; in the dev client Goku base and
   Super Saiyan.
+
+## 2026-10-13 — CX-35h: hair volume and flow (v0.96.0)
+- **The ask** (user: only Goku's base looked good; size everything up, the hair needs far more volume and dynamic flow).
+- **Why Goku's worked:** his hand-placed locks are thick (depth ~70% of width), taper only to about a third, and arc.
+  The generated locks were half as thick, tapered to a needle and stood straight.
+- **Volume:** every lock 1.2x wider, at least 70% as thick as wide, full then drawn to a point (`Sculpt.VOLUME`).
+- **Flow:** fan locks arc outward and over by how far out they stand, and each curves its own way a little.
+- **Rendering:** three long boxes per lock instead of six (a staircase), like the references; the bare-spot fillers
+  are flat slabs.
+- **Checked:** sheets of all 19 styles in all 7 looks; in the dev client teen Gohan, Broly, Super Saiyan Goku. All hair
+  checks pass (no bald spots over 15,246 crown points).
