@@ -41,23 +41,28 @@ public record HairShape(HairCap cap, List<HairLock> locks) {
             partner[j] = i;
         }
         for (int j = 0; j < nb; j++) {
-            float q = local(progress, j);
+            float q = local(progress, to.locks.get(j));
             HairLock b = to.locks.get(j);
             if (partner[j] >= 0) out.add(blend(from.locks.get(partner[j]), b, q));
-            else if (q > .03f) out.add(grown(b, q));
+            else if (q > .03f) out.add(grown(b, Math.min(1, q)));
         }
         for (int i = 0; i < na; i++) {
             if (taken[i]) continue;
-            float q = 1 - local(progress, 1000 + i);
+            float q = 1 - Math.min(1, local(progress, from.locks.get(i)));
             if (q > .03f) out.add(grown(from.locks.get(i), q));
         }
         return new HairShape(progress < .5f ? from.cap : to.cap, List.copyOf(out));
     }
 
-    private static float local(float progress, int index) {
-        double h = Math.sin(index * 12.9898 + 4.1414) * 43758.5453;
-        float delay = (float) (.06 * (h - Math.floor(h)));                       // all together, barely staggered
-        return Math.max(0, Math.min(1, (progress - delay) / (1 - .06f)));
+    /**
+     * How far one lock has got: the change sweeps from the forehead back to the nape (a wave through the hair, not all
+     * at once), and each lock eases out past its new shape a little and settles back (it whips into place).
+     */
+    private static float local(float progress, HairLock l) {
+        float front = (float) Math.max(0, Math.min(1, (l.z(0) + 4.4) / 8.8));      // 0 at the brow, 1 at the nape
+        float x = Math.max(0, Math.min(1, (progress - .38f * front) / .62f));
+        float c = 1.9f;                                                               // ease out with a small overshoot
+        return 1 + (c + 1) * (float) Math.pow(x - 1, 3) + c * (float) Math.pow(x - 1, 2);
     }
 
     /** A lock grown {@code g} of the way out along its own path (or drawn back in), its end tapering to a point. */

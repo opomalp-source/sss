@@ -41,7 +41,7 @@ public final class HairSheet {
             if (a.equals("grow")) grow = true;
             if (a.startsWith("pitch=")) PITCH = Double.parseDouble(a.substring(6));
         }
-        double[] yaws = views == 1 ? new double[]{-Math.PI / 5} : new double[]{0, -Math.PI / 2, Math.PI, -Math.PI / 5};
+        double[] yaws = views == 1 ? new double[]{-Math.PI / 5} : views == 0 ? new double[]{0} : new double[]{0, -Math.PI / 2, Math.PI, -Math.PI / 5};
         if (grow) {
             float[] steps = {0, .2f, .4f, .6f, .8f, 1};
             for (HairLook t : looks) {

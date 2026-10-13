@@ -47,9 +47,17 @@ public final class HairStyles {
         if (progress >= 1) return of(preset, to);
         int step = Math.max(1, Math.min(63, Math.round(progress * 64)));
         return MORPHS.computeIfAbsent(preset + "|" + from + ">" + to + "|" + step,
-                k -> HairShape.morph(of(preset, from), of(preset, to), step / 64f));
+                k -> closed(HairShape.morph(of(preset, from), of(preset, to), step / 64f), of(preset, to)));
     }
 
+
+    /** A shape part of the way through a change, its bare spots closed down to the hairline of where it is going. */
+    private static HairShape closed(HairShape s, HairShape target) {
+        if (s.locks().isEmpty() || target.cap() == HairCap.NONE && target.locks().isEmpty()) return s;
+        java.util.List<HairLock> all = new java.util.ArrayList<>(s.locks());
+        Sculpt.fill(all, target.cap() == HairCap.NONE ? HairCap.of(-7.4, 0, .3, -5.4, -4) : target.cap());
+        return new HairShape(s.cap(), java.util.List.copyOf(all));
+    }
     private static HairShape author(Preset preset, HairLook look) {
         HairShape s = shape(preset, look);
         if (s.locks().isEmpty() || preset == Preset.MOHAWK) return s;
@@ -148,6 +156,8 @@ public final class HairStyles {
         s.pair(4.2, -7, -.6, 52, 64, 4.6 * len, 3 * width, -6);                    // over the ears
         s.pair(4.2, -6.6, 1.4, 44, 50, 5 * len, 3 * width, -6);
         s.pair(1.6, -5.4, 4.3, -10, 10, 3.2, 2.6 * width, -20);                     // the nape
+        s.lock(0, -8.3, -4.1, -62, 180, 2.6, 3.4 * width, -14);                    // the widow's peak, down onto the brow
+        s.pair(1.6, -8.3, -4.1, -55, 172, 1.6, 2.4 * width, -10);
     }
 
     /** Gohan as a boy: short spikes off the crown leaning back and out, three bangs over the brow. */
@@ -452,7 +462,7 @@ public final class HairStyles {
         s.fans(.6, 14, 64, 8.6, 4.4, -40);
         s.pair(4.35, -6.4, -2.4, -62, 96, 2.6, 1.8, 0);
         manes(s, preset == Preset.MANE ? 46 : 28, 1, -88, .16f);
-        s.feel(.35f, 1).lock(-1.1, -8.5, -3.9, -64, 182, 6.4, 2.2, -16);           // the long bang
+        s.feel(.35f, 1).lock(-1.2, -8.6, -3.9, -48, 186, 8.4, 3, -38, -14, .6, .8);  // the long bang, curving down past the eye
         return s.build();
     }
 
@@ -503,15 +513,19 @@ public final class HairStyles {
      */
     static void manes(Sculpt s, double length, double spread, double fall, float stiff) {
         s.feel(stiff, 1);
-        for (int row = 0; row < 3; row++) {
-            for (int i = -3; i <= 3; i++) {
-                double x = i * 1.25 * Math.min(spread, 1.1);
-                double y = -8.3 + row * 1.9, z = Math.min(4.4, 1.2 + row * 1.5);
-                double up = 6 - row * 12;
-                double len = length * (1 - .14 * Math.abs(i) / 3.0) - row * 1.5 + ((i + row) & 1) * 2.5;
-                s.lock(x, y, z, up, i * 6 * spread, len, 3.8 - row * .3, fall - up, 0, .45, .25);
+        for (int row = 0; row < 4; row++) {                                          // four layers, many strands each
+            for (int i = -5; i <= 5; i++) {
+                double h = Math.sin(i * 12.9898 + row * 78.233) * 43758.5453;
+                double r = h - Math.floor(h);                                        // 0..1, fixed per strand
+                double x = (i * .78 + (row & 1) * .39) * Math.min(spread, 1.1);
+                double y = -8.4 + row * 1.35, z = Math.min(4.4, .8 + row * 1.2);
+                double up = 8 - row * 10;
+                double len = length * (1 - .16 * Math.abs(i) / 5.0) * (.86 + .28 * r) - row * 1.2;
+                double swing = (r - .5) * 18;                                         // strands cross a little as they fall
+                s.lock(x, y, z, up, i * 5 * spread, len, 2.7 - row * .15, fall - up, swing, .7, .25);
             }
         }
-        s.pair(4.4, -7, 1.2, -10, 60, length * .4, 3.2, fall + 30, -20, .45, .3);
+        for (int k = 0; k < 2; k++)                                                  // either side, behind the ears
+            s.pair(4.4, -7.4 + k * 1.2, .6 + k * 1.1, -10, 60 + k * 10, length * (.45 - k * .06), 2.6, fall + 30, -20, .7, .3);
     }
 }

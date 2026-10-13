@@ -67,3 +67,17 @@ others. The mohawk opts out (`cover = false`). `HairPreview` checks 15,000+ poin
 - `HairRender` draws a lock as three long boxes (two knots each), each a step thinner, like the Dragon Block hair
   models, not six short ones (which read as staircases).
 - Bare-spot fillers (`Sculpt.fill`) are flat, blunt slabs (`Sculpt.flat`) so they don't form steps on the forehead.
+
+## CX-35i: transformation wave, hairlines, no bare scalp anywhere, fuller manes
+
+- **Transformation:** the change sweeps from the brow to the nape (a lock starts when the wave reaches its root), and
+  each lock eases out a little past its new shape and settles back, so the hair whips into place
+  (`HairShape.local`). The in-betweens get their bare spots closed too (`HairStyles.closed`).
+- **No bare scalp:** `Sculpt.fill` also walks the rim where the top of the head meets the sides (the corners seen
+  from three-quarter views); `Sculpt.covers` measures a lock by its thickness (what actually lies over the scalp),
+  not its width. `HairPreview` checks the top, the rim, and the brow, sides and back down to each hairline, for every
+  look and for every transformation at a quarter, half and three quarters.
+- **Hairlines:** Vegeta has his widow's peak as its own locks.
+- **Manes** (Raditz, Super Saiyan 3, Super Saiyan 4): four layers of eleven strands each, thinner, lengths varying a
+  little strand to strand and crossing as they fall, two strands either side behind the ears. The Super Saiyan 3 bang
+  is a long lock curving down past the eye.

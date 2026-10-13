@@ -2583,3 +2583,16 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   are flat slabs.
 - **Checked:** sheets of all 19 styles in all 7 looks; in the dev client teen Gohan, Broly, Super Saiyan Goku. All hair
   checks pass (no bald spots over 15,246 crown points).
+
+## 2026-10-13 — CX-35i: hair transformation wave, hairlines, no bare scalp, fuller manes (v0.97.0)
+- **The ask** (user: a better transformation animation for the hair, right hairlines, remove the bald spots, more
+  strands for Raditz and Super Saiyan 3, more aesthetic).
+- **Transformation:** a wave from the brow to the nape, each lock overshooting slightly and settling; in-betweens are
+  closed over like finished looks.
+- **Bald spots:** the head's top rim (top meets sides) is now filled and checked; coverage is measured by a lock's
+  thickness; the check covers top, rim, brow, sides and back to the hairline, for every look and transformation step.
+  Raditz's crown-to-mane specks are gone.
+- **Hairlines:** Vegeta's widow's peak.
+- **Strands:** manes are four layers of eleven thinner strands with varied lengths, crossing slightly; the SSJ3 bang
+  is long and curved.
+- **Checked:** sheets of every style; transformation strips (base to SSJ and SSJ3) for Goku, Vegeta, Gohan, Raditz.

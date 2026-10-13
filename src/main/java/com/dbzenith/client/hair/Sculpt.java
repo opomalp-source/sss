@@ -194,6 +194,12 @@ final class Sculpt {
             for (double y = -7.6; y <= front - .2; y += step) patch(all, x, y, -4 - out, 78, 186);
             for (double y = -7.6; y <= line.back() - .2; y += step) patch(all, x, y, 4 + out, 74, 6);
         }
+        for (double a = -3.9; a <= 3.95; a += step) {                                                 // the rim where the top meets the sides
+            patch(all, a, -8 - out * .6, -4 - out * .6, 30, 180);
+            patch(all, a, -8 - out * .6, 4 + out * .6, 30, 0);
+            patch(all, -4 - out * .6, -8 - out * .6, a, 30, -90);
+            patch(all, 4 + out * .6, -8 - out * .6, a, 30, 90);
+        }
         for (int s : new int[]{-1, 1}) for (double z = -3.6; z <= 3.65; z += step) {                 // the sides
             double f = (z + 4) / 8, temple = line.fringe() - line.temples();
             double end = f < .35 ? temple + (line.sides() - temple) * smooth(0, .35, f) : f < .7 ? line.sides()
@@ -224,7 +230,7 @@ final class Sculpt {
             double len2 = bx * bx + by * by + bz * bz, t = len2 < 1e-9 ? 0 : ((x - ax) * bx + (y - ay) * by + (z - az) * bz) / len2;
             t = Math.max(0, Math.min(1, t));
             double dx = x - (ax + bx * t), dy = y - (ay + by * t), dz = z - (az + bz * t);
-            double reach = Math.max(l.w(i), Math.max(l.t(i), l.w(i) * .6)) * .5 + .15 + margin;
+            double reach = Math.max(.5, Math.max(l.t(i), l.w(i) * .6)) * .5 + .12 + margin;   // its thickness: what lies over the scalp
             if (dx * dx + dy * dy + dz * dz < reach * reach) return true;
         }
         return false;

@@ -54,6 +54,25 @@ public final class HairPreview {
             }
         }
         report.append("PASS: no bald spots (").append(spots).append(" points over the crown)\n");
+        int edge = 0;                                                               // and down to the hairline all round
+        StringBuilder bare = new StringBuilder();
+        for (Preset p : Preset.values()) {
+            if (p == Preset.BALD || p == Preset.MOHAWK) continue;
+            for (HairLook look : HairLook.values()) {
+                HairShape s = HairStyles.of(p, look);
+                int miss = bareSpots(s, s.cap() == HairCap.NONE ? HairCap.of(-7.4, 0, .3, -5.4, -4) : s.cap());
+                if (miss > 0) bare.append(p).append('/').append(look).append(':').append(miss).append(' ');
+                edge++;
+                for (float t : new float[]{.25f, .5f, .75f}) {
+                    if (look == HairLook.BASE) continue;
+                    HairShape m = HairStyles.between(p, HairLook.BASE, look, t);
+                    int mm = bareSpots(m, s.cap() == HairCap.NONE ? HairCap.of(-7.4, 0, .3, -5.4, -4) : s.cap());
+                    if (mm > 0) bare.append(p).append(" BASE>").append(look).append(' ').append(t).append(':').append(mm).append(' ');
+                }
+            }
+        }
+        check(bare.length() == 0, "bare scalp: " + bare);
+        report.append("PASS: no bare scalp down to the hairline, in ").append(edge).append(" looks and their transformations\n");
 
         double previous = -1;                                                       // the mane grows from the roots
         for (float t : new float[]{0, .25f, .5f, .75f, 1}) {
@@ -146,6 +165,39 @@ public final class HairPreview {
         System.out.print(report);
     }
 
+
+    /** Points of the scalp (the top, and the brow, sides and back down to the hairline) no lock covers. */
+    static int bareSpots(HairShape s, HairCap line) {
+        int miss = 0;
+        java.util.List<double[]> pts = new java.util.ArrayList<>();
+        for (double x = -3.5; x <= 3.5; x += .7) for (double z = -3.5; z <= 3.5; z += .7) pts.add(new double[]{x, -8.3, z});
+        for (double a = -3.9; a <= 3.95; a += .6) {                                    // the rim where the top meets the sides
+            pts.add(new double[]{a, -8.15, -4.15}); pts.add(new double[]{a, -8.15, 4.15});
+            pts.add(new double[]{-4.15, -8.15, a}); pts.add(new double[]{4.15, -8.15, a});
+        }
+        for (double x = -3.5; x <= 3.5; x += .7) {
+            double mx = Math.abs(x);
+            double front = line.fringe() + line.peak() * Math.max(0, 1 - mx / 1.7) - line.temples() * sm(1.2, 3.4, mx);
+            for (double y = -7.5; y <= front - .4; y += .7) pts.add(new double[]{x, y, -4.3});
+            for (double y = -7.5; y <= line.back() - .4; y += .7) pts.add(new double[]{x, y, 4.3});
+        }
+        for (int sd : new int[]{-1, 1}) for (double z = -3.5; z <= 3.5; z += .7) {
+            double f = (z + 4) / 8, temple = line.fringe() - line.temples();
+            double end = f < .35 ? temple + (line.sides() - temple) * sm(0, .35, f) : f < .7 ? line.sides() : line.sides() + (line.back() - line.sides()) * sm(.7, 1, f);
+            for (double y = -7.5; y <= end - .4; y += .7) pts.add(new double[]{sd * 4.3, y, z});
+        }
+        for (double[] q : pts) {
+            boolean hit = false;
+            for (HairLock l : s.locks()) if (Sculpt.covers(l, q[0], q[1], q[2])) { hit = true; break; }
+            if (!hit) miss++;
+        }
+        return miss;
+    }
+
+    private static double sm(double e0, double e1, double v) {
+        double t = Math.max(0, Math.min(1, (v - e0) / (e1 - e0)));
+        return t * t * (3 - 2 * t);
+    }
     private static double sq(double v) {
         return v * v;
     }
