@@ -2602,3 +2602,12 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **Fix** (`HairStyles.manes`): the outer layers leave the head going back and turn down late, and nine thick locks
   arch back off the crown, so Super Saiyan 3, Super Saiyan 4 and Raditz fill out into a rounded mass behind the head.
 - **Checked:** side and back sheets; all hair checks pass.
+
+## 2026-10-13 — CX-36: hands, not gloves (v0.97.2)
+- **The ask** (user: make the hands a little smaller or change them so they don't look like gloves).
+- **Why they did:** the hand block (`LimbSegments`, "arm_fist") stood 0.35-0.65 px proud of the arm on every side,
+  over twice as far as the forearm, with a hard step at the wrist, and ran 1.1 px past the end of the arm: a mitten.
+- **Fix:** the hand is now a touch slimmer than the forearm (0.06 / 0.11 / 0.21 px by build), so the arm runs on into
+  it with no step, and shorter (ends 0.5 px past the arm instead of 1.1). The painted relaxed fist is unchanged.
+  Outfits that are meant to have gloves (armour, Vegeta's, Buu's) still paint them.
+- **Checked:** in the dev client from the front and three-quarter.

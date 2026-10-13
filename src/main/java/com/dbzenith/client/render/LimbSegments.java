@@ -25,7 +25,7 @@ import java.util.Map;
 
 /**
  * Segmented limbs (CX-29, from the user's reference pictures): each arm is three plain blocks (upper arm, forearm, and
- * a fist a little bigger than the forearm), each leg two (thigh and shin) with a foot block sticking out in front,
+ * a hand a touch slimmer than the forearm, CX-36), each leg two (thigh and shin) with a foot block sticking out in front,
  * toes painted on its top. No sculpting: the anatomy is painted (tools/gen_body.py).
  * <p>
  * The blocks sit over the vanilla limb (a little wider, so its own cube stays hidden inside) as children of it, so they
@@ -44,7 +44,7 @@ public final class LimbSegments {
     /** How much longer the legs are, and how much the rest of the figure rises on them (pixels). */
     static final float LEG_SCALE = 1.2f, RISE = 12 * (LEG_SCALE - 1);
     /** How far each build's blocks stand out from the limb: upper arm, forearm, fist, thigh, shin (pixels). */
-    static final float[][] GROW = {{0.12f, 0.1f, 0.35f, 0.2f, 0.08f}, {0.24f, 0.15f, 0.48f, 0.32f, 0.12f}, {0.42f, 0.25f, 0.65f, 0.48f, 0.2f}};   // upper arm trimmed (CX-30)
+    static final float[][] GROW = {{0.12f, 0.1f, 0.06f, 0.2f, 0.08f}, {0.24f, 0.15f, 0.11f, 0.32f, 0.12f}, {0.42f, 0.25f, 0.21f, 0.48f, 0.2f}};   // upper arm trimmed (CX-30); hands no wider than the forearm (CX-36)
 
     /** Set per figure before it is drawn: lengthen its legs; whether its feet stand (flattened to the ground). */
     static boolean proportions;
@@ -69,7 +69,7 @@ public final class LimbSegments {
                     // arms: rows 0..6 the upper arm, 6..9.4 the forearm, 9.4..12 the fist (as gen_body.py paints them)
                     add(ac, name(b, "arm_up"), arm, STATIC, ab.block(g[0], top - 0.3f, top + 6f, 0, 6, true, false));
                     add(ac, name(b, "arm_fore"), arm, BENT, ab.block(g[1], top + 6f, top + 10.2f, 6, 9.4f, false, false));
-                    add(ac, name(b, "arm_fist"), arm, BENT, ab.block(g[2], top + 10.2f, top + 13.1f, 9.4f, 12, false, true));
+                    add(ac, name(b, "arm_fist"), arm, BENT, ab.block(g[2], top + 10.2f, top + 12.5f, 9.4f, 12, false, true));   // a hand, not a glove
                     // legs: the thigh to the knee, the shin to the ankle, then the foot
                     add(lc, name(b, "leg_up"), leg, STATIC, lb.block(g[3], 0f, 6.2f, 0, 6.2f, true, false));
                     add(lc, name(b, "leg_low"), leg, BENT, lb.block(g[4], 6.2f, 10.2f, 6.2f, 10f, false, false));
