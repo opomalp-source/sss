@@ -2475,3 +2475,20 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   lengths kept, streaming back when running, settling), the transformation flashes.
 - **Checked:** the sheets for all 19 styles × 7 looks and the growth; in the dev client Vegeta, Future Trunks,
   Gohan SSJ2 and Raditz (front and back).
+
+## 2026-10-13 — CX-35b: hair shading (v0.91.0)
+- **The ask** (user: the hair lacks shading and looks bland, maybe the texture; make it look far better).
+- **Why it was bland:** the locks were plain white texture tinted one colour, shaded only by Minecraft's soft entity
+  lighting; gold went olive under it, dark hair went flat black.
+- **Painted like anime hair** (`HairRender`, docs/HAIR.md):
+  - a real texture (`hair_lock.png`, `tools/HairTextureGen.java`): dark edges outlining every lock, strand lines, a
+    darker root and lighter tip; and a gloss decal (a broken, saw-edged highlight streak) laid over the lit side of
+    each lock a third of the way along, tinted toward white;
+  - three crisp cel tones per face from a key light above and in front; shadows shift hue (gold to amber, blue to deep
+    blue); dark hair gets a cool sheen and glossy streaks;
+  - roots and scalp darker, slight variation lock to lock;
+  - the tones are painted rather than lit (vertices face up), so entity lighting no longer dulls them; the world's
+    light level still applies.
+- **Tools:** the sheets sample the texture through the emitted UVs (cutout included), so they match the game.
+- **Checked:** sheets of Goku, Vegeta, Gohan and Trunks base and Super Saiyan; in the dev client Goku base, Super
+  Saiyan and Blue, Vegeta and Future Trunks. Hair checks all pass.

@@ -49,3 +49,19 @@ progress follows the transformation bar (`HairTransformation`).
 - segments keep their length; knots are pushed out of the head and the back.
 
 Off with the `hairPhysics` setting, and past 48 blocks (the hair is then drawn at rest).
+
+## Shading (CX-35b)
+
+Hair is painted like anime hair rather than lit like a block:
+- `textures/entity/hair_lock.png` (made by `tools/HairTextureGen.java`, 32 x 64): the left half is one lock, u across
+  and v from root to tip, in greys the hair colour tints (dark edges that outline each lock, faint strand lines, a
+  darker root, a lighter tip); the right half is the gloss, a broken saw-edged highlight streak, clear elsewhere.
+- Every face takes one of three cel tones by how it faces a key light above and in front of the head: lit (the
+  colour, dark hair lifted with a blue-grey sheen), mid and shadow. Shadows shift hue: warm colours toward red-orange
+  (gold goes amber, never olive), cool ones toward blue.
+- The gloss is laid just over the lit broad side of each lock, a third of the way along, tinted toward white.
+- Roots and the scalp are darker; each lock differs a little in value.
+- Vertices face up, so Minecraft's soft entity lighting doesn't dull the tones; the world's light level still darkens
+  hair in shade (transformed hair glows).
+
+The sheets (`hairSheet`) sample the texture through the emitted UVs, so they show what the game shows.
