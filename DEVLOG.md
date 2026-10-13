@@ -2404,3 +2404,41 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   also on savannas. `/landmark survey <name>` (ops, dev) counts, round you, cells that hold one and why the rest don't.
 - A landmark that throws while building is logged and skipped instead of stopping world generation.
 - The GameTest server doesn't search for a tournament arena (tests stage their own ring). 209 GameTests.
+
+## 2026-10-13 — CX-34: hair in every form (v0.89.0)
+- **Source first:** the 0.88 line (`claude/aura-rework-phase1`: auras, animation, physique, landmarks) and `main`
+  (0.72 plus the rebuilt hair, Flying Nimbus, parties and clans) are merged into `main`; the merge covers every class
+  in the 0.88.0-social.1 jar. Only the language file conflicted (both sides added keys; both kept).
+- **The ask** (user: "if you transform into Super Saiyan with Goku's hair, the hair should look like SSJ1 Goku, and the
+  same for everyone's hair and how they look in their form"; for SSJ3 and other forms that lengthen the hair, it
+  should grow from the root while transforming; reference: in-game shots of SSJ Goku's hair).
+- **Before:** every form bent the base hair the same generic way (every lock tilted upward, a generic mane for SSJ3),
+  so only Goku, already spiky, looked right; Vegeta lost his widow's peak, Gohan got a crown of blobs, God hair was the
+  base hair unchanged.
+- **Looks** (`HairLook`): base; Super Saiyan (also Grade 2, Blue, the Legendary first stages); Super Saiyan 2 (also
+  Grade 3, Rage, the later Legendary stages); Super Saiyan 3; Super Saiyan 4; God; Beast. Picked from the form itself,
+  so SSJ4, God and Beast are told apart from the rest.
+- **Every stock style in every look** (`CharacterHair`, built from locks in `HairSculpt`):
+  - the Super Saiyan fan after the reference: wide locks standing up off the whole crown in three rows, tallest in the
+    middle, opening towards wings at the temples, a ragged outline (neighbouring locks differ in length), the hairline
+    lifted, the nape swept up; the second grade taller, thinner and sharper, with the loose bang;
+  - Goku: the full fan; Gohan: narrower and taller, the SSJ2 bang, a towering Beast crest; adult Gohan shorter with
+    his bang; Vegeta: the flame and widow's peak drawn up taller, a shaggy SSJ4 with bangs; Broly: a towering
+    Legendary mass; Raditz: the crown lifted, his knee-length hair (now 27 px) stiffened and fanned; Future Trunks: a
+    new straight centre-parted base, Super Saiyan standing almost straight up;
+  - the other cuts: a fan cut to their shape (slicked and ponytail cuts swept back, a tall crest for the mohawk, short
+    spikes for the buzz cut, a fuller puff), their tails and drapes stiffened and arcing out;
+  - Super Saiyan 3: a spiky crest swept back off the brow into a mane to the waist (three rows bending close to the
+    back, staggered tips) and one long bang; Super Saiyan 4: the own hair bigger with a mane down the back; God: the own
+    hair slimmer and shorter; Beast: drawn up into a crest.
+- **Transformations** (`HairSculpt.morph`): each lock of the new look takes over the old lock rooted nearest it and
+  swings round its root (not through the head) to the new angle and length; a lock that must grow much longer first
+  turns onto its new path, then grows along it; locks only the new look has grow out from the scalp along their own
+  path, pointed while young; locks it lacks draw back in. Each lock moves a moment after the last. Built once per 1/64
+  of progress and cached. Hair drawn in the editor still rises strand by strand, as before.
+- **Tools:** `tools/HairLookSheet.java` (`gradlew -I tools/hair-looks.init.gradle hairLooks -PhairOut=<folder>`,
+  optional `-PhairArgs="only=SPIKY views=4 big looks=SSJ,SSJ3"`) renders every style in every look and the growth step
+  by step, offline. `tools/HairPreview.java` now also checks every look and every look-to-look change at four points
+  (3,920 cases: built, whole blocks), and its rise check uses the mean height (locks now come and go).
+- **Checked:** the offline sheets of all 19 styles × 7 looks and the growth strips; in the dev client Goku SSJ and
+  SSJ2, Vegeta SSJ, Gohan SSJ2, Trunks base and SSJ, Goku SSJ3 front and back.

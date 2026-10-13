@@ -1,51 +1,10 @@
 package com.dbzenith.client.render;
 
-import com.dbzenith.appearance.HairCode.Preset;
-import com.dbzenith.transform.Form;
-import java.util.ArrayList;
-import java.util.List;
-
-/** Authored block-lock layouts. Head pixels: -Z is the face, -Y is up. */
+/** The hand-placed base hairstyles (each look of them is built in {@link CharacterHair}). Head pixels: -Z is the face, -Y is up. */
 public final class HairPresetLibrary {
     private HairPresetLibrary() {}
-    public static List<HairMesh.Segment> create(Preset preset,Form.HairStyle style) {
-        return create(preset,style,style,1);
-    }
-    static List<HairMesh.Segment> create(Preset preset,Form.HairStyle style,Form.HairStyle target,float progress) {
-        if(preset==Preset.BALD) return List.of();
-        HairGeometry.Builder h=new HairGeometry.Builder(style,target,progress),longs=new HairGeometry.Builder(Form.HairStyle.NONE);
-        switch(preset) {
-            case SPIKY -> goku(h);
-            case PRINCE -> vegeta(h);
-            case TEEN -> gohan(h,false);
-            case GOHAN_ADULT -> gohan(h,true);
-            case WILD -> broly(h);
-            case MANE -> { raditz(h);mane(longs,18,1); }
-            case CURTAINS -> curtains(h,false);
-            case SAGE -> { curtains(h,true);mane(longs,13,.8); }
-            case LONG -> { curtains(h,true);drape(longs,0,11,5); }
-            case SWEPT -> swept(h,false);
-            case SIDECUT -> swept(h,true);
-            case SLICK -> slick(h);
-            case BOWL -> bowl(h);
-            case BUZZ -> h.cap(HairGeometry.Cap.BUZZ);
-            case PUFF -> puff(h);
-            case MOHAWK -> mohawk(h);
-            case PONYTAIL -> { slick(h);drape(longs,0,12,3); }
-            case TWINTAILS -> { curtains(h,false);drape(longs,-5,11,2);drape(longs,5,11,2); }
-            case TOPKNOT -> { slick(h);lock(h,0,-9,2,0,-12,3,3.4,3,3); }
-            default -> {}
-        }
-        float growth=(style==Form.HairStyle.LONG?1:0)*(1-progress)+(target==Form.HairStyle.LONG?1:0)*progress;
-        if(growth>0&&preset!=Preset.MANE) {
-            HairGeometry.Builder extra=new HairGeometry.Builder(Form.HairStyle.NONE);extra.growth=growth;
-            mane(extra,21,1.1);
-            List<HairMesh.Segment> out=new ArrayList<>(h.build());out.addAll(longs.build());out.addAll(extra.build());return List.copyOf(out);
-        }
-        List<HairMesh.Segment> out=new ArrayList<>(h.build());out.addAll(longs.build());return List.copyOf(out);
-    }
     /** A stepped lock with a slight backward bow and a square final block, never a zero-area tip. */
-    private static void lock(HairGeometry.Builder h,double x,double y,double z,double ex,double ey,double ez,double w,double d,int steps) {
+    static void lock(HairGeometry.Builder h,double x,double y,double z,double ex,double ey,double ez,double w,double d,int steps) {
         double[] data=new double[(steps+1)*5];
         for(int i=0;i<=steps;i++) {
             double t=i/(double)steps,section=1-.68*t;
@@ -55,12 +14,12 @@ public final class HairPresetLibrary {
         }
         h.tuft(.12,data);
     }
-    private static void bang(HairGeometry.Builder h,double x,double endX,double endY,double width) {
+    static void bang(HairGeometry.Builder h,double x,double endX,double endY,double width) {
         h.tuft(.08,x,-8.9,-4.05,width,1.65,x+.15,-7.7,-4.85,width*.88,1.45,
             endX,-6.55,-5.12,width*.64,1.12,endX,endY,-5.18,width*.4,.8);
     }
     /** Goku reference: large left fan, thin vertical crest, lower right wing, and a separate rear fan. */
-    private static void goku(HairGeometry.Builder h) {
+    static void goku(HairGeometry.Builder h) {
         h.cap(HairGeometry.Cap.FULL);
         // Outward-bending shoulders carry the broad fan in the supplied front reference.
         h.tuft(.12,-.65,-8.8,-1.7,4.9,3.5,-1.7,-11.3,-1.45,4.8,3.4,
@@ -84,7 +43,7 @@ public final class HairPresetLibrary {
         sides(h,1.15,false);
     }
     /** Short, staggered side fans and nape shingles give depth without a second buzz haircut. */
-    private static void sides(HairGeometry.Builder h,double size,boolean upright) {
+    static void sides(HairGeometry.Builder h,double size,boolean upright) {
         for(int s:new int[]{-1,1}) {
             for(int tier=0;tier<3;tier++) {
                 double y=-7.2+tier*1.25;
@@ -97,7 +56,7 @@ public final class HairPresetLibrary {
             lock(h,x,-5.3,4.4,x+i*.35,-3.05+(Math.abs(i)%2)*.45,6.25,2.2,1.5,3);
         }
     }
-    private static void vegeta(HairGeometry.Builder h) {
+    static void vegeta(HairGeometry.Builder h) {
         h.cap(HairGeometry.Cap.PRINCE);
         h.tuft(.05,0,-8.65,-4.1,3.2,1.5,0,-7.5,-4.7,2.2,1.25,0,-6.45,-4.85,1.15,.9,0,-5.9,-4.85,.6,.6);
         // Converging flame silhouette instead of parallel upright columns.
@@ -114,7 +73,7 @@ public final class HairPresetLibrary {
         lock(h,0,-8.7,2.7,0,-16,4.4,2.9,2.55,5);
         for(int i=-2;i<=2;i++) lock(h,i*1.7,-5.1,4.4,i*1.65,-6.1,5.6,1.9,1.25,3);
     }
-    private static void gohan(HairGeometry.Builder h,boolean adult) {
+    static void gohan(HairGeometry.Builder h,boolean adult) {
         h.cap(adult?HairGeometry.Cap.SHORT:HairGeometry.Cap.FULL);
         if(adult) {
             h.tuft(.1,-1.1,-8.8,-2,3.85,3,-1.1,-10.65,-.7,3.25,2.75,
@@ -138,7 +97,7 @@ public final class HairPresetLibrary {
             sides(h,.45,false);
         }
     }
-    private static void broly(HairGeometry.Builder h) {
+    static void broly(HairGeometry.Builder h) {
         h.cap(HairGeometry.Cap.LONG);
         for(int s:new int[]{-1,1}) {
             lock(h,s*1.2,-8.6,-.5,s*3.3,-14.5,1.8,4.2,3.5,4);
@@ -149,7 +108,7 @@ public final class HairPresetLibrary {
         bang(h,0,-.6,-5.5,2.45);sides(h,1.4,false);
         for(int i=-2;i<=2;i++) lock(h,i*1.8,-4.6,4.3,i*2.8,1.1-Math.abs(i)*.45,7,2.8,2.3,4);
     }
-    private static void raditz(HairGeometry.Builder h) {
+    static void raditz(HairGeometry.Builder h) {
         h.cap(HairGeometry.Cap.PRINCE);
         lock(h,0,-8.7,-2,0,-13.8,4.8,4,3.6,4);
         for(int s:new int[]{-1,1}) {
@@ -158,7 +117,7 @@ public final class HairPresetLibrary {
         }
         sides(h,.8,false);
     }
-    private static void mane(HairGeometry.Builder h,double length,double spread) {
+    static void mane(HairGeometry.Builder h,double length,double spread) {
         for(int layer=0;layer<3;layer++) for(int i=-4;i<=4;i++) {
             double stagger=((i+4)%3)*.8,edge=Math.abs(i)/4.0;
             double x=(i*1.48+(layer%2==1?.55:0))*spread;
@@ -175,7 +134,7 @@ public final class HairPresetLibrary {
         for(int s:new int[]{-1,1}) for(int t=0;t<4;t++)
             lock(h,s*3.9,-6+t*.7,2+t*.8,s*(6.8+t*.15)*spread,2+t*2.0,6.6+t*.7,2.5,2,4);
     }
-    private static void curtains(HairGeometry.Builder h,boolean longHair) {
+    static void curtains(HairGeometry.Builder h,boolean longHair) {
         h.cap(longHair?HairGeometry.Cap.LONG:HairGeometry.Cap.FULL);
         for(int s:new int[]{-1,1}) {
             h.tuft(.1,s*.65,-8.8,-2.9,3.15,2.6,s*2.35,-9.05,-3.7,3.35,2.3,
@@ -184,34 +143,34 @@ public final class HairPresetLibrary {
         }
         for(int i=-1;i<=1;i++) lock(h,i*2.4,-8.5,3.5,i*2.9,-2.6,5.2,3,2,4);
     }
-    private static void drape(HairGeometry.Builder h,double center,double length,int count) {
+    static void drape(HairGeometry.Builder h,double center,double length,int count) {
         for(int i=0;i<count;i++) {
             double x=center+(i-(count-1)*.5)*1.4;
             h.tuft(.3,x*.65,-7,4,2.35,2.15,x,-2,6,2.4,2,x+.3,4,7.2,2,1.6,x-.25,length-2,7.8,1.55,1.2,x-.5,length,7.8,.7,.7);
         }
     }
-    private static void swept(HairGeometry.Builder h,boolean shaved) {
+    static void swept(HairGeometry.Builder h,boolean shaved) {
         h.cap(shaved?HairGeometry.Cap.SIDECUT:HairGeometry.Cap.SHORT);
         for(int i=0;i<4;i++) {
             double z=-3+i*2;
             h.tuft(.12,-2.9,-8.7,z,3,2.4,-1.2,-10.1,z+.15,3.1,2.4,2,-10.2,z+.4,2.7,2.1,4.6,-8.6,z+.8,2,1.65,5.4,shaved?-3.4:-7,z+1.1,1.1,1);
         }
     }
-    private static void slick(HairGeometry.Builder h) {
+    static void slick(HairGeometry.Builder h) {
         h.cap(HairGeometry.Cap.SHORT);
         for(int i=-2;i<=2;i++) lock(h,i*1.7,-8.95,-3.9,i*1.95,-9.3,5.6,2.25,1.85,4);
     }
-    private static void bowl(HairGeometry.Builder h) {
+    static void bowl(HairGeometry.Builder h) {
         h.cap(HairGeometry.Cap.FULL);
         for(int i=-2;i<=2;i++) lock(h,i*1.85,-8.9,-3.65,i*1.88,-5.25,-4.85,2.15,1.65,3);
         for(int s:new int[]{-1,1}) for(int i=0;i<4;i++) lock(h,s*3.6,-8.7,-2+i*1.9,s*4.7,-4.8,-1.7+i*1.9,2.45,1.8,3);
     }
-    private static void puff(HairGeometry.Builder h) {
+    static void puff(HairGeometry.Builder h) {
         h.cap(HairGeometry.Cap.FULL);
         for(int x=-1;x<=1;x++) for(int z=-1;z<=1;z++) lock(h,x*2.7,-8.65,z*2.6,x*4,-11.8+(Math.abs(x)+Math.abs(z))*.65,z*4,4.1,3.8,2);
         sides(h,.5,false);
     }
-    private static void mohawk(HairGeometry.Builder h) {
+    static void mohawk(HairGeometry.Builder h) {
         h.cap(HairGeometry.Cap.MOHAWK);
         for(int i=0;i<5;i++) lock(h,0,-8.7,-3.5+i*1.7,0,-13.6,-3+i*1.8,1.55,2.25,4);
     }

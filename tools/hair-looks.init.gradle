@@ -1,0 +1,19 @@
+// Offline sheets of every stock hairstyle in every form look: gradlew -I tools/hair-looks.init.gradle hairLooks -PhairOut=<folder> [-PhairArgs="only=SPIKY views=4"]
+allprojects {
+    afterEvaluate {
+        tasks.register('compileHairLooks', JavaCompile) {
+            dependsOn tasks.named('classes')
+            source = project.fileTree(project.file('tools')) { include 'HairLookSheet.java' }
+            classpath = sourceSets.main.runtimeClasspath
+            destinationDirectory = layout.buildDirectory.dir('hair-looks/classes')
+            javaCompiler = javaToolchains.compilerFor { languageVersion = JavaLanguageVersion.of(17) }
+        }
+        tasks.register('hairLooks', JavaExec) {
+            dependsOn tasks.named('compileHairLooks')
+            classpath = files(layout.buildDirectory.dir('hair-looks/classes')) + sourceSets.main.runtimeClasspath
+            mainClass = 'com.dbzenith.client.render.HairLookSheet'
+            args([project.findProperty('hairOut') ?: project.file('build/hair-looks').absolutePath] + ((project.findProperty('hairArgs') ?: '').tokenize(' ')))
+            systemProperty 'java.awt.headless', 'true'
+        }
+    }
+}

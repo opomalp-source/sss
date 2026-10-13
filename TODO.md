@@ -236,4 +236,5 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - [ ] phase 5 Ultra Instinct (silver shimmer, afterimages)
   - [ ] phase 6 Transformation burst, ground effects, light
   - [ ] phase 7 Performance and config (quality, light, ground, own aura, intensity), live tweaking
+- [x] CX-34 (v0.89.0) Hair in every form: each stock style sculpted per look (base, Super Saiyan, SSJ2, SSJ3, SSJ4, God, Beast) after the characters, transformations morph lock by lock and grow from the roots; offline look sheets (tools/hair-looks.init.gradle)
 - Paused for CX-19: 17d (the robot dojo), 18b (the combat animations as data; folded into 19b)

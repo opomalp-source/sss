@@ -16,12 +16,15 @@ public final class HairGeometry {
         private final float blend;
         public double growth=1;
         public int mirror=1;
+        /** When set, locks and the scalp are recorded here instead of built (the sculpted looks morph them). */
+        public HairSculpt capture;
         public Builder(Form.HairStyle style) { this(style,style,1); }
         public Builder(Form.HairStyle style,Form.HairStyle target,float blend) { this.style=style;this.targetStyle=target;this.blend=blend; }
         public List<HairMesh.Segment> build() { return List.copyOf(faces); }
 
         /** Overlapping root blocks form the actual haircut, with staggered side and nape ends. */
         public void cap(Cap profile) {
+            if(capture!=null) { capture.cap=profile;return; }
             if(profile==Cap.MOHAWK) { box(-.8,-8.7,-4.55,.8,-7.8,4.55);return; }
             box(-4.57,-8.85,-4.57,4.57,-7.8,4.57);
             if(profile==Cap.BUZZ) {
@@ -50,6 +53,7 @@ public final class HairGeometry {
         /** Knots contain x,y,z,width,depth. Width stays constant per section; steps expose shoulders. */
         public void tuft(double flex,double... data) {
             if(data.length<10||data.length%5!=0) throw new IllegalArgumentException("Invalid block lock");
+            if(capture!=null) { capture.add(flex,data);return; }
             int n=data.length/5; Vec3[] p=new Vec3[n];
             Vec3 origin=new Vec3(data[0]*mirror,data[1],data[2]);
             for(int i=0;i<n;i++) {

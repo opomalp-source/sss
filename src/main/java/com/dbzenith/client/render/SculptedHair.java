@@ -47,14 +47,21 @@ public final class SculptedHair {
 
     static List<HairMesh.Segment> transition(String from,String to,float progress) {
         Look a=find(from),b=find(to);
-        return a==null||b==null||a.preset!=b.preset?null:HairPresetLibrary.create(a.preset,a.style,b.style,progress);
+        return a==null||b==null||a.preset!=b.preset?null:CharacterHair.transition(a.preset,HairLook.ofStyle(a.style),HairLook.ofStyle(b.style),progress);
     }
 
     public static boolean isStock(String code) { return find(code) != null; }
 
+    /** The stock hairstyle a character's own hair code is (bald for none), or null for hair drawn in the editor. */
+    public static Preset presetOf(String code) {
+        if (code == null || code.isEmpty()) return Preset.BALD;
+        Look look = find(code);
+        return look == null ? null : look.preset;
+    }
+
     /** Null means user-authored hair: render the editable strand code instead. */
     static List<HairMesh.Segment> create(String code) {
         Look look = find(code);
-        return look == null ? null : HairPresetLibrary.create(look.preset, look.style);
+        return look == null ? null : CharacterHair.mesh(look.preset, HairLook.ofStyle(look.style));
     }
 }

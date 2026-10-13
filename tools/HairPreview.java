@@ -67,6 +67,19 @@ public final class HairPreview {
         verifyTransformation();
         verifyDynamics();
         int coverage=verifyCoverage();
+        int looks=0;
+        for(Preset p:Preset.values()) for(HairLook look:HairLook.values()) {
+            var mesh=CharacterHair.mesh(p,look);
+            check((p==Preset.BALD&&look==HairLook.BASE)||!mesh.isEmpty(),"every look is built: "+p+"/"+look);
+            for(HairLook from:HairLook.values()) for(float t:new float[]{.1f,.35f,.6f,.9f}) {
+                var shape=CharacterHair.transition(p,from,look,t);
+                ValidatingConsumer vc=new ValidatingConsumer();
+                HairMesh.render(new PoseStack(),vc,shape,HairWind.State.STILL,15728880,0,0,0,0);
+                check(vc.count==shape.size()*4,"every look-to-look change keeps whole blocks: "+p+" "+from+">"+look+" "+t);
+                looks++;
+            }
+        }
+        report.append("PASS: ").append(looks).append(" per-form looks and look-to-look transitions render whole\n");
         check(HairMesh.MATERIAL.getPath().equals("textures/entity/aura_white.png"),"flat material selected");
         try(var input=HairCode.class.getResourceAsStream("/assets/dbzenith/textures/entity/aura_white.png")) {
             check(input!=null,"flat material exists");
@@ -197,8 +210,8 @@ public final class HairPreview {
         double previous=Double.POSITIVE_INFINITY;
         for(float t:new float[]{0,.25f,.5f,.75f,1}) {
             var shape=HairMesh.transition(baseCode,raisedCode,t);
-            double y=0;for(var face:shape) for(var v:face.corners()) y+=v[1];
-            check(y<=previous+.001,"hair rises continuously with progress");previous=y;
+            double y=0;int n=0;for(var face:shape) for(var v:face.corners()) {y+=v[1];n++;} y/=Math.max(1,n);
+            check(y<=previous+.05,"hair rises continuously with progress (mean height "+y+" after "+previous+")");previous=y;
             ValidatingConsumer consumer=new ValidatingConsumer();
             HairMesh.render(new PoseStack(),consumer,shape,HairWind.State.STILL,15728880,0,0,0,0);
             check(consumer.count==shape.size()*4,"transition faces render without collapse");

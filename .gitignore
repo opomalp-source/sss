@@ -32,3 +32,6 @@ run-clienttest
 
 # the user's style references (inspiration only, never shipped)
 reference/
+
+# dev-run logs
+logs/
