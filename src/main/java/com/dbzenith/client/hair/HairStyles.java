@@ -519,11 +519,16 @@ public final class HairStyles {
                 double r = h - Math.floor(h);                                        // 0..1, fixed per strand
                 double x = (i * .78 + (row & 1) * .39) * Math.min(spread, 1.1);
                 double y = -8.4 + row * 1.35, z = Math.min(4.4, .8 + row * 1.2);
-                double up = 8 - row * 10;
+                double up = 30 - row * 13;                                           // the outer layers leave the head going back
+                double bend = .85 - row * .17;                                       // and turn down late: a full, rounded back
                 double len = length * (1 - .16 * Math.abs(i) / 5.0) * (.86 + .28 * r) - row * 1.2;
                 double swing = (r - .5) * 18;                                         // strands cross a little as they fall
-                s.lock(x, y, z, up, i * 5 * spread, len, 2.7 - row * .15, fall - up, swing, .7, .25);
+                s.lock(x, y, z, up, i * 5 * spread, len, 2.8 - row * .15, fall - up, swing, .75, bend);
             }
+        }
+        for (int i = -4; i <= 4; i++) {                                              // the billow: thick locks arching back off the crown
+            double h = Math.sin(i * 7.77 + 3.1) * 43758.5453, r = h - Math.floor(h);
+            s.lock(i * .95, -8.6, 1.4 + Math.abs(i) * .25, 42, i * 11 * spread, length * (.32 + .1 * r), 3.6, fall - 42, (r - .5) * 14, .85, .95);
         }
         for (int k = 0; k < 2; k++)                                                  // either side, behind the ears
             s.pair(4.4, -7.4 + k * 1.2, .6 + k * 1.1, -10, 60 + k * 10, length * (.45 - k * .06), 2.6, fall + 30, -20, .7, .3);

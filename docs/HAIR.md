@@ -81,3 +81,10 @@ others. The mohawk opts out (`cover = false`). `HairPreview` checks 15,000+ poin
 - **Manes** (Raditz, Super Saiyan 3, Super Saiyan 4): four layers of eleven strands each, thinner, lengths varying a
   little strand to strand and crossing as they fall, two strands either side behind the ears. The Super Saiyan 3 bang
   is a long lock curving down past the eye.
+
+## Billowing manes (CX-35j)
+
+`manes` leaves the head going back before it falls: the outer layers start up to 30 degrees above the horizontal and
+turn down late (bend 0.85 for the top layer, less for the inner ones), and a layer of nine thick locks arches back off
+the crown. The back of the head fills out into a full, rounded mass (no hollow between the crest and the hanging
+hair), as in the Super Saiyan 3 and Raditz designs.

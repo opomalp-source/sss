@@ -2596,3 +2596,9 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **Strands:** manes are four layers of eleven thinner strands with varied lengths, crossing slightly; the SSJ3 bang
   is long and curved.
 - **Checked:** sheets of every style; transformation strips (base to SSJ and SSJ3) for Goku, Vegeta, Gohan, Raditz.
+
+## 2026-10-13 — CX-35j: billowing manes (v0.97.1)
+- **The ask** (user screenshot of Super Saiyan 3 from the side, the hollow behind the head circled: put more hair there).
+- **Fix** (`HairStyles.manes`): the outer layers leave the head going back and turn down late, and nine thick locks
+  arch back off the crown, so Super Saiyan 3, Super Saiyan 4 and Raditz fill out into a rounded mass behind the head.
+- **Checked:** side and back sheets; all hair checks pass.

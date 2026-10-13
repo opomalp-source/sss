@@ -246,4 +246,5 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [x] CX-35g (v0.95.0) Model hair (a box per segment, stepping thinner, a pixel hair texture) and no bald spots (every look's scalp filled to its hairline, checked)
 - [x] CX-35h (v0.96.0) Hair volume and flow: thicker, bigger locks with Goku's taper, arcing fans, three boxes per lock
 - [x] CX-35i (v0.97.0) Hair transformation wave (brow to nape, overshoot), no bare scalp anywhere (rim, hairlines, mid-transformation; checked), Vegeta's widow's peak, fuller manes, long SSJ3 bang
+- [x] CX-35j (v0.97.1) Billowing manes: the hollow behind the head filled (SSJ3, SSJ4, Raditz)
 - Paused for CX-19: 17d (the robot dojo), 18b (the combat animations as data; folded into 19b)
