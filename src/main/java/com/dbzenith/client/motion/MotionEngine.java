@@ -225,9 +225,6 @@ public final class MotionEngine {
         m.takeoff = Math.max(0, m.takeoff - 0.12f * dt);
         if (m.state == State.SPRINT) m.fatigue = Math.min(1, m.fatigue + 0.004f * dt);
         else m.fatigue = Math.max(0, m.fatigue - 0.0025f * dt);
-        if (e instanceof net.minecraft.client.player.AbstractClientPlayer p && m.state == State.FAST && m.engine > 0.5f) {
-            com.dbzenith.client.fx.Afterimages.keepAlive(p, 3);
-        }
     }
 
     private static void approachMask(Motion m, Bone b, float target, float dt) {

@@ -1,0 +1,141 @@
+{
+  "silhouette": "jagged",
+  "shape": {
+    "width": 1.47,
+    "height": 1.65,
+    "bottom": -0.08,
+    "widest": 0.4,
+    "taper": 1.8,
+    "tip": 0.62,
+    "peak": 0.105,
+    "flare": 0.02
+  },
+  "lobes": {
+    "count": 3,
+    "size": 0.015,
+    "rise": 0.8,
+    "rows": 1.5
+  },
+  "motion": {
+    "pulse": 0.025,
+    "pulseSpeed": 2.5,
+    "sway": 0.02
+  },
+  "layers": [
+    {
+      "kind": "glow",
+      "scale": 1.24,
+      "opacity": 0.38,
+      "colors": {
+        "rim": "$edge"
+      }
+    },
+    {
+      "kind": "glow",
+      "scale": 1.13,
+      "opacity": 1.0,
+      "colors": {
+        "rim": "$c"
+      }
+    },
+    {
+      "kind": "shell",
+      "colors": {
+        "core": "$white",
+        "mid": "$c",
+        "edge": "$edge",
+        "rim": "$white"
+      },
+      "alpha": {
+        "core": 0.12,
+        "edge": 1.0
+      },
+      "rim": {
+        "width": 0.03,
+        "strength": 0.6
+      },
+      "spikes": {
+        "count": 7,
+        "size": 0.27,
+        "sharpness": 0.9,
+        "lean": 1.4
+      },
+      "motion": {
+        "scroll": 1.4,
+        "flicker": 0.14,
+        "streaks": 0.7,
+        "streakSpeed": 3.5,
+        "stretch": 0.5,
+        "tallFlames": 0.6,
+        "warp": 0.25,
+        "fps": 12,
+        "smear": 0.08
+      },
+      "band": 0.17
+    },
+    {
+      "kind": "shell",
+      "colors": {
+        "core": "$white",
+        "mid": "$c",
+        "edge": "$edge",
+        "rim": "$white"
+      },
+      "alpha": {
+        "core": 0.12,
+        "edge": 1.0
+      },
+      "rim": {
+        "width": 0.03,
+        "strength": 0.6
+      },
+      "spikes": {
+        "count": 7,
+        "size": 0.27,
+        "sharpness": 0.9,
+        "lean": 1.4
+      },
+      "motion": {
+        "scroll": 1.82,
+        "flicker": 0.14,
+        "streaks": 0.7,
+        "streakSpeed": 3.5,
+        "stretch": 0.5,
+        "tallFlames": 0.6,
+        "warp": 0.25,
+        "fps": 12,
+        "smear": 0.08
+      },
+      "band": 0.12,
+      "scale": 0.84,
+      "heightScale": 0.9,
+      "seed": 23.7,
+      "opacity": 0.5
+    }
+  ],
+  "particles": {
+    "type": "flecks",
+    "rate": 1.4,
+    "size": 1.0,
+    "color": "$white"
+  },
+  "motes": {
+    "rate": 1.0,
+    "color": "$core"
+  },
+  "react": {
+    "charge": {
+      "scale": 0.2,
+      "height": 0.25,
+      "wild": 1.1,
+      "glow": 0.45,
+      "shake": 0.02
+    },
+    "move": {
+      "trail": 1.6,
+      "max": 0.45
+    }
+  },
+  "light": 12,
+  "ground": "dust"
+}

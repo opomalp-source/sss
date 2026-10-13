@@ -1,0 +1,7 @@
+{
+  "extends": "fam_base",
+  "forms": [
+    "base"
+  ],
+  "tint": "#7FC8FF"
+}

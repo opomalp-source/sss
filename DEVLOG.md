@@ -2066,3 +2066,341 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   - The shot helper takes `@<command>` steps between shots, for example to turn the camera to look down from above.
 - **Tests:** `AuraTests` (every shipped aura file reads, wears real forms, keeps sane sizes, opacities and spikes; Blue is lobed and blue). 207 GameTests.
 - **Checked in the dev client:** Blue from the front, side, behind and above, by day and night, frame to frame (the bulges rise and the outline moves), and the plain fallback.
+
+## 2026-10-08 — CX-24 phase 2: aura layers and states (v0.73.0)
+- **The ask:** auras that never sit still and answer what the fighter does, matched against the user's Godot prototype videos (SS_Blue, GF2KK). Stacking rules agreed: technique shell outside the form's aura (about 1.35x wide, 1.5x tall), red edge blended, pink-white middle added on.
+- **Layers as data** (`AuraDef.Layer`): an aura is one body (shape, bulges, sway, pulse) worn as a list of 1-6 layers drawn outermost first: `shell`, `glow` (follows another layer's outline, `wraps`) or `haze`. Each has its own colours, opacities, rim, lobed or jagged spikes, pace, seed and blend (`normal` or `add`). Files without `layers` get glow, shell, haze.
+- **Shape:** `peak` (one tall flame above the head, flickering), `flare` (wider base), `lobes.rows` (bulges stacked up the height) and `lobes.billow` (round puffs with creases, Blue's cloud look).
+- **States** (`AuraSystem.State`, followed each tick, drawn interpolated):
+  - charging, powering up or transforming: bigger, taller, wilder (flicker, scroll, deeper spikes, bigger bulges), brighter, shaking, with energy motes rising from the ground;
+  - moving fast or flying: the shell streams back, the top and the back side most (deadzone 0.12 blocks a tick, capped);
+  - hit or swinging: a short flare; a new aura: a burst.
+  - The aura keeps its own clock, so speeding up never jumps; each fighter runs at a slightly different pace.
+  - The shader takes an `AuraBoost` brightness.
+- **Particles:** all drawn after the shells in one batch per texture, capped at 900 a frame: `sparkle`, `ember`, and `motes`. Your own aura from your own eyes shows only the motes, kept away from the camera.
+- **Data:** `"extends"` between files (objects merged key by key, lists replaced, `forms` never inherited, loops reported); sub-folders only sort files. `react` block (charge, move, hit, burst) per aura.
+- **Live tweaking:** `/dbzaura state <idle|charge|fly|hit|burst|hithold|bursthold>`, `/dbzaura set <path> <value>`, `/dbzaura dump` (to `aura_tweaks/<id>.json`), `/dbzaura reload` (aura files only). Devshots: `aurapv.<id>.<state>`, `aurareload`, `auraset.<path-with-dashes>+<value>`.
+- **Super Saiyan Blue** retuned against the video: shorter and wider (1.5 x 1.95), 2.6 rows of billowy bulges, a thicker edge band, a cyan outer glow plus a thin gold one, a smooth milky middle.
+- **Docs:** `docs/AURA_GUIDE.md` (every key, the commands, shader packs).
+- **Tests:** `AuraTests` checks layers, glows, reactions; `auraExtendsMerges`. 208 GameTests (two timing tests, guard meter and super dash, failed once on a slow first run and passed on the rerun).
+- **Checked in a dev client** (cloud container, Xvfb + llvmpipe): Blue idle (frame to frame), charging, hit flare, burst, flying sideways, side, back, top (a lobed disc), night, and the plain fallback.
+
+## 2026-10-08 — CX-24 phase 3: flames, every form, Kaioken, charge lock, auto-deploy (v0.74.0)
+- **The ask:** auras that burn like Dragon Ball Z flames, for every form and technique, each one different; flames that
+  stream back when moving; standing still while powering up; new builds landing in the mods folder by themselves.
+- **Bug fixed:** auras were drawing solid. A shader's blend mode is skipped when it was the last one applied, even after
+  something turned blending off; `AuraSystem.blend` now sets it by hand before every draw.
+- **Flame tongues** (`AuraFlames`, layer kind `tongues`): ribbons set on the aura's outline as the camera sees it (left,
+  right, over the top), shooting out, climbing, waving, letting go at the base and fading; drawn by the aura shader's
+  tongue mode (a tapered lick eaten by rising noise, white down the middle), or the old flame texture on shader packs.
+  Ribbons keep one facing so they never twist. Moving fast streams them out behind.
+- **Shell fire:** twisting upward noise (`warp`), flames taller near the top (`tallFlames`), streak speed and stretch per
+  layer. Moving sideways pulls the back of the shell out like a comet while the front stays round the fighter.
+- **Every form** (`tools/gen_auras.py`): ten families in `auras/families/` (flame, roar, divine, wisp, dark, tech, majin,
+  regal, SSJ4, base) using `$` colours made from each file's `tint`; one file per form in `auras/forms/` with its tint,
+  sizes grown by tier, more tongues by tier, and extras (lightning, embers, sparkles, colour accents). Blue keeps its own
+  file and gains soft wisps. The Great Apes burn none.
+- **Base form:** `base.json` follows the fighter's aura colour (`followFighter`) and only burns while charging (`idle`).
+- **Kaioken** (`auras/techniques/kaioken.json`, `technique`): worn over the form's aura (`wrap` 1.35 wide, 1.5 tall),
+  jagged red flames, pink to near-white inside, fast streaks, flecks; tiers by stage (x2-x10, then x20 and up: wider,
+  taller, wilder, lightning) with growth per stage; a stage up flares. The stage rides in the public state flags (bits
+  20-27); protocol 34.
+- **Lightning** (`lightning` block): jagged bolts flashing over the aura, a glow round a white core. **Ground:** a ring
+  lit under a charging fighter and one thrown out by a burst.
+- **Old renderer retired** (`AuraRenderer` is no longer subscribed).
+- **Charge lock** (`client.ChargeLock`): while charging ki or holding a transformation the movement keys do nothing and
+  speed dies away.
+- **Auto-deploy:** `tools/deploy.sh` publishes the jar on the `builds` branch (one commit, replaced each time; GitHub
+  releases are not allowed from these sessions). `tools/windows/Install DBZ auto-update.bat` installs the updater and a
+  scheduled task (every 10 minutes): it swaps the newest jar into `%APPDATA%\.minecraft-dbz\mods` and, when DBZ is in
+  it, `%APPDATA%\.minecraft\mods`, removes old `dbzenith-*.jar`, and retries later if Minecraft holds the file.
+- **Dev:** `/dbzaura <id> [stage]` (a technique goes over your aura), `auratech.` devshots, several `auraset.` per
+  shot, a clip mode (`seq<N>`), devshot names up to 256 characters, `tools/devshots.sh`.
+- **Tests:** every form's aura reads (with `extends`) and is sane; the base aura follows the fighter; Kaioken's tiers.
+  209 GameTests.
+- **Checked in a dev client:** SSJ, SSJ2, SSJ3, God, Blue (with wisps), UI, LSSJ3, SSJ4, Golden Frieza, Pure Majin,
+  Super Android, Elder Blood, Beast, the base aura charging, Kaioken alone and x10 / x20 over Blue, flying, and clips.
+
+## 2026-10-08 — CX-24: smooth, cohesive aura silhouettes (v0.75.0)
+- **The ask:** no more random spikes, jagged protrusions or separate flame pieces sticking out of the aura; a smooth,
+  rounded, tapering flame that still flows upward and flickers, same colours and style.
+- **Causes found and fixed at the source:**
+  - **Shell shader** (`aura.fsh`): the outline was cut by noise sharpened into ridges (`pow(1-|2n-1|,3)`), at up to
+    42 crests round with a second octave doubling it, flickering at `t*9`, up to 1.6x deeper near the top and with a
+    one-pixel edge. Now: at most ten broad crests, mostly one octave, shaped with smoothsteps (no ridges), depth capped
+    at 12% of the radius, slow bounded flicker, a feathered edge. "Sharpness" now only makes crests fuller.
+  - **Flame tongues** (`AuraFlames`): ribbons sat on the outline leaning outward, long, and broke off at the base. Now
+    they are inner flames laid along the built shell's own surface (`AuraShell.sample`, bulges, sway and trail
+    included), pulled in by more than their width, growing and fading in place: they can never cross the silhouette.
+  - **Mesh bulges** (`AuraShell`): the billow fold used `|l|` (a sharp V between puffs); waves finer than the mesh
+    could carry (about three vertices a wave) came out as polygon zigzags; a wild charge pushed bulges far enough to
+    fold the surface. Now a softened `|l|`, waves faded out past a fixed level of detail (about five up, seven round),
+    and a soft limit on bulge depth.
+  - **Particles:** embers no longer fly off past the top, motes rise inside the aura's outline instead of up to 1.3x
+    outside it, and lightning stays inside the body of the aura.
+- Near auras get a finer mesh (40 rings x 64 segments) so the outline shows no facets up close.
+- Majin's family bulges toned down (size 0.15, 2.8 rows).
+- **Checked in a dev client:** the full gallery (Kaioken over Blue x10/x20, base, SSJ 1-3, God, UI, LSSJ3, SSJ4, Golden,
+  Majin idle and charging, Android, Elder Blood, Beast, flying, charging) and clips. 209 GameTests.
+
+## 2026-10-08 — CX-24: Dragon Ball flame silhouettes instead of bubbles (v0.76.0)
+- **The ask:** v0.75 looked bubbly, blobby and inflated, like clouds or liquid. Wanted: tall, slim, vertically flowing
+  ki flames with a few long tapered tongues and pointed tips, vertical energy streaks, rising and flickering, not
+  breathing like a balloon.
+- **What made it bubbly, and what replaced it:**
+  - **Outline** (`aura.fsh`, `flameCut`): rounded smoothstep crests are gone. The edge is now cut into flame teeth: a
+    few tongues round (`spikes.count`, at most 8), several up the height (`motion.stretch` x 10), each running from a
+    deep root out to a pointed tip and snapping back in just above it, so every tip points up. They climb with
+    `motion.scroll`, each has its own length that flickers, and `sharpness` makes the points longer and slimmer.
+    The glow layers follow the same flame edge instead of a smooth oval round it.
+  - **Mesh** (`AuraShell`): the round bulges and billows are dropped from every aura (lobe size about 0.02, no billow).
+  - **Proportions:** narrower than before (about twice the body wide), widest at the chest, a flame top narrowing to a
+    point (taper 1.4, tip 0.9), a short peak; Grade 2/3, the LSSJ and other bulky forms stay a little wider.
+  - **Animation** (`AuraSystem.measure`): the pulse no longer scales the width; it stretches the aura upward, and a
+    charge mostly makes it taller (width +35% of the old amount).
+  - **Inside:** energy streaks drawn long and thin straight up; the rim tint follows them instead of round patches.
+  - **Inner flames:** slim, drawn to a point, a gentler sway.
+- All families, Blue and Kaioken (both tiers) re-proportioned in `tools/gen_auras.py` (`flame_proportions`).
+- **Checked in a dev client:** the full gallery and clips (the tongues climb, the width holds still). 209 GameTests.
+
+## 2026-10-08 — CX-24: the hollow anime aura, after the user's reference video (v0.77.0)
+- **The reference** (an 18 s clip of Dokkan-style SSJ1, SSJ2, SSJ2 full power and SSJ3 auras): a thick glowing band
+  forming a fir-tree flame silhouette (about five sharp tongues up each side pointing up and out, a crown on top, a
+  smooth bowl under the feet) round an almost empty middle with small streaks of light rising in it; saturated colour
+  with a wide soft halo; fast flicker; blue-white lightning on SSJ2/3. About as wide as the fighter is tall, about 1.4
+  times as tall.
+- **Hollow band** (`aura.fsh`, per-layer `band`): a shell with `band` > 0 draws a bright band of that width behind
+  its flame edge (the form's full colour, streaked with upward blur) and leaves the middle clear (`alpha.core` 0).
+  Because depth is the share of the radius in from the outline, the band is the same thickness from every side.
+- **Flecks** (`particles.type: "flecks"`): small vertical streaks of light shooting up inside the aura and flickering.
+- **Tongues:** steeper (root depth 0.24-0.34 of the radius), needle tips (sharpness 0.9), five rows up the height
+  (`stretch` 0.5); none in the bottom third, so the bowl round the feet stays smooth.
+- **Data** (`tools/gen_auras.py`, `anime()`): every family and Kaioken drop the layers that filled the middle (inner
+  flames, hazes, added light shells), gain the band, flecks and a wider halo (glow 1.13); proportions about 1.5x wider
+  and 0.75x as tall as v0.76, a crown instead of a needle on top. Kaioken wraps at 1.15 (x20: 1.25) round the now
+  wider form auras, its x20 tongues still deeper. SSJ2/3 lightning is blue-white. Blue keeps its colours.
+- A 3D shell was kept rather than flat 2D sprites: the band reads the same from every angle (side, behind, above).
+- **Checked in a dev client** against the video, by night and day, with clips. 209 GameTests.
+
+## 2026-10-08 — CX-24: steady auras when the camera moves (v0.78.0)
+- **The report:** fine while standing still with the camera still; moving the camera made auras melt into themselves or
+  vanish (especially looking towards clouds), and they did not move well with the player.
+- **Causes and fixes:**
+  - **Melting:** the flame tongues were laid out by the shell's own angle round the fighter, while what you see is the
+    outline as seen from the eye; turning the camera brought other parts of the shell to the edge, so the tongues slid,
+    merged and reshaped. The shader now lays them out by the angle measured from the eye's side (`viewU`, from the new
+    `AuraCenter` uniform), so the outline keeps its flames from every angle, like a drawn aura.
+  - **Vanishing:** the aura shader faded with Minecraft's fog, whose settings when the aura is drawn could be the sky's
+    or the clouds'. Auras glow and no longer take fog.
+  - **Not following well:** movement was smoothed slowly (0.35 a tick) and any walk streamed the aura back, so it lagged
+    and sheared like jelly. Now 0.6 a tick, and only real speed (over 0.45 blocks a tick: flying, dashing) leans it,
+    a little (half the old maximum).
+  - The camera close up or inside the (now wider) aura faded it to a quarter at once; now a smooth fade to 45% at most.
+- **Checked in a dev client:** an orbit in 20 degree steps (the same silhouette all round), looking up into sky and
+  clouds, from behind and above, flying. 209 GameTests.
+
+## 2026-10-09 — CX-24: drawn like anime: timing, smear, ghost flames, bloom (v0.79.0)
+- **The ask:** make every aura far better. Measured against the user's reference video frame by frame:
+  - it is animated on twos: each drawing holds two frames at 30 fps (15 drawings a second, every change a full
+    redraw), cycling through 15 drawings a second;
+  - every tongue tip is smeared upward like motion blur;
+  - a dimmer, blurred copy of the flames sits just inside the band (ghost flames), a wide soft bloom round it all;
+  - the flecks inside are big, soft and blurred.
+- **Drawing timing** (`motion.fps`): the outline, its streaks and the flecks hold each drawing and jump to the next
+  (15 a second for the Super Saiyan style, 10 for calm god ki, 12 dark and regal, 20 machines, smooth for UI's shimmer).
+- **Upward smear** (`motion.smear`, `aura.fsh` `smearedCover`): the flame edge is sampled six times below each point,
+  each pixel's samples nudged by its own offset so they blend into one streak; the glow follows the smeared edge.
+- **Ghost flames:** every family's first shell is copied smaller (0.84 wide, 0.9 tall), dimmer (0.5), with a thinner
+  band, its own seed and a quicker climb. **Bloom:** a wide, soft glow (1.24, 0.38) before the tight one.
+- **Band:** a hot highlight hugging the outer edge. **Flecks:** twice as wide, longer, more of them, on the drawing
+  timing. **Lightning:** thicker glow and core, and a thinner branch forks off each bolt.
+- Beast's band is a rich purple (its hand-set colour was near white). Blue gets the same treatment by hand (10 a second).
+- `layers_mod {1: ...}` in the generator now means every flame shell (glows come first now).
+- **Checked in a dev client** against the video (night and day), every family, and clips. 209 GameTests.
+
+
+## 2026-10-09 — CX-25: clouds, a calmer Kaioken, a tinted middle (v0.80.0)
+- **Clouds showed through the aura:** clouds are drawn after the stage the aura used (AFTER_PARTICLES). Auras now draw
+  at AFTER_WEATHER, after clouds and rain. At that stage the model-view stack already holds the camera's rotation, so
+  the aura is drawn with an identity pose (applying the camera again hid it in third person and floated it in front).
+- **Kaioken too wobbly:** smaller pulse (0.015), slower motion (3), less sway and flicker, slower scroll, smaller growth
+  per stage, calmer charge and tier-2 reactions, no ghost shell, and drawn at 10 a second like Blue.
+- **Vanishing from above:** a hollow aura seen from above is only its band. The middle now carries a light tint
+  (core alpha 0.12, up from near clear), and a little more (+0.18) as the camera looks down on it.
+- Height breathing reduced (pulse factor 1.5, was 2.5).
+- **Checked in a dev client:** every angle including straight down, against clouds, Kaioken 1/10/20. 209 GameTests.
+- Known: from about 30° above, the tip can show as small arcs above the head.
+
+## 2026-10-09 — CX-26: the aura leans to the eye, calmer everywhere (v0.81.0)
+- **Looked down on, the aura fell apart** (user's screenshot): an upright 3D egg seen from above shows its outline as a
+  ring round the feet, with the tip as loose arcs over the head and the flame tongues pointing away from the eye. The
+  shell is now turned about a level axis through its middle (42% up), top away from the eye, by 0.75 of the angle the
+  eye looks down at it (`AuraSystem.lean`, `AuraShell.setTilt`; positions and normals both, shader and plain paths).
+  From above it keeps its whole flame outline round the fighter, like a drawn aura; the bottom swings up towards the
+  eye, so nothing sinks into the ground. Off when looking up, and faded out within 1.4–2.4 radii of the eye (first
+  person and close cameras unchanged).
+- **Less wobble:** `gen_auras.py calm()` caps every generated file: breathing 0.025 at most 3.5/s, sway 0.025,
+  flicker x0.7 (max 0.3), flame sway (warp) 0.3, charge shake 0.025 and wildness 1.3. The peak flame's height now
+  rises and falls slowly instead of quivering (13.7/s term gone).
+- **Checked in a dev client:** pitch 0/30/45/60/80 idle and charging, looking up, first person, SS2, Blue, Blue +
+  Kaioken 20 from above. 209 GameTests.
+
+## 2026-10-09 — CX-27: the fighter's physique in real 3D (v0.82.0)
+- **The ask:** muscular DBZ proportions (user's two reference images) as actual model geometry, not a texture: pecs,
+  abs, obliques, back, neck, shoulders, arms, legs, real fists (fingers, knuckles, thumb) and feet with five toes.
+- **How** (`client/render/Physique.java`): pieces are chamfered blocks (45-degree cut edges and corners; the big
+  muscles get two cuts for a rounder shape) added as children of the player model's six parts, so they follow every
+  animation and every layer draws them. Each face takes the texture of the part face below it (box projection onto
+  the part's own skin layout, sides only), so skins, the generated bodies, gi and form tints run over the muscles. A
+  custom `ModelPart.Cube` (`MeshCube`) draws them:
+  - pieces past the elbow and knee follow bendy-lib's bend (its transform rebuilt from the bent cuboid's angle, axis
+    and centre; `getLastPosMatrix` is null in this version);
+  - feet turn about the ankle against the shin's whole turn (swing and knee bend) while on the ground, so they stay
+    flat and the toes never sink in (big turns, like kicks, are followed less).
+- **Anatomy:** split pecs tilted out at the bottom with a valley between, a 3-row six-pack, lower abs, serratus,
+  obliques, lats flaring into a V, traps, upper back, erectors, a thick neck; deltoid caps, biceps with a peak,
+  triceps, tapering forearms; fists with palm facing back (a straight punch lands palm down), four fingers (first
+  bones form the fist's face, knuckles on the front edge, middle bones folded on the palm), a thumb up the inside and
+  across the fingers; quads with the teardrop, rectus, glutes, hamstrings, kneecaps, two-headed calves, shins;
+  heel, instep, ankle bones, five toes (big toe largest).
+- **Builds:** lean, athletic, bulky (how far muscles stand out). Players with their own Minecraft skin now get the
+  athletic physique too (the Classic art style keeps vanilla). Limb scale-up reduced, since muscles add the bulk.
+- **Arms** hang a little out from the body past the lats (`PhysiqueModel`, swapped in for the player renderers'
+  model; `MotionModel` for NPCs).
+- Vanilla armour hides the muscles it would be poked by (chestplate: torso and upper arms; leggings; boots: feet).
+  Detail is skipped beyond 32 blocks. 3765 quads per figure.
+- First person shows your 3D fist and forearm. Dev: `clientTest` window now 1280x720 (`-PdevWidth/-PdevHeight`).
+- **Known:** a Minecraft skin's outer layer (jacket/sleeves) stays flat, so muscles push through it.
+- **Checked in a dev client:** pose sheets at 0/35/90/160 degrees (idle, fight, charge, heavy walk with knee bend),
+  in-world front/back/above, first person, an NPC. 209 GameTests.
+
+## 2026-10-09 — CX-28: the 3D physique reverted; muscles painted in high detail instead (v0.83.0)
+- **The ask:** "revert the 3d muscles completely, just make them highly textured on the model. no 3d at all", and
+  hands and feet natural, nothing extra. CX-27's geometry is gone (`Physique`, `PhysiqueModel` deleted;
+  `BodyShape`, `FighterRenderer`, `FirstPersonBody`, `ClientSetup`, `MotionModel` back to v0.81.0): the model is the
+  plain blocks again (with CX-22's chest and waist blocks and limb proportions as before).
+- **`tools/gen_body.py`** paints the generated bodies (lean, athletic, bulky) at 256x256 (four texture pixels per
+  model pixel, twice the old resolution) into `body_painted/` and `body_hd/`: each face is a height map of muscles
+  (smooth bumps that blend into each other), lit from above by its slope, darker in the valleys between muscles,
+  with ink only where anime draws it (under the pecs, between the abs, the sternum, the hip V, the calves) and soft
+  skin grain. Pecs, six-pack, serratus, obliques, traps, shoulder blades, lats, erectors; deltoids, biceps, triceps,
+  forearms; quads with the teardrop, kneecaps, hamstrings, two-headed calves, Achilles. Hands are painted as a
+  relaxed fist (knuckles, curled fingers, thumb with its nail), feet as bare feet (five toes with nails and gaps,
+  ankle bones, arch, heel, sole) on the vanilla blocks. Leg tops (inside the shorts) are painted in shadow.
+- Note: `tools/ArtGen.java` (Painted.all / Hd) also writes these files; run `python3 tools/gen_body.py` after it.
+- **Checked in a dev client:** front, sides, back, above, guard pose, walk pose sheets. 209 GameTests.
+
+## 2026-10-09 — CX-29: segmented limbs, feet that stick out, longer legs (v0.84.0)
+- **The ask** (with three reference pictures): feet sticking out with toes on top, a bigger chest and smaller belly,
+  arms in three parts and legs in two, the fist a little bigger than the forearm, longer legs.
+- **`LimbSegments`**: plain blocks over the vanilla limbs (no sculpting; the anatomy stays painted): upper arm,
+  forearm, and a fist bigger than the forearm; thigh and shin; a foot block from the ankle to the ground sticking out
+  2.6 px in front. Each face shows the rows of the limb's own texture it covers (any skin paints them); the foot's top
+  and front show the leg front's rows 10..12, where `gen_body.py` now paints the toes (tips at the front, nails, dark
+  gaps). Blocks past the elbow and knee follow bendy-lib's bend; feet stay flat on the ground against the shin's
+  swing (kicks still point). Three builds' block sizes. Vanilla leggings/boots hide the leg blocks/feet.
+- **Proportions:** legs 1.2x longer, the figure standing taller on them (`LimbSegments.pose`, after the model's own
+  pose: `PhysiqueModel` swapped in for players, `MotionModel` for NPCs); a bigger chest block over a smaller belly and
+  a slightly narrower torso; arms hang a little out.
+- Only for the mod's bodies (generated or race looks); a player's own Minecraft skin keeps vanilla's shape.
+- **Checked in a dev client:** pose sheets (idle, guard, hover, heavy walk), in-world front and above. 209 GameTests.
+
+## 2026-10-09 — CX-30: a slimmer upper arm (v0.84.1)
+- The upper-arm block stands out less (lean 0.12, athletic 0.24, bulky 0.42 px, was 0.25/0.4/0.6), at the user's
+  request ("the bicep part just a little bit smaller"). Checked in a dev client.
+
+## 2026-10-09 — CX-31: every animation reworked (v0.85.0)
+- **The ask:** rework all the animations (styles, fighting, idle, defaults), each distinct, "a million times better".
+- **What was wrong:** most movement clips were two keys swinging between two poses (idle barely moved, the fighting
+  stance was frozen, flight poses rigid); strikes snapped from the hit straight back to the guard.
+- **`tools/gen_motion.py`** now writes every movement clip from shared builders that apply the principles: weight
+  (hips drop on each footfall and rise through the passing pose, sway over the standing leg), counter-rotation of the
+  shoulders, overlap and follow-through (arms, head and floating legs a beat behind), breathing and weight shifts,
+  acting beats in idles, bouncing fighting stances with the guard following the bounce and the lead hand pawing,
+  fluttering flight, trembling and surging charges. Defaults, race and form idles, heavy walk and lope.
+- **`tools/gen_styles.py`**: the sixteen styles, each a character kept through all nine slots (now every style fills
+  every slot, fast flight included): Goku loose and bouncy (scratches his head), Vegeta arms folded and impatient
+  (taps a foot), Piccolo meditating (cross-legged hover), Gohan calm (rubs his head), Krillin nimble, Roshi stooped
+  (strokes his beard, Max Power flex), Tien precise (crane stance on one leg), Yamcha cocky (hand behind the head,
+  wolf crouch), Trunks composed (hand on the strap, sword guard), Frieza regal (hands behind, finger to the sky), Cell
+  smug (hands on hips, laughs), Broly heavy (heaving breath, bounding charge), Buu childish (skipping, aeroplane),
+  Android 17 bored (pockets), Jiren immovable (arms folded even fighting), Hit utterly still (pockets everywhere).
+- **Combat (`Anims.java`)**: `Pose.past` and a shared `strike(...)` give jab, cross, hook, heavy punch, uppercut,
+  launcher, spike, Z-hit and Breaker Wave a deeper wind-up, follow-through past the hit and a settle; the kick
+  follows through and lands its weight; ki blast kicks back; the beam kicks and strains harder; dash and rush are
+  full-body (push, burst, skid); sweep and side steps land into the knees; hits whip the head past and stagger;
+  guard breathes; the power-up loop surges.
+- **Dev tools:** devshots `posestrip_<clip>_<turn>[_<pitch>]` (one clip at eight moments), `motionreload`; the pose
+  sheet's figures sized for strips. StyleTests adjusted (every style now fills every slot).
+- **Checked in a dev client:** film strips of every default clip, side-by-side pose sheets of all styles per slot,
+  frame sequences of the combat clips. 209 GameTests.
+
+## 2026-10-09 — CX-32: no afterimages in flight (v0.85.1)
+- At the user's request, flying leaves no afterimages at all: full-speed flight no longer starts a trail (motion
+  engine and the old flight clips), and a dash in the air leaves none either. Dashes on the ground and the fusion
+  dance keep theirs. 209 GameTests.
+
+## 2026-10-09 — CX-33a: landmarks framework, architecture blocks, the tournament arena (v0.86.0)
+- **The ask:** rebuild every structure from scratch, anime scale, out of our own blocks: the tournament arena, Korin
+  Tower + Kami's Lookout, the Cell Games ring, the Frypan Mountains, West City. This phase: the block set, the
+  framework, and the tournament arena. The old hand-built grounds (`TournamentGrounds.build`) are deleted.
+- **Blocks (`tools/gen_architecture.py`)**: 48 base blocks in six families (tournament stone/tiles/trim/red band,
+  temple plaster/red pillar/gold/lantern/clay roof tiles, Lookout tiles/hull/bands/dome gold/awnings/lamps, Korin
+  stone, Cell Games tiles/rock, strata sandstones, city plaster/window strips/domes/asphalt...), plus 17 stairs, 22
+  slabs and 5 walls. The script draws the 16x16 textures and writes blockstates, models, item models, loot tables,
+  tool/stairs/slabs/walls tags, lang and `world/arch/ArchitectureBlockList.java`; `ArchitectureBlocks` registers them
+  under their own creative tab ("Architecture"). Re-run the script after editing its tables.
+- **Landmarks (`world/landmark/`)**: not vanilla structures (their pieces can't reach 160+ blocks from the start
+  chunk). `Landmark` lists each kind (grid spacing, radius, biomes); `LandmarkSites` picks one seeded site per grid
+  cell and asks the plan if the biome and the terrain (generator base heights, so every thread agrees) suit it; plans
+  are immutable and cached. `LandmarkFeature` (a `top_layer_modification` feature in every overworld biome) builds,
+  per chunk, only the blocks inside that chunk through a clipped `Canvas` (`ground` levels and blends a column), then
+  sweeps natural leaves/logs that neighbouring chunks' trees hung into the landmark. `Shapes`: hip roofs with
+  upturned corners, domes, onion domes, palms, cypresses, banner poles.
+- **Tournament arena (`TournamentArena`)**: a 268-block-square levelled field eased into the land round it; a 41-block
+  tiled ring with a trim skirt, rails and lanterns; stands on all four sides (15 tiers of seats, aisle stairs, a red
+  band rail) over a lit, pillared concourse with doorways into four gate tunnels; a 24-high back wall with arches,
+  windows, a red triple band, merlons and banner poles in four colours; a south gatehouse; behind the north stand a
+  raised temple: a great hall (red lacquer columns with lamps, windows, a gold throne dais, banners) under a
+  two-storey brown tile roof with gold ridges and upturned corners, flanked by three-tier pagodas; palms and lamp
+  posts round the grounds; the Announcer by the ring. Spacing 1024, plains/meadow/savanna/forest biomes, on fairly
+  level ground.
+- **Finding them:** `/landmark locate <tournament|lookout|cell_games|frypan_mountains|west_city>` and `/landmark tp
+  <name>` (ops). The tournament uses the arena nearest spawn (`/dbz tournament where`); the old `build` subcommand
+  is gone. In the dev world (seed 8675309) the first arena is ~1,700 blocks out.
+- TournamentTests stage their match on a floor over the test (`TournamentGrounds.useRing`); the ring search is cached
+  when it finds nothing. 209 GameTests.
+
+## 2026-10-09 — CX-33b: Korin Tower and Kami's Lookout (v0.87.0)
+- **`KamiLookout`** (replaces the stub): Korin Tower rises from a round carved plinth (standing stones with slab caps)
+  as a 13-wide shaft of ribbed, panelled Korin stone banded every 16 blocks, to Korin's sanctuary at y 170: a
+  swelling banded underside, a balcony with a lantern-posted balustrade, a round room (windows, wall lanterns, four
+  doors, lamps, a gold-topped pedestal) under a dome and a spire. A stone stair winds round the whole tower from the
+  ground (railing posts on the outside, lit where it tunnels up through the sanctuary's underside into the room).
+- High above it (deck at y 276, 113 blocks across) the Lookout: a red patterned band, a white band with long glowing
+  windows, a red band, then a teal hull with trim rings drawing in to a gold-banded pole pointing down at Korin's spire.
+  On the deck: marble walks, a lamp-posted balustrade, fourteen tall white lamp towers, a cypress avenue to the palace
+  steps, a palm grove on a lawn and a palm-shaded pool. Kami's palace on a marble platform: a round hall (glowing
+  windows, inner colonnade with lamps, a gold floor ring, a dais) ringed by a pink awning on columns, a red drum and a
+  gold onion dome; two round towers with pink awnings, an upper floor and small onion domes; wings with windows and
+  awnings, passages joining all of it. Piccolo (the style master) keeps the Lookout.
+- **Daylight through the Lookout:** `lookout_*` blocks pass skylight (`propagatesSkylightDown`, light block 0) while
+  staying solid and opaque, so the land under a 113-block island isn't in permanent darkness spawning monsters, and
+  the underside is lit teal instead of black.
+- `Shapes`: `inDisc`/`onRim`/`arc` (watertight circular walls, spacing round a circle) and `circleWall` (a joined-up
+  circular balustrade with posts).
+- Spacing 2048, forest/plains/savanna/jungle/meadow/taiga biomes, ground dry and fairly level, below y 100.
+  `/landmark tp lookout` puts you on the deck; the dev world's first is at (-797, 858).
+
+## 2026-10-09 — CX-33c: Cell Games arena, findable landmarks (v0.88.0, deployed early at the user's request)
+- **`CellGamesArena`** (replaces the stub): a 101-block-square ring of white tiles, 6 high, bevelled all round with
+  stepped stairs, a carved band at its foot, a faint seam grid, steps up the south side; a tall carved spire on each
+  corner (plinth, tiers narrowing between round flanges, to a point). Round it a levelled rocky wasteland (wasteland
+  rock with gravel and pale sand patches, rubble) eased into the land, ringed by eroded formations: tall pillars with
+  overhanging caps, flat-topped buttes on talus with dead bushes, sometimes an arch, all in wasteland rock with wavy
+  tan strata, and boulders strewn about. Cell (the style master) waits in the middle. Not yet checked in a client.
+- **Findability:** every grid cell now tries up to four spots in turn (`LandmarkSites.ATTEMPTS`; the first spot is
+  the old one, so existing sites stay put); Cell Games spacing 1536 and also on savanna/plains, Frypan spacing 1792 and
+  also on savannas. `/landmark survey <name>` (ops, dev) counts, round you, cells that hold one and why the rest don't.
+- A landmark that throws while building is logged and skipped instead of stopping world generation.
+- The GameTest server doesn't search for a tournament arena (tests stage their own ring). 209 GameTests.

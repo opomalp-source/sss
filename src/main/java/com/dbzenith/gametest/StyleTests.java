@@ -99,13 +99,14 @@ public final class StyleTests {
         PlayerData d = ModCapabilities.getOrThrow(p);
         StyleLogic.grant(d, "saiyan_prince");
         helper.assertTrue(d.getStyleSlot("walk").equals("saiyan_prince") && d.getStyleSlot("fight_stance").equals("saiyan_prince"), "a first style fills its slots");
+        StyleLogic.equip(p, d, "sprint", "");                                   // every style fills every slot (CX-31): free one
         StyleLogic.grant(d, "wild_saiyan");
         helper.assertTrue(d.getStyleSlot("walk").equals("saiyan_prince"), "a second leaves chosen slots alone");
         helper.assertTrue(d.getStyleSlot("sprint").equals("wild_saiyan"), "and fills the ones still on the default");
         helper.assertTrue(StyleLogic.equip(p, d, "walk", "wild_saiyan") && d.getStyleSlot("walk").equals("wild_saiyan"), "Goku's walk with Vegeta's stance");
         helper.assertTrue(d.getStyleSlot("fight_stance").equals("saiyan_prince"), "the other slots unchanged");
         helper.assertTrue(!StyleLogic.equip(p, d, "walk", "pride_trooper"), "not a style you haven't learned");
-        helper.assertTrue(!StyleLogic.equip(p, d, "sprint", "saiyan_prince"), "not a style without that slot");
+        helper.assertTrue(!StyleLogic.equip(p, d, "no_such_slot", "saiyan_prince"), "not a slot that does not exist");
         helper.assertTrue(StyleLogic.equip(p, d, "walk", "") && d.getStyleSlot("walk").isEmpty(), "back to the default");
         d.learnStyle("saiyan_prince", false);
         helper.assertTrue(d.getStyleSlot("fight_stance").isEmpty(), "forgetting a style empties its slots");

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "dbzenith:block/lookout_deck_tiles",
+    "top": "dbzenith:block/lookout_deck_tiles",
+    "side": "dbzenith:block/lookout_deck_tiles"
+  }
+}

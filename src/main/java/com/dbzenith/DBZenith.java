@@ -32,6 +32,7 @@ public class DBZenith {
         ModItems.register(modBus);
         ModEntities.register(modBus);
         ModBlocks.register(modBus);
+        com.dbzenith.world.arch.ArchitectureBlocks.register(modBus);              // the landmark block set (CX-33)
         com.dbzenith.registry.ModRecipes.register(modBus);
         ModBlockEntities.register(modBus);
         com.dbzenith.registry.ModEffects.register(modBus);

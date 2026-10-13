@@ -59,6 +59,10 @@ public final class FirstPersonBody {
     public static void onRenderArm(RenderArmEvent event) {
         AbstractClientPlayer player = event.getPlayer();
         PublicStatePacket state = ClientPublicStates.get(player.getId());
+        if (Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player) instanceof PlayerRenderer pr) {
+            LimbSegments.show(pr.getModel(), BodyShape.build(state), true, true, true);      // your forearm and fist (CX-29)
+            LimbSegments.reset(pr.getModel());
+        }
         if (!hasOwnBody(state)) return;
         EntityRenderer<?> r = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
         if (!(r instanceof PlayerRenderer renderer)) return;

@@ -12,12 +12,12 @@ import java.util.function.Supplier;
  */
 public record DevScreenshotPacket(String name, int delayTicks) {
     public static void encode(DevScreenshotPacket msg, FriendlyByteBuf buf) {
-        buf.writeUtf(msg.name, 64);
+        buf.writeUtf(msg.name, 256);
         buf.writeVarInt(msg.delayTicks);
     }
 
     public static DevScreenshotPacket decode(FriendlyByteBuf buf) {
-        return new DevScreenshotPacket(buf.readUtf(64), buf.readVarInt());
+        return new DevScreenshotPacket(buf.readUtf(256), buf.readVarInt());
     }
 
     public static void handle(DevScreenshotPacket msg, Supplier<NetworkEvent.Context> ctx) {

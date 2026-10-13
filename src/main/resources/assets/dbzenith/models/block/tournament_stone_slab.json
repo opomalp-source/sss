@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "dbzenith:block/tournament_stone",
+    "top": "dbzenith:block/tournament_stone",
+    "side": "dbzenith:block/tournament_stone"
+  }
+}

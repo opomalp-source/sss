@@ -17,13 +17,15 @@ import java.util.Map;
 
 /**
  * The auras, loaded from {@code assets/<namespace>/auras/*.json} with the resource packs (CX-24): a resource pack can
- * change any aura or add one, and F3+T reloads them. A form wears the aura that lists it under {@code forms}.
+ * change any aura or add one, and F3+T reloads them. A form wears the aura that lists it under {@code forms}. Files
+ * may start from another with {@code "extends"}; /dbzaura set swaps in a changed copy until the next reload.
  */
 public final class AuraDefs extends SimplePreparableReloadListener<Map<String, AuraDef>> {
     public static final AuraDefs INSTANCE = new AuraDefs();
     private static final Logger LOG = DBZenith.LOGGER;
     private static volatile Map<String, AuraDef> byId = Map.of();
     private static volatile Map<String, AuraDef> byForm = Map.of();
+    private static volatile Map<String, AuraDef> byTechnique = Map.of();
 
     private AuraDefs() {}
 
@@ -36,22 +38,58 @@ public final class AuraDefs extends SimplePreparableReloadListener<Map<String, A
         return byForm.get(formId);
     }
 
+    /** The aura a technique wears over the form's (e.g. "kaioken"), or null. */
+    public static AuraDef forTechnique(String technique) {
+        return byTechnique.get(technique);
+    }
+
     public static Collection<String> ids() {
         return byId.keySet();
     }
 
+    /** Swaps in a changed aura (live tweaking) for everyone wearing it, until the next reload. */
+    static void replace(AuraDef d) {
+        Map<String, AuraDef> ids = new HashMap<>(byId);
+        ids.put(d.id, d);
+        Map<String, AuraDef> forms = new HashMap<>(byForm);
+        for (String f : d.forms) forms.put(f, d);
+        byId = Map.copyOf(ids);
+        byForm = Map.copyOf(forms);
+        if (d.technique != null) {
+            Map<String, AuraDef> tech = new HashMap<>(byTechnique);
+            tech.put(d.technique, d);
+            byTechnique = Map.copyOf(tech);
+        }
+    }
+
+    /** Reads every aura file again now, without reloading the other resources (/dbzaura reload). */
+    public static int reloadNow() {
+        ResourceManager rm = net.minecraft.client.Minecraft.getInstance().getResourceManager();
+        Map<String, AuraDef> loaded = INSTANCE.prepare(rm, net.minecraft.util.profiling.InactiveProfiler.INSTANCE);
+        INSTANCE.apply(loaded, rm, net.minecraft.util.profiling.InactiveProfiler.INSTANCE);
+        return loaded.size();
+    }
+
     @Override
     protected Map<String, AuraDef> prepare(ResourceManager rm, ProfilerFiller profiler) {
-        Map<String, AuraDef> out = new HashMap<>();
+        Map<String, JsonObject> raw = new HashMap<>();
         for (Map.Entry<ResourceLocation, Resource> e : rm.listResources("auras", f -> f.getPath().endsWith(".json")).entrySet()) {
             String path = e.getKey().getPath();
             String name = path.substring("auras/".length(), path.length() - ".json".length());
+            name = name.substring(name.lastIndexOf('/') + 1);                  // sub-folders (techniques/, families/) only sort files
             String id = e.getKey().getNamespace().equals(DBZenith.MOD_ID) ? name : e.getKey().getNamespace() + ":" + name;
             try (Reader r = e.getValue().openAsReader()) {
-                JsonObject json = JsonParser.parseReader(r).getAsJsonObject();
-                out.put(id, AuraDef.parse(id, json));
+                raw.put(id, JsonParser.parseReader(r).getAsJsonObject());
             } catch (Exception ex) {
                 LOG.error("Bad aura {}: {}", e.getKey(), ex.toString());
+            }
+        }
+        Map<String, AuraDef> out = new HashMap<>();
+        for (String id : raw.keySet()) {
+            try {
+                out.put(id, AuraDef.parse(id, AuraDef.resolve(id, raw, LOG::error)));
+            } catch (Exception ex) {
+                LOG.error("Bad aura {}: {}", id, ex.toString());
             }
         }
         return out;
@@ -60,9 +98,14 @@ public final class AuraDefs extends SimplePreparableReloadListener<Map<String, A
     @Override
     protected void apply(Map<String, AuraDef> loaded, ResourceManager rm, ProfilerFiller profiler) {
         Map<String, AuraDef> forms = new HashMap<>();
-        for (AuraDef d : loaded.values()) for (String f : d.forms) forms.put(f, d);
+        Map<String, AuraDef> tech = new HashMap<>();
+        for (AuraDef d : loaded.values()) {
+            for (String f : d.forms) forms.put(f, d);
+            if (d.technique != null) tech.put(d.technique, d);
+        }
         byId = Map.copyOf(loaded);
         byForm = Map.copyOf(forms);
+        byTechnique = Map.copyOf(tech);
         LOG.info("Loaded {} auras", loaded.size());
     }
 }

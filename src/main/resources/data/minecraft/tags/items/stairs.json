@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "dbzenith:tournament_stone_stairs",
+    "dbzenith:tournament_tiles_stairs",
+    "dbzenith:arena_tile_stairs",
+    "dbzenith:clay_roof_tiles_stairs",
+    "dbzenith:lookout_marble_stairs",
+    "dbzenith:lookout_gold_dome_stairs",
+    "dbzenith:lookout_awning_stairs",
+    "dbzenith:korin_stone_stairs",
+    "dbzenith:cell_tile_stairs",
+    "dbzenith:wasteland_rock_stairs",
+    "dbzenith:strata_red_stairs",
+    "dbzenith:strata_brown_stairs",
+    "dbzenith:strata_tan_stairs",
+    "dbzenith:strata_cream_stairs",
+    "dbzenith:city_concrete_stairs",
+    "dbzenith:city_roof_red_stairs",
+    "dbzenith:city_roof_orange_stairs"
+  ]
+}

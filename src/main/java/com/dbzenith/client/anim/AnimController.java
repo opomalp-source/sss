@@ -141,10 +141,7 @@ public final class AnimController {
             double dy = player.getY() - player.yo;
             if (dy > 0.25 && horizontal < 0.4) return Anims.FLY_ASCEND;              // straight up
             if (dy < -0.35 && horizontal < 0.4) return Anims.FLY_DESCEND;            // dropping to land
-            if (horizontal > 0.9) {
-                com.dbzenith.client.fx.Afterimages.keepAlive(player, 3);
-                return Anims.FLY_FAST;
-            }
+            if (horizontal > 0.9) return Anims.FLY_FAST;                                 // no afterimages in flight (CX-32)
             if (horizontal > 0.12) return Anims.FLY_FORWARD;
             return Anims.FLY_HOVER;
         }
@@ -259,7 +256,9 @@ public final class AnimController {
         t.suppressSwingUntil = now + 3;
         t.lastEventTick = now;
         if (msg.kind() == AnimEventPacket.DASH) {
-            com.dbzenith.client.fx.Afterimages.keepAlive(player, 8);
+            var ps = com.dbzenith.client.ClientPublicStates.get(player.getId());
+            boolean flying = ps != null && ps.has(PublicStatePacket.FLYING) && !player.onGround();
+            if (!flying) com.dbzenith.client.fx.Afterimages.keepAlive(player, 8);   // none in flight (CX-32)
             if (player == mc.player) com.dbzenith.client.fx.CameraFx.rush();
         }
     }

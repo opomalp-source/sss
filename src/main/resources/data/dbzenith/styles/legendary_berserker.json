@@ -1,4 +1,5 @@
-{"master": "broly", "color": "#3AB848",
- "slots": {"idle": "style_broly_idle", "walk": "style_broly_walk", "sprint": "style_broly_sprint", "charge": "style_broly_charge", "fight_stance": "style_broly_fight", "fight_steps": "style_broly_steps"},
+{"master": "broly",
+ "color": "#3AB848",
+ "slots": {"idle": "style_broly_idle", "walk": "style_broly_walk", "sprint": "style_broly_sprint", "hover": "style_broly_hover", "flight": "style_broly_flight", "fast_flight": "style_broly_fast", "charge": "style_broly_charge", "fight_stance": "style_broly_fight", "fight_steps": "style_broly_steps"},
  "requirements": {"battle_power": 150000, "affinity": 6, "training_minutes": 15, "items": [{"item": "minecraft:cooked_porkchop", "count": 8}]},
  "npcs": ["dbzenith:rampage_brute"]}

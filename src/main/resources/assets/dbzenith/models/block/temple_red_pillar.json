@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "dbzenith:block/temple_red_pillar_top",
+    "side": "dbzenith:block/temple_red_pillar"
+  }
+}

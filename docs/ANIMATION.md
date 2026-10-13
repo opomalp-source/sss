@@ -46,6 +46,22 @@ on its own. First person is untouched (vanilla arms).
 3. Optional, if it flies or charges on purpose and you want that shown before it moves: implement
    `com.dbzenith.npc.Animated` (`isFlyingNow`, `isChargingKi`), backed by synced entity data.
 
+## Generated clips (CX-31)
+
+Every movement clip (the defaults, race and form idles, and the sixteen fighting styles' nine slots each) is written by
+`tools/gen_motion.py` (shared builders: `gait`, `held_idle`, `hover`, `flight`, `fastfly`, `charge`, `stance`, `steps`)
+and `tools/gen_styles.py` (one block per style). Edit those and re-run `python3 tools/gen_motion.py`; hand edits to the
+JSON are overwritten. They layer motion over a key pose: weight shift, breathing, the hips dropping on each footfall,
+shoulders counter-twisting, arms and legs following a beat behind (overlap), acting beats in idles (a glance, a shoulder
+roll, scratching the head), tremble and surges when charging.
+
+Combat actions in `Anims.java` share `strike(...)`: a wind-up deeper than the pose, a snap to the hit, follow-through
+past it, a beat held, and a recoil just past the guard before settling.
+
+Dev views: the devshot `posestrip_<clip>_<turn>[_<pitch>]` draws one clip at eight moments; `posesheet_<slot>_<phase>`
+draws the default and every style for a slot; `motionreload` re-reads the clips; `anim_<NAME>_f<tick>` freezes a combat
+clip on a tick.
+
 ## Adding or changing an animation
 
 Clips live in `assets/dbzenith/motion/clips/<name>.json`. A resource pack can override any of them, and F3+T reloads them.

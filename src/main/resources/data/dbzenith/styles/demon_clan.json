@@ -1,4 +1,5 @@
-{"master": "piccolo", "color": "#5AA040",
- "slots": {"idle": "style_piccolo_idle", "walk": "style_piccolo_walk", "hover": "style_piccolo_hover", "flight": "style_piccolo_flight", "charge": "style_piccolo_charge", "fight_stance": "style_piccolo_fight", "fight_steps": "style_piccolo_steps"},
+{"master": "piccolo",
+ "color": "#5AA040",
+ "slots": {"idle": "style_piccolo_idle", "walk": "style_piccolo_walk", "sprint": "style_piccolo_sprint", "hover": "style_piccolo_hover", "flight": "style_piccolo_flight", "fast_flight": "style_piccolo_fast", "charge": "style_piccolo_charge", "fight_stance": "style_piccolo_fight", "fight_steps": "style_piccolo_steps"},
  "requirements": {"battle_power": 8000, "affinity": 4, "training_minutes": 10},
  "npcs": ["dbzenith:namekian_warrior"]}

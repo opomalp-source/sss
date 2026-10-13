@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "dbzenith:block/lookout_marble_pillar"
+    },
+    "axis=z": {
+      "model": "dbzenith:block/lookout_marble_pillar_horizontal",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "dbzenith:block/lookout_marble_pillar_horizontal",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

@@ -178,6 +178,12 @@ public final class MotionData extends SimplePreparableReloadListener<MotionData.
         }
     }
 
+    /** Dev: reads the motion data again now (the devshot "motionreload"). */
+    public static void reloadNow() {
+        ResourceManager rm = net.minecraft.client.Minecraft.getInstance().getResourceManager();
+        INSTANCE.apply(INSTANCE.prepare(rm, net.minecraft.util.profiling.InactiveProfiler.INSTANCE), rm, net.minecraft.util.profiling.InactiveProfiler.INSTANCE);
+    }
+
     @Override
     protected void apply(Loaded l, ResourceManager rm, ProfilerFiller profiler) {
         current = l;

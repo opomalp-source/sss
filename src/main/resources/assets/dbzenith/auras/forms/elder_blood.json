@@ -1,0 +1,113 @@
+{
+  "extends": "fam_dark",
+  "forms": [
+    "elder_blood"
+  ],
+  "tint": "#600818",
+  "shape": {
+    "width": 1.749,
+    "height": 1.854
+  },
+  "lightning": {
+    "rate": 2.5,
+    "size": 0.9,
+    "color": "#FF4060"
+  },
+  "layers": [
+    {
+      "kind": "glow",
+      "scale": 1.24,
+      "opacity": 0.38,
+      "colors": {
+        "rim": "$edge"
+      }
+    },
+    {
+      "kind": "glow",
+      "scale": 1.13,
+      "opacity": 1.0,
+      "colors": {
+        "rim": "$edge"
+      }
+    },
+    {
+      "kind": "shell",
+      "colors": {
+        "core": "$dark",
+        "mid": "$deep",
+        "edge": "$edge",
+        "rim": "$rim"
+      },
+      "alpha": {
+        "core": 0.12,
+        "edge": 1.0
+      },
+      "rim": {
+        "width": 0.05,
+        "strength": 0.7
+      },
+      "spikes": {
+        "count": 6,
+        "size": 0.289,
+        "sharpness": 0.9,
+        "lean": 1.1
+      },
+      "motion": {
+        "scroll": 1.5,
+        "flicker": 0.21,
+        "streaks": 0.4,
+        "streakSpeed": 2.5,
+        "stretch": 0.5,
+        "tallFlames": 0.7,
+        "warp": 0.3,
+        "fps": 12,
+        "smear": 0.085
+      },
+      "band": 0.17
+    },
+    {
+      "kind": "shell",
+      "colors": {
+        "core": "$dark",
+        "mid": "$deep",
+        "edge": "$edge",
+        "rim": "$rim"
+      },
+      "alpha": {
+        "core": 0.12,
+        "edge": 1.0
+      },
+      "rim": {
+        "width": 0.05,
+        "strength": 0.7
+      },
+      "spikes": {
+        "count": 6,
+        "size": 0.289,
+        "sharpness": 0.9,
+        "lean": 1.1
+      },
+      "motion": {
+        "scroll": 1.95,
+        "flicker": 0.21,
+        "streaks": 0.4,
+        "streakSpeed": 2.5,
+        "stretch": 0.5,
+        "tallFlames": 0.7,
+        "warp": 0.3,
+        "fps": 12,
+        "smear": 0.085
+      },
+      "band": 0.12,
+      "scale": 0.84,
+      "heightScale": 0.9,
+      "seed": 23.7,
+      "opacity": 0.5
+    }
+  ],
+  "react": {
+    "charge": {
+      "shake": 0.025
+    }
+  }
+}

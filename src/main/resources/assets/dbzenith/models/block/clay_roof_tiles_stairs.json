@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "bottom": "dbzenith:block/clay_roof_tiles",
+    "top": "dbzenith:block/clay_roof_tiles",
+    "side": "dbzenith:block/clay_roof_tiles"
+  }
+}

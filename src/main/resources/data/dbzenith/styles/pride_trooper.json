@@ -1,3 +1,4 @@
-{"master": "jiren", "color": "#E04040",
- "slots": {"idle": "style_jiren_idle", "walk": "style_jiren_walk", "hover": "style_jiren_hover", "flight": "style_jiren_flight", "charge": "style_jiren_charge", "fight_stance": "style_jiren_fight", "fight_steps": "style_jiren_steps"},
+{"master": "jiren",
+ "color": "#E04040",
+ "slots": {"idle": "style_jiren_idle", "walk": "style_jiren_walk", "sprint": "style_jiren_sprint", "hover": "style_jiren_hover", "flight": "style_jiren_flight", "fast_flight": "style_jiren_fast", "charge": "style_jiren_charge", "fight_stance": "style_jiren_fight", "fight_steps": "style_jiren_steps"},
  "requirements": {"battle_power": 500000, "affinity": 8, "training_minutes": 30}}

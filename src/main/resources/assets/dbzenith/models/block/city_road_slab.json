@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "dbzenith:block/city_road",
+    "top": "dbzenith:block/city_road",
+    "side": "dbzenith:block/city_road"
+  }
+}

@@ -16,6 +16,10 @@ public final class ModFeatures {
     public static final RegistryObject<Feature<NoneFeatureConfiguration>> NAMEK_HOUSE =
             FEATURES.register("namek_house", () -> new NamekHouseFeature(NoneFeatureConfiguration.CODEC));
 
+    /** The great landmarks (CX-33): one per chunk, last of the decoration steps; it builds the parts that reach the chunk. */
+    public static final RegistryObject<Feature<NoneFeatureConfiguration>> LANDMARKS =
+            FEATURES.register("landmarks", () -> new com.dbzenith.world.landmark.LandmarkFeature(NoneFeatureConfiguration.CODEC));
+
     private ModFeatures() {}
 
     public static void register(IEventBus modBus) {

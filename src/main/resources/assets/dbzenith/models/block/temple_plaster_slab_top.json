@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "dbzenith:block/temple_plaster",
+    "top": "dbzenith:block/temple_plaster",
+    "side": "dbzenith:block/temple_plaster"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "dbzenith:block/cell_spire_top",
+    "side": "dbzenith:block/cell_spire"
+  }
+}

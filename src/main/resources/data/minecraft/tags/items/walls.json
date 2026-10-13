@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "dbzenith:tournament_stone_wall",
+    "dbzenith:lookout_marble_wall",
+    "dbzenith:korin_stone_wall",
+    "dbzenith:cell_spire_cap_wall",
+    "dbzenith:city_concrete_wall"
+  ]
+}

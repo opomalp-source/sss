@@ -27,6 +27,8 @@ public final class ClientEvents {
     private static int ticksInWorld;
     private static String pendingShot;
     private static int pendingShotTicks;
+    private static String seqName;
+    private static int seqLeft, seqFrame;
 
     private ClientEvents() {}
 
@@ -51,10 +53,22 @@ public final class ClientEvents {
         if (mc.level == null || mc.player == null) return;
         ClientHooks.maybeOpenCreation();
         ticksInWorld++;
+        if (seqLeft > 0) {                                                       // a clip: one frame a tick (dev only)
+            Screenshot.grab(mc.gameDirectory, String.format("dbz_%s_f%03d.png", seqName, seqFrame++), mc.getMainRenderTarget(),
+                    msg -> {});
+            if (--seqLeft == 0) mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON);
+        }
         if (pendingShot != null && --pendingShotTicks <= 0) {
             String shot = pendingShot;
             pendingShot = null;
             devScreenshot(shot, 0);
+            java.util.regex.Matcher seq = java.util.regex.Pattern.compile("seq(\\d+)").matcher(shot);
+            if (seq.find()) {                                                    // ..seq40..: 40 more frames, a tick apart
+                seqName = shot.replaceAll("[^a-zA-Z0-9_-]", "_");
+                seqLeft = Math.min(400, Integer.parseInt(seq.group(1)));
+                seqFrame = 0;
+                return;
+            }
             if (mc.screen instanceof com.dbzenith.client.screen.StatScreen || mc.screen instanceof com.dbzenith.client.screen.FormScreen
                     || mc.screen instanceof com.dbzenith.client.screen.CharacterCreationScreen
                     || mc.screen instanceof com.dbzenith.client.screen.DeckScreen || mc.screen instanceof com.dbzenith.client.screen.QuestScreen
@@ -102,6 +116,19 @@ public final class ClientEvents {
         if (name.startsWith("movelist") && !(mc.screen instanceof com.dbzenith.client.screen.MoveListScreen)) {   // movelist0_ .. movelist3_
             mc.setScreen(new com.dbzenith.client.screen.MoveListScreen(null).onTab(name.length() > 8 && Character.isDigit(name.charAt(8)) ? name.charAt(8) - '0' : 0));
             delayTicks = Math.max(delayTicks, 6);
+        }
+        if (name.contains("motionreload")) com.dbzenith.client.motion.MotionData.reloadNow();   // CX-31
+        if (name.startsWith("posestrip_") && !(mc.screen instanceof com.dbzenith.client.screen.PoseSheetScreen ps0 && ps0.key.equals(name))) {
+            // posestrip_<clip>_<turn>[_<pitch>]: one clip at eight moments (a film strip), for judging motion
+            String rest = name.substring("posestrip_".length());
+            String[] parts = rest.split("_");
+            int k = parts.length;
+            while (k > 0 && parts[k - 1].matches("-?[0-9]+")) k--;
+            String clip = String.join("_", java.util.Arrays.copyOfRange(parts, 0, k));
+            float turn = k < parts.length ? Integer.parseInt(parts[k]) : 30f;
+            float pitch = k + 1 < parts.length ? Integer.parseInt(parts[k + 1]) : 0f;
+            mc.setScreen(new com.dbzenith.client.screen.PoseSheetScreen(name, clip, com.dbzenith.client.screen.PoseSheetScreen.stripCells(clip, 8), 0f, turn, pitch, null));
+            delayTicks = Math.max(delayTicks, 4);
         }
         if (name.startsWith("posesheet") && !(mc.screen instanceof com.dbzenith.client.screen.PoseSheetScreen ps && ps.key.equals(name))) {
             boolean npc = name.startsWith("posesheetnpc_");                     // posesheet[npc]_<slot | clips_<prefix>>_<phase%>[_<turn>]
@@ -160,6 +187,7 @@ public final class ClientEvents {
             delayTicks = Math.max(delayTicks, 6);
         }
         com.dbzenith.config.DBZConfig.CLIENT.auraRenderer.set(name.contains("auraplain") ? 2 : 0);              // CX-24
+        com.dbzenith.client.aura.AuraSystem.devFromShot(name);
         if (name.contains("hudzenith")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(0);
         if (name.contains("hudclassic")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(1);
         if (name.contains("hudminimal")) com.dbzenith.config.DBZConfig.CLIENT.hudStyle.set(2);

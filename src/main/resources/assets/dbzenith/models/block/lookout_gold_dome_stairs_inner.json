@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "dbzenith:block/lookout_gold_dome",
+    "top": "dbzenith:block/lookout_gold_dome",
+    "side": "dbzenith:block/lookout_gold_dome"
+  }
+}
