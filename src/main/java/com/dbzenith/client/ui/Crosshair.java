@@ -75,7 +75,7 @@ public final class Crosshair implements IGuiOverlay {
         if (s == Shape.VANILLA) return;
         Camera cam = mc.gameRenderer.getMainCamera();
         boolean first = mc.options.getCameraType().isFirstPerson();
-        if (!first && !(ClientPvp.on() && !mc.options.getCameraType().isMirrored())) return;   // third person: only the PvP view aims
+        if (!first && !((ClientPvp.on() || com.dbzenith.client.ShoulderCam.active()) && !mc.options.getCameraType().isMirrored())) return;   // third person: the shoulder view aims
         if (mc.player.isSpectator() && mc.hitResult != null && mc.hitResult.getType() != HitResult.Type.ENTITY) return;
         float x = width / 2f, y = height / 2f;
         if (!first) {                                                       // where the character really aims

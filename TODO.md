@@ -248,4 +248,5 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [x] CX-35i (v0.97.0) Hair transformation wave (brow to nape, overshoot), no bare scalp anywhere (rim, hairlines, mid-transformation; checked), Vegeta's widow's peak, fuller manes, long SSJ3 bang
 - [x] CX-35j (v0.97.1) Billowing manes: the hollow behind the head filled (SSJ3, SSJ4, Raditz)
 - [x] CX-36 (v0.97.2) Hands slimmer and shorter, flush with the forearm (no glove step)
+- [x] CX-37 (v0.98.0) Third person by default, camera over the right shoulder in every situation, the crosshair at the real aim point
 - Paused for CX-19: 17d (the robot dojo), 18b (the combat animations as data; folded into 19b)

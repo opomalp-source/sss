@@ -22,14 +22,16 @@ import org.joml.Vector3f;
 import java.lang.reflect.Method;
 
 /**
- * The PvP camera (CX-20): turning PvP on switches to third person with the camera over your right shoulder
+ * The shoulder camera (CX-20, always on since CX-37): in third person behind, the camera sits over your right shoulder,
+ * walking, flying and fighting alike ({@code shoulderCamera}); you start in third person ({@code startThirdPerson}).
+ * Turning PvP on also switches to third person with the camera over your right shoulder
  * ({@code shoulderOffset} blocks to the right, {@code shoulderHeight} up), easing in; turning it off goes back to the view
  * you had. The camera never goes into a wall (it slides in as far as there is room). Client config {@code pvpCamera}.
  */
 @Mod.EventBusSubscriber(modid = DBZenith.MOD_ID, value = Dist.CLIENT)
 public final class ShoulderCam {
     private static final Method MOVE = ObfuscationReflectionHelper.findMethod(Camera.class, "m_90568_", double.class, double.class, double.class);
-    private static boolean was;
+    private static boolean was, joined;
     private static CameraType before;
     private static float amount, amountO;
 
@@ -46,8 +48,15 @@ public final class ShoulderCam {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) {
             was = false;
+            joined = false;
             amount = amountO = 0;
             return;
+        }
+        if (!joined) {                                                       // just joined a world: start in third person
+            joined = true;
+            if (DBZConfig.CLIENT.startThirdPerson.get() && mc.options.getCameraType().isFirstPerson() && !Boolean.getBoolean("dbzenith.devAutomation")) {
+                mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+            }
         }
         boolean on = ClientPvp.on() && DBZConfig.CLIENT.pvpCamera.get();
         if (on && !was) {                                                    // PvP on: third person
@@ -59,7 +68,7 @@ public final class ShoulderCam {
         }
         was = on;
         amountO = amount;
-        boolean shoulder = on && mc.options.getCameraType() == CameraType.THIRD_PERSON_BACK;
+        boolean shoulder = (on || DBZConfig.CLIENT.shoulderCamera.get()) && mc.options.getCameraType() == CameraType.THIRD_PERSON_BACK;   // over the shoulder whenever behind
         amount = shoulder ? Math.min(1f, amount + 0.2f) : Math.max(0f, amount - 0.2f);
     }
 

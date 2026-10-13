@@ -2611,3 +2611,13 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   it with no step, and shorter (ends 0.5 px past the arm instead of 1.1). The painted relaxed fist is unchanged.
   Outfits that are meant to have gloves (armour, Vegeta's, Buu's) still paint them.
 - **Checked:** in the dev client from the front and three-quarter.
+
+## 2026-10-14 — CX-37: third person by default, over the shoulder always (v0.98.0)
+- **The ask** (user: the camera should start in third person, a little to the right, also when flying and so on).
+- **`ShoulderCam`:** the shoulder view (CX-20, PvP only until now) applies whenever the camera is in third person
+  behind: walking, flying, charging, fighting (`shoulderCamera`, on by default). Joining a world switches to third
+  person (`startThirdPerson`, on by default; skipped for the scripted dev client so its first-person shots are kept).
+  The default offset is 0.6 blocks to the right (was 0.8); F5 still cycles the views.
+- **Crosshair:** in the shoulder view it marks where the character really aims (as in PvP), not the screen centre.
+- **Settings → Camera:** "Start in third person" and "Shoulder camera" toggles beside the offset.
+- **Checked:** third person in the dev client, base and Super Saiyan: the character left of centre.

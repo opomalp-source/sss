@@ -1868,7 +1868,7 @@
   "settings.dbzenith.pvp_camera": "PvP camera",
   "settings.dbzenith.pvp_camera.desc": "In PvP mode, third person over your right shoulder; back to your own view when PvP goes off.",
   "settings.dbzenith.shoulder_offset": "Shoulder offset",
-  "settings.dbzenith.shoulder_offset.desc": "How far to the right of your character the PvP camera sits.",
+  "settings.dbzenith.shoulder_offset.desc": "How far to the right of your character the third-person camera sits.",
   "settings.dbzenith.crosshair_out": "Crosshair (out of PvP)",
   "settings.dbzenith.crosshair_out.desc": "The crosshair outside PvP mode: a four-pointed star like a Dragon Ball's, the dot, or vanilla's.",
   "settings.dbzenith.crosshair_out.star": "Star",
@@ -2136,4 +2136,9 @@
   "block.dbzenith.city_pier_deck": "Pier Decking",
   "block.dbzenith.city_pier_deck_slab": "Pier Decking Slab",
   "itemGroup.dbzenith.architecture": "Dragon Block Zenith: Landmarks"
+,
+  "settings.dbzenith.start_third_person": "Start in third person",
+  "settings.dbzenith.start_third_person.desc": "Join a world in third person, behind your character.",
+  "settings.dbzenith.shoulder_camera": "Shoulder camera",
+  "settings.dbzenith.shoulder_camera.desc": "In third person, the camera sits a little over your right shoulder, walking, flying and fighting alike."
 }
