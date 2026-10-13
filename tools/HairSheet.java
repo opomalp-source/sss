@@ -25,7 +25,7 @@ public final class HairSheet {
     private static BufferedImage tex;
 
     public static void main(String[] args) throws Exception {
-        tex = ImageIO.read(HairSheet.class.getResourceAsStream("/assets/dbzenith/textures/entity/hair_lock.png"));
+        tex = ImageIO.read(HairSheet.class.getResourceAsStream("/assets/dbzenith/textures/entity/aura_white.png"));
         File out = new File(args[0]);
         out.mkdirs();
         List<Preset> presets = new ArrayList<>(Arrays.asList(Preset.values()));

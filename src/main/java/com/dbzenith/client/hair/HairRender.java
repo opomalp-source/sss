@@ -7,33 +7,22 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 /**
- * Draws a head of hair in head space (the pose stack at the head), shaded like anime hair:
- * <ul>
- *   <li>each lock is a tapering band ending in a point, its frame carried along the lock, textured along its length
- *       ({@code hair_lock.png}: dark edges that outline every lock, strand lines, a broken gloss streak);</li>
- *   <li>cel tones: every face takes one of three tones by how it faces a key light above and in front, with crisp
- *       steps between them, the shadow tone deeper and richer than the colour (warm for gold, deep for blue), dark hair
- *       lifted with a cool sheen so it never goes dead black;</li>
- *   <li>darker toward the roots and the scalp, a touch of difference from lock to lock;</li>
- *   <li>the tones are painted, not lit: every vertex faces up, so Minecraft's soft entity lighting doesn't dull them
- *       (gold would go olive); the world's light level still darkens hair in shade.</li>
- * </ul>
+ * Draws a head of hair in head space (the pose stack at the head) the way Minecraft draws everything: in blocks. Each
+ * lock is laid down along its path as a chain of small cubes on a half-pixel grid, big near the root and shrinking to
+ * a single half-pixel at the tip, so a slanting lock steps like a staircase and the whole head reads as pixel art next
+ * to the skin. The cubes take Minecraft's own face lighting (tops bright, sides darker) and vary a little cube to
+ * cube; the roots are a little darker than the tips. No scalp is drawn: the locks cover the head themselves.
  * Lock positions come from {@link HairSim} when the hair moves, else from the rest shape. Render thread only.
  */
 public final class HairRender {
-    public static final ResourceLocation MATERIAL = new ResourceLocation("dbzenith", "textures/entity/hair_lock.png");
+    /** A plain white texture: the hair is coloured per vertex. */
+    public static final ResourceLocation MATERIAL = new ResourceLocation("dbzenith", "textures/entity/aura_white.png");
+    /** The grid the cubes sit on, in head pixels. */
+    static final float UNIT = .5f;
+    /** How far apart along a lock the cubes are laid (smaller than a cube, so they always touch). */
+    private static final float STEP = .35f;
     private static final int N = HairLock.KNOTS;
-    private static final double CX = 0, CY = -4.2, CZ = .6;                        // the middle of the head, for "outward"
-    /** The key light, in head space (y down): above, in front, a little to the wearer's right. */
-    private static final float LX = -.28f, LY = -.86f, LZ = -.42f;
-    /** The cross-section, a diamond: the edge across the scalp, the ridge away from it, the other edge, the underside. */
-    private static final float[] SIGN = {1, 0, 0, 1, -1, 0, 0, -1};
-    private static final float[] P = new float[N * 3], S = new float[N * 3], U = new float[N * 3], C = new float[N * 4 * 3];
-    /** The tones this frame: lit, mid, shadow, tip dye (r, g, b each). */
-    private static final float[] LIT = new float[3], MID = new float[3], DARK = new float[3], DYE = new float[3], GLOSS = new float[3];
-    /** Where along a lock the gloss lies. */
-    private static final float GLOSS_FROM = .2f, GLOSS_TO = .62f;
-    private static boolean dyed;
+    private static final float[] P = new float[N * 3], AT = new float[N];
 
     private HairRender() {}
 
@@ -46,153 +35,82 @@ public final class HairRender {
         pose.scale(1 / 16f, 1 / 16f, 1 / 16f);
         Matrix4f m = pose.last().pose();
         Matrix3f n = pose.last().normal();
-        palette(rgb);
-        dyed = tips >= 0;
-        if (dyed) { DYE[0] = ((tips >> 16) & 255) / 255f; DYE[1] = ((tips >> 8) & 255) / 255f; DYE[2] = (tips & 255) / 255f; }
-
-        float[] q = shape.cap().quads();                                          // the scalp, in the shadow tone
-        for (int f = 0; f + 15 <= q.length; f += 15) {
-            float tone = q[f + 13] < -.5f ? .9f : .78f;                             // the scalp in the mid tone, its sides darker
-            for (int c = 0; c < 4; c++) {
-                vc.vertex(m, q[f + c * 3], q[f + c * 3 + 1], q[f + c * 3 + 2]).color(MID[0] * tone, MID[1] * tone, MID[2] * tone, 1f)
-                        .uv(c == 1 || c == 2 ? .45f : .05f, .62f).overlayCoords(overlay).uv2(light).normal(n, 0, -1, 0).endVertex();
-            }
-        }
+        float r = ((rgb >> 16) & 255) / 255f, g = ((rgb >> 8) & 255) / 255f, b = (rgb & 255) / 255f;
+        float lift = .24f * (1 - Math.max(r, Math.max(g, b)));                       // black hair reads as dark grey blocks, not a silhouette
+        r += (1 - r) * lift; g += (1 - g) * lift; b += (1 - b) * lift;
+        float tr = tips < 0 ? r : ((tips >> 16) & 255) / 255f, tg = tips < 0 ? g : ((tips >> 8) & 255) / 255f, tb = tips < 0 ? b : (tips & 255) / 255f;
 
         int li = 0;
         for (HairLock lock : shape.locks()) {
             for (int i = 0; i < N; i++) {
                 int o = (li * N + i) * 3;
-                if (live != null && o + 2 < live.length) {
-                    P[i * 3] = live[o];
-                    P[i * 3 + 1] = live[o + 1];
-                    P[i * 3 + 2] = live[o + 2];
-                } else {
-                    P[i * 3] = (float) lock.x(i);
-                    P[i * 3 + 1] = (float) lock.y(i);
-                    P[i * 3 + 2] = (float) lock.z(i);
-                }
+                boolean sim = live != null && o + 2 < live.length;
+                P[i * 3] = sim ? live[o] : (float) lock.x(i);
+                P[i * 3 + 1] = sim ? live[o + 1] : (float) lock.y(i);
+                P[i * 3 + 2] = sim ? live[o + 2] : (float) lock.z(i);
+                AT[i] = i == 0 ? 0 : AT[i - 1] + dist(i - 1, i);
             }
-            frames();
-            for (int i = 0; i < N; i++) corners(i, (float) lock.w(i), (float) lock.t(i));
-            float jitter = 1 + .07f * (float) Math.sin(li * 2.39 + lock.x(0) * 1.7);    // no two locks quite the same
-            for (int i = 0; i < N - 1; i++) {
-                float t0 = i / (float) (N - 1), t1 = (i + 1) / (float) (N - 1);
-                for (int side = 0; side < 4; side++) quad(vc, m, n, i, side, (side + 1) & 3, t0, t1, jitter, light, overlay);
+            float total = AT[N - 1];
+            float pcx = Float.NaN, pcy = 0, pcz = 0, psz = 0;
+            int seg = 0;
+            for (float d = 0; d <= total + 1e-4f; d += STEP) {
+                while (seg < N - 2 && AT[seg + 1] < d) seg++;
+                float span = AT[seg + 1] - AT[seg], f = span < 1e-6f ? 0 : (d - AT[seg]) / span;
+                float x = lerp(P[seg * 3], P[seg * 3 + 3], f), y = lerp(P[seg * 3 + 1], P[seg * 3 + 4], f), z = lerp(P[seg * 3 + 2], P[seg * 3 + 5], f);
+                float t = total < 1e-6f ? 0 : d / total;
+                float w = (float) (lock.w(seg) + (lock.w(seg + 1) - lock.w(seg)) * f);
+                float size = Math.max(UNIT, Math.round(w * .62f / UNIT) * UNIT);   // the cube, in whole grid steps
+                float cx = snap(x, size), cy = snap(y, size), cz = snap(z, size);
+                if (cx == pcx && cy == pcy && cz == pcz && size == psz) continue;    // the same cube again
+                pcx = cx; pcy = cy; pcz = cz; psz = size;
+                float shade = (.74f + .26f * t) * (1 + .09f * (hash(cx, cy, cz) - .5f));
+                float dye = Math.max(0, Math.min(1, (t - .55f) / .45f));
+                cube(vc, m, n, cx, cy, cz, size * .5f, (r + (tr - r) * dye) * shade, (g + (tg - g) * dye) * shade, (b + (tb - b) * dye) * shade, light, overlay);
             }
             li++;
         }
         pose.popPose();
     }
 
-    /**
-     * The three tones from the colour: lit is the colour itself (dark hair lifted with a cool sheen), mid a step down,
-     * shadow deeper and more saturated (gold goes amber, blue goes deep blue).
-     */
-    private static void palette(int rgb) {
-        float r = ((rgb >> 16) & 255) / 255f, g = ((rgb >> 8) & 255) / 255f, b = (rgb & 255) / 255f;
-        float max = Math.max(r, Math.max(g, b));
-        float sheen = Math.max(0, .34f - max) * .9f;                                // black and dark hair: a blue-grey sheen
-        LIT[0] = Math.min(1, r * 1.1f + sheen * .82f); LIT[1] = Math.min(1, g * 1.1f + sheen * .88f); LIT[2] = Math.min(1, b * 1.1f + sheen * 1.1f);
-        // shadows shift hue the way painted hair does: warm colours toward red-orange (gold goes amber, not olive),
-        // cool ones toward blue; the stronger the colour, the stronger the shift
-        float warm = Math.max(-1, Math.min(1, (r - b) / Math.max(.05f, max)));
-        LIT[1] *= 1 - .05f * Math.max(0, warm);                                    // warm hair a touch warmer: gold, not lemon
-        float mr = .9f + .06f * warm, mg = .84f - .04f * Math.abs(warm), mb = .86f - .1f * warm;
-        float dr = .74f + .12f * warm, dg = .56f - .02f * Math.abs(warm), db = .58f - .14f * warm;
-        MID[0] = LIT[0] * mr; MID[1] = LIT[1] * mg; MID[2] = LIT[2] * mb;
-        DARK[0] = LIT[0] * dr + sheen * .1f; DARK[1] = LIT[1] * dg + sheen * .12f; DARK[2] = LIT[2] * db + sheen * .2f;
-        float white = max < .34f ? .42f : .62f;                                     // the gloss: toward white (cooler on dark hair)
-        GLOSS[0] = LIT[0] + (1 - LIT[0]) * white * (max < .34f ? .85f : 1);
-        GLOSS[1] = LIT[1] + (1 - LIT[1]) * white * (max < .34f ? .9f : 1);
-        GLOSS[2] = LIT[2] + (1 - LIT[2]) * white;
+    /** A cube's centre on the grid: whole steps for an even number of steps across, half steps for an odd one. */
+    private static float snap(float v, float size) {
+        int steps = Math.round(size / UNIT);
+        float off = (steps & 1) == 1 ? UNIT * .5f : 0;
+        return Math.round((v - off) / UNIT) * UNIT + off;
     }
 
-    /** Along the lock: the direction across the scalp (S) and away from it (U) at each knot, carried smoothly. */
-    private static void frames() {
-        float px = 0, py = 0, pz = 0;
-        for (int i = 0; i < N; i++) {
-            int a = Math.max(0, i - 1), c = Math.min(N - 1, i + 1);
-            float tx = P[c * 3] - P[a * 3], ty = P[c * 3 + 1] - P[a * 3 + 1], tz = P[c * 3 + 2] - P[a * 3 + 2];
-            float tl = (float) Math.sqrt(tx * tx + ty * ty + tz * tz);
-            if (tl < 1e-5f) { tx = 0; ty = -1; tz = 0; tl = 1; }
-            tx /= tl; ty /= tl; tz /= tl;
-            float ox = (float) (P[i * 3] - CX), oy = (float) (P[i * 3 + 1] - CY), oz = (float) (P[i * 3 + 2] - CZ);
-            if (i > 0) { ox += px * 1.5f; oy += py * 1.5f; oz += pz * 1.5f; }
-            float sx = ty * oz - tz * oy, sy = tz * ox - tx * oz, sz = tx * oy - ty * ox;
-            float sl = (float) Math.sqrt(sx * sx + sy * sy + sz * sz);
-            if (sl < 1e-5f) {
-                if (i > 0) { sx = S[(i - 1) * 3]; sy = S[(i - 1) * 3 + 1]; sz = S[(i - 1) * 3 + 2]; }
-                else { sx = 1; sy = 0; sz = 0; }
-                sl = 1;
-            }
-            sx /= sl; sy /= sl; sz /= sl;
-            if (i > 0 && sx * S[(i - 1) * 3] + sy * S[(i - 1) * 3 + 1] + sz * S[(i - 1) * 3 + 2] < 0) { sx = -sx; sy = -sy; sz = -sz; }
-            float ux = sy * tz - sz * ty, uy = sz * tx - sx * tz, uz = sx * ty - sy * tx;
-            S[i * 3] = sx; S[i * 3 + 1] = sy; S[i * 3 + 2] = sz;
-            U[i * 3] = ux; U[i * 3 + 1] = uy; U[i * 3 + 2] = uz;
-            px = ux; py = uy; pz = uz;
+    private static void cube(VertexConsumer vc, Matrix4f m, Matrix3f n, float x, float y, float z, float h, float r, float g, float b, int light, int overlay) {
+        float x0 = x - h, x1 = x + h, y0 = y - h, y1 = y + h, z0 = z - h, z1 = z + h;
+        r = Math.min(1, r); g = Math.min(1, g); b = Math.min(1, b);
+        face(vc, m, n, 0, -1, 0, r, g, b, light, overlay, x0, y0, z0, x1, y0, z0, x1, y0, z1, x0, y0, z1);   // top (y is down)
+        face(vc, m, n, 0, 1, 0, r, g, b, light, overlay, x0, y1, z1, x1, y1, z1, x1, y1, z0, x0, y1, z0);    // bottom
+        face(vc, m, n, 0, 0, -1, r, g, b, light, overlay, x0, y1, z0, x1, y1, z0, x1, y0, z0, x0, y0, z0);   // front
+        face(vc, m, n, 0, 0, 1, r, g, b, light, overlay, x1, y1, z1, x0, y1, z1, x0, y0, z1, x1, y0, z1);    // back
+        face(vc, m, n, -1, 0, 0, r, g, b, light, overlay, x0, y1, z1, x0, y1, z0, x0, y0, z0, x0, y0, z1);   // right
+        face(vc, m, n, 1, 0, 0, r, g, b, light, overlay, x1, y1, z0, x1, y1, z1, x1, y0, z1, x1, y0, z0);    // left
+    }
+
+    private static void face(VertexConsumer vc, Matrix4f m, Matrix3f n, float nx, float ny, float nz, float r, float g, float b,
+                             int light, int overlay, float... p) {
+        for (int i = 0; i < 4; i++) {
+            vc.vertex(m, p[i * 3], p[i * 3 + 1], p[i * 3 + 2]).color(r, g, b, 1f).uv(.5f, .5f).overlayCoords(overlay).uv2(light)
+                    .normal(n, nx, ny, nz).endVertex();
         }
     }
 
-    private static void corners(int i, float w, float t) {
-        float hw = Math.max(.05f, w) * .6f, ht = Math.max(.04f, t) * .62f;          // a diamond: a little wider than the band it replaces
-        for (int c = 0; c < 4; c++) {
-            int o = (i * 4 + c) * 3;
-            float a = SIGN[c * 2] * hw, b = SIGN[c * 2 + 1] * ht;
-            C[o] = P[i * 3] + S[i * 3] * a + U[i * 3] * b;
-            C[o + 1] = P[i * 3 + 1] + S[i * 3 + 1] * a + U[i * 3 + 1] * b;
-            C[o + 2] = P[i * 3 + 2] + S[i * 3 + 2] * a + U[i * 3 + 2] * b;
-        }
+    private static float dist(int a, int b) {
+        float dx = P[b * 3] - P[a * 3], dy = P[b * 3 + 1] - P[a * 3 + 1], dz = P[b * 3 + 2] - P[a * 3 + 2];
+        return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
     }
 
-    private static void quad(VertexConsumer vc, Matrix4f m, Matrix3f n, int i, int a, int b, float t0, float t1, float jitter, int light, int overlay) {
-        int p0 = (i * 4 + a) * 3, p1 = (i * 4 + b) * 3, p2 = ((i + 1) * 4 + b) * 3, p3 = ((i + 1) * 4 + a) * 3;
-        float ex = C[p2] - C[p0], ey = C[p2 + 1] - C[p0 + 1], ez = C[p2 + 2] - C[p0 + 2];
-        float fx = C[p3] - C[p1], fy = C[p3 + 1] - C[p1 + 1], fz = C[p3 + 2] - C[p1 + 2];
-        float nx = ey * fz - ez * fy, ny = ez * fx - ex * fz, nz = ex * fy - ey * fx;
-        float nl = (float) Math.sqrt(nx * nx + ny * ny + nz * nz);
-        if (nl < 1e-7f) return;
-        nx /= nl; ny /= nl; nz /= nl;
-        float mx = (C[p0] + C[p1] + C[p2] + C[p3]) * .25f - (P[i * 3] + P[(i + 1) * 3]) * .5f;   // face outward
-        float my = (C[p0 + 1] + C[p1 + 1] + C[p2 + 1] + C[p3 + 1]) * .25f - (P[i * 3 + 1] + P[(i + 1) * 3 + 1]) * .5f;
-        float mz = (C[p0 + 2] + C[p1 + 2] + C[p2 + 2] + C[p3 + 2]) * .25f - (P[i * 3 + 2] + P[(i + 1) * 3 + 2]) * .5f;
-        if (nx * mx + ny * my + nz * mz < 0) { nx = -nx; ny = -ny; nz = -nz; }
-        float d = nx * LX + ny * LY + nz * LZ;                                       // cel steps: lit, mid, shadow
-        float[] tone = d > .12f ? LIT : d > -.5f ? MID : DARK;
-        boolean upper = a == 0 || a == 1;                                             // the two faces either side of the ridge, outside
-        float u0, u1;
-        u0 = (a & 1) == 0 ? 0 : .25f; u1 = (a & 1) == 0 ? .25f : 0;                // edge (outlined) to ridge, in the lock half of the atlas
-        vertex(vc, m, n, p0, u0, t0, tone, jitter, nx, ny, nz, light, overlay);
-        vertex(vc, m, n, p1, u1, t0, tone, jitter, nx, ny, nz, light, overlay);
-        vertex(vc, m, n, p2, u1, t1, tone, jitter, nx, ny, nz, light, overlay);
-        vertex(vc, m, n, p3, u0, t1, tone, jitter, nx, ny, nz, light, overlay);
-        if (upper && tone == LIT && t1 > GLOSS_FROM && t0 < GLOSS_TO) {           // the gloss, laid just over the lit side
-            float o = .05f, v0 = (t0 - GLOSS_FROM) / (GLOSS_TO - GLOSS_FROM), v1 = (t1 - GLOSS_FROM) / (GLOSS_TO - GLOSS_FROM);
-            float g0 = (a & 1) == 0 ? .5f : 1f, g1 = (a & 1) == 0 ? 1f : .5f;
-            gloss(vc, m, n, p0, g0, v0, nx, ny, nz, o, light, overlay);
-            gloss(vc, m, n, p1, g1, v0, nx, ny, nz, o, light, overlay);
-            gloss(vc, m, n, p2, g1, v1, nx, ny, nz, o, light, overlay);
-            gloss(vc, m, n, p3, g0, v1, nx, ny, nz, o, light, overlay);
-        }
+    private static float lerp(float a, float b, float t) {
+        return a + (b - a) * t;
     }
 
-    private static void gloss(VertexConsumer vc, Matrix4f m, Matrix3f n, int p, float u, float v, float nx, float ny, float nz, float o, int light, int overlay) {
-        vc.vertex(m, C[p] + nx * o, C[p + 1] + ny * o, C[p + 2] + nz * o).color(GLOSS[0], GLOSS[1], GLOSS[2], 1f)
-                .uv(u, Math.max(0, Math.min(1, v))).overlayCoords(overlay).uv2(light).normal(n, 0, -1, 0).endVertex();
-    }
-
-    private static void vertex(VertexConsumer vc, Matrix4f m, Matrix3f n, int p, float u, float t, float[] tone, float jitter,
-                               float nx, float ny, float nz, int light, int overlay) {
-        float shade = (.7f + .3f * (float) Math.pow(t, .7)) * jitter;               // darker toward the roots
-        float r = tone[0], g = tone[1], b = tone[2];
-        if (dyed) {
-            float dye = Math.max(0, Math.min(1, (t - .5f) / .5f));
-            dye = dye * dye * (3 - 2 * dye);
-            float k = tone == LIT ? 1 : tone == MID ? .8f : .58f;
-            r += (DYE[0] * k - r) * dye; g += (DYE[1] * k - g) * dye; b += (DYE[2] * k - b) * dye;
-        }
-        vc.vertex(m, C[p], C[p + 1], C[p + 2]).color(Math.min(1, r * shade), Math.min(1, g * shade), Math.min(1, b * shade), 1f)
-                .uv(u, t).overlayCoords(overlay).uv2(light).normal(n, 0, -1, 0).endVertex();
+    /** 0..1 from a cube's place, the same every frame. */
+    private static float hash(float x, float y, float z) {
+        int h = Float.floatToIntBits(x * 7.1f + y * 13.3f + z * 3.7f);
+        h ^= h >>> 15; h *= 0x2c1b3c6d; h ^= h >>> 12; h *= 0x297a2d39; h ^= h >>> 15;
+        return (h & 1023) / 1023f;
     }
 }

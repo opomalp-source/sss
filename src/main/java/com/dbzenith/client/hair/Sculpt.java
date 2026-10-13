@@ -76,6 +76,30 @@ final class Sculpt {
         double el = Math.toDegrees(Math.asin(Math.max(-1, Math.min(1, -dy / d)))), a = Math.toDegrees(Math.atan2(dx, dz));
         return lock(x, y, z, el - curl * .5, a, d * reach, w, curl);
     }
+
+    /**
+     * Hair lying flat over the crown, under the other locks, so no skin shows between their roots from above (only the
+     * top of the head: nothing runs down the sides or the back the way a buzz cut would).
+     */
+    Sculpt crown() {
+        float s0 = stiff, w0 = weight;
+        feel(.95f, .2f);
+        for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++)
+            lock(i * 2.6, -8.2, j * 2.6 + .3, 6, i * 20, 2.6, 3.6, -6, 0, .45, 1);
+        return feel(s0, w0);
+    }
+
+    /** A buzz cut: short hair lying close all over the scalp, down to the ears and the nape. */
+    Sculpt buzz() {
+        feel(.95f, .2f);
+        for (double x = -3.2; x <= 3.3; x += 1.6) for (double z = -3.2; z <= 3.3; z += 1.6)
+            lock(x, -8.15, z, 4, 0, 1.6, 2.4, 0, 0, .4, 1);                         // the top
+        for (int side : new int[]{-1, 1}) for (double y = -7.4; y <= -5; y += 1.2) for (double z = -2.4; z <= 3.4; z += 1.6)
+            lock(side * 4.15, y, z, -40, side * 90, 1.4, 2.2, 0, 0, .4, 1);         // the sides
+        for (double y = -7.4; y <= -3.6; y += 1.2) for (double x = -3.2; x <= 3.3; x += 1.6)
+            lock(x, y, 4.15, -40, 0, 1.4, 2.2, 0, 0, .4, 1);                         // the back
+        return this;
+    }
     /** {@link #lock} on both sides, mirrored. */
     Sculpt pair(double x, double y, double z, double el, double az, double len, double w, double curl) {
         lock(x, y, z, el, az, len, w, curl);
@@ -141,7 +165,7 @@ final class Sculpt {
     boolean dense = true;
 
     HairShape build() {
-        return new HairShape(cap, List.copyOf(densify(locks, dense)));
+        return new HairShape(cap, List.copyOf(locks));
     }
 
     /**

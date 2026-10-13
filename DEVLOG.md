@@ -2539,3 +2539,22 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   Super Saiyan front no longer reads as a hood; Future Trunks rebuilt as seven thin strands a side combed from the
   parting into a rounded dome, bangs curving down to the brows, the back to the nape.
 - **Checks:** all hair checks pass (including the head-whipping test).
+
+## 2026-10-13 — CX-35f: block hair (v0.94.0)
+- **The ask** (user: didn't like the hair, the transformation animation, the accuracy or the material; redo it from
+  zero; references: screenshots of Dragon Block mod block-hair (Goku base, Super Saiyan Gohan, Blue and others);
+  remove the buzz-cut layer under the hair).
+- **The references:** locks built from small square blocks that step down from root to tip (a slanting lock is a
+  staircase), Minecraft face lighting, thin strands and long thin bangs; no smooth shapes, no gloss.
+- **Block hair** (`HairRender` rewritten): every lock laid down as a chain of cubes on a half-pixel grid, big at the
+  root and shrinking to a half-pixel at the tip; Minecraft's face lighting, a little variation cube to cube, roots
+  darker; dark hair lifted to a dark grey so the blocks read. The smooth bands, cel tones, gloss decal and the
+  `hair_lock.png` texture are gone (`tools/HairTextureGen.java` removed).
+- **No buzz-cut layer:** the scalp shell is no longer drawn; the locks cover the head, plus a few flat locks over the
+  crown only (`Sculpt.crown`) so no skin shows between the roots from above. The buzz cut itself is now short locks
+  lying close all over (`Sculpt.buzz`). The blended filler locks and underlayers are gone.
+- **Super Saiyan:** fewer, chunkier locks (three rows of a few big locks, wings, the nape, the lifted hairline), as
+  the block references show.
+- **Transformation:** all locks move together (no more one-after-another staggering).
+- **Checked:** the sheets of all 19 styles in all 7 looks; in the dev client Goku base, Vegeta, Super Saiyan Goku.
+  Hair checks pass.

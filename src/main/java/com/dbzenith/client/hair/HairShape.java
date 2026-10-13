@@ -15,7 +15,7 @@ public record HairShape(HairCap cap, List<HairLock> locks) {
     public static final HairShape BALD = new HairShape(HairCap.NONE, List.of());
 
     public boolean isEmpty() {
-        return locks.isEmpty() && cap.quads().length == 0;
+        return locks.isEmpty();
     }
 
     /** {@code from} turned {@code progress} of the way into {@code to}. */
@@ -56,8 +56,8 @@ public record HairShape(HairCap cap, List<HairLock> locks) {
 
     private static float local(float progress, int index) {
         double h = Math.sin(index * 12.9898 + 4.1414) * 43758.5453;
-        float delay = (float) (.32 * (h - Math.floor(h)));
-        return Math.max(0, Math.min(1, (progress - delay) / (1 - .32f)));
+        float delay = (float) (.06 * (h - Math.floor(h)));                       // all together, barely staggered
+        return Math.max(0, Math.min(1, (progress - delay) / (1 - .06f)));
     }
 
     /** A lock grown {@code g} of the way out along its own path (or drawn back in), its end tapering to a point. */

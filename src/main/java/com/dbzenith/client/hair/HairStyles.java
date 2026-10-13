@@ -51,7 +51,13 @@ public final class HairStyles {
     }
 
     private static HairShape author(Preset preset, HairLook look) {
-        if (preset == Preset.BALD) return look == HairLook.BASE ? HairShape.BALD : author(Preset.SPIKY, look);
+        HairShape s = shape(preset, look);
+        if (s.locks().isEmpty() || preset == Preset.BUZZ || preset == Preset.MOHAWK) return s;
+        return new Sculpt().crown().with(s).build();                                  // no skin between the roots
+    }
+
+    private static HairShape shape(Preset preset, HairLook look) {
+        if (preset == Preset.BALD) return look == HairLook.BASE ? HairShape.BALD : shape(Preset.SPIKY, look);
         HairShape base = base(preset);
         return switch (look) {
             case BASE -> base;
@@ -82,7 +88,7 @@ public final class HairStyles {
             case SIDECUT -> sidecut(s);
             case SLICK -> slick(s);
             case BOWL -> bowl(s);
-            case BUZZ -> s.cap(-7.3, 0, .4, -5.2, -3.6);
+            case BUZZ -> s.buzz();
             case PUFF -> puff(s);
             case MOHAWK -> mohawk(s, 1, false);
             case PONYTAIL -> { slick(s); ponytail(s, false); }
@@ -366,30 +372,23 @@ public final class HairStyles {
      */
     static void flame(Sculpt s, double len, double w, double spread, double lean, boolean sharp) {
         s.cap(-7.4, 0, .4, -5.6, -4.2).feel(sharp ? .9f : .85f, .5f);
-        double sp = spread;
-        w *= 1.55;                                                                    // broad blades, as the figures sculpt them
-        s.fan(-2.4, 0, 6 + lean, 12.4 * len, 4.8 * w, -2);                           // the front row
-        s.fan(-2.4, 16 * sp, 7 + lean, 11.8 * len, 4.6 * w, -4);
-        s.fan(-2.4, -15 * sp, 7 + lean, 12 * len, 4.6 * w, -4);
-        s.fans(-2.2, 32 * sp, 8 + lean, 10.8 * len, 4.3 * w, -6);
-        s.fans(-1.8, 50 * sp, 10 + lean, 9.2 * len, 4 * w, -8);
-        s.fans(-1.2, Math.min(66, 56 * sp + 6), 14 + lean, 7.8 * len, 3.6 * w, -6);  // the outer flares
-        s.fans(.6, 9 * sp, 20 + lean, 12 * len, 4.7 * w, -6);                        // the middle row
-        s.fans(.6, 28 * sp, 20 + lean, 11.2 * len, 4.5 * w, -6);
-        s.fans(.6, 42 * sp, 22 + lean, 9.8 * len, 4.2 * w, -8);
-        s.fan(2.8, 0, 36 + lean, 10.6 * len, 4.7 * w, -6);                           // the back row
-        s.fans(2.8, 22 * sp, 36 + lean, 10 * len, 4.4 * w, -6);
-        s.fans(2.8, 38 * sp, 38 + lean, 9 * len, 4.1 * w, -8);
-        s.pair(4.3, -6.9, -.2, 50, 72, 5.4 * len, 3 * w, 6);                         // wings over the ears
-        s.pair(2.2, -5.6, 4.35, 34, 18, 6.6 * len, 4 * w, -2);                       // the nape, up and back
-        s.lock(0, -4.8, 4.4, 26, 0, 6 * len, 4 * w, -2);
-        s.lock(-.6, -8.4, -3.8, 74, 172, 5.4 * len, 3.4 * w, 10);                    // the hairline, lifted
-        s.pair(2.5, -8.3, -3.6, 68, 150, 5 * len, 3 * w, 8);
-        s.pair(4.35, -6.4, -2.4, -62, 96, 2.8, 2, 0);                                 // sideburns
-        if (sharp) {
-            s.fans(-1, 22 * sp, 12 + lean, 13 * len, 3.2 * w, -3);
-            s.fans(1.8, 38 * sp, 28 + lean, 11.6 * len, 3.2 * w, -6);
-        }
+        s.jagged = .18;
+        double sp = spread, k = sharp ? .82 : 1;                                     // the second grade: thinner, sharper
+        w *= 1.1 * k;
+        s.fan(-2.4, 0, 6 + lean, 12 * len, 5 * w, -2);                               // the front row: three big locks
+        s.fans(-2.2, 26 * sp, 8 + lean, 11 * len, 4.8 * w, -5);
+        s.fans(-1.4, 52 * sp, 12 + lean, 9 * len, 4.4 * w, -7);                       // flaring out over the temples
+        s.fans(.8, 13 * sp, 22 + lean, 11.4 * len, 5 * w, -6);                        // the middle row
+        s.fans(.8, 40 * sp, 24 + lean, 10 * len, 4.6 * w, -7);
+        s.fan(3, 0, 40 + lean, 10 * len, 5 * w, -6);                                  // the back row
+        s.fans(3, 30 * sp, 40 + lean, 9 * len, 4.6 * w, -7);
+        s.pair(4.3, -6.8, -.4, 50, 72, 5.4 * len, 3.6 * w, 6);                        // wings over the ears
+        s.pair(2.2, -5.6, 4.35, 34, 18, 6.4 * len, 4.4 * w, -2);                      // the nape, up and back
+        s.lock(0, -4.8, 4.4, 26, 0, 6 * len, 4.4 * w, -2);
+        s.lock(-.6, -8.4, -3.8, 74, 172, 5.4 * len, 4 * w, 10);                       // the hairline, lifted
+        s.pair(2.5, -8.3, -3.6, 68, 150, 5 * len, 3.6 * w, 8);
+        s.pair(4.35, -6.4, -2.4, -62, 96, 2.8, 2.4, 0);                               // sideburns
+        if (sharp) s.fans(-.6, 20 * sp, 14 + lean, 13 * len, 3.6 * w, -3);           // a few taller spikes
     }
 
     /** Super Saiyan Goku's two thin bangs over the brow. */
