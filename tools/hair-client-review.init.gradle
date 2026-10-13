@@ -1,0 +1,11 @@
+allprojects {
+    afterEvaluate {
+        legacyForge.runs.named('clientTest') {
+            gameDirectory = project.file('../work/hair-client-review')
+            programArguments.set(['--username','Dev','--quickPlaySingleplayer','hair-review','--width','1600','--height','1000'])
+            systemProperty 'dbzenith.devHairReview','true'
+            systemProperty 'dbzenith.devScreenshots',''
+            systemProperty 'dbzenith.devQuitAfter','3600'
+        }
+    }
+}

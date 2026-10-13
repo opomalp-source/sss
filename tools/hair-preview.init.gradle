@@ -1,0 +1,18 @@
+allprojects {
+    afterEvaluate {
+        tasks.register('compileHairPreview', JavaCompile) {
+            dependsOn tasks.named('classes')
+            source = project.fileTree(project.file('tools')) { include 'HairPreview.java' }
+            classpath = sourceSets.main.runtimeClasspath
+            destinationDirectory = layout.buildDirectory.dir('hair-preview/classes')
+            javaCompiler = javaToolchains.compilerFor { languageVersion = JavaLanguageVersion.of(17) }
+        }
+        tasks.register('hairPreview', JavaExec) {
+            dependsOn tasks.named('compileHairPreview')
+            classpath = files(layout.buildDirectory.dir('hair-preview/classes')) + sourceSets.main.runtimeClasspath
+            mainClass = 'com.dbzenith.client.render.HairPreview'
+            args project.file('../outputs').absolutePath
+            systemProperty 'java.awt.headless', 'true'
+        }
+    }
+}

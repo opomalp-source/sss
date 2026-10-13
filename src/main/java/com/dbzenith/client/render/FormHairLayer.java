@@ -78,28 +78,30 @@ public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         if (state == null) return;
         Form form = flicker(player, state, ageInTicks);
         boolean formHair = form.hairStyle() != Form.HairStyle.NONE && form.hairColor() >= 0;
-        String code = GearLayer.turban(player) ? "" : hairFor(state.hairCode(), form);   // a turban covers the hair
+        HairTransformation.Frame transition = HairTransformation.sample(player, state, partialTick);
+        Form shape = transition.target().isEmpty() ? form : Forms.byId(state.form());
+        String code = GearLayer.turban(player) ? "" : hairFor(state.hairCode(), shape);   // a turban covers the hair
         int hairColor = form.hairColor() >= 0 ? form.hairColor() : state.hairColor();
+        boolean goldCharge=state.has(PublicStatePacket.TRANSFORMING)&&HairTransformation.goldTarget(transition.target());
+        if(goldCharge) hairColor=HairTransformation.chargeColor(state.hairColor(),Forms.SUPER_SAIYAN.hairColor(),transition.progress(),ageInTicks);
         int eyeColor = form.eyeColor() >= 0 ? form.eyeColor() : state.eyeColor();
         if (code.isEmpty() && eyeColor < 0) return;
 
         VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(ArtStyle.hiRes() ? TEXTURE_HD : TEXTURE));
-        int hairLight = formHair ? LightTexture.FULL_BRIGHT : light;              // transformed hair glows
+        int hairLight = goldCharge ? (hairColor==state.hairColor()?light:LightTexture.FULL_BRIGHT) : formHair ? LightTexture.FULL_BRIGHT : light;              // transformed hair glows
         float r = ((hairColor >> 16) & 0xFF) / 255f, g = ((hairColor >> 8) & 0xFF) / 255f, b = (hairColor & 0xFF) / 255f;
         if (!code.isEmpty()) {
-            model.copyHead(getParentModel().head);
-            if (state.skinTone() < 0 && !state.raceLook()) {                       // hide the skin's own painted hair
-                model.renderCap(pose, vc, hairLight, OverlayTexture.NO_OVERLAY, r, g, b);
-            }
-            if (ArtStyle.get() != ArtStyle.CLASSIC && HairCode.hasVolume(code)) {                  // the mass the clumps grow from
-                model.copyHead(getParentModel().head);
-                model.renderMass(pose, vc, hairLight, OverlayTexture.NO_OVERLAY, r * 0.85f + 0.03f, g * 0.85f + 0.03f, b * 0.85f + 0.03f);
-            }
+            VertexConsumer hairBuffer = buffers.getBuffer(RenderType.entityCutoutNoCull(HairMesh.MATERIAL));
             pose.pushPose();
             getParentModel().head.translateAndRotate(pose);
             HairWind.State wind = HairWind.of(player, getParentModel().head, state, formHair, partialTick);
-            int tips = (form.isBase() || form.hairColor() < 0) ? state.highlight() : -1;   // dyed tips, until a form recolours the hair
-            HairMesh.render(pose, vc, HairMesh.of(code), wind, hairLight, OverlayTexture.NO_OVERLAY, r, g, b, tips);
+            int tips = !goldCharge && (form.isBase() || form.hairColor() < 0) ? state.highlight() : -1;   // dyed tips, until a form recolours the hair
+            var mesh = HairMesh.of(code);
+            if (!transition.target().isEmpty()) {
+                String targetCode = hairFor(state.hairCode(), Forms.byId(transition.target()));
+                mesh = HairMesh.transition(code, targetCode, transition.progress());
+            }
+            HairMesh.render(pose, hairBuffer, mesh, wind, hairLight, OverlayTexture.NO_OVERLAY, r, g, b, tips);
             pose.popPose();
         }
         if (eyeColor >= 0 && !FaceLayer.active(state)) {                         // drawn faces bring their own irises

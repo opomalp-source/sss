@@ -137,7 +137,7 @@ public final class FormHandler {
         double mastery = data.getMastery(form.id());
         if (instant <= 0 || mastery >= instant) return 0;
         double full = DBZConfig.SERVER.transformTimeBase.get() + DBZConfig.SERVER.transformTimePerTier.get() * form.tier();
-        return Math.max(10, (int) Math.round(full * (1.0 - 0.6 * mastery / instant)));
+        return TransformationExperience.duration(Math.max(10, (int) Math.round(full * (1.0 - 0.6 * mastery / instant))), data, form);
     }
 
     /** One tick of powering up: the aura builds, the ground shakes, and at the end the form takes hold. */
@@ -215,6 +215,7 @@ public final class FormHandler {
     /** Enters a form with effects. No requirement checks (callers check). */
     public static void enter(ServerPlayer player, PlayerData data, Form form) {
         data.setFormId(form.id());
+        TransformationExperience.completed(data, form);
         if (!form.isBase()) data.setFlag("has_transformed", true);
         data.recomputeIfStale();
         if (!Kaioken.formAllows(form)) Kaioken.stop(player, data, true);

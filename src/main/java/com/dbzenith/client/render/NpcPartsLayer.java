@@ -50,17 +50,13 @@ public class NpcPartsLayer<T extends Mob> extends RenderLayer<T, PlayerModel<T>>
         String code = look.hairCode();
         boolean hat = look.extras().contains(NpcLooks.Extra.HAT), cap = look.extras().contains(NpcLooks.Extra.CAP);
         if (!code.isEmpty() && !hat) {
-            VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(HAIR));
+            VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(HairMesh.MATERIAL));
             int c = look.hairColor();
             float r = ((c >> 16) & 255) / 255f, g = ((c >> 8) & 255) / 255f, b = (c & 255) / 255f;
-            if (com.dbzenith.appearance.HairCode.hasVolume(code)) {
-                hair.copyHead(m.head);
-                hair.renderMass(pose, vc, light, overlay, r * 0.85f + 0.03f, g * 0.85f + 0.03f, b * 0.85f + 0.03f);
-            }
-            if (!cap) {                                                                  // a cap flattens the hair to its mass
+            {                                                                           // a cap flattens the hair to the fitted scalp
                 pose.pushPose();
                 m.head.translateAndRotate(pose);
-                HairMesh.render(pose, vc, HairMesh.of(code), light, overlay, r, g, b);
+                HairMesh.render(pose, vc, cap ? HairMesh.cropped() : HairMesh.of(code), HairWind.of(npc, m.head, null, false, partialTick), light, overlay, r, g, b);
                 pose.popPose();
             }
         }

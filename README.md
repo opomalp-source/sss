@@ -3,6 +3,14 @@
 A Dragon Ball-inspired total-conversion mod for **Minecraft 1.20.1 / NeoForge 47.1.106**. Mod id `dbzenith`.
 Status, roadmap and decisions: [TODO.md](TODO.md), [FEATURE_MATRIX.md](FEATURE_MATRIX.md), [DEVLOG.md](DEVLOG.md), [BRIEF.md](BRIEF.md).
 
+## Latest packaged release: 0.88.0-social.1
+
+Download the tested mod from the [`builds` branch](https://github.com/opomalp-source/sss/tree/builds).
+This release includes the hair/transform revisions, Flying Nimbus, Party and Clan tabs, clan name suffixes, and character level beside TP.
+Details: [hair](docs/HAIR_REBUILD.md), [Nimbus](docs/NIMBUS.md), [parties and clans](docs/SOCIAL.md).
+
+**Build compatibility:** this source checkout is based on 0.72.0. The installed 0.88.0 release contains newer code on the separate `claude/aura-rework-phase1` branch. The tested downloadable JAR preserves the original 0.88.0 baseline and adds the allowlisted updates using `tools/PackageHairUpdate.ps1`; a plain Gradle build of this checkout produces the donor JAR, not the full published release. Do not replace the packaged release with that donor JAR. The packaging procedure and validation are documented in the feature notes above.
+
 ## Build
 Requires JDK 17 (`JAVA_HOME`). On this machine: `C:\Users\sunam\.jdks\jdk-17.0.20.1+1`.
 

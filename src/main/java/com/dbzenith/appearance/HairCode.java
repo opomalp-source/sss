@@ -5,6 +5,8 @@ import com.dbzenith.transform.Form;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Hair as data: a list of strands, each a tapered spike rooted on one face of the head on an 8x8 grid (the head's
@@ -18,6 +20,19 @@ public final class HairCode {
     public static final String PREFIX = "DBZH1-";
     public static final int MAX_STRANDS = 64;
     public static final int MAX_CODE_LENGTH = PREFIX.length() + (MAX_STRANDS * 4 * 4 + 2) / 3 + 2;
+    private static final Map<String, Preset> LEGACY_PRESETS = loadLegacyPresets();
+
+    private static Map<String, Preset> loadLegacyPresets() {
+        Properties properties = new Properties();
+        try (var input = HairCode.class.getResourceAsStream("/assets/dbzenith/hair/legacy-presets.properties")) {
+            if (input != null) properties.load(input);
+        } catch (java.io.IOException e) {
+            throw new IllegalStateException("Cannot load hair preset migrations", e);
+        }
+        Map<String, Preset> out = new java.util.HashMap<>();
+        for (String code : properties.stringPropertyNames()) out.put(code, Preset.valueOf(properties.getProperty(code)));
+        return Map.copyOf(out);
+    }
 
     public enum Face { TOP, FRONT, BACK, LEFT, RIGHT }
 
@@ -80,6 +95,9 @@ public final class HairCode {
         if (code == null || code.isEmpty()) return List.of();
         code = code.trim();
         if (!code.startsWith(PREFIX) || code.length() > MAX_CODE_LENGTH) return null;
+        // Only exact shipped presets are upgraded. Hand-edited and shared custom codes retain their own strands.
+        Preset legacy = LEGACY_PRESETS.get(code);
+        if (legacy != null) return strands(legacy);
         byte[] bytes;
         try {
             bytes = Base64.getUrlDecoder().decode(code.substring(PREFIX.length()));
@@ -107,7 +125,7 @@ public final class HairCode {
 
     public enum Preset {
         BALD, SPIKY, PRINCE, WILD, TEEN, MANE, SAGE, CURTAINS, SWEPT, SLICK, BOWL, BUZZ, PUFF, MOHAWK, PONYTAIL, TWINTAILS, LONG, TOPKNOT,
-        SIDECUT;
+        SIDECUT, GOHAN_ADULT;
 
         public String code() {
             return encode(strands(this));
@@ -136,170 +154,182 @@ public final class HairCode {
         };
     }
 
-    /** Short thick strands over the crown, sides and back so no scalp shows between the shaped strands. */
-    private static void volume(List<Strand> s, int len, Bend topBend, int topPitch) {
-        for (int u = 0; u <= 7; u += 2) for (int v = 1; v <= 7; v += 2) s.add(new Strand(Face.TOP, u, v, 0, topPitch, len, 4, topBend));
-        for (int u = 1; u <= 7; u += 2) s.add(new Strand(Face.BACK, u, 1, 0, -4, len + 1, 4, Bend.DROOP));
-        for (int u = 1; u <= 6; u += 3) {
-            s.add(new Strand(Face.LEFT, u, 0, 1, -3, len, 3, Bend.DROOP));
-            s.add(new Strand(Face.RIGHT, 7 - u, 0, -1, -3, len, 3, Bend.DROOP));
+    /** Authored clumps, in head pixels. Keep the existing code format and preset IDs for saved characters. */
+    private static void lock(List<Strand> s, Face f, int u, int v, int yaw, int pitch, int length, int width, Bend bend) {
+        s.add(new Strand(f, u, v, yaw, pitch, length, width, bend));
+    }
+
+    private static void pair(List<Strand> s, Face f, int u, int v, int yaw, int pitch, int len, int width, Bend bend) {
+        lock(s, f, u, v, yaw, pitch, len, width, bend);
+        switch (f) {
+            case LEFT -> lock(s, Face.RIGHT, 7 - u, v, -yaw, pitch, len, width, bend);
+            case RIGHT -> lock(s, Face.LEFT, 7 - u, v, -yaw, pitch, len, width, bend);
+            default -> lock(s, f, 7 - u, v, -yaw, pitch, len, width, bend);
         }
     }
 
-    /** A strand and its mirror on the other side of the head (left/right swap; top, face, back flip). */
-    private static void pair(List<Strand> s, Face f, int u, int v, int yaw, int pitch, int len, int width, Bend bend) {
-        s.add(new Strand(f, u, v, yaw, pitch, len, width, bend));
-        switch (f) {
-            case LEFT -> s.add(new Strand(Face.RIGHT, 7 - u, v, -yaw, pitch, len, width, bend));
-            case RIGHT -> s.add(new Strand(Face.LEFT, 7 - u, v, -yaw, pitch, len, width, bend));
-            default -> s.add(new Strand(f, 7 - u, v, -yaw, pitch, len, width, bend));
-        }
+    /** A fitted crown, rather than a grid of competing spikes. */
+    private static void crown(List<Strand> s, int pitch) {
+        pair(s, Face.TOP, 1, 3, -2, pitch, 2, 3, Bend.STRAIGHT);
+        pair(s, Face.TOP, 2, 6, -1, -2, 2, 3, Bend.STRAIGHT);
+        pair(s, Face.LEFT, 2, 0, 0, -3, 2, 2, Bend.DROOP);
+    }
+
+    private static void nape(List<Strand> s, int length) {
+        pair(s, Face.BACK, 1, 2, -2, -3, length, 3, Bend.DROOP);
+        pair(s, Face.BACK, 2, 4, -1, -4, Math.max(3, length - 1), 2, Bend.DROOP);
     }
 
     public static List<Strand> strands(Preset p) {
         List<Strand> s = new ArrayList<>();
         switch (p) {
             case BALD -> { }
-            case SPIKY -> {                                        // the classic hero: a few big spikes, up and out
-                volume(s, 2, Bend.STRAIGHT, 0);
-                pair(s, Face.TOP, 1, 2, -3, 0, 9, 4, Bend.STRAIGHT);
-                pair(s, Face.TOP, 3, 1, -1, 1, 8, 4, Bend.STRAIGHT);
+            case SPIKY -> { // Goku: asymmetric fan, three hanging bangs, layered outward nape.
+                crown(s, 0);
+                lock(s, Face.TOP, 1, 3, -4, 0, 10, 4, Bend.STRAIGHT);
+                lock(s, Face.TOP, 2, 4, -1, -1, 11, 4, Bend.STRAIGHT);
+                lock(s, Face.TOP, 4, 3, 2, 0, 8, 4, Bend.STRAIGHT);
+                lock(s, Face.TOP, 4, 5, 1, -1, 12, 2, Bend.STRAIGHT);
+                lock(s, Face.TOP, 6, 4, 4, -1, 9, 4, Bend.STRAIGHT);
+                lock(s, Face.TOP, 5, 6, 2, -3, 8, 3, Bend.STRAIGHT);
+                lock(s, Face.TOP, 2, 6, -4, -3, 8, 3, Bend.STRAIGHT);
+                lock(s, Face.LEFT, 4, 1, 2, 1, 6, 3, Bend.STRAIGHT);
+                lock(s, Face.RIGHT, 3, 1, -2, 1, 7, 3, Bend.STRAIGHT);
+                lock(s, Face.FRONT, 1, 0, -1, -5, 5, 3, Bend.HANG);
+                lock(s, Face.FRONT, 4, 0, 1, -5, 5, 3, Bend.HANG);
+                lock(s, Face.FRONT, 6, 0, 2, -4, 3, 2, Bend.DROOP);
+                nape(s, 6);
+            }
+            case PRINCE -> { // Vegeta: narrow flame, swept sides and a central widow's peak.
+                crown(s, -2);
+                pair(s, Face.TOP, 3, 2, 0, -1, 12, 3, Bend.STRAIGHT);
+                pair(s, Face.TOP, 2, 4, -1, -2, 11, 3, Bend.STRAIGHT);
+                pair(s, Face.TOP, 1, 2, -2, -1, 8, 3, Bend.LIFT);
+                pair(s, Face.TOP, 1, 6, -2, -3, 8, 3, Bend.LIFT);
+                lock(s, Face.TOP, 4, 6, 0, -2, 10, 3, Bend.STRAIGHT);
+                lock(s, Face.FRONT, 3, 0, 0, -5, 3, 2, Bend.STRAIGHT);
+                pair(s, Face.LEFT, 2, 0, 1, 4, 5, 2, Bend.LIFT);
+                pair(s, Face.LEFT, 5, 1, 2, 4, 5, 2, Bend.LIFT);
+                pair(s, Face.BACK, 2, 1, 0, 4, 6, 3, Bend.LIFT);
+            }
+            case TEEN, GOHAN_ADULT -> { // Stable editable codes identify each separately sculpted Gohan preset.
+                crown(s, -2);
+                lock(s, Face.TOP, 2, 2, -2, -1, 7, 4, Bend.STRAIGHT);
+                lock(s, Face.TOP, 4, 3, 0, -2, 8, 4, Bend.STRAIGHT);
+                lock(s, Face.TOP, 6, 3, 2, -2, 6, 3, Bend.STRAIGHT);
+                pair(s, Face.TOP, 1, 6, -3, -3, 6, 3, Bend.STRAIGHT);
+                lock(s, Face.FRONT, 2, 0, 1, -5, p == Preset.TEEN ? 6 : 4, 3, Bend.HANG);
+                lock(s, Face.FRONT, 5, 0, 2, -3, 2, 2, Bend.DROOP);
+                pair(s, Face.LEFT, 4, 1, 2, 2, 4, 2, Bend.STRAIGHT);
+                nape(s, 4);
+            }
+            case WILD -> { // Broly: heavy spreading locks, with a lower, rougher outer silhouette.
+                crown(s, 0);
+                pair(s, Face.TOP, 1, 2, -3, 1, 9, 4, Bend.STRAIGHT);
                 pair(s, Face.TOP, 2, 5, -2, -2, 10, 4, Bend.STRAIGHT);
-                pair(s, Face.TOP, 0, 4, -4, -1, 9, 4, Bend.STRAIGHT);
-                pair(s, Face.LEFT, 3, 2, 3, 1, 6, 3, Bend.STRAIGHT);
-                pair(s, Face.BACK, 2, 2, 1, -2, 8, 4, Bend.STRAIGHT);
-                pair(s, Face.BACK, 3, 4, 0, -3, 7, 4, Bend.STRAIGHT);
-                pair(s, Face.FRONT, 1, 0, -2, -2, 4, 2, Bend.DROOP);   // bangs framing the brow
-                s.add(new Strand(Face.FRONT, 4, 0, 1, -1, 5, 2, Bend.DROOP));
+                lock(s, Face.TOP, 4, 3, 1, 0, 11, 4, Bend.STRAIGHT);
+                pair(s, Face.LEFT, 4, 1, 2, 1, 8, 4, Bend.DROOP);
+                pair(s, Face.LEFT, 6, 3, 2, -2, 7, 3, Bend.DROOP);
+                pair(s, Face.FRONT, 1, 0, -2, -4, 6, 3, Bend.HANG);
+                lock(s, Face.FRONT, 4, 0, 1, -4, 4, 2, Bend.DROOP);
+                nape(s, 8);
             }
-            case PRINCE -> {                                       // a tall flame swept up and back from a widow's peak
-                volume(s, 3, Bend.LIFT, 0);
-                pair(s, Face.TOP, 3, 1, 0, -1, 13, 4, Bend.STRAIGHT);
-                pair(s, Face.TOP, 1, 1, -1, -1, 10, 4, Bend.STRAIGHT);
-                pair(s, Face.TOP, 3, 4, 0, -2, 14, 4, Bend.STRAIGHT);
-                pair(s, Face.TOP, 1, 4, -2, -2, 11, 4, Bend.STRAIGHT);
-                pair(s, Face.TOP, 2, 6, -1, -3, 11, 4, Bend.STRAIGHT);
-                pair(s, Face.TOP, 0, 2, -3, -1, 8, 4, Bend.STRAIGHT);
-                pair(s, Face.FRONT, 3, 0, 0, 5, 6, 3, Bend.LIFT);         // the peak
-                pair(s, Face.LEFT, 1, 1, 1, 5, 6, 3, Bend.LIFT);
-                pair(s, Face.LEFT, 4, 1, 2, 4, 7, 3, Bend.LIFT);
-                pair(s, Face.BACK, 2, 1, 0, 4, 8, 4, Bend.LIFT);
-            }
-            case WILD -> {                                         // untamed, everything everywhere
-                volume(s, 3, Bend.STRAIGHT, 0);
-                for (int u = 0; u <= 7; u += 2) for (int v = 0; v <= 7; v += 2)
-                    s.add(new Strand(Face.TOP, u, v, (u - 3) * 2, -(v - 3), 8 + (u + v) % 3, 4, Bend.STRAIGHT));
-                for (int v = 1; v <= 5; v += 2) pair(s, Face.LEFT, 5, v, 3, 2, 8, 3, Bend.STRAIGHT);
-                for (int u = 0; u <= 7; u += 2) s.add(new Strand(Face.BACK, u, 2, (u - 3), -1, 9, 4, Bend.STRAIGHT));
-                pair(s, Face.FRONT, 2, 0, -2, -2, 6, 2, Bend.DROOP);
-            }
-            case TEEN -> {                                         // medium spikes and one long lock over the eye
-                volume(s, 2, Bend.STRAIGHT, 0);
-                pair(s, Face.TOP, 1, 2, -3, 1, 6, 4, Bend.STRAIGHT);
-                pair(s, Face.TOP, 3, 4, -1, -1, 7, 4, Bend.STRAIGHT);
-                pair(s, Face.TOP, 1, 6, -3, -3, 6, 4, Bend.STRAIGHT);
-                s.add(new Strand(Face.FRONT, 2, 0, -1, -5, 8, 2, Bend.HANG));
-                pair(s, Face.LEFT, 3, 1, 2, 1, 5, 3, Bend.STRAIGHT);
-                pair(s, Face.BACK, 2, 2, 0, -2, 7, 4, Bend.DROOP);
-            }
-            case MANE -> {                                         // a long spiked mane down the back
-                volume(s, 3, Bend.STRAIGHT, -1);
-                pair(s, Face.TOP, 1, 2, -3, 1, 8, 4, Bend.STRAIGHT);
+            case MANE -> { // Raditz: crown spikes flow into separate long back tiers.
+                crown(s, -1);
+                pair(s, Face.TOP, 1, 2, -3, 0, 8, 4, Bend.STRAIGHT);
                 pair(s, Face.TOP, 3, 4, -1, -2, 9, 4, Bend.STRAIGHT);
-                for (int u = 0; u <= 7; u += 2) {
-                    s.add(new Strand(Face.BACK, u, 1, (u - 3) / 2, -5, 15, 4, Bend.DROOP));
-                    s.add(new Strand(Face.BACK, u + 1 > 7 ? 7 : u + 1, 4, (u - 3) / 2, -5, 13, 3, Bend.DROOP));
-                }
-                pair(s, Face.LEFT, 5, 1, 2, -3, 11, 3, Bend.DROOP);
-                pair(s, Face.FRONT, 2, 0, -2, -3, 6, 3, Bend.DROOP);
+                pair(s, Face.BACK, 1, 0, -2, -4, 16, 4, Bend.HANG);
+                pair(s, Face.BACK, 3, 1, 0, -5, 16, 4, Bend.HANG);
+                pair(s, Face.BACK, 2, 4, -1, -4, 12, 3, Bend.HANG);
+                pair(s, Face.LEFT, 5, 0, 1, -4, 12, 3, Bend.HANG);
+                pair(s, Face.FRONT, 1, 0, -2, -4, 4, 2, Bend.DROOP);
             }
-            case SAGE -> {                                         // long and straight with a centre part
-                for (int u = 0; u <= 7; u += 2) for (int v = 1; v <= 7; v += 2)
-                    s.add(new Strand(Face.TOP, u, v, u < 4 ? -2 : 2, -5, 4, 4, Bend.HANG));
-                for (int u = 0; u <= 7; u++) s.add(new Strand(Face.BACK, u, 0, 0, -6, 16, 4, Bend.HANG));
-                for (int u = 1; u <= 7; u += 2) pair(s, Face.LEFT, u, 0, 0, -6, 13, 3, Bend.HANG);
-                pair(s, Face.FRONT, 0, 0, -2, -5, 6, 2, Bend.HANG);
+            case SAGE, LONG -> {
+                crown(s, -3);
+                pair(s, Face.TOP, 2, 1, -3, -1, 3, 3, Bend.DROOP);
+                pair(s, Face.FRONT, 1, 0, -2, -5, p == Preset.SAGE ? 7 : 5, 2, Bend.HANG);
+                pair(s, Face.LEFT, 5, 0, 0, -5, p == Preset.SAGE ? 14 : 11, 3, Bend.HANG);
+                pair(s, Face.BACK, 1, 0, 0, -6, 14, 3, Bend.HANG);
+                pair(s, Face.BACK, 3, 0, 0, -6, 16, 3, Bend.HANG);
+                if (p == Preset.SAGE) pair(s, Face.BACK, 2, 3, -1, -5, 12, 3, Bend.HANG);
             }
-            case CURTAINS -> {                                     // parted bangs falling either side of the face
-                volume(s, 2, Bend.DROOP, -2);
-                pair(s, Face.FRONT, 1, 0, -2, -4, 7, 3, Bend.HANG);
-                pair(s, Face.FRONT, 2, 0, -1, -5, 7, 3, Bend.HANG);
-                for (int u = 1; u <= 6; u += 2) pair(s, Face.LEFT, u, 0, 0, -6, 6, 3, Bend.HANG);
-                for (int u = 0; u <= 7; u += 2) s.add(new Strand(Face.BACK, u, 0, 0, -6, 7, 4, Bend.HANG));
+            case CURTAINS -> { // Trunks: centre part with broad cheek-framing locks.
+                crown(s, -3);
+                pair(s, Face.TOP, 2, 1, -3, 1, 3, 3, Bend.DROOP);
+                pair(s, Face.FRONT, 1, 0, -2, -5, 6, 3, Bend.HANG);
+                pair(s, Face.FRONT, 2, 0, -2, -3, 4, 2, Bend.HANG);
+                pair(s, Face.LEFT, 4, 0, 0, -5, 5, 3, Bend.HANG);
+                pair(s, Face.BACK, 1, 0, 0, -6, 6, 3, Bend.HANG);
+                pair(s, Face.BACK, 3, 1, 0, -6, 5, 3, Bend.HANG);
             }
-            case SWEPT -> {
-                volume(s, 2, Bend.DROOP, -4);
-                for (int u = 0; u <= 7; u += 2) for (int v = 0; v <= 6; v += 2) s.add(new Strand(Face.TOP, u, v, 0, -5, 7, 4, Bend.DROOP));
-                for (int u = 0; u <= 7; u += 2) s.add(new Strand(Face.BACK, u, 1, 0, -6, 6, 4, Bend.DROOP));
-                pair(s, Face.LEFT, 3, 1, 1, -3, 4, 3, Bend.STRAIGHT);
-            }
-            case SLICK -> {
-                for (int u = 0; u <= 7; u += 2) for (int v = 0; v <= 7; v += 2) s.add(new Strand(Face.TOP, u, v, 0, -5, 5, 4, Bend.DROOP));
-                for (int u = 1; u <= 7; u += 2) s.add(new Strand(Face.BACK, u, 0, 0, -6, 4, 4, Bend.DROOP));
-                pair(s, Face.LEFT, 2, 0, 1, -4, 3, 3, Bend.DROOP);
-                s.add(new Strand(Face.FRONT, 2, 0, 1, -6, 5, 1, Bend.HANG));                    // one loose bang
+            case SWEPT, SLICK -> {
+                crown(s, -3);
+                pair(s, Face.TOP, 1, 1, -1, -4, p == Preset.SWEPT ? 7 : 5, 3, Bend.DROOP);
+                pair(s, Face.TOP, 3, 2, 0, -4, p == Preset.SWEPT ? 8 : 5, 3, Bend.DROOP);
+                pair(s, Face.TOP, 2, 5, -1, -4, 5, 3, Bend.DROOP);
+                pair(s, Face.LEFT, 4, 0, 1, 1, 3, 2, Bend.STRAIGHT);
+                nape(s, p == Preset.SWEPT ? 5 : 3);
+                if (p == Preset.SLICK) lock(s, Face.FRONT, 2, 0, 1, -5, 4, 1, Bend.HANG);
             }
             case BOWL -> {
-                for (int u = 0; u <= 7; u += 2) for (int v = 0; v <= 7; v += 2) s.add(new Strand(Face.TOP, u, v, 0, 0, 2, 4, Bend.STRAIGHT));
-                for (int u = 0; u <= 7; u++) s.add(new Strand(Face.FRONT, u, 0, 0, -6, 3, 3, Bend.HANG));
-                for (int u = 0; u <= 7; u += 2) {
-                    pair(s, Face.LEFT, u, 0, 0, -6, 5, 3, Bend.HANG);
-                    s.add(new Strand(Face.BACK, u, 0, 0, -6, 5, 4, Bend.HANG));
-                }
+                crown(s, 0);
+                pair(s, Face.TOP, 1, 1, 0, 0, 2, 3, Bend.STRAIGHT);
+                pair(s, Face.FRONT, 0, 0, 0, -6, 3, 2, Bend.STRAIGHT);
+                pair(s, Face.FRONT, 2, 0, 0, -6, 3, 2, Bend.STRAIGHT);
+                pair(s, Face.LEFT, 2, 0, 0, -6, 4, 3, Bend.HANG);
+                pair(s, Face.LEFT, 5, 0, 0, -6, 4, 3, Bend.HANG);
+                pair(s, Face.BACK, 1, 0, 0, -6, 5, 3, Bend.HANG);
+                pair(s, Face.BACK, 3, 0, 0, -6, 5, 3, Bend.HANG);
             }
-            case BUZZ -> {                                         // close-cropped: a short even layer of volume
-                for (int u = 0; u <= 7; u += 2) for (int v = 0; v <= 7; v += 2) s.add(new Strand(Face.TOP, u, v, 0, -1, 1, 4, Bend.STRAIGHT));
-                for (int u = 1; u <= 7; u += 2) s.add(new Strand(Face.BACK, u, 1, 0, -5, 1, 4, Bend.STRAIGHT));
-                pair(s, Face.LEFT, 2, 0, 0, -4, 1, 4, Bend.STRAIGHT);
+            case BUZZ -> {
+                for (int u = 1; u <= 6; u += 2) for (int v = 1; v <= 6; v += 2)
+                    lock(s, Face.TOP, u, v, 0, 0, 1, 2, Bend.STRAIGHT);
+                pair(s, Face.BACK, 1, 0, 0, -4, 1, 3, Bend.STRAIGHT);
             }
-            case PUFF -> {                                         // a round, springy cloud of curls
-                for (int u = 0; u <= 7; u += 2) for (int v = 0; v <= 7; v += 2)
-                    s.add(new Strand(Face.TOP, u, v, (u - 3), -(v - 3), 4, 4, Bend.LIFT));
-                for (int u = 0; u <= 7; u += 2) for (int v = 0; v <= 2; v += 2) {
-                    pair(s, Face.LEFT, u, v, 0, 1, 3, 4, Bend.LIFT);
-                    s.add(new Strand(Face.BACK, u, v, 0, 1, 4, 4, Bend.LIFT));
-                }
+            case PUFF -> {
+                crown(s, 0);
+                pair(s, Face.TOP, 1, 1, -2, 2, 4, 4, Bend.LIFT);
+                pair(s, Face.TOP, 3, 2, 0, 0, 5, 4, Bend.LIFT);
+                pair(s, Face.TOP, 1, 5, -2, -2, 4, 4, Bend.LIFT);
+                pair(s, Face.LEFT, 2, 0, -1, 1, 3, 4, Bend.LIFT);
+                pair(s, Face.LEFT, 5, 1, 1, 0, 3, 4, Bend.LIFT);
+                pair(s, Face.BACK, 1, 1, -1, 1, 4, 4, Bend.LIFT);
+                pair(s, Face.BACK, 3, 1, 0, 0, 4, 4, Bend.LIFT);
             }
             case MOHAWK -> {
-                for (int v = 0; v <= 7; v++) s.add(new Strand(Face.TOP, 3 + v % 2, v, 0, -(v - 4), 8 - Math.abs(v - 3), 3, Bend.STRAIGHT));
-                s.add(new Strand(Face.FRONT, 3, 0, 0, 3, 5, 3, Bend.STRAIGHT));
-                s.add(new Strand(Face.BACK, 3, 1, 0, -2, 6, 3, Bend.DROOP));
+                for (int v = 1; v <= 6; v++) lock(s, Face.TOP, 3, v, 0, 2 - v / 2, 7 - Math.abs(v - 3), 2, Bend.STRAIGHT);
+                lock(s, Face.BACK, 3, 0, 0, 2, 4, 2, Bend.STRAIGHT);
             }
-            case PONYTAIL -> {
-                volume(s, 2, Bend.DROOP, -4);
-                s.add(new Strand(Face.BACK, 3, 1, 0, -2, 16, 3, Bend.HANG));
-                s.add(new Strand(Face.BACK, 4, 1, 0, -2, 15, 3, Bend.HANG));
-                s.add(new Strand(Face.BACK, 3, 2, 0, -1, 14, 2, Bend.HANG));
-                pair(s, Face.FRONT, 1, 0, -2, -5, 4, 1, Bend.HANG);
-            }
-            case TWINTAILS -> {
-                volume(s, 2, Bend.DROOP, -3);
-                pair(s, Face.LEFT, 6, 1, 4, -1, 12, 3, Bend.HANG);
-                pair(s, Face.LEFT, 6, 2, 4, -2, 11, 3, Bend.HANG);
-                pair(s, Face.FRONT, 2, 0, -1, -5, 5, 2, Bend.HANG);
-            }
-            case LONG -> {
-                volume(s, 2, Bend.DROOP, -4);
-                for (int u = 0; u <= 7; u += 2) s.add(new Strand(Face.BACK, u, 0, 0, -6, 14, 4, Bend.HANG));
-                pair(s, Face.LEFT, 6, 0, 0, -6, 11, 3, Bend.HANG);
-                pair(s, Face.FRONT, 2, 0, -1, -6, 5, 2, Bend.HANG);
+            case PONYTAIL, TWINTAILS -> {
+                crown(s, -3);
+                pair(s, Face.TOP, 2, 1, -1, -4, 4, 3, Bend.DROOP);
+                pair(s, Face.FRONT, 1, 0, -1, -5, 4, 2, Bend.HANG);
+                if (p == Preset.PONYTAIL) {
+                    pair(s, Face.BACK, 3, 1, 0, -1, 15, 3, Bend.HANG);
+                    lock(s, Face.BACK, 4, 2, 1, -2, 12, 2, Bend.HANG);
+                } else {
+                    pair(s, Face.LEFT, 6, 0, 1, -1, 13, 3, Bend.HANG);
+                    pair(s, Face.LEFT, 6, 1, 2, -2, 11, 2, Bend.HANG);
+                }
             }
             case TOPKNOT -> {
-                for (int u = 0; u <= 7; u += 2) for (int v = 0; v <= 7; v += 2) s.add(new Strand(Face.TOP, u, v, 0, 0, 1, 4, Bend.STRAIGHT));
-                s.add(new Strand(Face.TOP, 3, 5, 0, -2, 5, 4, Bend.STRAIGHT));
-                s.add(new Strand(Face.TOP, 4, 5, 0, -2, 5, 4, Bend.STRAIGHT));
-                s.add(new Strand(Face.TOP, 3, 6, 0, -3, 4, 4, Bend.STRAIGHT));
+                crown(s, -3);
+                pair(s, Face.TOP, 2, 1, 1, -4, 3, 3, Bend.DROOP);
+                pair(s, Face.TOP, 3, 5, 0, -1, 4, 3, Bend.DROOP);
+                lock(s, Face.TOP, 4, 6, 0, 3, 3, 3, Bend.HANG);
+                nape(s, 3);
             }
-            case SIDECUT -> {                                      // shaved on one side, a long sweep over the other
-                for (int u = 2; u <= 7; u += 2) for (int v = 0; v <= 7; v += 2) s.add(new Strand(Face.TOP, u, v, 3, -1, 7, 4, Bend.DROOP));
-                s.add(new Strand(Face.LEFT, 2, 0, 1, -5, 9, 4, Bend.HANG));
-                s.add(new Strand(Face.LEFT, 5, 0, 2, -5, 8, 4, Bend.HANG));
-                for (int u = 1; u <= 7; u += 3) s.add(new Strand(Face.BACK, u, 1, 0, -5, 4, 4, Bend.DROOP));
+            case SIDECUT -> {
+                lock(s, Face.TOP, 1, 2, 3, -1, 6, 3, Bend.DROOP);
+                lock(s, Face.TOP, 3, 2, 4, -1, 7, 4, Bend.DROOP);
+                lock(s, Face.TOP, 5, 4, 4, -2, 6, 3, Bend.DROOP);
+                lock(s, Face.LEFT, 2, 0, 0, -5, 7, 3, Bend.HANG);
+                lock(s, Face.LEFT, 5, 0, 1, -4, 6, 3, Bend.HANG);
+                pair(s, Face.BACK, 2, 1, 0, -4, 3, 3, Bend.DROOP);
             }
         }
         return s;
     }
-
     /** Whether a hair covers the skull (strands rooted across the top, both sides of the middle): a mohawk does not. */
     public static boolean hasVolume(String code) {
         return VOLUME.computeIfAbsent(code, c -> {

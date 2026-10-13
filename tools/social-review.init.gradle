@@ -1,0 +1,17 @@
+allprojects {
+    afterEvaluate {
+        legacyForge.runs.named('gameTestServer') {
+            gameDirectory=project.file('../work/social-tests')
+            systemProperty 'forge.enabledGameTestNamespaces','socialqa'
+        }
+        legacyForge.runs.named('clientTest') {
+            gameDirectory=project.file('../work/hair-client-review')
+            programArguments.set(['--username','Dev','--quickPlaySingleplayer','hair-review','--width','1600','--height','1000'])
+            systemProperty 'dbzenith.devHairReview','false'
+            systemProperty 'dbzenith.devNimbusReview','false'
+            systemProperty 'dbzenith.devSocialReview','true'
+            systemProperty 'dbzenith.devScreenshots',''
+            systemProperty 'dbzenith.devQuitAfter','1000'
+        }
+    }
+}
