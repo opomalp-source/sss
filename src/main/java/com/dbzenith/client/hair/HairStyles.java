@@ -95,6 +95,7 @@ public final class HairStyles {
 
     /** Goku's own hair: the hand-placed layout (a big fan over his right eye, a crest, a lower wing, a rear fan, bangs). */
     static void goku(Sculpt s) {
+        s.dense = false;                                                            // the hand-placed layout as it is (an underlayer fills it)
         s.cap(-7.5, 0, .3, -5.4, -4.2).feel(.6f, 1);
         s.knots(-.65, -8.8, -1.7, 4.9, 3.5, -1.7, -11.3, -1.45, 4.8, 3.4, -3.85, -13.8, -.95, 3.9, 2.9, -6.15, -15.35, -.4, 2.85, 2.3, -8.2, -16.15, .15, 1.8, 1.7);
         s.knots(-2.4, -8.5, -.9, 4.1, 3.2, -4.15, -10.1, -.65, 4.05, 3.1, -6.55, -11.35, -.25, 3.3, 2.6, -8.25, -11.95, .1, 2.65, 2.15, -10.2, -12.4, .4, 1.75, 1.7);
@@ -125,21 +126,20 @@ public final class HairStyles {
      */
     static void vegeta(Sculpt s, double len, double back, double width) {
         s.cap(-7, 1.7, 1.5, -6.6, -4.6).feel(.75f, .8f);
-        s.jagged = .2;
-        s.lock(0, -8.3, -3.4, 82, 0, 13.5 * len, 4.4 * width, -4 - back);          // the front spike, off the peak
-        s.pair(1.6, -8.5, -2.6, 80, 10, 12.6 * len, 4 * width, -5 - back);
-        s.pair(3, -8.3, -1.8, 74, 28, 11 * len, 3.7 * width, -6 - back);
-        s.lock(0, -8.5, -.6, 78, 0, 13 * len, 4.4 * width, -8 - back);
-        s.pair(1.9, -8.5, -.2, 76, 14, 12.2 * len, 4 * width, -8 - back);
-        s.pair(3.5, -8.2, .4, 70, 30, 10.4 * len, 3.6 * width, -9 - back);
-        s.lock(0, -8.4, 2, 68, 0, 11.6 * len, 4.4 * width, -10 - back);
-        s.pair(2.2, -8.2, 2.4, 66, 16, 10.8 * len, 4 * width, -10 - back);
-        s.pair(3.6, -7.8, 2.6, 58, 32, 9 * len, 3.5 * width, -10 - back);
-        s.lock(0, -7.2, 3.9, 50, 0, 9 * len, 4 * width, -10 - back);
-        s.pair(2.4, -7, 3.9, 46, 18, 8 * len, 3.6 * width, -10 - back);
-        s.pair(4.2, -7, -.6, 48, 70, 5 * len, 2.6 * width, -6);                    // over the ears
-        s.pair(4.2, -6.6, 1.4, 40, 55, 5.4 * len, 2.6 * width, -6);
-        s.pair(1.6, -5.4, 4.3, -10, 10, 3.2, 2.4 * width, -20);                     // the nape
+        double top = 13.5 * len, w = 5 * width;
+        // each spike drawn up toward the middle, but only part of the way: a tall flame tapering to a few separate tips
+        double[][] roots = {                                                       // x, y, z, height share, width share
+                {0, -8.2, -3.6, .92, .95}, {1.5, -8.4, -3, .98, 1}, {-1.5, -8.4, -3, .84, 1}, {3, -8.3, -2.4, .7, .92}, {-3, -8.3, -2.4, .74, .92},
+                {0, -8.6, -.6, 1, 1}, {1.9, -8.5, -.4, .82, 1}, {-1.9, -8.5, -.4, .9, 1}, {3.6, -8.2, 0, .58, .9}, {-3.6, -8.2, 0, .62, .9},
+                {0, -8.4, 2.1, .86, 1}, {2.1, -8.2, 2.3, .74, .95}, {-2.1, -8.2, 2.3, .78, .95}, {3.7, -7.6, 2.4, .54, .85}, {-3.7, -7.6, 2.4, .56, .85},
+                {0, -7, 3.9, .64, .95}, {2.4, -6.8, 3.9, .52, .85}, {-2.4, -6.8, 3.9, .54, .85}};
+        for (double[] r : roots) {
+            double tx = r[0] * .9 + Math.signum(r[0]) * Math.abs(r[0]) * .12, ty = -8.6 - top * r[3], tz = 1.4 + back * .12 + r[2] * .35;
+            s.toward(r[0], r[1], r[2], tx, ty, tz, 1, w * r[4], -4 - back);
+        }
+        s.pair(4.2, -7, -.6, 52, 64, 4.6 * len, 3 * width, -6);                    // over the ears
+        s.pair(4.2, -6.6, 1.4, 44, 50, 5 * len, 3 * width, -6);
+        s.pair(1.6, -5.4, 4.3, -10, 10, 3.2, 2.6 * width, -20);                     // the nape
     }
 
     /** Gohan as a boy: short spikes off the crown leaning back and out, three bangs over the brow. */
@@ -207,16 +207,16 @@ public final class HairStyles {
 
     /** Future Trunks: straight hair parted in the middle, bangs to the eyes, the sides over the ears to the jaw. */
     static void trunks(Sculpt s) {
-        s.cap(-6.2, 0, 0, -3.4, -1.4).feel(.4f, 1);
+        s.cap(-6.2, 0, 0, -2.2, -.2).feel(.4f, 1);
         s.pair(.7, -8.75, -2.4, 12, 115, 4.8, 3.2, -100, 0, .4, .6);               // over from the parting and down
         s.pair(.9, -8.75, .2, 12, 92, 5.2, 3.4, -104, 0, .4, .6);
         s.pair(.8, -8.75, 2.6, 12, 58, 5.4, 3.4, -104, 0, .4, .6);
-        s.pair(.8, -8.5, -3.8, -64, 170, 5.6, 2.8, -10, 0, .4, 1);                // bangs
-        s.pair(2.6, -8.3, -3.6, -72, 148, 6, 2.7, -6, 0, .4, 1);
-        s.pair(4.4, -7.9, -1.6, -86, 94, 7.2, 2.8, 0, 0, .4, 1);                  // the sides
-        s.pair(4.4, -7.9, .9, -86, 88, 7.4, 2.8, 0, 0, .4, 1);
-        s.pair(4.3, -7.6, 3, -84, 66, 7, 2.8, 0, 0, .4, 1);
-        for (int i = -2; i <= 2; i++) s.lock(i * 1.75, -7.6, 4.4, -86, i * 6, 7.6, 2.7, 0, 0, .4, 1);
+        s.pair(.8, -8.5, -3.8, -64, 170, 6.2, 3.2, -10, 0, .4, 1);                // bangs, to the eyes
+        s.pair(2.6, -8.3, -3.6, -72, 148, 6.6, 3, -6, 0, .4, 1);
+        s.pair(4.4, -7.9, -1.6, -86, 94, 8.6, 3.2, 0, 0, .4, 1);                  // the sides, past the ears
+        s.pair(4.4, -7.9, .9, -86, 88, 9.2, 3.2, 0, 0, .4, 1);
+        s.pair(4.3, -7.6, 3, -84, 66, 9, 3.2, 0, 0, .4, 1);
+        for (int i = -2; i <= 2; i++) s.lock(i * 1.75, -7.6, 4.4, -86, i * 6, 9.6, 3.1, 0, 0, .4, 1);   // the back, to the nape
     }
 
     /** Long hair parted in the middle, falling straight down the back ({@code length}), bangs swept aside. */

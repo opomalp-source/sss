@@ -69,3 +69,14 @@ The sheets (`hairSheet`) sample the texture through the emitted UVs, so they sho
 The hair steps once per world frame; drawing the same fighter again that frame (the HUD portrait, the inventory)
 shows it as it is. Damping is strong and every knot stays within a swing of its place (`.18 + .42 * (1 - stiff)` of
 its distance along the lock), so it sways and settles rather than whipping about.
+
+## Fullness (CX-35d)
+
+`Sculpt.build` fills every style out so it reads as a full head of hair with nothing showing through: between every two
+neighbouring locks that flow the same way (roots within 4.6 px, directions within 60 degrees, lengths within about
+double), a lock blended from both, tucked a little under them; under every lock a shorter, wider underlayer near the
+roots. The hand-placed locks stay on top and keep the style's shape. Set `dense = false` on a sculpt to keep only the
+underlayer (Goku's own hand-placed layout does this).
+
+Hair that rests inside the head or the back (tucked locks, hair lying on the scalp) is not pushed out of it, so it
+doesn't shiver between the spring and the collision.

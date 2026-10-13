@@ -22,9 +22,11 @@ import java.util.WeakHashMap;
 @net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = com.dbzenith.DBZenith.MOD_ID, value = net.minecraftforge.api.distmarker.Dist.CLIENT)
 public final class HairSim {
     private static final int N = HairLock.KNOTS;
-    private static final float GRAVITY = .7f, DRAG = .08f, UPDRAFT = .8f;
+    private static final float GRAVITY = .55f, DRAG = .045f, UPDRAFT = .5f;
     /** How much of the head's own motion the hair lags behind (0: none, 1: all of it). */
-    private static final float INERTIA = .3f;
+    private static final float INERTIA = .14f;
+    /** Half the size of the head box the hair is kept out of. */
+    private static final float B = 4.05f;
     private static final double SIM_DISTANCE = 48;
     private static int frameNo;
 
@@ -138,7 +140,7 @@ public final class HairSim {
 
     private static void integrate(HairShape shape, Body b, float h, float aura, float t, int seed) {
         float[] p = b.p, q = b.prev;
-        float damp = (float) Math.pow(.84, h);                                       // hair is heavily damped: it sways, it doesn't ring
+        float damp = (float) Math.pow(.74, h);                                       // hair is heavily damped: it sways, it doesn't ring
         float flutter = aura > 0 ? aura * (.6f + .4f * Mth.sin(t * 1.7f + seed)) : 0;
         int li = 0;
         for (HairLock l : shape.locks()) {
@@ -156,7 +158,7 @@ public final class HairSim {
                     p[o + c] = next;
                 }
                 // spring back towards the style: firm at the root, looser at the tip
-                float k = (float) (1 - Math.pow(1 - Math.min(.95, (.12f + stiff) * (1 - .45 * u) * .9), h));
+                float k = (float) (1 - Math.pow(1 - Math.min(.95, (.3f + stiff) * (1 - .35 * u)), h));
                 p[o] += ((float) l.x(i) - p[o]) * k;
                 p[o + 1] += ((float) l.y(i) - p[o + 1]) * k;
                 p[o + 2] += ((float) l.z(i) - p[o + 2]) * k;
@@ -165,7 +167,7 @@ public final class HairSim {
             for (int i = 1; i < N; i++) {                                           // a stiff lock a little, a loose one more
                 int o = base + i * 3;
                 arc += (float) Math.sqrt(sq(l.x(i) - l.x(i - 1)) + sq(l.y(i) - l.y(i - 1)) + sq(l.z(i) - l.z(i - 1)));
-                float max = (.18f + .42f * (1 - stiff)) * arc;
+                float max = (.08f + .24f * (1 - stiff)) * arc;
                 float dx = p[o] - (float) l.x(i), dy = p[o + 1] - (float) l.y(i), dz = p[o + 2] - (float) l.z(i);
                 float d = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
                 if (d > max && d > 1e-5f) {
@@ -184,7 +186,7 @@ public final class HairSim {
                     float f = len / d;
                     p[o] = p[a] + dx * f; p[o + 1] = p[a + 1] + dy * f; p[o + 2] = p[a + 2] + dz * f;
                 }
-                collide(p, o);
+                collide(p, o, (float) l.x(i), (float) l.y(i), (float) l.z(i));
                 dx = p[o] - p[a]; dy = p[o + 1] - p[a + 1]; dz = p[o + 2] - p[a + 2];   // and its length again after the push
                 d = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
                 if (d > 1e-5f) {
@@ -200,16 +202,29 @@ public final class HairSim {
         return v * v;
     }
 
-    /** Out of the head (a box) and out of the back (the torso, through the head's turn). */
-    private static void collide(float[] p, int o) {
+
+    /** Inside the torso (model space). */
+    private static boolean inTorso(Vector3f v) {
+        return v.x > -4.4f && v.x < 4.4f && v.y > 0 && v.y < 12.5f && v.z > -2.5f && v.z < 2.5f;
+    }
+    /** Inside the head box. */
+    private static boolean inside(float x, float y, float z) {
+        return x > -B && x < B && y > -8 - (B - 4) && y < .2f && z > -B && z < B;
+    }
+
+    /** Out of the head (a box the size of the head) unless the lock rests there, and out of the back. */
+    private static void collide(float[] p, int o, float rx, float ry, float rz) {
+        boolean restsInHead = inside(rx, ry, rz);
+        HEAD.transform(V.set(rx, ry, rz));
+        boolean restsInBack = inTorso(V);
         float x = p[o], y = p[o + 1], z = p[o + 2];
-        if (x > -4.3f && x < 4.3f && y > -8.3f && y < .2f && z > -4.3f && z < 4.3f) {
-            float dx0 = x + 4.3f, dx1 = 4.3f - x, dy0 = y + 8.3f, dz0 = z + 4.3f, dz1 = 4.3f - z;
+        if (!restsInHead && inside(x, y, z)) {
+            float dx0 = x + B, dx1 = B - x, dy0 = y + 8 + (B - 4), dz0 = z + B, dz1 = B - z;
             float m = Math.min(Math.min(dx0, dx1), Math.min(dy0, Math.min(dz0, dz1)));
-            if (m == dx0) x = -4.3f; else if (m == dx1) x = 4.3f; else if (m == dy0) y = -8.3f; else if (m == dz0) z = -4.3f; else z = 4.3f;
+            if (m == dx0) x = -B; else if (m == dx1) x = B; else if (m == dy0) y = -8 - (B - 4); else if (m == dz0) z = -B; else z = B;
         }
         HEAD.transform(V.set(x, y, z));                                             // head space -> model space
-        if (V.x > -4.4f && V.x < 4.4f && V.y > 0 && V.y < 12.5f && V.z > -2.5f && V.z < 2.5f) {
+        if (!restsInBack && inTorso(V)) {
             float dx0 = V.x + 4.4f, dx1 = 4.4f - V.x, dz0 = V.z + 2.5f, dz1 = 2.5f - V.z;
             float m = Math.min(Math.min(dx0, dx1), Math.min(dz0, dz1));
             if (m == dz1) V.z = 2.5f; else if (m == dz0) V.z = -2.5f; else if (m == dx0) V.x = -4.4f; else V.x = 4.4f;

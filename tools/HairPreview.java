@@ -116,7 +116,7 @@ public final class HairPreview {
                     worst = Math.max(worst, tip / Math.max(1, l.length()));
                 }
             }
-            check(worst < .75, "whipping the head about, the hair stays near its style: " + p + "/" + look + " " + worst);
+            check(worst < .5, "whipping the head about, the hair stays near its style: " + p + "/" + look + " " + worst);
         }
         report.append("PASS: hair stays near its style when the head whips about\n");
 

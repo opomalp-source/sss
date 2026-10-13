@@ -67,6 +67,13 @@ final class Sculpt {
         return this;
     }
 
+
+    /** A straight-ish lock from (x, y, z) aimed at a point (ax, ay, az), reaching {@code reach} of the way there. */
+    Sculpt toward(double x, double y, double z, double ax, double ay, double az, double reach, double w, double curl) {
+        double dx = ax - x, dy = ay - y, dz = az - z, d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        double el = Math.toDegrees(Math.asin(Math.max(-1, Math.min(1, -dy / d)))), a = Math.toDegrees(Math.atan2(dx, dz));
+        return lock(x, y, z, el - curl * .5, a, d * reach, w, curl);
+    }
     /** {@link #lock} on both sides, mirrored. */
     Sculpt pair(double x, double y, double z, double el, double az, double len, double w, double curl) {
         lock(x, y, z, el, az, len, w, curl);
@@ -128,8 +135,87 @@ final class Sculpt {
         return this;
     }
 
+    /** Whether {@link #build} also blends new locks between the hand-placed ones (an underlayer is always added). */
+    boolean dense = true;
+
     HairShape build() {
-        return new HairShape(cap, List.copyOf(locks));
+        return new HairShape(cap, List.copyOf(densify(locks, dense)));
+    }
+
+    /**
+     * Fills the hair out so it reads as a full head of hair, not a few big strands, and nothing shows through: between
+     * every two neighbouring locks that flow the same way, a lock blended from both, tucked a little under them; under
+     * every lock, a shorter, wider one near the roots. The hand-placed locks stay on top and keep the style's shape.
+     */
+    static List<HairLock> densify(List<HairLock> locks, boolean blended) {
+        int n = locks.size();
+        List<HairLock> under = new ArrayList<>(), between = new ArrayList<>();
+        double[][] dir = new double[n][];
+        for (int i = 0; i < n; i++) {
+            HairLock l = locks.get(i);
+            int e = HairLock.KNOTS - 1;
+            double dx = l.x(e) - l.x(0), dy = l.y(e) - l.y(0), dz = l.z(e) - l.z(0), d = Math.max(1e-6, Math.sqrt(dx * dx + dy * dy + dz * dz));
+            dir[i] = new double[]{dx / d, dy / d, dz / d};
+        }
+        java.util.Set<Long> done = new java.util.HashSet<>();
+        for (int i = 0; i < n; i++) {
+            HairLock a = locks.get(i);
+            int best = -1, second = -1;
+            double bestD = 4.6, secondD = 4.6;
+            for (int j = 0; j < n; j++) {
+                if (j == i) continue;
+                HairLock b = locks.get(j);
+                double d = Math.sqrt(HairLock.sq(a.x(0) - b.x(0)) + HairLock.sq(a.y(0) - b.y(0)) + HairLock.sq(a.z(0) - b.z(0)));
+                double same = dir[i][0] * dir[j][0] + dir[i][1] * dir[j][1] + dir[i][2] * dir[j][2];
+                double ratio = a.length() / Math.max(1e-3, b.length());
+                if (same < .5 || ratio < .45 || ratio > 2.2) continue;
+                if (d < bestD) { second = best; secondD = bestD; best = j; bestD = d; }
+                else if (d < secondD) { second = j; secondD = d; }
+            }
+            for (int j : new int[]{best, second}) {
+                if (!blended || j < 0 || !done.add(Math.min(i, j) * 100000L + Math.max(i, j))) continue;
+                between.add(blend(a, locks.get(j)));
+            }
+            under.add(underlay(a));
+        }
+        List<HairLock> out = new ArrayList<>(under.size() + between.size() + n);
+        out.addAll(under);                                                        // drawn first, underneath
+        out.addAll(between);
+        out.addAll(locks);
+        return out;
+    }
+
+    /** A lock half-way between two, a little shorter and tucked under them. */
+    private static HairLock blend(HairLock a, HairLock b) {
+        double[] k = new double[HairLock.KNOTS * 5];
+        for (int i = 0; i < k.length; i++) k[i] = (a.k()[i] + b.k()[i]) * .5;
+        k = HairLock.resample(k, .9);
+        tuck(k, .35);
+        return new HairLock(k, (a.stiff() + b.stiff()) * .5f, (a.weight() + b.weight()) * .5f);
+    }
+
+    /** The volume under a lock: its first half, wider, tucked in toward the head. */
+    private static HairLock underlay(HairLock l) {
+        double[] k = HairLock.resample(l.k(), .5);
+        for (int i = 0; i < HairLock.KNOTS; i++) {
+            k[i * 5 + 3] *= 1.25;
+            k[i * 5 + 4] *= 1.15;
+        }
+        tuck(k, .5);
+        return new HairLock(k, l.stiff(), l.weight());
+    }
+
+    /** Moves a lock's knots (not its root) toward the middle of the head by up to {@code by} pixels. */
+    private static void tuck(double[] k, double by) {
+        for (int i = 1; i < HairLock.KNOTS; i++) {
+            int o = i * 5;
+            double dx = k[o], dy = k[o + 1] + 4.2, dz = k[o + 2] - .6, d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            if (d < 1e-6) continue;
+            double f = by * i / (HairLock.KNOTS - 1.0) / d;
+            k[o] -= dx * f;
+            k[o + 1] -= dy * f;
+            k[o + 2] -= dz * f;
+        }
     }
 
     // ------------------------------------------------------------------ whole looks changed

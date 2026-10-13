@@ -2505,3 +2505,20 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   ring); the spring back firmer; and every knot is kept within a swing of its place in the style (a stiff lock a
   little, a loose one more); lengths are re-kept after collisions; moving air and the aura lift gentler.
 - **Checks:** a new stress test whips the head ±70° every frame with sideways air: the hair stays near its style.
+
+## 2026-10-13 — CX-35d: fuller hair, no holes, calmer still, Vegeta and Trunks truer (v0.92.0)
+- **The ask** (user: make it jiggle less; the presets are sometimes a few big strands, add more hair; there are holes
+  in the hair; work on the accuracy).
+- **Fuller, no holes** (`Sculpt.densify`): every style gets a lock blended between each two neighbouring locks that
+  flow the same way (tucked a little under them) and a shorter, wider underlayer under each lock near the roots: about
+  three times the hair, following each style's own flow, nothing showing through. Goku's own hand-placed layout keeps
+  only the underlayer. The scalp is drawn in the mid tone (on gold it no longer shows as an orange band).
+- **Calmer** (`HairSim`): lag 14% of the head's motion (was 30%), damping much stronger, the spring firmer, the swing
+  cap tighter, wind and aura lift gentler. The shiver found by the stress test is gone: hair resting just inside the
+  head's collision box was pulled in by the spring and pushed out by the collision every frame; hair now isn't pushed
+  out of the head or back where it rests, and the head box is the head's own size.
+- **Accuracy:** Vegeta's flame rebuilt (each spike drawn up toward the middle only part of the way: a tall flame
+  tapering to several separate tips, not a cone or a bundle of needles); Future Trunks' hair falls past his ears to the
+  nape, bangs to the eyes.
+- **Checks:** the head-whipping stress test now requires the hair to stay within half a lock's length (passes).
+- **Checked in the dev client:** Vegeta, Future Trunks, Super Saiyan Goku: full, no holes.

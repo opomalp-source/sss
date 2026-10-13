@@ -51,9 +51,9 @@ public final class HairRender {
 
         float[] q = shape.cap().quads();                                          // the scalp, in the shadow tone
         for (int f = 0; f + 15 <= q.length; f += 15) {
-            float tone = q[f + 13] < -.5f ? .95f : .8f;                            // the crown a little lighter than the sides
+            float tone = q[f + 13] < -.5f ? .9f : .78f;                             // the scalp in the mid tone, its sides darker
             for (int c = 0; c < 4; c++) {
-                vc.vertex(m, q[f + c * 3], q[f + c * 3 + 1], q[f + c * 3 + 2]).color(DARK[0] * tone, DARK[1] * tone, DARK[2] * tone, 1f)
+                vc.vertex(m, q[f + c * 3], q[f + c * 3 + 1], q[f + c * 3 + 2]).color(MID[0] * tone, MID[1] * tone, MID[2] * tone, 1f)
                         .uv(c == 1 || c == 2 ? .45f : .05f, .62f).overlayCoords(overlay).uv2(light).normal(n, 0, -1, 0).endVertex();
             }
         }
