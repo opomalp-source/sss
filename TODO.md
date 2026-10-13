@@ -250,4 +250,5 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [x] CX-36 (v0.97.2) Hands slimmer and shorter, flush with the forearm (no glove step)
 - [x] CX-37 (v0.98.0) Third person by default, camera over the right shoulder in every situation, the crosshair at the real aim point
 - [x] CX-38 (v0.99.0) Flight rework: momentum physics (fly where you look, glide, brake, boost), spring-driven body dynamics (trailing legs, flutter, hover dangle, arms, head), wind sound, FOV, boost rings, streaks, skim dust and spray
+- [x] CX-38b (v0.99.1) Flight body by forward speed (strafing barely moves it), the body turning after the camera, camera-steered flight setting, cinematic camera (speed pull-back, turn roll)
 - Paused for CX-19: 17d (the robot dojo), 18b (the combat animations as data; folded into 19b)

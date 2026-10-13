@@ -2647,3 +2647,19 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **Tests:** `FlightTests` (speed builds, reaches cruise, flies where you look, glides then stops, braking beats
   coasting, the boost launches and builds, looking up climbs, stunned stalls). 210 GameTests.
 - **Checked in the dev client:** hovering (no errors). The movement itself can't be driven from the test harness.
+
+## 2026-10-14 — CX-38b: flight body by velocity, body lag, cinematic camera (v0.99.1)
+- **The ask** (user: in flight the body should move according to the speed and direction actually flown: full motion
+  flying fast, only a little drifting sideways; the camera direction should steer (default, with a setting); the camera
+  immersive and cinematic, and the body should take a moment to turn after the camera instead of snapping).
+- **The body by velocity** (`MotionEngine`): the flight pose (hover, cruise, fast) and the body's pitch are now set by
+  speed forward along the view; drifting sideways counts only 15% (`strafeWeight`), so strafing keeps the hover pose
+  and banks just a little (at most 11 degrees, `strafeBankMax`). Leg trail, flutter and hover dangle follow the same
+  forward speed.
+- **The body follows the camera** (`FlightPhysics.body`): in flight every flier's body yaw eases after where they look
+  on a spring (about 0.3 s behind, barely any overshoot; very sharp turns catch up at once); the head turns first.
+- **Steering:** the camera steers flight (forward goes where you look, up and down too) by default; `flightLookSteering`
+  off keeps forward level, with jump and sneak for height.
+- **The cinematic camera:** in third person it eases back (up to 1.6 blocks, trailing the speed, never into walls) as you
+  pick up speed and comes back in as you slow; it rolls a little into turns (at most 4.5 degrees, with speed).
+- **Settings → Camera:** "Camera steers flight", "Body follows the camera", "Cinematic flight camera" (all on).

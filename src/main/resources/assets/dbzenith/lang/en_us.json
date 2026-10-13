@@ -2144,5 +2144,11 @@
   "settings.dbzenith.flight_momentum": "Flight momentum",
   "settings.dbzenith.flight_momentum.desc": "Fly where you look; speed builds, carries and glides to a stop; sprint to boost. Off: vanilla creative flight.",
   "settings.dbzenith.flight_effects": "Flight effects",
-  "settings.dbzenith.flight_effects.desc": "Wind streaks at speed, dust and spray when skimming low, rings of air when boosting."
+  "settings.dbzenith.flight_effects.desc": "Wind streaks at speed, dust and spray when skimming low, rings of air when boosting.",
+  "settings.dbzenith.flight_look_steering": "Camera steers flight",
+  "settings.dbzenith.flight_look_steering.desc": "Flying forward goes where the camera looks, climbing and diving too. Off: forward stays level; jump and sneak climb and drop.",
+  "settings.dbzenith.flight_body_lag": "Body follows the camera",
+  "settings.dbzenith.flight_body_lag.desc": "In flight the body turns after the camera a moment later, the head first, instead of snapping round with it.",
+  "settings.dbzenith.flight_cinematic_camera": "Cinematic flight camera",
+  "settings.dbzenith.flight_cinematic_camera.desc": "The camera eases back as you pick up speed and rolls a little into turns."
 }

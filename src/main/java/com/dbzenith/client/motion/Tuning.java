@@ -43,7 +43,9 @@ public final class Tuning {
     public static float flyClimb = 34f;            // pitch change per block-per-tick of climb or dive
     public static float flyBank = 2.4f;            // bank per degree of turn per tick in flight
     public static float flyBankMax = 42f;
-    public static float strafeBank = 55f;          // bank per block-per-tick of sideways flight
+    public static float strafeBank = 30f;          // bank per block-per-tick of sideways flight
+    public static float strafeBankMax = 11f;       // drifting sideways banks only a little (CX-38b)
+    public static float strafeWeight = 0.15f;      // how much sideways drift counts towards the forward flight pose
     public static float hoverBob = 1.1f;           // pixels
     public static float breathe = 1f;              // idle breath strength
     public static float headCounter = 0.85f;       // how much the head counters the body pitch to keep looking ahead

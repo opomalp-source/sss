@@ -46,6 +46,11 @@ public final class FlightPhysics {
     private static float fov, fovO;
     private static Wind wind;
     private static final Map<Integer, Double> LAST_SPEED = new HashMap<>();
+    /** Each flier's lagging body yaw and its spring speed. */
+    private static final Map<Integer, float[]> BODY = new HashMap<>();
+    private static float camBack, camBackO, camRoll, camRollO, lastYaw;
+    private static final java.lang.reflect.Method MOVE = net.minecraftforge.fml.util.ObfuscationReflectionHelper.findMethod(
+            net.minecraft.client.Camera.class, "m_90568_", double.class, double.class, double.class);
 
     private FlightPhysics() {}
 
@@ -90,7 +95,8 @@ public final class FlightPhysics {
         Minecraft mc = Minecraft.getInstance();
         boolean boost = mc.options.keySprint.isDown();
         double up = (p.input.jumping ? 1 : 0) - (p.input.shiftKeyDown ? 1 : 0);
-        boolean burst = FlightModel.step(STATE, p.input.forwardImpulse, p.input.leftImpulse, up, boost, p.getYRot(), p.getXRot(), savedSpeed);
+        float steerPitch = DBZConfig.CLIENT.flightLookSteering.get() ? p.getXRot() : 0;   // fly where you look, or keep level
+        boolean burst = FlightModel.step(STATE, p.input.forwardImpulse, p.input.leftImpulse, up, boost, p.getYRot(), steerPitch, savedSpeed);
         p.setDeltaMovement(STATE.vx, STATE.vy, STATE.vz);
         if (burst) {
             ImpactFx.boostBurst(p, p.getLookAngle(), auraColor(p));
@@ -123,13 +129,24 @@ public final class FlightPhysics {
             wind = new Wind(me);
             mc.getSoundManager().play(wind);
         }
+        // the cinematic camera: easing back as speed builds (and in a little when braking), rolling into turns
+        camBackO = camBack;
+        camRollO = camRoll;
+        float turn = active ? Mth.wrapDegrees(me.getYRot() - lastYaw) : 0;
+        lastYaw = me.getYRot();
+        float backWant = active ? (float) Mth.clamp((mySpeed - cruise * .4) / (cruise * 2.2), 0, 1) * 1.6f : 0;
+        camBack += (backWant - camBack) * .06f;                                  // slow: the camera trails the speed
+        float rollWant = active ? Mth.clamp(turn * .22f, -4.5f, 4.5f) * (float) Mth.clamp(mySpeed / cruise, .3, 1) : 0;
+        camRoll += (rollWant - camRoll) * .12f;
         for (AbstractClientPlayer p : mc.level.players()) {
             PublicStatePacket s = ClientPublicStates.get(p.getId());
             boolean flying = s != null && s.has(PublicStatePacket.FLYING) && !p.onGround();
             if (!flying || p.distanceToSqr(me) > 64 * 64) {
                 LAST_SPEED.remove(p.getId());
+                BODY.remove(p.getId());
                 continue;
             }
+            body(p);
             Vec3 v = p == me ? new Vec3(STATE.vx, STATE.vy, STATE.vz) : new Vec3(p.getX() - p.xo, p.getY() - p.yo, p.getZ() - p.zo);
             double speed = v.length();
             Double last = LAST_SPEED.put(p.getId(), speed);
@@ -137,6 +154,46 @@ public final class FlightPhysics {
             if (!DBZConfig.CLIENT.flightEffects.get()) continue;
             streaks(mc, p, v, speed, p == me);
             skim(mc, p, v, speed);
+        }
+    }
+
+    /**
+     * A flier's body turns after where they look on a soft spring, a moment behind the camera, instead of snapping
+     * round with it (the head turns first, the body follows). Set after the entity ticked, so it overrides vanilla.
+     */
+    private static void body(AbstractClientPlayer p) {
+        if (!DBZConfig.CLIENT.flightBodyLag.get()) return;
+        float[] b = BODY.computeIfAbsent(p.getId(), k -> new float[]{p.getYRot(), 0});
+        float prev = b[0];
+        float diff = Mth.wrapDegrees(p.getYRot() - b[0]);
+        if (Math.abs(diff) > 120) {                                              // a snap turn: catch up at once
+            b[0] = p.getYRot() - Math.signum(diff) * 120;
+            diff = Mth.wrapDegrees(p.getYRot() - b[0]);
+        }
+        b[1] += diff * .16f - b[1] * .55f;                                        // a spring: about 0.3 s behind, barely any overshoot
+        b[0] += b[1];
+        p.yBodyRotO = prev;
+        p.yBodyRot = b[0];
+    }
+
+    /** Applies the camera's speed pull-back and turn roll, before the shoulder camera's own shift. */
+    @SubscribeEvent
+    public static void onCamera(ViewportEvent.ComputeCameraAngles event) {
+        if (!DBZConfig.CLIENT.flightCinematicCamera.get()) return;
+        float pt = (float) event.getPartialTick();
+        float roll = Mth.lerp(pt, camRollO, camRoll), back = Mth.lerp(pt, camBackO, camBack);
+        if (Math.abs(roll) > .01f) event.setRoll(event.getRoll() + roll);
+        net.minecraft.client.Camera cam = event.getCamera();
+        Minecraft mc = Minecraft.getInstance();
+        if (back < .01f || !cam.isDetached() || mc.level == null || mc.options.getCameraType().isMirrored()) return;
+        Vec3 from = cam.getPosition(), look = new Vec3(cam.getLookVector());
+        Vec3 to = from.subtract(look.scale(back));
+        var hit = mc.level.clip(new net.minecraft.world.level.ClipContext(from, to, net.minecraft.world.level.ClipContext.Block.VISUAL,
+                net.minecraft.world.level.ClipContext.Fluid.NONE, cam.getEntity()));
+        double room = hit.getType() == net.minecraft.world.phys.HitResult.Type.MISS ? back : Math.max(0, hit.getLocation().distanceTo(from) - .25);
+        try {
+            MOVE.invoke(cam, -room, 0.0, 0.0);                                    // move(forward, up, left)
+        } catch (ReflectiveOperationException ignored) {
         }
     }
 

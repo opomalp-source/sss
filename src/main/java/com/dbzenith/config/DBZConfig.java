@@ -755,7 +755,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue crosshairOpacity;
         public final ForgeConfigSpec.DoubleValue shoulderOffset, shoulderHeight;
         public final ForgeConfigSpec.BooleanValue shoulderCamera, startThirdPerson;
-        public final ForgeConfigSpec.BooleanValue flightMomentum, flightEffects;
+        public final ForgeConfigSpec.BooleanValue flightMomentum, flightEffects, flightLookSteering, flightBodyLag, flightCinematicCamera;
         public final ForgeConfigSpec.DoubleValue lockOnRange, lockOnCameraSpeed, lockOnFreeLook;
         public final ForgeConfigSpec.DoubleValue screenShake;
         public final ForgeConfigSpec.BooleanValue hitstop;
@@ -808,6 +808,9 @@ public final class DBZConfig {
             startThirdPerson = b.comment("Start in third person when you join a world").define("startThirdPerson", true);
             flightMomentum = b.comment("Ki flight with momentum: fly where you look, speed builds and carries, sprint boosts (off: vanilla creative flight)").define("flightMomentum", true);
             flightEffects = b.comment("Flight effects: wind streaks, dust and spray when skimming low, boost rings").define("flightEffects", true);
+            flightLookSteering = b.comment("Flight: the camera steers (flying forward goes where you look, up and down too); off: forward stays level, jump and sneak climb and drop").define("flightLookSteering", true);
+            flightBodyLag = b.comment("Flight: the body turns after the camera a moment later instead of snapping round with it").define("flightBodyLag", true);
+            flightCinematicCamera = b.comment("Flight: the camera eases back as you speed up and rolls a little into turns").define("flightCinematicCamera", true);
             shoulderHeight = b.comment("Shoulder camera: blocks up").defineInRange("shoulderHeight", 0.15, -1.0, 2.0);
             crosshairDotMode = b.comment("The dot crosshair: 0 = in PvP only (out of PvP, crosshairStyle), 1 = always").defineInRange("crosshairDotMode", 0, 0, 1);
             crosshairStyle = b.comment("The crosshair out of PvP: 0 = a four-pointed star, 1 = the dot, 2 = vanilla's").defineInRange("crosshairStyle", 0, 0, 2);

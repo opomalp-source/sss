@@ -78,6 +78,9 @@ public class SettingsScreen extends Screen {
                 o.add(new Option("shoulder_camera", c.shoulderCamera, 0, 0, null));
                 o.add(new Option("flight_momentum", c.flightMomentum, 0, 0, null));
                 o.add(new Option("flight_effects", c.flightEffects, 0, 0, null));
+                o.add(new Option("flight_look_steering", c.flightLookSteering, 0, 0, null));
+                o.add(new Option("flight_body_lag", c.flightBodyLag, 0, 0, null));
+                o.add(new Option("flight_cinematic_camera", c.flightCinematicCamera, 0, 0, null));
                 o.add(new Option("shoulder_offset", c.shoulderOffset, 0, 3, null, "b"));
             }
             case COMBAT -> {                                                    // CX-19

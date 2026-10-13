@@ -205,7 +205,7 @@ public final class MotionEngine {
                 rollTarget = (float) Mth.clamp(-m.yawRate * Tuning.turnLean * Math.min(1, m.speed / Tuning.walkSpeed), -Tuning.turnLeanMax, Tuning.turnLeanMax);
             }
             if (air) {
-                double h = Math.sqrt(m.forward * m.forward + m.lateral * m.lateral);
+                double h = Math.max(0, m.forward) + Math.abs(m.lateral) * Tuning.strafeWeight;   // forward speed sets the pose; drifting sideways barely (CX-38b)
                 float base;
                 if (m.forward < -0.04 && -m.forward > Math.abs(m.lateral)) base = (float) Mth.clamp(m.forward * 60, -22, 0);   // backing off: lean back
                 else if (h <= Tuning.flyCruise) base = (float) (h / Tuning.flyCruise) * 18f;
@@ -213,13 +213,14 @@ public final class MotionEngine {
                 else base = Tuning.flyPitchCruise + (float) Math.min(1, (h - Tuning.flyFast) / Tuning.flyFast) * (Tuning.flyPitchMax - Tuning.flyPitchCruise);
                 float climb = (float) (-m.vy * Tuning.flyClimb * Math.min(1, h / Tuning.flyCruise));
                 pitchTarget = Mth.clamp(base + climb, -30, 105);
-                bankTarget = (float) Mth.clamp(-m.yawRate * Tuning.flyBank * Math.min(1, h / 0.5) - m.lateral * Tuning.strafeBank,
+                bankTarget = (float) Mth.clamp(-m.yawRate * Tuning.flyBank * Math.min(1, h / 0.5)
+                        - Mth.clamp(m.lateral * Tuning.strafeBank, -Tuning.strafeBankMax, Tuning.strafeBankMax),
                         -Tuning.flyBankMax, Tuning.flyBankMax);
             }
             m.lean += (leanTarget - m.lean) * k;
             m.roll += (rollTarget - m.roll) * k;
             m.flyHPrev = m.flyH;
-            m.flyH = (float) Math.sqrt(m.forward * m.forward + m.lateral * m.lateral);
+            m.flyH = (float) (Math.max(0, m.forward) + Math.abs(m.lateral) * Tuning.strafeWeight);   // how far into flying forward
             m.flyVy = (float) m.vy;
             if (air) {
                 // the body pitches and banks on springs: a little past where it is going, then settling (CX-38)
@@ -315,8 +316,9 @@ public final class MotionEngine {
             if (m.vy > Tuning.flyVertical && h < 0.35) return State.ASCEND;
             if (m.vy < -Tuning.flyVertical && h < 0.35) return State.DESCEND;
             if (m.forward < -0.06 && -m.forward > Math.abs(m.lateral) * 0.8 && h > Tuning.flyCruise * 0.6) return State.BACKWARD;
-            if (h > Tuning.flyFast) return State.FAST;
-            if (h > Tuning.flyCruise) return State.CRUISE;
+            double fwd = Math.max(0, m.forward) + Math.abs(m.lateral) * Tuning.strafeWeight;   // drifting sideways is not flying forward (CX-38b)
+            if (fwd > Tuning.flyFast) return State.FAST;
+            if (fwd > Tuning.flyCruise) return State.CRUISE;
             return State.HOVER;
         }
         if (!m.ground && !e.isInWater()) {
