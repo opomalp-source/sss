@@ -2041,6 +2041,8 @@
   "message.dbzenith.aura_unknown": "No aura called %s",
   "settings.dbzenith.aura_renderer": "Aura shader",
   "settings.dbzenith.aura_renderer.desc": "Auto draws auras with their own shader, and with the plain one while a shader pack is on. Plain looks simpler but works everywhere.",
+  "settings.dbzenith.ki_bloom": "Ki bloom",
+  "settings.dbzenith.ki_bloom.desc": "Auras, blasts, beams and sparks glow onto what is around them. 0 is off. Off with Fabulous graphics or a shader pack.",
   "settings.dbzenith.aura_renderer.auto": "Auto",
   "settings.dbzenith.aura_renderer.shader": "Own shader",
   "settings.dbzenith.aura_renderer.plain": "Plain",

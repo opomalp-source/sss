@@ -761,7 +761,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue hitstop;
         public final ForgeConfigSpec.BooleanValue afterimages;
         public final ForgeConfigSpec.BooleanValue firstPersonAura;
-        public final ForgeConfigSpec.DoubleValue hudScale;
+        public final ForgeConfigSpec.DoubleValue hudScale, kiBloom;
         public final ForgeConfigSpec.IntValue auraDetail;
         public final ForgeConfigSpec.IntValue auraRenderer;
         public final ForgeConfigSpec.BooleanValue fovEffects;
@@ -827,6 +827,8 @@ public final class DBZConfig {
                     .defineInRange("lockOnFreeLook", 25.0, 0.0, 90.0);
             hudScale = b.comment("Size of the portrait HUD (0.6 - 1.4)")
                     .defineInRange("hudScale", 1.0, 0.6, 1.4);
+            kiBloom = b.comment("Bloom: ki effects (auras, blasts, beams, sparks) glow onto what is around them (0 off, 1 normal, up to 2). Off with Fabulous graphics or a shader pack (CX-45)")
+                    .defineInRange("kiBloom", 1.0, 0.0, 2.0);
             hudStyle = b.comment("HUD: 0 Saga (a round portrait, a Release tab, a smoky BP and Ki bar, slanted health and stamina bars), 1 Classic, 2 Minimal (thin bars, no portrait), 3 Ornate (a portrait frame per form), 4 Clean (a portrait card and slim gradient bars)")
                     .defineInRange("hudStyle", 0, 0, 4);
             b.pop();

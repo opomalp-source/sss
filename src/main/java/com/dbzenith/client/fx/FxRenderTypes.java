@@ -10,6 +10,9 @@ import java.util.function.Function;
 
 /** Render types for energy effects. Both are full-bright, double-sided and leave the depth buffer alone. */
 public final class FxRenderTypes extends RenderType {
+    /** Light goes into the bloom's glow target (CX-45; onto the picture as before when the bloom is off). */
+    private static final OutputStateShard GLOW_TARGET = new OutputStateShard("dbzenith_glow_target", KiBloom::begin, KiBloom::end);
+
     /** Light adds onto what is behind it: cores, flashes, lightning. Glows against dark and bright skies alike. */
     private static final Function<ResourceLocation, RenderType> ADDITIVE = Util.memoize(tex -> create("dbzenith_fx_additive",
             DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, false, true,
@@ -20,6 +23,7 @@ public final class FxRenderTypes extends RenderType {
                     .setCullState(NO_CULL)
                     .setWriteMaskState(COLOR_WRITE)
                     .setOverlayState(OVERLAY)
+                    .setOutputState(GLOW_TARGET)
                     .createCompositeState(false)));
 
     /** Ordinary blending, so a colour stays saturated in daylight: the body of an aura. */
@@ -87,6 +91,7 @@ public final class FxRenderTypes extends RenderType {
                     .setCullState(CULL)
                     .setWriteMaskState(COLOR_WRITE)
                     .setOverlayState(OVERLAY)
+                    .setOutputState(GLOW_TARGET)
                     .createCompositeState(false)));
 
     public static RenderType auraPlain(ResourceLocation texture) {

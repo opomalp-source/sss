@@ -1,0 +1,14 @@
+{
+    "blend": {
+        "func": "add",
+        "srcrgb": "1",
+        "dstrgb": "1"
+    },
+    "vertex": "dbzenith:bloom",
+    "fragment": "dbzenith:bloom_blur",
+    "attributes": [ "Position", "UV0" ],
+    "samplers": [ { "name": "DiffuseSampler" } ],
+    "uniforms": [
+        { "name": "Direction", "type": "float", "count": 2, "values": [ 1.0, 0.0 ] }
+    ]
+}

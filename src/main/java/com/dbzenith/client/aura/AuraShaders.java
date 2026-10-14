@@ -43,6 +43,11 @@ public final class AuraShaders {
         return mode == 1 || !shaderPackOn();
     }
 
+    /** Is a shader pack in use (for other client code, CX-45)? */
+    public static boolean packOn() {
+        return shaderPackOn();
+    }
+
     /** Is an Oculus / Iris shader pack in use? Looked up by name, so neither has to be installed. */
     static boolean shaderPackOn() {
         try {

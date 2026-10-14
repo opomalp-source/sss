@@ -2788,3 +2788,17 @@ Starts the polish round (the user: everything suggested except story, which come
 - NPC capes use it too.
 - **Checked in the dev client** (pushed forward 0.6 blocks a tick, then stopped): the cape streams out flat behind
   and the tail trails; on stopping the cape swings forward, bounces and settles within about 1.5 seconds.
+
+## 2026-10-14 — CX-45: ki bloom (v0.106.0)
+- **`client.fx.KiBloom`:** everything that adds light goes to a glow target of its own:
+  - covered: aura glow layers (both the aura shader and the plain fallback), and every `FxRenderTypes.additive` effect
+    (blasts, beams' glow, sparks, rings, flashes, lightning, the Nimbus streak);
+  - how: an `OutputStateShard` on those render types, and begin/end around the aura shader's additive draws;
+  - the world's depth is copied in first, so walls still hide it.
+- **At the end of the world pass** the light is added back unchanged (the same picture as before, since adding is
+  order-free), then blurred at half size (two Gaussian passes each way, the second wider) and added again as bloom.
+  New core shaders: `bloom.vsh`, `bloom_blur`, `bloom_add`.
+- **Strength:** client config `kiBloom` (0 off .. 2, default 1), Settings → Effects → "Ki bloom". Off with Fabulous
+  graphics or a shader pack, where everything draws as before.
+- **Checked in the dev client:** a Super Saiyan aura by day and at night. A soft golden halo spills round the aura and,
+  at night, onto the ground. No shader errors (only vanilla's and the aura shader's usual missing-uniform warnings).

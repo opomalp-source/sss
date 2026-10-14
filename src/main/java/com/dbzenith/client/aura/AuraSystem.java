@@ -570,6 +570,7 @@ public final class AuraSystem {
         int budget = detail == 0 ? Math.max(4, l.tongueCount / 2) : 64;
         if (shader) {
             uniforms(l.additive ? AuraShaders.glow : AuraShaders.shell, l, l, seed + l.seed, opacity, t, wild, bright);
+            if (l.additive) com.dbzenith.client.fx.KiBloom.begin();
             blend(l.additive);
             RenderSystem.setShader(l.additive ? GLOW_SHADER : SHELL_SHADER);
             RenderSystem.disableCull();
@@ -579,6 +580,7 @@ public final class AuraSystem {
             BufferBuilder.RenderedBuffer done = bb.endOrDiscardIfEmpty();
             if (done != null) BufferUploader.drawWithShader(done);
             RenderSystem.enableCull();
+            if (l.additive) com.dbzenith.client.fx.KiBloom.end();
         } else {
             var type = l.additive ? FxRenderTypes.additive(TONGUE_TEX) : FxRenderTypes.soft(TONGUE_TEX);
             AuraFlames.emit(buffers.getBuffer(type), pose.last().pose(), SHELL, l, ox, oy, oz, height, t, wild, seed + l.seed,
@@ -599,12 +601,15 @@ public final class AuraSystem {
     }
 
     private static void drawShell(Supplier<ShaderInstance> shader, float ox, float oy, float oz, float scale) {
-        blend(shader == GLOW_SHADER);
+        boolean light = shader == GLOW_SHADER;
+        if (light) com.dbzenith.client.fx.KiBloom.begin();                     // light goes through the bloom (CX-45)
+        blend(light);
         RenderSystem.setShader(shader);
         BufferBuilder bb = Tesselator.getInstance().getBuilder();
         bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
         SHELL.emit(bb, ox, oy, oz, scale, 255);
         BufferUploader.drawWithShader(bb.end());
+        if (light) com.dbzenith.client.fx.KiBloom.end();
     }
 
     private static final org.joml.Vector3f LOOK = new org.joml.Vector3f();
