@@ -52,6 +52,7 @@ public final class ClientKnockouts {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {
             DOWN.clear();
+            com.dbzenith.combat.Limbs.clearClient();
             return;
         }
         if (mc.player == null || !isDown(mc.player.getId())) return;

@@ -2962,3 +2962,43 @@ and Majins regrow, prosthetics for the rest; NPCs and bosses too. Plan in TODO.m
   slower on foot). 222 GameTests.
 - **Checked in the dev client:** at 12% health, the hunched stance with a hand at the wound and the battle damage,
   firing, and walking.
+
+## 2026-10-14 — CX-53: limbs that break and can be cut off (v0.114.0)
+- **`combat.Limbs`:** every fighter (players and NPC fighters) has two arms and two legs, each with its own health
+  (0..100).
+  - **Hits:** about half the blows that land also hurt a limb, always for a cutting or overwhelming blow. The limb is
+    chosen by the side the attacker is on and whether they struck from above (arms) or below (legs); falls go to the
+    legs. The damage is 1.8 times the blow's share of the fighter's health, in limb health.
+  - **Broken** below 25: it can't be used. Broken limbs mend slowly on their own (1 a second, from 15 seconds after
+    the last blow), back in use from 25.
+  - **Cut off:** a limb that is broken or nearly so (at most 35) hit by a cutting attack (a sword or an axe, or a
+    disc of ki like the Destructo Disc, `Style.DISK`), or a broken one hit by an overwhelming blow (a third of the
+    fighter's health at once), is lost.
+    - What that hand held falls.
+    - A spray of dark red and smoke, a slash and a cry.
+    - It stays lost (CX-54: prosthetics, regrowing).
+  - **What it costs:**
+    - one arm out: punches 30% weaker, ki 20% weaker;
+    - both arms out: kicks only (half strength) and no ki techniques ("You need a hand to fire ki"; NPCs stop firing
+      too);
+    - one leg out: 35% slower, no sprinting, a weaker jump;
+    - both legs out: crawling (85% slower, no jumping). Flying still works.
+  - **State** lives in the entity's persistent data: it survives relogging, and a death leaves it behind (a respawn
+    is whole). It reaches clients in `LimbsPacket` (protocol 37), on every change, on tracking and on login.
+- **On the model:**
+  - **Broken limbs** (`client.anim.InjuryLayer`, over every other animation, players and NPCs): an arm hangs limp and
+    nearly straight, a leg drags behind.
+  - **Lost limbs** (`client.render.LimbRender`):
+    - the limb and its sleeve or trouser layer are left out, so every layer drawn on the body leaves it out too;
+    - in its place a stump, skin round the sides and a dark seared end;
+    - in first person the hand isn't drawn.
+  - **The HUD** (`LimbsOverlay`): a small figure at the left edge while a limb is hurt. Each limb is coloured by its
+    health; a lost one is an empty red outline, a prosthetic steel blue.
+- **Admin/dev:** `/dbz limb <entities> <limb|all> break|sever|heal`.
+- **Tests:** `LimbsTests`:
+  - hurt but working, then broken; an ordinary blow doesn't sever, a cutting one does, and the held item drops;
+  - no hands means no ki; a lost leg counts;
+  - both legs out slow an NPC to a crawl.
+  - 224 GameTests.
+- **Checked in the dev client:** the right arm cut off with its stump (the gi sleeve gone with it), the left arm
+  hanging limp, and the HUD figure showing it.

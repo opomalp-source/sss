@@ -272,5 +272,5 @@ Most of these already exist in a first version; each step upgrades what is there
 # Injury round (user, 2026-10-14: low health slows you, limbs that break and can be cut off, prosthetics, knocked out at zero)
 - [x] CX-51 (v0.112.0) Knocked out at zero health: on the ground, crawl if strong, bleed out, finished by a blow, saved by a Senzu Bean or healing, carried by others; NPCs too
 - [x] CX-52 (v0.113.0) Low health: slower movement, slow weak ki firing with its own animations, stumbling
-- [ ] CX-53 Limbs: per-limb damage, broken limbs that can't be used (arms: no punching or firing with that hand; legs: limping, crawling), cut off by cutting attacks or overwhelming blows; NPCs and bosses too
+- [x] CX-53 (v0.114.0) Limbs: per-limb damage, broken limbs that can't be used (arms: no punching or firing with that hand; legs: limping, crawling), cut off by cutting attacks or overwhelming blows; NPCs and bosses too
 - [ ] CX-54 Recovery: Namekians and Majins regrow limbs, prosthetics (crafted, fitted, mechanical look) for everyone else, a Dragon Ball wish restores them, broken limbs heal slowly (at once with a Senzu Bean)

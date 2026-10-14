@@ -44,6 +44,7 @@ public final class NpcActions {
             this.entity = entity;
             stack.addAnimLayer(STANCE, stance);
             stack.addAnimLayer(ACTION, action);
+            stack.addAnimLayer(2000, new InjuryLayer(entity));                 // broken limbs (CX-53)
             stack.addAnimLayer(RIG, new RigFix(() -> stack));                 // keeps the upper body on the hips
         }
     }

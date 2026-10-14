@@ -43,6 +43,7 @@ public final class ClientSetup {
         event.registerBelowAll("aura_edge", new com.dbzenith.client.fx.AuraEdgeOverlay());
         event.registerAboveAll("hud", new DbzHud());
         event.registerAboveAll("knocked_out", new ClientKnockouts.Overlay());                  // CX-51
+        event.registerAboveAll("limbs", new com.dbzenith.client.ui.LimbsOverlay());              // CX-53
         event.registerAboveAll("enemy_panel", new com.dbzenith.client.ui.EnemyPanel());          // CX-19 phase 8
         event.registerAboveAll("callouts", new com.dbzenith.client.ui.CalloutOverlay());
         event.registerAboveAll("combat_log", new com.dbzenith.client.ui.CombatLogOverlay());       // CX-19 phase 9
@@ -94,6 +95,7 @@ public final class ClientSetup {
                 renderer.addLayer(new com.dbzenith.client.render.CosmeticsLayer(renderer));
                 renderer.addLayer(new com.dbzenith.client.render.GearLayer(renderer, event.getEntityModels()));
                 renderer.addLayer(new com.dbzenith.client.render.BattleDamageLayer<>(renderer));
+                renderer.addLayer(new com.dbzenith.client.render.LimbRender.StumpLayer<>(renderer));    // CX-53
                 renderer.addLayer(new FormHairLayer(renderer, event.getEntityModels()));
                 renderer.addLayer(new RaceFeatureLayer(renderer, event.getEntityModels()));
                 renderer.addLayer(new com.dbzenith.client.render.HaloLayer(renderer, event.getEntityModels()));

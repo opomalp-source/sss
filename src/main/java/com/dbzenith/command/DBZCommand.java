@@ -716,6 +716,38 @@ public final class DBZCommand {
                                     ctx.getSource().sendSuccess(() -> Component.literal("Revived " + count + " player(s)"), true);
                                     return n;
                                 })))
+                .then(Commands.literal("limb")   // CX-53: break, cut off or heal a fighter's limbs
+                        .then(Commands.argument("targets", EntityArgument.entities())
+                                .then(Commands.argument("limb", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.stream.Stream.concat(java.util.stream.Stream.of("all"),
+                                                Arrays.stream(com.dbzenith.combat.Limbs.Limb.values()).map(com.dbzenith.combat.Limbs.Limb::key)), b))
+                                        .then(Commands.argument("action", StringArgumentType.word())
+                                                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.List.of("break", "sever", "heal"), b))
+                                                .executes(ctx -> {
+                                                    String limb = StringArgumentType.getString(ctx, "limb"), action = StringArgumentType.getString(ctx, "action");
+                                                    int n = 0;
+                                                    for (net.minecraft.world.entity.Entity e : EntityArgument.getEntities(ctx, "targets")) {
+                                                        if (!(e instanceof LivingEntity l) || !com.dbzenith.combat.Limbs.eligible(l)) continue;
+                                                        for (com.dbzenith.combat.Limbs.Limb which : com.dbzenith.combat.Limbs.Limb.values()) {
+                                                            if (!limb.equals("all") && !limb.equals(which.key())) continue;
+                                                            var s = com.dbzenith.combat.Limbs.of(l);
+                                                            switch (action) {
+                                                                case "break" -> com.dbzenith.combat.Limbs.hit(l, which, 1000, false, false);
+                                                                case "sever" -> com.dbzenith.combat.Limbs.sever(l, which);
+                                                                default -> {
+                                                                    s.health[which.ordinal()] = 100;
+                                                                    s.severed &= ~(1 << which.ordinal());
+                                                                    s.prosthetic &= ~(1 << which.ordinal());
+                                                                    com.dbzenith.combat.Limbs.changed(l);
+                                                                }
+                                                            }
+                                                        }
+                                                        n++;
+                                                    }
+                                                    int count = n;
+                                                    ctx.getSource().sendSuccess(() -> Component.literal("Limbs " + action + " " + limb + ": " + count + " fighter(s)"), true);
+                                                    return n;
+                                                })))))
                 .then(Commands.literal("usehand")   // dev: use what the player holds, as a right-click would (CX-50)
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .executes(ctx -> {

@@ -53,6 +53,7 @@ public final class AnimController {
                 player -> com.dbzenith.client.motion.MotionAnimation.of(com.dbzenith.client.motion.MotionEngine.get(player)));
         PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(STATE_LAYER, 1000, player -> withSpeed(player, 0));
         PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(ACTION_LAYER, 1500, player -> withSpeed(player, 1));
+        PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(new ResourceLocation(DBZenith.MOD_ID, "injury"), 2000, InjuryLayer::new);   // broken limbs (CX-53)
         PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(new ResourceLocation(DBZenith.MOD_ID, "rig"), 9000,   // keeps the upper body on the hips
                 player -> new RigFix(() -> dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess.getPlayerAnimLayer(player)));
     }

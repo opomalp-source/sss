@@ -213,7 +213,7 @@ public class KiFighter extends Monster {
         @Override
         public boolean canUse() {
             LivingEntity t = mob.getTarget();
-            if (t == null || !t.isAlive() || mob.kiCooldown > 0) return false;
+            if (t == null || !t.isAlive() || mob.kiCooldown > 0 || !com.dbzenith.combat.Limbs.canUseKi(mob)) return false;   // no hands, no ki (CX-53)
             if (com.dbzenith.registry.ModEffects.isStunned(mob) || com.dbzenith.registry.ModEffects.isKiSealed(mob)) return false;
             double d = mob.distanceToSqr(t);
             return d > 4 * 4 && d < 28 * 28 && mob.hasLineOfSight(t);

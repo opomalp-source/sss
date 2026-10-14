@@ -23,6 +23,7 @@ public class FighterRenderer<T extends net.minecraft.world.entity.Mob> extends H
         BodyShape.attach(getModel());                                              // anime proportions, as players have (CX-22)
         addLayer(new NpcPartsLayer<>(this, ctx.getModelSet(), skin));
         addLayer(new BattleDamageLayer<>(this));                                   // the fight shows on them too (CX-47)
+        addLayer(new LimbRender.StumpLayer<>(this));                               // lost limbs (CX-53)
     }
 
     @Override
@@ -32,7 +33,9 @@ public class FighterRenderer<T extends net.minecraft.world.entity.Mob> extends H
                 !BodyShape.armour(fighter, net.minecraft.world.entity.EquipmentSlot.FEET));      // segmented limbs, longer legs (CX-29)
         LimbSegments.proportions = true;
         LimbSegments.grounded = fighter.onGround() || fighter.isPassenger();
+        int hidden = LimbRender.hide(getModel(), fighter);                          // lost limbs (CX-53)
         super.render(fighter, yaw, partialTick, pose, buffers, light);
+        LimbRender.show(getModel(), hidden);
         LimbSegments.reset(getModel());
     }
 
