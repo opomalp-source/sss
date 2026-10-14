@@ -2663,3 +2663,29 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
 - **The cinematic camera:** in third person it eases back (up to 1.6 blocks, trailing the speed, never into walls) as you
   pick up speed and comes back in as you slow; it rolls a little into turns (at most 4.5 degrees, with speed).
 - **Settings → Camera:** "Camera steers flight", "Body follows the camera", "Cinematic flight camera" (all on).
+
+## 2026-10-14 — CX-39: the Flying Nimbus reworked (v0.100.0)
+- **The ask** (user): make the Nimbus look cool and dynamic instead of a 3D object, with a trail behind it while you
+  fly it.
+- **A cloud of puffs** (`NimbusRenderer`): about thirty soft camera-facing puffs replace the sculpted mesh.
+  - Each puff breathes and churns on its own, and the cloud has a curling tail.
+  - Colour runs yellow on top, warm orange underneath, with white-gold highlights.
+  - The puffs are sorted back to front and drawn unlit: the new `FxRenderTypes.unlit`, on the eyes shader. The entity
+    shaders shade by the normal against the world's lights and greyed the cloud.
+  - Brightness follows the world's daylight (`getSkyDarken`). The entity's packed light read 0 for it in the dev world,
+    which had dimmed the cloud by 40%.
+  - New texture `nimbus_puff.png` from `tools/NimbusTextureGen.java`.
+- **Dynamics** (`NimbusEntity.clientMotion`):
+  - It tilts nose-down when speeding up, rocks back when braking, banks into turns and stretches with speed. Each
+    runs on a spring with a little overshoot.
+  - It bobs while hovering.
+  - On the server, an unridden Nimbus that is moving turns to face its travel.
+- **The trail:**
+  - a golden streak (a soft gold band, an additive glow and a white core) along the wake, joined to the tail;
+  - golden wisps shed off the tail (one or two a tick with speed), swelling as they fade;
+  - star glints at speed.
+- **Feel:**
+  - riding wind that rises in volume and pitch with speed (`NimbusClient.Wind`);
+  - server momentum: speed builds (lerp .11), glides to a stop (.06), turning back brakes (.16).
+- **Checked in the dev client:** a summoned Nimbus hovering, and gliding across the view by day and at night (streak,
+  wisps and glints visible, colours bright). Riding with input can't be driven from the harness.

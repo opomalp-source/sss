@@ -34,6 +34,24 @@ public final class FxRenderTypes extends RenderType {
                     .setOverlayState(OVERLAY)
                     .createCompositeState(false)));
 
+    /**
+     * Ordinary blending with no shading at all (the eyes shader: the vertex colour as given), so a cloud keeps exactly
+     * its colours from every side. The entity shaders above dim by the normal against the world's two lights.
+     */
+    private static final Function<ResourceLocation, RenderType> UNLIT = Util.memoize(tex -> create("dbzenith_fx_unlit",
+            DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, false, true,
+            CompositeState.builder()
+                    .setShaderState(RENDERTYPE_EYES_SHADER)
+                    .setTextureState(new TextureStateShard(tex, false, false))
+                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                    .setCullState(NO_CULL)
+                    .setWriteMaskState(COLOR_WRITE)
+                    .createCompositeState(false)));
+
+    public static RenderType unlit(ResourceLocation texture) {
+        return UNLIT.apply(texture);
+    }
+
     private FxRenderTypes(String name, VertexFormat format, VertexFormat.Mode mode, int size, boolean crumbling, boolean sort,
                           Runnable setup, Runnable clear) {
         super(name, format, mode, size, crumbling, sort, setup, clear);

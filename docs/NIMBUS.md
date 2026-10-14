@@ -23,10 +23,35 @@ Use the item in open space to summon and mount it. It is not consumed. Empty clo
 - Use the item again while mounted: also switches posture.
 - Shift: dismount.
 
-The cloud uses one closed sculpted surface with a scalloped silhouette, a broad billowing top, recessed golden spirals, and a swept rear tip. Its fading wake is a continuous tapered mesh with shared rings, not separate spheres or Minecraft particles. The body mesh and its surface normals are cached once. Motion and eligibility are server-authoritative; a missing input stream brakes to a hover. Both client and server need this version for multiplayer.
+## How it looks (CX-39)
 
-## Build and compatibility
+The cloud is about thirty soft puffs (`NimbusRenderer`), not a solid mesh. Each puff breathes and churns on its own; the colour runs from bright yellow on top to warm orange underneath, with a few white-gold highlights and a curling tail. The puffs face the camera, are sorted back to front, and are drawn unlit (`FxRenderTypes.unlit`) so the cloud keeps its colour from every side. It glows a little softer at night. The puff texture comes from `tools/NimbusTextureGen.java`.
 
-The source checkout predates the user's installed 0.88.0 release. Build the donor with Gradle, then use `tools/PackageHairUpdate.ps1` against the untouched original 0.88.0 JAR. Never install the whole 0.72.0 donor. The packager preserves the prior hair and transformation changes, adds only Nimbus classes/assets, and verifies unrelated original entries byte-for-byte. Nimbus registration is self-contained and does not replace the baseline entity/item/network registries.
+It moves like a living thing. The client works out its motion each tick (`NimbusEntity.clientMotion`):
 
-The `NimbusTests` server GameTests cover alignment boundaries, bypass rejection, alignment loss, posture persistence, non-finite input rejection, movement and stale input braking. `tools/nimbus-review.init.gradle` launches an isolated client review. Development tests/review classes are excluded from the packaged release.
+- It tilts nose-down as it speeds up and rocks back as it brakes, banks into turns, and stretches out with speed, the tail streaming back. Each of these runs on a spring, so it overshoots a little and settles.
+- Hovering, it bobs.
+- Gliding on its own, it turns to face where it is going.
+
+The trail behind it:
+
+- a glowing golden streak along the last 1.7 seconds of its path, joined to the tail;
+- golden wisps peeling off the tail, swelling as they fade;
+- glints sparkling in the wake.
+
+Riding it plays wind that rises in volume and pitch with speed. Movement has momentum (server-side): speed builds over a moment, glides to a stop, and turns back faster than it coasts.
+
+Motion and eligibility are server-authoritative; a missing input stream glides to a hover. Both client and server need this version for multiplayer.
+
+## Tests
+
+The `NimbusTests` server GameTests cover:
+
+- alignment boundaries;
+- bypass rejection;
+- alignment loss;
+- posture persistence;
+- non-finite input rejection;
+- movement and stale-input braking.
+
+`tools/nimbus-review.init.gradle` launches an isolated client review.
