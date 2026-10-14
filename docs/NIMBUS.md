@@ -2,7 +2,7 @@
 
 Nimbus is a reusable flying mount restricted to Good alignment (30 or higher). The server checks eligibility both when mounting and during flight. Losing Good alignment dismounts the rider.
 
-## Obtaining and riding
+## Obtaining, binding and calling (CX-40)
 
 Find Flying Nimbus in Creative > Tools & Utilities, or use `/give @s dbzenith:flying_nimbus`.
 
@@ -14,14 +14,28 @@ Feather     | Golden apple | Feather
 Yellow wool | Feather      | Yellow wool
 ```
 
-Use the item in open space to summon and mount it. It is not consumed. Empty clouds disappear after one minute. Summoning another replaces your nearby empty cloud.
+**Bind it:** use the item. It is absorbed and the cloud is bound to your soul (`NimbusBond`, kept in the player's persisted data, so it survives death and relogging).
 
+**Call it:** press the call key (M by default, "Nimbus: Call / Send Away").
+- "Nimbus!": the cloud appears high in the sky ahead of you and swoops down along a curve, trailing gold. Indoors it comes from just above.
+- It parks beside you, turned your way.
+- If you are falling, it dives under you and catches you.
+- Jump onto it to ride (as Goku does), or right-click it.
+
+**Send it away:** press the key again. It works while it is still coming in, parked, or carrying you.
+- The cloud comes apart into golden wisps and glints over 1.5 seconds.
+- A rider high in the air gets a few seconds of slow falling.
+- Pressing from more than 64 blocks away calls a fresh cloud instead (the old one dissolves).
+- An empty cloud also dissolves on its own after a minute.
+
+**Admin:** `/dbz nimbus <players> bind|unbind|call`.
+
+**Riding:**
 - WASD and view direction: steer; look down while moving forward to descend.
 - Space: rise.
 - Sprint: fly faster.
-- M: switch between standing and sitting (remappable in Controls).
-- Use the item again while mounted: also switches posture.
-- Shift: dismount.
+- `,`: switch between standing and sitting (remappable in Controls).
+- Shift: get off.
 
 ## How it looks (CX-39)
 
@@ -52,6 +66,7 @@ The `NimbusTests` server GameTests cover:
 - alignment loss;
 - posture persistence;
 - non-finite input rejection;
-- movement and stale-input braking.
+- movement and stale-input braking;
+- binding, calling and sending away (the cloud comes from high above and parks beside you; a leaving cloud drops its rider softly and cannot be mounted).
 
 `tools/nimbus-review.init.gradle` launches an isolated client review.

@@ -2689,3 +2689,36 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   - server momentum: speed builds (lerp .11), glides to a stop (.06), turning back brakes (.16).
 - **Checked in the dev client:** a summoned Nimbus hovering, and gliding across the view by day and at night (streak,
   wisps and glints visible, colours bright). Riding with input can't be driven from the harness.
+
+## 2026-10-14 — CX-40: the Flying Nimbus bound to your soul, called down from the sky (v0.101.0)
+- **The ask** (user): with the item, bind the Nimbus to your soul; a key brings it flying down from above to you, as
+  with Goku; pressing again makes it disappear.
+- **Binding** (`NimbusBond`): using the item binds it, with a golden flash and a chime, and absorbs the item. The bond
+  is kept in the player's persisted data, so it survives death. Using another item while bound acts like the call key.
+- **Calling:** the new key "Nimbus: Call / Send Away" (M; packet `NimbusNetwork.Call`, rate-limited).
+  - "Nimbus!" appears on the action bar.
+  - The cloud appears 26 blocks up and 22 ahead (within 40 degrees either way; indoors 7 up and 10 ahead) and swoops in
+    on a curve, passing through terrain. It is fast from afar and eases in, nose first, then turns your way to park
+    1.8 blocks in front of you.
+  - If you are falling (fall distance over 2.5), it dives under you and catches you.
+  - A rushing wind plays where it is as it comes, and a chime when it arrives.
+  - Owners hop on by landing on it (`hopOn`), not within a second of getting off.
+- **Sending away:** pressing again while your cloud is within 64 blocks.
+  - It drops its rider (with slow falling if there's nothing below) and can't be mounted any more.
+  - It dissolves over 30 ticks: the puffs drift outward, swell, whiten and fade; a burst of wisps and glints flies
+    off; a chime and a whoosh play.
+  - From further away, the key calls a fresh cloud and the old one dissolves.
+  - Empty clouds dissolve after a minute instead of vanishing.
+- **Keys:** sit/stand moved to `,`, with a new id (`nimbus_sit`) so the saved M binding doesn't clash with the call
+  key. Channel version 2.
+- **Admin:** `/dbz nimbus <players> bind|unbind|call`.
+- **Tests:**
+  - The `nimbusqa` and `socialqa` GameTest namespaces (from the 0.88 line) were never enabled, so their tests had not
+    been running. They are now enabled in build.gradle.
+  - The old stale-input test now allows the momentum glide.
+  - New: `bindCallAndSendAway`, `sentAwayWhileRidingDissolves`.
+  - `safeZonesStopFights` checks the spawn radius at its default within one tick, since DestructionTests turns it off
+    for a while. This fixes the flake.
+  - 217 GameTests.
+- **Checked in the dev client:** binding; the call (the cloud in the sky, then curving down with its golden streak,
+  then parked beside the player); sending away (the golden dissolve with glints).

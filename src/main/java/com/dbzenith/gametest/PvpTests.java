@@ -111,7 +111,13 @@ public final class PvpTests {
         zones.remove("test_zone");
         BlockPos s = helper.getLevel().getSharedSpawnPos();
         a.teleportTo(s.getX() + 0.5, s.getY() + 1, s.getZ() + 0.5);
-        helper.assertTrue(PvpRules.inSafeZone(a), "world spawn is safe");
+        // other tests (DestructionTests) switch the spawn radius off for a while: check it at its default, within this tick
+        var radius = com.dbzenith.config.DBZConfig.SERVER.pvpSpawnSafeRadius;
+        int was = radius.get();
+        radius.set(32);
+        boolean safe = PvpRules.inSafeZone(a);
+        radius.set(was);
+        helper.assertTrue(safe, "world spawn is safe");
         TestPlayers.remove(helper, a);
         TestPlayers.remove(helper, b);
         helper.succeed();

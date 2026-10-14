@@ -29,7 +29,7 @@ legacyForge {
         client {
             client()
             programArguments.addAll '--username', 'Dev'
-            systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+            systemProperty 'forge.enabledGameTestNamespaces', project.mod_id + ',nimbusqa,socialqa'
         }
 
         // Dev client that auto-joins the local dev server (runServer), screenshots the HUD, then quits.
@@ -50,14 +50,14 @@ legacyForge {
             server()
             gameDirectory = project.file('run-server')
             programArgument '--nogui'
-            systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+            systemProperty 'forge.enabledGameTestNamespaces', project.mod_id + ',nimbusqa,socialqa'
         }
 
         // Boots a headless server, runs every @GameTest in our namespace, then exits (non-zero on failure).
         gameTestServer {
             type = "gameTestServer"
             gameDirectory = project.file('run-gametest')
-            systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+            systemProperty 'forge.enabledGameTestNamespaces', project.mod_id + ',nimbusqa,socialqa'
         }
 
         data {

@@ -252,4 +252,5 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [x] CX-38 (v0.99.0) Flight rework: momentum physics (fly where you look, glide, brake, boost), spring-driven body dynamics (trailing legs, flutter, hover dangle, arms, head), wind sound, FOV, boost rings, streaks, skim dust and spray
 - [x] CX-38b (v0.99.1) Flight body by forward speed (strafing barely moves it), the body turning after the camera, camera-steered flight setting, cinematic camera (speed pull-back, turn roll)
 - [x] CX-39 (v0.100.0) Flying Nimbus rework: a living cloud of breathing puffs (tilts, banks, stretches on springs), golden trail (streak, shed wisps, glints), riding wind, momentum
+- [x] CX-40 (v0.101.0) Soul-bound Flying Nimbus: bind with the item, call key (M) swoops it down from the sky (catches you falling, hop on), press again to dissolve it; `/dbz nimbus`; nimbusqa/socialqa tests enabled, safe-zone test flake fixed
 - Paused for CX-19: 17d (the robot dojo), 18b (the combat animations as data; folded into 19b)

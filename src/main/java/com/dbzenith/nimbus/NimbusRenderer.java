@@ -89,6 +89,9 @@ public class NimbusRenderer extends EntityRenderer<NimbusEntity> {
         float day = mc.level == null ? 1 : (mc.level.getSkyDarken(partial) - .2f) / .8f;               // 0 at night, 1 by day
         float bright = .74f + .26f * Math.max(day, LightTexture.block(light) / 15f);        // it glows, a little softer at night
         float bob = Mth.sin(t * .09f) * .05f * (1 - Math.min(1, n.speed * 3));
+        // sent away: every puff drifts out from the middle, swells, turns white-gold and fades
+        float gone = n.leaving() ? Mth.clamp((t - n.stateStart) / NimbusEntity.LEAVE_TICKS, 0, 1) : 0;
+        float spread = 1 - (1 - gone) * (1 - gone);
 
         // the body: placed, turned, tilted, banked and stretched, then sorted back to front
         Quaternionf turn = new Quaternionf().rotationY((float) Math.toRadians(-yaw)).rotateX((float) Math.toRadians(tilt)).rotateZ((float) Math.toRadians(bank));
@@ -99,12 +102,14 @@ public class NimbusRenderer extends EntityRenderer<NimbusEntity> {
             float breathe = 1 + .07f * Mth.sin(t * .075f + ph);
             float churn = .045f * (1 + n.speed * 2);
             float z = s.z() * (1 + stretch * (s.z() < -.5f ? 1.4f : .35f));             // the tail streams back the most
-            Vector3f p = new Vector3f(s.x() + Mth.sin(t * .05f + ph) * churn, s.y() * (1 - stretch * .18f) + Mth.cos(t * .06f + ph) * churn * .7f, z + Mth.sin(t * .04f + ph * 1.3f) * churn);
+            Vector3f p = new Vector3f(s.x() * (1 + spread * 1.6f) + Mth.sin(t * .05f + ph) * churn, s.y() * (1 - stretch * .18f) + (s.y() - .25f) * spread * 1.2f + spread * .5f + Mth.cos(t * .06f + ph) * churn * .7f, z * (1 + spread * 1.6f) + Mth.sin(t * .04f + ph * 1.3f) * churn);
             turn.transform(p);
             float shade = Mth.clamp((s.y() - .1f) / .7f, 0, 1);
             int rgb = s.shine() ? SHINE : shade > .5f ? FxDraw.mix(MID, TOP, (shade - .5f) * 2) : FxDraw.mix(UNDER, MID, shade * 2);
             Vec3 at = new Vec3(p.x, p.y + bob, p.z);
-            draws.add(new Draw(at, s.size() * breathe * 1.18f, dim(rgb, bright), s.shine() ? 200 : 245, ph, at.distanceToSqr(eye)));
+            if (gone > 0) rgb = FxDraw.mix(rgb, SHINE, gone);
+            int alpha = (int) ((s.shine() ? 200 : 245) * Math.pow(1 - gone, 1.5));
+            draws.add(new Draw(at, s.size() * breathe * 1.18f * (1 + gone * .7f), dim(rgb, bright), alpha, ph + gone * 2, at.distanceToSqr(eye)));
         }
         // the puffs it has shed: golden wisps peeling off the tail, swelling as they fade (sorted in with the body)
         for (NimbusEntity.Puff p : n.puffs) {
@@ -131,7 +136,7 @@ public class NimbusRenderer extends EntityRenderer<NimbusEntity> {
         if (pts.size() > 1 && n.speed > .04f) {
             pts.add(n.rearPoint().subtract(origin));                                    // join the streak to the tail now
             lives.add(1f);
-            float strength = Math.min(1, n.speed * 2.2f);
+            float strength = Math.min(1, n.speed * 2.2f) * (1 - gone);
             // one buffer at a time: asking for the next ends the last (they share one builder)
             VertexConsumer band = buffers.getBuffer(FxRenderTypes.unlit(GLOW));
             for (int i = 0; i < pts.size() - 1; i++) {

@@ -708,6 +708,11 @@ public final class DBZCommand {
                                     ctx.getSource().sendSuccess(() -> Component.literal("Revived " + count + " player(s)"), true);
                                     return n;
                                 })))
+                .then(Commands.literal("nimbus")   // the soul-bound Flying Nimbus (CX-40): bind, unbind, or press the call key
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.literal("bind").executes(ctx -> nimbus(ctx, "bind")))
+                                .then(Commands.literal("unbind").executes(ctx -> nimbus(ctx, "unbind")))
+                                .then(Commands.literal("call").executes(ctx -> nimbus(ctx, "call")))))
                 .then(Commands.literal("devshot")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("name", StringArgumentType.word())
@@ -717,6 +722,25 @@ public final class DBZCommand {
                 .then(Commands.literal("reset")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .executes(ctx -> apply(ctx, "Reset character of", PlayerData::reset)))));
+    }
+
+    /** /dbz nimbus: binds or unbinds the Flying Nimbus to players' souls, or presses their call key for them. */
+    private static int nimbus(CommandContext<CommandSourceStack> ctx, String action) throws CommandSyntaxException {
+        int n = 0;
+        for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
+            switch (action) {
+                case "bind" -> com.dbzenith.nimbus.NimbusBond.bind(p);
+                case "unbind" -> {
+                    com.dbzenith.nimbus.NimbusBond.owned(p).forEach(com.dbzenith.nimbus.NimbusEntity::leave);
+                    com.dbzenith.nimbus.NimbusBond.setBound(p, false);
+                }
+                default -> com.dbzenith.nimbus.NimbusBond.press(p);
+            }
+            n++;
+        }
+        int count = n;
+        ctx.getSource().sendSuccess(() -> Component.literal("Nimbus " + action + ": " + count + " player(s)"), true);
+        return n;
     }
 
     /** /dbz look: hair (a preset name or a hair code), skin tone (-1 = own skin) and height in percent. */

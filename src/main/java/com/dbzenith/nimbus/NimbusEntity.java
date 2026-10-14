@@ -19,6 +19,14 @@ import java.util.Deque;
 /** Server-authoritative flying cloud; no vanilla flight ability or ki is required. */
 public class NimbusEntity extends Entity {
     private static final EntityDataAccessor<Boolean> SITTING=SynchedEntityData.defineId(NimbusEntity.class,EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Byte> STATE=SynchedEntityData.defineId(NimbusEntity.class,EntityDataSerializers.BYTE);
+    /** What the cloud is doing: parked or carrying someone, swooping in to its owner when called, or dissolving away. */
+    public static final byte IDLE=0,ARRIVING=1,LEAVING=2;
+    /** How long it takes to dissolve, in ticks. */
+    public static final int LEAVE_TICKS=30;
+    private int stateTicks,dismountTick=-100;
+    /** Client: the tick the current state began (for the dissolve). */
+    public int stateStart;
     private float forward,strafe;
     private boolean rise,boost;
     private int emptyTicks;
@@ -36,10 +44,20 @@ public class NimbusEntity extends Entity {
         forward=net.minecraft.util.Mth.clamp(f,-1,1);strafe=net.minecraft.util.Mth.clamp(s,-1,1);rise=up;boost=fast;inputTick=tickCount;
         if(toggle) togglePosture();
     }
-    @Override protected void defineSynchedData() { entityData.define(SITTING,false); }
+    @Override protected void defineSynchedData() { entityData.define(SITTING,false);entityData.define(STATE,IDLE); }
+    public byte state() { return entityData.get(STATE); }
+    public boolean leaving() { return state()==LEAVING; }
+    public String owner() { return getPersistentData().getString("NimbusOwner"); }
+    public void setOwner(Player p) { getPersistentData().putString("NimbusOwner",p.getUUID().toString()); }
+    private Player ownerPlayer() {
+        try { return owner().isEmpty()?null:level().getPlayerByUUID(java.util.UUID.fromString(owner())); } catch(IllegalArgumentException e) { return null; }
+    }
+    private void setState(byte s) { entityData.set(STATE,s);stateTicks=0; }
+    /** Called: swoop in to the owner. */
+    public void arrive() { setState(ARRIVING);noPhysics=true; }
     @Override public boolean shouldRiderSit() { return sitting(); }
     @Override public double getPassengersRidingOffset() { return sitting()?.57:1.05; }
-    @Override protected boolean canAddPassenger(Entity e) { return getPassengers().isEmpty()&&e instanceof Player p&&(level().isClientSide||eligible(p)); }
+    @Override protected boolean canAddPassenger(Entity e) { return getPassengers().isEmpty()&&!leaving()&&e instanceof Player p&&(level().isClientSide||eligible(p)); }
     @Override public boolean isPickable() { return !isRemoved(); }
     @Override public InteractionResult interact(Player p,InteractionHand hand) {
         if(!level().isClientSide) {
@@ -72,6 +90,12 @@ public class NimbusEntity extends Entity {
         }
         Player pilot=getFirstPassenger() instanceof Player p?p:null;
         if(pilot!=null&&!eligible(pilot)) { pilot.stopRiding();pilot.displayClientMessage(Component.translatable("message.dbzenith.nimbus.good"),true);pilot=null; }
+        stateTicks++;
+        if(leaving()) { dissolving();return; }
+        if(state()==ARRIVING) {
+            if(pilot==null) { swoop();return; }
+            setState(IDLE);noPhysics=false;
+        }
         Vec3 wanted=Vec3.ZERO;
         if(pilot!=null&&tickCount-inputTick<=10) {
             Vec3 look=pilot.getLookAngle();double yaw=Math.toRadians(pilot.getYRot());
@@ -91,7 +115,87 @@ public class NimbusEntity extends Entity {
         if(horizontalCollision||verticalCollision) setDeltaMovement(getDeltaMovement().scale(.3));
         if(getY()>level().getMaxBuildHeight()-2) { setPos(getX(),level().getMaxBuildHeight()-2,getZ());setDeltaMovement(Vec3.ZERO); }
         fallDistance=0;
-        if(pilot==null) { if(++emptyTicks>1200) discard(); } else emptyTicks=0;
+        if(pilot==null) { hopOn();if(++emptyTicks>1200) leave(); } else emptyTicks=0;
+    }
+    // ---------------------------------------------------------------- server: called, sent away, hopped onto
+    /** Sent away: drops its rider (softly, if high up) and dissolves. */
+    public void leave() {
+        if(leaving()||level().isClientSide) return;
+        for(Entity e:getPassengers()) {
+            e.stopRiding();e.fallDistance=0;
+            if(e instanceof Player p&&level().noCollision(p,p.getBoundingBox().move(0,-2.5,0).expandTowards(0,2.5,0)))   // nothing under you: drift down
+                p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOW_FALLING,70,0,false,false,true));
+        }
+        setState(LEAVING);noPhysics=true;
+        level().playSound(null,blockPosition(),net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_CHIME,net.minecraft.sounds.SoundSource.NEUTRAL,1f,.7f);
+        level().playSound(null,blockPosition(),net.minecraft.sounds.SoundEvents.ILLUSIONER_MIRROR_MOVE,net.minecraft.sounds.SoundSource.NEUTRAL,.8f,1.3f);
+    }
+    private void dissolving() {
+        Vec3 v=getDeltaMovement().scale(.85).add(0,.006,0);                         // slows, lifting a little as it comes apart
+        setDeltaMovement(v);setPos(position().add(v));
+        if(stateTicks>=LEAVE_TICKS) discard();
+    }
+    /** Where the cloud parks for its owner: in front of them at their feet, or, if they are falling, right under them. */
+    private Vec3 meetPoint(Player o,boolean catching) {
+        if(catching) return o.position().add(0,-.75+Math.max(-4,Math.min(0,o.getY()-o.yo))*2,0);   // a little below, where you will be
+        Vec3 ahead=o.getLookAngle().multiply(1,0,1);
+        if(ahead.lengthSqr()<1e-4) ahead=Vec3.directionFromRotation(0,o.getYRot());
+        return o.position().add(ahead.normalize().scale(1.8)).add(0,.3,0);
+    }
+    /** Called: flies to its owner, fast from afar and easing in, along a curve (its velocity turns, it doesn't snap). */
+    private void swoop() {
+        Player o=ownerPlayer();
+        if(o==null||o.isRemoved()||o.distanceToSqr(this)>160*160) { leave();return; }
+        boolean catching=!o.onGround()&&!o.isPassenger()&&o.fallDistance>2.5f&&!o.getAbilities().flying;
+        Vec3 to=meetPoint(o,catching).subtract(position());
+        double d=to.length();
+        if(catching&&d<1.6&&eligible(o)&&o.startRiding(this,true)) {               // caught you as you fell
+            o.fallDistance=0;setState(IDLE);noPhysics=false;setDeltaMovement(getDeltaMovement().scale(.3));arrived();return;
+        }
+        if(!catching&&d<.35||stateTicks>260) {
+            if(stateTicks>260) setPos(position().add(to));
+            setState(IDLE);noPhysics=false;setDeltaMovement(getDeltaMovement().scale(.2));arrived();return;
+        }
+        double speed=net.minecraft.util.Mth.clamp(d*.17+.12,.1,catching?4.5:1.6);
+        Vec3 v=getDeltaMovement().lerp(to.scale(speed/Math.max(d,1e-4)),catching?.6:.2);
+        setDeltaMovement(v);setPos(position().add(v));
+        float face=d<3?o.getYRot():(float)Math.toDegrees(Math.atan2(-v.x,v.z));  // nose first, then turned your way to get on
+        setYRot(net.minecraft.util.Mth.rotLerp(d<3?.25f:.3f,getYRot(),face));
+        fallDistance=0;
+    }
+    private void arrived() {
+        level().playSound(null,blockPosition(),net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_CHIME,net.minecraft.sounds.SoundSource.NEUTRAL,1f,1.25f);
+    }
+    /** Its owner jumping onto it rides it, as Goku does. */
+    private void hopOn() {
+        if(tickCount-dismountTick<20) return;
+        Player o=ownerPlayer();
+        if(o==null||o.isPassenger()||o.isShiftKeyDown()||o.onGround()||o.fallDistance<=0) return;     // coming down onto it
+        double top=getY()+getBbHeight();
+        if(o.getY()<top-.45||o.getY()>top+.9||o.position().subtract(position()).horizontalDistanceSqr()>1.2*1.2) return;
+        if(eligible(o)&&o.startRiding(this,true)) { o.fallDistance=0;ModCapabilities.get(o).ifPresent(d->d.setFlying(false)); }
+    }
+    @Override protected void removePassenger(Entity e) { super.removePassenger(e);dismountTick=tickCount; }
+    @Override public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if(key.equals(STATE)&&level().isClientSide) {
+            stateStart=tickCount;
+            if(leaving()) burst();
+            else if(state()==ARRIVING) NimbusClient.incoming(this);
+        }
+    }
+    /** Client: the moment it comes apart, puffs and glints fly off every side. */
+    private void burst() {
+        var rnd=random;
+        for(int i=0;i<26;i++) {
+            Vec3 dir=new Vec3(rnd.nextFloat()-.5,(rnd.nextFloat()-.3)*.7,rnd.nextFloat()-.5).normalize();
+            Vec3 at=position().add(0,.4,0).add(dir.scale(.5+rnd.nextFloat()*.4));
+            puffs.add(new Puff(at,dir.scale(.05+rnd.nextFloat()*.05).add(0,.01,0),tickCount,18+rnd.nextInt(14),.35f+rnd.nextFloat()*.35f,false));
+        }
+        for(int i=0;i<14;i++) {
+            Vec3 dir=new Vec3(rnd.nextFloat()-.5,rnd.nextFloat()-.2,rnd.nextFloat()-.5).normalize();
+            puffs.add(new Puff(position().add(0,.4,0).add(dir.scale(.4)),dir.scale(.07+rnd.nextFloat()*.06),tickCount,16+rnd.nextInt(14),.14f+rnd.nextFloat()*.12f,true));
+        }
     }
     // ---------------------------------------------------------------- client: how the cloud moves and what it sheds
     /** A puff peeling off the back of the cloud: where (world), drifting how, born when, how big. */
