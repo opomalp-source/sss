@@ -74,9 +74,82 @@ public final class ClientSounds {
             }
             case ImpactPacket.DEFLECT -> at(level, pos, ModSounds.DEFLECT.get(), 0.9f, 1f);
             case ImpactPacket.KI_HIT -> at(level, pos, ModSounds.KI_HIT.get(), 0.5f + 0.25f * big, 1.15f - 0.1f * big);
-            case ImpactPacket.EXPLOSION -> at(level, pos, big > 1.6f ? ModSounds.EXPLOSION_BIG.get() : ModSounds.EXPLOSION.get(),
-                    0.7f + 0.3f * big, 1.1f - 0.1f * big);
+            case ImpactPacket.EXPLOSION -> {                                  // in layers (the ki attack rework): the boom, then debris, then far off an echo
+                at(level, pos, big > 1.6f ? ModSounds.EXPLOSION_BIG.get() : ModSounds.EXPLOSION.get(), 0.7f + 0.3f * big, 1.1f - 0.1f * big);
+                later(level, pos, 6, ModSounds.IMPACT_DEBRIS.get(), 0.35f + 0.25f * big, 1f);
+                Minecraft mc = Minecraft.getInstance();
+                double far = mc.gameRenderer.getMainCamera().getPosition().distanceTo(pos);
+                if (scale >= 1.2f) later(level, pos, 10 + (int) (far / 17), ModSounds.IMPACT_ECHO.get(), Math.min(1.6f, 0.4f + 0.4f * big), 0.9f);
+            }
             default -> { }
+        }
+    }
+
+
+    // ------------------------------------------------------------------ the ki attack rework: sounds that come later, and ki in flight
+
+    private record Later(long at, Vec3 pos, SoundEvent sound, float volume, float pitch) {}
+
+    private static final java.util.List<Later> LATER = new java.util.ArrayList<>();
+
+    /** A sound some ticks from now (debris coming down, an echo coming back). */
+    static void later(ClientLevel level, Vec3 pos, int ticks, SoundEvent sound, float volume, float pitch) {
+        if (LATER.size() < 64) LATER.add(new Later(level.getGameTime() + ticks, pos, sound, volume, pitch));
+    }
+
+    @SubscribeEvent
+    public static void onLaterTick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || LATER.isEmpty()) return;
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) {
+            LATER.clear();
+            return;
+        }
+        long now = mc.level.getGameTime();
+        LATER.removeIf(l -> {
+            if (now < l.at) return false;
+            at(mc.level, l.pos, l.sound, l.volume, l.pitch);
+            return true;
+        });
+    }
+
+    /** A ki ball in flight: its hum and rush follow it, rising in pitch as it comes at you and falling as it goes. */
+    public static void travel(com.dbzenith.skill.KiBlastEntity blast) {
+        Minecraft.getInstance().getSoundManager().play(new Travel(blast));
+    }
+
+    static final class Travel extends AbstractTickableSoundInstance {
+        final com.dbzenith.skill.KiBlastEntity blast;
+        double lastDist = -1;
+        float doppler = 1;
+
+        Travel(com.dbzenith.skill.KiBlastEntity blast) {
+            super(ModSounds.KI_TRAVEL.get(), SoundSource.PLAYERS, SoundInstance.createUnseededRandom());
+            this.blast = blast;
+            this.looping = true;
+            this.delay = 0;
+            this.volume = 0.01f;
+            this.x = blast.getX(); this.y = blast.getY(); this.z = blast.getZ();
+        }
+
+        @Override
+        public void tick() {
+            if (blast.isRemoved()) { stop(); return; }
+            x = blast.getX(); y = blast.getY() + blast.getBbHeight() / 2; z = blast.getZ();
+            Vec3 ear = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+            double dist = ear.distanceTo(new Vec3(x, y, z));
+            double closing = lastDist < 0 ? 0 : lastDist - dist;                   // blocks a tick toward you
+            lastDist = dist;
+            doppler += ((float) Mth.clamp(1 + closing * 0.18, 0.7, 1.45) - doppler) * 0.5f;
+            double speed = blast.getDeltaMovement().length();
+            float size = Math.min(2.5f, blast.getSize());
+            volume = (float) Math.max(0.01, Math.min(1, speed * 1.2) * (0.35 + 0.45 * size));   // a bigger ball carries further
+            pitch = (1.25f - 0.2f * size) * doppler;
+        }
+
+        @Override
+        public boolean canStartSilent() {
+            return true;
         }
     }
 

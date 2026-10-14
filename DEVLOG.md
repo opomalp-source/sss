@@ -3050,3 +3050,42 @@ answers: move all built-ins to JSON; for charging movement, my judgement; very b
 - **`docs/KI_ATTACKS.md`:** the data format and how to add an attack.
 - **Tests:** `KiAttackDataTests`: every built-in has its file; a file changes one, leaving the rest as is; a file adds
   a new attack; loading again restores both. 226 GameTests.
+
+## 2026-10-14 — Ki attack rework, phase 1: the basic blast (v0.117.0)
+- **`ki_energy` core shader** (`client.fx.KiEnergy`):
+  - glowing, additive and never lit by the world, drawn into the bloom;
+  - scrolling `ki_noise.png` (tileable: billows, ridges, a second billow; `tools/KiNoiseGen.java`), with GameTime
+    driving the motion;
+  - modes per vertex (UV1): the shell (bright at the rim, plasma boiling over it), the core (white-hot where it faces
+    you), crackling strands, a soft halo, a ribbon (soft across, bright and flowing down the middle).
+  - Its meshes: spheres at three levels of detail, built once and written straight to the buffer (nothing allocated
+    while drawing), camera-facing billboards, ribbons.
+  - Off with a shader pack, where the old look draws.
+- **The ki ball** (`KiBlastRenderer.renderEnergy`):
+  - a soft halo, the shell, crackling strands, a white-hot core and a spinning flare;
+  - a smooth tapered trail through the last ticks' positions (recorded client side), with a white core down it;
+  - a flicker;
+  - detail drops with distance and the quality setting.
+  - Its look comes from its technique's data file (`KiFx.look`, the new synced technique id on `KiBlastEntity`).
+- **Colour:** an attack's colour now leans toward the caster's own aura colour by the technique's `aura_mix` (0.35 by
+  default), so the same attack fired in different forms shows the form (`KiBlastEntity.colorFor`).
+- **`client.fx.KiParticles`:** the attacks' own particles.
+  - Sparks (streaks along their motion), motes (soft shrinking dots) and embers (falling sparks).
+  - Additive and in the bloom, kept in one fixed pool of arrays (nothing allocated while they live; the oldest make
+    way when full).
+  - Caps by quality.
+  - Blasts shed motes and the odd spark; ki hits and explosions burst into radial sparks.
+- **Sound** (SfxGen; old files untouched):
+  - `ki_release` (3 variants: a punch transient, a sub-bass thump, a falling zap, a sizzle) for every blast, or the
+    data file's own `sounds.release`;
+  - `ki_travel`: a hum and a fluttering rush that follows each blast, its pitch rising as it comes at you and falling
+    as it goes (doppler), louder for bigger ones;
+  - explosions add `impact_debris` (a patter of stones) and, for big ones, `impact_echo` (a dull boom washed in a
+    long tail), delayed by the distance to you.
+- **Client setting** `kiQuality` (low, medium, high, ultra), in Settings → Effects.
+- **Checked in the dev client** (a dev datapack of slow test attacks, `/dbz cast`):
+  - a blue ball and a gold one at five blocks: white-hot centres, glowing coloured rims, a halo and plasma;
+  - a blast's flight and trail;
+  - an explosion with the dome, rings, radial spark streaks and smoke.
+  - The vanilla explosion puffs still show (phase 6 replaces them).
+- 226 GameTests.

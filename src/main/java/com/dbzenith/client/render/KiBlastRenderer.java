@@ -81,11 +81,76 @@ public class KiBlastRenderer extends EntityRenderer<KiBlastEntity> {
             super.render(entity, yaw, partialTicks, pose, buffers, light);
             return;
         }
+        if (com.dbzenith.client.fx.KiEnergy.available()) {                     // the ki attack rework: a real glowing sphere
+            renderEnergy(entity, partialTicks, pose, buffers, c, size, t, mid);
+            super.render(entity, yaw, partialTicks, pose, buffers, light);
+            return;
+        }
         float pulse = 1f + 0.08f * Mth.sin(t * 0.8f);
         FxDraw.billboard(pose, buffers.getBuffer(FxRenderTypes.soft(GLOW)), camera, 0, mid, 0, size * 2.6f * pulse, 0, 0, 0, 1, 1, c, 210);
         FxDraw.billboard(pose, buffers.getBuffer(FxRenderTypes.additive(STAR)), camera, 0, mid, 0, size * 2.4f, t * 0.35f, 0, 0, 1, 1, hot, 170);
         FxDraw.billboard(pose, buffers.getBuffer(FxRenderTypes.additive(GLOW)), camera, 0, mid, 0, size * 1.3f, 0, 0, 0, 1, 1, 0xFFFFFF, 255);
         super.render(entity, yaw, partialTicks, pose, buffers, light);
+    }
+
+
+    private static final org.joml.Vector3f LEFT = new org.joml.Vector3f(), UP = new org.joml.Vector3f();
+
+    /**
+     * A ki ball through the energy shader: a soft halo, a shell glowing at its rim with plasma boiling over it,
+     * crackling strands, a white-hot core and a spinning flare; behind it a smooth tapered trail of where it has been,
+     * a white core running down it. Less detail far away and at lower quality.
+     */
+    private void renderEnergy(KiBlastEntity e, float pt, PoseStack pose, MultiBufferSource buffers, int c, float size, float t, double mid) {
+        com.dbzenith.skill.KiLook look = com.dbzenith.client.fx.KiFx.look(e);
+        double ex0 = Mth.lerp(pt, e.xo, e.getX()), ey0 = Mth.lerp(pt, e.yo, e.getY()), ez0 = Mth.lerp(pt, e.zo, e.getZ());
+        Vec3 cam = entityRenderDispatcher.camera.getPosition();
+        float ex = (float) (cam.x - ex0), ey = (float) (cam.y - ey0), ez = (float) (cam.z - ez0);
+        double dist = Math.sqrt(ex * ex + ey * ey + ez * ez);
+        int q = com.dbzenith.client.fx.KiParticles.quality();
+        int detail = Math.min(q == 0 ? 0 : q == 1 ? 1 : 2, dist < 16 ? 2 : dist < 48 ? 1 : 0);
+        float flick = 1f + (0.05f * Mth.sin(t * 0.9f) + 0.03f * Mth.sin(t * 2.3f)) * look.flicker;
+        float r = size * 0.5f * flick;
+        float my = (float) mid;
+        var last = pose.last();
+        org.joml.Matrix4f m = last.pose();
+        org.joml.Matrix3f n = last.normal();
+        LEFT.set(entityRenderDispatcher.camera.getLeftVector());
+        UP.set(entityRenderDispatcher.camera.getUpVector());
+
+        // flat things: the trail, the halo
+        VertexConsumer flat = buffers.getBuffer(com.dbzenith.client.fx.KiEnergy.flat());
+        int pts = e.trailCount;
+        if (pts >= 2 && look.trail > 0) {
+            int used = Math.min(pts, Math.max(3, Math.round(12 * look.trail)));
+            float px = 0, py = my, pz = 0;                                     // newest: where it is drawn now
+            float vNow = t * 0.15f;
+            for (int k = 0; k < used - 1; k++) {
+                int i = (pts - 2 - k) * 3;
+                if (i < 0) break;
+                float qx = (float) (e.trail[i] - ex0), qy = (float) (e.trail[i + 1] - ey0), qz = (float) (e.trail[i + 2] - ez0);
+                float fa = 1 - k / (float) (used - 1), fb = 1 - (k + 1) / (float) (used - 1);
+                com.dbzenith.client.fx.KiEnergy.ribbon(flat, m, n, px, py, pz, qx, qy, qz, ex, ey, ez, size * 1.0f * fa, size * 1.0f * fb,
+                        c, (int) (150 * fa), (int) (150 * fb), vNow + k * 0.2f, vNow + (k + 1) * 0.2f, com.dbzenith.client.fx.KiEnergy.RIBBON);
+                com.dbzenith.client.fx.KiEnergy.ribbon(flat, m, n, px, py, pz, qx, qy, qz, ex, ey, ez, size * 0.45f * fa, size * 0.45f * fb,
+                        look.core, (int) (170 * fa), (int) (170 * fb), vNow + k * 0.2f, vNow + (k + 1) * 0.2f, com.dbzenith.client.fx.KiEnergy.RIBBON);
+                px = qx; py = qy; pz = qz;
+            }
+        }
+        com.dbzenith.client.fx.KiEnergy.billboard(flat, m, n, 0, my, 0, LEFT, UP, size * 1.05f * look.glow * flick, com.dbzenith.client.fx.KiEnergy.argb(c, 95), com.dbzenith.client.fx.KiEnergy.HALO);
+        com.dbzenith.client.fx.KiEnergy.billboard(flat, m, n, 0, my, 0, LEFT, UP, size * 0.55f * flick, com.dbzenith.client.fx.KiEnergy.argb(FxDraw.mix(c, 0xFFFFFF, 0.4f), 90), com.dbzenith.client.fx.KiEnergy.HALO);
+
+        // the sphere in layers
+        VertexConsumer solid = buffers.getBuffer(com.dbzenith.client.fx.KiEnergy.solid());
+        float spin = t * 0.02f;
+        com.dbzenith.client.fx.KiEnergy.sphere(solid, m, n, 0, my, 0, r, com.dbzenith.client.fx.KiEnergy.argb(c, 210), com.dbzenith.client.fx.KiEnergy.SHELL, detail, spin);
+        if (detail > 0 && look.plasma > 0)
+            com.dbzenith.client.fx.KiEnergy.sphere(solid, m, n, 0, my, 0, r * 1.06f, com.dbzenith.client.fx.KiEnergy.argb(c, (int) (220 * Math.min(1, look.plasma))), com.dbzenith.client.fx.KiEnergy.STRANDS, detail, -spin * 1.7f);
+        com.dbzenith.client.fx.KiEnergy.sphere(solid, m, n, 0, my, 0, r * 0.5f, com.dbzenith.client.fx.KiEnergy.argb(look.core, 255), com.dbzenith.client.fx.KiEnergy.CORE, Math.max(0, detail - 1), spin * 0.5f);
+
+        // a spinning flare of light across it
+        VertexConsumer star = buffers.getBuffer(FxRenderTypes.additive(STAR));
+        FxDraw.billboard(pose, star, entityRenderDispatcher.cameraOrientation(), 0, mid, 0, size * 1.6f * flick, t * 0.35f, 0, 0, 1, 1, FxDraw.mix(c, 0xFFFFFF, 0.4f), 60);
     }
 
     @Override

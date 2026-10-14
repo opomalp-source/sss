@@ -116,10 +116,21 @@ public final class TechniqueHandler {
             com.dbzenith.combat.CombatLog.near(player, net.minecraft.network.chat.Component.translatable("log.dbzenith.ultimate", player.getDisplayName(), technique.name()));
         }
         com.dbzenith.network.ModNetwork.sendToTrackingAndSelf(player, com.dbzenith.network.AnimEventPacket.forTechnique(player, technique));
-        level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                technique.style() == Technique.Style.BEAM ? com.dbzenith.registry.ModSounds.BEAM_FIRE.get() : com.dbzenith.registry.ModSounds.KI_FIRE.get(),
-                SoundSource.PLAYERS, 0.6f, 1.4f + level.random.nextFloat() * 0.3f);
+        boolean beam = technique.style() == Technique.Style.BEAM;               // the release (the ki attack rework: its own, layered)
+        level.playSound(null, player.getX(), player.getY(), player.getZ(), releaseSound(technique), SoundSource.PLAYERS,
+                beam ? 0.6f : 0.75f + 0.2f * Math.min(2f, technique.size()),
+                beam ? 1.4f + level.random.nextFloat() * 0.3f : 1.05f - 0.12f * Math.min(2f, technique.size()) + level.random.nextFloat() * 0.12f);
         return Result.FIRED;
+    }
+
+    /** The sound of letting it go: its data file's, else a beam's roar or the layered blast. */
+    public static net.minecraft.sounds.SoundEvent releaseSound(Technique t) {
+        String id = t.look().releaseSound;
+        if (!id.isEmpty()) {
+            net.minecraft.sounds.SoundEvent s = net.minecraftforge.registries.ForgeRegistries.SOUND_EVENTS.getValue(new net.minecraft.resources.ResourceLocation(id));
+            if (s != null) return s;
+        }
+        return t.style() == Technique.Style.BEAM ? com.dbzenith.registry.ModSounds.BEAM_FIRE.get() : com.dbzenith.registry.ModSounds.KI_RELEASE.get();
     }
 
     /**

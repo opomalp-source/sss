@@ -134,13 +134,14 @@ public final class ImpactFx {
             case ImpactPacket.KI_HIT -> {
                 add(Kind.FLASH, pos, dir, tint, 0, 1.4f * s, 3, 230);
                 add(Kind.FACING_RING, pos, dir, m.color(), 0.1f * s, 1.3f * s, 5, 170);
-                burst(level, ParticleTypes.END_ROD, pos, dir, 3, 0.15);
+                KiParticles.burst(pos, m.color(), (int) (14 + 10 * s), 0.18f + 0.06f * s, 0.6f + 0.3f * s);   // radial sparks (the ki attack rework)
                 CameraFx.shakeAt(pos, 0.05f, 12);
             }
             case ImpactPacket.EXPLOSION -> {
                 add(Kind.FLASH, pos, dir, tint, 0, 2.4f * s, 5, 255);
                 add(Kind.RING, pos, UP, m.color(), 0.3f * s, 2.6f * s, 12, 200);
                 add(Kind.FACING_RING, pos, dir, 0xFFFFFF, 0.2f * s, 1.8f * s, 8, 180);
+                KiParticles.burst(pos, m.color(), (int) (30 + 18 * s), 0.3f + 0.08f * s, 0.9f + 0.3f * s);
                 // CX-46: a dome of light swelling out and thinning, then smoke left hanging and rising
                 add(Kind.DOME, pos, UP, tint, 0.3f * s, 1.25f * s, 9 + (int) (2 * s), 230);
                 int puffs = Math.min(22, 5 + (int) (3 * s));

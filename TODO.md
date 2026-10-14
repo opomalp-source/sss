@@ -280,7 +280,7 @@ Decided with the user: all built-in attacks as JSON; charging locks movement for
 very big craters; light faked (ground glow + bloom); procedural 3D glowing meshes; run phases 1-4 then stop; install
 to both mods folders.
 - [x] Phase 0 (v0.116.0) Groundwork: attacks as data files (data/*/ki_attacks/*.json, /reload, synced), look and sound profile, /dbz kiattacks export, ./gradlew installMod, docs/KI_ATTACKS.md
-- [ ] Phase 1 Basic blast: 3D layered glowing sphere (core, shell, plasma, halo), trail, own particles, impact, layered sound
+- [x] Phase 1 (v0.117.0) Basic blast: 3D layered glowing sphere (core, shell, plasma, halo), trail, own particles, impact, layered sound
 - [ ] Phase 2 Charge-up: particles drawn in, growing orb with arcs, dust and debris, cracks, rising light and sound, movement lock
 - [ ] Phase 3 Beams: tapered beam mesh, scrolling energy, core, spirals, crackling edges, 3D end cap, widening, flicker
 - [ ] Phase 4 Large spheres: huge swirling sphere, orbiting sparks, ground reaction

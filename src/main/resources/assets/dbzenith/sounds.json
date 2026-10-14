@@ -154,5 +154,21 @@
   "nimbus_dissolve": {
     "subtitle": "subtitles.dbzenith.nimbus_dissolve",
     "sounds": ["dbzenith:nimbus_dissolve"]
+  },
+  "ki_release": {
+    "subtitle": "subtitles.dbzenith.ki_release",
+    "sounds": ["dbzenith:ki_release_1", "dbzenith:ki_release_2", "dbzenith:ki_release_3"]
+  },
+  "ki_travel": {
+    "subtitle": "subtitles.dbzenith.ki_travel",
+    "sounds": ["dbzenith:ki_travel"]
+  },
+  "impact_debris": {
+    "subtitle": "subtitles.dbzenith.impact_debris",
+    "sounds": ["dbzenith:impact_debris_1", "dbzenith:impact_debris_2"]
+  },
+  "impact_echo": {
+    "subtitle": "subtitles.dbzenith.impact_echo",
+    "sounds": ["dbzenith:impact_echo_1", "dbzenith:impact_echo_2"]
   }
 }

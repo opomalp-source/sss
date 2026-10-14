@@ -61,6 +61,11 @@ public final class SfxGen {
         save("nimbus_call", 0, nimbusCall());
         save("nimbus_arrive", 0, nimbusArrive());
         save("nimbus_dissolve", 0, nimbusDissolve());
+        // ki attack rework, phase 1: layered blast sounds
+        for (int v = 0; v < 3; v++) save("ki_release", v, kiRelease(v));
+        save("ki_travel", 0, loop(kiTravel(), 0.3));
+        for (int v = 0; v < 2; v++) save("impact_debris", v, impactDebris(v));
+        for (int v = 0; v < 2; v++) save("impact_echo", v, impactEcho(v));
         writeSoundsJson();
         System.out.println("SfxGen done: " + EVENTS.size() + " events");
     }
@@ -843,11 +848,82 @@ public final class SfxGen {
         return room(out, 0.4, 0.55);
     }
 
+
+    // ================================================================== ki attack rework, phase 1
+
+    /** A ki blast let go: a sharp punch of air, a deep sub-bass thump under it, a bright zap falling away, a sizzle. */
+    static double[] kiRelease(int v) {
+        double[] out = buf(0.9);
+        double[] punch = highpass(noise(out.length), 1800);
+        mul(punch, env(out.length, 0.001, 0.035));
+        double[] sub = sine(out.length, t -> 62 - 26 * Math.min(1, t / 0.25) + v * 4);
+        mul(sub, env(out.length, 0.004, 0.32));
+        double[] zap = saw(out.length, t -> (1900 + v * 260) * Math.exp(-t * 9) + 260, 0.8);
+        zap = lowpass(zap, t -> 6000 * Math.exp(-t * 6) + 900);
+        mul(zap, env(out.length, 0.003, 0.18));
+        double[] sizzle = bandpass(noise(out.length), t -> 4200, 0.9);
+        mul(sizzle, crackle(out.length, 0.6, 40 + v));
+        mul(sizzle, env(out.length, 0.01, 0.4));
+        mix(out, punch, 0.9);
+        mix(out, sub, 1.3);
+        mix(out, zap, 0.45);
+        mix(out, sizzle, 0.25);
+        saturate(out, 1.6);
+        return room(out, 0.18, 0.25);
+    }
+
+    /** A ki ball in flight: a hum with a fluttering rush of air round it and a faint crackle (looped). */
+    static double[] kiTravel() {
+        double[] out = buf(1.6);
+        double[] hum = add(saw(out.length, t -> 196, 0.4), scale(saw(out.length, t -> 197.8, 0.4), 0.8));
+        hum = lowpass(hum, t -> 900);
+        mul(hum, shape(out.length, t -> 0.75 + 0.25 * Math.sin(2 * Math.PI * 9 * t)));
+        double[] rush = bandpass(noise(out.length), t -> 1100 + 300 * Math.sin(2 * Math.PI * t / 0.8), 0.8);
+        mul(rush, shape(out.length, t -> 0.7 + 0.3 * Math.sin(2 * Math.PI * 13 * t)));
+        double[] crack = highpass(noise(out.length), 5000);
+        mul(crack, crackle(out.length, 0.3, 61));
+        mix(out, hum, 0.5);
+        mix(out, rush, 0.9);
+        mix(out, crack, 0.2);
+        return out;
+    }
+
+    /** What an explosion throws up coming down: a patter of stones and grit, thinning. */
+    static double[] impactDebris(int v) {
+        double[] out = buf(1.8);
+        Random r = new Random(70 + v);
+        for (int k = 0; k < 90; k++) {
+            double at = Math.pow(r.nextDouble(), 1.6) * 1.5 + 0.05;
+            int start = (int) (at * SR), len = (int) ((0.008 + r.nextDouble() * 0.03) * SR);
+            double f = 1200 + r.nextDouble() * 4000, gain = (0.3 + r.nextDouble() * 0.7) * (1 - at / 1.7);
+            for (int i = 0; i < len && start + i < out.length; i++) {
+                double t = i / (double) SR;
+                out[start + i] += Math.sin(2 * Math.PI * f * t) * Math.exp(-t * 180) * gain + (r.nextDouble() * 2 - 1) * Math.exp(-t * 300) * gain * 0.5;
+            }
+        }
+        double[] grit = bandpass(noise(out.length), t -> 2500, 0.6);
+        mul(grit, env(out.length, 0.05, 1.2));
+        mix(out, grit, 0.25);
+        return room(out, 0.25, 0.3);
+    }
+
+    /** An explosion heard far off, coming back: a dull low boom, washed in a long tail. */
+    static double[] impactEcho(int v) {
+        double[] out = buf(2.4);
+        double[] boom = lowpass(brown(out.length), t -> 220 - 60 * t);
+        mul(boom, env(out.length, 0.04, 1.4 + v * 0.3));
+        double[] rumble = sine(out.length, t -> 44 - 10 * t);
+        mul(rumble, env(out.length, 0.08, 1.8));
+        mix(out, boom, 1.4);
+        mix(out, rumble, 0.7);
+        return room(out, 0.7, 0.9);
+    }
+
     // ================================================================== output
 
     static void save(String event, int variant, double[] samples) throws Exception {
         normalizeTo(samples, 0.89);
-        String name = event + (variant > 0 || event.matches("punch_light|punch_heavy|whoosh|ki_fire|ki_hit|explosion|explosion_big|beam_fire|guard_block|parry|guard_break|deflect|dash|vanish|powerup|transform|flight|skill|ui_click|stun|land|hit_crit|counter_hit|impact_boom|hit_guarded") ? "_" + (variant + 1) : "");
+        String name = event + (variant > 0 || event.matches("punch_light|punch_heavy|whoosh|ki_fire|ki_hit|explosion|explosion_big|beam_fire|guard_block|parry|guard_break|deflect|dash|vanish|powerup|transform|flight|skill|ui_click|stun|land|hit_crit|counter_hit|impact_boom|hit_guarded|ki_release|impact_debris|impact_echo") ? "_" + (variant + 1) : "");
         File wav = new File("build/sfx/" + name + ".wav");
         writeWav(wav, samples);
         File ogg = new File(OUT + "sounds/" + name + ".ogg");

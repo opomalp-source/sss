@@ -37,6 +37,8 @@ public class KiBlastEntity extends Projectile {
     private static final EntityDataAccessor<Integer> STYLE = SynchedEntityData.defineId(KiBlastEntity.class, EntityDataSerializers.INT);
     /** Shown as the Spirit Bomb (a solid, bright sphere). */
     private static final EntityDataAccessor<Boolean> SPIRIT = SynchedEntityData.defineId(KiBlastEntity.class, EntityDataSerializers.BOOLEAN);
+    /** Which technique it is (for its look on the client: the ki attack rework). */
+    private static final EntityDataAccessor<String> TECH = SynchedEntityData.defineId(KiBlastEntity.class, EntityDataSerializers.STRING);
 
     private static final double HOMING_STRENGTH = 0.12;
 
@@ -108,7 +110,8 @@ public class KiBlastEntity extends Projectile {
         blast.flags = technique.flags();
         blast.bouncesLeft = technique.has(Technique.BOUNCE) ? 2 : 0;
         blast.entityData.set(SIZE, technique.size());
-        blast.entityData.set(COLOR, technique.color());
+        blast.entityData.set(COLOR, colorFor(technique, owner));
+        blast.entityData.set(TECH, technique.id());
         blast.entityData.set(STYLE, technique.style().ordinal());
         blast.spiritBomb = technique.effect() == Technique.Effect.SPIRIT_BOMB;
         blast.entityData.set(SPIRIT, blast.spiritBomb);
@@ -152,6 +155,34 @@ public class KiBlastEntity extends Projectile {
         return entityData.get(COLOR);
     }
 
+    /** Client: where it has been, newest last (x, y, z of its middle a tick), for the trail. */
+    public final double[] trail = new double[3 * 16];
+    public int trailCount;
+
+    /** The technique it was fired as (empty if unknown). */
+    public String getTechnique() {
+        return entityData.get(TECH);
+    }
+
+    /**
+     * Its colour: the technique's (or the fighter's aura colour for a white one), leaning toward the fighter's aura by the
+     * technique's {@code aura_mix}, so the same attack fired in different forms shows it.
+     */
+    public static int colorFor(Technique t, LivingEntity owner) {
+        int aura = owner instanceof net.minecraft.world.entity.player.Player p
+                ? com.dbzenith.data.ModCapabilities.get(p).map(com.dbzenith.ki.Aura::color).orElse(t.color()) : t.color();
+        int base = t.color() == 0xFFFFFF ? aura : t.color();
+        return mix(base, aura, t.look().auraMix);
+    }
+
+    private static int mix(int a, int b, float f) {
+        f = Math.max(0, Math.min(1, f));
+        int r = (int) ((a >> 16 & 255) + ((b >> 16 & 255) - (a >> 16 & 255)) * f);
+        int g = (int) ((a >> 8 & 255) + ((b >> 8 & 255) - (a >> 8 & 255)) * f);
+        int bl = (int) ((a & 255) + ((b & 255) - (a & 255)) * f);
+        return r << 16 | g << 8 | bl;
+    }
+
     public Technique.Style getStyle() {
         int i = entityData.get(STYLE);
         return Technique.Style.values()[Math.max(0, Math.min(i, Technique.Style.values().length - 1))];
@@ -163,6 +194,7 @@ public class KiBlastEntity extends Projectile {
         entityData.define(COLOR, 0xFFFFFF);
         entityData.define(STYLE, 0);
         entityData.define(SPIRIT, false);
+        entityData.define(TECH, "");
     }
 
     @Override
@@ -175,6 +207,12 @@ public class KiBlastEntity extends Projectile {
     public EntityDimensions getDimensions(Pose pose) {
         float s = getSize();
         return EntityDimensions.scalable(s, s);
+    }
+
+    @Override
+    public void onAddedToWorld() {
+        super.onAddedToWorld();
+        if (level().isClientSide) com.dbzenith.client.ClientSounds.travel(this);   // its hum and rush in flight (the ki attack rework)
     }
 
     @Override
@@ -223,11 +261,7 @@ public class KiBlastEntity extends Projectile {
         setPos(getX() + motion.x, getY() + motion.y, getZ() + motion.z);
         ProjectileUtil.rotateTowardsMovement(this, 0.5f);
 
-        if (level.isClientSide) {
-            int c = getColor();
-            Vector3f rgb = new Vector3f(((c >> 16) & 0xFF) / 255f, ((c >> 8) & 0xFF) / 255f, (c & 0xFF) / 255f);
-            level.addParticle(new DustParticleOptions(rgb, Math.max(0.4f, getSize())), getX(), getY() + getBbHeight() / 2, getZ(), 0, 0, 0);
-        }
+        if (level.isClientSide) com.dbzenith.client.fx.KiFx.blastTick(this);   // its trail and what it sheds (the ki attack rework)
     }
 
     /** Above the caster's head while it forms; then hurled at whatever the caster is looking at. */

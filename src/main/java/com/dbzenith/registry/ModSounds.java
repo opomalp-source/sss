@@ -55,6 +55,10 @@ public final class ModSounds {
     public static final RegistryObject<SoundEvent> NIMBUS_CALL = sound("nimbus_call");
     public static final RegistryObject<SoundEvent> NIMBUS_ARRIVE = sound("nimbus_arrive");
     public static final RegistryObject<SoundEvent> NIMBUS_DISSOLVE = sound("nimbus_dissolve");
+    public static final RegistryObject<SoundEvent> KI_RELEASE = sound("ki_release");
+    public static final RegistryObject<SoundEvent> KI_TRAVEL = sound("ki_travel");
+    public static final RegistryObject<SoundEvent> IMPACT_DEBRIS = sound("impact_debris");
+    public static final RegistryObject<SoundEvent> IMPACT_ECHO = sound("impact_echo");
 
     private ModSounds() {}
 

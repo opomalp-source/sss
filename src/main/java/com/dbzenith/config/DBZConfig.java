@@ -783,7 +783,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue animationLabels;
         public final ForgeConfigSpec.IntValue artStyle;
         public final ForgeConfigSpec.IntValue uiStyle;
-        public final ForgeConfigSpec.IntValue hudStyle;
+        public final ForgeConfigSpec.IntValue hudStyle, kiQuality;
 
         Client(ForgeConfigSpec.Builder b) {
             b.push("hud");
@@ -844,6 +844,8 @@ public final class DBZConfig {
                     .defineInRange("kiBloom", 1.0, 0.0, 2.0);
             speedFovLimit = b.comment("How much moving fast may widen the view, in percent (vanilla allows up to 50, which with high Dexterity or in flight leaves your fighter tiny)")
                     .defineInRange("speedFovLimit", 10.0, 0.0, 50.0);
+            kiQuality = b.comment("Ki attack effects quality: 0 low, 1 medium, 2 high, 3 ultra (particles, mesh detail, extra layers)")
+                    .defineInRange("kiQuality", 2, 0, 3);
             hudStyle = b.comment("HUD: 0 Saga (a round portrait, a Release tab, a smoky BP and Ki bar, slanted health and stamina bars), 1 Classic, 2 Minimal (thin bars, no portrait), 3 Ornate (a portrait frame per form), 4 Clean (a portrait card and slim gradient bars)")
                     .defineInRange("hudStyle", 0, 0, 4);
             b.pop();
