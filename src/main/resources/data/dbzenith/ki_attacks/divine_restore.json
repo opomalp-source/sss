@@ -1,0 +1,47 @@
+{
+  "style": "self",
+  "effect": "heal_ally",
+  "effect_power": 0.25,
+  "ki_cost": 60.0,
+  "damage": 1.0,
+  "speed": 1.5,
+  "size": 0.5,
+  "cooldown": 300,
+  "count": 1,
+  "spread": 0.0,
+  "pierce": 0,
+  "homing": false,
+  "explosion": 0.0,
+  "destructive": true,
+  "color": "#FFF2A0",
+  "life": 60,
+  "drop": 0,
+  "learn_tp": 0,
+  "unlock_level": 0,
+  "races": [
+    "core_person"
+  ],
+  "ki_type": "pure",
+  "flags": [],
+  "charge_seconds": 0.0,
+  "charge_power": 1.0,
+  "look": {
+    "aura_mix": 0.35,
+    "core": "#FFFFFF",
+    "glow": 1.0,
+    "plasma": 1.0,
+    "trail": 1.0,
+    "sparks": 1.0,
+    "light": 1.0,
+    "flicker": 1.0,
+    "sounds": {
+      "charge": "",
+      "release": "",
+      "travel": "",
+      "impact": ""
+    },
+    "impact": 1.0,
+    "shake": 1.0,
+    "crater": 1.0
+  }
+}

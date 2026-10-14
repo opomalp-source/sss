@@ -149,3 +149,30 @@ idea {
         downloadJavadoc = true
     }
 }
+
+// ./gradlew installMod: build, then put the new jar into each mods folder listed in local.properties (mods.dirs,
+// separated by ;) and delete only older jars of this mod (dbzenith-*.jar) there. Nothing is touched if the build fails.
+def installProps = new Properties()
+def installPropsFile = rootProject.file('local.properties')
+if (installPropsFile.exists()) installPropsFile.withInputStream { installProps.load(it) }
+def installDirs = (installProps.getProperty('mods.dirs') ?: '').split(';').collect { it.trim() }.findAll { it }
+def installJar = file("build/libs/${mod_id}-${mod_version}.jar")
+def installPrefix = "${mod_id}-"
+tasks.register('installMod') {
+    group = 'dbzenith'
+    description = 'Builds the mod and installs the jar into the mods folders in local.properties (mods.dirs).'
+    dependsOn 'build'
+    doLast {
+        if (installDirs.isEmpty()) throw new GradleException("Create local.properties with mods.dirs=<your mods folder> (several separated by ;)")
+        if (!installJar.exists()) throw new GradleException("No jar at ${installJar}")
+        installDirs.each { d ->
+            def dir = new File(d)
+            if (!dir.isDirectory()) { println("installMod: no folder ${dir}, skipped"); return }
+            dir.listFiles().findAll { it.name.startsWith(installPrefix) && it.name.endsWith('.jar') && Character.isDigit(it.name.charAt(installPrefix.length())) && it.name != installJar.name }.each {
+                println(it.delete() ? "installMod: removed ${it.name}" : "installMod: could not remove ${it.name} (is Minecraft running?)")
+            }
+            java.nio.file.Files.copy(installJar.toPath(), new File(dir, installJar.name).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+            println("installMod: installed ${installJar.name} into ${dir}")
+        }
+    }
+}

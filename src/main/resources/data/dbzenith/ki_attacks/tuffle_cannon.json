@@ -1,0 +1,47 @@
+{
+  "style": "beam",
+  "effect": "none",
+  "effect_power": 0.0,
+  "ki_cost": 85.0,
+  "damage": 3.2,
+  "speed": 4.0,
+  "size": 0.9,
+  "cooldown": 70,
+  "count": 1,
+  "spread": 0.0,
+  "pierce": 0,
+  "homing": false,
+  "explosion": 1.5,
+  "destructive": true,
+  "color": "#8AFF30",
+  "life": 30,
+  "drop": 0,
+  "learn_tp": 0,
+  "unlock_level": 0,
+  "races": [
+    "tuffle"
+  ],
+  "ki_type": "pure",
+  "flags": [],
+  "charge_seconds": 30.0,
+  "charge_power": 5.0,
+  "look": {
+    "aura_mix": 0.35,
+    "core": "#FFFFFF",
+    "glow": 1.0,
+    "plasma": 1.0,
+    "trail": 1.0,
+    "sparks": 1.0,
+    "light": 1.0,
+    "flicker": 1.0,
+    "sounds": {
+      "charge": "",
+      "release": "",
+      "travel": "",
+      "impact": ""
+    },
+    "impact": 1.0,
+    "shake": 1.0,
+    "crater": 1.0
+  }
+}

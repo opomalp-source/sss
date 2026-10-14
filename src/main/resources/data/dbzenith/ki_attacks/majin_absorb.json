@@ -1,0 +1,47 @@
+{
+  "style": "self",
+  "effect": "absorb",
+  "effect_power": 4.0,
+  "ki_cost": 50.0,
+  "damage": 1.0,
+  "speed": 1.5,
+  "size": 0.5,
+  "cooldown": 200,
+  "count": 1,
+  "spread": 0.0,
+  "pierce": 0,
+  "homing": false,
+  "explosion": 0.0,
+  "destructive": true,
+  "color": "#FF80C0",
+  "life": 60,
+  "drop": 0,
+  "learn_tp": 400,
+  "unlock_level": 60,
+  "races": [
+    "majin"
+  ],
+  "ki_type": "pure",
+  "flags": [],
+  "charge_seconds": 0.0,
+  "charge_power": 1.0,
+  "look": {
+    "aura_mix": 0.35,
+    "core": "#FFFFFF",
+    "glow": 1.0,
+    "plasma": 1.0,
+    "trail": 1.0,
+    "sparks": 1.0,
+    "light": 1.0,
+    "flicker": 1.0,
+    "sounds": {
+      "charge": "",
+      "release": "",
+      "travel": "",
+      "impact": ""
+    },
+    "impact": 1.0,
+    "shake": 1.0,
+    "crater": 1.0
+  }
+}

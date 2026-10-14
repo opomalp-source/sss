@@ -716,6 +716,20 @@ public final class DBZCommand {
                                     ctx.getSource().sendSuccess(() -> Component.literal("Revived " + count + " player(s)"), true);
                                     return n;
                                 })))
+                .then(Commands.literal("kiattacks")   // ki attacks as data: write every attack out as files to start from
+                        .then(Commands.literal("export").executes(ctx -> {
+                            java.nio.file.Path dir = ctx.getSource().getServer().getServerDirectory().toPath().resolve("ki_attacks_export");
+                            try {
+                                java.nio.file.Files.createDirectories(dir);
+                                for (var e : com.dbzenith.skill.KiAttackData.export().entrySet())
+                                    java.nio.file.Files.writeString(dir.resolve(e.getKey() + ".json"), e.getValue() + "\n");
+                            } catch (java.io.IOException ex) {
+                                ctx.getSource().sendFailure(Component.literal("Could not write " + dir + ": " + ex.getMessage()));
+                                return 0;
+                            }
+                            ctx.getSource().sendSuccess(() -> Component.literal("Wrote the ki attacks to " + dir), true);
+                            return 1;
+                        })))
                 .then(Commands.literal("limb")   // CX-53: break, cut off or heal a fighter's limbs
                         .then(Commands.argument("targets", EntityArgument.entities())
                                 .then(Commands.argument("limb", StringArgumentType.word())

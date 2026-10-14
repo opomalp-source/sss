@@ -106,6 +106,15 @@ public final class Techniques {
         return t;
     }
 
+    /** An attack added by a data file (the ki attack rework). */
+    static void register(Technique t) {
+        BY_ID.put(t.id(), t);
+    }
+
+    static void remove(String id) {
+        BY_ID.remove(id);
+    }
+
     public static Technique byId(String id) {
         return BY_ID.get(id);
     }

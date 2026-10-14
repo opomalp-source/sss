@@ -3029,3 +3029,24 @@ and Majins regrow, prosthetics for the rest; NPCs and bosses too. Plan in TODO.m
   - a wish makes the body whole.
   - 225 GameTests.
 - **Checked in the dev client:** a steel prosthetic right arm and leg with the Turtle gi.
+
+## 2026-10-14 — Ki attack rework, phase 0: attacks as data (v0.116.0)
+The user's spec: cinematic ki attacks and sound, everything data-driven. Step 0 was an inspection report. Their
+answers: move all built-ins to JSON; for charging movement, my judgement; very big craters; fake the light; procedural
+3D meshes; run phases 1-4 then stop.
+- **`skill.KiAttackData`:** attacks are data files, `data/<ns>/ki_attacks/<id>.json`.
+  - A built-in id replaces whatever its file says, falling back to the built-in values; a new id adds an attack.
+  - Loaded with the datapacks (`/reload`) and sent to clients (`KiAttackData.Packet`, on joining and after a reload;
+    protocol 38).
+  - Every load first puts the built-ins back, so removing a field or a file undoes it.
+  - All 34 built-in techniques now ship as files, exported by the new `/dbz kiattacks export`.
+- **`Technique`** is loadable (`toJson`, `apply`, `fromJson`; colours as `#RRGGBB` or `aura`), and carries a
+  **`KiLook`**: aura mix (how far the colour leans to the fighter's aura), core colour, glow, plasma, trail, sparks,
+  light and flicker multipliers, sound ids (charge, release, travel, impact), impact, shake and crater multipliers.
+  These are for the rendering and sound phases.
+- **`./gradlew installMod`:** builds, then installs the jar into every folder in `local.properties` (`mods.dirs`,
+  separated by `;`; not committed), deleting only older `dbzenith-<version>.jar`. If the build fails, nothing is
+  touched.
+- **`docs/KI_ATTACKS.md`:** the data format and how to add an attack.
+- **Tests:** `KiAttackDataTests`: every built-in has its file; a file changes one, leaving the rest as is; a file adds
+  a new attack; loading again restores both. 226 GameTests.

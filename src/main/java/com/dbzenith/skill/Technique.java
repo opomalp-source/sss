@@ -23,34 +23,34 @@ public final class Technique {
             PLACED = 128, RAIN = 256, CHARGED = 512;
 
     private final String id;
-    private final double kiCost;
-    private final double damageMult;
-    private final float speed;
-    private final float size;
-    private final int cooldownTicks;
-    private final int count;
-    private final float spreadDegrees;
-    private final int pierce;
-    private final boolean homing;
-    private final float explosionPower;
+    private double kiCost;
+    private double damageMult;
+    private float speed;
+    private float size;
+    private int cooldownTicks;
+    private int count;
+    private float spreadDegrees;
+    private int pierce;
+    private boolean homing;
+    private float explosionPower;
     /** Whether it tears the land up where it strikes (CX-20; the Ki creator can make a technique calm). */
-    private final boolean destructive;
-    private final int color;
-    private final int lifeTicks;
-    private final Style style;
-    private final Effect effect;
-    private final double effectPower;
-    private final long learnCost;
-    private final int unlockLevel;
-    private final Set<Race> races;
-    private final int holdTicks;
+    private boolean destructive;
+    private int color;
+    private int lifeTicks;
+    private Style style;
+    private Effect effect;
+    private double effectPower;
+    private long learnCost;
+    private int unlockLevel;
+    private Set<Race> races;
+    private int holdTicks;
     private final String displayName;     // player-made techniques carry their own name
     private final String summary;         // ...and a generated description
-    private final KiType kiType;
-    private final int flags;
+    private KiType kiType;
+    private int flags;
     /** Holding the key charges it (CX-23): up to this many ticks (0: it goes off at once), for up to this much damage. */
-    private final int chargeTicks;
-    private final double chargePower;
+    private int chargeTicks;
+    private double chargePower;
 
     private Technique(Builder b) {
         id = b.id;
@@ -164,6 +164,110 @@ public final class Technique {
     /** Made in the Ki Creator. */
     public boolean isCustom() {
         return displayName != null;
+    }
+
+    // ---------------------------------------------------------------- data files (ki attack rework, phase 0)
+
+    private KiLook look = new KiLook();
+
+    /** How it looks and sounds. */
+    public KiLook look() { return look; }
+
+    /** The flags by name, for data files. */
+    private static final String[] FLAG_NAMES = {"split", "bounce", "guided", "chain", "guard_break", "stun", "knockback", "placed", "rain", "charged"};
+
+    /** Everything about it as a data file ({@code data/<ns>/ki_attacks/<id>.json}). */
+    public com.google.gson.JsonObject toJson() {
+        com.google.gson.JsonObject j = new com.google.gson.JsonObject();
+        j.addProperty("style", style.name().toLowerCase());
+        j.addProperty("effect", effect.name().toLowerCase());
+        j.addProperty("effect_power", effectPower);
+        j.addProperty("ki_cost", kiCost);
+        j.addProperty("damage", damageMult);
+        j.addProperty("speed", speed);
+        j.addProperty("size", size);
+        j.addProperty("cooldown", cooldownTicks);
+        j.addProperty("count", count);
+        j.addProperty("spread", spreadDegrees);
+        j.addProperty("pierce", pierce);
+        j.addProperty("homing", homing);
+        j.addProperty("explosion", explosionPower);
+        j.addProperty("destructive", destructive);
+        j.addProperty("color", color == 0xFFFFFF ? "aura" : hex(color));
+        j.addProperty("life", lifeTicks);
+        j.addProperty("drop", holdTicks);
+        j.addProperty("learn_tp", learnCost);
+        j.addProperty("unlock_level", unlockLevel);
+        if (races.size() < Race.values().length) {
+            com.google.gson.JsonArray r = new com.google.gson.JsonArray();
+            for (Race race : races) r.add(race.name().toLowerCase());
+            j.add("races", r);
+        }
+        j.addProperty("ki_type", kiType.name().toLowerCase());
+        com.google.gson.JsonArray f = new com.google.gson.JsonArray();
+        for (int i = 0; i < FLAG_NAMES.length; i++) if ((flags & 1 << i) != 0) f.add(FLAG_NAMES[i]);
+        j.add("flags", f);
+        j.addProperty("charge_seconds", chargeTicks / 20.0);
+        j.addProperty("charge_power", chargePower);
+        j.add("look", look.toJson());
+        return j;
+    }
+
+    /** Takes what a data file says (anything left out stays as it was). */
+    public void apply(com.google.gson.JsonObject j) {
+        if (j.has("style")) style = Style.valueOf(j.get("style").getAsString().toUpperCase());
+        if (j.has("effect")) effect = Effect.valueOf(j.get("effect").getAsString().toUpperCase());
+        if (j.has("effect_power")) effectPower = j.get("effect_power").getAsDouble();
+        if (j.has("ki_cost")) kiCost = j.get("ki_cost").getAsDouble();
+        if (j.has("damage")) damageMult = j.get("damage").getAsDouble();
+        if (j.has("speed")) speed = j.get("speed").getAsFloat();
+        if (j.has("size")) size = j.get("size").getAsFloat();
+        if (j.has("cooldown")) cooldownTicks = j.get("cooldown").getAsInt();
+        if (j.has("count")) count = j.get("count").getAsInt();
+        if (j.has("spread")) spreadDegrees = j.get("spread").getAsFloat();
+        if (j.has("pierce")) pierce = j.get("pierce").getAsInt();
+        if (j.has("homing")) homing = j.get("homing").getAsBoolean();
+        if (j.has("explosion")) explosionPower = j.get("explosion").getAsFloat();
+        if (j.has("destructive")) destructive = j.get("destructive").getAsBoolean();
+        if (j.has("color")) color = parseColor(j.get("color").getAsString());
+        if (j.has("life")) lifeTicks = j.get("life").getAsInt();
+        if (j.has("drop")) holdTicks = j.get("drop").getAsInt();
+        if (j.has("learn_tp")) learnCost = j.get("learn_tp").getAsLong();
+        if (j.has("unlock_level")) unlockLevel = j.get("unlock_level").getAsInt();
+        if (j.has("races")) {
+            Set<Race> r = EnumSet.noneOf(Race.class);
+            for (var e : j.getAsJsonArray("races")) r.add(Race.valueOf(e.getAsString().toUpperCase()));
+            races = r.isEmpty() ? EnumSet.allOf(Race.class) : r;
+        }
+        if (j.has("ki_type")) kiType = KiType.valueOf(j.get("ki_type").getAsString().toUpperCase());
+        if (j.has("flags")) {
+            int f = 0;
+            for (var e : j.getAsJsonArray("flags")) {
+                int i = java.util.Arrays.asList(FLAG_NAMES).indexOf(e.getAsString().toLowerCase());
+                if (i >= 0) f |= 1 << i;
+            }
+            flags = f;
+        }
+        if (j.has("charge_seconds")) chargeTicks = (int) Math.round(j.get("charge_seconds").getAsDouble() * 20);
+        if (j.has("charge_power")) chargePower = j.get("charge_power").getAsDouble();
+        if (j.has("look")) look.apply(j.getAsJsonObject("look"));
+    }
+
+    /** A new technique straight from a data file. */
+    public static Technique fromJson(String id, com.google.gson.JsonObject j) {
+        Technique t = builder(id).build();
+        t.apply(j);
+        return t;
+    }
+
+    public static String hex(int rgb) {
+        return String.format("#%06X", rgb & 0xFFFFFF);
+    }
+
+    /** "#RRGGBB", "RRGGBB", or "aura" (white: the fighter's aura colour). */
+    public static int parseColor(String s) {
+        if (s.equalsIgnoreCase("aura")) return 0xFFFFFF;
+        return Integer.parseInt(s.startsWith("#") ? s.substring(1) : s, 16);
     }
 
     public static final class Builder {
