@@ -252,7 +252,7 @@ public final class FlightPhysics {
         private final LocalPlayer player;
 
         Wind(LocalPlayer player) {
-            super(SoundEvents.ELYTRA_FLYING, SoundSource.PLAYERS, SoundInstance.createUnseededRandom());
+            super(com.dbzenith.registry.ModSounds.WIND_LOOP.get(), SoundSource.PLAYERS, SoundInstance.createUnseededRandom());
             this.player = player;
             this.looping = true;
             this.delay = 0;

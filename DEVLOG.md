@@ -2722,3 +2722,23 @@ User spec: a circular portrait in a glowing white and light-blue ring with the h
   - 217 GameTests.
 - **Checked in the dev client:** binding; the call (the cloud in the sky, then curving down with its golden streak,
   then parked beside the player); sending away (the golden dissolve with glints).
+
+## 2026-10-14 — CX-41: sounds pass 2 (v0.102.0)
+Starts the polish round (the user: everything suggested except story, which comes last; plan in TODO.md).
+- **Six new synthesized sounds** (`tools/SfxGen.java`, appended so every earlier sound comes out the same):
+  - `wind_loop`: a rumble, gusting breathy air and a drifting whistle;
+  - `beam_loop`: detuned saws under hiss with power crackle and a 17 Hz flutter;
+  - `nimbus_bind`: a rising bell chord over a shimmer;
+  - `nimbus_call`: two chimes stepping up, with rising air;
+  - `nimbus_arrive`: a falling whoosh and a soft bell;
+  - `nimbus_dissolve`: bells falling down the scale, a breath of air and glitter.
+- **Wired in:**
+  - Ki flight and Nimbus riding use the new wind instead of vanilla's elytra sound.
+  - The Nimbus bind, call, arrival and dissolve play their own sounds instead of beacon and amethyst ones.
+  - Every beam now roars for as long as it lasts (`ClientSounds.BeamLoop`, started from
+    `KiBeamEntity.onAddedToWorld`). It fades in as the firing burst ends, is heard from the beam's middle, is louder
+    and lower for wider beams, and fades out when the beam ends.
+- Re-running SfxGen rewrites every Ogg with a new stream serial; the unchanged files were restored from git so only
+  new sounds are committed.
+- **Checked:** the dev client loaded and played them (only vanilla's usual missing goat-horn warnings). 217
+  GameTests (`SoundTests` checks every event has real Ogg files).

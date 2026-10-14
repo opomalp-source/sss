@@ -119,6 +119,12 @@ public class KiBeamEntity extends Entity {
     }
 
     @Override
+    public void onAddedToWorld() {
+        super.onAddedToWorld();
+        if (level().isClientSide) com.dbzenith.client.ClientSounds.beam(this);   // its roar, for as long as it lasts (CX-41)
+    }
+
+    @Override
     public void tick() {
         super.tick();
         if (level().isClientSide) return;

@@ -127,8 +127,7 @@ public class NimbusEntity extends Entity {
                 p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOW_FALLING,70,0,false,false,true));
         }
         setState(LEAVING);noPhysics=true;
-        level().playSound(null,blockPosition(),net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_CHIME,net.minecraft.sounds.SoundSource.NEUTRAL,1f,.7f);
-        level().playSound(null,blockPosition(),net.minecraft.sounds.SoundEvents.ILLUSIONER_MIRROR_MOVE,net.minecraft.sounds.SoundSource.NEUTRAL,.8f,1.3f);
+        level().playSound(null,blockPosition(),com.dbzenith.registry.ModSounds.NIMBUS_DISSOLVE.get(),net.minecraft.sounds.SoundSource.NEUTRAL,1f,1f);
     }
     private void dissolving() {
         Vec3 v=getDeltaMovement().scale(.85).add(0,.006,0);                         // slows, lifting a little as it comes apart
@@ -164,7 +163,7 @@ public class NimbusEntity extends Entity {
         fallDistance=0;
     }
     private void arrived() {
-        level().playSound(null,blockPosition(),net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_CHIME,net.minecraft.sounds.SoundSource.NEUTRAL,1f,1.25f);
+        level().playSound(null,blockPosition(),com.dbzenith.registry.ModSounds.NIMBUS_ARRIVE.get(),net.minecraft.sounds.SoundSource.NEUTRAL,1f,1f);
     }
     /** Its owner jumping onto it rides it, as Goku does. */
     private void hopOn() {

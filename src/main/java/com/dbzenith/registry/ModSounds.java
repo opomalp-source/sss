@@ -49,6 +49,12 @@ public final class ModSounds {
     public static final RegistryObject<SoundEvent> COUNTER_HIT = sound("counter_hit");
     public static final RegistryObject<SoundEvent> IMPACT_BOOM = sound("impact_boom");
     public static final RegistryObject<SoundEvent> HIT_GUARDED = sound("hit_guarded");
+    public static final RegistryObject<SoundEvent> WIND_LOOP = sound("wind_loop");
+    public static final RegistryObject<SoundEvent> BEAM_LOOP = sound("beam_loop");
+    public static final RegistryObject<SoundEvent> NIMBUS_BIND = sound("nimbus_bind");
+    public static final RegistryObject<SoundEvent> NIMBUS_CALL = sound("nimbus_call");
+    public static final RegistryObject<SoundEvent> NIMBUS_ARRIVE = sound("nimbus_arrive");
+    public static final RegistryObject<SoundEvent> NIMBUS_DISSOLVE = sound("nimbus_dissolve");
 
     private ModSounds() {}
 

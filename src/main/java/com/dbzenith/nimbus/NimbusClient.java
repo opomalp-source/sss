@@ -21,7 +21,7 @@ public final class NimbusClient {
     /** The wind while riding, louder and higher the faster the cloud goes. */
     private static final class Wind extends net.minecraft.client.resources.sounds.AbstractTickableSoundInstance {
         Wind() {
-            super(net.minecraft.sounds.SoundEvents.ELYTRA_FLYING, net.minecraft.sounds.SoundSource.PLAYERS,
+            super(com.dbzenith.registry.ModSounds.WIND_LOOP.get(), net.minecraft.sounds.SoundSource.PLAYERS,
                     net.minecraft.client.resources.sounds.SoundInstance.createUnseededRandom());
             looping = true;
             delay = 0;
@@ -45,7 +45,7 @@ public final class NimbusClient {
         private final NimbusEntity cloud;
 
         Rush(NimbusEntity cloud) {
-            super(net.minecraft.sounds.SoundEvents.ELYTRA_FLYING, net.minecraft.sounds.SoundSource.NEUTRAL,
+            super(com.dbzenith.registry.ModSounds.WIND_LOOP.get(), net.minecraft.sounds.SoundSource.NEUTRAL,
                     net.minecraft.client.resources.sounds.SoundInstance.createUnseededRandom());
             this.cloud = cloud;
             looping = true;

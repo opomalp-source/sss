@@ -54,6 +54,13 @@ public final class SfxGen {
         for (int v = 0; v < 2; v++) save("counter_hit", v, counterHit(v));
         for (int v = 0; v < 2; v++) save("impact_boom", v, impactBoom(v));
         for (int v = 0; v < 2; v++) save("hit_guarded", v, hitGuarded(v));
+        // CX-41: added at the end so every sound above comes out the same (RNG is shared and seeded)
+        save("wind_loop", 0, loop(windLoop(), 0.5));
+        save("beam_loop", 0, loop(beamLoop(), 0.3));
+        save("nimbus_bind", 0, nimbusBind());
+        save("nimbus_call", 0, nimbusCall());
+        save("nimbus_arrive", 0, nimbusArrive());
+        save("nimbus_dissolve", 0, nimbusDissolve());
         writeSoundsJson();
         System.out.println("SfxGen done: " + EVENTS.size() + " events");
     }
@@ -732,6 +739,108 @@ public final class SfxGen {
         for (double v : a) m = Math.max(m, Math.abs(v));
         for (int i = 0; i < a.length; i++) a[i] *= peak / m;
         return a;
+    }
+
+
+    // ================================================================== CX-41: wind, the beam's roar, the Flying Nimbus
+
+    /** Air rushing past: low rumble, a breathy middle that swells in gusts, and a faint whistle that drifts. */
+    static double[] windLoop() {
+        double len = 3.5;
+        double[] out = buf(len);
+        double[] rumble = lowpass(brown(out.length), t -> 160);
+        double[] body = lowpass(noise(out.length), t -> 700 + 600 * (0.5 + 0.5 * Math.sin(2 * Math.PI * t / 1.5)) + 300 * Math.sin(2 * Math.PI * t / 0.7));
+        mul(body, shape(out.length, t -> 0.7 + 0.3 * Math.sin(2 * Math.PI * t / 1.5 + 1)));
+        double[] whistle = bandpass(noise(out.length), t -> 1100 + 250 * Math.sin(2 * Math.PI * t / 3.0), 6);
+        mul(whistle, shape(out.length, t -> 0.5 + 0.5 * Math.sin(2 * Math.PI * t / 3.0 + 2)));
+        mix(out, rumble, 1.4);
+        mix(out, body, 1.0);
+        mix(out, whistle, 0.5);
+        saturate(out, 1.2);
+        return out;
+    }
+
+    /** The roar of a beam held: detuned saws under a hiss, fluttering, with a crackle of power through it. */
+    static double[] beamLoop() {
+        double[] out = buf(2.6);
+        double base = 98;
+        double[] roar = add(add(saw(out.length, t -> base, 1), saw(out.length, t -> base * 1.013, 1)), saw(out.length, t -> base * 1.5, 0.6));
+        roar = lowpass(roar, t -> 1700 + 500 * Math.sin(2 * Math.PI * 2 * t));
+        double[] hiss = bandpass(noise(out.length), t -> 1400, 0.7);
+        double[] crack = highpass(noise(out.length), 3000);
+        mul(crack, crackle(out.length, 0.25, 21));
+        double[] rumble = lowpass(brown(out.length), t -> 200);
+        mix(out, roar, 0.8);
+        mix(out, hiss, 0.7);
+        mix(out, crack, 0.25);
+        mix(out, rumble, 1.2);
+        mul(out, shape(out.length, t -> 0.88 + 0.12 * Math.sin(2 * Math.PI * 17 * t)));
+        saturate(out, 1.7);
+        return out;
+    }
+
+    /** A struck bell: a few inharmonic partials, the high ones dying first. */
+    static void bell(double[] out, double at, double f, double decay, double gain) {
+        int start = (int) (at * SR);
+        double[][] partials = {{1, 1}, {2.76, .35}, {5.4, .15}, {8.9, .06}};
+        for (double[] p : partials) {
+            double ph = 0, fr = f * p[0];
+            for (int i = start; i < out.length; i++) {
+                double t = (i - start) / (double) SR;
+                ph += 2 * Math.PI * fr / SR;
+                out[i] += Math.sin(ph) * p[1] * gain * Math.min(1, t / 0.003) * Math.exp(-t * 3 / (decay / p[0] * 1.5));
+            }
+        }
+    }
+
+    /** Bound to your soul: a rising golden chord over a shimmer that swells and settles. */
+    static double[] nimbusBind() {
+        double[] out = buf(2.4);
+        double[] notes = {523.3, 659.3, 784.0, 1046.5, 1318.5};
+        for (int i = 0; i < notes.length; i++) bell(out, 0.05 + i * 0.09, notes[i], 1.6, 0.5);
+        double[] shimmer = highpass(noise(out.length), 4500);
+        mul(shimmer, shape(out.length, t -> Math.sin(Math.PI * Math.min(1, t / 1.6)) * (0.6 + 0.4 * Math.sin(2 * Math.PI * 9 * t))));
+        double[] pad = add(sine(out.length, t -> 261.6), scale(sine(out.length, t -> 392), 0.6));
+        mul(pad, env(out.length, 0.4, 1.5));
+        mix(out, shimmer, 0.12);
+        mix(out, pad, 0.18);
+        return room(out, 0.45, 0.6);
+    }
+
+    /** "Nimbus!": two bright chimes stepping up, and air rising behind them. */
+    static double[] nimbusCall() {
+        double[] out = buf(1.4);
+        bell(out, 0.0, 1318.5, 0.9, 0.55);
+        bell(out, 0.13, 1760.0, 1.1, 0.6);
+        double[] air = bandpass(noise(out.length), t -> 600 + 2200 * Math.min(1, t / 0.6), 1.0);
+        mul(air, shape(out.length, t -> Math.sin(Math.PI * Math.min(1, t / 0.9)) * 0.8));
+        mix(out, air, 0.35);
+        return room(out, 0.35, 0.5);
+    }
+
+    /** It pulls up beside you: a whoosh falling away, a soft bell. */
+    static double[] nimbusArrive() {
+        double[] out = buf(1.1);
+        double[] air = lowpass(noise(out.length), t -> 3200 * Math.exp(-t * 3) + 300);
+        mul(air, env(out.length, 0.03, 0.6));
+        mix(out, air, 1.0);
+        bell(out, 0.12, 1046.5, 0.8, 0.35);
+        return room(out, 0.3, 0.4);
+    }
+
+    /** Sent away: sparkles falling down the scale as it comes apart in a breath of air. */
+    static double[] nimbusDissolve() {
+        double[] out = buf(1.8);
+        double[] notes = {1568.0, 1318.5, 1046.5, 784.0};
+        for (int i = 0; i < notes.length; i++) bell(out, i * 0.1, notes[i], 0.9, 0.4);
+        double[] puff = bandpass(noise(out.length), t -> 2000 * Math.exp(-t * 1.5) + 400, 0.8);
+        mul(puff, env(out.length, 0.05, 1.1));
+        double[] glitter = highpass(noise(out.length), 6000);
+        mul(glitter, crackle(out.length, 0.5, 33));
+        mul(glitter, env(out.length, 0.02, 1.2));
+        mix(out, puff, 0.7);
+        mix(out, glitter, 0.3);
+        return room(out, 0.4, 0.55);
     }
 
     // ================================================================== output

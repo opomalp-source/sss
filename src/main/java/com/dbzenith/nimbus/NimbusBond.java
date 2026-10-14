@@ -47,8 +47,7 @@ public final class NimbusBond {
         Vec3 c = p.position().add(0, 1, 0);
         level.sendParticles(ParticleTypes.END_ROD, c.x, c.y, c.z, 40, .5, .8, .5, .08);
         level.sendParticles(ParticleTypes.WAX_ON, c.x, c.y, c.z, 30, .6, .9, .6, .5);
-        level.playSound(null, p.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1f, 1.4f);
-        level.playSound(null, p.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1f, 1.2f);
+        level.playSound(null, p.blockPosition(), com.dbzenith.registry.ModSounds.NIMBUS_BIND.get(), SoundSource.PLAYERS, 1f, 1f);
         p.displayClientMessage(Component.translatable("message.dbzenith.nimbus.bound", Component.keybind("key.dbzenith.nimbus_call")), true);
     }
 
@@ -98,7 +97,7 @@ public final class NimbusBond {
         cloud.arrive();
         level.addFreshEntity(cloud);
         p.displayClientMessage(Component.translatable("message.dbzenith.nimbus.call"), true);
-        level.playSound(null, p.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1f, 1.5f);
+        level.playSound(null, p.blockPosition(), com.dbzenith.registry.ModSounds.NIMBUS_CALL.get(), SoundSource.PLAYERS, 1f, 1f);
         return cloud;
     }
 }

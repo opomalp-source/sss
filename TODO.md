@@ -254,3 +254,17 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [x] CX-39 (v0.100.0) Flying Nimbus rework: a living cloud of breathing puffs (tilts, banks, stretches on springs), golden trail (streak, shed wisps, glints), riding wind, momentum
 - [x] CX-40 (v0.101.0) Soul-bound Flying Nimbus: bind with the item, call key (M) swoops it down from the sky (catches you falling, hop on), press again to dissolve it; `/dbz nimbus`; nimbusqa/socialqa tests enabled, safe-zone test flake fixed
 - Paused for CX-19: 17d (the robot dojo), 18b (the combat animations as data; folded into 19b)
+
+# Polish round (user, 2026-10-14: "do everything you've listed except story, story comes last")
+Most of these already exist in a first version; each step upgrades what is there.
+- [x] CX-41 (v0.102.0) Sounds pass 2: own sounds for the Nimbus (bind, call, rush, dissolve), flight wind, a beam roar while firing, the charge ball, heavy landings
+- [ ] CX-42 Faces v2: more expressions (focused in combat, pained when hurt badly, calm when meditating, a smirk), eyes that follow the look, per-form eyes (Super Saiyan 3 without brows, and so on)
+- [ ] CX-43 Transformation cinematics: camera orbit, cracks spreading from the feet, lightning, a held scream, white flash into the new aura
+- [ ] CX-44 Cloth and tail physics: cape, gi sash and belt ends, Saiyan tail on springs (like the hair)
+- [ ] CX-45 Bloom for ki (post-processing chain)
+- [ ] CX-46 Beams v2: a charge ball between the hands, a head that pushes forward, spiral, dome explosions with smoke
+- [ ] CX-47 Battle damage: torn gi with health, bruises, dust after crashes
+- [ ] CX-48 Environment: water parting under fliers and beams, lasting shock rings and dust
+- [ ] CX-49 Animations: takeoff crouch-launch, hero landing, signature ki poses (Kamehameha, Galick Gun, Special Beam Cannon, Final Flash), teleport-behind in rushes, afterimage dodge, tumble recovery
+- [ ] CX-50 Gameplay: Hoipoi capsules that deploy (house, vehicle), scouter and ki sense upgrades, Instant Transmission lock-on
+- [ ] Last: story mode (V2-G)

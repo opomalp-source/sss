@@ -140,6 +140,49 @@ public final class ClientSounds {
         return f.calmAura() && !s.has(PublicStatePacket.KAIOKEN) ? Loop.CALM : Loop.HUM;
     }
 
+    // ------------------------------------------------------------------ the roar of a held beam (CX-41)
+
+    /** A beam has appeared: its roar takes over from the firing sound and lasts as long as the beam does. */
+    public static void beam(com.dbzenith.skill.KiBeamEntity beam) {
+        Minecraft.getInstance().getSoundManager().play(new BeamLoop(beam));
+    }
+
+    static final class BeamLoop extends AbstractTickableSoundInstance {
+        final com.dbzenith.skill.KiBeamEntity beam;
+        int age;
+        float level;
+
+        BeamLoop(com.dbzenith.skill.KiBeamEntity beam) {
+            super(ModSounds.BEAM_LOOP.get(), SoundSource.PLAYERS, SoundInstance.createUnseededRandom());
+            this.beam = beam;
+            this.looping = true;
+            this.delay = 0;
+            this.volume = 0.01f;
+            this.x = beam.getX(); this.y = beam.getY(); this.z = beam.getZ();
+        }
+
+        @Override
+        public void tick() {
+            age++;
+            boolean alive = !beam.isRemoved();
+            float width = Math.max(0.3f, beam.getWidth());
+            float want = alive && age > 8 ? Math.min(1f, 0.35f + width * 0.25f) : 0f;   // after the firing burst, by the beam's size
+            level += (want - level) * (alive ? 0.12f : 0.3f);
+            if (!alive && level < 0.02f) { stop(); return; }
+            volume = Math.max(0.01f, level * 0.7f);
+            pitch = 1.15f - Math.min(0.35f, width * 0.08f);                           // bigger beams roar lower
+            if (alive) {                                                                 // heard from its middle
+                net.minecraft.world.phys.Vec3 mid = beam.position().add(beam.direction().scale(Math.min(beam.getLength(), 16) * 0.3));
+                x = mid.x; y = mid.y; z = mid.z;
+            }
+        }
+
+        @Override
+        public boolean canStartSilent() {
+            return true;
+        }
+    }
+
     /** A loop that follows its fighter and fades in and out instead of cutting. */
     static final class AuraLoop extends AbstractTickableSoundInstance {
         final AbstractClientPlayer player;

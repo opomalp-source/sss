@@ -130,5 +130,29 @@
   "hit_guarded": {
     "subtitle": "subtitles.dbzenith.hit_guarded",
     "sounds": ["dbzenith:hit_guarded_1", "dbzenith:hit_guarded_2"]
+  },
+  "wind_loop": {
+    "subtitle": "subtitles.dbzenith.wind_loop",
+    "sounds": ["dbzenith:wind_loop"]
+  },
+  "beam_loop": {
+    "subtitle": "subtitles.dbzenith.beam_loop",
+    "sounds": ["dbzenith:beam_loop"]
+  },
+  "nimbus_bind": {
+    "subtitle": "subtitles.dbzenith.nimbus_bind",
+    "sounds": ["dbzenith:nimbus_bind"]
+  },
+  "nimbus_call": {
+    "subtitle": "subtitles.dbzenith.nimbus_call",
+    "sounds": ["dbzenith:nimbus_call"]
+  },
+  "nimbus_arrive": {
+    "subtitle": "subtitles.dbzenith.nimbus_arrive",
+    "sounds": ["dbzenith:nimbus_arrive"]
+  },
+  "nimbus_dissolve": {
+    "subtitle": "subtitles.dbzenith.nimbus_dissolve",
+    "sounds": ["dbzenith:nimbus_dissolve"]
   }
 }
