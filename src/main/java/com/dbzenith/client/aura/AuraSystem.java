@@ -236,10 +236,11 @@ public final class AuraSystem {
         s.vzO = s.vz;
 
         boolean dev = self && (preview != null || previewTech != null);
-        boolean charging = state != null && (state.powering() || state.has(PublicStatePacket.TRANSFORMING))
-                || com.dbzenith.client.ClientKiCharge.get(e.getId()) != null;   // charging an attack flares it too (the ki attack rework)
+        boolean charging = state != null && (state.powering() || state.has(PublicStatePacket.TRANSFORMING));
         if (dev && devState.equals("charge")) charging = true;
         float target = charging ? 1 : 0;
+        var attack = com.dbzenith.client.ClientKiCharge.get(e.getId());     // charging an attack flares it too, but only partway: the orb
+        if (attack != null) target = Math.max(target, 0.15f + 0.3f * com.dbzenith.client.ClientKiCharge.shownFraction(attack, 0));   // is the show (the ki attack rework)
         s.charge += (target - s.charge) * (target > s.charge ? 0.2f : 0.09f);
 
         // the base form's aura only burns while charging

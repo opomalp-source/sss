@@ -33,9 +33,9 @@ public final class KiEnergy {
     private KiEnergy() {}
 
     @Mod.EventBusSubscriber(modid = DBZenith.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static final class Shaders {
+    public static final class EnergyShader {          // not "Shaders": the event bus mixes up subscribers that share a simple class and method name (KiBloom.Shaders)
         @SubscribeEvent
-        public static void register(RegisterShadersEvent event) throws IOException {
+        public static void registerEnergy(RegisterShadersEvent event) throws IOException {
             event.registerShader(new ShaderInstance(event.getResourceProvider(), new ResourceLocation(DBZenith.MOD_ID, "ki_energy"),
                     DefaultVertexFormat.NEW_ENTITY), s -> shader = s);
         }
@@ -106,6 +106,40 @@ public final class KiEnergy {
             float px = s[i], py = s[i + 1], pz = s[i + 2];
             vc.vertex(m, x + px * r, y + py * r, z + pz * r).color(red, g, b, a).uv(s[i + 3] + spin, s[i + 4])
                     .overlayCoords(mode, 0).uv2(LightTexture.FULL_BRIGHT).normal(n, px, py, pz).endVertex();
+        }
+    }
+
+    /**
+     * A tube along {@code dir} (a unit vector) from (sx, sy, sz), {@code length} long, its radius going from {@code r0}
+     * to {@code r1}, {@code sides} round and {@code rings} along; texture u round it, v down it from {@code v0} (one per
+     * radius-ish, so the plasma keeps its size), {@code wobble} rippling its radius along the length at time {@code t}.
+     */
+    public static void tube(VertexConsumer vc, Matrix4f m, Matrix3f n, float sx, float sy, float sz, float dx, float dy, float dz, float length,
+                            float r0, float r1, int argb, int mode, int sides, int rings, float v0, float wobble, float t) {
+        float ax, ay, az;                                                     // a, b: round the tube
+        if (Math.abs(dy) > 0.9f) { ax = 1; ay = 0; az = 0; } else { ax = 0; ay = 1; az = 0; }
+        float px = dy * az - dz * ay, py = dz * ax - dx * az, pz = dx * ay - dy * ax;
+        float pl = (float) Math.sqrt(px * px + py * py + pz * pz);
+        px /= pl; py /= pl; pz /= pl;
+        float qx = dy * pz - dz * py, qy = dz * px - dx * pz, qz = dx * py - dy * px;
+        int a = argb >>> 24, red = argb >> 16 & 255, g = argb >> 8 & 255, b = argb & 255;
+        for (int i = 0; i < rings; i++) {
+            float k0 = i / (float) rings, k1 = (i + 1) / (float) rings;
+            float rad0 = (r0 + (r1 - r0) * k0) * (1 + wobble * (float) Math.sin(k0 * 17 - t * 0.9f)),
+                    rad1 = (r0 + (r1 - r0) * k1) * (1 + wobble * (float) Math.sin(k1 * 17 - t * 0.9f));
+            float c0x = sx + dx * length * k0, c0y = sy + dy * length * k0, c0z = sz + dz * length * k0;
+            float c1x = sx + dx * length * k1, c1y = sy + dy * length * k1, c1z = sz + dz * length * k1;
+            float vv0 = v0 + length * k0 / Math.max(0.3f, r1 * 12), vv1 = v0 + length * k1 / Math.max(0.3f, r1 * 12);   // stretched along it: long flowing streaks
+            for (int j = 0; j < sides; j++) {
+                double th0 = Math.PI * 2 * j / sides, th1 = Math.PI * 2 * (j + 1) / sides;
+                float n0x = (float) (px * Math.cos(th0) + qx * Math.sin(th0)), n0y = (float) (py * Math.cos(th0) + qy * Math.sin(th0)), n0z = (float) (pz * Math.cos(th0) + qz * Math.sin(th0));
+                float n1x = (float) (px * Math.cos(th1) + qx * Math.sin(th1)), n1y = (float) (py * Math.cos(th1) + qy * Math.sin(th1)), n1z = (float) (pz * Math.cos(th1) + qz * Math.sin(th1));
+                float u0 = j / (float) sides, u1 = (j + 1) / (float) sides;
+                vc.vertex(m, c0x + n0x * rad0, c0y + n0y * rad0, c0z + n0z * rad0).color(red, g, b, a).uv(u0, vv0).overlayCoords(mode, 0).uv2(LightTexture.FULL_BRIGHT).normal(n, n0x, n0y, n0z).endVertex();
+                vc.vertex(m, c0x + n1x * rad0, c0y + n1y * rad0, c0z + n1z * rad0).color(red, g, b, a).uv(u1, vv0).overlayCoords(mode, 0).uv2(LightTexture.FULL_BRIGHT).normal(n, n1x, n1y, n1z).endVertex();
+                vc.vertex(m, c1x + n1x * rad1, c1y + n1y * rad1, c1z + n1z * rad1).color(red, g, b, a).uv(u1, vv1).overlayCoords(mode, 0).uv2(LightTexture.FULL_BRIGHT).normal(n, n1x, n1y, n1z).endVertex();
+                vc.vertex(m, c1x + n0x * rad1, c1y + n0y * rad1, c1z + n0z * rad1).color(red, g, b, a).uv(u0, vv1).overlayCoords(mode, 0).uv2(LightTexture.FULL_BRIGHT).normal(n, n0x, n0y, n0z).endVertex();
+            }
         }
     }
 

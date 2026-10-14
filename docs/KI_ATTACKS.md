@@ -61,3 +61,10 @@ among them.
 
 The rework phases fill these in as they land. A field the current version doesn't use yet is kept and simply has no
 effect.
+
+## How they're drawn
+
+Attacks glow through the mod's own `ki_energy` shader, which draws smooth layered meshes (shell, plasma strands,
+white-hot core, halo) into the bloom. With an Oculus or Iris shader pack on, the shader is skipped and the older, plainer
+look is drawn instead. The client setting `kiQuality` (Settings → Effects) trades mesh detail and particle counts for
+speed.

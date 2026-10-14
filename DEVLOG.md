@@ -3111,3 +3111,35 @@ answers: move all built-ins to JSON; for charging movement, my judgement; very b
   its own mine (other tests' blasts nearby had made it flaky). 227 GameTests.
 - **Checked in the dev client** (charging a Kamehameha, front and back): the aura flaring, chunks of ground lifting
   round the fighter, the orb at the cupped hands and its light on the cracked ground, the HUD charge gauge.
+
+## 2026-10-15 — Ki attack rework, phase 3: beams (v0.119.0)
+- **Fixed: the energy shader never loaded, so v0.117.0 and v0.118.0 drew the old blasts and charge glow.**
+  - `KiEnergy.Shaders.register` and `KiBloom.Shaders.register` had the same simple class name and method name, and the
+    event bus mixed them up: the bloom's handler ran twice and the ki energy one never ran.
+  - The class is now `KiEnergy.EnergyShader` with `registerEnergy`. No other subscribers share a name (checked every
+    `@Mod.EventBusSubscriber` class).
+  - With the shader actually running, the blast is the layered plasma sphere phase 1 described: a white-hot core, a
+    coloured rim with plasma boiling over it, and a halo.
+- **The beam** (`KiBeamRenderer.renderEnergy`):
+  - **Body:** a smooth tube that widens as it travels (a glowing shell with energy flowing down it, a strand layer over
+    it, a white-hot core inside), flickering slightly. Its level of detail drops with distance and `kiQuality`.
+  - **Head:** a big churning sphere in a halo.
+  - **Hands:** a glowing sphere where the beam pours out, and a white flash at the moment it fires.
+  - **Spirals and lightning:** two long spiral strands wind down it, and lightning arcs snap off its edges, re-struck
+    every other tick.
+  - On firing, the caster gets a burst of sparks and a small camera kick (`KiFx.beamFired`), plus the beam sound.
+  - With a shader pack on, the old beam is drawn.
+- **Charge-up, reviewed with the shader on:**
+  - The orb was blinding. Its shell, strands, halo and ground glow are softer, and the core takes the attack's hot
+    colour.
+  - **Aura flare:** charging an attack had flared the aura as fully as a power-up, which buried the orb. It now flares
+    partway, rising with the charge.
+  - **View zoom:** while a charge plants you, the view zoomed in, because vanilla narrows the view as movement speed
+    falls. It now holds still while charging (`FlightPhysics.onFovModifier`).
+  - **Beam-charge orb:** it sat inside the arm. It is now larger and out in front of the cupped hands at the hip.
+- **Checked in the dev client:**
+  - a Kamehameha side-on: the tube, the core, the spirals, and the orb at the hands;
+  - slow test blasts;
+  - the beam charge from behind, growing, then the release;
+  - a Supernova charge above the head.
+- 227 GameTests.

@@ -100,7 +100,7 @@ public final class ClientKiCharge {
         Vec3 forward = new Vec3(-Math.sin(r), 0, Math.cos(r)), right = new Vec3(-Math.cos(r), 0, -Math.sin(r));
         float scale = e.getBbHeight() / 1.8f;
         return switch (kind) {
-            case KiCharge.KIND_BEAM -> pos.add(0, 0.85 * scale, 0).add(right.scale(0.42 * scale)).add(forward.scale(-0.05));
+            case KiCharge.KIND_BEAM -> pos.add(0, 0.88 * scale, 0).add(right.scale(0.52 * scale)).add(forward.scale(0.12 * scale));
             case KiCharge.KIND_OVERHEAD -> pos.add(0, (2.15 + radius(kind, f)) * scale, 0);
             default -> pos.add(0, 1.2 * scale, 0).add(forward.scale(0.75 * scale));
         };
@@ -109,7 +109,7 @@ public final class ClientKiCharge {
     public static float radius(int kind, float f) {
         return switch (kind) {
             case KiCharge.KIND_OVERHEAD -> 0.25f + 1.6f * f;
-            case KiCharge.KIND_BEAM -> 0.12f + 0.5f * f;
+            case KiCharge.KIND_BEAM -> 0.2f + 0.6f * f;
             default -> 0.12f + 0.55f * f;
         };
     }
@@ -166,7 +166,7 @@ public final class ClientKiCharge {
                 continue;
             }
             var flat = buffers.getBuffer(com.dbzenith.client.fx.KiEnergy.flat());
-            com.dbzenith.client.fx.KiEnergy.billboard(flat, m, n, x, y, z, LEFT, UP, r * 2.4f * pulse, com.dbzenith.client.fx.KiEnergy.argb(c.color(), (int) (80 + 70 * f)), com.dbzenith.client.fx.KiEnergy.HALO);
+            com.dbzenith.client.fx.KiEnergy.billboard(flat, m, n, x, y, z, LEFT, UP, r * 2.2f * pulse, com.dbzenith.client.fx.KiEnergy.argb(c.color(), (int) (45 + 45 * f)), com.dbzenith.client.fx.KiEnergy.HALO);
             if (!firstPerson && f > 0.5f) {                                      // arcs of ki snapping round it
                 java.util.Random rnd = new java.util.Random(en.getKey() * 31L + (long) (t / 2));
                 int arcs = 1 + (int) ((f - 0.5f) * 6);
@@ -188,15 +188,15 @@ public final class ClientKiCharge {
             var solid = buffers.getBuffer(com.dbzenith.client.fx.KiEnergy.solid());
             float rr = r * 0.62f * pulse;
             int detail = com.dbzenith.client.fx.KiParticles.quality() >= 2 ? 2 : 1;
-            com.dbzenith.client.fx.KiEnergy.sphere(solid, m, n, x, y, z, rr, com.dbzenith.client.fx.KiEnergy.argb(c.color(), 220), com.dbzenith.client.fx.KiEnergy.SHELL, detail, t * 0.03f);
-            com.dbzenith.client.fx.KiEnergy.sphere(solid, m, n, x, y, z, rr * 1.07f, com.dbzenith.client.fx.KiEnergy.argb(c.color(), (int) (120 + 120 * f)), com.dbzenith.client.fx.KiEnergy.STRANDS, detail, -t * 0.05f);
-            com.dbzenith.client.fx.KiEnergy.sphere(solid, m, n, x, y, z, rr * 0.55f, com.dbzenith.client.fx.KiEnergy.argb(0xFFFFFF, 255), com.dbzenith.client.fx.KiEnergy.CORE, 1, t * 0.02f);
+            com.dbzenith.client.fx.KiEnergy.sphere(solid, m, n, x, y, z, rr, com.dbzenith.client.fx.KiEnergy.argb(c.color(), 150), com.dbzenith.client.fx.KiEnergy.SHELL, detail, t * 0.03f);
+            com.dbzenith.client.fx.KiEnergy.sphere(solid, m, n, x, y, z, rr * 1.07f, com.dbzenith.client.fx.KiEnergy.argb(c.color(), (int) (60 + 90 * f)), com.dbzenith.client.fx.KiEnergy.STRANDS, detail, -t * 0.05f);
+            com.dbzenith.client.fx.KiEnergy.sphere(solid, m, n, x, y, z, rr * 0.5f, com.dbzenith.client.fx.KiEnergy.argb(hot, 210), com.dbzenith.client.fx.KiEnergy.CORE, 1, t * 0.02f);
             buffers.endBatch(com.dbzenith.client.fx.KiEnergy.solid());
             Vec3 ground = groundBelow(e, 4);                                    // its light on the ground, rising with it
             if (ground != null && !firstPerson) {
                 var glowType = com.dbzenith.client.fx.FxRenderTypes.additive(GLOW);
                 com.dbzenith.client.fx.FxDraw.plane(pose, buffers.getBuffer(glowType), ground.subtract(cam).add(0, 0.03, 0), new Vec3(0, 1, 0), 1.2f + 3.2f * f,
-                        0, c.color(), (int) ((50 + 130 * f) * Math.max(0.2, 1 - (at.y - ground.y) / 6)), net.minecraft.client.renderer.LightTexture.FULL_BRIGHT);
+                        0, c.color(), (int) ((35 + 85 * f) * Math.max(0.2, 1 - (at.y - ground.y) / 6)), net.minecraft.client.renderer.LightTexture.FULL_BRIGHT);
                 buffers.endBatch(glowType);
             }
         }

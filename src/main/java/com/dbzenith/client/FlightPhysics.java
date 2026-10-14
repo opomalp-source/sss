@@ -254,10 +254,15 @@ public final class FlightPhysics {
     /**
      * Vanilla widens the view with your movement speed, up to half again. Dexterity raises that speed a long way, and
      * flying adds to it, so the view blew wide open and the fighter shrank to a dot. Here speed may widen it only by
-     * {@code speedFovLimit} percent (10 by default); narrowing (drawing a bow, a spyglass) is left alone.
+     * {@code speedFovLimit} percent (10 by default); narrowing (drawing a bow, a spyglass) is left alone. While
+     * charging a technique the view holds still (a charge plants you or slows you, which would otherwise zoom it in).
      */
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onFovModifier(net.minecraftforge.client.event.ComputeFovModifierEvent event) {
+        if (ClientKiCharge.get(event.getPlayer().getId()) != null) {          // charging: planted or slowed, the view mustn't zoom in (the ki attack rework)
+            event.setNewFovModifier(1f);
+            return;
+        }
         float m = event.getNewFovModifier();
         float most = 1 + DBZConfig.CLIENT.speedFovLimit.get().floatValue() / 100f;
         if (m > most) event.setNewFovModifier(most);

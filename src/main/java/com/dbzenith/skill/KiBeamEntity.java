@@ -121,7 +121,10 @@ public class KiBeamEntity extends Entity {
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
-        if (level().isClientSide) com.dbzenith.client.ClientSounds.beam(this);   // its roar, for as long as it lasts (CX-41)
+        if (level().isClientSide) {
+            com.dbzenith.client.ClientSounds.beam(this);   // its roar, for as long as it lasts (CX-41)
+            com.dbzenith.client.fx.KiFx.beamFired(this);   // the release: a burst of sparks, a kick and a flash (the ki attack rework)
+        }
     }
 
     @Override

@@ -282,7 +282,7 @@ to both mods folders.
 - [x] Phase 0 (v0.116.0) Groundwork: attacks as data files (data/*/ki_attacks/*.json, /reload, synced), look and sound profile, /dbz kiattacks export, ./gradlew installMod, docs/KI_ATTACKS.md
 - [x] Phase 1 (v0.117.0) Basic blast: 3D layered glowing sphere (core, shell, plasma, halo), trail, own particles, impact, layered sound
 - [x] Phase 2 (v0.118.0) Charge-up: particles drawn in, growing orb with arcs, dust and debris, cracks, rising light and sound, movement lock
-- [ ] Phase 3 Beams: tapered beam mesh, scrolling energy, core, spirals, crackling edges, 3D end cap, widening, flicker
+- [x] Phase 3 (v0.119.0) Beams: widening tube mesh, flowing energy, core, spirals, lightning off the edges, churning head sphere, release flash, flicker (and the energy shader now actually loads)
 - [ ] Phase 4 Large spheres: huge swirling sphere, orbiting sparks, ground reaction
 - [ ] Phase 5 Barrage, homing, disc, wave, burst
 - [ ] Phase 6 Impacts and terrain: huge craters, debris, plumes, regeneration option

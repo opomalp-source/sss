@@ -22,6 +22,18 @@ public final class KiFx {
         return t == null ? PLAIN : t.look();
     }
 
+    /** A beam let go: a burst of sparks off the hands and, for the one who fired it, a kick of the camera and a flash. */
+    public static void beamFired(com.dbzenith.skill.KiBeamEntity beam) {
+        Minecraft mc = Minecraft.getInstance();
+        float w = Math.max(0.4f, beam.getWidth());
+        KiParticles.burst(beam.position(), beam.getColor(), (int) (24 + 16 * w), 0.25f + 0.1f * w, 0.8f + 0.4f * w);
+        if (beam.getOwner() == mc.player) {
+            CameraFx.kick(0.5f);
+            CameraFx.flash(FxDraw.mix(beam.getColor(), 0xFFFFFF, 0.5f), 0.25f);
+        }
+        CameraFx.shakeAt(beam.position(), 0.2f + 0.1f * w, 24);
+    }
+
     /** One client tick of a ki blast: remember where it is (the trail), shed motes and the odd spark. */
     public static void blastTick(KiBlastEntity b) {
         double cx = b.getX(), cy = b.getY() + b.getBbHeight() / 2, cz = b.getZ();
