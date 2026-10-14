@@ -71,6 +71,9 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue staminaRegenPercentPerSecond;
         public final ForgeConfigSpec.DoubleValue bodyRegenPercentPerSecond;
         public final ForgeConfigSpec.IntValue bodyRegenDelayTicks;
+        /** CX-51: knocked out at zero health instead of dying at once. */
+        public final ForgeConfigSpec.BooleanValue knockOut;
+        public final ForgeConfigSpec.IntValue knockOutSeconds, knockOutNpcSeconds, knockOutCrawlStrength;
         public final ForgeConfigSpec.DoubleValue chargeKiPercentPerSecond;
         public final ForgeConfigSpec.DoubleValue chargeStaminaPercentPerSecond;
         public final ForgeConfigSpec.IntValue chargeReleaseStepTicks;
@@ -343,6 +346,14 @@ public final class DBZConfig {
                     .defineInRange("bodyRegenPercentPerSecond", 1.0, 0.0, 100.0);
             bodyRegenDelayTicks = b.comment("Ticks after taking damage before body regen starts")
                     .defineInRange("bodyRegenDelayTicks", 100, 0, 72000);
+            knockOut = b.comment("At zero health fighters (players and NPC fighters) are knocked out on the ground instead of dying at once: they bleed out after a while, a blow finishes them, a Senzu Bean or healing saves them, and others can carry them")
+                    .define("knockOut", true);
+            knockOutSeconds = b.comment("How long a knocked-out player lasts before bleeding out (seconds; tougher fighters last up to half again)")
+                    .defineInRange("knockOutSeconds", 45, 5, 600);
+            knockOutNpcSeconds = b.comment("How long a knocked-out NPC fighter lies there before it dies (seconds)")
+                    .defineInRange("knockOutNpcSeconds", 12, 1, 120);
+            knockOutCrawlStrength = b.comment("Strength plus Constitution needed to crawl while knocked out (below it you can only lie there)")
+                    .defineInRange("knockOutCrawlStrength", 60, 0, 100000);
             chargeKiPercentPerSecond = b.comment("Ki gained per second while charging, % of max")
                     .defineInRange("chargeKiPercentPerSecond", 10.0, 0.0, 100.0);
             chargeStaminaPercentPerSecond = b.comment("Stamina drained per second while charging, % of max")

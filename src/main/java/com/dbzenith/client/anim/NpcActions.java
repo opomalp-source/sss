@@ -124,7 +124,7 @@ public final class NpcActions {
                 t.stanceSpeed.speed = 1f;
                 t.actionSpeed.speed = 1f;
             }
-            stance(t, FighterStates.get(e.getId()));
+            stance(t, com.dbzenith.client.ClientKnockouts.isDown(e.getId()) ? Fighter.State.KNOCKDOWN : FighterStates.get(e.getId()));   // knocked out lies down too (CX-51)
             if (e.hurtTime > t.lastHurtTime && e.isAlive() && now - t.actionAt > 1) {     // struck: reel (unless its own move just began)
                 boolean heavy = now <= t.heavyHintUntil || t.shown == Fighter.State.LAUNCHED || t.shown == Fighter.State.KNOCKDOWN;
                 play(e, heavy ? Anims.custom("hit_heavy", Anims.HIT_HEAVY) : Anims.custom("hit_light", Anims.HIT_LIGHT));

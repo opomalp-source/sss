@@ -2894,3 +2894,52 @@ behind on chases and counters (VfxV3). What was missing was each beam having its
   - The flight widening is now at most 6%.
 - **Checked in the dev client:** at Dexterity 20,000 the view is barely wider than at 10, and the fighter stays full
   size.
+
+## 2026-10-14 — CX-51: knocked out at zero health (v0.112.0)
+Starts the injury round (the user: low health slows you, limbs that break and can be cut off, prosthetics, and at
+zero health you are knocked down instead of dying; saved with Senzu Beans by others, or carried and finished by
+others). Decided with the user: bleed out after a while; severing by cutting attacks and overwhelming blows; Namekians
+and Majins regrow, prosthetics for the rest; NPCs and bosses too. Plan in TODO.md.
+- **`combat.KnockOut`:** what would kill a player or an NPC fighter puts them down on the ground with the last sliver
+  of health. Duels keep their own knockout (they cancel the death first); creative players, /kill and the void still
+  kill.
+  - **Down:**
+    - they revert to base form and stop flying and charging;
+    - they are ki-sealed, can't attack (their blows are cancelled) and don't heal on their own (food regeneration and
+      body regeneration are blocked);
+    - players strong enough (Strength + Constitution of at least `knockOutCrawlStrength`, 60) crawl at a fifth of
+      their speed; the rest can't move;
+    - NPC fighters lie still (AI off).
+  - **The end:**
+    - **Bleeding out:** after `knockOutSeconds` (45, up to half again with Constitution); NPCs after
+      `knockOutNpcSeconds` (12). Death goes to whoever put them down, so kills, TP and quest credit still count.
+    - **Finishing blow:** any blow from someone finishes them at once.
+    - **Giving up:** a player holds Sneak for 3 seconds. Logging out while down counts as giving up.
+  - **Saved:**
+    - someone feeds them a Senzu Bean (right-click holding one): full health;
+    - or heals them past a fifth of their health (Ki Heal works).
+  - **Carried:**
+    - Sneak and right-click a downed fighter with an empty hand puts them over your shoulder; you walk 30% slower;
+    - hold Sneak a second to put them down;
+    - they can't climb off.
+  - Packet `KnockOutPacket` (protocol 36), resent to anyone who starts tracking a downed fighter.
+- **Client** (`ClientKnockouts`):
+  - **The pose:** lying on the back, crawling face down (pulling along one arm at a time, head up), or draped over a
+    shoulder when carried. New animations `CRAWL` and `CARRIED`. NPCs use the downed pose. Faces show out cold.
+  - **Your screen while down:**
+    - dark red edges pulsing like a heartbeat, closing in as time runs out;
+    - "KNOCKED OUT", the time left, and what can save you.
+  - **Your controls:** no jumping, attacking or using things; crawling slowly if strong enough; your body faces where
+    you look.
+  - **The camera** drops to the ground with you: low behind you in third person, at ground level in first person.
+- **Config** (server): `knockOut`, `knockOutSeconds`, `knockOutNpcSeconds`, `knockOutCrawlStrength`.
+- **Tests:** `KnockOutTests` (its own batch):
+  - a player knocked out by a lethal blow can't heal on their own, is picked up and can't climb off, is saved by a
+    Senzu Bean, and is put down;
+  - an NPC fighter goes down and one more blow finishes it;
+  - an NPC bleeds out after its time.
+  - `CombatTests.lethalBodyDamageKills` and `QuestTests` (bounty kills) updated to knock out, then finish.
+  - 221 GameTests.
+- **Checked in the dev client:** knocked down in survival: the overlay (KNOCKED OUT, 52 s, can still crawl, a Senzu
+  Bean or healing can save you, hold Sneak to give up), the low camera behind the fighter lying on their back, and an
+  NPC fighter down beside them. Crawling and being carried couldn't be driven from the harness.

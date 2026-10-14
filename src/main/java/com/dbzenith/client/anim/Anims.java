@@ -719,6 +719,29 @@ public final class Anims {
         a.rot("head", 0, -15, 20, 0, Ease.LINEAR);
     });
 
+
+    /** Knocked out but strong enough to crawl (CX-51): face down, dragging yourself along one arm at a time, head up. */
+    public static final KeyframeAnimation CRAWL = loop(30, a -> {
+        a.tilt(0, 88, 9.5f, Ease.INOUTSINE).tilt(15, 86, 9.3f, Ease.INOUTSINE).tilt(30, 88, 9.5f, Ease.INOUTSINE);
+        a.rot("rightArm", 0, -165, 10, 0, Ease.INOUTSINE).rot("rightArm", 15, -105, 20, 0, Ease.INOUTSINE).rot("rightArm", 30, -165, 10, 0, Ease.INOUTSINE);
+        a.rot("leftArm", 0, -105, -20, 0, Ease.INOUTSINE).rot("leftArm", 15, -165, -10, 0, Ease.INOUTSINE).rot("leftArm", 30, -105, -20, 0, Ease.INOUTSINE);
+        a.bend("rightArm", 0, 10, Ease.INOUTSINE).bend("rightArm", 15, 45, Ease.INOUTSINE).bend("rightArm", 30, 10, Ease.INOUTSINE);
+        a.bend("leftArm", 0, 45, Ease.INOUTSINE).bend("leftArm", 15, 10, Ease.INOUTSINE).bend("leftArm", 30, 45, Ease.INOUTSINE);
+        a.rot("rightLeg", 0, 4, 0, 6, Ease.INOUTSINE).rot("rightLeg", 15, -8, 0, 8, Ease.INOUTSINE).rot("rightLeg", 30, 4, 0, 6, Ease.INOUTSINE);
+        a.rot("leftLeg", 0, -8, 0, -8, Ease.INOUTSINE).rot("leftLeg", 15, 4, 0, -6, Ease.INOUTSINE).rot("leftLeg", 30, -8, 0, -8, Ease.INOUTSINE);
+        a.rot("head", 0, -45, 0, 0, Ease.INOUTSINE).rot("head", 15, -38, 0, 0, Ease.INOUTSINE).rot("head", 30, -45, 0, 0, Ease.INOUTSINE);
+    });
+
+    /** Knocked out and carried (CX-51): draped face down over someone's shoulder, arms and legs hanging, swaying. */
+    public static final KeyframeAnimation CARRIED = loop(40, a -> {
+        a.tilt(0, 90, 17f, Ease.INOUTSINE).tilt(20, 86, 17.4f, Ease.INOUTSINE).tilt(40, 90, 17f, Ease.INOUTSINE);
+        a.rot("rightArm", 0, -88, 0, 6, Ease.INOUTSINE).rot("rightArm", 20, -96, 0, 2, Ease.INOUTSINE).rot("rightArm", 40, -88, 0, 6, Ease.INOUTSINE);
+        a.rot("leftArm", 0, -94, 0, -4, Ease.INOUTSINE).rot("leftArm", 20, -86, 0, -6, Ease.INOUTSINE).rot("leftArm", 40, -94, 0, -4, Ease.INOUTSINE);
+        a.rot("rightLeg", 0, -84, 0, 4, Ease.INOUTSINE).rot("rightLeg", 20, -92, 0, 2, Ease.INOUTSINE).rot("rightLeg", 40, -84, 0, 4, Ease.INOUTSINE);
+        a.rot("leftLeg", 0, -92, 0, -3, Ease.INOUTSINE).rot("leftLeg", 20, -84, 0, -4, Ease.INOUTSINE).rot("leftLeg", 40, -92, 0, -3, Ease.INOUTSINE);
+        a.rot("head", 0, 30, 10, 0, Ease.INOUTSINE).rot("head", 20, 36, 6, 0, Ease.INOUTSINE).rot("head", 40, 30, 10, 0, Ease.INOUTSINE);
+    });
+
     /** Namekian idle: arms folded across the chest, weight on one leg, a slow breath. The head stays free. */
     public static final KeyframeAnimation IDLE_CROSSED = loop(60, a -> {
         Pose p = new Pose().freeing("head").r("torso", -2, 0, 0)

@@ -97,8 +97,10 @@ public final class CombatTests {
         PlayerData d = ModCapabilities.getOrThrow(player);
         helper.runAfterDelay(SPAWN_PROTECTION, () -> {
         player.hurt(player.damageSources().generic(), 1000f); // 10,000 body damage
-        helper.assertTrue(d.getBody() <= 0, "body should be empty");
-        helper.assertTrue(player.isDeadOrDying(), "player should die when body hits 0");
+        helper.assertTrue(com.dbzenith.combat.KnockOut.isDown(player) && !player.isDeadOrDying(), "at zero body the player is knocked out, not dead (CX-51)");
+        player.invulnerableTime = 0;
+        player.hurt(player.damageSources().generic(), 1000f);
+        helper.assertTrue(player.isDeadOrDying(), "a second lethal blow while down kills");
         TestPlayers.remove(helper, player);
         helper.succeed();
         });

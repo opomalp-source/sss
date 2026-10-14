@@ -50,7 +50,8 @@ public final class QuestTests {
         helper.assertTrue(!QuestManager.accept(p, "bounty_tyrant"), "high-rank bounty locked");
         for (int i = 0; i < 10; i++) {
             var soldier = helper.spawnWithNoFreeWill(ModNpcs.KI_SOLDIER.get(), new BlockPos(1, 1, 1));
-            soldier.hurt(p.damageSources().playerAttack(p), 1_000_000f);
+            soldier.hurt(p.damageSources().playerAttack(p), 1_000_000f);   // knocked out (CX-51)
+            soldier.hurt(p.damageSources().playerAttack(p), 1_000_000f);   // and finished
         }
         Zombie z = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(1, 1, 1));
         z.hurt(p.damageSources().playerAttack(p), 1_000_000f); // wrong type: must not count

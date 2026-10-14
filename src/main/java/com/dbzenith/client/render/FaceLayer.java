@@ -79,7 +79,7 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         boolean fighting = lastFight != null && ageInTicks - lastFight < 160 && ageInTicks >= lastFight;
         boolean pained = player.getHealth() < player.getMaxHealth() * 0.3f && player.getMaxHealth() > 0;
         boolean ownEyes = eyes != FaceParts.EYES_CAT;
-        if (state.has(PublicStatePacket.DOWNED) || state.has(PublicStatePacket.DEAD)) {
+        if (state.has(PublicStatePacket.DOWNED) || state.has(PublicStatePacket.DEAD) || com.dbzenith.client.ClientKnockouts.isDown(player.getId())) {
             eyes = FaceParts.EYES_CLOSED;                                      // out cold
             mouth = MOUTH_FROWN;
             if (brows != BROWS_NONE) brows = BROWS_WORRIED;

@@ -120,6 +120,13 @@ public final class AnimController {
     }
 
     private static KeyframeAnimation chooseStance(AbstractClientPlayer player, PublicStatePacket state, Track t, long now) {
+        var knocked = com.dbzenith.client.ClientKnockouts.get(player.getId());   // knocked out (CX-51): carried, crawling or lying there
+        if (knocked != null) {
+            if (player.getVehicle() instanceof net.minecraft.world.entity.player.Player) return Anims.custom("carried", Anims.CARRIED);
+            double moved = Math.hypot(player.getX() - player.xo, player.getZ() - player.zo);
+            if (knocked.crawl() && moved > 0.005) return Anims.custom("crawl", Anims.CRAWL);
+            return Anims.custom("downed", Anims.DOWNED);
+        }
         if (state == null || player.isPassenger() || player.isSleeping() || player.isFallFlying() || player.isSwimming()
                 || player.getPose() == Pose.SWIMMING || isApe(state.form())) return null;
         if (state.has(PublicStatePacket.DOWNED)) return Anims.custom("downed", Anims.DOWNED);
