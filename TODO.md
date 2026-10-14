@@ -262,7 +262,7 @@ Most of these already exist in a first version; each step upgrades what is there
 - [x] CX-43 (v0.104.0) Transformation cinematics: camera orbit, cracks spreading from the feet, lightning, a held scream, white flash into the new aura
 - [x] CX-44 (v0.105.0) Cloth and tail physics: cape, gi sash and belt ends, Saiyan tail on springs (like the hair)
 - [x] CX-45 (v0.106.0) Bloom for ki (post-processing chain)
-- [ ] CX-46 Beams v2: a charge ball between the hands, a head that pushes forward, spiral, dome explosions with smoke
+- [x] CX-46 (v0.107.0) Beams v2: a charge ball between the hands, a head that pushes forward, spiral, dome explosions with smoke
 - [ ] CX-47 Battle damage: torn gi with health, bruises, dust after crashes
 - [ ] CX-48 Environment: water parting under fliers and beams, lasting shock rings and dust
 - [ ] CX-49 Animations: takeoff crouch-launch, hero landing, signature ki poses (Kamehameha, Galick Gun, Special Beam Cannon, Final Flash), teleport-behind in rushes, afterimage dodge, tumble recovery

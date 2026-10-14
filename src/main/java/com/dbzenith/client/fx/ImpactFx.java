@@ -47,11 +47,13 @@ public final class ImpactFx {
     private static final ResourceLocation RING = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/shock_ring.png");
     private static final ResourceLocation CRATER = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/crater.png");
     private static final ResourceLocation CRACKS = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/ground_cracks.png");
+    private static final ResourceLocation GLOW = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/ki_glow.png");
+    private static final ResourceLocation PUFF = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/nimbus_puff.png");
     private static final Vec3 UP = new Vec3(0, 1, 0);
     private static final int MAX_EFFECTS = 256;
     private static final int MAX_DECALS = 48;
 
-    private enum Kind { FLASH, RING, FACING_RING, DECAL, CRACKS }
+    private enum Kind { FLASH, RING, FACING_RING, DECAL, CRACKS, DOME, SMOKE }
 
     /** One effect. RING grows from {@code size0} to {@code size}; everything fades over its life. */
     private record Fx(Kind kind, Vec3 pos, Vec3 normal, int color, float size0, float size, int born, int life, float spin, int alpha) {}
@@ -139,6 +141,15 @@ public final class ImpactFx {
                 add(Kind.FLASH, pos, dir, tint, 0, 2.4f * s, 5, 255);
                 add(Kind.RING, pos, UP, m.color(), 0.3f * s, 2.6f * s, 12, 200);
                 add(Kind.FACING_RING, pos, dir, 0xFFFFFF, 0.2f * s, 1.8f * s, 8, 180);
+                // CX-46: a dome of light swelling out and thinning, then smoke left hanging and rising
+                add(Kind.DOME, pos, UP, tint, 0.3f * s, 1.25f * s, 9 + (int) (2 * s), 230);
+                int puffs = Math.min(22, 5 + (int) (3 * s));
+                for (int i = 0; i < puffs; i++) {
+                    Vec3 at = pos.add(rnd.nextGaussian() * 0.35 * s, rnd.nextDouble() * 0.6 * s, rnd.nextGaussian() * 0.35 * s);
+                    Vec3 drift = new Vec3(rnd.nextGaussian() * 0.012, 0.015 + rnd.nextDouble() * 0.03, rnd.nextGaussian() * 0.012);
+                    int grey = 0x3C3834 + 0x0A0A0A * rnd.nextInt(4);
+                    add(Kind.SMOKE, at, drift, grey, 0.45f * s, (0.9f + rnd.nextFloat() * 0.7f) * s, 60 + rnd.nextInt(50), 190);
+                }
                 Vec3 ground = groundBelow(level, pos, 3);
                 if (ground != null) crater(level, ground, Math.min(6f, 0.9f * s), (int) (8 + 6 * s));
                 CameraFx.shakeAt(pos, 0.25f + 0.08f * s, 32 + 4 * s);
@@ -344,6 +355,31 @@ public final class ImpactFx {
         }
         buffers.endBatch(ringType);
 
+        // CX-46: smoke hanging after an explosion, lit by the world, swelling, rising and thinning
+        RenderType smokeType = RenderType.entityTranslucent(PUFF);
+        VertexConsumer smoke = buffers.getBuffer(smokeType);
+        for (Fx f : EFFECTS) {
+            if (f.kind != Kind.SMOKE) continue;
+            float age = ticks - f.born + partial, t = Math.min(1f, age / f.life);
+            Vec3 at = f.pos.add(f.normal.scale(age));
+            int light = LevelRenderer.getLightColor(mc.level, BlockPos.containing(at));
+            float size = Mth.lerp(1 - (1 - t) * (1 - t), f.size0, f.size);
+            int alpha = (int) (f.alpha * Math.min(1f, age / 6f) * (1 - t) * (1 - t));
+            FxDraw.billboard(pose, smoke, camera.rotation(), at.x, at.y, at.z, size, f.spin + age * 0.01f, 0, 0, 1, 1, f.color, alpha);
+        }
+        buffers.endBatch(smokeType);
+
+        // CX-46: the dome of light, brightest at its rim, swelling fast and thinning out
+        RenderType domeType = FxRenderTypes.additive(GLOW);
+        VertexConsumer dome = buffers.getBuffer(domeType);
+        for (Fx f : EFFECTS) {
+            if (f.kind != Kind.DOME) continue;
+            float t = Math.min(1f, (ticks - f.born + partial) / f.life);
+            float r = Mth.lerp(1 - (1 - t) * (1 - t) * (1 - t), f.size0, f.size);
+            sphere(pose, dome, f.pos, r, cam, f.color, f.alpha * (1 - t) * (1 - t));
+        }
+        buffers.endBatch(domeType);
+
         RenderType starType = FxRenderTypes.additive(STAR);
         VertexConsumer stars = buffers.getBuffer(starType);
         for (Fx f : EFFECTS) {
@@ -367,6 +403,30 @@ public final class ImpactFx {
     private static void add(Kind kind, Vec3 pos, Vec3 normal, int color, float size0, float size, int life, int alpha, float spin) {
         if (EFFECTS.size() >= MAX_EFFECTS) EFFECTS.remove(0);
         EFFECTS.add(new Fx(kind, pos, normal, color, size0, size, ticks, life, spin, alpha));
+    }
+
+    /** A ball of light (the middle of the glow texture, so plain colour), see-through in the middle, bright at the rim. */
+    private static void sphere(PoseStack pose, VertexConsumer vc, Vec3 c, float r, Vec3 eye, int rgb, float alpha) {
+        int lat = 10, lon = 18;
+        var m = pose.last().pose();
+        var n = pose.last().normal();
+        for (int i = 0; i < lat; i++) {
+            for (int j = 0; j < lon; j++) {
+                Vec3[] q = {dir(i, j, lat, lon), dir(i + 1, j, lat, lon), dir(i + 1, j + 1, lat, lon), dir(i, j + 1, lat, lon)};
+                for (Vec3 d : q) {
+                    Vec3 p = c.add(d.scale(r));
+                    Vec3 view = eye.subtract(p).normalize();
+                    float rim = 1 - (float) Math.abs(view.dot(d));
+                    int a = (int) (alpha * (0.18f + 0.82f * rim * rim));
+                    FxDraw.vertex(vc, m, n, (float) p.x, (float) p.y, (float) p.z, 0.5f, 0.5f, rgb, a, net.minecraft.client.renderer.LightTexture.FULL_BRIGHT);
+                }
+            }
+        }
+    }
+
+    private static Vec3 dir(int i, int j, int lat, int lon) {
+        double th = Math.PI * i / lat, ph = Math.PI * 2 * j / lon;
+        return new Vec3(Math.sin(th) * Math.cos(ph), Math.cos(th), Math.sin(th) * Math.sin(ph));
     }
 
     /** Particles thrown out roughly along {@code dir}. */

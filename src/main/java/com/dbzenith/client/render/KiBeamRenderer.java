@@ -30,6 +30,7 @@ public class KiBeamRenderer extends EntityRenderer<KiBeamEntity> {
     private static final ResourceLocation GLOW = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/ki_glow.png");
     private static final ResourceLocation STAR = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/impact_star.png");
     private static final ResourceLocation STREAK = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/fx_streak.png");
+    private static final ResourceLocation RING = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/shock_ring.png");
 
     public KiBeamRenderer(EntityRendererProvider.Context context) {
         super(context);
@@ -99,7 +100,27 @@ public class KiBeamRenderer extends EntityRenderer<KiBeamEntity> {
         FxDraw.billboard(pose, star, camera, 0, 0, 0, width * 3.2f, t * 0.4f, 0, 0, 1, 1, hot, 200);
         float flicker = 0.85f + 0.15f * Mth.sin(t * 3.1f);
         FxDraw.billboard(pose, star, camera, end.x, end.y, end.z, width * 4.5f * flicker, -t * 0.6f, 0, 0, 1, 1, hot, 230);
-        FxDraw.billboard(pose, buffers.getBuffer(FxRenderTypes.additive(GLOW)), camera, end.x, end.y, end.z, width * 1.8f, 0, 0, 0, 1, 1, 0xFFFFFF, 255);
+        VertexConsumer light2 = buffers.getBuffer(FxRenderTypes.additive(GLOW));
+        FxDraw.billboard(pose, light2, camera, end.x, end.y, end.z, width * 1.8f, 0, 0, 0, 1, 1, 0xFFFFFF, 255);
+
+        // CX-46: the head churns, energy boiling round it as it pushes forward
+        for (int i = 0; i < 6; i++) {
+            float ang = t * (0.35f + 0.07f * i) + i * 1.047f;
+            float r = width * (0.55f + 0.25f * Mth.sin(t * 0.9f + i * 2.1f));
+            Vec3 p = end.add(a.scale(Mth.cos(ang) * r)).add(b.scale(Mth.sin(ang) * r)).subtract(dir.scale(width * 0.4f * (i % 3)));
+            FxDraw.billboard(pose, light2, camera, p.x, p.y, p.z, width * (1.6f + 0.5f * Mth.sin(t * 1.7f + i)), 0, 0, 0, 1, 1, hot, 150);
+        }
+        // shock rings running from the hands to the head, and the pressure ring the head drives before it
+        VertexConsumer rings = buffers.getBuffer(FxRenderTypes.additive(RING));
+        float speed = Math.max(1.2f, length / 12f);
+        for (int k = 0; k < 4; k++) {
+            float s = ((t * speed) + k * length / 4f) % Math.max(0.01f, length);
+            float fade = Mth.clamp(s / 1.5f, 0, 1) * Mth.clamp((length - s) / 2f, 0, 1);
+            FxDraw.plane(pose, rings, dir.scale(s), dir, width * (1.5f + 0.6f * s / Math.max(1, length)), t * 0.2f + k, hot, (int) (170 * fade), LightTexture.FULL_BRIGHT);
+        }
+        float throb = 0.8f + 0.2f * Mth.sin(t * 2.3f);
+        FxDraw.plane(pose, rings, end.subtract(dir.scale(width * 0.3f)), dir, width * 2.9f * throb, -t * 0.3f, hot, 210, LightTexture.FULL_BRIGHT);
+        FxDraw.plane(pose, rings, end.add(dir.scale(width * 0.5f)), dir, width * 1.9f / throb, t * 0.5f, 0xFFFFFF, 160, LightTexture.FULL_BRIGHT);
         super.render(beam, yaw, partialTicks, pose, buffers, light);
     }
 

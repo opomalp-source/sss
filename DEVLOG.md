@@ -2802,3 +2802,17 @@ Starts the polish round (the user: everything suggested except story, which come
   graphics or a shader pack, where everything draws as before.
 - **Checked in the dev client:** a Super Saiyan aura by day and at night. A soft golden halo spills round the aura and,
   at night, onto the ground. No shader errors (only vanilla's and the aura shader's usual missing-uniform warnings).
+
+## 2026-10-14 — CX-46: beams v2, explosion domes and smoke (v0.107.0)
+The charge ball between the hands and the beam's spiral strands were already there (CX-23, KiBeamRenderer).
+- **Beams** (`KiBeamRenderer`):
+  - shock rings run along the beam from the hands to the head (four at a time, speed scaled with length, widening
+    toward the head);
+  - the head churns: six blobs of light boil round it on their own orbits and sizes;
+  - a throbbing pressure ring the head drives before it, with a white inner ring.
+- **Explosions** (`ImpactFx`, every `EXPLOSION` impact):
+  - a dome of light (a sphere, see-through in the middle and bright at the rim) swells out fast and thins;
+  - then smoke: 5 to 22 grey puffs, lit by the world, that hang, swell, rise and thin over 3 to 5.5 seconds.
+  - Both scale with the blast.
+- **Checked in the dev client** (a Wave Beam fired at the ground): the rings racing along the beam to the churning
+  head, the dome at the blast, smoke billowing up.
