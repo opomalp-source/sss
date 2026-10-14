@@ -55,6 +55,7 @@ public class SettingsScreen extends Screen {
                 o.add(new Option("custom_hotbar", c.customHotbar, 0, 0, null));
                 o.add(new Option("hide_hearts", c.hideVanillaHearts, 0, 0, null));
                 o.add(new Option("cut_in", c.transformCutIn, 0, 0, null));
+                o.add(new Option("transform_cinematic", c.transformCinematic, 0, 0, null));
                 o.add(new Option("debug_stats", c.showDebugOverlay, 0, 0, null));
             }
             case EFFECTS -> {

@@ -750,7 +750,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue showDebugOverlay;
         public final ForgeConfigSpec.BooleanValue customHotbar;
         public final ForgeConfigSpec.BooleanValue hideVanillaHearts;
-        public final ForgeConfigSpec.BooleanValue transformCutIn, ultimateCinematic, damagePopups, prediction, enemyPanel, combatCallouts, comboCounter, combatLog, hitboxOverlay, pvpCamera;
+        public final ForgeConfigSpec.BooleanValue transformCutIn, transformCinematic, ultimateCinematic, damagePopups, prediction, enemyPanel, combatCallouts, comboCounter, combatLog, hitboxOverlay, pvpCamera;
         public final ForgeConfigSpec.IntValue crosshairDotMode, crosshairStyle, crosshairSize, crosshairColor;
         public final ForgeConfigSpec.DoubleValue crosshairOpacity;
         public final ForgeConfigSpec.DoubleValue shoulderOffset, shoulderHeight;
@@ -784,6 +784,8 @@ public final class DBZConfig {
                     .define("hideVanillaHearts", true);
             transformCutIn = b.comment("Play a cut-in (portrait slash and form name) when you transform")
                     .define("transformCutIn", true);
+            transformCinematic = b.comment("When you transform in third person, the camera circles round to your front and holds on the burst (CX-43)")
+                    .define("transformCinematic", true);
             ultimateCinematic = b.comment("Play the cinematic (a cut-in with the technique's name, the screen darkening, a shake) when an ultimate is fired near you")
                     .define("ultimateCinematic", true);
             damagePopups = b.comment("Show the damage of each blow over whoever took it, and words for counters, criticals, guard breaks and perfect guards")

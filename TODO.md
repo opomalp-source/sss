@@ -259,7 +259,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 Most of these already exist in a first version; each step upgrades what is there.
 - [x] CX-41 (v0.102.0) Sounds pass 2: own sounds for the Nimbus (bind, call, rush, dissolve), flight wind, a beam roar while firing, the charge ball, heavy landings
 - [x] CX-42 (v0.103.0) Faces v2: more expressions (focused in combat, pained when hurt badly, calm when meditating, a smirk), eyes that follow the look, per-form eyes (Super Saiyan 3 without brows, and so on)
-- [ ] CX-43 Transformation cinematics: camera orbit, cracks spreading from the feet, lightning, a held scream, white flash into the new aura
+- [x] CX-43 (v0.104.0) Transformation cinematics: camera orbit, cracks spreading from the feet, lightning, a held scream, white flash into the new aura
 - [ ] CX-44 Cloth and tail physics: cape, gi sash and belt ends, Saiyan tail on springs (like the hair)
 - [ ] CX-45 Bloom for ki (post-processing chain)
 - [ ] CX-46 Beams v2: a charge ball between the hands, a head that pushes forward, spiral, dome explosions with smoke

@@ -209,7 +209,15 @@ public final class DBZCommand {
                                     int count = n;
                                     ctx.getSource().sendSuccess(() -> Component.literal("Transformed " + count + " player(s)"), true);
                                     return n;
-                                })))
+                                })
+                                .then(Commands.literal("hold")   // the real power-up, as if the key were held down (CX-43)
+                                        .executes(ctx -> {
+                                            int n = 0;
+                                            for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) if (FormHandler.holdUp(p)) n++;
+                                            int count = n;
+                                            ctx.getSource().sendSuccess(() -> Component.literal("Powering up " + count + " player(s)"), true);
+                                            return n;
+                                        }))))
                 .then(Commands.literal("mastery")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("form", StringArgumentType.word())

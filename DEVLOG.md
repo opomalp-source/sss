@@ -2758,3 +2758,17 @@ Starts the polish round (the user: everything suggested except story, which come
 - Per-form eyes were already there (glowing form irises; brow ridges instead of brows for forms like Super Saiyan 3).
 - **Checked in the dev client** (zoomed face shots with the generated body): base glancing; Super Saiyan smirking with
   glowing teal eyes; badly hurt panting with worried brows. The fighting face couldn't be triggered from the harness.
+
+## 2026-10-14 — CX-43: transformation cinematics (v0.104.0)
+- **While powering up into a form** (`client.fx.TransformFx`, for every fighter):
+  - Cracks spread through the ground from the feet out to 4.2 blocks over 3.5 seconds, glowing and pulsing in the new
+    aura's colour (a white glow mask `ground_cracks_glow.png` from `tools/CrackGlowGen.java`).
+  - Lightning arcs flicker round the body (more as the power-up builds) and keep crackling for a moment after the burst.
+  - The ground trembles for whoever is near.
+  - The cracks stay behind after the burst. The flash, rings, rocks, dust, shout and cut-in were already there.
+- **Your own transformation, in third person:** the camera circles 165 degrees round to your front on a low orbit,
+  finishes the swing and holds on the burst (a short power-up finishes it quickly), then eases back. Client config
+  `transformCinematic`, Settings → HUD → "Transformation camera".
+- **Dev:** `/dbz transform <players> hold` runs the real held power-up (the plain command is instant).
+- **Checked in the dev client** (a 60-frame clip): the cracks under the fighter; the camera swinging to a front shot
+  of the new Super Saiyan (glowing eyes, clenched fists) and easing back.

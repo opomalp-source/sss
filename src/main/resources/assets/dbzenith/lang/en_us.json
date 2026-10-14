@@ -573,6 +573,8 @@
   "settings.dbzenith.hide_hearts.desc": "Your Body bar already shows your health, so the hearts and armour bar are hidden.",
   "settings.dbzenith.cut_in": "Transformation cut-in",
   "settings.dbzenith.cut_in.desc": "A slash of your aura colour with your portrait and the form's name when you transform.",
+  "settings.dbzenith.transform_cinematic": "Transformation camera",
+  "settings.dbzenith.transform_cinematic.desc": "In third person the camera circles round to your front while you transform and holds on the burst.",
   "settings.dbzenith.debug_stats": "Raw stat overlay",
   "settings.dbzenith.debug_stats.desc": "Developer aid: every derived stat as plain numbers.",
   "settings.dbzenith.aura_detail": "Aura detail",
