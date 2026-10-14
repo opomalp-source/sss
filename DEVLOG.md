@@ -2843,3 +2843,19 @@ The charge ball between the hands and the beam's spiral strands were already the
 - **Hooks:** `FlightPhysics.skim` (for every flier), `NimbusEntity.clientMotion`, and beams sampled every 1.6 blocks
   along their length every other tick.
 - **Checked in the dev client** (a Wave Beam over a pool): foam lines, the trench and spray along its path.
+
+## 2026-10-14 — CX-49: signature technique poses (v0.110.0)
+Most of the animation list from the suggestions was already in place: the takeoff crouch-and-spring and landings
+(MotionEngine), idle breathing, descending, launched, victory, air recovery, roll-up, spot dodge, rushes, and vanishes
+behind on chases and counters (VfxV3). What was missing was each beam having its own pose:
+- **Galick Gun** (`crimson_beam`): turned side-on, both arms flung out straight to the right, palms open, the energy
+  gathered there; swung round and through into the beam.
+- **Masenko** (`twin_wave`): both hands raised above the forehead, leaning back into it; driven down from overhead.
+- **Death Beam** (`finger_beam`): one arm out, finger pointed, the other hand at ease, shoulder leading; a flick of
+  the finger to fire.
+- **Kamehameha** keeps the cupped-at-the-hip charge and two-palmed thrust (the general beam pose).
+- **How it works:** the charge packet now carries the technique id (protocol 35). `Anims.techHold(kind, technique)`
+  picks the hold pose, `ClientKiCharge.hold(…, Charge, …)` puts the ball where that pose holds it, and a beam fired
+  within two seconds of a charge uses `Anims.beamFor(technique)`.
+- **Checked in the dev client** (front and back camera): each hold with the ball in the hands (or at the fingertip, or
+  above the forehead), and each firing.

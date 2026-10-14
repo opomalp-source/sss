@@ -130,7 +130,7 @@ public final class AnimController {
         if (state.has(PublicStatePacket.GUARDING)) return Anims.GUARD;
         if (state.has(PublicStatePacket.HEAVY)) return Anims.HEAVY_WINDUP;
         var techCharge = com.dbzenith.client.ClientKiCharge.get(player.getId());             // charging a technique (CX-23)
-        if (techCharge != null) return Anims.techHold(techCharge.kind());
+        if (techCharge != null) return Anims.techHold(techCharge.kind(), techCharge.technique());   // its own pose if it has one (CX-49)
         if (state.has(PublicStatePacket.CHARGING) || state.has(PublicStatePacket.TRANSFORMING)) return Anims.CHARGE;
         if (com.dbzenith.client.motion.MotionEngine.enabled()) {                    // the motion engine moves the body now
             return null;                                                       // the fighting stance is the motion engine's, by PvP mode (CX-20)
@@ -236,7 +236,7 @@ public final class AnimController {
         }
         KeyframeAnimation anim = switch (msg.kind()) {
             case AnimEventPacket.VOLLEY -> Anims.KI_VOLLEY;
-            case AnimEventPacket.BEAM -> Anims.kiBeam(msg.data());
+            case AnimEventPacket.BEAM -> Anims.beamFor(com.dbzenith.client.ClientKiCharge.lastTechnique(msg.entityId()), msg.data());
             case AnimEventPacket.THROW -> Anims.kiThrow(msg.data());
             case AnimEventPacket.WAVE -> Anims.KI_WAVE;
             case AnimEventPacket.FOCUS -> Anims.KI_FOCUS;

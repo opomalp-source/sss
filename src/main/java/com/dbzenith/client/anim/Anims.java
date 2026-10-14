@@ -229,6 +229,55 @@ public final class Anims {
         for (int t = 0; t <= 8; t += 2) a.pose(t, p.copy().move(t % 4 == 0 ? 0.08f : -0.08f, 0, 0), Ease.LINEAR);
     });
 
+    // ------------------------------------------------------------------ signature techniques (CX-49)
+
+    /** Galick Gun: turned side-on, both arms flung out straight to the right, palms open, the energy gathered there. */
+    static final Pose GALICK = new Pose().at(0, 1.8f, 0).r("torso", 6, 38, 0).r("head", -2, -40, 0)
+            .limb("rightArm", -12, 0, 84, 0).limb("leftArm", -88, 78, 0, 6)
+            .limb("rightLeg", 6, 0, 16, 24).limb("leftLeg", -10, 0, -14, 30);
+    /** Masenko: both hands raised above the forehead, palms together facing out, leaning back into it. */
+    static final Pose MASENKO = new Pose().at(0, 1.2f, 0).r("torso", -10, 0, 0).r("head", -8, 0, 0)
+            .limb("rightArm", -168, -14, -14, 36).limb("leftArm", -168, 14, 14, 36)
+            .limb("rightLeg", 4, 0, 12, 16).limb("leftLeg", -6, 0, -12, 18);
+    /** Death Beam: one arm out, finger pointed, the other hand at ease, shoulder leading. Unhurried. */
+    static final Pose FINGER = new Pose().at(0, 0.6f, 0).r("torso", 2, -18, 0).r("head", 2, 16, 0)
+            .limb("rightArm", -90, 14, 0, 0).limb("leftArm", 12, 0, -10, 24).freeing("rightLeg", "leftLeg");
+
+    public static final KeyframeAnimation TECH_HOLD_GALICK = loop(8, a -> {
+        for (int t = 0; t <= 8; t += 2) a.pose(t, GALICK.copy().move(t % 4 == 0 ? 0.08f : -0.08f, 0, 0), Ease.LINEAR);
+    });
+    public static final KeyframeAnimation TECH_HOLD_MASENKO = loop(8, a -> {
+        for (int t = 0; t <= 8; t += 2) a.pose(t, MASENKO.copy().move(t % 4 == 0 ? 0.08f : -0.08f, 0, 0), Ease.LINEAR);
+    });
+    public static final KeyframeAnimation TECH_HOLD_FINGER = loop(16, a -> {
+        a.pose(0, FINGER, Ease.INOUTSINE).pose(8, FINGER.copy().limb("rightArm", -92, 14, 0, 0), Ease.INOUTSINE).pose(16, FINGER, Ease.INOUTSINE);
+    });
+
+    /** The hold pose for a charge: the technique's own if it has one, else by its kind. */
+    public static KeyframeAnimation techHold(int kind, String technique) {
+        return switch (technique == null ? "" : technique) {
+            case "crimson_beam" -> custom("tech_hold_galick", TECH_HOLD_GALICK);
+            case "twin_wave" -> custom("tech_hold_masenko", TECH_HOLD_MASENKO);
+            case "finger_beam" -> custom("tech_hold_finger", TECH_HOLD_FINGER);
+            default -> techHold(kind);
+        };
+    }
+
+    /** A beam fired in its technique's own way (the one just charged), else the usual two-handed thrust. */
+    public static KeyframeAnimation beamFor(String technique, int holdTicks) {
+        return switch (technique == null ? "" : technique) {
+            case "crimson_beam" -> kiBeam(holdTicks, GALICK, BEAM_FIRE.copy().r("torso", 12, 14, 0));          // swung round and through
+            case "twin_wave" -> kiBeam(holdTicks, MASENKO, BEAM_FIRE.copy().at(0, 1.6f, -1.2f)
+                    .limb("rightArm", -100, 10, 0, 0).limb("leftArm", -100, -10, 0, 0));                       // driven down from overhead
+            case "finger_beam" -> once(Math.max(12, holdTicks + 8), a -> {                                    // a flick of the finger
+                int end = Math.max(12, holdTicks + 8);
+                a.pose(0, FINGER, Ease.LINEAR).pose(2, FINGER.copy().limb("rightArm", -104, 14, 0, 0), Ease.OUTEXPO)
+                        .pose(5, FINGER, Ease.OUTQUAD).pose(end, fight(), Ease.INOUTSINE);
+            });
+            default -> kiBeam(holdTicks);
+        };
+    }
+
     /** The hold pose for a kind of charge (KiCharge.KIND_*). */
     public static KeyframeAnimation techHold(int kind) {
         return switch (kind) {
@@ -440,14 +489,21 @@ public final class Anims {
      * against the force while the beam burns.
      */
     public static KeyframeAnimation kiBeam(int holdTicks) {
+        return kiBeam(holdTicks, new Pose().at(0, 2.0f, 0.6f).r("torso", 4, -48, 0)
+                        .limb("rightArm", 22, 40, 18, 80).limb("leftArm", 10, 50, 10, 70)
+                        .limb("rightLeg", 16, 0, 14, 30).limb("leftLeg", -22, 0, -12, 34),
+                BEAM_FIRE);
+    }
+
+    /** Both palms thrust out together, braced: how most beams are fired. */
+    static final Pose BEAM_FIRE = new Pose().at(0, 2.0f, -1.4f).r("torso", 10, 8, 0)
+            .limb("rightArm", -90, 12, 0, 0).limb("leftArm", -90, -12, 0, 0)
+            .limb("rightLeg", 26, 0, 12, 4).limb("leftLeg", -30, 0, -12, 38);
+
+    /** A beam fired from {@code gather} (where the energy was held) into {@code fire}, then straining to hold it. */
+    static KeyframeAnimation kiBeam(int holdTicks, Pose gather, Pose fire) {
         int end = Math.max(14, holdTicks + 10);
         return once(end, a -> {
-            Pose gather = new Pose().at(0, 2.0f, 0.6f).r("torso", 4, -48, 0)
-                    .limb("rightArm", 22, 40, 18, 80).limb("leftArm", 10, 50, 10, 70)
-                    .limb("rightLeg", 16, 0, 14, 30).limb("leftLeg", -22, 0, -12, 34);
-            Pose fire = new Pose().at(0, 2.0f, -1.4f).r("torso", 10, 8, 0)
-                    .limb("rightArm", -90, 12, 0, 0).limb("leftArm", -90, -12, 0, 0)
-                    .limb("rightLeg", 26, 0, 12, 4).limb("leftLeg", -30, 0, -12, 38);
             a.pose(0, fight(), Ease.LINEAR).pose(3, gather.past(fight(), 0.2f), Ease.OUTQUAD).pose(5, fire, Ease.OUTEXPO)
                     .pose(6, fire.copy().move(0, 0.3f, 0.9f), Ease.OUTQUAD);                                   // the beam's kick
             for (int t = 8; t < end - 4; t += 2) {                                                            // straining against it

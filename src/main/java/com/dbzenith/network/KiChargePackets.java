@@ -36,7 +36,7 @@ public final class KiChargePackets {
      * Server to the clients near a player: their charge (kind of hold, colour, 0..1 grown, the damage multiplier it has
      * reached, the longest charge in ticks); a fraction below 0 means it stopped.
      */
-    public record State(int entityId, int kind, int color, float fraction, float power, int maxTicks) {
+    public record State(int entityId, int kind, int color, float fraction, float power, int maxTicks, String technique) {
         public static void encode(State m, FriendlyByteBuf buf) {
             buf.writeVarInt(m.entityId);
             buf.writeByte(m.kind);
@@ -44,10 +44,11 @@ public final class KiChargePackets {
             buf.writeFloat(m.fraction);
             buf.writeFloat(m.power);
             buf.writeVarInt(m.maxTicks);
+            buf.writeUtf(m.technique, 64);                                     // for its signature pose (CX-49)
         }
 
         public static State decode(FriendlyByteBuf buf) {
-            return new State(buf.readVarInt(), buf.readByte(), buf.readInt(), buf.readFloat(), buf.readFloat(), buf.readVarInt());
+            return new State(buf.readVarInt(), buf.readByte(), buf.readInt(), buf.readFloat(), buf.readFloat(), buf.readVarInt(), buf.readUtf(64));
         }
 
         public static void handle(State m, Supplier<NetworkEvent.Context> ctx) {

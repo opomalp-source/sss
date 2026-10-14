@@ -158,11 +158,11 @@ public final class KiCharge {
 
     private static void broadcast(ServerPlayer p, State s) {
         ModNetwork.sendToTrackingAndSelf(p, new KiChargePackets.State(p.getId(), s.kind, s.color, (float) s.fraction(),
-                (float) TechniqueHandler.chargeDamage(s.technique, s.fraction()), s.max));
+                (float) TechniqueHandler.chargeDamage(s.technique, s.fraction()), s.max, s.technique.id()));
     }
 
     private static void stopped(ServerPlayer p) {
-        ModNetwork.sendToTrackingAndSelf(p, new KiChargePackets.State(p.getId(), 0, 0, -1f, 1f, 0));
+        ModNetwork.sendToTrackingAndSelf(p, new KiChargePackets.State(p.getId(), 0, 0, -1f, 1f, 0, ""));
     }
 
     private static void report(ServerPlayer p, TechniqueHandler.Result r, Technique t) {

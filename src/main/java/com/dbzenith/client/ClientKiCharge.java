@@ -29,7 +29,11 @@ import java.util.Map;
 @Mod.EventBusSubscriber(modid = DBZenith.MOD_ID, value = Dist.CLIENT)
 public final class ClientKiCharge {
     /** A charge as last heard: how it is held, its colour, how far grown, the damage multiplier reached, the longest charge. */
-    public record Charge(int kind, int color, float fraction, float power, int maxTicks, long heardAt) {}
+    public record Charge(int kind, int color, float fraction, float power, int maxTicks, long heardAt, String technique) {}
+
+    /** The technique each fighter charged last, and when (so the beam that follows fires in its own pose, CX-49). */
+    private static final Map<Integer, String> LAST = new HashMap<>();
+    private static final Map<Integer, Long> LAST_AT = new HashMap<>();
 
     private static final Map<Integer, Charge> CHARGES = new HashMap<>();
 
@@ -41,7 +45,17 @@ public final class ClientKiCharge {
             return;
         }
         long now = Minecraft.getInstance().level == null ? 0 : Minecraft.getInstance().level.getGameTime();
-        CHARGES.put(m.entityId(), new Charge(m.kind(), m.color(), m.fraction(), m.power(), m.maxTicks(), now));
+        CHARGES.put(m.entityId(), new Charge(m.kind(), m.color(), m.fraction(), m.power(), m.maxTicks(), now, m.technique()));
+        LAST.put(m.entityId(), m.technique());
+        LAST_AT.put(m.entityId(), now);
+    }
+
+    /** The technique this fighter was charging in the last couple of seconds, or "". */
+    public static String lastTechnique(int entityId) {
+        Minecraft mc = Minecraft.getInstance();
+        Long at = LAST_AT.get(entityId);
+        if (mc.level == null || at == null || mc.level.getGameTime() - at > 40) return "";
+        return LAST.getOrDefault(entityId, "");
     }
 
     public static Charge get(int entityId) {
@@ -63,6 +77,20 @@ public final class ClientKiCharge {
     /** Where a figure holds the energy, and how big the ball is at a charge. */
     public static Vec3 hold(Entity e, int kind, float f) {
         return hold(e, e.position(), kind, f);
+    }
+
+    /** Where this charge is held: a signature technique's own place (CX-49), else by its kind. */
+    public static Vec3 hold(Entity e, Vec3 pos, Charge c, float f) {
+        float yaw = e instanceof net.minecraft.world.entity.LivingEntity l ? l.yBodyRot : e.getYRot();
+        double r = Math.toRadians(yaw);
+        Vec3 forward = new Vec3(-Math.sin(r), 0, Math.cos(r)), right = new Vec3(-Math.cos(r), 0, -Math.sin(r));
+        float scale = e.getBbHeight() / 1.8f;
+        return switch (c.technique() == null ? "" : c.technique()) {
+            case "crimson_beam" -> pos.add(0, 1.3 * scale, 0).add(right.scale(1.05 * scale)).add(forward.scale(-0.25 * scale));   // out to the right side
+            case "twin_wave" -> pos.add(0, 2.05 * scale, 0).add(forward.scale(0.3 * scale));                                   // above the forehead
+            case "finger_beam" -> pos.add(0, 1.38 * scale, 0).add(forward.scale(0.85 * scale)).add(right.scale(0.28 * scale));   // the fingertip
+            default -> hold(e, pos, c.kind(), f);
+        };
     }
 
     /** The same from a given position of the figure (interpolated, when drawing). */
@@ -107,7 +135,7 @@ public final class ClientKiCharge {
             if (e == null) continue;
             Charge c = en.getValue();
             float f = shownFraction(c, pt);
-            Vec3 at = hold(e, e.getPosition(pt), c.kind(), f);
+            Vec3 at = hold(e, e.getPosition(pt), c, f);
             float r = radius(c.kind(), f) * e.getBbHeight() / 1.8f;
             if (e == mc.player && mc.options.getCameraType().isFirstPerson()) {   // your own, seen from the eyes: smaller, a little lower
                 r *= 0.45f;
@@ -144,7 +172,7 @@ public final class ClientKiCharge {
             }
             float f = shownFraction(c, 0);
             if (e == mc.player && mc.options.getCameraType().isFirstPerson()) continue;   // your own sparks would fill the screen
-            Vec3 at = hold(e, c.kind(), f);
+            Vec3 at = hold(e, e.position(), c, f);
             float rad = radius(c.kind(), f) * e.getBbHeight() / 1.8f;
             Vector3f rgb = new Vector3f(((c.color() >> 16) & 255) / 255f, ((c.color() >> 8) & 255) / 255f, (c.color() & 255) / 255f);
             Vector3f core = new Vector3f(Mth.lerp(0.6f, rgb.x(), 1f), Mth.lerp(0.6f, rgb.y(), 1f), Mth.lerp(0.6f, rgb.z(), 1f));
