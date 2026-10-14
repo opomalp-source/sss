@@ -195,7 +195,7 @@ public final class BeamStruggle {
                             winner.getOwner() == null ? -1 : winner.getOwner().getId()).send(sl);
                 }
             } else {
-                level.explode(a, clash.x, clash.y, clash.z, 3f, Level.ExplosionInteraction.NONE);
+                KiExplosion.blast(sl, a, clash.x, clash.y, clash.z, 3f);                  // its own look and sound (the ki attack rework, phase 6)
                 ImpactPacket.at(clash, a.direction(), ImpactPacket.EXPLOSION, 4.5f, mixColor(a.getColor(), b.getColor()), -1).send(sl);
             }
             update(oa, 0, 0, 0, false);

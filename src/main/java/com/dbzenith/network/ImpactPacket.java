@@ -26,11 +26,15 @@ public record ImpactPacket(float x, float y, float z, float dx, float dy, float 
     public static final int DEFLECT = 8;
     /** The ki attack rework, phase 5: a burst of ki all round (scale: its radius), a paralysing discharge thrown forward, a blinding flash. */
     public static final int WAVE = 9, STUN_WAVE = 10, FLARE = 11;
+    /** Phase 6: the ground torn open (scale: the crater's radius): dust, debris, a rumble; no light. */
+    public static final int CRATER = 12;
 
     private static final double RANGE = 96;
 
     /** Flags (CX-19e): what kind of blow it was, for its look and sound. */
     public static final int CRIT = 1, COUNTER = 2, ZHIT = 4;
+    /** An explosion that digs a real crater (the ki attack rework, phase 6): no flat crater decal, the dug crater sends its own dust. */
+    public static final int DIGS = 8;
 
     /** Hitstop ticks for a kind of impact (before the config's scale): light 2, heavy 4, more for criticals and counters. */
     public static int hitstopFor(int kind, int flags) {

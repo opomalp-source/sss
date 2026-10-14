@@ -43,8 +43,14 @@ public final class KiWaveFx {
     private static final List<Wave> WAVES = new ArrayList<>();
     private static final Vector3f LEFT = new Vector3f(), UP = new Vector3f();
     private static int ticks;
+    private static final int DOME = 100;
 
     private KiWaveFx() {}
+
+    /** An explosion's dome of energy (phase 6), swelling to {@code reach} and thinning over {@code life} ticks, with its ring across the ground. */
+    public static void dome(Vec3 pos, float reach, int color, int life) {
+        WAVES.add(new Wave(DOME, pos, new Vec3(0, 1, 0), Math.max(1, reach), color, ticks, life, 0));
+    }
 
     /** One arrives from the server (through {@link ImpactFx#onImpact}). */
     public static void start(ImpactPacket m) {
@@ -133,7 +139,7 @@ public final class KiWaveFx {
             float age = ticks - w.born + pt, k = Mth.clamp(age / w.life, 0, 1);
             float x = (float) (w.pos.x - cam.x), y = (float) (w.pos.y - cam.y), z = (float) (w.pos.z - cam.z);
             switch (w.kind) {
-                case ImpactPacket.WAVE -> wave(buffers, m, n, x, y, z, w, age, k, cam);
+                case ImpactPacket.WAVE, DOME -> wave(buffers, m, n, x, y, z, w, age, k, cam);
                 case ImpactPacket.STUN_WAVE -> stun(buffers, m, n, x, y, z, w, age, k);
                 case ImpactPacket.FLARE -> flare(buffers, m, n, x, y, z, w, k);
                 default -> { }

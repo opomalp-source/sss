@@ -3233,3 +3233,51 @@ answers: move all built-ins to JSON; for charging movement, my judgement; very b
   - the Paralysis Wave's yellow lightning;
   - the Solar Flare's burst.
 - **Dev datapack:** `test_volley`, `test_disk` and `test_homing` (slow versions).
+
+## 2026-10-15 — Ki attack rework, phase 6: impacts and terrain (v0.122.0)
+- **Huge ki craters** (`Destruction.ki`; the user: "make craters very huge so it actually feels like youre destroying").
+  - **Size:** a ki crater is `kiCraterScale` (2.5) times the radius a fighter's impact of the same force digs, up to
+    `kiCraterMaxRadius` (20) blocks and `kiCraterMaxBlocks` (30000) blocks. A size-1.5 ball with explosion power 5
+    digs about 16 blocks across its radius.
+  - **Carved over ticks:** big ones (over 5 blocks) are queued and carved from the middle outward, `blocksPerTick`
+    (1500) blocks a tick across all craters, so the server doesn't stall and the hole visibly spreads.
+  - **Finishing:** once carved, the rim cracks.
+    - The floor is scorched: blackstone thickest at the middle, coarse dirt and tuff.
+    - A lip of thrown-out earth is piled round the edge, highest just outside it, made of the ground's own material
+      (dirt with coarse dirt on top, cobble round stone, sand round sand).
+    - Real blocks are flung up and out as falling blocks, up to 48, that land where they fall (`debris`).
+  - **Beams:** a beam held on the ground carves as big with `Destruction.kiCarve`, but without a lip or flung debris,
+    which would pile up.
+  - **Unchanged:** a fighter slammed into the ground, and `Destruction.crater`, behave as before.
+- **Craters can grow back** (`regrowSeconds`, 0 = off by default). Everything a crater took grows back from the bottom
+  up that many seconds later, 300 blocks a tick:
+  - dug blocks, the cracked rim, the scorched floor, the lip;
+  - never over something built or placed since.
+  - While regrowth is on, no blocks are flung (they couldn't be tracked).
+  - It isn't kept over a server restart.
+- **No vanilla explosions** (`KiExplosion.blast`). Ki blasts, beams and beam clashes explode for the same damage and
+  knockback, with each player's knockback sent to them, but without vanilla's grey puffs or bang. Blocks break only
+  with `kiBlastsBreakBlocks` on; otherwise the craters shape the land. The crater's vanilla bang is gone too.
+- **Explosions on the client:**
+  - a real dome of energy through the shader (`KiWaveFx.dome`), swelling and thinning, with its ring across the
+    ground;
+  - for big ones, a column of smoke rising into a spreading cap (`ImpactFx.plume`);
+  - an explosion that digs a real crater (flag `ImpactPacket.DIGS`) no longer lays the flat crater decal, which would
+    have floated over the hole.
+- **The crater on the client** (new impact kind `CRATER`, `ImpactFx.torn`):
+  - a ring of dust rolling out over the rim;
+  - earth flung up and out;
+  - for big ones, a column of dust rising from the middle;
+  - a shake.
+  - **Sound:** a boom, then debris; for big ones a deep rumble and, far off, the echo, delayed by distance.
+  - The small crater helper's vanilla clouds became the mod's own dust. `ImpactFx` holds 512 effects (was 256).
+- **Tests:** `DestructionTests.kiCratersAreHugeAndCanGrowBack`:
+  - wider than a fall's crater;
+  - over 200 blocks taken;
+  - carved over the next ticks;
+  - more than half the stone gone within 4 ticks;
+  - all of it back, scorched floor included, after regrowth.
+  230 GameTests.
+- **Checked in the dev client:** a destructive test ball (`test_crater` in the dev datapack) fired straight down. A
+  great bowl was carved, with its lip of earth and blocks flung out, under the energy dome and the plume. The dev
+  world's bedrock layer flattened its floor.

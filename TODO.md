@@ -286,7 +286,7 @@ to both mods folders.
 - [x] Phase 4 (v0.120.0) Large spheres: swirling layered sphere, orbiting sparks, inflow (Spirit Bomb) and flares (Supernova), ground light, dust and stones lifting, rumble; colour kept in daylight (tint layer) for every attack; asset list docs/KI_ASSETS.md
   - Paused after phase 4 for the user's feedback; they said "go on" (2026-10-15).
 - [x] Phase 5 (v0.121.0) Barrage (streamed shot by shot, palm flashes, zaps), disc (spinning blade mesh, whine), homing (seeker ring, lock-on marker, warble), bursts and waves (energy dome, ground ring, lightning fan, solar flare), new sounds
-- [ ] Phase 6 Impacts and terrain: huge craters, debris, plumes, regeneration option
+- [x] Phase 6 (v0.122.0) Impacts and terrain: huge ki craters carved over ticks (scorched floor, raised lip, flung blocks), optional regrowth, own explosions (no vanilla puffs or bang), energy dome, smoke plume, crater dust
 - [ ] Phase 7 Camera effects, accessibility (reduce flashing/shake)
 - [ ] Phase 8 Beam clash v2
 - [ ] Phase 9 Post-processing and polish (heat distortion, chromatic aberration)

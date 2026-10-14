@@ -515,17 +515,18 @@ public class KiBlastEntity extends Projectile {
             }
         }
         if (explosionPower > 0) {
-            Level.ExplosionInteraction interaction = DBZConfig.SERVER.kiBlastsBreakBlocks.get()
-                    ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE;
-            level().explode(this, getX(), getY(), getZ(), explosionPower, interaction);
             if (level() instanceof net.minecraft.server.level.ServerLevel sl) {
+                KiExplosion.blast(sl, this, getX(), getY(), getZ(), explosionPower);   // its own look and sound, not vanilla's (the ki attack rework, phase 6)
                 com.dbzenith.network.ImpactPacket.at(position().add(0, getBbHeight() / 2, 0), getDeltaMovement().normalize(),
-                        com.dbzenith.network.ImpactPacket.EXPLOSION, explosionPower, getColor(), getOwner() == null ? -1 : getOwner().getId()).send(sl);
+                        com.dbzenith.network.ImpactPacket.EXPLOSION, explosionPower, getColor(), getOwner() == null ? -1 : getOwner().getId())
+                        .withFeel(destructive && DBZConfig.SERVER.destructionKi.get() ? com.dbzenith.network.ImpactPacket.DIGS : 0, -1).send(sl);
             }
         }
         if (destructive && level() instanceof net.minecraft.server.level.ServerLevel sl) {       // the crater (CX-20)
             Vec3 n = impactNormal != null ? impactNormal : getDeltaMovement().lengthSqr() > 1e-6 ? getDeltaMovement().normalize().scale(-1) : new Vec3(0, 1, 0);
             double force = explosionPower > 0 ? 0.5 + explosionPower * 0.55 : 0.2 + getSize() * 0.5;
+            Technique tech = Techniques.byId(getTechnique());
+            if (tech != null) force *= tech.look().crater;                   // its data file's crater size (the ki attack rework, phase 6)
             com.dbzenith.combat.Destruction.ki(sl, position().add(0, getBbHeight() / 2, 0), n, force, getOwner() != null ? getOwner() : this);
         }
         discard();

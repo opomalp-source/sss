@@ -71,6 +71,40 @@ public final class DestructionTests {
         });
     }
 
+    /** The ki attack rework, phase 6: a ki crater is far bigger, carved outward over a few ticks, and can grow back. */
+    @GameTest(template = EMPTY, timeoutTicks = 120)
+    public static void kiCratersAreHugeAndCanGrowBack(GameTestHelper helper) {
+        DBZConfig.Server c = DBZConfig.SERVER;
+        int spawnSafe = c.pvpSpawnSafeRadius.get(), regrow = c.craterRegrowSeconds.get();
+        boolean debris = c.craterDebris.get();
+        c.pvpSpawnSafeRadius.set(0);
+        c.craterRegrowSeconds.set(1);
+        c.craterDebris.set(false);                                              // no blocks flung onto the other tests
+        ServerPlayer p = TestPlayers.create(helper);
+        ServerLevel level = helper.getLevel();
+        BlockPos o = fill(helper);
+        int full = SIDE * HEIGHT * SIDE;
+        BlockPos struck = BlockPos.containing(top(o)).below();
+        helper.assertTrue(Destruction.kiRadius(2.0) > Destruction.radius(2.0) * 1.5, "a ki crater is far wider than a fall's of the same force");
+        int planned = Destruction.ki(level, top(o), new Vec3(0, 1, 0), 2.0, p);
+        helper.assertTrue(planned > 200, "it takes a great bite: " + planned);
+        helper.assertTrue(level.getBlockState(struck).is(Blocks.STONE), "a big one is carved over the next ticks, not all at once");
+        helper.runAfterDelay(4, () -> {
+            int left = count(helper, o, Blocks.STONE);
+            helper.assertTrue(level.getBlockState(struck).isAir() && left < full / 2, "carved out: " + left + " of " + full + " stone left");
+        });
+        helper.runAfterDelay(60, () -> {
+            int back = count(helper, o, Blocks.STONE);
+            c.pvpSpawnSafeRadius.set(spawnSafe);
+            c.craterRegrowSeconds.set(regrow);
+            c.craterDebris.set(debris);
+            clear(helper, o);
+            TestPlayers.remove(helper, p);
+            helper.assertTrue(back == full, "it grew back, scorched floor and all: " + back + " of " + full);
+            helper.succeed();
+        });
+    }
+
     private static BlockPos fill(GameTestHelper helper) {
         BlockPos o = helper.absolutePos(new BlockPos(-4, LIFT, -4));
         ServerLevel level = helper.getLevel();

@@ -79,6 +79,15 @@ public final class ClientSounds {
                 later(level, pos, 5, ModSounds.IMPACT_DEBRIS.get(), 0.5f, 1f);
             }
             case ImpactPacket.STUN_WAVE -> at(level, pos, ModSounds.KI_CRACKLE.get(), 0.9f, 1f);
+            case ImpactPacket.CRATER -> {                                     // phase 6: the ground torn open, in place of vanilla's bang
+                at(level, pos, ModSounds.IMPACT_BOOM.get(), Math.min(2.5f, 0.5f + 0.12f * scale), Math.max(0.55f, 1.1f - 0.04f * scale));
+                if (scale >= 3) at(level, pos, ModSounds.EXPLOSION_BIG.get(), Math.min(3f, 0.4f + 0.1f * scale), Math.max(0.5f, 0.8f - 0.02f * scale));
+                later(level, pos, 5, ModSounds.IMPACT_DEBRIS.get(), Math.min(2f, 0.4f + 0.1f * scale), 0.9f);
+                if (scale >= 6) {
+                    double d = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().distanceTo(pos);
+                    later(level, pos, 10 + (int) (d / 17), ModSounds.IMPACT_ECHO.get(), Math.min(2.5f, 0.3f + 0.08f * scale), 0.85f);
+                }
+            }
             case ImpactPacket.FLARE -> at(level, pos, ModSounds.KI_FLASH.get(), 1f, 1f);
             case ImpactPacket.EXPLOSION -> {                                  // in layers (the ki attack rework): the boom, then debris, then far off an echo
                 at(level, pos, big > 1.6f ? ModSounds.EXPLOSION_BIG.get() : ModSounds.EXPLOSION.get(), 0.7f + 0.3f * big, 1.1f - 0.1f * big);

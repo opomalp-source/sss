@@ -247,6 +247,10 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue destructionEnabled, destructionKnockback, destructionKi;
         public final ForgeConfigSpec.DoubleValue destructionMaxRadius, destructionMaxHardness, destructionDrops, blowAwayForce, blowAwaySpeed;
         public final ForgeConfigSpec.IntValue destructionMaxBlocks, blowAwayComboHits;
+        /** The ki attack rework, phase 6: ki craters made huge, carved over a few ticks, and optionally grown back. */
+        public final ForgeConfigSpec.DoubleValue kiCraterScale, kiCraterMaxRadius;
+        public final ForgeConfigSpec.IntValue kiCraterMaxBlocks, craterBlocksPerTick, craterRegrowSeconds;
+        public final ForgeConfigSpec.BooleanValue craterDebris;
         public final ForgeConfigSpec.IntValue pvpSpawnSafeRadius;
         public final ForgeConfigSpec.BooleanValue pvpSafeOtherworld;
         public final ForgeConfigSpec.BooleanValue pvpSafeTournament;
@@ -702,6 +706,12 @@ public final class DBZConfig {
             destructionMaxHardness = b.comment("The hardest block anything can break (stone 1.5, iron block 5, obsidian 50)").defineInRange("maxHardness", 50.0, 0.0, 1000.0);
             destructionMaxBlocks = b.comment("At most this many blocks removed by one crater").defineInRange("maxBlocks", 500, 0, 5000);
             destructionDrops = b.comment("The share of removed blocks that drop as items (0: none, 1: all)").defineInRange("dropChance", 0.0, 0.0, 1.0);
+            kiCraterScale = b.comment("Ki attack craters are this many times wider than a fighter's impact of the same force (the ki attack rework: very big craters)").defineInRange("kiCraterScale", 2.5, 0.5, 10.0);
+            kiCraterMaxRadius = b.comment("The largest ki crater's radius in blocks").defineInRange("kiCraterMaxRadius", 20.0, 1.0, 48.0);
+            kiCraterMaxBlocks = b.comment("At most this many blocks removed by one ki crater").defineInRange("kiCraterMaxBlocks", 30000, 0, 200000);
+            craterBlocksPerTick = b.comment("Big craters are carved outward over a few ticks, at most this many blocks a tick in all (keeps the server smooth)").defineInRange("blocksPerTick", 1500, 50, 50000);
+            craterDebris = b.comment("Big ki craters throw real blocks out as debris, which land where they fall (off while craters grow back)").define("debris", true);
+            craterRegrowSeconds = b.comment("Ki craters grow back this many seconds after they are made, bottom up (0: never; the land stays torn up). Not kept over a server restart").defineInRange("regrowSeconds", 0, 0, 86400);
             blowAwayComboHits = b.comment("Every this many hits of a combo, the blow sends the victim flying (0: only knock-away moves and hard blows)").defineInRange("blowAwayComboHits", 5, 0, 50);
             blowAwayForce = b.comment("A blow at least this hard (force, about 0..3; a heavy that takes a quarter of the victim's health is about 2) sends the victim flying even outside a long combo").defineInRange("blowAwayForce", 1.6, 0.0, 10.0);
             blowAwaySpeed = b.comment("How fast a victim flies, per unit of force (blocks a tick)").defineInRange("blowAwaySpeed", 0.55, 0.0, 5.0);

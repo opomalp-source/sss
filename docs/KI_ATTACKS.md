@@ -71,7 +71,7 @@ coloured against a bright sky. With an Oculus or Iris shader pack on, the shader
 look is drawn instead. The client setting `kiQuality` (Settings → Effects) trades mesh detail and particle counts for
 speed.
 
-## Trying them in game (phases 1 to 5)
+## Trying them in game (phases 1 to 6)
 
 The commands below need cheats. `/dbz charge <player> <id>` starts a charge as if the key were held, skipping the deck
 and the meter; `/dbz charge <player> release` lets it go. `/dbz cast <entity> <id> <damage>` makes any entity fire an
@@ -115,3 +115,26 @@ attack.
   `/reload`.
   - A slow test ball: `{"style":"ball","speed":0.012,"size":3.0,"life":400,"color":"#FF7A30","look":{"sphere":"nova"}}`.
   - Fire it with `/dbz cast @s <id> 1`.
+
+## Craters
+
+A destructive attack (`"destructive": true`) tears the land up where it lands, and its explosion sets how big.
+
+- **Size:** ki craters are huge. They are `kiCraterScale` times a fighter's impact crater, up to `kiCraterMaxRadius`
+  blocks. A ball's `look.crater` multiplies its own crater.
+- **Carving:** big craters are carved outward over a few ticks.
+- **Finishing:** the floor is scorched (blackstone, coarse dirt, tuff), a lip of thrown-out earth rings the edge, and
+  real blocks are flung out to land where they fall.
+- **Settings:** server config `[destruction]`:
+  - `kiCraters`: on or off;
+  - `kiCraterScale`, `kiCraterMaxRadius`, `kiCraterMaxBlocks`: size;
+  - `blocksPerTick`: carving speed;
+  - `debris`: flung blocks;
+  - `regrowSeconds`: grow the land back after that long; 0 keeps it torn up.
+- **Where not:** never in safe zones (PvP zones, the spawn's safe radius, the tournament grounds, the Otherworld).
+  NPCs dig only with `mobGriefing` on, and a player's crater respects protection mods.
+- **The explosion itself:** it deals vanilla explosion damage and knockback, but its look and sound are the mod's own.
+  Blocks are only broken by the explosion with `kiBlastsBreakBlocks` on.
+
+To try it: fire a destructive attack at open ground away from spawn. For example, a datapack attack with
+`"explosion": 5.0, "destructive": true`, fired with `/dbz cast @s <id> 1` while looking down.

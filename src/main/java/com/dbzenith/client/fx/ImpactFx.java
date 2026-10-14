@@ -50,7 +50,7 @@ public final class ImpactFx {
     private static final ResourceLocation GLOW = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/ki_glow.png");
     private static final ResourceLocation PUFF = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/nimbus_puff.png");
     private static final Vec3 UP = new Vec3(0, 1, 0);
-    private static final int MAX_EFFECTS = 256;
+    private static final int MAX_EFFECTS = 512;
     private static final int MAX_DECALS = 48;
 
     private enum Kind { FLASH, RING, FACING_RING, DECAL, CRACKS, DOME, SMOKE }
@@ -143,7 +143,8 @@ public final class ImpactFx {
                 add(Kind.FACING_RING, pos, dir, 0xFFFFFF, 0.2f * s, 1.8f * s, 8, 180);
                 KiParticles.burst(pos, m.color(), (int) (30 + 18 * s), 0.3f + 0.08f * s, 0.9f + 0.3f * s);
                 // CX-46: a dome of light swelling out and thinning, then smoke left hanging and rising
-                add(Kind.DOME, pos, UP, tint, 0.3f * s, 1.25f * s, 9 + (int) (2 * s), 230);
+                if (KiEnergy.available()) KiWaveFx.dome(pos, 1.3f * s, m.color(), 9 + (int) (2 * s));   // phase 6: a real dome of energy
+                else add(Kind.DOME, pos, UP, tint, 0.3f * s, 1.25f * s, 9 + (int) (2 * s), 230);
                 int puffs = Math.min(22, 5 + (int) (3 * s));
                 for (int i = 0; i < puffs; i++) {
                     Vec3 at = pos.add(rnd.nextGaussian() * 0.35 * s, rnd.nextDouble() * 0.6 * s, rnd.nextGaussian() * 0.35 * s);
@@ -151,8 +152,9 @@ public final class ImpactFx {
                     int grey = 0x3C3834 + 0x0A0A0A * rnd.nextInt(4);
                     add(Kind.SMOKE, at, drift, grey, 0.45f * s, (0.9f + rnd.nextFloat() * 0.7f) * s, 60 + rnd.nextInt(50), 190);
                 }
+                if (s >= 2.5f) plume(pos, s, rnd);                                     // a big one sends up a column of smoke and a cap (phase 6)
                 Vec3 ground = groundBelow(level, pos, 3);
-                if (ground != null) crater(level, ground, Math.min(6f, 0.9f * s), (int) (8 + 6 * s));
+                if (ground != null && (m.flags() & ImpactPacket.DIGS) == 0) crater(level, ground, Math.min(6f, 0.9f * s), (int) (8 + 6 * s));   // a real crater brings its own dust
                 CameraFx.shakeAt(pos, 0.25f + 0.08f * s, 32 + 4 * s);
                 if (mc.gameRenderer.getMainCamera().getPosition().distanceTo(pos) < 4 + 2 * s) {
                     CameraFx.kick(0.6f);
@@ -160,6 +162,7 @@ public final class ImpactFx {
                 }
             }
             case ImpactPacket.WAVE, ImpactPacket.STUN_WAVE, ImpactPacket.FLARE -> KiWaveFx.start(m);   // the ki attack rework, phase 5
+            case ImpactPacket.CRATER -> torn(level, pos, s, rnd);                // phase 6: the ground torn open
             default -> { }
         }
         feel(m, level, pos, dir, s, mine);
@@ -267,10 +270,64 @@ public final class ImpactFx {
             level.addParticle(chunk, ground.x + Math.cos(a) * r, ground.y + 0.1, ground.z + Math.sin(a) * r,
                     Math.cos(a) * out, 0.25 + rnd.nextDouble() * 0.45, Math.sin(a) * out);
         }
-        for (int i = 0; i < 14; i++) {
+        for (int i = 0; i < 14; i++) {                                          // a ring of dust rolling out (its own smoke, not vanilla's clouds)
             double a = i * Math.PI * 2 / 14;
-            level.addParticle(ParticleTypes.CLOUD, ground.x + Math.cos(a) * radius * 0.5, ground.y + 0.15, ground.z + Math.sin(a) * radius * 0.5,
-                    Math.cos(a) * 0.22, 0.02, Math.sin(a) * 0.22);
+            add(Kind.SMOKE, ground.add(Math.cos(a) * radius * 0.5, 0.2, Math.sin(a) * radius * 0.5), new Vec3(Math.cos(a) * 0.05, 0.008, Math.sin(a) * 0.05),
+                    DUST + 0x0A0A0A * rnd.nextInt(3), 0.3f * radius, (0.6f + rnd.nextFloat() * 0.5f) * radius, 40 + rnd.nextInt(30), 170);
+        }
+    }
+
+    private static final int DUST = 0x7A6A55;
+
+    /**
+     * The ground torn open (the ki attack rework, phase 6), for a crater of radius {@code r}: a ring of dust rolling out
+     * over the rim, earth flung up and out, and for a big one a column of dust rising from the middle. The crater itself
+     * was dug for real; this is what hangs over it.
+     */
+    private static void torn(ClientLevel level, Vec3 pos, float r, RandomSource rnd) {
+        CameraFx.shakeAt(pos, 0.15f + 0.05f * r, 16 + 3 * r);
+        if (r < 0.9f) {                                                         // only cracked: a scuff and a puff
+            Vec3 ground = groundBelow(level, pos, 3);
+            if (ground != null) crater(level, ground, 0.9f, 6);
+            return;
+        }
+        BlockState below = level.getBlockState(BlockPos.containing(pos.x, pos.y - 0.5, pos.z));
+        if (below.isAir()) below = net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState();
+        ParticleOptions chunk = new BlockParticleOption(ParticleTypes.BLOCK, below);
+        int ring = Math.min(40, 8 + (int) (3 * r));
+        for (int i = 0; i < ring; i++) {                                        // dust rolling out over the rim
+            double a = rnd.nextDouble() * Math.PI * 2, d = r * (0.7 + rnd.nextDouble() * 0.6), out = 0.03 + rnd.nextDouble() * 0.06;
+            add(Kind.SMOKE, pos.add(Math.cos(a) * d, 0.3 + rnd.nextDouble() * 0.6, Math.sin(a) * d), new Vec3(Math.cos(a) * out, 0.01 + rnd.nextDouble() * 0.02, Math.sin(a) * out),
+                    DUST + 0x0A0A0A * rnd.nextInt(3), 0.4f + 0.12f * r, (0.9f + rnd.nextFloat() * 0.6f) * (0.6f + 0.16f * r), 70 + rnd.nextInt(60), 190);
+        }
+        int flung = Math.min(70, 10 + (int) (4 * r));
+        for (int i = 0; i < flung; i++) {                                       // earth flung up and out
+            double a = rnd.nextDouble() * Math.PI * 2, d = rnd.nextDouble() * r * 0.8, v = 0.2 + rnd.nextDouble() * (0.25 + 0.03 * r);
+            level.addParticle(chunk, pos.x + Math.cos(a) * d, pos.y + 0.2, pos.z + Math.sin(a) * d, Math.cos(a) * v, 0.35 + rnd.nextDouble() * (0.4 + 0.04 * r), Math.sin(a) * v);
+        }
+        if (r >= 4) {                                                           // a column of dust rising from the middle
+            int column = Math.min(24, (int) (2 * r));
+            for (int i = 0; i < column; i++) {
+                Vec3 at = pos.add(rnd.nextGaussian() * r * 0.2, rnd.nextDouble() * r * 0.8, rnd.nextGaussian() * r * 0.2);
+                add(Kind.SMOKE, at, new Vec3(rnd.nextGaussian() * 0.01, 0.03 + rnd.nextDouble() * 0.04, rnd.nextGaussian() * 0.01),
+                        DUST - 0x101010 + 0x0A0A0A * rnd.nextInt(3), 0.5f + 0.1f * r, (1f + rnd.nextFloat() * 0.6f) * (0.5f + 0.14f * r), 90 + rnd.nextInt(60), 200);
+            }
+        }
+    }
+
+    /** A column of smoke rising from a big explosion and spreading into a cap at the top. */
+    private static void plume(Vec3 pos, float s, RandomSource rnd) {
+        int column = Math.min(26, 6 + (int) (3 * s));
+        for (int i = 0; i < column; i++) {
+            double h = rnd.nextDouble() * s * 1.6;
+            Vec3 at = pos.add(rnd.nextGaussian() * s * 0.15, h, rnd.nextGaussian() * s * 0.15);
+            add(Kind.SMOKE, at, new Vec3(rnd.nextGaussian() * 0.008, 0.05 + rnd.nextDouble() * 0.05, rnd.nextGaussian() * 0.008),
+                    0x3A3632 + 0x0A0A0A * rnd.nextInt(3), 0.5f * s, (0.7f + rnd.nextFloat() * 0.5f) * s * 0.55f, 80 + rnd.nextInt(50), 200);
+        }
+        for (int i = 0; i < 12; i++) {                                          // the cap
+            double a = i * Math.PI * 2 / 12;
+            Vec3 at = pos.add(Math.cos(a) * s * 0.4, s * 1.7, Math.sin(a) * s * 0.4);
+            add(Kind.SMOKE, at, new Vec3(Math.cos(a) * 0.03, 0.05, Math.sin(a) * 0.03), 0x48423C, 0.6f * s, 0.9f * s, 100 + rnd.nextInt(40), 190);
         }
     }
 
