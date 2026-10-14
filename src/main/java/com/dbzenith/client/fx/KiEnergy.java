@@ -26,9 +26,9 @@ import java.io.IOException;
  * fallback.
  */
 public final class KiEnergy {
-    public static final int SHELL = 0, CORE = 1, STRANDS = 2, HALO = 3, RIBBON = 4;
+    public static final int SHELL = 0, CORE = 1, STRANDS = 2, HALO = 3, RIBBON = 4, TINT = 5;
     private static final ResourceLocation NOISE = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/ki_noise.png");
-    static ShaderInstance shader;
+    static ShaderInstance shader, tintShader;
 
     private KiEnergy() {}
 
@@ -38,12 +38,14 @@ public final class KiEnergy {
         public static void registerEnergy(RegisterShadersEvent event) throws IOException {
             event.registerShader(new ShaderInstance(event.getResourceProvider(), new ResourceLocation(DBZenith.MOD_ID, "ki_energy"),
                     DefaultVertexFormat.NEW_ENTITY), s -> shader = s);
+            event.registerShader(new ShaderInstance(event.getResourceProvider(), new ResourceLocation(DBZenith.MOD_ID, "ki_energy_tint"),
+                    DefaultVertexFormat.NEW_ENTITY), s -> tintShader = s);
         }
     }
 
     /** Whether the energy shader can be used now (else draw the plain way). */
     public static boolean available() {
-        return shader != null && !com.dbzenith.client.aura.AuraShaders.packOn();
+        return shader != null && tintShader != null && !com.dbzenith.client.aura.AuraShaders.packOn();
     }
 
     /** Solid shapes, drawn front faces only (spheres). */
@@ -56,8 +58,18 @@ public final class KiEnergy {
         return Types.FLAT;
     }
 
+    /**
+     * A see-through body in the attack's own colour, blended normally (not added) and kept out of the bloom: drawn
+     * first, under the glow, it tints what lies behind, so the energy keeps its colour against a bright sky instead of
+     * washing out to white.
+     */
+    public static RenderType tint() {
+        return Types.TINT;
+    }
+
     private static final class Types extends RenderType {
         private static final ShaderStateShard SHADER = new ShaderStateShard(() -> shader);
+        private static final ShaderStateShard TINT_SHADER = new ShaderStateShard(() -> tintShader);   // the same, blended normally
         private static final OutputStateShard GLOW = new OutputStateShard("dbzenith_ki_glow", KiBloom::begin, KiBloom::end);
         static final RenderType SOLID = create("dbzenith_ki_energy", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 8192, false, true,
                 CompositeState.builder().setShaderState(SHADER).setTextureState(new TextureStateShard(NOISE, true, false))
@@ -66,6 +78,10 @@ public final class KiEnergy {
         static final RenderType FLAT = create("dbzenith_ki_energy_flat", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 8192, false, true,
                 CompositeState.builder().setShaderState(SHADER).setTextureState(new TextureStateShard(NOISE, true, false))
                         .setTransparencyState(LIGHTNING_TRANSPARENCY).setCullState(NO_CULL).setWriteMaskState(COLOR_WRITE).setOutputState(GLOW)
+                        .createCompositeState(false));
+        static final RenderType TINT = create("dbzenith_ki_energy_tint", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 8192, false, true,
+                CompositeState.builder().setShaderState(TINT_SHADER).setTextureState(new TextureStateShard(NOISE, true, false))
+                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY).setCullState(CULL).setWriteMaskState(COLOR_WRITE)
                         .createCompositeState(false));
 
         private Types(String name, VertexFormat format, VertexFormat.Mode mode, int size, boolean crumbling, boolean sort, Runnable setup, Runnable clear) {
@@ -106,6 +122,18 @@ public final class KiEnergy {
             float px = s[i], py = s[i + 1], pz = s[i + 2];
             vc.vertex(m, x + px * r, y + py * r, z + pz * r).color(red, g, b, a).uv(s[i + 3] + spin, s[i + 4])
                     .overlayCoords(mode, 0).uv2(LightTexture.FULL_BRIGHT).normal(n, px, py, pz).endVertex();
+        }
+    }
+
+    /** The same turned by {@code rot} round its centre (the swirling layers of a big sphere, each on its own axis). */
+    public static void sphere(VertexConsumer vc, Matrix4f m, Matrix3f n, float x, float y, float z, float r, int argb, int mode, int detail, float spin, Matrix3f rot) {
+        float[] s = SPHERES[Math.max(0, Math.min(2, detail))];
+        int a = argb >>> 24, red = argb >> 16 & 255, g = argb >> 8 & 255, b = argb & 255;
+        Vector3f p = new Vector3f();
+        for (int i = 0; i < s.length; i += 5) {
+            rot.transform(p.set(s[i], s[i + 1], s[i + 2]));
+            vc.vertex(m, x + p.x * r, y + p.y * r, z + p.z * r).color(red, g, b, a).uv(s[i + 3] + spin, s[i + 4])
+                    .overlayCoords(mode, 0).uv2(LightTexture.FULL_BRIGHT).normal(n, p.x, p.y, p.z).endVertex();
         }
     }
 

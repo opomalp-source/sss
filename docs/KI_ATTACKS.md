@@ -58,6 +58,7 @@ among them.
 | `glow`, `plasma`, `trail`, `sparks`, `light`, `flicker` | Multipliers: the halo, the moving plasma on its surface, the trail, the sparks it sheds, the glow it throws on the ground, how much it flickers |
 | `sounds.charge`, `.release`, `.travel`, `.impact` | Sound event ids (e.g. `"dbzenith:ki_fire"`); empty: chosen by its kind |
 | `impact`, `shake`, `crater` | Multipliers: the impact's flash, rings and sparks; the camera shake; the crater |
+| `sphere` | How a big sphere looks: `"auto"` (any ball of size 2 or more is drawn big, with orbiting sparks), `"gather"` (energy streams in while it hangs still, like the Spirit Bomb), `"nova"` (flares loop off its surface, like the Supernova), `"plain"` (drawn big at any size), `"none"` (never drawn big) |
 
 The rework phases fill these in as they land. A field the current version doesn't use yet is kept and simply has no
 effect.
@@ -65,6 +66,41 @@ effect.
 ## How they're drawn
 
 Attacks glow through the mod's own `ki_energy` shader, which draws smooth layered meshes (shell, plasma strands,
-white-hot core, halo) into the bloom. With an Oculus or Iris shader pack on, the shader is skipped and the older, plainer
+white-hot core, halo) into the bloom, over a see-through body in the attack's colour that keeps it
+coloured against a bright sky. With an Oculus or Iris shader pack on, the shader is skipped and the older, plainer
 look is drawn instead. The client setting `kiQuality` (Settings → Effects) trades mesh detail and particle counts for
 speed.
+
+## Trying them in game (phases 1 to 4)
+
+The commands below need cheats. `/dbz charge <player> <id>` starts a charge as if the key were held, skipping the deck
+and the meter; `/dbz charge <player> release` lets it go. `/dbz cast <entity> <id> <damage>` makes any entity fire an
+attack.
+
+- **Basic blast:** fire Ki Blast (`ki_blast`) in daylight and at night.
+  - You should see a glowing sphere with a white-hot core, a coloured rim with plasma moving over it, and a halo.
+  - Behind it runs a smooth trail; motes peel off it, and its hum rises and falls as it passes you.
+  - On impact: sparks, the boom, stones pattering down, and an echo for big ones.
+  - Set `kiQuality` in Settings → Effects to compare detail levels.
+- **Charge-up:** hold a Kamehameha (`/dbz charge @s wave_beam`) for a few seconds, then `/dbz charge @s release`.
+  - The orb at your cupped hands grows. Motes are drawn in, arcs snap round it past half, and its light spreads on the
+    ground.
+  - The ground cracks at half and near full charge, chunks lift, and the hum rises.
+  - You can't walk or jump, but you can turn, and the view doesn't zoom.
+  - A heavy hit (a tenth of your health) breaks the charge.
+- **Beams:** the release fires a tube that widens as it goes.
+  - It has flowing energy, a white-hot core, spirals winding down it, lightning off its edges, and a churning sphere at
+    its head.
+  - You get a flash and a kick when it fires. Watch it side-on from a few blocks away.
+- **Big spheres:**
+  - **Supernova:** `/dbz charge @s supernova_orb` (a long charge) grows an orange sphere over your head, with flares
+    looping off it and sparks orbiting.
+  - **Spirit Bomb:** `/dbz charge @s spirit_bomb` raises a blue-white sphere that energy streams into. Cast it again
+    to throw it.
+  - Both rumble low, light the ground below, and lift dust and stones near the ground.
+  - The Spirit Bomb has a 60-second cooldown. For repeated tries, copy its file into a datapack under a new id with
+    `"cooldown": 0`.
+- **Your own attack:** make a datapack with `data/<ns>/ki_attacks/<id>.json` (start from `/dbz kiattacks export`), then
+  `/reload`.
+  - A slow test ball: `{"style":"ball","speed":0.012,"size":3.0,"life":400,"color":"#FF7A30","look":{"sphere":"nova"}}`.
+  - Fire it with `/dbz cast @s <id> 1`.

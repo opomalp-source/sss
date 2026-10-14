@@ -3143,3 +3143,46 @@ answers: move all built-ins to JSON; for charging movement, my judgement; very b
   - the beam charge from behind, growing, then the release;
   - a Supernova charge above the head.
 - 227 GameTests.
+
+## 2026-10-15 — Ki attack rework, phase 4: big spheres (v0.120.0)
+- **`BigSphere`** (client/fx): one drawer for every big sphere, in flight (`KiBlastRenderer.renderBig`) and while
+  charging overhead (`ClientKiCharge`), so a Supernova looks the same in your hands as when thrown.
+  - **Body:** a wide corona. Layers of shell and plasma strands, each turning on its own tilted axis
+    (`KiEnergy.sphere` with a rotation), so the surface swirls round a hot core.
+  - **Sparks:** they race round it on tilted orbits, alternate orbits turning back.
+  - **By character**, a new look field `sphere`:
+    - `gather` (the Spirit Bomb): streams of energy curl in from all round while it hangs still;
+    - `nova` (the Supernova): flares loop off the surface and fall back, each rising and dying somewhere new;
+    - `auto`: any ball of size 2 or more (the Gathering Sphere, Ki Creator designs) gets the plain big look;
+    - `plain` and `none` force it on or off.
+    The 34 shipped files carry the field.
+  - **The ground answers** (`BigSphere.tick`, from `KiFx.blastTick` and the charge tick):
+    - dust and stones of the ground's own block lift toward the sphere, more the lower it hangs;
+    - motes rise and sparks spit off its skin;
+    - for big ones (size 3 or more, the Spirit Bomb, or a charge past 60%), the camera trembles nearby.
+  - **Ground light:** a glow of its colour on the ground below, fading as it rises.
+  - **Sound:** big spheres keep a low rumble (`ki_travel` at about 0.6 pitch, carrying further) even hanging still.
+    It used to go silent when the sphere wasn't moving.
+- **Colour in daylight** (all ki attacks). Additive glow over a bright sky saturates to white, so blasts, beams and
+  spheres read as white in the day.
+  - Each now draws a see-through body in its own colour first, under the glow: `KiEnergy.tint()`, with the
+    `ki_energy_tint` shader blended normally and mode 5. The Supernova is orange, the blast blue and the Kamehameha
+    cyan, even against the sky.
+  - Big spheres use a more saturated version of their colour (`BigSphere.vivid`), so the pale Spirit Bomb stays
+    blue-white.
+  - Old comet streaks are no longer drawn under the energy trail.
+- **View:** being slowed (a gathering Spirit Bomb, wounds, Slowness) no longer zooms the view in; drawing a bow or
+  using a spyglass still does.
+- **Docs:**
+  - `docs/KI_ATTACKS.md`: the `sphere` field, and how to try phases 1 to 4 in game.
+  - New `docs/KI_ASSETS.md`: every shader, texture and sound the attacks use, with specs, plus those wanted for the
+    later phases.
+- **Tests:** `KiAttackDataTests` checks that the sphere characters load from the shipped files, can be changed, and are
+  restored. 227 GameTests.
+- **Checked in the dev client:**
+  - slow test spheres (nova, plain, gather) and a blue test blast, all coloured in daylight;
+  - the Kamehameha beam in cyan;
+  - a Supernova charging over the head;
+  - the Spirit Bomb gathering (energy streaming in, the ground lit) and then thrown.
+- **Dev datapack:** `run-server/world/datapacks/kitest` has `test_nova`, `test_gather`, `test_big` and `test_sb` (a
+  Spirit Bomb with no cooldown).

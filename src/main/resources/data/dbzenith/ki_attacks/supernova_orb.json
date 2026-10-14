@@ -42,6 +42,7 @@
     },
     "impact": 1.0,
     "shake": 1.0,
-    "crater": 1.0
+    "crater": 1.0,
+    "sphere": "nova"
   }
 }

@@ -45,8 +45,12 @@ public final class KiFx {
         b.trail[i + 1] = cy;
         b.trail[i + 2] = cz;
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || b.isSpiritBomb() || mc.player.distanceToSqr(cx, cy, cz) > 96 * 96) return;
         KiLook look = look(b);
+        if (KiEnergy.available() && (b.isSpiritBomb() || BigSphere.style(look, b.getSize()) >= 0)) {   // a big sphere: the ground answers it (phase 4)
+            BigSphere.tick(b.level(), new net.minecraft.world.phys.Vec3(cx, cy, cz), b.getSize() * 0.5f, b.getColor(), b.getSize() >= 3f || b.isSpiritBomb());
+            return;
+        }
+        if (mc.player == null || b.isSpiritBomb() || mc.player.distanceToSqr(cx, cy, cz) > 96 * 96) return;
         RandomSource r = b.level().random;
         float s = b.getSize();
         int c = b.getColor();

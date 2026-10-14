@@ -143,8 +143,10 @@ public final class ClientSounds {
             doppler += ((float) Mth.clamp(1 + closing * 0.18, 0.7, 1.45) - doppler) * 0.5f;
             double speed = blast.getDeltaMovement().length();
             float size = Math.min(2.5f, blast.getSize());
-            volume = (float) Math.max(0.01, Math.min(1, speed * 1.2) * (0.35 + 0.45 * size));   // a bigger ball carries further
-            pitch = (1.25f - 0.2f * size) * doppler;
+            boolean big = blast.getSize() >= 2f;                                    // a big sphere rumbles low even hanging still (phase 4)
+            double moving = Math.max(Math.min(1, speed * 1.2), big ? 0.5 : 0);
+            volume = (float) Math.max(0.01, moving * (0.35 + 0.45 * size) * (big ? 1.6 : 1));   // a bigger ball carries further
+            pitch = (big ? 0.62f - 0.04f * Math.min(3, blast.getSize() - 2) : 1.25f - 0.2f * size) * doppler;
         }
 
         @Override

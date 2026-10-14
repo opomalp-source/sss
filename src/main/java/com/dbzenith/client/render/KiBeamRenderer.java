@@ -154,6 +154,8 @@ public class KiBeamRenderer extends EntityRenderer<KiBeamEntity> {
         float flow = -t * 0.12f;
         float born = Math.min(1, beam.tickCount / 4f);                          // fired: a flash that settles
 
+        com.dbzenith.client.fx.KiEnergy.tube(buffers.getBuffer(com.dbzenith.client.fx.KiEnergy.tint()), m, n, 0, 0, 0, dx, dy, dz, length, r0 * 0.95f, r1 * 0.95f,
+                com.dbzenith.client.fx.KiEnergy.argb(c, 120), com.dbzenith.client.fx.KiEnergy.TINT, sides, Math.max(4, rings / 2), 0, 0.05f, t);   // its colour against a bright sky
         // the tube: the glowing body, energy flowing down it; inside, the white-hot core
         var solid = buffers.getBuffer(com.dbzenith.client.fx.KiEnergy.solid());
         com.dbzenith.client.fx.KiEnergy.tube(solid, m, n, 0, 0, 0, dx, dy, dz, length, r0, r1, com.dbzenith.client.fx.KiEnergy.argb(c, 175),

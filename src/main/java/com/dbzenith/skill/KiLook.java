@@ -17,6 +17,9 @@ public final class KiLook {
     public String chargeSound = "", releaseSound = "", travelSound = "", impactSound = "";
     /** The impact: how big its flash, rings and sparks are, how hard the camera shakes, how big the crater is. */
     public float impact = 1, shake = 1, crater = 1;
+    /** A big sphere's character (the ki attack rework, phase 4): "auto" (by size), "gather" (energy flowing in, like the
+     *  Spirit Bomb), "nova" (flares leaping off it, like the Supernova), "plain" (orbiting sparks only) or "none" (never drawn big). */
+    public String sphere = "auto";
 
     public KiLook copy() {
         KiLook k = new KiLook();
@@ -43,6 +46,7 @@ public final class KiLook {
         j.addProperty("impact", impact);
         j.addProperty("shake", shake);
         j.addProperty("crater", crater);
+        j.addProperty("sphere", sphere);
         return j;
     }
 
@@ -65,5 +69,6 @@ public final class KiLook {
         if (j.has("impact")) impact = j.get("impact").getAsFloat();
         if (j.has("shake")) shake = j.get("shake").getAsFloat();
         if (j.has("crater")) crater = j.get("crater").getAsFloat();
+        if (j.has("sphere")) sphere = j.get("sphere").getAsString();
     }
 }

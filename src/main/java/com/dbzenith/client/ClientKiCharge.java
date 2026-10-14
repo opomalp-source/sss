@@ -165,6 +165,18 @@ public final class ClientKiCharge {
                 com.dbzenith.client.fx.FxDraw.billboard(pose, buffers.getBuffer(com.dbzenith.client.fx.FxRenderTypes.additive(GLOW)), rot, x, y, z, r * 1.6f, 0, 0, 0, 1, 1, 0xFFFFFF, 255);
                 continue;
             }
+            if (c.kind() == KiCharge.KIND_OVERHEAD && !firstPerson) {           // a big sphere gathering overhead (phase 4): drawn as it will fly
+                com.dbzenith.skill.Technique tech = com.dbzenith.skill.Techniques.byId(c.technique());
+                com.dbzenith.skill.KiLook look = tech == null ? new com.dbzenith.skill.KiLook() : tech.look();
+                int style = Math.max(com.dbzenith.client.fx.BigSphere.PLAIN, com.dbzenith.client.fx.BigSphere.style(look, 2.5f));
+                int detail = com.dbzenith.client.fx.KiParticles.quality() >= 2 ? 2 : 1;
+                com.dbzenith.client.fx.BigSphere.draw(buffers, m, n, x, y, z, r * 0.62f, c.color(), look.core, style, t, 0, 0, 0, LEFT, UP,
+                        detail, look.glow, true, en.getKey());
+                Vec3 ground = groundBelow(e, 4);
+                if (ground != null)
+                    com.dbzenith.client.fx.BigSphere.groundGlow(pose, buffers, ground.subtract(cam), r * 0.62f, (float) (at.y - ground.y), c.color(), look.light * (0.4f + 0.6f * f));
+                continue;
+            }
             var flat = buffers.getBuffer(com.dbzenith.client.fx.KiEnergy.flat());
             com.dbzenith.client.fx.KiEnergy.billboard(flat, m, n, x, y, z, LEFT, UP, r * 2.2f * pulse, com.dbzenith.client.fx.KiEnergy.argb(c.color(), (int) (45 + 45 * f)), com.dbzenith.client.fx.KiEnergy.HALO);
             if (!firstPerson && f > 0.5f) {                                      // arcs of ki snapping round it
@@ -188,6 +200,10 @@ public final class ClientKiCharge {
             var solid = buffers.getBuffer(com.dbzenith.client.fx.KiEnergy.solid());
             float rr = r * 0.62f * pulse;
             int detail = com.dbzenith.client.fx.KiParticles.quality() >= 2 ? 2 : 1;
+            com.dbzenith.client.fx.KiEnergy.sphere(buffers.getBuffer(com.dbzenith.client.fx.KiEnergy.tint()), m, n, x, y, z, rr * 0.95f,   // its colour against a bright sky
+                    com.dbzenith.client.fx.KiEnergy.argb(c.color(), 120), com.dbzenith.client.fx.KiEnergy.TINT, 1, 0);
+            buffers.endBatch(com.dbzenith.client.fx.KiEnergy.tint());
+            solid = buffers.getBuffer(com.dbzenith.client.fx.KiEnergy.solid());
             com.dbzenith.client.fx.KiEnergy.sphere(solid, m, n, x, y, z, rr, com.dbzenith.client.fx.KiEnergy.argb(c.color(), 150), com.dbzenith.client.fx.KiEnergy.SHELL, detail, t * 0.03f);
             com.dbzenith.client.fx.KiEnergy.sphere(solid, m, n, x, y, z, rr * 1.07f, com.dbzenith.client.fx.KiEnergy.argb(c.color(), (int) (60 + 90 * f)), com.dbzenith.client.fx.KiEnergy.STRANDS, detail, -t * 0.05f);
             com.dbzenith.client.fx.KiEnergy.sphere(solid, m, n, x, y, z, rr * 0.5f, com.dbzenith.client.fx.KiEnergy.argb(hot, 210), com.dbzenith.client.fx.KiEnergy.CORE, 1, t * 0.02f);
@@ -253,6 +269,8 @@ public final class ClientKiCharge {
             if (e == mc.player && mc.options.getCameraType().isFirstPerson()) continue;   // your own sparks would fill the screen
             Vec3 at = hold(e, e.position(), c, f);
             float rad = radius(c.kind(), f) * e.getBbHeight() / 1.8f;
+            if (c.kind() == KiCharge.KIND_OVERHEAD && f > 0.25f && com.dbzenith.client.fx.KiEnergy.available())   // the ground answers a big sphere overhead (phase 4)
+                com.dbzenith.client.fx.BigSphere.tick(mc.level, at, rad * 0.62f, c.color(), f > 0.6f);
             int pull = com.dbzenith.client.fx.KiParticles.scaled(2 + (int) (f * 6));
             for (int i = 0; i < pull; i++) {                                    // drawn in from all round, arriving as they fade
                 double ux = rnd.nextGaussian(), uy = rnd.nextGaussian() * 0.7, uz = rnd.nextGaussian(), ul = Math.sqrt(ux * ux + uy * uy + uz * uz) + 1e-6;

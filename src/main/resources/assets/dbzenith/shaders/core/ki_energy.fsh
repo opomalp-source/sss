@@ -41,11 +41,13 @@ void main() {
         float d = length(texCoord0 - 0.5) * 2.0;
         float h = pow(clamp(1.0 - d, 0.0, 1.0), 2.4);
         outc = vec4(col * h, a * h);
-    } else {                                                        // a ribbon: soft across, bright down the middle, flowing
+    } else if (mode == 4) {                                         // a ribbon: soft across, bright down the middle, flowing
         float across = 1.0 - abs(texCoord0.x * 2.0 - 1.0);
         float flow = texture(Sampler0, vec2(texCoord0.x * 0.5, texCoord0.y * 0.5 - t * 0.9)).r;
         float h = pow(across, 1.8) * (0.7 + 0.6 * flow);
         outc = vec4(mix(col, vec3(1.0), pow(across, 6.0)) * h, a * h);
+    } else {                                                        // the tint: a see-through body in its colour, thickest where it faces you
+        outc = vec4(col, a * (0.3 + 0.7 * pow(facing, 0.7)));
     }
     fragColor = outc * ColorModulator;
 }
