@@ -222,6 +222,10 @@ public class NimbusEntity extends Entity {
         bankV += (bankTarget - bank) * .12f - bankV * .34f;
         bank += bankV;
         stretch += (net.minecraft.util.Mth.clamp(speed * .6f, 0f, .55f) - stretch) * .15f;
+        if (speed > .3f) {                                                   // skimming water parts it (CX-48)
+            Vec3 surf = com.dbzenith.client.fx.WaterFx.surfaceBelow(level(), position(), 3);
+            if (surf != null) com.dbzenith.client.fx.WaterFx.part(surf, v, Math.min(1f, speed * 0.9f) * (float) (1 - (getY() - surf.y) / 4));
+        }
         if (speed > .05f) {                                                  // shed puffs off the tail
             var rnd = random;
             Vec3 rear = rearPoint();

@@ -225,6 +225,10 @@ public final class FlightPhysics {
         var rnd = p.getRandom();
         int n = (int) Math.ceil(close * Math.min(4, h * 3));
         boolean water = !mc.level.getFluidState(below).isEmpty();
+        if (water) {                                                              // the water parts under you (CX-48)
+            Vec3 surf = com.dbzenith.client.fx.WaterFx.surfaceBelow(mc.level, p.position(), 5);
+            if (surf != null) com.dbzenith.client.fx.WaterFx.part(surf, v, (float) Math.min(1, h * 0.8) * close);
+        }
         BlockState block = mc.level.getBlockState(below);
         for (int i = 0; i < n; i++) {
             double ox = (rnd.nextDouble() - .5) * 1.6, oz = (rnd.nextDouble() - .5) * 1.6;

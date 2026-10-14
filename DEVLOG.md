@@ -2832,3 +2832,14 @@ The charge ball between the hands and the beam's spiral strands were already the
 - **Client config** `battleDamage`, Settings → Effects → "Battle damage". Dev stat `body_percent` for `/dbz set`.
 - **Checked in the dev client** (Turtle gi at 60%, 35% and 10% health): the rips spread across the gi with skin
   through them; at 10% torn and battered, with the cheek cut and the pained face from CX-42.
+
+## 2026-10-14 — CX-48: water parting (v0.109.0)
+- **`client.fx.WaterFx`:** a fast flier skimming low over water, the Flying Nimbus skimming it, or a beam passing within
+  three blocks above it pushes the water apart:
+  - a dark trench where the water is pushed down, soft across and closing up within about 1.4 seconds;
+  - two lines of foam spreading out behind in a V and fading over 2.3 seconds (`foam.png` from `tools/FoamGen.java`);
+  - puffs of spray thrown up to both sides, rising and falling back, plus vanilla splashes along beams.
+  - Wake pieces are long enough to overlap the next one, so the wake reads as a continuous line.
+- **Hooks:** `FlightPhysics.skim` (for every flier), `NimbusEntity.clientMotion`, and beams sampled every 1.6 blocks
+  along their length every other tick.
+- **Checked in the dev client** (a Wave Beam over a pool): foam lines, the trench and spray along its path.
