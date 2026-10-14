@@ -22,6 +22,7 @@ public class FighterRenderer<T extends net.minecraft.world.entity.Mob> extends H
         this.build = NpcLooks.build(skin);
         BodyShape.attach(getModel());                                              // anime proportions, as players have (CX-22)
         addLayer(new NpcPartsLayer<>(this, ctx.getModelSet(), skin));
+        addLayer(new BattleDamageLayer<>(this));                                   // the fight shows on them too (CX-47)
     }
 
     @Override

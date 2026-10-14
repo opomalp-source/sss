@@ -2043,6 +2043,8 @@
   "settings.dbzenith.aura_renderer.desc": "Auto draws auras with their own shader, and with the plain one while a shader pack is on. Plain looks simpler but works everywhere.",
   "settings.dbzenith.ki_bloom": "Ki bloom",
   "settings.dbzenith.ki_bloom.desc": "Auras, blasts, beams and sparks glow onto what is around them. 0 is off. Off with Fabulous graphics or a shader pack.",
+  "settings.dbzenith.battle_damage": "Battle damage",
+  "settings.dbzenith.battle_damage.desc": "Clothes rip, and scratches and bruises show as a fighter's health falls; heavy blows and hard landings leave dust.",
   "settings.dbzenith.aura_renderer.auto": "Auto",
   "settings.dbzenith.aura_renderer.shader": "Own shader",
   "settings.dbzenith.aura_renderer.plain": "Plain",

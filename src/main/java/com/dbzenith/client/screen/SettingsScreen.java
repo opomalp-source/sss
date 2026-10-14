@@ -64,6 +64,7 @@ public class SettingsScreen extends Screen {
                 o.add(new Option("ki_bloom", c.kiBloom, 0, 2, null));
                 o.add(new Option("first_person_aura", c.firstPersonAura, 0, 0, null));
                 o.add(new Option("afterimages", c.afterimages, 0, 0, null));
+                o.add(new Option("battle_damage", c.battleDamage, 0, 0, null));
                 o.add(new Option("hitstop", c.hitstop, 0, 0, null));
                 o.add(new Option("hair_physics", c.hairPhysics, 0, 0, null));
                 o.add(new Option("procedural_motion", c.proceduralMotion, 0, 0, null));

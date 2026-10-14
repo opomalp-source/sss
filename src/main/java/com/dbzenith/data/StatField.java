@@ -24,6 +24,8 @@ public record StatField(String id, ToDoubleFunction<PlayerData> getter, BiConsum
         }
         register("tp", d -> d.getTrainingPoints(), (d, v) -> d.setTrainingPoints(Math.round(v)));
         register("body", PlayerData::getBody, PlayerData::setBody);
+        register("body_percent", d -> d.getDerived().maxBody() > 0 ? d.getBody() / d.getDerived().maxBody() * 100 : 0,
+                (d, v) -> d.setBody(d.getDerived().maxBody() * Math.max(0, Math.min(100, v)) / 100));   // dev: health as a share (CX-47)
         register("ki", PlayerData::getKi, PlayerData::setKi);
         register("stamina", PlayerData::getStamina, PlayerData::setStamina);
         register("release", PlayerData::getReleasePercent, (d, v) -> d.setReleasePercent((int) Math.round(v)));

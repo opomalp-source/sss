@@ -2816,3 +2816,19 @@ The charge ball between the hands and the beam's spiral strands were already the
   - Both scale with the blast.
 - **Checked in the dev client** (a Wave Beam fired at the ground): the rings racing along the beam to the churning
   head, the dome at the blast, smoke billowing up.
+
+## 2026-10-14 — CX-47: battle damage (v0.108.0)
+- **`BattleDamageLayer`** (players and NPC fighters) shows the fight on the fighter, by health:
+  - below 70%: the first rips in the clothes, skin showing through in the fighter's own skin tone, with dark frayed
+    edges and the odd hanging thread, plus a few scratches and grime;
+  - below 45%: more rips, bruises;
+  - below 20%: in tatters, with a cut on the cheek and a bruise over the eye.
+  - The rips mend as health comes back.
+- **Dust:** heavy blows (+0.3), lighter ones (+0.15) and hard landings (with fall distance) cover the fighter in dust,
+  more on the legs. It wears off over a minute, and at once in water.
+- **Textures** from `tools/BattleDamageGen.java` (`battle/` and `battle_hd/`): `tears_1..3` (a white mask drawn in the
+  skin tone), `marks_1..3`, `dust`. One placement plan for both sizes; each level keeps the last one's damage and adds
+  more.
+- **Client config** `battleDamage`, Settings → Effects → "Battle damage". Dev stat `body_percent` for `/dbz set`.
+- **Checked in the dev client** (Turtle gi at 60%, 35% and 10% health): the rips spread across the gi with skin
+  through them; at 10% torn and battered, with the cheek cut and the pained face from CX-42.

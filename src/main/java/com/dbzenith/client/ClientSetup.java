@@ -92,6 +92,7 @@ public final class ClientSetup {
                 for (var layer : java.util.List.of(bodySkin, raceSkin, formOverlay, bodyFx)) com.dbzenith.client.render.FirstPersonBody.register(renderer, layer);   // your own arm in first person (CX-18)
                 renderer.addLayer(new com.dbzenith.client.render.CosmeticsLayer(renderer));
                 renderer.addLayer(new com.dbzenith.client.render.GearLayer(renderer, event.getEntityModels()));
+                renderer.addLayer(new com.dbzenith.client.render.BattleDamageLayer<>(renderer));
                 renderer.addLayer(new FormHairLayer(renderer, event.getEntityModels()));
                 renderer.addLayer(new RaceFeatureLayer(renderer, event.getEntityModels()));
                 renderer.addLayer(new com.dbzenith.client.render.HaloLayer(renderer, event.getEntityModels()));
