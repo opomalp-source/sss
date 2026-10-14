@@ -604,6 +604,8 @@
   "settings.dbzenith.hair_physics.desc": "Hair streams behind you as you run and fly, lifts as you fall, swings as you turn and flickers in an aura.",
   "settings.dbzenith.fov_effects": "Camera punches",
   "settings.dbzenith.fov_effects.desc": "A quick zoom on heavy blows and a widening rush when you dash.",
+  "settings.dbzenith.speed_fov_limit": "Speed view widening",
+  "settings.dbzenith.speed_fov_limit.desc": "How much moving fast (Dexterity, sprinting, flying) may widen the view. Vanilla allows 50%, which leaves your fighter tiny.",
   "radial.dbzenith.settings": "Settings",
   "radial.dbzenith.settings.hint": "HUD, effects, camera and controls.",
   "race.dbzenith.vampire": "Vampire",

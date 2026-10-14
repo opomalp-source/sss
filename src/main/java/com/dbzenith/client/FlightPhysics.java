@@ -243,12 +243,24 @@ public final class FlightPhysics {
         }
     }
 
-    /** The view widens with speed. */
+    /** The view widens a little with flight speed (at most 6%; it was 16%, too much on top of vanilla's). */
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onFov(ViewportEvent.ComputeFov event) {
         if (!DBZConfig.CLIENT.fovEffects.get()) return;
         float f = Mth.lerp((float) event.getPartialTick(), fovO, fov);
-        if (f > .001f) event.setFOV(event.getFOV() * (1 + .16f * f * f * (3 - 2 * f)));
+        if (f > .001f) event.setFOV(event.getFOV() * (1 + .06f * f * f * (3 - 2 * f)));
+    }
+
+    /**
+     * Vanilla widens the view with your movement speed, up to half again. Dexterity raises that speed a long way, and
+     * flying adds to it, so the view blew wide open and the fighter shrank to a dot. Here speed may widen it only by
+     * {@code speedFovLimit} percent (10 by default); narrowing (drawing a bow, a spyglass) is left alone.
+     */
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onFovModifier(net.minecraftforge.client.event.ComputeFovModifierEvent event) {
+        float m = event.getNewFovModifier();
+        float most = 1 + DBZConfig.CLIENT.speedFovLimit.get().floatValue() / 100f;
+        if (m > most) event.setNewFovModifier(most);
     }
 
     /** The wind in your ears, louder and higher the faster you fly. */

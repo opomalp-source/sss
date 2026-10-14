@@ -761,7 +761,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue hitstop;
         public final ForgeConfigSpec.BooleanValue afterimages;
         public final ForgeConfigSpec.BooleanValue firstPersonAura;
-        public final ForgeConfigSpec.DoubleValue hudScale, kiBloom;
+        public final ForgeConfigSpec.DoubleValue hudScale, kiBloom, speedFovLimit;
         public final ForgeConfigSpec.IntValue auraDetail;
         public final ForgeConfigSpec.IntValue auraRenderer;
         public final ForgeConfigSpec.BooleanValue fovEffects;
@@ -831,6 +831,8 @@ public final class DBZConfig {
                     .defineInRange("hudScale", 1.0, 0.6, 1.4);
             kiBloom = b.comment("Bloom: ki effects (auras, blasts, beams, sparks) glow onto what is around them (0 off, 1 normal, up to 2). Off with Fabulous graphics or a shader pack (CX-45)")
                     .defineInRange("kiBloom", 1.0, 0.0, 2.0);
+            speedFovLimit = b.comment("How much moving fast may widen the view, in percent (vanilla allows up to 50, which with high Dexterity or in flight leaves your fighter tiny)")
+                    .defineInRange("speedFovLimit", 10.0, 0.0, 50.0);
             hudStyle = b.comment("HUD: 0 Saga (a round portrait, a Release tab, a smoky BP and Ki bar, slanted health and stamina bars), 1 Classic, 2 Minimal (thin bars, no portrait), 3 Ornate (a portrait frame per form), 4 Clean (a portrait card and slim gradient bars)")
                     .defineInRange("hudStyle", 0, 0, 4);
             b.pop();

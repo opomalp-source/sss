@@ -72,6 +72,7 @@ public class SettingsScreen extends Screen {
             case CAMERA -> {
                 o.add(new Option("screen_shake", c.screenShake, 0, 2, null));
                 o.add(new Option("fov_effects", c.fovEffects, 0, 0, null));
+                o.add(new Option("speed_fov_limit", c.speedFovLimit, 0, 50, null, "%"));
                 o.add(new Option("speed_lines", c.speedLines, 0, 0, null));
                 o.add(new Option("lock_camera", c.lockOnCameraSpeed, 0, 3, null));                // lock-on (CX-19)
                 o.add(new Option("lock_free_look", c.lockOnFreeLook, 0, 90, null, "\u00b0"));

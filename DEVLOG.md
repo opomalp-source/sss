@@ -2882,3 +2882,15 @@ behind on chases and counters (VfxV3). What was missing was each beam having its
   player's block, and doesn't go up where there's no room. This caught the ground search finding a block in the way
   and building on top of it. 218 GameTests.
 - **Checked in the dev client:** the house popping up in smoke; the scouter lens with SCAN and a power marker.
+
+## 2026-10-14 — CX-50b: speed no longer blows the view wide open (v0.111.1)
+- **The ask** (user): levelling Dexterity, and flying, widened the view so far the fighter couldn't be seen.
+- **Why:** vanilla widens the view with the movement-speed attribute, by up to half again, and Dexterity raises that
+  attribute a long way. Flying stacked our own flight widening (up to 16%) on top.
+- **Fix:**
+  - `FlightPhysics.onFovModifier` (`ComputeFovModifierEvent`) caps the widening from speed at `speedFovLimit` percent
+    (client config, default 10, 0 to 50; Settings → Camera → "Speed view widening"). Narrowing (bows, spyglass) is
+    untouched.
+  - The flight widening is now at most 6%.
+- **Checked in the dev client:** at Dexterity 20,000 the view is barely wider than at 10, and the fighter stays full
+  size.
