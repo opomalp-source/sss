@@ -60,6 +60,11 @@ public final class ModSounds {
     public static final RegistryObject<SoundEvent> IMPACT_DEBRIS = sound("impact_debris");
     public static final RegistryObject<SoundEvent> IMPACT_ECHO = sound("impact_echo");
     public static final RegistryObject<SoundEvent> KI_CHARGE = sound("ki_charge");
+    public static final RegistryObject<SoundEvent> KI_ZAP = sound("ki_zap");                 // the ki attack rework, phase 5
+    public static final RegistryObject<SoundEvent> KI_WAVE = sound("ki_wave");
+    public static final RegistryObject<SoundEvent> KI_CRACKLE = sound("ki_crackle");
+    public static final RegistryObject<SoundEvent> KI_FLASH = sound("ki_flash");
+    public static final RegistryObject<SoundEvent> DISC_WHINE = sound("disc_whine");
 
     private ModSounds() {}
 

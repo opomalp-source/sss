@@ -24,6 +24,8 @@ public record ImpactPacket(float x, float y, float z, float dx, float dy, float 
     public static final int PARRY = 6;
     public static final int GUARD_BREAK = 7;
     public static final int DEFLECT = 8;
+    /** The ki attack rework, phase 5: a burst of ki all round (scale: its radius), a paralysing discharge thrown forward, a blinding flash. */
+    public static final int WAVE = 9, STUN_WAVE = 10, FLARE = 11;
 
     private static final double RANGE = 96;
 

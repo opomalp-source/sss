@@ -172,15 +172,31 @@ public final class TechniqueHandler {
             return;
         }
         LivingEntity homingTarget = technique.homing() ? findTarget(caster, look) : null;
-        for (int i = 0; i < technique.count(); i++) {
-            Vec3 dir = technique.spreadDegrees() > 0 ? spread(look, technique.spreadDegrees(), caster) : look;
-            KiBlastEntity blast = KiBlastEntity.create(level, caster, technique, damage, scale);
-            Vec3 start = caster.getEyePosition().add(look.scale(0.6)).subtract(0, technique.size() * scale / 2.0, 0);
-            blast.moveTo(start.x, start.y, start.z, caster.getYRot(), caster.getXRot());
-            blast.setDeltaMovement(dir.normalize().scale(technique.speed() * com.dbzenith.combat.Wounds.kiSpeed(caster)));   // weaker when badly hurt (CX-52)
-            blast.setHomingTarget(homingTarget);
-            level.addFreshEntity(blast);
+        if (technique.count() > 1) {                                       // a barrage streams out shot by shot (the ki attack rework, phase 5)
+            fireOne(level, caster, technique, damage, scale, homingTarget, 0);
+            Volleys.queue(level, caster, technique, damage, scale, homingTarget);
+            return;
         }
+        fireOne(level, caster, technique, damage, scale, homingTarget, -1);
+    }
+
+    /**
+     * One ki ball from the caster's hands along where they look now. {@code shot} is its place in a barrage (-1 for a
+     * single shot): a barrage's shots come two from each palm in turn, as the volley animation throws them.
+     */
+    static void fireOne(ServerLevel level, LivingEntity caster, Technique technique, double damage, float scale, LivingEntity homingTarget, int shot) {
+        Vec3 look = caster.getLookAngle();
+        Vec3 dir = technique.spreadDegrees() > 0 ? spread(look, technique.spreadDegrees(), caster) : look;
+        KiBlastEntity blast = KiBlastEntity.create(level, caster, technique, damage, scale);
+        Vec3 start = caster.getEyePosition().add(look.scale(0.6)).subtract(0, technique.size() * scale / 2.0, 0);
+        if (shot >= 0) {
+            Vec3 right = look.cross(new Vec3(0, 1, 0));
+            if (right.lengthSqr() > 1e-4) start = start.add(right.normalize().scale((shot / 2) % 2 == 0 ? 0.35 : -0.35)).subtract(0, 0.25, 0);
+        }
+        blast.moveTo(start.x, start.y, start.z, caster.getYRot(), caster.getXRot());
+        blast.setDeltaMovement(dir.normalize().scale(technique.speed() * com.dbzenith.combat.Wounds.kiSpeed(caster)));   // weaker when badly hurt (CX-52)
+        blast.setHomingTarget(homingTarget);
+        level.addFreshEntity(blast);
     }
 
     private static Vec3 spread(Vec3 dir, float degrees, LivingEntity caster) {

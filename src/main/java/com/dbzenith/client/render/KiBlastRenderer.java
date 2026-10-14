@@ -41,6 +41,11 @@ public class KiBlastRenderer extends EntityRenderer<KiBlastEntity> {
         Quaternionf camera = entityRenderDispatcher.cameraOrientation();
         double mid = entity.getBbHeight() / 2.0;
 
+        if (entity.getStyle() == Technique.Style.DISK && com.dbzenith.client.fx.KiEnergy.available()) {   // the ki attack rework, phase 5
+            renderDisc(entity, partialTicks, pose, buffers, c, size, t, mid);
+            super.render(entity, yaw, partialTicks, pose, buffers, light);
+            return;
+        }
         if (entity.getStyle() == Technique.Style.DISK) {
             pose.pushPose();
             pose.translate(0, mid, 0);
@@ -146,6 +151,66 @@ public class KiBlastRenderer extends EntityRenderer<KiBlastEntity> {
         // a spinning flare of light across it
         VertexConsumer star = buffers.getBuffer(FxRenderTypes.additive(STAR));
         FxDraw.billboard(pose, star, entityRenderDispatcher.cameraOrientation(), 0, mid, 0, size * 1.6f * flick, t * 0.35f, 0, 0, 1, 1, FxDraw.mix(c, 0xFFFFFF, 0.4f), 60);
+        if (e.seeking() >= 0) seeker(e, pt, buffers, m, n, ex0, ey0, ez0, ex, ey, ez, my, size, c, t);
+    }
+
+    /**
+     * A homing orb (the ki attack rework, phase 5): a ring spinning round it across its path, and on what it has locked
+     * on to, four brackets closing in and turning, pulsing, so everyone can see who it is after.
+     */
+    private static void seeker(KiBlastEntity e, float pt, MultiBufferSource buffers, org.joml.Matrix4f m, org.joml.Matrix3f n, double ex0, double ey0, double ez0,
+                               float ex, float ey, float ez, float my, float size, int c, float t) {
+        VertexConsumer flat = buffers.getBuffer(com.dbzenith.client.fx.KiEnergy.flat());
+        int hot = FxDraw.mix(c, 0xFFFFFF, 0.6f);
+        Vec3 v = e.getDeltaMovement().lengthSqr() > 1e-6 ? e.getDeltaMovement().normalize() : new Vec3(0, 0, 1);
+        Vec3 a = v.cross(Math.abs(v.y) > 0.9 ? new Vec3(1, 0, 0) : new Vec3(0, 1, 0)).normalize(), b = v.cross(a).normalize();
+        float rr = size * 0.95f;
+        int segs = 20;
+        for (int i = 0; i < segs; i++) {                                       // the ring round it
+            if (i % 5 == 4) continue;                                           // broken into arcs, so its turning shows
+            double a0 = t * 0.4 + Math.PI * 2 * i / segs, a1 = t * 0.4 + Math.PI * 2 * (i + 1) / segs;
+            Vec3 p = a.scale(Math.cos(a0) * rr).add(b.scale(Math.sin(a0) * rr)), q = a.scale(Math.cos(a1) * rr).add(b.scale(Math.sin(a1) * rr));
+            com.dbzenith.client.fx.KiEnergy.ribbon(flat, m, n, (float) p.x, my + (float) p.y, (float) p.z, (float) q.x, my + (float) q.y, (float) q.z,
+                    ex, ey, ez, size * 0.1f, size * 0.1f, hot, 220, 220, 0, 1, com.dbzenith.client.fx.KiEnergy.RIBBON);
+        }
+        net.minecraft.world.entity.Entity target = e.level().getEntity(e.seeking());
+        if (target == null || !target.isAlive()) return;
+        double tx = Mth.lerp(pt, target.xo, target.getX()) - ex0, ty = Mth.lerp(pt, target.yo, target.getY()) + target.getBbHeight() / 2 - ey0,
+                tz = Mth.lerp(pt, target.zo, target.getZ()) - ez0;
+        Vec3 toEye = new Vec3(ex - tx, ey - ty, ez - tz).normalize();
+        Vec3 ra = toEye.cross(new Vec3(0, 1, 0));
+        if (ra.lengthSqr() < 1e-4) ra = new Vec3(1, 0, 0);
+        ra = ra.normalize();
+        Vec3 rb = ra.cross(toEye).normalize();
+        float pulse = 0.85f + 0.15f * Mth.sin(t * 0.6f);
+        float rad = (Math.max(target.getBbWidth(), target.getBbHeight() * 0.5f) + 0.5f) * pulse, arm = 0.45f * pulse;
+        int deep = com.dbzenith.client.fx.BigSphere.vivid(c);
+        for (int pass = 0; pass < 2; pass++) {                                 // a tinted underlay (its colour against the sky), then the glow
+            boolean under = pass == 0;
+            VertexConsumer vc = buffers.getBuffer(under ? com.dbzenith.client.fx.KiEnergy.tint() : com.dbzenith.client.fx.KiEnergy.flat());
+            int ring = under ? deep : c, mark = under ? deep : FxDraw.mix(c, 0xFFFFFF, 0.3f);
+            float wide = under ? 1.6f : 1f;
+            for (int i = 0; i < 24; i += 2) {                                   // a dashed ring turning the other way
+                double a0 = -t * 0.08 + Math.PI * 2 * i / 24, a1 = -t * 0.08 + Math.PI * 2 * (i + 1) / 24;
+                float r2 = rad * 1.1f;
+                Vec3 p = ra.scale(Math.cos(a0) * r2).add(rb.scale(Math.sin(a0) * r2)), q = ra.scale(Math.cos(a1) * r2).add(rb.scale(Math.sin(a1) * r2));
+                com.dbzenith.client.fx.KiEnergy.ribbon(vc, m, n, (float) (tx + p.x), (float) (ty + p.y), (float) (tz + p.z), (float) (tx + q.x), (float) (ty + q.y), (float) (tz + q.z),
+                        ex, ey, ez, 0.1f * wide, 0.1f * wide, ring, 200, 200, 0, 1, com.dbzenith.client.fx.KiEnergy.RIBBON);
+            }
+            for (int k = 0; k < 4; k++) {                                      // four brackets, turning
+                double ang = t * 0.12 + k * Math.PI / 2;
+                Vec3 dir = ra.scale(Math.cos(ang)).add(rb.scale(Math.sin(ang))), side = ra.scale(-Math.sin(ang)).add(rb.scale(Math.cos(ang)));
+                Vec3 corner = dir.scale(rad);
+                Vec3 p1 = corner.add(side.scale(arm)), p2 = corner.subtract(side.scale(arm)), p3 = corner.subtract(dir.scale(arm * 0.8));
+                float cx = (float) (tx + corner.x), cy = (float) (ty + corner.y), cz = (float) (tz + corner.z);
+                com.dbzenith.client.fx.KiEnergy.ribbon(vc, m, n, cx, cy, cz, (float) (tx + p1.x), (float) (ty + p1.y), (float) (tz + p1.z), ex, ey, ez,
+                        0.2f * wide, 0.1f * wide, mark, 255, 200, 0, 1, com.dbzenith.client.fx.KiEnergy.RIBBON);
+                com.dbzenith.client.fx.KiEnergy.ribbon(vc, m, n, cx, cy, cz, (float) (tx + p2.x), (float) (ty + p2.y), (float) (tz + p2.z), ex, ey, ez,
+                        0.2f * wide, 0.1f * wide, mark, 255, 200, 0, 1, com.dbzenith.client.fx.KiEnergy.RIBBON);
+                com.dbzenith.client.fx.KiEnergy.ribbon(vc, m, n, cx, cy, cz, (float) (tx + p3.x), (float) (ty + p3.y), (float) (tz + p3.z), ex, ey, ez,
+                        0.1f * wide, 0.03f * wide, ring, 220, 80, 0, 1, com.dbzenith.client.fx.KiEnergy.RIBBON);
+            }
+        }
     }
 
     /** Its smooth tapered trail of where it has been, a core-coloured line down the middle; {@code wide} scales it. */
@@ -193,6 +258,51 @@ public class KiBlastRenderer extends EntityRenderer<KiBlastEntity> {
         Vec3 ground = com.dbzenith.client.fx.BigSphere.groundBelow(e.level(), centre, r * 5);
         if (ground != null && look.light > 0)
             com.dbzenith.client.fx.BigSphere.groundGlow(pose, buffers, ground.subtract(ex0, ey0, ez0), r, (float) (centre.y - ground.y), c, look.light);
+    }
+
+    private static final org.joml.Vector3f FLAT_A = new org.joml.Vector3f(1, 0, 0), FLAT_B = new org.joml.Vector3f(0, 0, 1);
+
+    /**
+     * A ki disc (the ki attack rework, phase 5): flat and level, a glowing body tinted its colour with a white-hot centre,
+     * curved arms sweeping round inside it, a bright rim and sawtooth teeth racing round the edge. Seen edge-on it is a
+     * thin bright line, as a blade should be.
+     */
+    private void renderDisc(KiBlastEntity e, float pt, PoseStack pose, MultiBufferSource buffers, int c, float size, float t, double mid) {
+        double ex0 = Mth.lerp(pt, e.xo, e.getX()), ey0 = Mth.lerp(pt, e.yo, e.getY()), ez0 = Mth.lerp(pt, e.zo, e.getZ());
+        Vec3 cam = entityRenderDispatcher.camera.getPosition();
+        float ex = (float) (cam.x - ex0), ey = (float) (cam.y - ey0), ez = (float) (cam.z - ez0);
+        var last = pose.last();
+        org.joml.Matrix4f m = last.pose();
+        org.joml.Matrix3f n = last.normal();
+        float my = (float) mid, r = size * 0.6f;
+        int hot = FxDraw.mix(c, 0xFFFFFF, 0.6f), deep = com.dbzenith.client.fx.BigSphere.vivid(c);
+        float spin = t * 0.9f;
+        com.dbzenith.client.fx.KiEnergy.billboard(buffers.getBuffer(com.dbzenith.client.fx.KiEnergy.tint()), m, n, 0, my, 0, FLAT_A, FLAT_B, r * 1.05f,
+                com.dbzenith.client.fx.KiEnergy.argb(deep, 170), com.dbzenith.client.fx.KiEnergy.HALO);
+        VertexConsumer flat = buffers.getBuffer(com.dbzenith.client.fx.KiEnergy.flat());
+        com.dbzenith.client.fx.KiEnergy.billboard(flat, m, n, 0, my, 0, FLAT_A, FLAT_B, r * 1.15f, com.dbzenith.client.fx.KiEnergy.argb(c, 200), com.dbzenith.client.fx.KiEnergy.HALO);
+        com.dbzenith.client.fx.KiEnergy.billboard(flat, m, n, 0, my, 0, FLAT_A, FLAT_B, r * 0.45f, com.dbzenith.client.fx.KiEnergy.argb(0xFFFFFF, 230), com.dbzenith.client.fx.KiEnergy.HALO);
+        for (int k = 0; k < 3; k++) {                                          // arms sweeping round
+            float lx = 0, lz = 0;
+            for (int s = 0; s <= 6; s++) {
+                float u = s / 6f, ang = spin + k * Mth.TWO_PI / 3 + u * 1.6f, rad = r * (0.15f + 0.75f * u);
+                float px = Mth.cos(ang) * rad, pz = Mth.sin(ang) * rad;
+                if (s > 0) com.dbzenith.client.fx.KiEnergy.ribbon(flat, m, n, lx, my, lz, px, my, pz, ex, ey, ez, r * 0.12f, r * 0.1f, hot,
+                        (int) (200 * (1 - (u - 1 / 6f) * 0.5f)), (int) (200 * (1 - u * 0.5f)), 0, 1, com.dbzenith.client.fx.KiEnergy.RIBBON);
+                lx = px; lz = pz;
+            }
+        }
+        int segs = 32;
+        for (int i = 0; i < segs; i++) {                                       // the rim
+            float a0 = Mth.TWO_PI * i / segs, a1 = Mth.TWO_PI * (i + 1) / segs;
+            com.dbzenith.client.fx.KiEnergy.ribbon(flat, m, n, Mth.cos(a0) * r, my, Mth.sin(a0) * r, Mth.cos(a1) * r, my, Mth.sin(a1) * r, ex, ey, ez,
+                    r * 0.1f, r * 0.1f, hot, 240, 240, 0, 1, com.dbzenith.client.fx.KiEnergy.RIBBON);
+        }
+        for (int i = 0; i < 10; i++) {                                         // sawtooth teeth racing round the edge
+            float a = spin * 1.3f + i * Mth.TWO_PI / 10;
+            com.dbzenith.client.fx.KiEnergy.ribbon(flat, m, n, Mth.cos(a) * r, my, Mth.sin(a) * r, Mth.cos(a - 0.3f) * r * 1.2f, my, Mth.sin(a - 0.3f) * r * 1.2f,
+                    ex, ey, ez, r * 0.09f, r * 0.01f, hot, 230, 120, 0, 1, com.dbzenith.client.fx.KiEnergy.RIBBON);
+        }
     }
 
     @Override

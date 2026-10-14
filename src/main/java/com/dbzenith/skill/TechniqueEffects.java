@@ -63,8 +63,8 @@ public final class TechniqueEffects {
                     e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, 3));
                     if (e instanceof Mob mob) mob.setTarget(null);
                 }
-                level.sendParticles(ParticleTypes.FLASH, player.getX(), player.getEyeY(), player.getZ(), 3, 0.2, 0.2, 0.2, 0);
-                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 0.4f, 2.0f);
+                com.dbzenith.network.ImpactPacket.at(player.getEyePosition().add(look.scale(0.4)), look, com.dbzenith.network.ImpactPacket.FLARE, (float) power,
+                        0xFFF6D0, player.getId()).send(level);                       // the flash, its sound (the ki attack rework, phase 5)
                 return true;
             }
             case LIFE_DRAIN -> {                                    // a bite: the closest foe in front loses life, half comes back as body
@@ -91,8 +91,9 @@ public final class TechniqueEffects {
                     KiTraits.onHit(player, player, t.kiType(), t.flags(), e, damage, push, null);
                     e.push(push.x, 0.4, push.z);
                 }
-                level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, player.getX(), player.getY() + 1, player.getZ(), 1, 0, 0, 0, 0);
-                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 1f, 0.8f);
+                int waveColor = t.color() == 0xFFFFFF ? com.dbzenith.ki.Aura.color(data) : t.color();
+                com.dbzenith.network.ImpactPacket.at(player.position().add(0, 1, 0), new Vec3(0, 1, 0), com.dbzenith.network.ImpactPacket.WAVE, (float) power,
+                        waveColor, player.getId()).send(level);                      // the burst, its sound (the ki attack rework, phase 5)
                 return true;
             }
             case TELEPORT -> {
@@ -157,9 +158,8 @@ public final class TechniqueEffects {
                     if (to.dot(look) < 0.3) continue;
                     e.addEffect(new MobEffectInstance(com.dbzenith.registry.ModEffects.STUN.get(), (int) power, 0));
                 }
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX() + look.x * 2, player.getEyeY(), player.getZ() + look.z * 2,
-                        40, 1.5, 0.8, 1.5, 0.2);
-                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 0.3f, 2.0f);
+                com.dbzenith.network.ImpactPacket.at(player.getEyePosition().subtract(0, 0.3, 0), look, com.dbzenith.network.ImpactPacket.STUN_WAVE, 6f,
+                        0xFFE85A, player.getId()).send(level);                       // the discharge, its sound (the ki attack rework, phase 5)
                 return true; // a miss still spends the ki
             }
             case GRAB -> {

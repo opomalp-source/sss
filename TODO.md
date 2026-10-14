@@ -284,8 +284,8 @@ to both mods folders.
 - [x] Phase 2 (v0.118.0) Charge-up: particles drawn in, growing orb with arcs, dust and debris, cracks, rising light and sound, movement lock
 - [x] Phase 3 (v0.119.0) Beams: widening tube mesh, flowing energy, core, spirals, lightning off the edges, churning head sphere, release flash, flicker (and the energy shader now actually loads)
 - [x] Phase 4 (v0.120.0) Large spheres: swirling layered sphere, orbiting sparks, inflow (Spirit Bomb) and flares (Supernova), ground light, dust and stones lifting, rumble; colour kept in daylight (tint layer) for every attack; asset list docs/KI_ASSETS.md
-  - Paused after phase 4 for the user's feedback (they asked for phases 1 to 4 first); phases 5 to 10 wait on it.
-- [ ] Phase 5 Barrage, homing, disc, wave, burst
+  - Paused after phase 4 for the user's feedback; they said "go on" (2026-10-15).
+- [x] Phase 5 (v0.121.0) Barrage (streamed shot by shot, palm flashes, zaps), disc (spinning blade mesh, whine), homing (seeker ring, lock-on marker, warble), bursts and waves (energy dome, ground ring, lightning fan, solar flare), new sounds
 - [ ] Phase 6 Impacts and terrain: huge craters, debris, plumes, regeneration option
 - [ ] Phase 7 Camera effects, accessibility (reduce flashing/shake)
 - [ ] Phase 8 Beam clash v2

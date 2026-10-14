@@ -39,6 +39,8 @@ public class KiBlastEntity extends Projectile {
     private static final EntityDataAccessor<Boolean> SPIRIT = SynchedEntityData.defineId(KiBlastEntity.class, EntityDataSerializers.BOOLEAN);
     /** Which technique it is (for its look on the client: the ki attack rework). */
     private static final EntityDataAccessor<String> TECH = SynchedEntityData.defineId(KiBlastEntity.class, EntityDataSerializers.STRING);
+    /** What a homing technique has locked on to (-1 none), so clients can mark it (the ki attack rework, phase 5). */
+    private static final EntityDataAccessor<Integer> SEEKING = SynchedEntityData.defineId(KiBlastEntity.class, EntityDataSerializers.INT);
 
     private static final double HOMING_STRENGTH = 0.12;
 
@@ -135,12 +137,19 @@ public class KiBlastEntity extends Projectile {
 
     /** Homing with a gentler (or stronger) pull than a homing technique's (a lock-on curve, CX-19). */
     public void setHomingTarget(Entity target, double strength) {
-        setHomingTarget(target);
+        homingTargetId = target == null ? -1 : target.getId();
         homingStrength = strength;
     }
 
+    /** A homing technique's target: it curves after it, and clients mark it. */
     public void setHomingTarget(Entity target) {
         homingTargetId = target == null ? -1 : target.getId();
+        entityData.set(SEEKING, homingTargetId);
+    }
+
+    /** The entity id a homing technique is seeking (-1 none). */
+    public int seeking() {
+        return entityData.get(SEEKING);
     }
 
     public double getDamage() {
@@ -195,6 +204,7 @@ public class KiBlastEntity extends Projectile {
         entityData.define(STYLE, 0);
         entityData.define(SPIRIT, false);
         entityData.define(TECH, "");
+        entityData.define(SEEKING, -1);
     }
 
     @Override
@@ -207,12 +217,6 @@ public class KiBlastEntity extends Projectile {
     public EntityDimensions getDimensions(Pose pose) {
         float s = getSize();
         return EntityDimensions.scalable(s, s);
-    }
-
-    @Override
-    public void onAddedToWorld() {
-        super.onAddedToWorld();
-        if (level().isClientSide) com.dbzenith.client.ClientSounds.travel(this);   // its hum and rush in flight (the ki attack rework)
     }
 
     @Override

@@ -233,7 +233,7 @@ public final class BigSphere {
     }
 
     /** The same colour, at least half saturated and bright: a pale blue-white keeps its blue. */
-    static int vivid(int rgb) {
+    public static int vivid(int rgb) {
         float[] hsb = java.awt.Color.RGBtoHSB(rgb >> 16 & 255, rgb >> 8 & 255, rgb & 255, null);
         return java.awt.Color.HSBtoRGB(hsb[0], Math.max(hsb[1], 0.55f), Math.max(hsb[2], 0.85f)) & 0xFFFFFF;
     }

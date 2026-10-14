@@ -3186,3 +3186,50 @@ answers: move all built-ins to JSON; for charging movement, my judgement; very b
   - the Spirit Bomb gathering (energy streaming in, the ground lit) and then thrown.
 - **Dev datapack:** `run-server/world/datapacks/kitest` has `test_nova`, `test_gather`, `test_big` and `test_sb` (a
   Spirit Bomb with no cooldown).
+
+## 2026-10-15 — Ki attack rework, phase 5: barrages, discs, homing, bursts and waves (v0.121.0)
+- **Barrages** (`Volleys`, server). A technique that throws several balls (Rapid Volley, Chaos Barrage, Ki Creator
+  designs with a count) used to throw them all in one tick, as a cluster.
+  - Now the first goes at once and the rest stream out one every 2 ticks, two from each palm in turn, in step with the
+    volley animation's punches.
+  - Each shot goes where the caster looks at that moment, so a barrage can be swept across a target.
+  - It stops if the caster dies, leaves or is stunned.
+  - On the client, each shot flashes at the palm with a burst of sparks and a quick `ki_zap`.
+- **Discs** (`KiBlastRenderer.renderDisc`): a flat, level blade.
+  - It has a body tinted its colour, a white-hot centre, three arms sweeping round inside, a bright rim, and sawtooth
+    teeth racing round the edge. Edge-on it is a thin bright line.
+  - It sheds sparks off its rim along its spin, and its flight sound is `disc_whine` instead of the hum.
+- **Homing:**
+  - **Synced target:** a homing technique's target now reaches clients (`KiBlastEntity.seeking()`). Lock-on curves
+    are not marked.
+  - **Seeker ring:** a broken ring spins round the orb across its path, and motes swirl round its trail.
+  - **Lock-on marker:** on the target, a dashed ring and four brackets turn in its colour, pulsing, so everyone can
+    see who it is after.
+  - **Sound:** its flight sound warbles.
+- **Bursts and waves**, three new impact kinds, `ImpactPacket.WAVE`, `STUN_WAVE` and `FLARE`, drawn by `KiWaveFx`.
+  They replace the vanilla explosion emitter, electric sparks, flash particle and the borrowed vanilla sounds.
+  - **Explosive Wave and Perfect Barrier:**
+    - a dome of energy swells to the wave's reach and thins, drawn from inside when you are in it;
+    - a ring races out across the ground, earth is thrown outward and the ground cracks;
+    - sparks fly, and those inside get a flash and a jolt;
+    - sound `ki_wave`, then debris.
+  - **Paralysis Wave:** a fan of forked lightning thrown forward, re-struck every tick, thick and in its colour (with a
+    tinted underlay so it stays yellow against the sky), with sparks crackling along it. Sound `ki_crackle`.
+  - **Solar Flare:** a burst of white light with rays at the face. Anyone within 24 blocks facing it is whited out by
+    how squarely they face it. Sound `ki_flash`.
+- **Sounds** (SfxGen, added at the end so the others don't change): `ki_zap` (3), `ki_wave` (2), `ki_crackle` (2),
+  `ki_flash`, and the `disc_whine` loop. `docs/KI_ASSETS.md` lists them.
+- **Flight sound start:** a blast's flight sound now starts on its first client tick, once its kind is known (a disc
+  whines), instead of when it is added.
+- **Tests:** `KiAttackKindTests`:
+  - a barrage streams out (one at once, more after 5 ticks, all six by 14);
+  - a homing technique's target is synced, and a lock-on curve's is not.
+  229 GameTests.
+- **Checked in the dev client:**
+  - a test volley streaming across to a husk;
+  - the disc spinning;
+  - the homing orb and its marker on the husk;
+  - the Explosive Wave's ring, dome wall, earth and cracks;
+  - the Paralysis Wave's yellow lightning;
+  - the Solar Flare's burst.
+- **Dev datapack:** `test_volley`, `test_disk` and `test_homing` (slow versions).

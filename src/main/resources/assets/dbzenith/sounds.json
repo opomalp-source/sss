@@ -174,5 +174,25 @@
   "ki_charge": {
     "subtitle": "subtitles.dbzenith.ki_charge",
     "sounds": ["dbzenith:ki_charge"]
+  },
+  "ki_zap": {
+    "subtitle": "subtitles.dbzenith.ki_zap",
+    "sounds": ["dbzenith:ki_zap_1", "dbzenith:ki_zap_2", "dbzenith:ki_zap_3"]
+  },
+  "ki_wave": {
+    "subtitle": "subtitles.dbzenith.ki_wave",
+    "sounds": ["dbzenith:ki_wave_1", "dbzenith:ki_wave_2"]
+  },
+  "ki_crackle": {
+    "subtitle": "subtitles.dbzenith.ki_crackle",
+    "sounds": ["dbzenith:ki_crackle_1", "dbzenith:ki_crackle_2"]
+  },
+  "ki_flash": {
+    "subtitle": "subtitles.dbzenith.ki_flash",
+    "sounds": ["dbzenith:ki_flash"]
+  },
+  "disc_whine": {
+    "subtitle": "subtitles.dbzenith.disc_whine",
+    "sounds": ["dbzenith:disc_whine"]
   }
 }

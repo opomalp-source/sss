@@ -71,7 +71,7 @@ coloured against a bright sky. With an Oculus or Iris shader pack on, the shader
 look is drawn instead. The client setting `kiQuality` (Settings → Effects) trades mesh detail and particle counts for
 speed.
 
-## Trying them in game (phases 1 to 4)
+## Trying them in game (phases 1 to 5)
 
 The commands below need cheats. `/dbz charge <player> <id>` starts a charge as if the key were held, skipping the deck
 and the meter; `/dbz charge <player> release` lets it go. `/dbz cast <entity> <id> <damage>` makes any entity fire an
@@ -100,6 +100,17 @@ attack.
   - Both rumble low, light the ground below, and lift dust and stones near the ground.
   - The Spirit Bomb has a 60-second cooldown. For repeated tries, copy its file into a datapack under a new id with
     `"cooldown": 0`.
+- **Barrages, discs, homing, waves (phase 5):**
+  - **Rapid Volley** (`/dbz charge @s rapid_volley`): the shots stream out one every 2 ticks, two from each palm, each with a
+    flash and a zap. Sweep your aim while it fires.
+  - **Cutter Disk:** a flat spinning blade with a bright rim, teeth racing round the edge and arms swirling inside. It
+    sheds sparks and whines as it passes.
+  - **Homing Orb:** fire it at a mob. A ring spins round the orb, a dashed ring and brackets turn round its target, and
+    it warbles as it seeks.
+  - **Explosive Wave:** a dome of energy swells round you, a ring races out across the ground, earth is thrown out and
+    the ground cracks.
+  - **Paralysis Wave:** a fan of yellow lightning thrown forward.
+  - **Solar Flare:** a burst of light with rays; anyone facing it is whited out.
 - **Your own attack:** make a datapack with `data/<ns>/ki_attacks/<id>.json` (start from `/dbz kiattacks export`), then
   `/reload`.
   - A slow test ball: `{"style":"ball","speed":0.012,"size":3.0,"life":400,"color":"#FF7A30","look":{"sphere":"nova"}}`.

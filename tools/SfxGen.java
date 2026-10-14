@@ -68,6 +68,12 @@ public final class SfxGen {
         for (int v = 0; v < 2; v++) save("impact_echo", v, impactEcho(v));
         // phase 2: the charge
         save("ki_charge", 0, loop(kiCharge(), 0.35));
+        // phase 5: barrages, discs, bursts and waves
+        for (int v = 0; v < 3; v++) save("ki_zap", v, kiZap(v));
+        for (int v = 0; v < 2; v++) save("ki_wave", v, kiWave(v));
+        for (int v = 0; v < 2; v++) save("ki_crackle", v, kiCrackle(v));
+        save("ki_flash", 0, kiFlash());
+        save("disc_whine", 0, loop(discWhine(), 0.25));
         writeSoundsJson();
         System.out.println("SfxGen done: " + EVENTS.size() + " events");
     }
@@ -943,11 +949,100 @@ public final class SfxGen {
         return out;
     }
 
+    // ================================================================== ki attack rework, phase 5
+
+    /** One shot of a barrage: a quick bright pew dropping in pitch, a click, a puff of air. */
+    static double[] kiZap(int v) {
+        double[] out = buf(0.32);
+        double f0 = 1500 + v * 220;
+        double[] tone = sine(out.length, t -> f0 * Math.exp(-t * 9) + 260);
+        mul(tone, env(out.length, 0.002, 0.09));
+        double[] click = highpass(noise(out.length), 2500);
+        mul(click, env(out.length, 0.001, 0.012));
+        double[] air = bandpass(noise(out.length), t -> 1800 - 2400 * t, 0.8);
+        mul(air, env(out.length, 0.004, 0.12));
+        double[] thump = sine(out.length, t -> 120 - 120 * t);
+        mul(thump, env(out.length, 0.002, 0.05));
+        mix(out, tone, 0.6);
+        mix(out, click, 0.5);
+        mix(out, air, 0.45);
+        mix(out, thump, 0.5);
+        saturate(out, 1.3);
+        return room(out, 0.12, 0.2);
+    }
+
+    /** A burst of ki thrown out all round: a deep whump, a roaring rush of air sweeping down, grit, a long tail. */
+    static double[] kiWave(int v) {
+        double[] out = buf(1.9);
+        double[] whump = add(sine(out.length, t -> 70 - 30 * t), scale(lowpass(brown(out.length), t -> 260), 1.4));
+        mul(whump, env(out.length, 0.01, 0.45 + 0.1 * v));
+        double[] rush = bandpass(noise(out.length), t -> 3200 * Math.exp(-t * 2.2) + 250, 0.7);
+        mul(rush, env(out.length, 0.03, 0.8));
+        double[] crack = highpass(noise(out.length), 3000);
+        mul(crack, env(out.length, 0.001, 0.03));
+        double[] grit = bandpass(noise(out.length), t -> 2200, 0.6);
+        mul(grit, crackle(out.length, 0.5, 91 + v));
+        mul(grit, env(out.length, 0.1, 1.0));
+        mix(out, whump, 1.0);
+        mix(out, rush, 0.8);
+        mix(out, crack, 0.6);
+        mix(out, grit, 0.25);
+        saturate(out, 1.5);
+        return room(out, 0.35, 0.6);
+    }
+
+    /** Ki crackling out as a paralysing discharge: snapping arcs over a buzzing hum. */
+    static double[] kiCrackle(int v) {
+        double[] out = buf(1.1);
+        double[] snaps = highpass(noise(out.length), 1800);
+        mul(snaps, crackle(out.length, 1.4, 57 + v * 13));
+        mul(snaps, env(out.length, 0.005, 0.6));
+        double[] buzz = saw(out.length, t -> 118 + 6 * Math.sin(2 * Math.PI * 23 * t), 0.7);
+        buzz = lowpass(buzz, t -> 1800);
+        mul(buzz, env(out.length, 0.01, 0.5));
+        double[] zing = sine(out.length, t -> 2400 - 1200 * t);
+        mul(zing, env(out.length, 0.002, 0.15));
+        mix(out, snaps, 0.9);
+        mix(out, buzz, 0.35);
+        mix(out, zing, 0.2);
+        saturate(out, 1.6);
+        return room(out, 0.2, 0.3);
+    }
+
+    /** A blinding flash: a bright shimmering chord swelling in at once and ringing away, over a hiss of light. */
+    static double[] kiFlash() {
+        double[] out = buf(1.6);
+        double[] chord = add(add(sine(out.length, t -> 1320), scale(sine(out.length, t -> 1980), 0.7)), scale(sine(out.length, t -> 2640 + 40 * Math.sin(2 * Math.PI * 9 * t)), 0.5));
+        mul(chord, env(out.length, 0.004, 0.9));
+        double[] hiss = highpass(noise(out.length), 5000);
+        mul(hiss, env(out.length, 0.002, 0.5));
+        double[] pop = sine(out.length, t -> 400 * Math.exp(-t * 20) + 80);
+        mul(pop, env(out.length, 0.001, 0.06));
+        mix(out, chord, 0.45);
+        mix(out, hiss, 0.3);
+        mix(out, pop, 0.6);
+        return room(out, 0.5, 0.7);
+    }
+
+    /** A spinning disc (looped): a thin keen whine with a fast flutter, and the air it cuts. */
+    static double[] discWhine() {
+        double[] out = buf(1.4);
+        double[] whine = add(sine(out.length, t -> 1420 + 25 * Math.sin(2 * Math.PI * 4 * t)), scale(sine(out.length, t -> 2850), 0.35));
+        mul(whine, shape(out.length, t -> 0.75 + 0.25 * Math.sin(2 * Math.PI * 40 * t)));
+        double[] saw = lowpass(saw(out.length, t -> 355, 0.8), t -> 2500);
+        mul(saw, shape(out.length, t -> 0.6 + 0.4 * Math.sin(2 * Math.PI * 20 * t)));
+        double[] air = bandpass(noise(out.length), t -> 3000, 0.9);
+        mix(out, whine, 0.45);
+        mix(out, saw, 0.2);
+        mix(out, air, 0.3);
+        return out;
+    }
+
     // ================================================================== output
 
     static void save(String event, int variant, double[] samples) throws Exception {
         normalizeTo(samples, 0.89);
-        String name = event + (variant > 0 || event.matches("punch_light|punch_heavy|whoosh|ki_fire|ki_hit|explosion|explosion_big|beam_fire|guard_block|parry|guard_break|deflect|dash|vanish|powerup|transform|flight|skill|ui_click|stun|land|hit_crit|counter_hit|impact_boom|hit_guarded|ki_release|impact_debris|impact_echo") ? "_" + (variant + 1) : "");
+        String name = event + (variant > 0 || event.matches("punch_light|punch_heavy|whoosh|ki_fire|ki_hit|explosion|explosion_big|beam_fire|guard_block|parry|guard_break|deflect|dash|vanish|powerup|transform|flight|skill|ui_click|stun|land|hit_crit|counter_hit|impact_boom|hit_guarded|ki_release|impact_debris|impact_echo|ki_zap|ki_wave|ki_crackle") ? "_" + (variant + 1) : "");
         File wav = new File("build/sfx/" + name + ".wav");
         writeWav(wav, samples);
         File ogg = new File(OUT + "sounds/" + name + ".ogg");

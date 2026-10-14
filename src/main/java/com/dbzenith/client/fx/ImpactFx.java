@@ -159,6 +159,7 @@ public final class ImpactFx {
                     CameraFx.flash(tint, 0.35f);
                 }
             }
+            case ImpactPacket.WAVE, ImpactPacket.STUN_WAVE, ImpactPacket.FLARE -> KiWaveFx.start(m);   // the ki attack rework, phase 5
             default -> { }
         }
         feel(m, level, pos, dir, s, mine);

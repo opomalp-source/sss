@@ -47,6 +47,11 @@ OGG Vorbis, mono, 44.1 kHz, under `assets/dbzenith/sounds/`. Events are in `soun
 | `impact_debris` | `impact_debris_1..2` | about 2.5 s | Stones pattering down after an explosion |
 | `impact_echo` | `impact_echo_1..2` | about 4.7 s | A dull boom in a long tail, delayed by distance, for big explosions |
 | `ki_charge` | `ki_charge` (**loops**) | 2.25 s, seamless | The charge-up: a deep hum, crackling electricity and a faint whine. It is pitched 0.6 to 1.55 with the charge. |
+| `ki_zap` | `ki_zap_1..3` | about 0.8 s | One shot of a barrage: a quick bright pew dropping in pitch, a click, a puff of air |
+| `ki_wave` | `ki_wave_1..2` | about 3.4 s with its tail | A burst of ki all round (Explosive Wave, Perfect Barrier): a deep whump, a roaring rush of air, grit |
+| `ki_crackle` | `ki_crackle_1..2` | about 1.9 s | A paralysing discharge: snapping arcs over a buzzing hum |
+| `ki_flash` | `ki_flash` | about 3.4 s with its tail | Solar Flare: a bright shimmering chord over a hiss of light |
+| `disc_whine` | `disc_whine` (**loops**) | 1.15 s, seamless | A spinning disc in flight: a thin keen whine with a fast flutter. It replaces `ki_travel` for discs and follows them with doppler. |
 
 Each attack's data file can name its own sound events in `look.sounds` (see [KI_ATTACKS.md](KI_ATTACKS.md)), so a
 resource pack can give one attack a sound of its own without replacing the shared ones.
@@ -57,8 +62,6 @@ None of these exist yet. Each would get a placeholder when its phase lands.
 
 | Phase | Asset | Spec |
 |---|---|---|
-| 5 | `disc_whine` loop | A thin rising whine for spinning discs (Destructo Disc), 1 to 2 s, seamless |
-| 5 | `barrage_rattle` | A rapid rattle for volleys, 0.5 s, several variants |
 | 6 | `crater_scorch.png` | 128x128, a dark scorched ring fading out, for crater floors |
 | 6 | `impact_plume.png` | 64x256 strip of 4 frames: a rising dust and smoke plume, alpha |
 | 6 | `impact_big` | A huge layered explosion (crack, boom, roar), 3 to 5 s, 2 variants |

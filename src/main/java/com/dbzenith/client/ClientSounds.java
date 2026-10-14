@@ -74,6 +74,12 @@ public final class ClientSounds {
             }
             case ImpactPacket.DEFLECT -> at(level, pos, ModSounds.DEFLECT.get(), 0.9f, 1f);
             case ImpactPacket.KI_HIT -> at(level, pos, ModSounds.KI_HIT.get(), 0.5f + 0.25f * big, 1.15f - 0.1f * big);
+            case ImpactPacket.WAVE -> {                                       // phase 5: a burst all round, a discharge, a flash
+                at(level, pos, ModSounds.KI_WAVE.get(), 1f, 1.05f - 0.03f * Math.min(8, scale));
+                later(level, pos, 5, ModSounds.IMPACT_DEBRIS.get(), 0.5f, 1f);
+            }
+            case ImpactPacket.STUN_WAVE -> at(level, pos, ModSounds.KI_CRACKLE.get(), 0.9f, 1f);
+            case ImpactPacket.FLARE -> at(level, pos, ModSounds.KI_FLASH.get(), 1f, 1f);
             case ImpactPacket.EXPLOSION -> {                                  // in layers (the ki attack rework): the boom, then debris, then far off an echo
                 at(level, pos, big > 1.6f ? ModSounds.EXPLOSION_BIG.get() : ModSounds.EXPLOSION.get(), 0.7f + 0.3f * big, 1.1f - 0.1f * big);
                 later(level, pos, 6, ModSounds.IMPACT_DEBRIS.get(), 0.35f + 0.25f * big, 1f);
@@ -124,7 +130,8 @@ public final class ClientSounds {
         float doppler = 1;
 
         Travel(com.dbzenith.skill.KiBlastEntity blast) {
-            super(ModSounds.KI_TRAVEL.get(), SoundSource.PLAYERS, SoundInstance.createUnseededRandom());
+            super(blast.getStyle() == com.dbzenith.skill.Technique.Style.DISK ? ModSounds.DISC_WHINE.get() : ModSounds.KI_TRAVEL.get(),   // a disc whines (phase 5)
+                    SoundSource.PLAYERS, SoundInstance.createUnseededRandom());
             this.blast = blast;
             this.looping = true;
             this.delay = 0;
@@ -147,6 +154,8 @@ public final class ClientSounds {
             double moving = Math.max(Math.min(1, speed * 1.2), big ? 0.5 : 0);
             volume = (float) Math.max(0.01, moving * (0.35 + 0.45 * size) * (big ? 1.6 : 1));   // a bigger ball carries further
             pitch = (big ? 0.62f - 0.04f * Math.min(3, blast.getSize() - 2) : 1.25f - 0.2f * size) * doppler;
+            if (blast.getStyle() == com.dbzenith.skill.Technique.Style.DISK) pitch = doppler;
+            if (blast.seeking() >= 0) pitch *= 1 + 0.08f * Mth.sin(blast.tickCount * 0.9f);   // a homing orb warbles as it seeks
         }
 
         @Override
