@@ -102,7 +102,7 @@ public final class TechniqueHandler {
         }
 
         if (!player.getAbilities().instabuild) data.setKi(data.getKi() - cost);
-        data.setCooldown(technique.id(), now + TechniqueMastery.cooldownTicks(data, technique));
+        data.setCooldown(technique.id(), now + (long) (TechniqueMastery.cooldownTicks(data, technique) * com.dbzenith.combat.Wounds.cooldown(player)));   // slower when badly hurt (CX-52)
         TechniqueMastery.gain(data, technique);
         com.dbzenith.combat.engine.SpecialMeter.spend(player, data, meter);
         if (tier.cinematic()) {
@@ -162,7 +162,7 @@ public final class TechniqueHandler {
             KiBlastEntity blast = KiBlastEntity.create(level, caster, technique, damage, scale);
             Vec3 start = caster.getEyePosition().add(look.scale(0.6)).subtract(0, technique.size() * scale / 2.0, 0);
             blast.moveTo(start.x, start.y, start.z, caster.getYRot(), caster.getXRot());
-            blast.setDeltaMovement(dir.normalize().scale(technique.speed()));
+            blast.setDeltaMovement(dir.normalize().scale(technique.speed() * com.dbzenith.combat.Wounds.kiSpeed(caster)));   // weaker when badly hurt (CX-52)
             blast.setHomingTarget(homingTarget);
             level.addFreshEntity(blast);
         }

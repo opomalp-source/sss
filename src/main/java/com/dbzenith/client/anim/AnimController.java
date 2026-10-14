@@ -127,6 +127,8 @@ public final class AnimController {
             if (knocked.crawl() && moved > 0.005) return Anims.custom("crawl", Anims.CRAWL);
             return Anims.custom("downed", Anims.DOWNED);
         }
+        if (com.dbzenith.combat.Wounds.wounded(player) > 0.25f && player.onGround() && !state.has(PublicStatePacket.FLYING)
+                && !state.powering() && !state.has(PublicStatePacket.GUARDING)) return Anims.custom("wounded", Anims.WOUNDED);   // hunched, a hand on the wound (CX-52)
         if (state == null || player.isPassenger() || player.isSleeping() || player.isFallFlying() || player.isSwimming()
                 || player.getPose() == Pose.SWIMMING || isApe(state.form())) return null;
         if (state.has(PublicStatePacket.DOWNED)) return Anims.custom("downed", Anims.DOWNED);
@@ -227,6 +229,10 @@ public final class AnimController {
         if (mc.level == null) return;
         if (com.dbzenith.client.Prediction.swallow(msg)) return;            // already shown (phase 7)
         Entity e = mc.level.getEntity(msg.entityId());
+        if (msg.kind() == AnimEventPacket.STUMBLE && e instanceof net.minecraft.world.entity.LivingEntity l && !(e instanceof AbstractClientPlayer)) {
+            NpcActions.play(l, Anims.STUMBLE);                                  // an NPC fighter stumbling (CX-52)
+            return;
+        }
         if (!(e instanceof AbstractClientPlayer player)) return;
         Track t = TRACKS.computeIfAbsent(player, p -> new Track());
         long now = mc.level.getGameTime();
@@ -257,7 +263,8 @@ public final class AnimController {
             case AnimEventPacket.RECOVER -> msg.data() == 1 ? Anims.ROLL_UP : Anims.AIR_RECOVER;
             case AnimEventPacket.ZHIT -> Anims.ZHIT;
             case AnimEventPacket.VICTORY -> Anims.VICTORY;
-            default -> Anims.KI_BLAST;
+            case AnimEventPacket.STUMBLE -> Anims.STUMBLE;
+            default -> com.dbzenith.combat.Wounds.wounded(player) > 0.3f ? Anims.KI_BLAST_WOUNDED : Anims.KI_BLAST;   // one-handed, badly hurt (CX-52)
         };
         play(player, t, anim, now, 0);
         t.suppressSwingUntil = now + 3;

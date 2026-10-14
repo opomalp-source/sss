@@ -225,7 +225,7 @@ public class KiFighter extends Monster {
             if (t == null) return;
             mob.getLookControl().setLookAt(t, 30f, 30f);
             mob.fireAt(t);
-            mob.kiCooldown = mob.profile.kiInterval() + mob.random.nextInt(20);
+            mob.kiCooldown = (int) ((mob.profile.kiInterval() + mob.random.nextInt(20)) * com.dbzenith.combat.Wounds.cooldown(mob));   // slower badly hurt (CX-52)
         }
 
         @Override

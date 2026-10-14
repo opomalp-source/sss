@@ -66,7 +66,7 @@ public final class FlightHandler {
             a.mayfly = true;
             changed = true;
         }
-        float speed = com.dbzenith.registry.ModEffects.isStunned(player) ? 0f : speed(data);
+        float speed = com.dbzenith.registry.ModEffects.isStunned(player) ? 0f : speed(data) * com.dbzenith.combat.Wounds.flight(player);   // slower badly hurt (CX-52)
         if (Math.abs(a.getFlyingSpeed() - speed) > 1e-4f) {
             a.setFlyingSpeed(speed);
             changed = true;

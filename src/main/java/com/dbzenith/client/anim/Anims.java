@@ -742,6 +742,42 @@ public final class Anims {
         a.rot("head", 0, 30, 10, 0, Ease.INOUTSINE).rot("head", 20, 36, 6, 0, Ease.INOUTSINE).rot("head", 40, 30, 10, 0, Ease.INOUTSINE);
     });
 
+
+    // ------------------------------------------------------------------ badly hurt (CX-52)
+
+    /** Badly hurt: hunched over, the left hand pressed to the wound, head low, breathing hard. Legs and right arm stay free. */
+    public static final KeyframeAnimation WOUNDED = loop(28, a -> {
+        Pose p = new Pose().r("torso", 16, -6, 0).r("head", 10, 0, 0).limb("leftArm", -38, 34, -6, 104).freeing("rightLeg", "leftLeg", "rightArm");
+        a.pose(0, p, Ease.INOUTSINE)
+                .pose(14, p.copy().r("torso", 21, -6, 1).r("head", 14, 0, 0).limb("leftArm", -34, 34, -6, 108).move(0, 0.4f, 0), Ease.INOUTSINE)
+                .pose(28, p, Ease.INOUTSINE);
+    });
+
+    /** A stumble: the knee gives, a lurch forward with the arms thrown out, caught just in time. */
+    public static final KeyframeAnimation STUMBLE = once(16, a -> {
+        Pose lurch = new Pose().at(0, 2.4f, -1.2f).r("torso", 34, 8, -6).r("head", 18, 0, 0)
+                .limb("rightArm", -64, -20, 30, 20).limb("leftArm", -50, 24, -34, 30)
+                .limb("rightLeg", -34, 0, 6, 70).limb("leftLeg", 20, 0, -4, 18);
+        Pose catchIt = new Pose().at(0, 1.6f, -0.4f).r("torso", 22, 4, -2).r("head", 6, 0, 0)
+                .limb("rightArm", -30, -10, 16, 30).limb("leftArm", -36, 30, -10, 90)
+                .limb("rightLeg", -16, 0, 6, 34).limb("leftLeg", 8, 0, -4, 12);
+        a.pose(0, new Pose().r("torso", 16, -6, 0), Ease.LINEAR).pose(4, lurch, Ease.OUTQUAD).pose(9, catchIt, Ease.INOUTSINE)
+                .pose(16, new Pose().r("torso", 16, -6, 0).limb("leftArm", -38, 34, -6, 104), Ease.INOUTSINE);
+    });
+
+    /** A ki blast fired badly hurt: one hand still clutching the wound, a slow, shaking push, a weak kick. */
+    public static final KeyframeAnimation KI_BLAST_WOUNDED = once(20, a -> {
+        Pose hunch = new Pose().r("torso", 16, 4, 0).r("head", 6, 0, 0).limb("leftArm", -38, 34, -6, 104).limb("rightArm", -20, 0, 10, 60);
+        Pose shot = new Pose().r("torso", 12, 12, 0).limb("leftArm", -38, 34, -6, 104).limb("rightArm", -84, -4, 0, 8).move(0, 0.3f, -0.5f);
+        a.pose(0, hunch, Ease.LINEAR)
+                .pose(5, hunch.copy().limb("rightArm", -60, 0, 6, 30), Ease.INOUTSINE)
+                .pose(8, shot.copy().limb("rightArm", -80, -4, 2, 12), Ease.INOUTSINE)
+                .pose(9, shot.copy().limb("rightArm", -86, -4, -1, 6), Ease.LINEAR)                   // shaking as it gathers
+                .pose(10, shot, Ease.OUTQUAD)
+                .pose(12, shot.copy().limb("rightArm", -66, -4, 4, 22).r("torso", 18, 8, 0).move(0, 0.2f, 0.6f), Ease.OUTQUAD)   // the kick staggers you
+                .pose(20, hunch, Ease.INOUTSINE);
+    });
+
     /** Namekian idle: arms folded across the chest, weight on one leg, a slow breath. The head stays free. */
     public static final KeyframeAnimation IDLE_CROSSED = loop(60, a -> {
         Pose p = new Pose().freeing("head").r("torso", -2, 0, 0)

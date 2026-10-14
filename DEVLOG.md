@@ -2943,3 +2943,22 @@ and Majins regrow, prosthetics for the rest; NPCs and bosses too. Plan in TODO.m
 - **Checked in the dev client:** knocked down in survival: the overlay (KNOCKED OUT, 52 s, can still crawl, a Senzu
   Bean or healing can save you, hold Sneak to give up), the low camera behind the fighter lying on their back, and an
   NPC fighter down beside them. Crawling and being carried couldn't be driven from the harness.
+
+## 2026-10-14 — CX-52: badly hurt (v0.113.0)
+- **`combat.Wounds`:** below 35% health a fighter is wounded, the more so the lower it gets (`wounded`, 0..1, worked
+  out the same on both sides from the synced health). Players and NPC fighters alike:
+  - they move up to 45% slower on foot, and fly up to 40% slower (`FlightHandler`);
+  - their blasts fly up to 35% slower, and every technique takes up to 80% longer to come round
+    (`TechniqueHandler`; NPC fighters' firing interval too);
+  - moving, they stumble now and then (0.4% a tick, up to 2.6% badly hurt): a lurch forward, a moment's stall
+    (slowness) and a stumbling animation for everyone watching (`AnimEventPacket.STUMBLE`).
+- **Animations:**
+  - `WOUNDED`: hunched over, the left hand pressed to the wound, head low, breathing hard; legs and the right arm
+    stay free for walking.
+  - `STUMBLE`: the knee gives, a lurch with the arms thrown out, caught.
+  - `KI_BLAST_WOUNDED`: one hand still on the wound, a slow shaking push, a weak kick that staggers. It replaces the
+    usual blast when badly hurt, the local player's predicted shot included.
+- **Tests:** `WoundsTests` (unhurt no effect; at a tenth of health slower ki, longer cooldowns, slower flight, and
+  slower on foot). 222 GameTests.
+- **Checked in the dev client:** at 12% health, the hunched stance with a hand at the wound and the battle damage,
+  firing, and walking.
