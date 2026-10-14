@@ -722,7 +722,7 @@ public final class DBZCommand {
                                         .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.stream.Stream.concat(java.util.stream.Stream.of("all"),
                                                 Arrays.stream(com.dbzenith.combat.Limbs.Limb.values()).map(com.dbzenith.combat.Limbs.Limb::key)), b))
                                         .then(Commands.argument("action", StringArgumentType.word())
-                                                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.List.of("break", "sever", "heal"), b))
+                                                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.List.of("break", "sever", "prosthetic", "heal"), b))
                                                 .executes(ctx -> {
                                                     String limb = StringArgumentType.getString(ctx, "limb"), action = StringArgumentType.getString(ctx, "action");
                                                     int n = 0;
@@ -734,6 +734,10 @@ public final class DBZCommand {
                                                             switch (action) {
                                                                 case "break" -> com.dbzenith.combat.Limbs.hit(l, which, 1000, false, false);
                                                                 case "sever" -> com.dbzenith.combat.Limbs.sever(l, which);
+                                                                case "prosthetic" -> {
+                                                                    if (!s.severed(which)) com.dbzenith.combat.Limbs.sever(l, which);
+                                                                    com.dbzenith.combat.Limbs.fit(l, which.arm());
+                                                                }
                                                                 default -> {
                                                                     s.health[which.ordinal()] = 100;
                                                                     s.severed &= ~(1 << which.ordinal());

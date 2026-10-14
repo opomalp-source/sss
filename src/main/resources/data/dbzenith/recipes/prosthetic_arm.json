@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [" II", "IRI", "II "],
+  "key": {"I": {"item": "minecraft:iron_ingot"}, "R": {"item": "minecraft:redstone_block"}},
+  "result": {"item": "dbzenith:prosthetic_arm"}
+}

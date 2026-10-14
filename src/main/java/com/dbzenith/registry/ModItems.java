@@ -63,6 +63,10 @@ public final class ModItems {
             () -> new CapsuleItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> CAPSULE_HOUSE = ITEMS.register("capsule_house",
             () -> new com.dbzenith.item.HouseCapsuleItem(new Item.Properties().stacksTo(1)));   // CX-50
+    public static final RegistryObject<Item> PROSTHETIC_ARM = ITEMS.register("prosthetic_arm",
+            () -> new com.dbzenith.item.ProstheticItem(new Item.Properties().stacksTo(4), true));   // CX-54
+    public static final RegistryObject<Item> PROSTHETIC_LEG = ITEMS.register("prosthetic_leg",
+            () -> new com.dbzenith.item.ProstheticItem(new Item.Properties().stacksTo(4), false));
     public static final java.util.List<RegistryObject<Item>> GI = gi();
 
     private static java.util.List<RegistryObject<Item>> gi() {

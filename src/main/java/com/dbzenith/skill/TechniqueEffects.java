@@ -42,6 +42,7 @@ public final class TechniqueEffects {
         switch (t.effect()) {
             case HEAL_SELF -> {
                 data.setBody(data.getBody() + data.getDerived().maxBody() * power);
+                if (t.id().equals("regenerate")) com.dbzenith.combat.Limbs.restore(player);   // a Namekian grows back what was lost (CX-54)
                 level.sendParticles(ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 1, player.getZ(), 20, 0.4, 0.8, 0.4, 0.1);
                 return true;
             }

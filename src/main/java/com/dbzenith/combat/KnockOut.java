@@ -298,6 +298,7 @@ public final class KnockOut {
         if (!isDown(v) || !held.is(ModItems.SENZU_BEAN.get())) return false;
         v.setHealth(v.getMaxHealth());
         if (v instanceof Player p) ModCapabilities.get(p).ifPresent(PlayerData::refill);
+        Limbs.mend(v);
         if (!helper.getAbilities().instabuild) held.shrink(1);
         v.level().playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.GENERIC_EAT, SoundSource.PLAYERS, 1f, 1.1f);
         standUp(v);

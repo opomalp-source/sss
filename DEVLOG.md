@@ -3002,3 +3002,30 @@ and Majins regrow, prosthetics for the rest; NPCs and bosses too. Plan in TODO.m
   - 224 GameTests.
 - **Checked in the dev client:** the right arm cut off with its stump (the gi sleeve gone with it), the left arm
   hanging limp, and the HUD figure showing it.
+
+## 2026-10-14 — CX-54: getting better: Senzu Beans, regrowing, prosthetics, wishes (v0.115.0)
+- **A Senzu Bean** sets broken limbs at once (`Limbs.mend`), eaten or fed to someone who is down. Lost limbs stay
+  lost.
+- **Regrowing** (`Limbs.regrowTicks`):
+  - Namekians grow a lost limb back after 40 seconds, Majins after 10 (players by race; the Namekian warriors too).
+  - It comes back weak (40) and mends from there, with green sparkles and a fanfare, or pink goo and a squelch for a
+    Majin.
+  - The Namekian Regenerate technique grows everything back at once.
+- **Prosthetics:** the new items Prosthetic Arm and Prosthetic Leg (iron and a redstone block).
+  - Use one to fit it where you lost that limb, the right side first (with a clank).
+  - It works like the limb did: it can be hurt and broken (and then stops working), and a cutting blow can take it
+    off again.
+  - **The look:** the limb drawn in brushed steel (plates, seams, rivets, a dark joint band at the elbow or knee, a
+    blue stripe) from `textures/entity/prosthetic.png`, also in first person; item icons. All from
+    `tools/ProstheticGen.java`.
+- **The Restoration wish** (and Universal Restoration) makes the body whole: lost limbs back, prosthetics handed back
+  as items.
+- **Fix:** hits now reach a prosthetic (they had been ignored as "lost").
+- **Dev:** `/dbz limb … prosthetic`.
+- **Tests:** `LimbsTests.limbsMendRegrowAndAreReplaced`:
+  - mended by a Senzu Bean, a lost leg staying lost;
+  - an arm prosthetic not fitting without a lost arm; a leg prosthetic fitted and working, smashed and then cut off;
+  - a human doesn't regrow, a Namekian warrior does; grown back weak;
+  - a wish makes the body whole.
+  - 225 GameTests.
+- **Checked in the dev client:** a steel prosthetic right arm and leg with the Turtle gi.

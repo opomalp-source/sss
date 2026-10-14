@@ -150,6 +150,7 @@ public enum Wish {
         player.setHealth(player.getMaxHealth());
         if (Races.of(d.getRace()).tail()) d.setTail(true);
         player.removeAllEffects();
+        com.dbzenith.combat.Limbs.restore(player);                        // lost limbs back too (CX-54)
     }
 
     /** A new variant of the same race, never the one you have: creation choices, rare destinies, and paths once on one. */

@@ -21,6 +21,7 @@ public class SenzuBeanItem extends Item {
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
         if (!level.isClientSide) {
             entity.setHealth(entity.getMaxHealth());
+            com.dbzenith.combat.Limbs.mend(entity);                           // broken bones set at once (CX-54)
             if (entity instanceof Player player) {
                 ModCapabilities.get(player).ifPresent(data -> data.refill());
             }

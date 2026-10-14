@@ -47,6 +47,34 @@ public class LimbsTests {
     }
 
     @GameTest(template = "empty", batch = "knockout", timeoutTicks = 60)
+    public static void limbsMendRegrowAndAreReplaced(GameTestHelper h) {
+        ServerPlayer p = TestPlayers.create(h);
+        p.setGameMode(GameType.SURVIVAL);
+        Limbs.State s = Limbs.of(p);
+        Limbs.hit(p, Limb.LEFT_ARM, 1000, false, false);
+        Limbs.sever(p, Limb.RIGHT_LEG);
+        Limbs.mend(p);
+        h.assertTrue(s.health(Limb.LEFT_ARM) == 100, "a Senzu Bean sets the broken arm");
+        h.assertTrue(s.severed(Limb.RIGHT_LEG) && !s.works(Limb.RIGHT_LEG), "but a lost leg stays lost");
+        h.assertTrue(!Limbs.fit(p, true), "no lost arm: an arm prosthetic doesn't fit");
+        h.assertTrue(Limbs.fit(p, false) && s.prosthetic(Limb.RIGHT_LEG) && s.works(Limb.RIGHT_LEG) && s.legsOut() == 0, "a prosthetic leg fitted works");
+        Limbs.hit(p, Limb.RIGHT_LEG, 1000, false, false);
+        h.assertTrue(s.prosthetic(Limb.RIGHT_LEG) && !s.works(Limb.RIGHT_LEG), "a smashed prosthetic stops working");
+        Limbs.hit(p, Limb.RIGHT_LEG, 10, true, false);
+        h.assertTrue(!s.prosthetic(Limb.RIGHT_LEG) && s.severed(Limb.RIGHT_LEG), "a cutting blow takes the prosthetic off again");
+        h.assertTrue(Limbs.regrowTicks(p) < 0, "a human doesn't regrow");
+        Limbs.regrow(p, Limb.RIGHT_LEG, false);
+        h.assertTrue(!s.severed(Limb.RIGHT_LEG) && s.health(Limb.RIGHT_LEG) == 40, "grown back weak");
+        Limbs.sever(p, Limb.LEFT_ARM);
+        Limbs.restore(p);
+        h.assertTrue(s.whole(), "a wish makes the body whole");
+        KiFighter namek = h.spawnWithNoFreeWill(ModNpcs.NAMEKIAN_WARRIOR.get(), new BlockPos(2, 1, 2));
+        h.assertTrue(Limbs.regrowTicks(namek) > 0, "Namekians regrow");
+        TestPlayers.remove(h, p);
+        h.succeed();
+    }
+
+    @GameTest(template = "empty", batch = "knockout", timeoutTicks = 60)
     public static void legsOutSlowAFighter(GameTestHelper h) {
         KiFighter foe = h.spawnWithNoFreeWill(ModNpcs.KI_SOLDIER.get(), new BlockPos(1, 1, 1));
         double before = foe.getAttributeValue(Attributes.MOVEMENT_SPEED);

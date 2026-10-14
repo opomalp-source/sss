@@ -33,6 +33,7 @@ import org.joml.Matrix4f;
 @Mod.EventBusSubscriber(modid = DBZenith.MOD_ID, value = Dist.CLIENT)
 public final class LimbRender {
     private static final ResourceLocation WHITE = new ResourceLocation("minecraft", "textures/misc/white.png");
+    private static final ResourceLocation PROSTHETIC = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/prosthetic.png");
     private static final int SEARED = 0x6A1410, DEFAULT_SKIN = 0xD9A87A;
 
     private LimbRender() {}
@@ -43,7 +44,7 @@ public final class LimbRender {
         if (s.severed == 0) return 0;
         int hidden = 0;
         for (Limbs.Limb l : Limbs.Limb.values()) {
-            if (!s.severed(l) || s.prosthetic(l)) continue;
+            if (!s.severed(l)) continue;                                      // lost: a stump, or a prosthetic drawn in its place (StumpLayer)
             for (ModelPart p : parts(m, l)) {
                 if (p.visible) {
                     p.visible = false;
@@ -99,7 +100,22 @@ public final class LimbRender {
     public static void onRenderArm(RenderArmEvent event) {
         Limbs.Limb l = event.getArm() == net.minecraft.world.entity.HumanoidArm.RIGHT ? Limbs.Limb.RIGHT_ARM : Limbs.Limb.LEFT_ARM;
         Limbs.State s = Limbs.of(event.getPlayer());
-        if (s.severed(l) && !s.prosthetic(l)) event.setCanceled(true);
+        if (!s.severed(l)) return;
+        event.setCanceled(true);
+        if (!s.prosthetic(l)) return;                                           // a prosthetic hand, in steel (CX-54)
+        if (!(net.minecraft.client.Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(event.getPlayer())
+                instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer r)) return;
+        PlayerModel<net.minecraft.client.player.AbstractClientPlayer> m = r.getModel();
+        m.attackTime = 0;
+        m.crouching = false;
+        m.swimAmount = 0;
+        m.setupAnim(event.getPlayer(), 0, 0, 0, 0, 0);
+        ModelPart arm = l == Limbs.Limb.RIGHT_ARM ? m.rightArm : m.leftArm;
+        arm.xRot = 0;
+        boolean was = arm.visible;
+        arm.visible = true;
+        arm.render(event.getPoseStack(), event.getMultiBufferSource().getBuffer(RenderType.entitySolid(PROSTHETIC)), event.getPackedLight(), OverlayTexture.NO_OVERLAY);
+        arm.visible = was;
     }
 
     /** The stumps, as a layer of the figure. */
@@ -119,8 +135,16 @@ public final class LimbRender {
             int overlay = LivingEntityRenderer.getOverlayCoords(e, 0);
             M m = getParentModel();
             for (Limbs.Limb l : Limbs.Limb.values()) {
-                if (!s.severed(l) || s.prosthetic(l)) continue;
+                if (!s.severed(l)) continue;
                 ModelPart p = parts(m, l)[0];
+                if (s.prosthetic(l)) {                                         // a prosthetic: the limb itself, in steel (CX-54)
+                    boolean was = p.visible;
+                    p.visible = true;
+                    p.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(PROSTHETIC)), light, overlay);
+                    p.visible = was;
+                    vc = buffers.getBuffer(RenderType.entityCutoutNoCull(WHITE));
+                    continue;
+                }
                 pose.pushPose();
                 p.translateAndRotate(pose);
                 boolean right = l == Limbs.Limb.RIGHT_ARM || l == Limbs.Limb.RIGHT_LEG;

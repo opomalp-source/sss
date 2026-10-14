@@ -81,6 +81,8 @@ public final class Limbs {
         public final byte[] health = {100, 100, 100, 100};
         public int severed, prosthetic;
         long lastHit;
+        /** When each lost limb grows back (Namekians, Majins; 0 not set yet). */
+        final long[] regrowAt = new long[4];
 
         public int health(Limb l) {
             return health[l.ordinal()];
@@ -96,7 +98,7 @@ public final class Limbs {
 
         /** Can this limb be used (not cut off, or replaced, and not broken)? */
         public boolean works(Limb l) {
-            if (severed(l)) return prosthetic(l);
+            if (severed(l)) return prosthetic(l) && health(l) >= USABLE;
             return health(l) >= USABLE;
         }
 
@@ -201,7 +203,7 @@ public final class Limbs {
     /** {@code amount}% off a limb; a cutting or overwhelming blow can take a broken one off. */
     public static void hit(LivingEntity v, Limb limb, float amount, boolean cutting, boolean overwhelming) {
         State s = of(v);
-        if (s.severed(limb)) return;
+        if (s.severed(limb) && !s.prosthetic(limb)) return;                // nothing left to hit (a prosthetic can be)
         int before = s.health(limb);
         int after = Math.max(0, Math.round(before - amount));
         s.lastHit = v.level().getGameTime();
@@ -252,6 +254,8 @@ public final class Limbs {
     public static void sever(LivingEntity v, Limb limb) {
         State s = of(v);
         s.severed |= 1 << limb.ordinal();
+        int regrow = regrowTicks(v);
+        if (regrow >= 0) s.regrowAt[limb.ordinal()] = v.level().getGameTime() + regrow;
         s.prosthetic &= ~(1 << limb.ordinal());
         s.health[limb.ordinal()] = 0;
         if (v.level() instanceof ServerLevel level) {
@@ -272,6 +276,80 @@ public final class Limbs {
         }
         if (v instanceof Player p) p.displayClientMessage(Component.translatable("message.dbzenith.limb_lost", Component.translatable("limb.dbzenith." + limb.key())), true);
         changed(v);
+    }
+
+
+    // ------------------------------------------------------------------ getting better (CX-54)
+
+    /** Broken limbs set whole again (a Senzu Bean); lost ones stay lost. */
+    public static void mend(LivingEntity e) {
+        if (e.level().isClientSide || !eligible(e)) return;
+        State s = of(e);
+        boolean any = false;
+        for (Limb l : Limb.values()) {
+            if (s.severed(l) && !s.prosthetic(l) || s.health(l) >= 100) continue;
+            s.health[l.ordinal()] = 100;
+            any = true;
+        }
+        if (any) changed(e);
+    }
+
+    /** The body made whole (a wish, Regenerate): lost limbs back as they were, prosthetics handed back. */
+    public static void restore(LivingEntity e) {
+        if (e.level().isClientSide || !eligible(e)) return;
+        State s = of(e);
+        if (s.whole()) return;
+        for (Limb l : Limb.values()) {
+            if (s.prosthetic(l) && e instanceof Player p)
+                p.getInventory().placeItemBackInInventory(new ItemStack(l.arm() ? com.dbzenith.registry.ModItems.PROSTHETIC_ARM.get() : com.dbzenith.registry.ModItems.PROSTHETIC_LEG.get()));
+            s.health[l.ordinal()] = 100;
+        }
+        s.severed = 0;
+        s.prosthetic = 0;
+        changed(e);
+    }
+
+    /** Fits a prosthetic where a limb of that kind was lost (the right side first); false if there is none to replace. */
+    public static boolean fit(LivingEntity e, boolean arm) {
+        State s = of(e);
+        Limb[] order = arm ? new Limb[]{Limb.RIGHT_ARM, Limb.LEFT_ARM} : new Limb[]{Limb.RIGHT_LEG, Limb.LEFT_LEG};
+        for (Limb l : order) {
+            if (!s.severed(l) || s.prosthetic(l)) continue;
+            s.prosthetic |= 1 << l.ordinal();
+            s.health[l.ordinal()] = 100;
+            e.level().playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.ANVIL_USE, SoundSource.PLAYERS, 0.6f, 1.6f);
+            e.level().playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.ARMOR_EQUIP_IRON, SoundSource.PLAYERS, 1f, 1f);
+            if (e instanceof Player p) p.displayClientMessage(Component.translatable("message.dbzenith.prosthetic_fitted", Component.translatable("limb.dbzenith." + l.key())), true);
+            changed(e);
+            return true;
+        }
+        return false;
+    }
+
+    /** Namekians and Majins grow lost limbs back (players by race, and the Namekian warriors). */
+    public static int regrowTicks(LivingEntity e) {
+        if (e instanceof Player p) {
+            var race = com.dbzenith.data.ModCapabilities.get(p).map(com.dbzenith.data.PlayerData::getRace).orElse(null);
+            if (race == com.dbzenith.stats.Race.MAJIN) return 200;
+            if (race == com.dbzenith.stats.Race.NAMEKIAN) return 800;
+            return -1;
+        }
+        return e.getType() == com.dbzenith.npc.ModNpcs.NAMEKIAN_WARRIOR.get() ? 800 : -1;
+    }
+
+    /** One lost limb grown back: weak at first, mending from there. */
+    public static void regrow(LivingEntity e, Limb l, boolean majin) {
+        State s = of(e);
+        s.severed &= ~(1 << l.ordinal());
+        s.health[l.ordinal()] = 40;
+        if (e.level() instanceof ServerLevel level) {
+            Vec3 at = e.position().add(0, l.arm() ? e.getBbHeight() * 0.65 : e.getBbHeight() * 0.25, 0);
+            if (majin) level.sendParticles(new DustParticleOptions(new Vector3f(1f, 0.55f, 0.75f), 1.6f), at.x, at.y, at.z, 30, 0.25, 0.3, 0.25, 0.02);
+            else level.sendParticles(ParticleTypes.HAPPY_VILLAGER, at.x, at.y, at.z, 24, 0.3, 0.3, 0.3, 0.05);
+            level.playSound(null, e.getX(), e.getY(), e.getZ(), majin ? SoundEvents.SLIME_SQUISH : SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1f, majin ? 0.7f : 0.6f);
+        }
+        if (e instanceof Player p) p.displayClientMessage(Component.translatable("message.dbzenith.limb_regrown", Component.translatable("limb.dbzenith." + l.key())), true);
+        changed(e);
     }
 
     // ------------------------------------------------------------------ what it costs
@@ -308,6 +386,18 @@ public final class Limbs {
             if (now == null ? want != 0 : now.getAmount() != want) {
                 if (now != null) speed.removeModifier(SLOW);
                 if (want != 0) speed.addTransientModifier(new AttributeModifier(SLOW, "dbzenith limbs", want, AttributeModifier.Operation.MULTIPLY_TOTAL));
+            }
+        }
+        int regrow = regrowTicks(e);                                          // Namekians and Majins grow lost limbs back (CX-54)
+        if (regrow >= 0 && s.severed != 0) {
+            long t = e.level().getGameTime();
+            for (Limb l : Limb.values()) {
+                if (!s.severed(l) || s.prosthetic(l)) continue;
+                if (s.regrowAt[l.ordinal()] == 0) s.regrowAt[l.ordinal()] = t + regrow;
+                else if (t >= s.regrowAt[l.ordinal()]) {
+                    s.regrowAt[l.ordinal()] = 0;
+                    regrow(e, l, regrow <= 200);
+                }
             }
         }
         long now = e.level().getGameTime();                                   // broken limbs mend slowly on their own
