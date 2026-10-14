@@ -92,6 +92,25 @@ public final class ChargeTests {
         helper.succeed();
     }
 
+    /** The ki attack rework, phase 2: charging a beam plants you; letting go frees you; a small blast never plants you. */
+    @GameTest(template = EMPTY)
+    public static void chargingSomethingBigPlantsYou(GameTestHelper helper) {
+        ServerPlayer p = caster(helper);
+        PlayerData d = ModCapabilities.getOrThrow(p);
+        KiCharge.press(p, "wave_beam", true);
+        for (int i = 1; i <= 12; i++) KiCharge.tick(p, d, i);
+        helper.assertTrue(KiCharge.planted(p), "charging a beam: planted where you stand");
+        KiCharge.release(p);
+        helper.assertTrue(!KiCharge.planted(p), "let go: free again");
+        d.setCooldown("ki_blast", 0);
+        KiCharge.press(p, "ki_blast", true);
+        for (int i = 1; i <= 12; i++) KiCharge.tick(p, d, i);
+        helper.assertTrue(!KiCharge.planted(p), "a small blast only slows you");
+        KiCharge.fizzle(p, false);
+        TestPlayers.remove(helper, p);
+        helper.succeed();
+    }
+
     @GameTest(template = EMPTY)
     public static void aChargeGoesOffWhenTheKiRunsShort(GameTestHelper helper) {
         ServerPlayer p = caster(helper);

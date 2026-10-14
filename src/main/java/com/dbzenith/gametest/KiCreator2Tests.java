@@ -79,7 +79,7 @@ public final class KiCreator2Tests {
         float hp = z.getHealth();
         helper.runAfterDelay(10, () -> {
             helper.assertTrue(z.getHealth() == hp, "the mine waits while no one is near");
-            var mines = helper.getLevel().getEntitiesOfClass(com.dbzenith.skill.KiBlastEntity.class, p.getBoundingBox().inflate(16));
+            var mines = helper.getLevel().getEntitiesOfClass(com.dbzenith.skill.KiBlastEntity.class, p.getBoundingBox().inflate(16), b -> b.getOwner() == p);   // its own (other tests nearby fire too)
             helper.assertTrue(mines.size() == 1, "one mine is out");
             Vec3 m = mines.get(0).position();
             z.teleportTo(m.x, m.y - 0.5, m.z);

@@ -236,7 +236,8 @@ public final class AuraSystem {
         s.vzO = s.vz;
 
         boolean dev = self && (preview != null || previewTech != null);
-        boolean charging = state != null && (state.powering() || state.has(PublicStatePacket.TRANSFORMING));
+        boolean charging = state != null && (state.powering() || state.has(PublicStatePacket.TRANSFORMING))
+                || com.dbzenith.client.ClientKiCharge.get(e.getId()) != null;   // charging an attack flares it too (the ki attack rework)
         if (dev && devState.equals("charge")) charging = true;
         float target = charging ? 1 : 0;
         s.charge += (target - s.charge) * (target > s.charge ? 0.2f : 0.09f);

@@ -67,7 +67,8 @@ public final class AuraDebris {
         RandomSource rnd = mc.level.random;
         for (Player p : mc.level.players()) {
             PublicStatePacket state = ClientPublicStates.get(p.getId());
-            if (state == null || !state.powering() || !p.onGround() || p.isInvisible()) {
+            boolean attack = com.dbzenith.client.ClientKiCharge.get(p.getId()) != null;   // charging an attack lifts the ground too (the ki attack rework)
+            if (state == null || !state.powering() && !attack || !p.onGround() || p.isInvisible()) {
                 CHARGING.remove(p.getId());
                 continue;
             }

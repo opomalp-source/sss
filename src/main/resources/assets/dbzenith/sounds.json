@@ -170,5 +170,9 @@
   "impact_echo": {
     "subtitle": "subtitles.dbzenith.impact_echo",
     "sounds": ["dbzenith:impact_echo_1", "dbzenith:impact_echo_2"]
+  },
+  "ki_charge": {
+    "subtitle": "subtitles.dbzenith.ki_charge",
+    "sounds": ["dbzenith:ki_charge"]
   }
 }

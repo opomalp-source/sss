@@ -66,6 +66,8 @@ public final class SfxGen {
         save("ki_travel", 0, loop(kiTravel(), 0.3));
         for (int v = 0; v < 2; v++) save("impact_debris", v, impactDebris(v));
         for (int v = 0; v < 2; v++) save("impact_echo", v, impactEcho(v));
+        // phase 2: the charge
+        save("ki_charge", 0, loop(kiCharge(), 0.35));
         writeSoundsJson();
         System.out.println("SfxGen done: " + EVENTS.size() + " events");
     }
@@ -917,6 +919,28 @@ public final class SfxGen {
         mix(out, boom, 1.4);
         mix(out, rumble, 0.7);
         return room(out, 0.7, 0.9);
+    }
+
+
+    // ================================================================== ki attack rework, phase 2
+
+    /** Gathering ki (looped; the game raises its pitch and loudness with the charge): a deep hum, crackling electricity, a faint whine. */
+    static double[] kiCharge() {
+        double[] out = buf(2.6);
+        double[] hum = add(add(saw(out.length, t -> 55, 0.5), scale(saw(out.length, t -> 55.6, 0.5), 0.8)), scale(sine(out.length, t -> 110), 0.6));
+        hum = lowpass(hum, t -> 700 + 200 * Math.sin(2 * Math.PI * 1.3 * t));
+        mul(hum, shape(out.length, t -> 0.8 + 0.2 * Math.sin(2 * Math.PI * 6 * t)));
+        double[] zap = highpass(noise(out.length), 3500);
+        mul(zap, crackle(out.length, 0.9, 83));
+        double[] whine = sine(out.length, t -> 880 + 30 * Math.sin(2 * Math.PI * 5 * t));
+        mul(whine, shape(out.length, t -> 0.5 + 0.5 * Math.sin(2 * Math.PI * 0.77 * t)));
+        double[] rumble = lowpass(brown(out.length), t -> 180);
+        mix(out, hum, 0.7);
+        mix(out, zap, 0.35);
+        mix(out, whine, 0.08);
+        mix(out, rumble, 1.0);
+        saturate(out, 1.4);
+        return out;
     }
 
     // ================================================================== output

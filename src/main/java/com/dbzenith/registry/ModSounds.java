@@ -59,6 +59,7 @@ public final class ModSounds {
     public static final RegistryObject<SoundEvent> KI_TRAVEL = sound("ki_travel");
     public static final RegistryObject<SoundEvent> IMPACT_DEBRIS = sound("impact_debris");
     public static final RegistryObject<SoundEvent> IMPACT_ECHO = sound("impact_echo");
+    public static final RegistryObject<SoundEvent> KI_CHARGE = sound("ki_charge");
 
     private ModSounds() {}
 

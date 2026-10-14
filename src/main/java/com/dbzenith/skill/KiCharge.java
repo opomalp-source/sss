@@ -148,12 +148,10 @@ public final class KiCharge {
             }
             d.setKi(d.getKi() - drain);
         }
-        p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 5, f < 0.5 ? 1 : 2, false, false, false));
+        if (locksMovement(s.technique) && DBZConfig.SERVER.chargeLockMovement.get()) lock(p, true);   // planted for the big ones (the ki attack rework)
+        else p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 5, f < 0.5 ? 1 : 2, false, false, false));   // a slow walk for the small ones
         if (s.ticks % 4 == 0) broadcast(p, s);
-        if (s.ticks % 10 == 0) {
-            p.level().playSound(null, p.getX(), p.getY(), p.getZ(), com.dbzenith.registry.ModSounds.POWERUP.get(), SoundSource.PLAYERS,
-                    0.2f + 0.4f * (float) f, 0.8f + 0.9f * (float) f);
-        }
+        // the charge's sound is the client's rising loop now (the ki attack rework, phase 2)
     }
 
     private static void broadcast(ServerPlayer p, State s) {
@@ -162,6 +160,7 @@ public final class KiCharge {
     }
 
     private static void stopped(ServerPlayer p) {
+        lock(p, false);
         ModNetwork.sendToTrackingAndSelf(p, new KiChargePackets.State(p.getId(), 0, 0, -1f, 1f, 0, ""));
     }
 
@@ -171,6 +170,41 @@ public final class KiCharge {
         if (r == TechniqueHandler.Result.NOT_ENOUGH_KI) p.displayClientMessage(Component.translatable("message.dbzenith.charge_no_ki"), true);
         if (r == TechniqueHandler.Result.NO_METER) p.displayClientMessage(Component.translatable("message.dbzenith.no_meter",
                 (int) Math.ceil(com.dbzenith.combat.engine.KiCombat.tier(t.id()).meter() / com.dbzenith.combat.engine.SpecialMeter.BAR)).withStyle(ChatFormatting.YELLOW), true);
+    }
+
+
+    // ------------------------------------------------------------------ the ki attack rework, phase 2: planted, and broken by a heavy blow
+
+    private static final java.util.UUID PLANTED = java.util.UUID.fromString("c55d7a10-3e1b-4c5a-9e1d-0c55ab7e0001");
+
+    /** Charging this, you stand your ground (turning only): beams, the big spheres, anything thrown from overhead. */
+    public static boolean locksMovement(Technique t) {
+        return kindOf(t) != KIND_BLAST;
+    }
+
+    private static void lock(ServerPlayer p, boolean on) {
+        var speed = p.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
+        if (speed == null) return;
+        boolean has = speed.getModifier(PLANTED) != null;
+        if (on && !has) speed.addTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(PLANTED, "dbzenith charging",
+                -1.0, net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_TOTAL));
+        else if (!on && has) speed.removeModifier(PLANTED);
+    }
+
+    /** A heavy blow (a tenth of your health or more at once) breaks your concentration: the charge is lost. */
+    @SubscribeEvent
+    public static void onHurt(net.minecraftforge.event.entity.living.LivingDamageEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer p) || !CHARGING.containsKey(p.getUUID())) return;
+        if (event.getAmount() >= p.getMaxHealth() * 0.1f) {
+            fizzle(p, false);
+            p.displayClientMessage(Component.translatable("message.dbzenith.charge_broken").withStyle(ChatFormatting.RED), true);
+        }
+    }
+
+    /** Is this player charging something that plants them? (Both sides: the client stops its own jumps.) */
+    public static boolean planted(net.minecraft.world.entity.player.Player p) {
+        var speed = p.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
+        return speed != null && speed.getModifier(PLANTED) != null;
     }
 
     @SubscribeEvent

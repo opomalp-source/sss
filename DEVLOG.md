@@ -3089,3 +3089,25 @@ answers: move all built-ins to JSON; for charging movement, my judgement; very b
   - an explosion with the dome, rings, radial spark streaks and smoke.
   - The vanilla explosion puffs still show (phase 6 replaces them).
 - 226 GameTests.
+
+## 2026-10-14 — Ki attack rework, phase 2: the charge-up (v0.118.0)
+- **The orb** (`ClientKiCharge.onRender`, energy shader): a real sphere in layers (shell, crackling strands, white-hot
+  core) in a halo, growing and pulsing with the charge. Past half, arcs of ki snap round it, more as it grows.
+- **Its light on the ground** below the fighter: a glow of its colour, wider and brighter with the charge, fading if
+  the orb is high above the ground (the faked light the user chose).
+- **Drawn in:** motes and streaks (`KiParticles`) pulled in toward the orb from all round, arriving as they fade,
+  more as it grows; sparks crackle off it past 60%. The vanilla dust particles are gone.
+- **The ground:** it cracks under the fighter at half and near full charge (with a little shake), and chunks of it lift
+  and orbit (`AuraDebris`, now for attack charges too). The aura flares while charging an attack (`AuraSystem`).
+- **Sound:** `ki_charge`, a looping deep hum with crackling electricity and a faint whine, following the fighter, its
+  pitch (0.6 to 1.55) and loudness rising with the charge and fading out at the end. It replaces the old power-up
+  blips every half second.
+- **Planted** (server, `KiCharge`): charging a beam, a big sphere or anything thrown from overhead stops you walking
+  (the movement speed is cancelled; you can still turn) and jumping (client). Small blasts keep the slow walk. Server
+  config `[techniques] lockMovement`.
+- **Broken:** a blow of a tenth of your health or more at once breaks your concentration and the charge is lost ("The
+  blow broke your charge!").
+- **Tests:** `ChargeTests.chargingSomethingBigPlantsYou`. `KiCreator2Tests.placedMinesWaitThenGoOff` now counts only
+  its own mine (other tests' blasts nearby had made it flaky). 227 GameTests.
+- **Checked in the dev client** (charging a Kamehameha, front and back): the aura flaring, chunks of ground lifting
+  round the fighter, the orb at the cupped hands and its light on the cracked ground, the HUD charge gauge.
