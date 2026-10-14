@@ -6,6 +6,8 @@ import com.dbzenith.appearance.FaceParts.Part;
 import com.dbzenith.client.ClientPublicStates;
 import com.dbzenith.network.PublicStatePacket;
 import com.dbzenith.transform.Form;
+import com.dbzenith.transform.Forms;
+import net.minecraft.util.Mth;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -68,19 +70,44 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         int face = state.face();
         int eyes = FaceParts.get(face, Part.EYES);
         int brows = FaceParts.get(face, Part.BROWS), mouth = FaceParts.get(face, Part.MOUTH);
-        // expressions (CX-14b): a shout while charging or transforming, gritted teeth under strain or a blow, a blink now and then
+        // expressions (CX-14b, CX-42): what the fighter is going through shows on the face, strongest first
         boolean shout = state.has(PublicStatePacket.CHARGING) || state.has(PublicStatePacket.TRANSFORMING);
         boolean hurt = player.hurtTime > 0;
         boolean grit = !shout && (hurt || state.has(PublicStatePacket.GUARDING) || state.has(PublicStatePacket.HEAVY));
-        if (shout) {
+        if (hurt || player.swinging || shout || grit) COMBAT.put(player.getId(), ageInTicks);
+        Float lastFight = COMBAT.get(player.getId());
+        boolean fighting = lastFight != null && ageInTicks - lastFight < 160 && ageInTicks >= lastFight;
+        boolean pained = player.getHealth() < player.getMaxHealth() * 0.3f && player.getMaxHealth() > 0;
+        boolean ownEyes = eyes != FaceParts.EYES_CAT;
+        if (state.has(PublicStatePacket.DOWNED) || state.has(PublicStatePacket.DEAD)) {
+            eyes = FaceParts.EYES_CLOSED;                                      // out cold
+            mouth = MOUTH_FROWN;
+            if (brows != BROWS_NONE) brows = BROWS_WORRIED;
+        } else if (shout) {
             mouth = MOUTH_SHOUT;
             if (brows != BROWS_NONE) brows = BROWS_FIERCE;
         } else if (grit) {
             mouth = MOUTH_GRIT;
             if (brows != BROWS_NONE) brows = BROWS_FIERCE;
             if (hurt && eyes != FaceParts.EYES_CLOSED) eyes = FaceParts.EYES_NARROW;
-        } else if ((ageInTicks + player.getId() * 37) % 84 < 2.5f && eyes != FaceParts.EYES_CAT) {
-            eyes = FaceParts.EYES_CLOSED;                                      // a blink
+        } else if (pained) {                                                   // badly hurt: worried brows, heavy eyes, panting
+            if (brows != BROWS_NONE) brows = BROWS_WORRIED;
+            if (ownEyes) eyes = FaceParts.EYES_TIRED;
+            mouth = (ageInTicks + player.getId() * 11) % 22 < 8 ? MOUTH_SHOUT : MOUTH_GRIT;
+        } else if (state.has(PublicStatePacket.MEDITATING)) {
+            eyes = FaceParts.EYES_CLOSED;                                      // at peace
+            mouth = MOUTH_LINE;
+        } else if (fighting) {                                                 // focused: fierce brows, a firm mouth
+            if (brows != BROWS_NONE) brows = BROWS_FIERCE;
+            if (mouth == MOUTH_LINE || mouth == MOUTH_SMILE) mouth = MOUTH_FROWN;
+        } else if (!form.isBase() && form != Forms.GREAT_APE) {                // transformed and at ease: confident
+            if (brows != BROWS_NONE) brows = BROWS_FIERCE;
+            mouth = MOUTH_SMIRK;
+        }
+        if (!shout && !grit && eyes != FaceParts.EYES_CLOSED && ownEyes) {      // a blink now and then, sometimes two
+            float cycle = (ageInTicks + player.getId() * 37) % 84;
+            boolean twice = ((int) ((ageInTicks + player.getId() * 37) / 84) + player.getId()) % 4 == 0;
+            if (cycle < 2.5f || twice && cycle >= 5 && cycle < 7.5f) eyes = FaceParts.EYES_CLOSED;
         }
         int overlay = LivingEntityRenderer.getOverlayCoords(player, 0);
 
@@ -90,6 +117,10 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         int iris = form.eyeColor() >= 0 ? form.eyeColor() : state.eyeColor() >= 0 ? state.eyeColor() : race != null ? race.iris() : 0x1E1610;
         boolean whites = race == null || race.whites() || state.eyeColor() >= 0;
         draw(pose, buffers, Part.EYES.ordinal(), eyes, light, overlay, whites ? 0xFFFFFF : iris);     // no whites: the whole eye is dark
+        pose.pushPose();                                                       // the eyes glance (CX-42): irises and pupils shift a touch sideways
+        float glance = glance(player, ageInTicks, eyes);
+        float headYaw = getParentModel().head.yRot;
+        pose.translate(glance * Mth.cos(headYaw), 0, -glance * Mth.sin(headYaw));
         draw(pose, buffers, IRIS, eyes, glowing ? LightTexture.FULL_BRIGHT : light, overlay, iris);
         if (hd) draw(pose, buffers, PUPIL, eyes, glowing ? LightTexture.FULL_BRIGHT : light, overlay, 0xFFFFFF);   // pupils and the shine
         if (glowing) {                                                         // eyes that burn: an emissive pass over the iris
@@ -97,6 +128,7 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
             getParentModel().renderToBuffer(pose, buffers.getBuffer(RenderType.eyes(glow)), LightTexture.FULL_BRIGHT, overlay,
                     ((iris >> 16) & 255) / 255f * 0.8f, ((iris >> 8) & 255) / 255f * 0.8f, (iris & 255) / 255f * 0.8f, 1f);
         }
+        pose.popPose();
         int hair = form.hairColor() >= 0 ? form.hairColor() : race != null ? race.brow() : state.hairColor() >= 0 ? state.hairColor() : 0x3A2414;
         if (!FormShape.browRidge(form.id())) draw(pose, buffers, Part.BROWS.ordinal(), brows, light, overlay, race != null && form.hairColor() < 0 ? hair : darken(hair, 0.8f));
         draw(pose, buffers, Part.NOSE.ordinal(), FaceParts.get(face, Part.NOSE), light, overlay, 0xFFFFFF);
@@ -106,12 +138,37 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
     }
 
     /** Face part options the expressions use. */
-    private static final int MOUTH_GRIT = 2, MOUTH_SHOUT = 5, BROWS_FIERCE = 2, BROWS_NONE = 5;
+    private static final int MOUTH_LINE = 0, MOUTH_SMILE = 1, MOUTH_GRIT = 2, MOUTH_FROWN = 3, MOUTH_SMIRK = 4, MOUTH_SHOUT = 5,
+            BROWS_FIERCE = 2, BROWS_WORRIED = 3, BROWS_NONE = 5;
+    /** When each fighter last fought (in their render age), for the focused look. */
+    private static final java.util.Map<Integer, Float> COMBAT = new java.util.HashMap<>();
 
     private void draw(PoseStack pose, MultiBufferSource buffers, int part, int option, int light, int overlay, int tint) {
         ResourceLocation tex = textures[part][Math.max(0, Math.min(textures[part].length - 1, option))];
         getParentModel().renderToBuffer(pose, buffers.getBuffer(RenderType.entityTranslucent(tex)), light, overlay,
                 ((tint >> 16) & 255) / 255f, ((tint >> 8) & 255) / 255f, (tint & 255) / 255f, 1f);
+    }
+
+
+    /**
+     * How far the irises shift sideways, in blocks (+ toward the fighter's left): toward the foe you are locked onto,
+     * otherwise a glance to one side now and then. At most about half a face pixel, so they stay inside the eye.
+     */
+    private static float glance(AbstractClientPlayer player, float age, int eyes) {
+        if (eyes == FaceParts.EYES_CLOSED) return 0;
+        float most = 0.55f / 32f;                                              // a face pixel is half a model pixel
+        net.minecraft.world.entity.LivingEntity target = player == net.minecraft.client.Minecraft.getInstance().player
+                ? com.dbzenith.client.LockOn.target() : null;
+        float side;
+        if (target != null) {
+            float yaw = (float) Math.toDegrees(Math.atan2(target.getZ() - player.getZ(), target.getX() - player.getX())) - 90;
+            side = -Mth.clamp(Mth.wrapDegrees(yaw - player.getYHeadRot()) / 25f, -1, 1);
+        } else {
+            float t = age + player.getId() * 53;
+            int pick = Math.floorMod((int) (t / 70) * 7919 + player.getId() * 31, 5);
+            side = t % 70 < 38 ? new float[]{-1, 0, 0, 1, 0}[pick] : 0;
+        }
+        return side * most;
     }
 
     private static int darken(int c, float f) {

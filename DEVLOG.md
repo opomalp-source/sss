@@ -2742,3 +2742,19 @@ Starts the polish round (the user: everything suggested except story, which come
   new sounds are committed.
 - **Checked:** the dev client loaded and played them (only vanilla's usual missing goat-horn warnings). 217
   GameTests (`SoundTests` checks every event has real Ogg files).
+
+## 2026-10-14 — CX-42: faces v2 (v0.103.0)
+- **More expressions** (`FaceLayer`), strongest first:
+  - **Out cold** (downed or dead): eyes shut, a frown, worried brows.
+  - **Shouting** while charging or transforming, and **grit** under a blow or while guarding (both already existed).
+  - **Badly hurt** (under 30% health): worried brows, heavy eyes, panting (the mouth opening and gritting in turn).
+  - **Meditating:** eyes closed, mouth at rest.
+  - **Fighting** (for 8 seconds after being hit, swinging, guarding or charging): fierce brows, and a firm frown
+    instead of a smile or a neutral mouth.
+  - **Transformed and at ease:** fierce brows and a confident smirk.
+  - **Blinks:** sometimes a double blink.
+- **Eyes that glance:** the irises and pupils shift up to half a face pixel sideways (in head space): toward your
+  lock-on target, otherwise to one side now and then.
+- Per-form eyes were already there (glowing form irises; brow ridges instead of brows for forms like Super Saiyan 3).
+- **Checked in the dev client** (zoomed face shots with the generated body): base glancing; Super Saiyan smirking with
+  glowing teal eyes; badly hurt panting with worried brows. The fighting face couldn't be triggered from the harness.
