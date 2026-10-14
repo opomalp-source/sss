@@ -85,19 +85,18 @@ public class GearLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         int o = OverlayTexture.NO_OVERLAY;
         if (pants == GiArmorItem.Set.MAJIN || pants == GiArmorItem.Set.FUSION) piece(pose, vc, light, o, GearModel.Piece.BAGGY, 0, 0xF2F0F4);
         if (top == null) return;
+        Cloth.Chain sash = Cloth.chain(player, "sash", Cloth.SASH, ageInTicks);   // CX-44: the sash ends and the cape swing on springs
         switch (top) {
-            case TURTLE -> piece(pose, vc, light, o, GearModel.Piece.SASH_TAILS, 0, 0x2852C8);
-            case DEMON -> piece(pose, vc, light, o, GearModel.Piece.SASH_TAILS, 0, 0xC02838);
+            case TURTLE -> piece(pose, vc, light, o, GearModel.Piece.SASH_TAILS, sash, 0x2852C8);
+            case DEMON -> piece(pose, vc, light, o, GearModel.Piece.SASH_TAILS, sash, 0xC02838);
             case BATTLE_ARMOR -> {
                 piece(pose, vc, light, o, GearModel.Piece.PADS, 0, 0xECEEF2);
                 piece(pose, vc, light, o, GearModel.Piece.PAD_TRIM, 0, 0xD8B040);
             }
             case NAMEKIAN -> {
-                PublicStatePacket state = ClientPublicStates.get(player.getId());
-                float lift = state == null ? 0 : RaceFeatureLayer.lift(player, state);
-                piece(pose, vc, light, o, GearModel.Piece.CAPE, lift, 0xF4F2EC);
+                piece(pose, vc, light, o, GearModel.Piece.CAPE, Cloth.chain(player, "cape", Cloth.CAPE, ageInTicks), 0xF4F2EC);
                 piece(pose, vc, light, o, GearModel.Piece.NAMEK_PADS, 0, 0xF4F2EC);
-                piece(pose, vc, light, o, GearModel.Piece.SASH_TAILS, 0, 0x40B0E0);
+                piece(pose, vc, light, o, GearModel.Piece.SASH_TAILS, sash, 0x40B0E0);
                 piece(pose, vc, light, o, GearModel.Piece.TURBAN, 0, 0xF4F2EC);
                 piece(pose, vc, light, o, GearModel.Piece.TURBAN_BAND, 0, 0x6A3A9A);
             }
@@ -115,6 +114,10 @@ public class GearLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
     }
 
     private void piece(PoseStack pose, VertexConsumer vc, int light, int overlay, GearModel.Piece piece, float lift, int c) {
-        model.render(pose, vc, light, overlay, piece, lift, ((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f);
+        model.render(pose, vc, light, overlay, piece, lift, null, ((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f);
+    }
+
+    private void piece(PoseStack pose, VertexConsumer vc, int light, int overlay, GearModel.Piece piece, Cloth.Chain cloth, int c) {
+        model.render(pose, vc, light, overlay, piece, 0, cloth, ((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f);
     }
 }

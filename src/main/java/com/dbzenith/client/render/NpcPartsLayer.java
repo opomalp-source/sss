@@ -74,8 +74,7 @@ public class NpcPartsLayer<T extends Mob> extends RenderLayer<T, PlayerModel<T>>
             }
             if (look.tailColor() >= 0) {
                 int t = look.tailColor();
-                float lift = (float) Math.min(1, npc.getDeltaMovement().horizontalDistance() * 4);
-                features.renderTail(pose, vc, light, overlay, ageInTicks, lift, look.wrapped(),
+                features.renderTail(pose, vc, light, overlay, Cloth.chain(npc, "tail", Cloth.TAIL, ageInTicks), look.wrapped(), 1f,
                         ((t >> 16) & 255) / 255f, ((t >> 8) & 255) / 255f, (t & 255) / 255f);
             }
         }
@@ -94,8 +93,7 @@ public class NpcPartsLayer<T extends Mob> extends RenderLayer<T, PlayerModel<T>>
                     gear.render(pose, vg, light, overlay, GearModel.Piece.PAD_TRIM, 0, 0.95f, 0.94f, 0.96f);
                 }
                 case NAMEK_PADS -> gear.render(pose, vg, light, overlay, GearModel.Piece.NAMEK_PADS, 0, 0.96f, 0.95f, 0.93f);
-                case CAPE -> gear.render(pose, vg, light, overlay, GearModel.Piece.CAPE,
-                        (float) Math.min(1, npc.getDeltaMovement().horizontalDistance() * 4), 0.96f, 0.95f, 0.93f);
+                case CAPE -> gear.render(pose, vg, light, overlay, GearModel.Piece.CAPE, 0, Cloth.chain(npc, "cape", Cloth.CAPE, ageInTicks), 0.96f, 0.95f, 0.93f);
                 case SHELL -> {
                     extras.render(pose, vg, light, overlay, NpcExtrasModel.Piece.SHELL, -1);
                     extras.render(pose, vg, light, overlay, NpcExtrasModel.Piece.SHELL_RIM, -1);

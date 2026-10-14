@@ -2772,3 +2772,19 @@ Starts the polish round (the user: everything suggested except story, which come
 - **Dev:** `/dbz transform <players> hold` runs the real held power-up (the plain command is instant).
 - **Checked in the dev client** (a 60-frame clip): the cracks under the fighter; the camera swinging to a front shot
   of the new Super Saiyan (glowing eyes, clenched fists) and easing back.
+
+## 2026-10-14 — CX-44: cloth and tail physics (v0.105.0)
+- **`client.render.Cloth`:** spring chains for things that hang and swing, driven by how the body actually moves:
+  - forward speed streams them back; falling lifts them; drifting sideways and turning fling them sideways;
+  - speeding up swings them back, and stopping throws them forward; a jolt up or down bounces them;
+  - at speed the free end flutters, and at rest they sway lazily; water damps them.
+  - Each segment is held toward the one it hangs from, so a wave runs down the chain.
+  - Chains step once per game tick at render time and are interpolated, so they work for any entity (players, NPCs).
+  - Kinds: `CAPE` (heavy, a slow wave), `SASH` (light, flapping), `TAIL` (springy, always a little alive).
+- **The Namekian cape** is now four linked panels and never swings into the back.
+- **The gi sash ends** (Turtle, Demon, Namekian) are two tails in two pieces each. They lie against the legs going
+  forward, swing forward when you stop, and swing sideways.
+- **The Saiyan tail** (players and NPCs) rides its chain on top of its lazy hanging curl.
+- NPC capes use it too.
+- **Checked in the dev client** (pushed forward 0.6 blocks a tick, then stopped): the cape streams out flat behind
+  and the tail trails; on stopping the cape swings forward, bounces and settles within about 1.5 seconds.

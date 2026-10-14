@@ -156,7 +156,7 @@ public class RaceFeatureLayer extends RenderLayer<AbstractClientPlayer, PlayerMo
             int c = tailColor(state);
             if (c == TAIL && state.racePart() >= 0) c = state.racePart();   // the chosen fur, unless a form colours it
             float size = variant == Variant.LEGENDARY_PRIMAL ? 1.45f : variant == Variant.PRIMAL ? 1.3f : 1f;   // the Primal clans' great tails
-            model.renderTail(pose, vc, light, overlay, ageInTicks, lift(player, state), player.isCrouching(), size, r(c), g(c), b(c));
+            model.renderTail(pose, vc, light, overlay, Cloth.chain(player, "tail", Cloth.TAIL, ageInTicks), player.isCrouching(), size, r(c), g(c), b(c));
         }
     }
 

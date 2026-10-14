@@ -273,4 +273,26 @@ public class RaceFeatureModel {
         }
         body.render(pose, vc, light, overlay, r, g, b, 1f);
     }
+
+    /**
+     * The tail on springs (CX-44): {@code chain} (a {@link Cloth#TAIL} chain) swings it with how the body moves; it
+     * still curls lazily when hanging, and streams out behind at speed.
+     */
+    public void renderTail(PoseStack pose, VertexConsumer vc, int light, int overlay, Cloth.Chain chain, boolean wrapped, float size,
+                           float r, float g, float b) {
+        tail[0].xScale = tail[0].yScale = tail[0].zScale = size;
+        wings.visible = false;
+        wrap.visible = wrapped;
+        tail[0].visible = !wrapped;
+        if (!wrapped) {
+            float lift = Mth.clamp(chain.pitch(0) / 1.05f, 0, 1), calm = 1 - lift;
+            for (int i = 0; i < TAIL_SEGMENTS; i++) {
+                int s = Math.min(i, chain.segments() - 1);
+                tail[i].xRot = i == 0 ? 0.45f + chain.pitch(0) : 0.32f * calm - 0.05f * lift + chain.relPitch(s);   // a lazy curl when hanging
+                tail[i].zRot = (i == 0 ? chain.roll(0) : chain.relRoll(s)) * 1.2f;
+                tail[i].yRot = i == 0 ? chain.roll(0) * 0.4f : 0;
+            }
+        }
+        body.render(pose, vc, light, overlay, r, g, b, 1f);
+    }
 }
