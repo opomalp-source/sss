@@ -181,6 +181,18 @@ public final class RacialPackets {
         public static void handle(Transmit m, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayer player = ctx.get().getSender();
             if (player == null) return;
+            if (m.key.startsWith("entity:")) {                                  // locked on (CX-50): straight behind them
+                ModCapabilities.get(player).ifPresent(d -> {
+                    if (!RacialSkills.has(d, "instant_transmission")) return;
+                    int id;
+                    try { id = Integer.parseInt(m.key.substring(7)); } catch (NumberFormatException e) { return; }
+                    if (!(player.serverLevel().getEntity(id) instanceof net.minecraft.world.entity.LivingEntity target) || !target.isAlive()
+                            || target.distanceToSqr(player) > 96 * 96) return;
+                    if (target instanceof ServerPlayer tp && ModCapabilities.get(tp).map(o -> o.hasFlag("god_ki")).orElse(false) && !d.hasFlag("god_ki")) return;
+                    RacialSkillEffects.transmit(player, target.position().subtract(target.getLookAngle().multiply(1, 0, 1).normalize().scale(1.5)));
+                });
+                return;
+            }
             ModCapabilities.get(player).ifPresent(d -> {
                 for (Destination t : destinations(player, d)) {
                     if (!t.key().equals(m.key)) continue;

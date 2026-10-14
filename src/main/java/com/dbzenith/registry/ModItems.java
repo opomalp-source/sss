@@ -61,6 +61,8 @@ public final class ModItems {
             () -> new ScouterItem(new Item.Properties().rarity(Rarity.UNCOMMON)));
     public static final RegistryObject<Item> CAPSULE = ITEMS.register("capsule",
             () -> new CapsuleItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> CAPSULE_HOUSE = ITEMS.register("capsule_house",
+            () -> new com.dbzenith.item.HouseCapsuleItem(new Item.Properties().stacksTo(1)));   // CX-50
     public static final java.util.List<RegistryObject<Item>> GI = gi();
 
     private static java.util.List<RegistryObject<Item>> gi() {

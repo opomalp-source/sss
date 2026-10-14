@@ -128,7 +128,10 @@ public final class ClientInput {
             com.dbzenith.data.PlayerData pd = ClientPlayerData.get();
             if (Screen.hasShiftDown()) mc.setScreen(new com.dbzenith.client.screen.RacialScreen(null, true));
             else if (pd.getSkillSelected().equals("instant_transmission") && pd.getSkillLevel("instant_transmission") > 0) {
-                if (mc.level.getGameTime() >= pd.getRacialCooldown("instant_transmission")) ModNetwork.sendToServer(new com.dbzenith.network.RacialPackets.TransmitRequest());
+                net.minecraft.world.entity.LivingEntity locked = LockOn.target();
+                if (locked != null && mc.level.getGameTime() >= pd.getRacialCooldown("instant_transmission"))   // locked on: straight behind them (CX-50)
+                    ModNetwork.sendToServer(new com.dbzenith.network.RacialPackets.Transmit("entity:" + locked.getId()));
+                else if (mc.level.getGameTime() >= pd.getRacialCooldown("instant_transmission")) ModNetwork.sendToServer(new com.dbzenith.network.RacialPackets.TransmitRequest());
                 else ModNetwork.sendToServer(new InputPacket(InputPacket.Action.SKILL_USE));   // the server says how long
             } else ModNetwork.sendToServer(new InputPacket(InputPacket.Action.SKILL_USE));
         }

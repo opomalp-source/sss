@@ -266,5 +266,5 @@ Most of these already exist in a first version; each step upgrades what is there
 - [x] CX-47 (v0.108.0) Battle damage: torn gi with health, bruises, dust after crashes
 - [x] CX-48 (v0.109.0) Environment: water parting under fliers and beams, lasting shock rings and dust
 - [x] CX-49 (v0.110.0) Animations: takeoff crouch-launch, hero landing, signature ki poses (Kamehameha, Galick Gun, Special Beam Cannon, Final Flash), teleport-behind in rushes, afterimage dodge, tumble recovery
-- [ ] CX-50 Gameplay: Hoipoi capsules that deploy (house, vehicle), scouter and ki sense upgrades, Instant Transmission lock-on
+- [x] CX-50 (v0.111.0) Gameplay: Hoipoi capsules that deploy (house, vehicle), scouter and ki sense upgrades, Instant Transmission lock-on
 - [ ] Last: story mode (V2-G)

@@ -2859,3 +2859,26 @@ behind on chases and counters (VfxV3). What was missing was each beam having its
   within two seconds of a charge uses `Anims.beamFor(technique)`.
 - **Checked in the dev client** (front and back camera): each hold with the ball in the hands (or at the fingertip, or
   above the forehead), and each firing.
+
+## 2026-10-14 — CX-50: House Capsule, Scouter v2, Instant Transmission lock-on (v0.111.0)
+- **House Capsule** (`item.HouseCapsuleItem`, new item; crafted from a Capsule, an oak door, a white bed, a crafting
+  table and white concrete).
+  - **Throw it:** in a burst of smoke a round domed house pops up a few blocks ahead, its door toward you: a white
+    dome with a yellow band, round blue windows, a bed, a crafting table, a furnace and a hanging lantern.
+  - It only goes up on solid ground at your feet' level with room for all of it.
+  - **Use it again within 24 blocks** and it packs back into the capsule. Only blocks still exactly as it placed them
+    are taken, so anything of yours stays; blocks come off in reverse, so nothing pops.
+  - The house's blocks are kept in the item.
+  - New texture: the capsule with a yellow band.
+- **Scouter v2** (`ScouterOverlay`):
+  - the lens (a fifth of the screen) with scanlines running down it, a sweeping bright line and a blinking SCAN;
+  - a marker with the power over every living thing in range (the nearest 12), red when far beyond yours;
+  - the lock-on reticle snaps down from wide onto what you look at, turning as it closes;
+  - the reading counts up with the scouter's beeps and flashes red with "!!" when it is more than five times yours.
+- **Instant Transmission lock-on:** with someone locked on, the skill key goes straight behind them, NPCs included
+  (within 96 blocks; god ki still only by god ki), with no list. The skill's usual cooldown and ki checks apply.
+- **Dev:** `/dbz usehand <players>`.
+- **Tests:** `CapsuleHouseTests`: it goes up (over 100 blocks, the dome, a door), packs away without taking a
+  player's block, and doesn't go up where there's no room. This caught the ground search finding a block in the way
+  and building on top of it. 218 GameTests.
+- **Checked in the dev client:** the house popping up in smoke; the scouter lens with SCAN and a power marker.

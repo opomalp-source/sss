@@ -716,6 +716,16 @@ public final class DBZCommand {
                                     ctx.getSource().sendSuccess(() -> Component.literal("Revived " + count + " player(s)"), true);
                                     return n;
                                 })))
+                .then(Commands.literal("usehand")   // dev: use what the player holds, as a right-click would (CX-50)
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .executes(ctx -> {
+                                    int n = 0;
+                                    for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) {
+                                        p.getMainHandItem().use(p.serverLevel(), p, net.minecraft.world.InteractionHand.MAIN_HAND);
+                                        n++;
+                                    }
+                                    return n;
+                                })))
                 .then(Commands.literal("nimbus")   // the soul-bound Flying Nimbus (CX-40): bind, unbind, or press the call key
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.literal("bind").executes(ctx -> nimbus(ctx, "bind")))

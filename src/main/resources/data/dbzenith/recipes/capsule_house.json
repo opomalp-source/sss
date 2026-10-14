@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [{"item": "dbzenith:capsule"}, {"item": "minecraft:oak_door"}, {"item": "minecraft:white_bed"}, {"item": "minecraft:crafting_table"}, {"item": "minecraft:white_concrete"}],
+  "result": {"item": "dbzenith:capsule_house"}
+}
