@@ -25,7 +25,7 @@ default shown in `client/aura/AuraDef.java`.
 | `auras/families/` | The ten family templates (flame, roar, divine, wisp, dark, tech, majin, regal, ssj4, base). |
 | `auras/forms/` | One file per form, made by `tools/gen_auras.py` (re-run it after changing its tables). |
 | `auras/techniques/` | Technique auras worn over the form's: `kaioken.json`. |
-| `auras/base.json`, `super_saiyan_blue.json` | The base form's charging aura; Blue, made by hand. |
+| `auras/base.json`, `super_saiyan_blue.json`, `super_saiyan_god.json`, `ultra_instinct.json`, `ultra_instinct_sign.json` | The base form's charging aura; Blue, God and Ultra Instinct, made by hand (`gen_auras.py` leaves them out). |
 
 ## Colours from a tint
 
@@ -121,7 +121,7 @@ Drawn in order: put the outermost first. One to six layers.
 
 ### `particles` and `motes`
 
-`particles.type`: `none`, `flecks` (small streaks of light shooting up inside, the anime look), `sparkle` (star dust rising inside) or `ember` (sparks drifting up inside).
+`particles.type`: `none`, `flecks` (small streaks of light shooting up inside, the anime look), `sparkle` (star dust rising inside), `ember` (sparks drifting up inside) or `streaks` (thin dashed lines of light standing up through the aura, each with a point of light at its head: Ultra Instinct).
 `motes` rise from the ground round a charging fighter; set `rate` to 0 for none.
 
 ### `react`: what the aura does when the fighter does something
@@ -146,4 +146,8 @@ Packs with strong bloom (Complementary, BSL) can make auras look brighter.
 
 ## Coming in later phases
 
-Ultra Instinct's afterimages, the transformation sequence, dynamic light, NPC auras, and the quality settings.
+The transformation sequence, dynamic light, NPC auras, and the quality settings.
+
+## Ultra Instinct
+
+Ultra Instinct is a technique, not a form: its aura (`ultra_instinct_sign`, `ultra_instinct`, listed in their files' `forms`) takes the place of the form's aura while it is on, whatever the form. Preview it with `/dbzaura ultra_instinct`.

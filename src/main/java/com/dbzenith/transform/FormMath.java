@@ -44,6 +44,7 @@ public final class FormMath {
     public static double attributeMultiplier(PlayerData data, Attribute attribute) {
         double m = formMultiplier(data, Forms.byId(data.getFormId()), attribute);
         if (isCombatAttribute(attribute)) {
+            m *= UltraInstinct.factor(data, attribute, m);                       // a technique over the form (CX-24 phase 5)
             m *= data.getGearMultiplier(attribute) * com.dbzenith.world.LifeSim.ageMultiplier(data, attribute)
                     * (1.0 + DBZConfig.SERVER.majinAbsorbBonusPerStack.get() * data.getMajinStacks())
                     * (1.0 + DBZConfig.SERVER.prestigePowerBonus.get() * data.getPrestige())

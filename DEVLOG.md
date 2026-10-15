@@ -3544,3 +3544,43 @@ scar system). And no big "knocked out" text or other indicators. Player guide: `
   - crawling on a seared leg;
   - a Namekian arm growing back (bud, push-out, strain and thrust);
   - a Namekian warrior and a soldier battered, with green skin through the rips.
+
+## 2026-10-15 — Ultra Instinct as a technique; UI and God auras after the user's pictures (v0.129.0)
+The user sent two pictures (Super Saiyan God in a fire-like aura; Mastered Ultra Instinct in a wispy blue-violet aura
+streaked with dashed lines of light) and asked for: UI and God auras like them; UI and MUI as techniques, not forms,
+that anyone can reach; the transformation burst and the aura settings; the Great Ape only at a full moon after
+looking at it; a real ape model; reworked clothing and armor (parts that stick out, head clothing such as Piccolo's
+turban as its own item); and a feel pass. Done in phases; this is the first. Plan in TODO.md ("Auras, apes and clothes").
+
+- **Ultra Instinct is a technique (`UltraInstinct`):**
+  - A level on the player (`PlayerData.ultraInstinct`: 0, the Sign, Mastered; synced, not saved) instead of a form.
+    The two forms are gone from `Forms`; an old save in one comes back in base.
+  - Entered on the technique key (O) as before, over whatever form you are in, and the form stays. Shift+O, an empty
+    technique bar in PvP, running out of ki or being knocked out ends it. It can't be held with Kaioken.
+  - Power: it lifts you at least to its own multipliers (the Sign 4.5/7/4.5, Mastered 6.5/10/6.5 for strength, speed
+    and ki power, grown with mastery), and 8% or 15% on top of a stronger form (`UltraInstinct.factor`, in
+    `FormMath.attributeMultiplier`).
+  - Burns 1.2% or 1.6% of max ki a second (less with mastery); mastery is kept under the old ids.
+  - Anyone can learn it: Whis's lessons, any race (as before); the level and Sign-mastery requirements now live in
+    `UltraInstinct.problem`.
+  - Synced to everyone in two bits of `PublicStatePacket` (`ultraInstinct()`); a HUD chip shows it.
+- **Its look:**
+  - Silver-grey eyes in the Sign; Mastered turns the hair, brows and eyes silver, and the hair glows
+    (`FormHairLayer`, `FaceLayer`).
+  - The body's edges shine silver-blue (`BodyFxLayer`).
+  - Each dodge leaves an afterimage standing where you were for most of a second, and a silver streak to where you
+    went (`ImpactPacket.UI_DODGE`, `Afterimages.ghost`).
+  - Its aura takes the place of the form's (`AuraSystem.wanted`).
+- **Auras after the pictures (hand-made now, left out of `gen_auras.py`):**
+  - `ultra_instinct`: a narrow wispy shell, white at the body through pale blue to a violet rim; soft additive tongues
+    curling up; a violet outer glow; a faint inner haze. New particle type `streaks`: thin dashed vertical lines of
+    light drifting up through the aura, each headed by a point of light.
+  - `ultra_instinct_sign`: the same, bluer and dimmer.
+  - `super_saiyan_god`: a tall fire, a yellow-white middle through orange to a red rim, many tongues, a red-magenta
+    glow outside, embers.
+- **Cheats:** `/dbz ultrainstinct <players> <0|1|2>`; `/dbz unlockform` takes the two UI ids.
+- **Tests:** UI tests rewritten for the technique (it keeps the form, lifts a base fighter past five times their
+  speed, gives out with no ki, isn't a form any more); the aura file test checks UI's auras too. A wound test that
+  scheduled a delay inside a delay crashed the test server's timer map; flattened. 241 GameTests.
+- **Checked in the dev client:** Mastered UI and the Sign, by day and night (silver hair; blue-violet wisps,
+  streaks); God's fire by day and night.

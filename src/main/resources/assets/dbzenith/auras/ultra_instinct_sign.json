@@ -1,0 +1,111 @@
+{
+  "extends": "ultra_instinct",
+  "forms": [
+    "ultra_instinct_sign"
+  ],
+  "layers": [
+    {
+      "kind": "glow",
+      "scale": 1.12,
+      "opacity": 0.55,
+      "colors": {
+        "rim": "#6A5CFF"
+      }
+    },
+    {
+      "kind": "glow",
+      "scale": 1.04,
+      "opacity": 0.75,
+      "colors": {
+        "rim": "#7F9CFF"
+      }
+    },
+    {
+      "kind": "shell",
+      "colors": {
+        "core": "#E8F0FF",
+        "mid": "#C4D4FF",
+        "edge": "#6F8CFF",
+        "rim": "#8F7CFF"
+      },
+      "alpha": {
+        "core": 0.08,
+        "edge": 0.8
+      },
+      "rim": {
+        "width": 0.06,
+        "strength": 0.8
+      },
+      "spikes": {
+        "count": 7,
+        "size": 0.3,
+        "sharpness": 0.35,
+        "lean": 1.4
+      },
+      "motion": {
+        "scroll": 0.9,
+        "flicker": 0.12,
+        "streaks": 0.5,
+        "streakSpeed": 2.0,
+        "stretch": 0.35,
+        "tallFlames": 0.8,
+        "warp": 0.7,
+        "fps": 0,
+        "smear": 0.1
+      },
+      "band": 0.2
+    },
+    {
+      "kind": "tongues",
+      "blend": "add",
+      "colors": {
+        "core": "#E8F0FF",
+        "mid": "#B8CAFF",
+        "edge": "#8478FF"
+      },
+      "alpha": {
+        "core": 0.6,
+        "edge": 0.35
+      },
+      "spikes": {
+        "sharpness": 0.2
+      },
+      "tongues": {
+        "count": 16,
+        "length": 0.48,
+        "width": 0.08,
+        "life": 1.2,
+        "top": 0.4,
+        "rise": 0.5,
+        "wave": 0.7,
+        "inset": 0.05
+      },
+      "motion": {
+        "scroll": 0.9
+      }
+    },
+    {
+      "kind": "haze",
+      "scale": 0.55,
+      "blend": "add",
+      "colors": {
+        "core": "#E8F0FF",
+        "mid": "#C8D8FF",
+        "edge": "#A8BCFF"
+      },
+      "alpha": {
+        "core": 0.22,
+        "edge": 0.15
+      },
+      "motion": {
+        "speed": 1.4
+      }
+    }
+  ],
+  "particles": {
+    "type": "streaks",
+    "rate": 1.0,
+    "size": 0.9,
+    "color": "#CFE0FF"
+  }
+}

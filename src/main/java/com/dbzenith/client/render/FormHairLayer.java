@@ -30,6 +30,8 @@ import java.util.Map;
  * own Minecraft skin a cap covers their painted hair first.
  */
 public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
+    /** Ultra Instinct (CX-24 phase 5): Mastered's silver hair and eyes, the Sign's grey-silver eyes. */
+    public static final int UI_HAIR = 0xDCE2EC, UI_EYES = 0xC8D2E0, UI_SIGN_EYES = 0xA9B1BD;
     private static final ResourceLocation TEXTURE = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/form_hair.png");
     private static final ResourceLocation TEXTURE_HD = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/form_hair_hd.png");
 
@@ -82,17 +84,20 @@ public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         boolean goldCharge=state.has(PublicStatePacket.TRANSFORMING)&&HairTransformation.goldTarget(transition.target());
         if(goldCharge) hairColor=HairTransformation.chargeColor(state.hairColor(),Forms.SUPER_SAIYAN.hairColor(),transition.progress(),ageInTicks);
         int eyeColor = form.eyeColor() >= 0 ? form.eyeColor() : state.eyeColor();
+        int ui = state.ultraInstinct();                                          // Ultra Instinct, over the form (CX-24 phase 5): silver eyes; Mastered, silver hair
+        if (ui == 2 && !goldCharge) hairColor = UI_HAIR;
+        if (ui > 0) eyeColor = ui == 2 ? UI_EYES : UI_SIGN_EYES;
         if (hair.isEmpty() && eyeColor < 0) return;
 
         VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(ArtStyle.hiRes() ? TEXTURE_HD : TEXTURE));
-        int hairLight = goldCharge ? (hairColor==state.hairColor()?light:LightTexture.FULL_BRIGHT) : formHair ? LightTexture.FULL_BRIGHT : light;              // transformed hair glows
+        int hairLight = goldCharge ? (hairColor==state.hairColor()?light:LightTexture.FULL_BRIGHT) : formHair || ui == 2 ? LightTexture.FULL_BRIGHT : light;              // transformed hair glows
         if (!hair.isEmpty()) {
             VertexConsumer hairBuffer = buffers.getBuffer(RenderType.entityCutoutNoCull(HairRender.MATERIAL));
             pose.pushPose();
             getParentModel().head.translateAndRotate(pose);
             float aura = state.powering() ? 1f : formHair ? .3f : 0f;                // an aura lifts the hair
             float[] live = HairSim.step(player, getParentModel().head, hair, partialTick, aura);
-            int tips = !goldCharge && (form.isBase() || form.hairColor() < 0) ? state.highlight() : -1;   // dyed tips, until a form recolours the hair
+            int tips = !goldCharge && ui < 2 && (form.isBase() || form.hairColor() < 0) ? state.highlight() : -1;   // dyed tips, until a form recolours the hair
             HairRender.render(pose, hairBuffer, hair, live, hairLight, OverlayTexture.NO_OVERLAY, hairColor, tips);
             pose.popPose();
         }

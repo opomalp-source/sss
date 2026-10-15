@@ -86,20 +86,19 @@ public final class FormHandler {
         Form next = null;
         if (Forms.exists(data.getTargetForm())) {
             Form target = Forms.byId(data.getTargetForm());
-            if (target != current && !com.dbzenith.combat.meter.Meters.isTechnique(target) && Forms.isOnPath(current.id(), target)
+            if (target != current && Forms.isOnPath(current.id(), target)
                     && pathUnlocked(data, current, target)) next = target;
         }
         if (next == null) {
             for (Form child : Forms.children(current.id(), data.getRace(), data.getVariant())) {
-                if (problem(data, child) == null && !com.dbzenith.combat.meter.Meters.isTechnique(child)) {   // Ultra Instinct is on O (CX-20)
+                if (problem(data, child) == null) {
                     next = child;
                     break;
                 }
             }
         }
         if (next == null) {
-            List<Form> children = Forms.children(current.id(), data.getRace(), data.getVariant()).stream()
-                    .filter(f -> !com.dbzenith.combat.meter.Meters.isTechnique(f)).toList();
+            List<Form> children = Forms.children(current.id(), data.getRace(), data.getVariant());
             Component reason = children.isEmpty() ? Component.translatable("form.dbzenith.problem.none")
                     : problem(data, children.get(0));
             player.displayClientMessage(reason == null ? Component.translatable("form.dbzenith.problem.none") : reason, true);

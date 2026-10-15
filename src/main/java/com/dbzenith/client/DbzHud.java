@@ -88,6 +88,10 @@ public final class DbzHud implements IGuiOverlay {
             int pulse = DbzTheme.mix(0xFFFF2A1E, 0xFFFFC0A0, 0.5f + 0.5f * Mth.sin(t * 0.5f));
             chipX = chip(g, font, chipX, ly, Component.translatable("hud.dbzenith.kaioken", d.getKaiokenStage()), pulse);
         }
+        if (d.getUltraInstinct() > 0) {                                        // a technique over the form (CX-24 phase 5)
+            int pulse = DbzTheme.mix(0xFFC8D4FF, 0xFFF4F8FF, 0.5f + 0.5f * Mth.sin(t * 0.8f));
+            chipX = chip(g, font, chipX, ly, com.dbzenith.transform.UltraInstinct.name(d.getUltraInstinct()), pulse);
+        }
         for (String buff : new String[]{"limit_break", "ki_barrier", "desperate_gambit"}) {          // universal buffs and their backlash
             com.dbzenith.race.RacialSkill rs = com.dbzenith.race.RacialSkills.byId(buff);
             if (d.getRacialActive().contains(buff)) chipX = chip(g, font, chipX, ly, Component.translatable(rs.translationKey()), rs.color());

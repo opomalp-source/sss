@@ -67,6 +67,12 @@ public final class AuraTests {
             sound(helper, d);
             checked++;
         }
+        for (String ui : new String[]{com.dbzenith.transform.UltraInstinct.SIGN_ID, com.dbzenith.transform.UltraInstinct.MASTERED_ID}) {   // a technique now, still with its aura
+            AuraDef d = load(auraFor(ui));
+            helper.assertTrue(d != null && d.forms.contains(ui), "Ultra Instinct's aura " + ui);
+            sound(helper, d);
+            checked++;
+        }
         helper.assertTrue(checked >= 100, "every form checked: " + checked);
         AuraDef blue = load("super_saiyan_blue");
         helper.assertTrue(!blue.jagged && blue.forms.contains(Forms.SUPER_SAIYAN_BLUE.id()), "Blue: a lobed shell");

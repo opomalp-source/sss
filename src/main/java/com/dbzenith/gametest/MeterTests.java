@@ -84,7 +84,6 @@ public final class MeterTests {
         helper.assertTrue(!s.isEmpty() && s.get(0).id().equals(Forms.SUPER_SAIYAN.id()), "Super Saiyan first: " + s);
         for (int i = 0; i < s.size(); i++) {
             helper.assertTrue(Math.abs(s.get(i).at() - 100.0 * (i + 1) / s.size()) < 1e-9, "spread evenly: " + s);
-            helper.assertTrue(!Meters.isTechnique(Forms.byId(s.get(i).id())), "Ultra Instinct isn't a form here");
         }
         helper.assertTrue(Meters.reached(s, 0) == null && Meters.reached(s, 100) == s.get(s.size() - 1), "reached steps");
         TestPlayers.remove(helper, p);
@@ -189,9 +188,8 @@ public final class MeterTests {
         helper.assertTrue(d.getKaiokenStage() == 0, "empty: Kaioken off");
 
         d.setFlag(UltraInstinct.SIGN_FLAG, true);
-        d.setFlag(FormHandler.UNLOCK_FLAG + Forms.ULTRA_INSTINCT_SIGN.id(), true);
-        helper.assertTrue(Meters.formSteps(d).stream().noneMatch(s -> Meters.isTechnique(Forms.byId(s.id()))), "never on the form bar");
-        d.setTargetForm(Forms.ULTRA_INSTINCT_SIGN.id());
+        d.setFlag(FormHandler.UNLOCK_FLAG + UltraInstinct.SIGN_ID, true);
+        d.setTargetForm(UltraInstinct.SIGN_ID);
         d.setFormMeter(100);
         FormHandler.transformUp(p, true);
         helper.assertTrue(!UltraInstinct.isIn(d), "J never goes to Ultra Instinct");

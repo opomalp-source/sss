@@ -39,7 +39,7 @@ public final class Afterimages {
     private static final int LIFE = 7;
     private static final double MIN_SPACING_SQ = 0.35 * 0.35;
 
-    private record Ghost(double x, double y, double z, float bodyYaw, int born) {}
+    private record Ghost(double x, double y, double z, float bodyYaw, int born, int life) {}
 
     private static final class Trail {
         final ArrayDeque<Ghost> ghosts = new ArrayDeque<>();
@@ -55,6 +55,14 @@ public final class Afterimages {
     public static void keepAlive(Player player, int forTicks) {
         Trail t = TRAILS.computeIfAbsent(player.getId(), id -> new Trail());
         t.until = Math.max(t.until, ticks + forTicks);
+    }
+
+    /**
+     * One afterimage left standing where a fighter was (Ultra Instinct's dodge, CX-24 phase 5): it lingers {@code life}
+     * ticks, fading.
+     */
+    public static void ghost(Player player, double x, double y, double z, int life) {
+        TRAILS.computeIfAbsent(player.getId(), id -> new Trail()).ghosts.addLast(new Ghost(x, y, z, player.yBodyRot, ticks, life));
     }
 
     @SubscribeEvent
@@ -75,10 +83,10 @@ public final class Afterimages {
             if (who instanceof Player p && ticks <= t.until) {
                 Ghost last = t.ghosts.peekLast();
                 if (last == null || p.distanceToSqr(last.x, last.y, last.z) > MIN_SPACING_SQ) {
-                    t.ghosts.addLast(new Ghost(p.xo, p.yo, p.zo, p.yBodyRotO, ticks));
+                    t.ghosts.addLast(new Ghost(p.xo, p.yo, p.zo, p.yBodyRotO, ticks, LIFE));
                 }
             }
-            while (!t.ghosts.isEmpty() && ticks - t.ghosts.peekFirst().born > LIFE) t.ghosts.removeFirst();
+            t.ghosts.removeIf(g -> ticks - g.born > g.life);
             if (t.ghosts.isEmpty() && ticks > t.until) it.remove();
         }
     }
@@ -91,7 +99,7 @@ public final class Afterimages {
         if (!(event.getEntity() instanceof AbstractClientPlayer player)) return;
         PublicStatePacket state = ClientPublicStates.get(player.getId());
         if (state != null && com.dbzenith.transform.GreatApe.isApeForm(state.form())) return;
-        int tint = FxDraw.mix(state == null ? 0xD9F2FF : state.auraColor(), 0xFFFFFF, 0.35f);
+        int tint = state != null && state.ultraInstinct() > 0 ? 0xC8D8FF : FxDraw.mix(state == null ? 0xD9F2FF : state.auraColor(), 0xFFFFFF, 0.35f);
         float r = ((tint >> 16) & 255) / 255f, g = ((tint >> 8) & 255) / 255f, b = (tint & 255) / 255f;
 
         float partial = event.getPartialTick();
@@ -114,7 +122,7 @@ public final class Afterimages {
         PoseStack pose = event.getPoseStack();
         for (Ghost ghost : trail.ghosts) {
             float age = ticks - ghost.born + partial;
-            float alpha = 0.5f * (1 - age / (LIFE + 1));
+            float alpha = (ghost.life > LIFE ? 0.6f : 0.5f) * (1 - age / (ghost.life + 1));
             if (alpha <= 0.02f) continue;
             pose.pushPose();
             pose.translate((ghost.x - px) / scale, (ghost.y - py) / scale, (ghost.z - pz) / scale);

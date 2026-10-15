@@ -72,16 +72,12 @@ public class WoundTests {
         p.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Items.BREAD));
         Limbs.sever(p, Limb.RIGHT_ARM);
         h.assertTrue(Limbs.of(p).leftHanded(), "right arm gone, left good");
-        h.runAfterDelay(12, () -> {
-            h.assertTrue(p.getMainArm() == HumanoidArm.LEFT, "the left is the main arm now");
-            h.assertTrue(p.getOffhandItem().isEmpty() && p.getInventory().contains(new ItemStack(Items.BREAD)), "nothing held on the lost side");
-            Limbs.regrow(p, Limb.RIGHT_ARM, false);
-            h.runAfterDelay(12, () -> {
-                h.assertTrue(p.getMainArm() == HumanoidArm.RIGHT, "back to the right when it is back");
-                TestPlayers.remove(h, p);
-                h.succeed();
-            });
-        });
+        h.assertTrue(p.getMainArm() == HumanoidArm.LEFT, "the left is the main arm now, at once");
+        h.assertTrue(p.getOffhandItem().isEmpty() && p.getInventory().contains(new ItemStack(Items.BREAD)), "nothing held on the lost side");
+        Limbs.regrow(p, Limb.RIGHT_ARM, false);
+        h.assertTrue(p.getMainArm() == HumanoidArm.RIGHT, "back to the right when it is back");
+        TestPlayers.remove(h, p);
+        h.succeed();
     }
 
     @GameTest(template = "empty", batch = "wounds", timeoutTicks = 60)

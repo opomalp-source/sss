@@ -68,6 +68,7 @@ public final class KiTicker {
         if (now % 20 == 0) com.dbzenith.transform.GodKi.tickSecond(player, data);
         com.dbzenith.race.RacialSkillEffects.tick(player, data, now);
         com.dbzenith.transform.Kaioken.tick(player, data, now);
+        com.dbzenith.transform.UltraInstinct.tick(player, data, now);          // a technique over the form (CX-24 phase 5)
         com.dbzenith.combat.meter.MeterLogic.tick(player, data, now);              // the PvP meters (CX-20)
         com.dbzenith.style.StyleLogic.tick(player, data, now);                     // training with a master (CX-20)
         com.dbzenith.skill.KiCharge.tick(player, data, now);                       // charging a technique (CX-23)

@@ -25,7 +25,7 @@ Server config `[pvp]`: `tagForcesPvp`, `hurtOutOfPvp`, `combatTagSeconds`, `togg
 Two upright bars sit bottom right, shown only in PvP mode. Both run 0–100.
 
 - **Form bar (right):** in your aura colour. Its studs are your unlocked forms, in the order J climbs them, following your target form.
-- **Technique bar (left):** in the technique's colour. Its studs are the Kaioken stages you know, then Ultra Instinct. Ultra Instinct is a technique (key O), never a form on J.
+- **Technique bar (left):** in the technique's colour. Its studs are the Kaioken stages you know, then Ultra Instinct. Ultra Instinct is a technique (key O), never a form on J: it goes over whatever form you are in.
 
 What fills them (PvP mode only, against anything):
 

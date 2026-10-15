@@ -71,6 +71,17 @@ public final class ImpactFx {
             BloodFx.onImpact(m);
             return;
         }
+        if (m.kind() == ImpactPacket.UI_DODGE) {                                // Ultra Instinct: an afterimage left standing, a silver streak
+            Minecraft mc0 = Minecraft.getInstance();
+            if (mc0.level != null && mc0.level.getEntity(m.attackerId()) instanceof net.minecraft.world.entity.player.Player who)
+                Afterimages.ghost(who, m.x(), m.y() - 1, m.z(), 14);
+            for (int i = 0; i <= 12; i++) {
+                float k = i / 12f;
+                KiParticles.add(KiParticles.MOTE, m.x() + m.dx() * k, m.y() + (Math.random() - 0.3) * 1.2, m.z() + m.dz() * k,
+                        m.dx() * 0.02, 0.02, m.dz() * 0.02, 0.18f, m.color(), 8 + i / 2, 0.8f, 0f);
+            }
+            return;
+        }
         if (m.kind() == ImpactPacket.REGROW) {                                  // the limbs rework: a limb growing back
             com.dbzenith.client.render.LimbRender.onRegrow(m);
             return;

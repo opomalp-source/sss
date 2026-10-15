@@ -160,6 +160,10 @@ public final class AuraSystem {
     /** The aura a fighter's form wears (the base form's only shows while charging), or null. */
     public static AuraDef wanted(PublicStatePacket state) {
         if (state == null) return null;
+        if (state.ultraInstinct() > 0) {                                        // Ultra Instinct, a technique, takes the form's place (CX-24 phase 5)
+            AuraDef ui = AuraDefs.forForm(com.dbzenith.transform.UltraInstinct.id(state.ultraInstinct()));
+            if (ui != null) return ui;
+        }
         return AuraDefs.forForm(state.form());
     }
 
@@ -375,6 +379,7 @@ public final class AuraSystem {
                 if (!sl.drawn || sl.fade <= 0.01f) continue;
                 if (sl.charge > 0.02f) budget -= motes(pose, dots, sl, budget, detail);
                 if (sl.shells && "flecks".equals(sl.def.particles)) budget -= flecks(pose, dots, sl, budget, detail);
+                if (sl.shells && "streaks".equals(sl.def.particles)) budget -= streaks(pose, dots, sl, budget, detail);
                 if (sl.shells && sl.def.lightningRate > 0) budget -= lightning(pose, dots, sl, t, budget, detail);
             }
         }
@@ -789,6 +794,61 @@ public final class AuraSystem {
             corner(vc, m, nm, px + sx, py - len, pz + sz, 1, 1, r, g, b, alpha);
             corner(vc, m, nm, px + sx, py + len, pz + sz, 1, 0, r, g, b, alpha);
             corner(vc, m, nm, px - sx, py + len, pz - sz, 0, 0, r, g, b, alpha);
+            drawn++;
+        }
+        return drawn;
+    }
+
+    /**
+     * Streaks: thin dashed lines of light standing up through the aura and drifting slowly upward, each topped with a
+     * point of light (Ultra Instinct's look, CX-24 phase 5). Returns how many quads it drew.
+     */
+    private static int streaks(PoseStack pose, VertexConsumer vc, Slot st, int budget, int detail) {
+        AuraDef d = st.def;
+        if (d.particleRate <= 0) return 0;
+        Matrix4f m = pose.last().pose();
+        Matrix3f nm = pose.last().normal();
+        float t = st.phase, seed = st.seed;
+        int count = Math.min(budget / 5, Math.round(14 * d.particleRate * (1 + 0.6f * st.charge) * (detail == 0 ? 0.5f : detail == 2 ? 1.4f : 1f)));
+        int r = (d.particleColor >> 16) & 255, g = (d.particleColor >> 8) & 255, b = d.particleColor & 255;
+        int drawn = 0;
+        for (int i = 0; i < count; i++) {
+            float period = 1.5f + (i % 5) * 0.3f;
+            float phase = (t * 0.8f + i * 0.917f + seed) / period;
+            int cycle = Mth.floor(phase);
+            float life = phase - cycle;
+            int h = hash((int) (seed * 613) + i * 7417 + cycle * 65537);
+            float a = (h & 1023) / 1023f * Mth.TWO_PI;
+            float s0 = 0.02f + 0.7f * ((h >>> 10) & 1023) / 1023f;
+            float sNow = Math.min(0.95f, s0 + life * 0.28f);
+            float rr = AuraShell.profile(d, sNow) * st.radius * (0.3f + 0.6f * ((h >>> 20) & 255) / 255f);
+            float px = st.x + Mth.cos(a) * rr, pz = st.z + Mth.sin(a) * rr;
+            float py = st.y + st.bottom + sNow * st.height;
+            float w = st.body * 0.0065f * d.particleSize;
+            float dash = st.body * 0.032f * d.particleSize, gap = dash * 0.6f;
+            int dashes = 2 + ((h >>> 3) & 3);
+            float flick = 0.75f + 0.25f * Mth.sin(t * 13f + i * 1.7f);
+            int alpha = Mth.clamp((int) (230 * Mth.sin(Mth.PI * life) * flick * st.fade), 0, 255);
+            if (alpha < 4) continue;
+            float sx = pz, sz = -px;                                              // across the line of sight, level
+            float sl = Mth.sqrt(sx * sx + sz * sz);
+            if (sl < 1e-4f) continue;
+            sx /= sl;
+            sz /= sl;
+            for (int k = 0; k < dashes && drawn < budget; k++) {                  // the dashes, fainter down the line
+                float top = py - k * (dash + gap), bot = top - dash;
+                int ak = (int) (alpha * (1 - k * 0.22f));
+                corner(vc, m, nm, px - sx * w, bot, pz - sz * w, 0, 1, r, g, b, ak);
+                corner(vc, m, nm, px + sx * w, bot, pz + sz * w, 1, 1, r, g, b, ak);
+                corner(vc, m, nm, px + sx * w, top, pz + sz * w, 1, 0, r, g, b, ak);
+                corner(vc, m, nm, px - sx * w, top, pz - sz * w, 0, 0, r, g, b, ak);
+                drawn++;
+            }
+            float dot = w * 2.6f;                                                 // a point of light at its head
+            corner(vc, m, nm, px - sx * dot, py + gap - dot, pz - sz * dot, 0, 1, r, g, b, alpha);
+            corner(vc, m, nm, px + sx * dot, py + gap - dot, pz + sz * dot, 1, 1, r, g, b, alpha);
+            corner(vc, m, nm, px + sx * dot, py + gap + dot, pz + sz * dot, 1, 0, r, g, b, alpha);
+            corner(vc, m, nm, px - sx * dot, py + gap + dot, pz - sz * dot, 0, 0, r, g, b, alpha);
             drawn++;
         }
         return drawn;

@@ -43,6 +43,8 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
     public static final int PVP = 1 << 15;
     /** Bits 20-27: the Kaioken stage (x2 = 2 ... x20 = 20), for the aura's red layer (CX-24). */
     public static final int KAIOKEN_SHIFT = 20;
+    /** Bits 28-29: Ultra Instinct, 1 the Sign, 2 Mastered (a technique over the form; CX-24 phase 5). */
+    public static final int UI_SHIFT = 28;
 
     public static PublicStatePacket of(int entityId, PlayerData d) {
         int flags = (d.isCharging() ? CHARGING : 0) | (d.isFlying() ? FLYING : 0)
@@ -50,7 +52,7 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
                 | (Races.of(d.getRace()).tail() && d.hasTail() ? TAIL : 0) | (d.isMeditating() ? MEDITATING : 0) | (d.isTransforming() && d.isTransformHeld() ? TRANSFORMING : 0)
                 | (d.getKaiokenStage() > 0 ? KAIOKEN : 0) | (d.getRacialActive().contains("ki_barrier") ? BARRIER : 0)
                 | (d.combat().downedFlag ? DOWNED : 0) | (d.isDead() ? DEAD : 0) | (d.isPvp() ? PVP : 0) | com.dbzenith.fusion.Fusion.publicBits(d)
-                | (Math.min(255, Math.max(0, d.getKaiokenStage())) << KAIOKEN_SHIFT);
+                | (Math.min(255, Math.max(0, d.getKaiokenStage())) << KAIOKEN_SHIFT) | (d.getUltraInstinct() & 3) << UI_SHIFT;
         return new PublicStatePacket(entityId, flags, d.getReleasePercent(), Aura.color(d), d.getFormId(),
                 d.getRace().ordinal(), d.getBodyType().ordinal(), d.getHairStyle(), d.getHairColor(), d.getEyeColor(),
                 d.hasFlag("god_ki") ? -1 : com.dbzenith.stats.StatCalculator.battlePower(d), // -1: god ki cannot be read
@@ -104,6 +106,11 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
     }
 
     /** The Kaioken stage, 0 when off. */
+    /** Ultra Instinct: 0 none, 1 the Sign, 2 Mastered. */
+    public int ultraInstinct() {
+        return flags >>> UI_SHIFT & 3;
+    }
+
     public int kaiokenStage() {
         return (flags >>> KAIOKEN_SHIFT) & 0xFF;
     }

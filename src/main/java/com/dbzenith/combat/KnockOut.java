@@ -145,6 +145,7 @@ public final class KnockOut {
                 com.dbzenith.skill.KiCharge.fizzle(p, false);
                 com.dbzenith.transform.FormHandler.revertToBase(p, data);         // the form drops away with the last of the ki
                 com.dbzenith.transform.Kaioken.stop(p, data, true);
+                com.dbzenith.transform.UltraInstinct.stop(p, data, true);        // and Ultra Instinct (CX-24 phase 5)
                 data.setBody(Math.max(1, data.getDerived().maxBody() * 0.01));
                 BodyHealth.mirror(p, data);
                 data.markDirty();

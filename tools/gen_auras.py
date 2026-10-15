@@ -254,8 +254,8 @@ form('super_saiyan_2', 'fam_flame', '#FFD840', 2, lightning={"rate": 3.5, "size"
 form('super_saiyan_3', 'fam_flame', '#FFDA48', 3, shape={"height": 2.45, "peak": 0.55, "flare": 0.04},
      lightning={"rate": 5, "size": 1.2, "color": "#7FD4FF"},
      react={"charge": {"shake": 0.05, "wild": 1.8}})
-form('super_saiyan_god', 'fam_divine', '#FF3B3B', 4, layers_mod={1: {"colors": {"edge": "#E81E3A", "mid": "#FF8A7A", "rim": "#FFD0A0"}}},
-     particles={"type": "ember", "rate": 1.2, "color": "#FFB080"})
+# hand-made (auras/super_saiyan_god.json, CX-24 phase 5): form('super_saiyan_god', 'fam_divine', '#FF3B3B', 4, layers_mod={1: {"colors": {"edge": "#E81E3A", "mid": "#FF8A7A", "rim": "#FFD0A0"}}},
+#     particles={"type": "ember", "rate": 1.2, "color": "#FFB080"})
 form('ultimate', 'fam_divine', '#F4F8FF', 4, particles={"type": "sparkle", "rate": 1.2})
 form('super_saiyan_4', 'fam_ssj4', SSJ4, 5)
 form('ssj4_full_power', 'fam_ssj4', '#FF5A3A', 6, lightning={"rate": 2.5, "size": 0.9, "color": "#FFE0A0"},
@@ -279,9 +279,9 @@ form('lssj4', 'fam_ssj4', SSJ4, 5, shape={"width": 1.35, "height": 2.45})
 form('lssj4_full_power', 'fam_ssj4', '#FF5A3A', 6, shape={"width": 1.4, "height": 2.55}, lightning={"rate": 3, "size": 1.0, "color": "#FFE0A0"})
 form('lssj4_limit_breaker', 'fam_divine', '#FF8AE0', 7, shape={"width": 1.3}, lightning={"rate": 2.5, "size": 1.0, "color": "#FFE8FA"})
 # Ultra Instinct
-form('ultra_instinct_sign', 'fam_wisp', '#CFE0FF', 5, layers_mod={1: {"colors": {"edge": "#7FA8FF", "rim": "#E8F0FF"}}})
-form('ultra_instinct', 'fam_wisp', '#EEF4FF', 6, layers_mod={1: {"alpha": {"core": 0.28}, "colors": {"edge": "#B8D0FF"}}},
-     particles={"rate": 2.4}, tongues={"count": 26})
+# hand-made (auras/ultra_instinct_sign.json): form('ultra_instinct_sign', 'fam_wisp', '#CFE0FF', 5, layers_mod={1: {"colors": {"edge": "#7FA8FF", "rim": "#E8F0FF"}}})
+# hand-made (auras/ultra_instinct.json): form('ultra_instinct', 'fam_wisp', '#EEF4FF', 6, layers_mod={1: {"alpha": {"core": 0.28}, "colors": {"edge": "#B8D0FF"}}},
+#     particles={"rate": 2.4}, tongues={"count": 26})
 # Human
 form('full_power', 'fam_flame', '#F2F6FF', 1)
 form('buffed', 'fam_roar', '#FFE8C0', 2, shape={"width": 1.2, "height": 2.15}, particles={"type": "sparkle", "rate": 0.4})

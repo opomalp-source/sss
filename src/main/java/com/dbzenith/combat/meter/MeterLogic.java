@@ -124,7 +124,7 @@ public final class MeterLogic {
             tech += r.tech().chargingPerSecond() * dt;
         }
         Form cur = Forms.byId(d.getFormId());
-        if (!cur.isBase() && !Meters.isTechnique(cur)) form -= (r.form().drainPerSecond() + r.form().drainPerTier() * cur.tier()) * dt;
+        if (!cur.isBase()) form -= (r.form().drainPerSecond() + r.form().drainPerTier() * cur.tier()) * dt;
         if (d.getKaiokenStage() > 0 || UltraInstinct.isIn(d)) tech -= (r.tech().drainPerSecond() + r.tech().drainPerTier() * d.getKaiokenStage()) * dt;
         long idle = now - d.getLastCombatTick();
         if (idle > r.form().decayAfterSeconds() * 20) form -= r.form().decayPerSecond() * dt;
@@ -136,7 +136,7 @@ public final class MeterLogic {
     /** Drops a form, a Kaioken stage or Ultra Instinct the bars no longer hold. */
     public static void hold(ServerPlayer p, PlayerData d) {
         Form cur = Forms.byId(d.getFormId());
-        if (!cur.isBase() && !Meters.isTechnique(cur)) {
+        if (!cur.isBase()) {
             List<Meters.Step> steps = Meters.formSteps(d);
             for (int i = 0; i < steps.size(); i++) {
                 if (!steps.get(i).id().equals(cur.id())) continue;
@@ -151,7 +151,7 @@ public final class MeterLogic {
         List<Meters.Step> tech = Meters.techSteps(d);
         if (UltraInstinct.isIn(d)) {                                            // not layered on Kaioken: it holds until the bar empties
             if (d.getTechMeter() <= 1e-6) {
-                FormHandler.revertToBase(p, d);
+                UltraInstinct.stop(p, d, false);
                 p.displayClientMessage(Component.translatable("message.dbzenith.meter_tech_fades"), true);
             }
         } else if (d.getKaiokenStage() > 0) {
@@ -213,31 +213,33 @@ public final class MeterLogic {
         p.displayClientMessage(Component.translatable("message.dbzenith.meter_tech_low", band == null ? 100 : (int) Math.ceil(band.at())), true);
     }
 
-    /** Which Ultra Instinct you can enter (Mastered if you have it), or null. */
-    public static Form ultraInstinct(PlayerData d) {
-        if (d.hasFlag(UltraInstinct.MASTERED_FLAG) && FormHandler.problem(d, Forms.ULTRA_INSTINCT) == null) return Forms.ULTRA_INSTINCT;
-        if (d.hasFlag(UltraInstinct.SIGN_FLAG) && FormHandler.problem(d, Forms.ULTRA_INSTINCT_SIGN) == null) return Forms.ULTRA_INSTINCT_SIGN;
-        return null;
-    }
-
     /**
      * The technique key (O): Kaioken one stage up; with Ultra Instinct learned, Ultra Instinct once Kaioken can go no
-     * higher (or isn't learned), and in PvP straight away once its stud is reached. Ultra Instinct is a technique: J
-     * never goes there.
+     * higher (or isn't learned), and in PvP straight away once its stud is reached. In the Sign with Mastered learned, O
+     * goes on to Mastered. Ultra Instinct is a technique over the form you are in: J never goes there.
      */
     public static boolean techniqueUp(ServerPlayer p, PlayerData d) {
-        Form ui = ultraInstinct(d);
+        int ui = UltraInstinct.reachable(d);
         if (UltraInstinct.isIn(d)) {
-            if (ui == Forms.ULTRA_INSTINCT && !Forms.ULTRA_INSTINCT.id().equals(d.getFormId())) return enterUltraInstinct(p, d, ui);
+            if (ui == UltraInstinct.MASTERED && !UltraInstinct.isMastered(d)) {
+                UltraInstinct.enter(p, d, ui);
+                return true;
+            }
             p.displayClientMessage(Component.translatable("message.dbzenith.ultra_instinct_already"), true);
             return false;
         }
         double uiAt = MeterRules.get().ultraInstinctAt();
         boolean uiReady = !gated(d) || d.getTechMeter() + 1e-6 >= uiAt;
-        if (ui != null && gated(d) && uiReady) return enterUltraInstinct(p, d, ui);
+        if (ui > 0 && gated(d) && uiReady) {
+            UltraInstinct.enter(p, d, ui);
+            return true;
+        }
         boolean kaiokenMore = Kaioken.maxStage(d) > 0 && d.getKaiokenStage() < Kaioken.maxStage(d) && Kaioken.formAllows(Forms.byId(d.getFormId()));
-        if (ui != null && !kaiokenMore) {
-            if (uiReady) return enterUltraInstinct(p, d, ui);
+        if (ui > 0 && !kaiokenMore) {
+            if (uiReady) {
+                UltraInstinct.enter(p, d, ui);
+                return true;
+            }
             p.displayClientMessage(Component.translatable("message.dbzenith.meter_tech_low", (int) Math.ceil(uiAt)), true);
             return false;
         }
@@ -246,15 +248,7 @@ public final class MeterLogic {
 
     /** Shift+O: Kaioken off, or out of Ultra Instinct. */
     public static void techniqueOff(ServerPlayer p, PlayerData d) {
-        if (UltraInstinct.isIn(d)) FormHandler.revertToBase(p, d);
+        if (UltraInstinct.isIn(d)) UltraInstinct.stop(p, d, false);
         else Kaioken.stop(p, d, false);
-    }
-
-    private static boolean enterUltraInstinct(ServerPlayer p, PlayerData d, Form ui) {
-        Kaioken.stop(p, d, true);
-        if (d.isTransforming()) d.stopTransforming();
-        FormHandler.enter(p, d, ui);
-        p.level().playSound(null, p.getX(), p.getY(), p.getZ(), com.dbzenith.registry.ModSounds.VANISH.get(), SoundSource.PLAYERS, 0.9f, 0.7f);
-        return true;
     }
 }

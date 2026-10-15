@@ -113,8 +113,9 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
 
         // a race skin's own face colours, unless the player chose their own
         FaceDefaults.Face race = raceSkin(state) ? FaceDefaults.of(RaceSkinLayer.skinName(state.raceEnum(), state.variantEnum())) : null;
-        boolean glowing = !form.isBase() && form.eyeColor() >= 0;
+        boolean glowing = !form.isBase() && form.eyeColor() >= 0 || state.ultraInstinct() > 0;
         int iris = form.eyeColor() >= 0 ? form.eyeColor() : state.eyeColor() >= 0 ? state.eyeColor() : race != null ? race.iris() : 0x1E1610;
+        if (state.ultraInstinct() > 0) iris = state.ultraInstinct() == 2 ? FormHairLayer.UI_EYES : FormHairLayer.UI_SIGN_EYES;   // Ultra Instinct's silver eyes
         boolean whites = race == null || race.whites() || state.eyeColor() >= 0;
         draw(pose, buffers, Part.EYES.ordinal(), eyes, light, overlay, whites ? 0xFFFFFF : iris);     // no whites: the whole eye is dark
         pose.pushPose();                                                       // the eyes glance (CX-42): irises and pupils shift a touch sideways
@@ -130,6 +131,7 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         }
         pose.popPose();
         int hair = form.hairColor() >= 0 ? form.hairColor() : race != null ? race.brow() : state.hairColor() >= 0 ? state.hairColor() : 0x3A2414;
+        if (state.ultraInstinct() == 2) hair = FormHairLayer.UI_HAIR;              // Mastered: silver brows too
         if (!FormShape.browRidge(form.id())) draw(pose, buffers, Part.BROWS.ordinal(), brows, light, overlay, race != null && form.hairColor() < 0 ? hair : darken(hair, 0.8f));
         draw(pose, buffers, Part.NOSE.ordinal(), FaceParts.get(face, Part.NOSE), light, overlay, 0xFFFFFF);
         draw(pose, buffers, Part.MOUTH.ordinal(), mouth, light, overlay, 0xFFFFFF);

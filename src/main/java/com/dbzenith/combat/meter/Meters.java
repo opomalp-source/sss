@@ -52,7 +52,7 @@ public final class Meters {
         for (int guard = 0; guard < 16; guard++) {
             Form next = null;
             for (Form child : Forms.children(f.id(), d.getRace(), d.getVariant())) {
-                if (isTechnique(child) || FormHandler.problem(d, child) != null) continue;
+                if (FormHandler.problem(d, child) != null) continue;
                 if (target != null && target != child && !Forms.isOnPath(child.id(), target)) {
                     if (next == null) next = child;                                   // keep looking for the target's way
                     continue;
@@ -77,16 +77,11 @@ public final class Meters {
             steps.add(new Step("kaioken_" + k.stage(), "meter.dbzenith.kaioken_" + k.stage(), k.at(), r.kaiokenColor(), k.stage()));
         }
         if (d.hasFlag(UltraInstinct.MASTERED_FLAG)) {
-            steps.add(new Step(Forms.ULTRA_INSTINCT.id(), Forms.ULTRA_INSTINCT.translationKey(), r.ultraInstinctAt(), r.masteredColor(), 0));
+            steps.add(new Step(UltraInstinct.MASTERED_ID, "technique.dbzenith." + UltraInstinct.MASTERED_ID, r.ultraInstinctAt(), r.masteredColor(), 0));
         } else if (d.hasFlag(UltraInstinct.SIGN_FLAG)) {
-            steps.add(new Step(Forms.ULTRA_INSTINCT_SIGN.id(), Forms.ULTRA_INSTINCT_SIGN.translationKey(), r.ultraInstinctAt(), r.signColor(), 0));
+            steps.add(new Step(UltraInstinct.SIGN_ID, "technique.dbzenith." + UltraInstinct.SIGN_ID, r.ultraInstinctAt(), r.signColor(), 0));
         }
         return steps;
-    }
-
-    /** Ultra Instinct sits on the technique bar, not the form bar. */
-    public static boolean isTechnique(Form f) {
-        return f == Forms.ULTRA_INSTINCT || f == Forms.ULTRA_INSTINCT_SIGN;
     }
 
     /** The last step reached at {@code value}, or null below the first. */

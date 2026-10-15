@@ -30,6 +30,8 @@ public record ImpactPacket(float x, float y, float z, float dx, float dy, float 
     public static final int BLOOD = 13;
     /** The limbs rework: a lost limb grows back (scale: the limb, colour: the slime or goo it comes out in, attacker: whose). */
     public static final int REGROW = 14;
+    /** Ultra Instinct dodged: an afterimage where they stood, a streak to where they went (dx, dy, dz). */
+    public static final int UI_DODGE = 15;
     /** Phase 6: the ground torn open (scale: the crater's radius): dust, debris, a rumble; no light. */
     public static final int CRATER = 12;
 

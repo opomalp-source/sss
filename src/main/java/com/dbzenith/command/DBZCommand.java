@@ -465,6 +465,20 @@ public final class DBZCommand {
                                             ctx.getSource().sendSuccess(() -> Component.literal("Training with " + m + " set to " + v + " min"), true);
                                             return 1;
                                         }))))))
+                .then(Commands.literal("ultrainstinct")                             // CX-24 phase 5: Ultra Instinct on or off (0 off, 1 the Sign, 2 Mastered), past its locks
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("level", IntegerArgumentType.integer(0, 2)).executes(ctx -> {
+                                    int level = IntegerArgumentType.getInteger(ctx, "level");
+                                    for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) ModCapabilities.get(p).ifPresent(d -> {
+                                        if (level == 0) com.dbzenith.transform.UltraInstinct.stop(p, d, false);
+                                        else {
+                                            d.setFlag(com.dbzenith.transform.FormHandler.UNLOCK_FLAG + com.dbzenith.transform.UltraInstinct.id(level), true);
+                                            com.dbzenith.transform.UltraInstinct.enter(p, d, level);
+                                        }
+                                    });
+                                    ctx.getSource().sendSuccess(() -> Component.literal("Ultra Instinct " + level), true);
+                                    return 1;
+                                }))))
                 .then(Commands.literal("unlockform")                                // CX-20: unlock a form outright (past level, mastery, flags)
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("form", StringArgumentType.word())
@@ -954,7 +968,7 @@ public final class DBZCommand {
     /** /dbz unlockform: sets or clears a form's unlock flag (CX-20, for testing the form bar). */
     private static int unlockForm(CommandContext<CommandSourceStack> ctx, boolean on) throws CommandSyntaxException {
         String id = StringArgumentType.getString(ctx, "form");
-        if (!Forms.exists(id)) {
+        if (!Forms.exists(id) && !id.equals(com.dbzenith.transform.UltraInstinct.SIGN_ID) && !id.equals(com.dbzenith.transform.UltraInstinct.MASTERED_ID)) {   // (Ultra Instinct: a technique)
             ctx.getSource().sendFailure(Component.literal("Unknown form: " + id));
             return 0;
         }

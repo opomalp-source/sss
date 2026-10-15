@@ -49,6 +49,12 @@ public class BodyFxLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<A
             getParentModel().renderToBuffer(pose, buffers.getBuffer(RenderType.eyes(GLOW)), LightTexture.FULL_BRIGHT, overlay,
                     r(c) * pulse, g(c) * pulse, b(c) * pulse, 1f);
         }
+        if (state.ultraInstinct() > 0) {                                              // Ultra Instinct: the body's edges shine silver-blue
+            float pulse = (state.ultraInstinct() == 2 ? 0.32f : 0.24f) + 0.06f * Mth.sin(t * 0.09f);
+            int c = state.ultraInstinct() == 2 ? 0xD8E4FF : 0xA8BCFF;
+            getParentModel().renderToBuffer(pose, buffers.getBuffer(RenderType.eyes(GLOW)), LightTexture.FULL_BRIGHT, overlay,
+                    r(c) * pulse, g(c) * pulse, b(c) * pulse, 1f);
+        }
         if (state.has(PublicStatePacket.KAIOKEN)) {                                   // Kaioken: a flush with every heartbeat
             float beat = 0.22f + 0.12f * Math.max(0, Mth.sin(t * 0.45f));
             getParentModel().renderToBuffer(pose, buffers.getBuffer(RenderType.entityTranslucent(MASK)), light, overlay, 1f, 0.12f, 0.08f, beat);

@@ -1265,6 +1265,8 @@ public class PlayerData {
     private final java.util.Map<String, Integer> skillLevels = new java.util.HashMap<>();
     private String skillSelected = "";
     private int kaiokenStage;
+    /** Ultra Instinct, a technique over the form: 0 none, 1 the Sign, 2 Mastered (synced, not saved). */
+    private int ultraInstinct;
     private int risingCharge, risingAge;
 
     public int getSkillLevel(String id) {
@@ -1299,6 +1301,18 @@ public class PlayerData {
         int s = Math.max(0, stage);
         if (s != kaiokenStage) {
             kaiokenStage = s;
+            invalidateDerived();
+        }
+    }
+
+    public int getUltraInstinct() {
+        return ultraInstinct;
+    }
+
+    public void setUltraInstinct(int level) {
+        int l = Math.max(0, Math.min(2, level));
+        if (l != ultraInstinct) {
+            ultraInstinct = l;
             invalidateDerived();
         }
     }
@@ -1981,6 +1995,7 @@ public class PlayerData {
         mentalAge = tag.contains("mentalAge") ? tag.getDouble("mentalAge") : 16;
         flying = tag.getBoolean("flying");
         formId = tag.contains("form") ? tag.getString("form") : BASE_FORM;
+        if (formId.startsWith("ultra_instinct")) formId = BASE_FORM;          // Ultra Instinct was a form; it is a technique now
         mastery.clear();
         CompoundTag m = tag.getCompound("mastery");
         for (String k : m.getAllKeys()) mastery.put(k, m.getDouble(k));
@@ -2123,6 +2138,7 @@ public class PlayerData {
         tag.putBoolean("transformHeld", transformHeld);
         tag.putInt("racialMask", racialMask);
         tag.putInt("kaioken", kaiokenStage);
+        tag.putInt("ultraInstinct", ultraInstinct);
         CompoundTag cs = new CompoundTag();
         combat.save(cs);
         tag.put("combat", cs);
@@ -2153,6 +2169,7 @@ public class PlayerData {
         transformHeld = !tag.contains("transformHeld") || tag.getBoolean("transformHeld");
         racialMask = tag.getInt("racialMask");
         kaiokenStage = tag.getInt("kaioken");
+        ultraInstinct = tag.getInt("ultraInstinct");
         combat.load(tag.getCompound("combat"));
         risingCharge = tag.getInt("risingCharge");
         trainingWith = tag.getString("trainingWith");

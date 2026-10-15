@@ -233,7 +233,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
   - [x] phase 2 (v0.73.0) Layers as data, animation and states (idle, charging, flying trail, hit flare, burst), extends, live tweaking
   - [x] phase 3 (v0.74.0) Kaioken (X2-X10, X20+ tiers) over other auras, stacking; flame tongues; every form from data; charge lock; auto-deploy
   - [x] phase 4 (v0.74.0) Super Saiyan and Super Saiyan God from data (and the other forms)
-  - [ ] phase 5 Ultra Instinct (silver shimmer, afterimages)
+  - [x] phase 5 (v0.129.0) Ultra Instinct a technique over any form (anyone taught by Whis), its own auras after the user's picture (wispy blue-violet, dashed light streaks), silver eyes and Mastered silver hair, body shine, afterimages on dodges; Super Saiyan God's aura redone as a fire (the user's picture)
   - [ ] phase 6 Transformation burst, ground effects, light
   - [ ] phase 7 Performance and config (quality, light, ground, own aura, intensity), live tweaking
 - [x] CX-34 (v0.89.0) Hair in every form: each stock style sculpted per look (base, Super Saiyan, SSJ2, SSJ3, SSJ4, God, Beast) after the characters, transformations morph lock by lock and grow from the roots; offline look sheets (tools/hair-looks.init.gradle)
@@ -279,6 +279,13 @@ Most of these already exist in a first version; each step upgrades what is there
 - [x] (v0.127.0) Custom carry (fixes the carried player's screen), grip finishers (six; the only way to kill the downed), help-up, timers and prompts, race-coloured blood and bleeding wounds, flying severed limbs, bandages, clothes torn until mended (sewing kit), NPCs grip downed players
 - [x] (v0.128.0) Wounds and scars: a lost leg means crawling, the left hand takes over for a lost right arm (stances, blows and what you hold), knock-out text removed (a faint heartbeat only), race-coloured stumps and battle damage (three layouts), open stumps keep bleeding until closed (bandage, sear with ki, Senzu, healing) and show it, regrowth animation for Namekians and Majins, earned scars that fade from red to pale
 - [ ] The user's feedback; more finishers or carry variants if wanted
+
+# Auras, apes and clothes (user request, 2026-10-15)
+- [x] (v0.129.0) Ultra Instinct and Mastered Ultra Instinct as techniques; UI and God auras after the user's pictures
+- [ ] Transformation burst (aura phase 6), aura quality and performance (phase 7)
+- [ ] Great Ape: only at a full moon, after looking at it a while; a real ape model and animations
+- [ ] Clothing and armor: better textures, parts that stick out (Frieza Force shoulder pads), head clothing as items (Piccolo's turban)
+- [ ] A real-play feel pass
 
 # Ki attack rework (user spec, 2026-10-14): cinematic attacks and sound, data-driven
 Decided with the user: all built-in attacks as JSON; charging locks movement for big attacks (best judgement);

@@ -60,22 +60,43 @@ public final class DestructionAndInstinctTests {
     public static void ultraInstinctDodgesOnItsOwn(GameTestHelper helper) {
         ServerPlayer p = TestPlayers.create(helper), foe = TestPlayers.create(helper);
         PlayerData d = ModCapabilities.getOrThrow(p);
-        helper.assertTrue(FormHandler.problem(d, Forms.ULTRA_INSTINCT_SIGN) != null, "locked until Whis teaches it");
+        helper.assertTrue(UltraInstinct.problem(d, UltraInstinct.SIGN) != null, "locked until Whis teaches it");
         d.setFlag(UltraInstinct.SIGN_FLAG, true);
-        FormHandler.enter(p, d, Forms.ULTRA_INSTINCT_SIGN);
+        d.setFlag(FormHandler.UNLOCK_FLAG + UltraInstinct.SIGN_ID, true);
+        UltraInstinct.enter(p, d, UltraInstinct.SIGN);
         d.setStamina(d.getDerived().maxStamina());
         helper.assertTrue(UltraInstinct.evadeChance(d) >= 0.25 && UltraInstinct.evadeChance(d) < 0.5, "the Sign: a quarter to a half");
         double stamina = d.getStamina();
         helper.assertTrue(UltraInstinct.evade(p, d, foe, 0.1), "a low roll slips past");
         helper.assertTrue(d.getStamina() < stamina, "a dodge costs a little stamina");
         helper.assertTrue(!UltraInstinct.evade(p, d, foe, 0.9), "a high roll lands");
-        d.setFlag(UltraInstinct.MASTERED_FLAG, true);
-        FormHandler.enter(p, d, Forms.ULTRA_INSTINCT);
+        UltraInstinct.enter(p, d, UltraInstinct.MASTERED);
         helper.assertTrue(UltraInstinct.evadeChance(d) >= 0.5, "Mastered: half or more");
-        FormHandler.revertToBase(p, d);
-        helper.assertTrue(UltraInstinct.evadeChance(d) == 0, "nothing outside the form");
+        UltraInstinct.stop(p, d, true);
+        helper.assertTrue(UltraInstinct.evadeChance(d) == 0, "nothing outside it");
         TestPlayers.remove(helper, p);
         TestPlayers.remove(helper, foe);
+        helper.succeed();
+    }
+
+    @GameTest(template = EMPTY)
+    public static void ultraInstinctIsATechniqueOverTheForm(GameTestHelper helper) {
+        ServerPlayer p = TestPlayers.create(helper);
+        PlayerData d = ModCapabilities.getOrThrow(p);
+        d.setRace(com.dbzenith.stats.Race.NAMEKIAN);                              // anyone can learn it
+        d.setFlag(UltraInstinct.SIGN_FLAG, true);
+        d.setFlag(FormHandler.UNLOCK_FLAG + UltraInstinct.SIGN_ID, true);
+        double base = com.dbzenith.transform.FormMath.attributeMultiplier(d, com.dbzenith.stats.Attribute.DEXTERITY);
+        UltraInstinct.enter(p, d, UltraInstinct.SIGN);
+        helper.assertTrue(d.getFormId().equals(Forms.BASE.id()), "the form stays what it was");
+        double in = com.dbzenith.transform.FormMath.attributeMultiplier(d, com.dbzenith.stats.Attribute.DEXTERITY);
+        helper.assertTrue(in > base * 5, "lifted to its own power from base: " + base + " -> " + in);
+        helper.assertTrue(Forms.byId(UltraInstinct.SIGN_ID) == Forms.BASE && !Forms.exists(UltraInstinct.SIGN_ID), "no longer a form");
+        d.setKaiokenStage(0);
+        d.setKi(0);
+        UltraInstinct.tick(p, d, 1);
+        helper.assertTrue(!UltraInstinct.isIn(d), "out of ki: it gives out");
+        TestPlayers.remove(helper, p);
         helper.succeed();
     }
 
