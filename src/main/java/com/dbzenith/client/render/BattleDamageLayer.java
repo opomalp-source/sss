@@ -1,9 +1,8 @@
 package com.dbzenith.client.render;
 
 import com.dbzenith.DBZenith;
-import com.dbzenith.client.ClientPublicStates;
+import com.dbzenith.client.fx.BloodFx;
 import com.dbzenith.config.DBZConfig;
-import com.dbzenith.network.PublicStatePacket;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -20,22 +19,28 @@ import java.util.WeakHashMap;
 /**
  * Battle damage (CX-47): a fighter shows the fight on them. (The knocked-out rework: the rips now come from how torn the
  * clothes are, {@link #torn}, and stay until they are mended; only the bruises and grime still follow health.) Below 70% health the clothes start to rip (skin showing
- * through, in the fighter's own skin tone), with frayed edges, scratches and grime; below 45% and 20% more of it, and
- * bruises. Heavy blows and hard landings cover them in dust, which wears off over a minute (at once in water). The rips
- * mend as health comes back. Textures from {@code tools/BattleDamageGen.java}; client config {@code battleDamage}.
+ * through), with frayed edges, scratches and grime; below 45% and 20% more of it, and bruises. Heavy blows and hard
+ * landings cover them in dust, which wears off over a minute (at once in water).
+ * <p>The limbs rework: it follows the fighter's race. The rips show their own skin ({@link Skin}), cuts are in their
+ * own blood's colour, bruises are made from their skin, and each fighter has one of three layouts, so it doesn't look
+ * the same on everyone. Textures from {@code tools/BattleDamageGen.java}; client config {@code battleDamage}.
  */
 public class BattleDamageLayer<T extends LivingEntity, M extends HumanoidModel<T>> extends RenderLayer<T, M> {
-    private static final ResourceLocation[][] TEX = {textures("battle"), textures("battle_hd")};
-    private static final int DEFAULT_SKIN = 0xD9A87A;
+    private static final String[] LAYERS = {"tears", "edges", "cuts", "bruises"};
+    /** [hi-res][layout][layer * 3 + level - 1], layers as {@link #LAYERS}. */
+    private static final ResourceLocation[][][] TEX = {textures("battle"), textures("battle_hd")};
+    private static final ResourceLocation[] DUST_TEX = {dust("battle"), dust("battle_hd")};
+    private static final int TEARS = 0, EDGES = 3, CUTS = 6, BRUISES = 9;
 
-    private static ResourceLocation[] textures(String folder) {
-        ResourceLocation[] t = new ResourceLocation[7];
-        for (int i = 1; i <= 3; i++) {
-            t[i - 1] = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/" + folder + "/tears_" + i + ".png");
-            t[i + 2] = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/" + folder + "/marks_" + i + ".png");
-        }
-        t[6] = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/" + folder + "/dust.png");
+    private static ResourceLocation[][] textures(String folder) {
+        ResourceLocation[][] t = new ResourceLocation[3][12];
+        for (int v = 0; v < 3; v++) for (int l = 0; l < LAYERS.length; l++) for (int i = 1; i <= 3; i++)
+            t[v][l * 3 + i - 1] = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/" + folder + "/v" + v + "/" + LAYERS[l] + "_" + i + ".png");
         return t;
+    }
+
+    private static ResourceLocation dust(String folder) {
+        return new ResourceLocation(DBZenith.MOD_ID, "textures/entity/" + folder + "/dust.png");
     }
 
     /** Each fighter's dust, and what it was last time we looked. */
@@ -79,21 +84,34 @@ public class BattleDamageLayer<T extends LivingEntity, M extends HumanoidModel<T
         return r < 0.2f ? 3 : r < 0.45f ? 2 : r < 0.7f ? 1 : 0;
     }
 
+    /** Which of the three layouts a fighter's damage takes: always the same one for the same fighter. */
+    public static int layout(LivingEntity e) {
+        return Math.floorMod(e.getUUID().hashCode() * 31 + 7, 3);
+    }
+
+    /** A bruise on this skin: darker and toward plum, so a dark skin bruises darker still and a green one goes olive-purple. */
+    public static int bruise(int skin) {
+        int r = skin >> 16 & 255, g = skin >> 8 & 255, b = skin & 255;
+        return (int) (r * 0.45 + 0x4A * 0.55) << 16 | (int) (g * 0.4 + 0x22 * 0.6) << 8 | (int) (b * 0.45 + 0x5A * 0.55);
+    }
+
     @Override
     public void render(PoseStack pose, MultiBufferSource buffers, int light, T e, float limbSwing, float limbSwingAmount,
                        float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
         if (e.isInvisible() || !DBZConfig.CLIENT.battleDamage.get()) return;
-        ResourceLocation[] tex = TEX[ArtStyle.hiRes() ? 1 : 0];
+        int hd = ArtStyle.hiRes() ? 1 : 0;
+        ResourceLocation[] tex = TEX[hd][layout(e)];
         int overlay = LivingEntityRenderer.getOverlayCoords(e, 0);
         int torn = torn(e), marks = Math.max(torn, level(e));
-        if (torn > 0) {
-            PublicStatePacket state = ClientPublicStates.get(e.getId());
-            int skin = state != null && state.skinTone() >= 0 ? state.skinTone() : DEFAULT_SKIN;
-            draw(pose, buffers, tex[torn - 1], light, overlay, skin, 1f);        // skin through the rips (they stay until mended)
+        int skin = Skin.of(e);
+        if (torn > 0) draw(pose, buffers, tex[TEARS + torn - 1], light, overlay, skin, 1f);   // their own skin through the rips (they stay until mended)
+        if (marks > 0) {
+            draw(pose, buffers, tex[EDGES + marks - 1], light, overlay, 0xFFFFFF, 1f);      // the rips' edges, grime
+            draw(pose, buffers, tex[BRUISES + marks - 1], light, overlay, bruise(skin), 1f);
+            draw(pose, buffers, tex[CUTS + marks - 1], light, overlay, BloodFx.color(e), 1f);
         }
-        if (marks > 0) draw(pose, buffers, tex[marks + 2], light, overlay, 0xFFFFFF, 1f);   // the rips' edges, scratches, bruises, grime
         float dust = dust(e, ageInTicks);
-        if (dust > 0.02f) draw(pose, buffers, tex[6], light, overlay, 0xFFFFFF, Math.min(1f, dust));
+        if (dust > 0.02f) draw(pose, buffers, DUST_TEX[hd], light, overlay, 0xFFFFFF, Math.min(1f, dust));
     }
 
     /** Builds up with heavy blows and hard landings, wears off over a minute, washes off in water. */

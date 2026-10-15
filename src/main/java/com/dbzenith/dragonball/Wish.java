@@ -151,6 +151,7 @@ public enum Wish {
         if (Races.of(d.getRace()).tail()) d.setTail(true);
         player.removeAllEffects();
         com.dbzenith.combat.Limbs.restore(player);                        // lost limbs back too (CX-54)
+        com.dbzenith.combat.Scars.clear(player);                          // and made whole: the scars go (the limbs rework)
     }
 
     /** A new variant of the same race, never the one you have: creation choices, rare destinies, and paths once on one. */

@@ -71,6 +71,10 @@ public final class ImpactFx {
             BloodFx.onImpact(m);
             return;
         }
+        if (m.kind() == ImpactPacket.REGROW) {                                  // the limbs rework: a limb growing back
+            com.dbzenith.client.render.LimbRender.onRegrow(m);
+            return;
+        }
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
         if (level == null) return;

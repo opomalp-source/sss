@@ -4,8 +4,8 @@
 
 At zero health a fighter (a player, or an NPC fighter) goes down instead of dying.
 
-- **On screen:** a timer shows over their head. The downed player's own screen pulses red, with the time left and what
-  can save them.
+- **On screen:** nothing in words: no banner, timer or tag. The downed player's screen darkens at the edges with a
+  slow, faint heartbeat, deeper as their time runs out.
 - **Moving:** strong fighters (Strength + Constitution at least `knockOutCrawlStrength`) can crawl; the rest just lie
   there.
 - **Only two things kill someone who is down:**
@@ -27,7 +27,7 @@ At zero health a fighter (a player, or an NPC fighter) goes down instead of dyin
 - **Letting go:** hold Sneak for a second to put them down gently, or attack to throw them.
 - **Being knocked down, stunned, or teleporting away** drops them.
 - **Their bleeding continues:** carrying doesn't stop it, so get them to someone who can save them.
-- The carried player sees it all from their own body, with "Carried by ..." on their screen.
+- The carried player sees it all from their own body.
 
 ## Gripping (finishing off)
 
@@ -51,7 +51,8 @@ fighter. The direction you hold picks the finisher:
 ## Limbs and blood
 
 - **Fresh cuts bleed:**
-  - A limb cut off by a blade bleeds for twenty seconds. One cut by ki is seared and bleeds for six.
+  - A limb cut off by a blade bleeds hard for twenty seconds, then seeps until the wound is closed (below). One cut by
+    ki is seared shut and bleeds for six.
   - The stump drips and spurts with the heartbeat, and drains 1% of health a second per wound (which can knock you
     out).
   - The limb flies off and lies on the ground for a minute, in the fighter's skin tone.
@@ -74,6 +75,48 @@ fighter. The direction you hold picks the finisher:
 - **Stopping it:** a **Bandage** (3 paper + 1 string makes 2) stops the bleeding and tends the most hurt limb. Use it
   on yourself or on someone else, even someone down. Senzu Beans and healing stop it too.
 
+## Living without a limb
+
+- **A leg gone** (with no prosthetic) puts you on the ground: you crawl, slowly, low to the ground, and can't jump.
+  You can still fly. A prosthetic leg stands you back up.
+- **The right arm gone:** the left takes over. It becomes your main hand (what you hold is in it, and it swings), and
+  your stances, blows and ki poses are mirrored so the left arm does what the right would. The off hand holds
+  nothing: what was in it goes back to your inventory. A blow thrown with one arm is weaker; with none, no ki.
+- **The stump** is in your own skin's colour (a Namekian's is green), and its end shows how the wound is:
+  - **open:** raw, in your blood's colour, the bone showing;
+  - **bandaged:** wrapped, the blood soaking through;
+  - **seared:** burnt shut, black at the middle;
+  - **healed:** skin drawn over, with a pale, puckered seam. A bandaged or seared stump heals over in five minutes.
+
+## Closing a wound
+
+Only Namekians and Majins close and regrow a lost limb on their own. Anyone else has to close it, or it keeps seeping
+(0.4% of health a second) after the first bleeding is over:
+
+- a **Bandage** binds it;
+- **Sneak + Ki Blast** sears it shut with your own ki: a tenth of your ki, and it hurts;
+- a **Senzu Bean**, Ki Heal or a Namekian's healing closes it at once (healed over).
+
+## Growing it back
+
+Namekians (and Majins, faster) grow lost limbs back, or at once with Regenerate. A bud of slime (pink goo for a
+Majin) swells at the stump, then the limb pushes out of it, thin at first and filling out, wet and dripping. They
+hunch over it, straining, then stand tall and thrust the new arm out (or stamp the new leg down).
+
+## Battle damage and scars
+
+- **Battle damage** follows the fighter: the rips show their own skin, cuts are in their own blood's colour, and
+  bruises are made from their skin. Each fighter has one of three layouts, so it doesn't look the same on everyone.
+- **Scars are earned:** a heavy wound (a fifth of your health or more in one blow) can leave one, more likely the
+  harder it was and for a blade. At most one a minute, fourteen in all.
+  - It goes where the blow landed: the side it came from, high or low; a hard blow high from the front can scar the
+    face.
+  - What made it shows: a blade or ki disc leaves a fine line (long ones sometimes with stitch marks), a ki blast or
+    beam a mottled burn, a heavy blow a short jagged split, a thrust a small puncture.
+  - Fresh scars are angry and red; over three days they settle to pale scar tissue, in your own skin's tones.
+  - They stay for life (a Senzu Bean heals wounds, not scars) and through death. A wish to be made whole
+    (Restoration) clears them. The scars picked on the Life screen are separate and stay.
+
 ## Clothes
 
 Clothes torn in battle stay torn until they are mended.
@@ -94,4 +137,6 @@ Clothes torn in battle stay torn until they are mended.
 - `/dbz carry <carrier> [target]`: pick a downed fighter up (no target: let go).
 - `/dbz grip <gripper> <target> <finisher>`: finish them with `ki_execution`, `skull_slam`, `stomp`, `bear_hug`,
   `elbow_drop` or `ki_spear`.
-- `/dbz limb <targets> <limb> sever`: cut a limb off (it bleeds).
+- `/dbz limb <targets> <limb> <action>`: `break`, `sever` (it bleeds), `bandage`, `sear`, `close` (healed over),
+  `regrow` (with the regrowth), `prosthetic` or `heal`.
+- `/dbz scars <players> add <count>`, `age <days>`, `clear`: give, age or clear battle scars.

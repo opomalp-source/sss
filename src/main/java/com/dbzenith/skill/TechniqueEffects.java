@@ -42,7 +42,8 @@ public final class TechniqueEffects {
         switch (t.effect()) {
             case HEAL_SELF -> {
                 data.setBody(data.getBody() + data.getDerived().maxBody() * power);
-                if (t.id().equals("regenerate")) com.dbzenith.combat.Limbs.restore(player);   // a Namekian grows back what was lost (CX-54)
+                if (t.id().equals("regenerate")) com.dbzenith.combat.Limbs.regrowAll(player);   // a Namekian grows back what was lost (CX-54), and it shows (the limbs rework)
+                com.dbzenith.combat.Limbs.healWounds(player);
                 level.sendParticles(ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 1, player.getZ(), 20, 0.4, 0.8, 0.4, 0.1);
                 return true;
             }
@@ -51,6 +52,7 @@ public final class TechniqueEffects {
                 PlayerData td = ModCapabilities.get(target).orElse(null);
                 if (td == null) return false;
                 td.setBody(td.getBody() + td.getDerived().maxBody() * power);
+                com.dbzenith.combat.Limbs.healWounds(target);                     // healing ki closes wounds (the limbs rework)
                 level.sendParticles(ParticleTypes.HAPPY_VILLAGER, target.getX(), target.getY() + 1, target.getZ(), 20, 0.4, 0.8, 0.4, 0.1);
                 return true;
             }

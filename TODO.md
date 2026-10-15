@@ -277,6 +277,7 @@ Most of these already exist in a first version; each step upgrades what is there
 
 # Knocked out, carry, grip, limbs, clothes rework (user request, 2026-10-15)
 - [x] (v0.127.0) Custom carry (fixes the carried player's screen), grip finishers (six; the only way to kill the downed), help-up, timers and prompts, race-coloured blood and bleeding wounds, flying severed limbs, bandages, clothes torn until mended (sewing kit), NPCs grip downed players
+- [x] (v0.128.0) Wounds and scars: a lost leg means crawling, the left hand takes over for a lost right arm (stances, blows and what you hold), knock-out text removed (a faint heartbeat only), race-coloured stumps and battle damage (three layouts), open stumps keep bleeding until closed (bandage, sear with ki, Senzu, healing) and show it, regrowth animation for Namekians and Majins, earned scars that fade from red to pale
 - [ ] The user's feedback; more finishers or carry variants if wanted
 
 # Ki attack rework (user spec, 2026-10-14): cinematic attacks and sound, data-driven

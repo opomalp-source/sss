@@ -3458,3 +3458,89 @@ means finishing off), with various animations. Player guide: `docs/KNOCKOUT.md`.
     overhead, slammed, dust);
   - an NPC soldier walking up to a downed Dev and gripping him, Dev's screen warning him;
   - a soldier's arm and a Namekian's arm cut off: the arms fly, red and violet blood, splats.
+
+## 2026-10-15 — Wounds and scars (v0.128.0)
+The user: a severed leg should mean crawling. The hurt textures were the same for every race; they should follow the
+race's colours, with more variety. Losing an arm should make sense (no fighting with it). A Namekian's severed arm
+should be their skin colour, and regrowing should have a regrowth animation that looks good. Other races must close
+the wound somehow. Fighters who get hurt a lot should get scars that look good, convincing and sensible (rework the
+scar system). And no big "knocked out" text or other indicators. Player guide: `docs/KNOCKOUT.md`.
+
+- **Knocked out, quietly:**
+  - Gone: the big text, timer and hints, the overhead timer bars, and the victim's messages (knocked out, carried,
+    gripped, helped, escaped); their lang keys are removed.
+  - The downed player keeps only a faint dark heartbeat at the screen's edges (`ClientKnockouts`).
+  - The prompts for whoever stands over them stay.
+- **Crawling on a lost leg (`Limbs.State.mustCrawl`):**
+  - Any lost leg without a prosthetic (or both legs broken): 82% slower, no jump.
+  - New `CRAWL_IDLE` clip, `CRAWL` when moving; the body follows the look and the camera sits low. NPCs too.
+  - Flying still works.
+- **The left hand takes over (`Limbs.handedness`, `State.leftHanded`):**
+  - With the right arm gone and the left good, the player's main arm becomes the left (put back when the arm is), so
+    the held item is in it and it swings; a Mob is made left-handed. The off hand's item goes back to the inventory.
+  - Stances and actions are mirrored by playerAnimator's `MirrorModifier` on the stance and action layers (players
+    in `AnimController`, NPCs in `NpcActions`).
+  - In first person, your own game keeps the options' main hand, so `LimbRender.onRenderHand` draws the held item
+    in the left hand.
+- **Skin colours (`SkinColor`, client `Skin`):** stumps, severed limbs, scars, battle damage and bruises come from
+  the fighter's shown skin (race look, generated tone, or the race's palette; NPCs by kind).
+- **Closing a wound (`Limbs`, stump states OPEN, BANDAGED, SEARED, HEALED; synced 2 bits per limb in `LimbsPacket`):**
+  - A non-regenerator's cut bleeds hard for 20 s, then seeps 0.4% of health a second until it is closed:
+    - a bandage binds it;
+    - Sneak + Ki Blast sears it (10% ki, 3% body; `KiBlastPacket.searWound`);
+    - a Senzu Bean or healing heals it over.
+  - A ki cut starts seared. Bandaged and seared stumps heal over after five minutes.
+  - A regenerator's stump closes when its bleeding stops.
+  - The message on losing a limb says how to close it.
+- **The stump's end (`LimbRender`):**
+  - open: raw, in the blood's colour, a bone dot;
+  - bandaged: a wrap with a band and the blood soaking through;
+  - seared: an angry rim, charred black middle;
+  - healed: a skin cap with a pale seam and puckers.
+- **Regrowth:**
+  - `ImpactPacket.REGROW` (14) tells clients which limb, in the slime's colour.
+  - `LimbRender` shows a bud of slime swelling at the stump for 12 ticks. Then the limb pushes out: the model part
+    is scaled long-thin to full with a little wobble, wet with a translucent slime pass that dries, and drips goo
+    (`BloodFx`).
+  - New `Anims.REGENERATE_ARM/LEG` (and mirrored for the left): hunch and strain (shaking), then stand and thrust
+    the new arm out, or stamp the leg down.
+  - Regenerate now regrows every lost limb at once (`Limbs.regrowAll`) and closes wounds.
+- **Battle damage, by race (`tools/BattleDamageGen.java`, `BattleDamageLayer`):**
+  - Split into layers: tears (tinted with the fighter's skin), edges and grime (as drawn), cuts (tinted with their
+    blood: violet on a Namekian, oil on an android) with new deeper gashes that ran, and bruises (tinted with a
+    bruise colour made from their skin).
+  - Three layouts (`v0..v2`), with different faces (split brow, swollen cheek, black eye...). Each fighter keeps one,
+    picked from their UUID.
+- **Earned scars (`Scars`, `ScarsPacket`, client `ScarLayer`):**
+  - A blow of a fifth of health or more can scar (more likely when deeper, and for a blade); one a minute, at most
+    fourteen.
+  - Placed where it came from (side, height; the face for a hard high blow from the front). The kind follows the
+    cause: cut (blade, ki disc), burn (ki blast or beam, fire, explosion), split (heavy blow), puncture (projectile).
+  - Kept over death; cleared by the Restoration wish.
+  - Each scarred fighter gets a 128-pixel texture painted from the list:
+    - cut: a tapered pale line with raised darker lips, some with stitch marks;
+    - split: a short jagged seam;
+    - burn: a mottled, shiny patch with a darker rim;
+    - puncture: a pucker with short rays.
+  - Colours come from their skin: fresh angry red toward their blood's colour, settling to pale over three days.
+  - Repainted only when something changes. Dev clients also dump the painted texture to `screenshots/`.
+  - Drawn as a body layer, so a jacket layer or a gi covers it, and it shows in first person too. The Life screen's
+    cosmetic scars stay.
+- **Commands:**
+  - `/dbz limb ... bandage|sear|close|regrow`;
+  - `/dbz scars <players> add <n>|age <days>|clear`.
+- **Network protocol 40.**
+- **Tests:** new `WoundTests`: crawling on a lost leg, a prosthetic leg standing you up, wounds staying open until
+  bandaged or seared (a Senzu Bean heals them over), the left hand taking over (and its off-hand item put away),
+  Namekians regrowing at once, scars earned, capped and cleared. 240 GameTests.
+- **Fixes on the way:**
+  - Putting the off-hand item back stacked it onto itself before the hand was emptied, losing it.
+  - A scar couldn't be earned in the first minute of a world.
+  - Burn scars at first covered a whole limb.
+- **Checked in the dev client:**
+  - Dev with fresh and then aged scars, and as a Namekian;
+  - the stumps open, bandaged and healed over;
+  - the mirrored guard with the right arm gone;
+  - crawling on a seared leg;
+  - a Namekian arm growing back (bud, push-out, strain and thrust);
+  - a Namekian warrior and a soldier battered, with green skin through the rips.

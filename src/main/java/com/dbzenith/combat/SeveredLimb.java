@@ -46,14 +46,7 @@ public class SeveredLimb extends Entity {
     }
 
     private static int skinTone(LivingEntity e) {
-        if (e instanceof net.minecraft.world.entity.player.Player p)
-            return com.dbzenith.data.ModCapabilities.get(p).map(d -> d.getSkinTone() < 0 ? 0xD9A87A : d.getSkinTone()).orElse(0xD9A87A);
-        return switch (Blood.race(e)) {
-            case NAMEKIAN -> 0x6FB04A;
-            case FROST_DEMON -> 0xE8E4F0;
-            case MAJIN -> 0xF2A0C8;
-            default -> 0xD9A87A;
-        };
+        return SkinColor.of(e);                                                // the race's own colour (a Namekian's arm is green)
     }
 
     public Limbs.Limb limb() {

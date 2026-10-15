@@ -34,7 +34,10 @@ public final class NpcActions {
         final LivingEntity entity;
         final AnimationStack stack = new AnimationStack();
         final SpeedModifier stanceSpeed = new SpeedModifier(1f), actionSpeed = new SpeedModifier(1f);
-        final ModifierLayer<IAnimation> stance = new ModifierLayer<>(null, stanceSpeed), action = new ModifierLayer<>(null, actionSpeed);
+        /** Mirrored with the right arm gone: the left does it all (the limbs rework). */
+        final dev.kosmx.playerAnim.api.layered.modifier.MirrorModifier stanceMirror = new dev.kosmx.playerAnim.api.layered.modifier.MirrorModifier(false),
+                actionMirror = new dev.kosmx.playerAnim.api.layered.modifier.MirrorModifier(false);
+        final ModifierLayer<IAnimation> stance = new ModifierLayer<>(null, stanceSpeed, stanceMirror), action = new ModifierLayer<>(null, actionSpeed, actionMirror);
         IAnimation motion;
         Fighter.State shown = Fighter.State.IDLE;
         long hitstopUntil, heavyHintUntil, actionAt = Long.MIN_VALUE / 2;
@@ -123,12 +126,19 @@ public final class NpcActions {
                 it.remove();
                 continue;
             }
+            boolean left = com.dbzenith.combat.Limbs.of(e).leftHanded();
+            if (t.stanceMirror.isEnabled() != left) {
+                t.stanceMirror.setEnabled(left);
+                t.actionMirror.setEnabled(left);
+            }
             if (now >= t.hitstopUntil && t.actionSpeed.speed == 0f) {
                 t.stanceSpeed.speed = 1f;
                 t.actionSpeed.speed = 1f;
             }
             KeyframeAnimation forced = com.dbzenith.client.ClientCarry.isCarried(e.getId()) ? Anims.custom("carried", Anims.CARRIED)
-                    : com.dbzenith.client.ClientCarry.isCarrying(e.getId()) ? Anims.custom("carrying", Anims.CARRYING) : null;
+                    : com.dbzenith.client.ClientCarry.isCarrying(e.getId()) ? Anims.custom("carrying", Anims.CARRYING)
+                    : !com.dbzenith.client.ClientKnockouts.isDown(e.getId()) && com.dbzenith.combat.Limbs.of(e).mustCrawl() && e.onGround()
+                    ? (Math.hypot(e.getX() - e.xo, e.getZ() - e.zo) > 0.005 ? Anims.custom("crawl", Anims.CRAWL) : Anims.custom("crawl_idle", Anims.CRAWL_IDLE)) : null;
             if (forced != t.forced) {                                           // carried or carrying (the knocked-out rework)
                 t.forced = forced;
                 if (forced != null) t.stance.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(4, Ease.INOUTSINE), new KeyframeAnimationPlayer(forced));

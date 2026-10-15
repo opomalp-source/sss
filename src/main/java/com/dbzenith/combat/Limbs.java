@@ -73,6 +73,10 @@ public final class Limbs {
 
     /** Back in use from this much health. */
     public static final int USABLE = 25;
+    /** A lost limb's wound: open (it bleeds until closed), bandaged, seared shut with ki, healed over (a closed stump). */
+    public static final int OPEN = 0, BANDAGED = 1, SEARED = 2, HEALED = 3;
+    /** Bandaged or seared, a stump has healed over after five minutes. */
+    private static final int HEAL_OVER = 6000;
     private static final String TAG = "dbzenith_limbs";
     private static final UUID SLOW = UUID.fromString("c53d7a10-3e1b-4c5a-9e1d-0c53ab7e0001");
 
@@ -83,6 +87,13 @@ public final class Limbs {
         /** Bleeding limbs (a bit mask; the knocked-out rework): fresh cuts, until {@link #bleedUntil}. */
         public int bleeding;
         final long[] bleedUntil = new long[4];
+        /** A lost limb's wound (the limbs rework): open, bandaged, seared shut, or healed over; and since when. */
+        public final byte[] stump = new byte[4];
+        final long[] stumpSince = new long[4];
+
+        public int stump(Limb l) {
+            return stump[l.ordinal()];
+        }
         long lastHit;
         /** When each lost limb grows back (Namekians, Majins; 0 not set yet). */
         final long[] regrowAt = new long[4];
@@ -101,6 +112,11 @@ public final class Limbs {
 
         public boolean bleeding(Limb l) {
             return (bleeding & 1 << l.ordinal()) != 0;
+        }
+
+        /** The right arm gone (no prosthetic) and the left still good: fights, fires and poses with the left (the limbs rework). */
+        public boolean leftHanded() {
+            return severed(Limb.RIGHT_ARM) && !prosthetic(Limb.RIGHT_ARM) && works(Limb.LEFT_ARM);
         }
 
         /** Can this limb be used (not cut off, or replaced, and not broken)? */
@@ -122,6 +138,12 @@ public final class Limbs {
             return (works(Limb.RIGHT_LEG) ? 0 : 1) + (works(Limb.LEFT_LEG) ? 0 : 1);
         }
 
+        /** On the ground with a leg gone (and no prosthetic in its place), or both legs useless: crawling. */
+        public boolean mustCrawl() {
+            for (Limb l : new Limb[]{Limb.RIGHT_LEG, Limb.LEFT_LEG}) if (severed(l) && !prosthetic(l)) return true;
+            return legsOut() == 2;
+        }
+
         public boolean whole() {
             return severed == 0 && bleeding == 0 && health[0] == 100 && health[1] == 100 && health[2] == 100 && health[3] == 100;
         }
@@ -131,6 +153,7 @@ public final class Limbs {
             t.putByteArray("health", health.clone());
             t.putInt("severed", severed);
             t.putInt("prosthetic", prosthetic);
+            t.putByteArray("stump", stump.clone());
             return t;
         }
 
@@ -139,6 +162,8 @@ public final class Limbs {
             for (int i = 0; i < 4 && i < h.length; i++) health[i] = h[i];
             severed = t.getInt("severed");
             prosthetic = t.getInt("prosthetic");
+            byte[] st = t.getByteArray("stump");
+            for (int i = 0; i < 4 && i < st.length; i++) stump[i] = st[i];
         }
     }
 
@@ -168,11 +193,14 @@ public final class Limbs {
         State s = of(e);
         if (s.whole()) e.getPersistentData().remove(TAG);
         else e.getPersistentData().put(TAG, s.save());
+        if (!e.level().isClientSide) handedness(e, s);                     // the left takes over at once (the limbs rework)
         broadcast(e, s);
     }
 
     private static LimbsPacket packet(LivingEntity e, State s) {
-        return new LimbsPacket(e.getId(), s.health.clone(), s.severed, s.prosthetic, s.bleeding);
+        int stumps = 0;
+        for (int i = 0; i < 4; i++) stumps |= (s.stump[i] & 3) << (i * 2);
+        return new LimbsPacket(e.getId(), s.health.clone(), s.severed, s.prosthetic, s.bleeding, stumps);
     }
 
     private static void broadcast(LivingEntity e, State s) {
@@ -187,6 +215,7 @@ public final class Limbs {
         s.severed = m.severed();
         s.prosthetic = m.prosthetic();
         s.bleeding = m.bleeding();
+        for (int i = 0; i < 4; i++) s.stump[i] = (byte) (m.stumps() >> (i * 2) & 3);
         if (s.whole()) CLIENT.remove(m.entityId());
         else CLIENT.put(m.entityId(), s);
     }
@@ -276,7 +305,11 @@ public final class Limbs {
     public static void sever(LivingEntity v, Limb limb, boolean seared) {
         State s = of(v);
         s.bleeding |= 1 << limb.ordinal();
-        s.bleedUntil[limb.ordinal()] = v.level().getGameTime() + (seared ? 120 : 400);
+        long now0 = v.level().getGameTime();
+        boolean regrows = regrowTicks(v) >= 0;
+        s.bleedUntil[limb.ordinal()] = now0 + (seared ? 120 : regrows ? (regrowTicks(v) <= 200 ? 60 : 120) : 400);   // open wounds keep seeping after that, until closed
+        s.stump[limb.ordinal()] = (byte) (seared ? SEARED : OPEN);
+        s.stumpSince[limb.ordinal()] = now0;
         s.severed |= 1 << limb.ordinal();
         int regrow = regrowTicks(v);
         if (regrow >= 0) s.regrowAt[limb.ordinal()] = v.level().getGameTime() + regrow;
@@ -302,7 +335,7 @@ public final class Limbs {
                 v.setItemInHand(hand, ItemStack.EMPTY);
             }
         }
-        if (v instanceof Player p) p.displayClientMessage(Component.translatable("message.dbzenith.limb_lost", Component.translatable("limb.dbzenith." + limb.key())), true);
+        if (v instanceof Player p) p.displayClientMessage(Component.translatable(seared || regrows ? "message.dbzenith.limb_lost" : "message.dbzenith.limb_lost_open", Component.translatable("limb.dbzenith." + limb.key())), true);
         changed(v);
     }
 
@@ -317,6 +350,13 @@ public final class Limbs {
         if (s.bleeding != 0) {
             s.bleeding = 0;
             any = true;
+        }
+        for (Limb l : Limb.values()) {                                      // a Senzu Bean closes a stump at once (the limbs rework)
+            if (s.severed(l) && !s.prosthetic(l) && s.stump(l) != HEALED) {
+                s.stump[l.ordinal()] = HEALED;
+                s.stumpSince[l.ordinal()] = e.level().getGameTime();
+                any = true;
+            }
         }
         for (Limb l : Limb.values()) {
             if (s.severed(l) && !s.prosthetic(l) || s.health(l) >= 100) continue;
@@ -370,16 +410,33 @@ public final class Limbs {
         return e.getType() == com.dbzenith.npc.ModNpcs.NAMEKIAN_WARRIOR.get() ? 800 : -1;
     }
 
+    /** Every lost limb grown back at once (the Regenerate technique), each with its regrowth. */
+    public static void regrowAll(LivingEntity e) {
+        if (e.level().isClientSide || !eligible(e)) return;
+        State s = of(e);
+        boolean majin = e instanceof Player p && com.dbzenith.data.ModCapabilities.get(p).map(d -> d.getRace() == com.dbzenith.stats.Race.MAJIN).orElse(false);
+        for (Limb l : Limb.values()) {
+            if (!s.severed(l)) continue;
+            if (s.prosthetic(l) && e instanceof Player p)
+                p.getInventory().placeItemBackInInventory(new ItemStack(l.arm() ? com.dbzenith.registry.ModItems.PROSTHETIC_ARM.get() : com.dbzenith.registry.ModItems.PROSTHETIC_LEG.get()));
+            s.prosthetic &= ~(1 << l.ordinal());
+            regrow(e, l, majin);
+        }
+    }
+
     /** One lost limb grown back: weak at first, mending from there. */
     public static void regrow(LivingEntity e, Limb l, boolean majin) {
         State s = of(e);
         s.severed &= ~(1 << l.ordinal());
+        s.stump[l.ordinal()] = OPEN;
+        s.bleeding &= ~(1 << l.ordinal());
         s.health[l.ordinal()] = 40;
         if (e.level() instanceof ServerLevel level) {
             Vec3 at = e.position().add(0, l.arm() ? e.getBbHeight() * 0.65 : e.getBbHeight() * 0.25, 0);
-            if (majin) level.sendParticles(new DustParticleOptions(new Vector3f(1f, 0.55f, 0.75f), 1.6f), at.x, at.y, at.z, 30, 0.25, 0.3, 0.25, 0.02);
-            else level.sendParticles(ParticleTypes.HAPPY_VILLAGER, at.x, at.y, at.z, 24, 0.3, 0.3, 0.3, 0.05);
-            level.playSound(null, e.getX(), e.getY(), e.getZ(), majin ? SoundEvents.SLIME_SQUISH : SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1f, majin ? 0.7f : 0.6f);
+            // the limb grows out of the stump in slime (Namekians) or goo (Majins), drawn by the clients (the limbs rework)
+            com.dbzenith.network.ImpactPacket.at(at, new Vec3(0, 1, 0), com.dbzenith.network.ImpactPacket.REGROW, l.ordinal(), majin ? 0xF06FB0 : 0xB890D8, e.getId()).send(level);
+            level.playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.2f, majin ? 0.8f : 0.55f);
+            level.playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.PLAYERS, 1f, 0.6f);
         }
         if (e instanceof Player p) p.displayClientMessage(Component.translatable("message.dbzenith.limb_regrown", Component.translatable("limb.dbzenith." + l.key())), true);
         changed(e);
@@ -394,22 +451,34 @@ public final class Limbs {
      */
     private static void bleed(LivingEntity e, State s) {
         long now = e.level().getGameTime();
-        int open = 0;
+        boolean regrows = regrowTicks(e) >= 0;
+        float rate = 0;
+        boolean changed = false;
         for (Limb l : Limb.values()) {
             if (!s.bleeding(l)) continue;
-            if (now >= s.bleedUntil[l.ordinal()]) s.bleeding &= ~(1 << l.ordinal());
-            else open++;
+            if (now < s.bleedUntil[l.ordinal()]) {
+                rate += 0.01f;                                                // a fresh wound pours
+                continue;
+            }
+            if (s.severed(l) && !s.prosthetic(l) && s.stump(l) == OPEN && !regrows) {
+                rate += 0.004f;                                               // an open stump seeps on until it is closed (the limbs rework)
+                continue;
+            }
+            s.bleeding &= ~(1 << l.ordinal());                                 // run its course (seared, or a body that closes its own wounds)
+            if (regrows && s.severed(l) && s.stump(l) == OPEN) {
+                s.stump[l.ordinal()] = HEALED;
+                s.stumpSince[l.ordinal()] = now;
+            }
+            changed = true;
         }
-        if (open == 0) {
-            changed(e);
-            return;
-        }
+        if (changed) changed(e);
+        if (rate <= 0) return;
         if (KnockOut.isDown(e) || e instanceof Player p && (p.isCreative() || p.isSpectator())) return;
-        float loss = e.getMaxHealth() * 0.01f * open;
+        float loss = e.getMaxHealth() * rate;
         if (e instanceof ServerPlayer p) {
             com.dbzenith.data.PlayerData data = com.dbzenith.data.ModCapabilities.get(p).orElse(null);
             if (data != null) {
-                double body = data.getBody() - data.getDerived().maxBody() * 0.01 * open;
+                double body = data.getBody() - data.getDerived().maxBody() * rate;
                 if (body <= 0 && KnockOut.eligible(p)) {
                     KnockOut.knockOut(p, p.damageSources().generic());
                     return;
@@ -424,14 +493,87 @@ public final class Limbs {
         else e.setHealth(Math.max(1, e.getHealth() - loss));
     }
 
+    /** Bandaged and seared stumps heal over in time (checked with the rest, every half second). */
+    private static void healOver(LivingEntity e, State s) {
+        long now = e.level().getGameTime();
+        boolean any = false;
+        for (Limb l : Limb.values()) {
+            if (!s.severed(l) || s.prosthetic(l)) continue;
+            int st = s.stump(l);
+            if ((st == BANDAGED || st == SEARED) && now - s.stumpSince[l.ordinal()] >= HEAL_OVER) {
+                s.stump[l.ordinal()] = HEALED;
+                s.stumpSince[l.ordinal()] = now;
+                // (healed over: the stump shows a pale, puckered seam, LimbRender)
+                any = true;
+            }
+        }
+        if (any) changed(e);
+    }
+
+    /** Healing ki (Ki Heal, a Namekian's healing): wounds close, healed over at once. */
+    public static void healWounds(LivingEntity e) {
+        if (e.level().isClientSide || !eligible(e)) return;
+        State s = of(e);
+        boolean any = s.bleeding != 0;
+        s.bleeding = 0;
+        for (Limb l : Limb.values()) {
+            if (s.severed(l) && !s.prosthetic(l) && s.stump(l) != HEALED) {
+                s.stump[l.ordinal()] = HEALED;
+                s.stumpSince[l.ordinal()] = e.level().getGameTime();
+                any = true;
+            }
+        }
+        if (any) changed(e);
+    }
+
+    /** Has an open stump (it needs closing: a bandage, searing it with ki, a Senzu Bean, healing). */
+    public static boolean openWound(LivingEntity e) {
+        State s = of(e);
+        for (Limb l : Limb.values()) if (s.severed(l) && !s.prosthetic(l) && s.stump(l) == OPEN && regrowTicks(e) < 0) return true;
+        return false;
+    }
+
+    /** Sears open stumps shut with one's own ki (Sneak + the Ki Blast key). Returns whether there was one. */
+    public static boolean sear(LivingEntity e) {
+        State s = of(e);
+        boolean any = false;
+        long now = e.level().getGameTime();
+        for (Limb l : Limb.values()) {
+            if (!s.severed(l) || s.prosthetic(l) || s.stump(l) != OPEN) continue;
+            s.stump[l.ordinal()] = SEARED;
+            s.stumpSince[l.ordinal()] = now;
+            s.bleeding &= ~(1 << l.ordinal());
+            any = true;
+            if (e.level() instanceof ServerLevel level) {
+                Vec3 at = e.position().add(0, l.arm() ? e.getBbHeight() * 0.7 : e.getBbHeight() * 0.3, 0);
+                level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 14, 0.1, 0.1, 0.1, 0.03);
+                level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 6, 0.06, 0.06, 0.06, 0.01);
+            }
+        }
+        if (any) {
+            e.level().playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.LAVA_EXTINGUISH, SoundSource.PLAYERS, 0.9f, 1.2f);
+            e.level().playSound(null, e.getX(), e.getY(), e.getZ(), com.dbzenith.registry.ModSounds.KI_CRACKLE.get(), SoundSource.PLAYERS, 0.6f, 1.4f);
+            changed(e);
+        }
+        return any;
+    }
+
     /** Stops every wound bleeding (a bandage, healing). Returns whether any was. */
     public static boolean stopBleeding(LivingEntity e) {
         if (e.level().isClientSide || !eligible(e)) return false;
         State s = of(e);
-        if (s.bleeding == 0) return false;
+        boolean any = s.bleeding != 0;
         s.bleeding = 0;
-        changed(e);
-        return true;
+        long now = e.level().getGameTime();
+        for (Limb l : Limb.values()) {                                      // an open stump is bound up (the limbs rework)
+            if (s.severed(l) && !s.prosthetic(l) && s.stump(l) == OPEN) {
+                s.stump[l.ordinal()] = BANDAGED;
+                s.stumpSince[l.ordinal()] = now;
+                any = true;
+            }
+        }
+        if (any) changed(e);
+        return any;
     }
 
     /** The most hurt limb still on the body (a bandage tends it), or null if all are whole. */
@@ -467,6 +609,32 @@ public final class Limbs {
         event.setAmount(event.getAmount() * f);
     }
 
+    /**
+     * With the right arm gone the left takes over (the limbs rework): it becomes the main arm, so what you hold is in it
+     * and it swings, and the other hand (on the side that is gone) holds nothing. Put back as it was when the arm is.
+     */
+    private static void handedness(LivingEntity e, State s) {
+        CompoundTag d = e.getPersistentData();
+        boolean left = s.leftHanded(), swapped = d.contains("dbzenith_main_arm");
+        if (left) {
+            if (!swapped) d.putByte("dbzenith_main_arm", (byte) (e instanceof Player p ? p.getMainArm().ordinal()
+                    : e instanceof net.minecraft.world.entity.Mob m && m.isLeftHanded() ? 0 : 1));
+            if (e instanceof Player p) {
+                if (p.getMainArm() != net.minecraft.world.entity.HumanoidArm.LEFT) p.setMainArm(net.minecraft.world.entity.HumanoidArm.LEFT);
+                ItemStack off = p.getOffhandItem();
+                if (!off.isEmpty()) {
+                    p.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);   // (emptied first: putting it back would stack it onto itself)
+                    p.getInventory().placeItemBackInInventory(off);
+                }
+            } else if (e instanceof net.minecraft.world.entity.Mob m && !m.isLeftHanded()) m.setLeftHanded(true);
+        } else if (swapped) {
+            boolean wasLeft = d.getByte("dbzenith_main_arm") == 0;
+            d.remove("dbzenith_main_arm");
+            if (e instanceof Player p) p.setMainArm(wasLeft ? net.minecraft.world.entity.HumanoidArm.LEFT : net.minecraft.world.entity.HumanoidArm.RIGHT);
+            else if (e instanceof net.minecraft.world.entity.Mob m) m.setLeftHanded(wasLeft);
+        }
+    }
+
     /** Ki needs a hand: with both arms out no technique can be fired. */
     public static boolean canUseKi(LivingEntity e) {
         return of(e).armsOut() < 2;
@@ -481,13 +649,14 @@ public final class Limbs {
         if (e.level().isClientSide || (e.tickCount % 10) != 0) return;
         AttributeInstance speed = e.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speed != null) {
-            double want = s.legsOut() == 0 ? 0 : s.legsOut() == 1 ? -0.35 : -0.85;
+            double want = s.mustCrawl() ? -0.82 : s.legsOut() == 1 ? -0.35 : 0;   // a leg gone: crawling (the user)
             AttributeModifier now = speed.getModifier(SLOW);
             if (now == null ? want != 0 : now.getAmount() != want) {
                 if (now != null) speed.removeModifier(SLOW);
                 if (want != 0) speed.addTransientModifier(new AttributeModifier(SLOW, "dbzenith limbs", want, AttributeModifier.Operation.MULTIPLY_TOTAL));
             }
         }
+        handedness(e, s);
         int regrow = regrowTicks(e);                                          // Namekians and Majins grow lost limbs back (CX-54)
         if (regrow >= 0 && s.severed != 0) {
             long t = e.level().getGameTime();
@@ -501,6 +670,7 @@ public final class Limbs {
             }
         }
         if (s.bleeding != 0 && e.tickCount % 20 == 0) bleed(e, s);            // fresh wounds bleed (the knocked-out rework)
+        if (s.severed != 0 && e.tickCount % 20 == 0) healOver(e, s);
         long now = e.level().getGameTime();                                   // broken limbs mend slowly on their own
         if (now - s.lastHit > 300 && !KnockOut.isDown(e)) {
             boolean any = false;
@@ -520,10 +690,12 @@ public final class Limbs {
     public static void onJump(LivingEvent.LivingJumpEvent event) {
         LivingEntity e = event.getEntity();
         if (!eligible(e)) return;
-        int legs = of(e).legsOut();
+        State s = of(e);
+        int legs = s.legsOut();
         if (legs == 0) return;
+        boolean crawl = s.mustCrawl();
         Vec3 v = e.getDeltaMovement();
-        e.setDeltaMovement(v.x * (legs == 2 ? 0.2 : 0.7), legs == 2 ? 0 : v.y * 0.65, v.z * (legs == 2 ? 0.2 : 0.7));
+        e.setDeltaMovement(v.x * (crawl ? 0.2 : 0.7), crawl ? 0 : v.y * 0.65, v.z * (crawl ? 0.2 : 0.7));
     }
 
     /** Someone starts seeing a fighter with hurt limbs, or a player joins: tell them. */

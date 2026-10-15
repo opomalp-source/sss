@@ -90,7 +90,6 @@ public final class Carry {
         place(v, carrier);
         carrier.level().playSound(null, carrier.getX(), carrier.getY(), carrier.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER, SoundSource.PLAYERS, 1f, 0.7f);
         if (carrier instanceof Player p) p.displayClientMessage(Component.translatable("message.dbzenith.carrying", v.getDisplayName()), true);
-        if (v instanceof Player p) p.displayClientMessage(Component.translatable("message.dbzenith.carried_by", carrier.getDisplayName()), true);
         broadcast(carrier, v, true);
         return true;
     }

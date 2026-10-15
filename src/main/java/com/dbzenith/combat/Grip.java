@@ -179,7 +179,6 @@ public final class Grip {
         if (gripper instanceof ServerPlayer p) p.connection.teleport(p.getX(), p.getY(), p.getZ(), yaw, p.getXRot());
         place(s, 0);
         broadcast(s, GripPacket.START);
-        if (victim instanceof Player p) p.displayClientMessage(Component.translatable("message.dbzenith.being_gripped", gripper.getDisplayName()), true);
         return true;
     }
 
@@ -190,7 +189,6 @@ public final class Grip {
         broadcast(s, broken ? GripPacket.BROKEN : GripPacket.DONE);
         if (broken) {
             if (s.gripper instanceof Player p) p.displayClientMessage(Component.translatable("message.dbzenith.grip_broken"), true);
-            if (s.victim instanceof Player p) p.displayClientMessage(Component.translatable("message.dbzenith.grip_escaped"), true);
         }
     }
 

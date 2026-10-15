@@ -6,15 +6,22 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Battle damage overlays for the player model (CX-47), in the player skin layout, at 64 and 128 pixels
- * (textures/entity/battle/ and battle_hd/):
+ * Battle damage overlays for the player model (CX-47; reworked in the limbs rework so they follow the fighter's race
+ * and don't always look the same), in the player skin layout, at 64 and 128 pixels (textures/entity/battle/ and
+ * battle_hd/). Three layouts ({@code v0..v2}: the game picks one per fighter), each at three levels; each level keeps
+ * everything of the one before and adds more:
  * <ul>
- *   <li>{@code tears_<1..3>}: where the clothes are ripped open (white; drawn tinted with the fighter's skin tone, so
+ *   <li>{@code tears_<1..3>}: where the clothes are ripped open (white; tinted with the fighter's skin, so their own
  *       skin shows through whatever is worn);</li>
- *   <li>{@code marks_<1..3>}: the frayed dark edges of the rips with a few hanging threads, scratches, bruises and grime;</li>
+ *   <li>{@code edges_<1..3>}: the frayed edges of the rips, hanging threads, the shadow under the cloth, and grime
+ *       (drawn as they are);</li>
+ *   <li>{@code cuts_<1..3>}: scratches, cuts and a few dried runs (grey to white; tinted with the fighter's blood, so a
+ *       Namekian's cuts are violet and an android's leak oil);</li>
+ *   <li>{@code bruises_<1..3>}: bruises and swelling (grey to white; tinted with a bruise colour made from the
+ *       fighter's own skin);</li>
  *   <li>{@code dust}: dust and dirt from crashing into the ground, faded in and out by the game.</li>
  * </ul>
- * Each level keeps everything of the one before and adds more. Usage: java tools/BattleDamageGen.java
+ * Usage: java tools/BattleDamageGen.java
  */
 public final class BattleDamageGen {
     /** Faces of the model the damage goes on (x, y, w, h in 64-pixel skin units), and how much each gets. */
@@ -26,32 +33,39 @@ public final class BattleDamageGen {
             {32, 52, 4, 12, 1}, {36, 52, 4, 12, 1}, {40, 52, 4, 12, 1}, {44, 52, 4, 12, 1},          // left arm
     };
     static final int[] FACE = {8, 8, 8, 8};                                                          // the head's front
+    static final int VARIANTS = 3;
 
     record Mark(int kind, int level, int face, double x, double y, double r, double a, long seed) {}
 
-    static final int TEAR = 0, SCRATCH = 1, BRUISE = 2, GRIME = 3;
+    static final int TEAR = 0, SCRATCH = 1, BRUISE = 2, GRIME = 3, GASH = 4;
+    static final String[] LAYERS = {"tears", "edges", "cuts", "bruises"};
 
     public static void main(String[] args) throws Exception {
         String root = "src/main/resources/assets/dbzenith/textures/entity/";
-        List<Mark> marks = plan();
+        int total = 0;
         for (int scale : new int[]{1, 2}) {
-            String dir = root + (scale == 1 ? "battle/" : "battle_hd/");
-            new File(dir).mkdirs();
-            for (int level = 1; level <= 3; level++) {
-                BufferedImage tears = new BufferedImage(64 * scale, 64 * scale, BufferedImage.TYPE_INT_ARGB);
-                BufferedImage edges = new BufferedImage(64 * scale, 64 * scale, BufferedImage.TYPE_INT_ARGB);
-                for (Mark m : marks) if (m.level <= level) draw(m, scale, tears, edges);
-                ImageIO.write(tears, "png", new File(dir + "tears_" + level + ".png"));
-                ImageIO.write(edges, "png", new File(dir + "marks_" + level + ".png"));
+            String base = root + (scale == 1 ? "battle/" : "battle_hd/");
+            for (String old : new String[]{"tears_1", "tears_2", "tears_3", "marks_1", "marks_2", "marks_3"}) new File(base + old + ".png").delete();
+            for (int v = 0; v < VARIANTS; v++) {
+                List<Mark> marks = plan(v);
+                total += scale == 1 ? marks.size() : 0;
+                String dir = base + "v" + v + "/";
+                new File(dir).mkdirs();
+                for (int level = 1; level <= 3; level++) {
+                    BufferedImage[] img = new BufferedImage[LAYERS.length];
+                    for (int i = 0; i < img.length; i++) img[i] = new BufferedImage(64 * scale, 64 * scale, BufferedImage.TYPE_INT_ARGB);
+                    for (Mark m : marks) if (m.level <= level) draw(m, scale, img);
+                    for (int i = 0; i < img.length; i++) ImageIO.write(img[i], "png", new File(dir + LAYERS[i] + "_" + level + ".png"));
+                }
             }
-            ImageIO.write(dust(scale), "png", new File(dir + "dust.png"));
+            ImageIO.write(dust(scale), "png", new File(base + "dust.png"));
         }
-        System.out.println("BattleDamageGen: " + marks.size() + " marks");
+        System.out.println("BattleDamageGen: " + total + " marks over " + VARIANTS + " layouts");
     }
 
-    /** Where everything goes: the same plan for both sizes, each mark given the level it first shows at. */
-    static List<Mark> plan() {
-        Random r = new Random(0xBA77);
+    /** Where everything goes in one layout: the same plan for both sizes, each mark given the level it first shows at. */
+    static List<Mark> plan(int variant) {
+        Random r = new Random(0xBA77 + variant * 7919L);
         List<Mark> out = new ArrayList<>();
         for (int f = 0; f < FACES.length; f++) {
             int[] face = FACES[f];
@@ -67,13 +81,30 @@ public final class BattleDamageGen {
                 out.add(new Mark(SCRATCH, level, f, face[0] + r.nextDouble() * face[2], face[1] + r.nextDouble() * face[3], 1.2 + r.nextDouble() * 1.6,
                         Math.PI * (0.15 + r.nextDouble() * 0.3) * (r.nextBoolean() ? 1 : -1), r.nextLong()));
             }
+            if (weight >= 2 && r.nextDouble() < 0.6)                               // a real cut, late, that has bled down a little
+                out.add(new Mark(GASH, 3, f, face[0] + 1 + r.nextDouble() * (face[2] - 2), face[1] + 2 + r.nextDouble() * (face[3] - 5), 1.6 + r.nextDouble() * 1.2,
+                        Math.PI * (0.1 + r.nextDouble() * 0.35) * (r.nextBoolean() ? 1 : -1), r.nextLong()));
             for (int i = 0; i < weight; i++)                                       // bruises
                 out.add(new Mark(BRUISE, 2 + r.nextInt(2), f, face[0] + r.nextDouble() * face[2], face[1] + r.nextDouble() * face[3], 1.0 + r.nextDouble() * 0.9, 0, r.nextLong()));
             for (int level = 1; level <= 3; level++)                               // grime, thicker each level
                 out.add(new Mark(GRIME, level, f, 0, 0, 0, 0, r.nextLong()));
         }
-        out.add(new Mark(SCRATCH, 3, -1, FACE[0] + 5.6, FACE[1] + 4.6, 1.4, -0.7, 7));        // a cut on the cheek
-        out.add(new Mark(BRUISE, 3, -1, FACE[0] + 1.8, FACE[1] + 2.4, 0.9, 0, 11));               // and a bruise over the eye
+        switch (variant) {                                                          // the face, last to go
+            case 0 -> {
+                out.add(new Mark(SCRATCH, 3, -1, FACE[0] + 5.6, FACE[1] + 4.6, 1.4, -0.7, 7));        // a cut on the cheek
+                out.add(new Mark(BRUISE, 3, -1, FACE[0] + 1.8, FACE[1] + 2.4, 0.9, 0, 11));           // and a bruise over the eye
+            }
+            case 1 -> {
+                out.add(new Mark(SCRATCH, 3, -1, FACE[0] + 2.2, FACE[1] + 1.4, 1.1, 0.35, 13));       // a split brow
+                out.add(new Mark(BRUISE, 3, -1, FACE[0] + 6.2, FACE[1] + 5.2, 1.0, 0, 17));           // a swollen cheek
+                out.add(new Mark(SCRATCH, 2, -1, FACE[0] + 4.0, FACE[1] + 7.0, 0.5, 1.4, 19));        // and a split lip
+            }
+            default -> {
+                out.add(new Mark(SCRATCH, 3, -1, FACE[0] + 3.0, FACE[1] + 5.5, 1.6, 0.6, 23));        // a long scrape over the cheek
+                out.add(new Mark(BRUISE, 3, -1, FACE[0] + 6.0, FACE[1] + 2.6, 0.9, 0, 29));           // a black eye
+                out.add(new Mark(BRUISE, 2, -1, FACE[0] + 1.6, FACE[1] + 0.8, 0.8, 0, 31));           // a knock on the forehead
+            }
+        }
         return out;
     }
 
@@ -81,7 +112,9 @@ public final class BattleDamageGen {
         return m.face < 0 ? FACE : FACES[m.face];
     }
 
-    static void draw(Mark m, int s, BufferedImage tears, BufferedImage edges) {
+    /** Draws a mark onto its layers: {tears, edges, cuts, bruises}. */
+    static void draw(Mark m, int s, BufferedImage[] img) {
+        BufferedImage tears = img[0], edges = img[1], cuts = img[2], bruises = img[3];
         int[] f = faceOf(m);
         int x0 = f[0] * s, y0 = f[1] * s, x1 = (f[0] + f[2]) * s, y1 = (f[1] + f[3]) * s;
         Random r = new Random(m.seed);
@@ -96,7 +129,7 @@ public final class BattleDamageGen {
                     if (d < edge) {
                         tears.setRGB(x, y, 0xFFFFFFFF);
                         double shade = (edge - d) / edge;
-                        if (shade < 0.25) blend(edges, x, y, 0x5A3A2A, (int) (90 * (1 - shade * 4)));   // the skin's shadow under the cloth's lip
+                        if (shade < 0.25) blend(edges, x, y, 0x3A2418, (int) (80 * (1 - shade * 4)));   // the shadow under the cloth's lip
                     } else if (d < edge + 0.75) blend(edges, x, y, 0x241A12, 235);          // frayed cloth edge
                 }
                 int threads = r.nextInt(3);                                                // hanging threads at the bottom
@@ -110,7 +143,8 @@ public final class BattleDamageGen {
                     }
                 }
             }
-            case SCRATCH -> {
+            case SCRATCH, GASH -> {
+                boolean gash = m.kind == GASH;
                 int steps = (int) (m.r * s * 3);
                 double ca = Math.cos(m.a), sa = Math.sin(m.a);
                 for (int i = 0; i <= steps; i++) {
@@ -118,14 +152,34 @@ public final class BattleDamageGen {
                     int px = (int) Math.floor((m.x + ca * t * m.r * 2) * s), py = (int) Math.floor((m.y + sa * t * m.r * 2) * s);
                     if (px < x0 || px >= x1 || py < y0 || py >= y1) continue;
                     double mid = 1 - Math.abs(t) * 2;
-                    blend(edges, px, py, 0x8A2420, (int) (80 + 80 * mid));
-                    if (s > 1 && mid > 0.3) blend(edges, Math.min(x1 - 1, px + 1), py, 0xB84038, 70);
+                    if (gash) {                                                            // dark open middle, fresh edges
+                        blend(cuts, px, py, 0x6A6A6A, (int) (170 + 70 * mid));
+                        if (mid > 0.2) {
+                            blend(cuts, px, Math.max(y0, py - 1), 0xFFFFFF, (int) (110 * mid));
+                            blend(cuts, px, Math.min(y1 - 1, py + 1), 0xE0E0E0, (int) (140 * mid));
+                        }
+                    } else {
+                        blend(cuts, px, py, 0xB0B0B0, (int) (90 + 90 * mid));
+                        if (s > 1 && mid > 0.3) blend(cuts, Math.min(x1 - 1, px + 1), py, 0xFFFFFF, 80);
+                    }
+                }
+                if (gash) {                                                                // runs, dried down the skin
+                    int runs = 1 + r.nextInt(3);
+                    for (int k = 0; k < runs; k++) {
+                        double t = (r.nextDouble() - 0.5) * 0.8;
+                        int px = (int) Math.floor((m.x + ca * t * m.r * 2) * s), py = (int) Math.floor((m.y + sa * t * m.r * 2) * s);
+                        int len = s * (1 + r.nextInt(3));
+                        for (int i = 1; i <= len; i++)
+                            if (px >= x0 && px < x1 && py + i < y1) blend(cuts, px, py + i, 0x8A8A8A, (int) (190 * (1 - i / (double) (len + 1))));
+                    }
                 }
             }
             case BRUISE -> {
+                double sq = 0.8 + r.nextDouble() * 0.4;                                   // not quite round
                 for (int y = y0; y < y1; y++) for (int x = x0; x < x1; x++) {
-                    double d = Math.hypot((x + 0.5) / s - m.x, (y + 0.5) / s - m.y) / m.r;
-                    if (d < 1) blend(edges, x, y, d < 0.5 ? 0x5A2E52 : 0x7A4A3A, (int) (75 * (1 - d * d)));
+                    double d = Math.hypot(((x + 0.5) / s - m.x) * sq, ((y + 0.5) / s - m.y) / sq) / m.r;
+                    d += (hash(x, y, m.seed) - 0.5) * 0.25;                               // mottled
+                    if (d < 1) blend(bruises, x, y, d < 0.5 ? 0x9A9A9A : 0xFFFFFF, (int) (95 * (1 - d * d)));
                 }
             }
             case GRIME -> {

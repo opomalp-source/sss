@@ -26,6 +26,7 @@ import com.dbzenith.stats.StatCalculator;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -775,7 +776,7 @@ public final class DBZCommand {
                                         .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.stream.Stream.concat(java.util.stream.Stream.of("all"),
                                                 Arrays.stream(com.dbzenith.combat.Limbs.Limb.values()).map(com.dbzenith.combat.Limbs.Limb::key)), b))
                                         .then(Commands.argument("action", StringArgumentType.word())
-                                                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.List.of("break", "sever", "prosthetic", "heal"), b))
+                                                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.List.of("break", "sever", "prosthetic", "heal", "bandage", "sear", "close", "regrow"), b))
                                                 .executes(ctx -> {
                                                     String limb = StringArgumentType.getString(ctx, "limb"), action = StringArgumentType.getString(ctx, "action");
                                                     int n = 0;
@@ -787,6 +788,12 @@ public final class DBZCommand {
                                                             switch (action) {
                                                                 case "break" -> com.dbzenith.combat.Limbs.hit(l, which, 1000, false, false);
                                                                 case "sever" -> com.dbzenith.combat.Limbs.sever(l, which);
+                                                                case "bandage" -> com.dbzenith.combat.Limbs.stopBleeding(l);   // the limbs rework: closing a stump, or growing it back
+                                                                case "sear" -> com.dbzenith.combat.Limbs.sear(l);
+                                                                case "close" -> com.dbzenith.combat.Limbs.healWounds(l);
+                                                                case "regrow" -> {
+                                                                    if (s.severed(which)) com.dbzenith.combat.Limbs.regrow(l, which, com.dbzenith.combat.Blood.race(l) == com.dbzenith.stats.Race.MAJIN);
+                                                                }
                                                                 case "prosthetic" -> {
                                                                     if (!s.severed(which)) com.dbzenith.combat.Limbs.sever(l, which);
                                                                     com.dbzenith.combat.Limbs.fit(l, which.arm());
@@ -805,6 +812,31 @@ public final class DBZCommand {
                                                     ctx.getSource().sendSuccess(() -> Component.literal("Limbs " + action + " " + limb + ": " + count + " fighter(s)"), true);
                                                     return n;
                                                 })))))
+                .then(Commands.literal("scars")   // the limbs rework: give, age or clear battle scars
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.literal("add")
+                                        .then(Commands.argument("count", IntegerArgumentType.integer(1, com.dbzenith.combat.Scars.MAX))
+                                                .executes(ctx -> {
+                                                    int count = IntegerArgumentType.getInteger(ctx, "count");
+                                                    for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets"))
+                                                        for (int i = 0; i < count; i++) com.dbzenith.combat.Scars.add(p, com.dbzenith.combat.Scars.random(p));
+                                                    ctx.getSource().sendSuccess(() -> Component.literal("Scars added: " + count), true);
+                                                    return count;
+                                                })))
+                                .then(Commands.literal("age")
+                                        .then(Commands.argument("days", FloatArgumentType.floatArg(0, 100))
+                                                .executes(ctx -> {
+                                                    float days = FloatArgumentType.getFloat(ctx, "days");
+                                                    for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) com.dbzenith.combat.Scars.age(p, days);
+                                                    ctx.getSource().sendSuccess(() -> Component.literal("Scars aged " + days + " days"), true);
+                                                    return 1;
+                                                })))
+                                .then(Commands.literal("clear")
+                                        .executes(ctx -> {
+                                            for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) com.dbzenith.combat.Scars.clear(p);
+                                            ctx.getSource().sendSuccess(() -> Component.literal("Scars cleared"), true);
+                                            return 1;
+                                        }))))
                 .then(Commands.literal("usehand")   // dev: use what the player holds, as a right-click would (CX-50)
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .executes(ctx -> {

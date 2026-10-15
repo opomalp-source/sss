@@ -732,6 +732,15 @@ public final class Anims {
         a.rot("head", 0, -45, 0, 0, Ease.INOUTSINE).rot("head", 15, -38, 0, 0, Ease.INOUTSINE).rot("head", 30, -45, 0, 0, Ease.INOUTSINE);
     });
 
+    /** Prone with a leg gone, not moving (the knocked-out rework): on the belly, up on the forearms, head up, the stump trailing. */
+    public static final KeyframeAnimation CRAWL_IDLE = loop(40, a -> {
+        a.tilt(0, 88, 9.5f, Ease.INOUTSINE).tilt(20, 87, 9.4f, Ease.INOUTSINE).tilt(40, 88, 9.5f, Ease.INOUTSINE);
+        a.rot("rightArm", 0, -150, 18, 0, Ease.LINEAR).bend("rightArm", 0, 70, Ease.LINEAR);
+        a.rot("leftArm", 0, -150, -18, 0, Ease.LINEAR).bend("leftArm", 0, 70, Ease.LINEAR);
+        a.rot("rightLeg", 0, 2, 0, 6, Ease.LINEAR).rot("leftLeg", 0, 2, 0, -6, Ease.LINEAR);
+        a.rot("head", 0, -50, 0, 0, Ease.INOUTSINE).rot("head", 20, -46, 0, 0, Ease.INOUTSINE).rot("head", 40, -50, 0, 0, Ease.INOUTSINE);
+    });
+
     /** Knocked out and carried (CX-51): draped face down over someone's shoulder, arms and legs hanging, swaying. */
     public static final KeyframeAnimation CARRIED = loop(40, a -> {
         a.tilt(0, 90, 0f, Ease.INOUTSINE).tilt(20, 86, 0.4f, Ease.INOUTSINE).tilt(40, 90, 0f, Ease.INOUTSINE);   // (placed on the shoulder by Carry.shoulder)
@@ -758,6 +767,59 @@ public final class Anims {
         Pose up = new Pose().r("torso", 7, 0, 0).limb("rightArm", -166, 8, 14, 112).limb("leftArm", -20, 0, -8, 20);
         a.pose(0, fight(), Ease.LINEAR).pose(6, low, Ease.OUTQUAD).pose(10, low.copy().move(0, -1, 0), Ease.LINEAR).pose(16, up, Ease.INOUTQUAD);
     });
+
+    // ------------------------------------------------------------------ growing a limb back (the limbs rework)
+
+    /**
+     * A Namekian or a Majin growing an arm back: hunched over the stump, the other hand clutching the shoulder, straining
+     * (shaking with it) while the bud swells, then standing tall and thrusting the new arm out, fist closed, as Piccolo
+     * does. Timed to {@code LimbRender}'s regrowth (the bud, then the limb pushing out).
+     */
+    public static final KeyframeAnimation REGENERATE_ARM = once(52, a -> regenerateArm(a));
+    public static final KeyframeAnimation REGENERATE_ARM_LEFT = onceMirrored(52, a -> regenerateArm(a));
+    /** The same for a leg: braced over it, straining, then the new leg stamped down. */
+    public static final KeyframeAnimation REGENERATE_LEG = once(52, a -> regenerateLeg(a));
+    public static final KeyframeAnimation REGENERATE_LEG_LEFT = onceMirrored(52, a -> regenerateLeg(a));
+
+    /** The regrowth for a limb, by {@code Limbs.Limb} ordinal. */
+    public static KeyframeAnimation regenerate(int limb) {
+        return switch (limb) {
+            case 0 -> custom("regenerate_arm", REGENERATE_ARM);
+            case 1 -> custom("regenerate_arm_left", REGENERATE_ARM_LEFT);
+            case 2 -> custom("regenerate_leg", REGENERATE_LEG);
+            default -> custom("regenerate_leg_left", REGENERATE_LEG_LEFT);
+        };
+    }
+
+    private static void regenerateArm(Keys a) {
+        Pose hunch = new Pose().at(0, 2, 0).r("torso", 28, -12, 0).r("head", 18, -10, 0)
+                .limb("rightArm", 12, 0, 14, 0).limb("leftArm", -78, 0, 38, 95)
+                .limb("rightLeg", -22, 0, 5, 34).limb("leftLeg", 12, 0, -5, 22);
+        Pose strain = hunch.copy().r("torso", 33, -14, 3).r("head", 26, -8, 0).move(0, 0.4f, 0).limb("leftArm", -82, 0, 42, 100);
+        Pose thrust = new Pose().r("torso", -10, 6, 0).r("head", -14, 0, 0)
+                .limb("rightArm", -92, 4, 0, 0).limb("leftArm", 24, 0, -22, 40)
+                .limb("rightLeg", -10, 0, 4, 12).limb("leftLeg", 14, 0, -4, 8);
+        a.pose(0, fight(), Ease.LINEAR).pose(7, hunch, Ease.OUTQUAD);
+        for (int t = 10; t <= 28; t += 3) a.pose(t, ((t / 3) % 2 == 0) ? strain : hunch.copy().move(0, 0.2f, 0), Ease.INOUTSINE);   // shaking with the strain
+        a.pose(31, strain.copy().r("torso", 36, -16, 4), Ease.INQUAD).pose(36, thrust, Ease.OUTBACK).pose(44, thrust.copy().limb("rightArm", -88, 4, 2, 6), Ease.INOUTSINE)
+                .pose(52, fight(), Ease.INOUTQUAD);
+    }
+
+    private static void regenerateLeg(Keys a) {
+        Pose brace = new Pose().at(0, 2.5f, 0).r("torso", 30, 0, -6).r("head", 20, 0, 0)
+                .limb("rightArm", -30, 0, 30, 60).limb("leftArm", -40, 0, -20, 70)
+                .limb("rightLeg", -18, 0, 10, 10).limb("leftLeg", -30, 0, -6, 60);
+        Pose strain = brace.copy().r("torso", 35, 0, -8).move(0, 0.4f, 0).limb("rightArm", -34, 0, 34, 70);
+        Pose lift = new Pose().r("torso", 6, 0, 0).r("head", -6, 0, 0)
+                .limb("rightArm", -20, 0, 24, 30).limb("leftArm", -24, 0, -24, 30)
+                .limb("rightLeg", -70, 0, 4, 80).limb("leftLeg", 0, 0, -3, 6);
+        Pose stamp = new Pose().at(0, 1.2f, 0).r("torso", 12, 0, 0).r("head", 4, 0, 0)
+                .limb("rightArm", -10, 0, 30, 40).limb("leftArm", -14, 0, -30, 40)
+                .limb("rightLeg", -6, 0, 6, 14).limb("leftLeg", 4, 0, -6, 18);
+        a.pose(0, fight(), Ease.LINEAR).pose(7, brace, Ease.OUTQUAD);
+        for (int t = 10; t <= 28; t += 3) a.pose(t, ((t / 3) % 2 == 0) ? strain : brace.copy().move(0, 0.2f, 0), Ease.INOUTSINE);
+        a.pose(34, lift, Ease.OUTQUAD).pose(38, stamp, Ease.INQUAD).pose(52, fight(), Ease.INOUTQUAD);
+    }
 
     /** The finisher a gripper plays, by {@code Grip.Finisher} ordinal. */
     public static KeyframeAnimation gripper(int finisher) {

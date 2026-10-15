@@ -27,7 +27,6 @@ import org.joml.Matrix4f;
 /**
  * The downed, as others see them (the knocked-out rework):
  * <ul>
- *   <li>over each downed fighter's head, how long they have left: a bar draining from green to red, and the seconds;</li>
  *   <li>looking at one up close, what you can do: grip (the grip key, the direction you hold picks the finisher), carry,
  *       help up, or save them with a Senzu Bean; carrying someone, how to put them down or throw them;</li>
  *   <li>the grip key itself (it takes the place of swapping hands only while there is someone to grip), and throwing
@@ -94,53 +93,6 @@ public final class DownedHud {
             while (mc.options.keyAttack.consumeClick()) { }
             while (mc.options.keyUse.consumeClick()) { }
         }
-    }
-
-    // ------------------------------------------------------------------ over their heads
-
-    @SubscribeEvent
-    public static void onRender(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) return;
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null || mc.player == null || mc.options.hideGui) return;
-        Vec3 cam = event.getCamera().getPosition();
-        PoseStack pose = event.getPoseStack();
-        MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
-        Font font = mc.font;
-        float pt = event.getPartialTick();
-        long now = mc.level.getGameTime();
-        for (Entity e : mc.level.entitiesForRendering()) {
-            if (!(e instanceof LivingEntity l) || l == mc.player) continue;
-            var d = ClientKnockouts.get(l.getId());
-            if (d == null || l.distanceToSqr(cam) > 40 * 40 || ClientGrip.isGripped(l.getId())) continue;
-            double x = net.minecraft.util.Mth.lerp(pt, l.xo, l.getX()) - cam.x, y = net.minecraft.util.Mth.lerp(pt, l.yo, l.getY()) + 1.0 - cam.y,
-                    z = net.minecraft.util.Mth.lerp(pt, l.zo, l.getZ()) - cam.z;
-            if (ClientCarry.isCarried(l.getId())) y += 0.9;
-            float left = Math.max(0, d.until() - now - pt), share = d.total() <= 0 ? 0 : left / d.total();
-            pose.pushPose();
-            pose.translate(x, y, z);
-            pose.mulPose(event.getCamera().rotation());
-            pose.scale(-0.025f, -0.025f, 0.025f);
-            Matrix4f m = pose.last().pose();
-            int w = 40, bar = (int) (w * share);
-            int col = share > 0.5f ? 0xFF60D060 : share > 0.25f ? 0xFFE0C040 : 0xFFE03A2A;
-            fill(buffers, m, -w / 2f - 1, -1, w / 2f + 1, 4, 0xB0000000);
-            fill(buffers, m, -w / 2f, 0, -w / 2f + bar, 3, col);
-            String s = String.format("%.0fs", left / 20f);
-            Component label = Component.translatable("hud.dbzenith.down_tag", s);
-            font.drawInBatch(label, -font.width(label) / 2f, -11, 0xFFFF6A5A, false, m, buffers, Font.DisplayMode.SEE_THROUGH, 0x40000000, LightTexture.FULL_BRIGHT);
-            pose.popPose();
-        }
-        buffers.endBatch();
-    }
-
-    private static void fill(MultiBufferSource buffers, Matrix4f m, float x0, float y0, float x1, float y1, int argb) {
-        var vc = buffers.getBuffer(net.minecraft.client.renderer.RenderType.textBackgroundSeeThrough());
-        int a = argb >>> 24, r = argb >> 16 & 255, g = argb >> 8 & 255, b = argb & 255;
-        vc.vertex(m, x0, y0, 0).color(r, g, b, a).uv2(LightTexture.FULL_BRIGHT).endVertex();
-        vc.vertex(m, x0, y1, 0).color(r, g, b, a).uv2(LightTexture.FULL_BRIGHT).endVertex();
-        vc.vertex(m, x1, y1, 0).color(r, g, b, a).uv2(LightTexture.FULL_BRIGHT).endVertex();
-        vc.vertex(m, x1, y0, 0).color(r, g, b, a).uv2(LightTexture.FULL_BRIGHT).endVertex();
     }
 
     // ------------------------------------------------------------------ what you can do

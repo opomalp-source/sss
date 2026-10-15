@@ -150,7 +150,6 @@ public final class KnockOut {
                 data.markDirty();
             }
             p.stopRiding();
-            p.displayClientMessage(Component.translatable("message.dbzenith.knocked_out"), true);
         } else {
             d.total = DBZConfig.SERVER.knockOutNpcSeconds.get() * 20;
             if (v instanceof Mob m) {
@@ -344,7 +343,6 @@ public final class KnockOut {
         } else {
             helper.displayClientMessage(Component.translatable("message.dbzenith.helping_up", v.getDisplayName(),
                     Math.min(99, h.progress * 100 / HELP_TICKS)), true);
-            if (v instanceof Player p) p.displayClientMessage(Component.translatable("message.dbzenith.being_helped", helper.getDisplayName()), true);
         }
         return true;
     }

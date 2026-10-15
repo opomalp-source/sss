@@ -44,6 +44,8 @@ public final class AnimController {
     /** A stance must hold this many ticks before the loop swaps, so brief flickers in speed do not jitter the pose. */
     private static final int STATE_SETTLE = 3;
     private static final Map<AbstractClientPlayer, SpeedModifier[]> SPEEDS = new WeakHashMap<>();
+    /** Each layer can be mirrored: with the right arm gone, everything is done with the left (the limbs rework). */
+    private static final Map<AbstractClientPlayer, dev.kosmx.playerAnim.api.layered.modifier.MirrorModifier[]> MIRRORS = new WeakHashMap<>();
 
     private AnimController() {}
 
@@ -62,7 +64,9 @@ public final class AnimController {
     private static ModifierLayer<IAnimation> withSpeed(AbstractClientPlayer player, int slot) {
         SpeedModifier speed = new SpeedModifier(1f);
         SPEEDS.computeIfAbsent(player, p -> new SpeedModifier[2])[slot] = speed;
-        return new ModifierLayer<>(null, speed);
+        var mirror = new dev.kosmx.playerAnim.api.layered.modifier.MirrorModifier(false);
+        MIRRORS.computeIfAbsent(player, p -> new dev.kosmx.playerAnim.api.layered.modifier.MirrorModifier[2])[slot] = mirror;
+        return new ModifierLayer<>(null, speed, mirror);
     }
 
     private static final class Track {
@@ -93,7 +97,7 @@ public final class AnimController {
             Track t = TRACKS.computeIfAbsent(player, p -> new Track());
             PublicStatePacket state = ClientPublicStates.get(player.getId());
             tickHitstop(player, t, now);
-            tickHitstop(player, t, now);
+            tickMirror(player);
             tickStance(player, t, state, now);
             tickActions(player, t, state, now);
         }
@@ -120,6 +124,11 @@ public final class AnimController {
         t.candidate = null;
     }
 
+    /** Crawling: a leg gone (or both useless), on the ground, not flying. */
+    public static boolean crawling(net.minecraft.world.entity.LivingEntity e, PublicStatePacket state) {
+        return com.dbzenith.combat.Limbs.of(e).mustCrawl() && (state == null || !state.has(PublicStatePacket.FLYING)) && !e.isPassenger();
+    }
+
     private static KeyframeAnimation chooseStance(AbstractClientPlayer player, PublicStatePacket state, Track t, long now) {
         var knocked = com.dbzenith.client.ClientKnockouts.get(player.getId());   // knocked out (CX-51): carried, crawling or lying there
         if (knocked != null) {
@@ -127,6 +136,10 @@ public final class AnimController {
             double moved = Math.hypot(player.getX() - player.xo, player.getZ() - player.zo);
             if (knocked.crawl() && moved > 0.005) return Anims.custom("crawl", Anims.CRAWL);
             return Anims.custom("downed", Anims.DOWNED);
+        }
+        if (crawling(player, state)) {                                         // a leg gone: on the belly (the knocked-out rework)
+            double moved = Math.hypot(player.getX() - player.xo, player.getZ() - player.zo);
+            return moved > 0.005 ? Anims.custom("crawl", Anims.CRAWL) : Anims.custom("crawl_idle", Anims.CRAWL_IDLE);
         }
         if (com.dbzenith.client.ClientCarry.isCarrying(player.getId())) return Anims.custom("carrying", Anims.CARRYING);   // someone over the shoulder (the knocked-out rework)
         if (com.dbzenith.combat.Wounds.wounded(player) > 0.25f && player.onGround() && !state.has(PublicStatePacket.FLYING)
@@ -319,6 +332,14 @@ public final class AnimController {
         Track t = TRACKS.computeIfAbsent(player, p -> new Track());
         t.hitstopUntil = Math.max(t.hitstopUntil, mc.level.getGameTime() + ticks);
         tickHitstop(player, t, mc.level.getGameTime());
+    }
+
+    /** One arm left (the left): every stance and action mirrored, so the left does what the right would (the limbs rework). */
+    private static void tickMirror(AbstractClientPlayer player) {
+        var mirrors = MIRRORS.get(player);
+        if (mirrors == null) return;
+        boolean left = com.dbzenith.combat.Limbs.of(player).leftHanded();
+        for (var m : mirrors) if (m != null && m.isEnabled() != left) m.setEnabled(left);
     }
 
     private static void tickHitstop(AbstractClientPlayer player, Track t, long now) {
