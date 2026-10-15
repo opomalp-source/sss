@@ -53,7 +53,13 @@ public final class KiParticles {
         };
     }
 
-    private static int cap() {
+    /** How many are alive now. */
+    public static int live() {
+        return count;
+    }
+
+    /** The most particles alive at once at this quality. */
+    public static int cap() {
         return switch (quality()) {
             case 0 -> 800;
             case 1 -> 2000;

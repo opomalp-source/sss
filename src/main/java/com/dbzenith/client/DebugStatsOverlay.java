@@ -46,5 +46,7 @@ public final class DebugStatsOverlay implements IGuiOverlay {
             attrs.append(a.shortName().toUpperCase()).append(' ').append(d.getAttribute(a)).append("  ");
         }
         g.drawString(font, attrs.toString().trim(), x, y, TEXT);
+        y += line;
+        g.drawString(font, com.dbzenith.client.fx.KiFxStats.summary() + String.format(", %d fps", mc.getFps()), x, y, TEXT);   // the ki attack rework, phase 10
     }
 }

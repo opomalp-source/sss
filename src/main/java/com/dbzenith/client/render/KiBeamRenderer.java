@@ -139,6 +139,7 @@ public class KiBeamRenderer extends EntityRenderer<KiBeamEntity> {
      */
 
     private void renderEnergy(KiBeamEntity beam, PoseStack pose, MultiBufferSource buffers, Vec3 dir, float length, float width, int c, int hot, float t, Vec3 eye) {
+        com.dbzenith.client.fx.KiFxStats.beam();
         var m = pose.last().pose();
         var n = pose.last().normal();
         float dx = (float) dir.x, dy = (float) dir.y, dz = (float) dir.z;
@@ -258,7 +259,7 @@ public class KiBeamRenderer extends EntityRenderer<KiBeamEntity> {
         com.dbzenith.client.fx.KiEnergy.billboard(flat, m, n, hx, hy, hz, LEFT, UP, rr * 3.2f, com.dbzenith.client.fx.KiEnergy.argb(mid, 90), com.dbzenith.client.fx.KiEnergy.HALO);
         com.dbzenith.client.fx.KiEnergy.billboard(flat, m, n, hx, hy, hz, LEFT, UP, rr * 1.7f, com.dbzenith.client.fx.KiEnergy.argb(0xFFFFFF, 120), com.dbzenith.client.fx.KiEnergy.HALO);
         java.util.Random rnd = new java.util.Random(beam.getId() * 131L + com.dbzenith.client.fx.CameraFx.strike(t, 2));
-        int arcs = 8 + (int) (6 * held);
+        int arcs = (8 + (int) (6 * held)) / (com.dbzenith.client.fx.KiParticles.quality() == 0 ? 2 : 1);   // fewer at low quality (phase 10)
         for (int a = 0; a < arcs; a++) {                                       // lightning thrown out sideways
             double ang = rnd.nextDouble() * Math.PI * 2;
             float ox = (float) (px * Math.cos(ang) + qx * Math.sin(ang)), oy = (float) (py * Math.cos(ang) + qy * Math.sin(ang)), oz = (float) (pz * Math.cos(ang) + qz * Math.sin(ang));

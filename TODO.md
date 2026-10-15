@@ -290,4 +290,4 @@ to both mods folders.
 - [x] Phase 7 (v0.123.0) Camera: charge focus, release rush, beam rumble; accessibility: screen flash strength, reduce flashing (faint flashes, slower strobing and flicker)
 - [x] Phase 8 (v0.124.0) Beam clash v2: clash orb tinted to the winner, sideways lightning, shock rings, sparks, ground and rumble, clash roar; draws scale with time, winners pour through
 - [x] Phase 9 (v0.125.0) Post-processing: heat shimmer round ki light (bloom glow as mask), colour split after big hits, anime impact frames; settings for each
-- [ ] Phase 10 Performance pass, quality presets
+- [x] Phase 10 (v0.126.0) Performance: per-frame budget and distance LOD for ki balls, low quality trims (no shimmer, fewer arcs and bolts), debug overlay stats, stress-tested; fixed the post pass blacking out the world with the HUD on (v0.125.0)

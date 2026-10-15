@@ -186,7 +186,7 @@ public final class KiWaveFx {
             var type = pass == 0 ? KiEnergy.tint() : KiEnergy.flat();
             VertexConsumer vc = buffers.getBuffer(type);
             RandomSource rnd = RandomSource.create(w.seed + CameraFx.strike(age, 1));  // the same bolts in both passes (re-struck slower with reduce flashing)
-            for (int b = 0; b < 7; b++) {
+            for (int b = 0; b < (KiParticles.quality() == 0 ? 4 : 7); b++) {               // fewer bolts at low quality (phase 10)
                 Vec3 d = cone(w.dir, 0.65, rnd);
                 float px = x, py = y, pz = z;
                 int steps = 6;

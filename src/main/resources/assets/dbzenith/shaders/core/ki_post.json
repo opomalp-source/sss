@@ -2,7 +2,9 @@
     "blend": {
         "func": "add",
         "srcrgb": "1",
-        "dstrgb": "0"
+        "dstrgb": "0",
+        "srcalpha": "0",
+        "dstalpha": "1"
     },
     "vertex": "dbzenith:bloom",
     "fragment": "dbzenith:ki_post",

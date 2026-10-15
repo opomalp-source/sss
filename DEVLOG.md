@@ -3348,3 +3348,30 @@ answers: move all built-ins to JSON; for charging movement, my judgement; very b
   - charging and firing a Kamehameha at spawn, where the picture was intact (a black box and missing ground seen at
     x=600 turned out to be chunks that hadn't loaded yet);
   - an explosion's flash.
+
+## 2026-10-15 — Ki attack rework, phase 10: performance and quality (v0.126.0)
+- **Fixed: with the HUD showing, ki light turned the world black in v0.125.0.** The post pass (phase 9) was drawn with
+  a blend that replaced alpha as well as colour; with the HUD drawn over it, the world came out black. It now replaces
+  only the colour and keeps the picture's alpha (`ki_post.json`).
+  - Bisected in the dev client: bloom off fine; post effects off fine; copy only fine; post draw broken; post with
+    alpha kept fine.
+  - Hidden-HUD screenshots never showed it, which is why it slipped through. The empty sky and black box seen at x=600
+    were probably the same bug, not chunk loading.
+- **Fixed: bloom only during the world pass.** Light drawn outside it (the HUD's portrait of you, with your aura) went
+  into the bloom target, where it was never added back and could leave a stale glow for the next frame's post pass.
+  It now draws straight onto the picture (`KiBloom.inLevel`).
+- **A budget per frame** (`KiFxStats`). Each ki ball asks whether it may draw in full.
+  - A ball draws the cheap way (a glow and a plain core, no trail, plasma or flare) when it is farther than 64 blocks
+    (40 at low and medium quality), or once the frame's budget is spent: 24, 48, 96 or 160 full balls by quality.
+- **Low quality trims more:** no heat shimmer, half the clash lightning, four Paralysis Wave bolts instead of seven
+  (on top of fewer particles and simpler meshes).
+- **Stats on the debug overlay** (`showDebugStats`): last frame's full and cheap balls and the budget, beams, live
+  particles against the cap, quality and fps.
+- **Stress test** in the dev client (quality high, bloom and every post effect on):
+  - eight soldiers firing Rapid Volleys, then volleys and Ki Blasts together;
+  - two soldiers clashing Kamehamehas meanwhile.
+  - Frame rate: 98 fps idle, 86 fps with 22 balls, 2 beams and 674 particles, 73 fps with 29 balls and 713 particles.
+- 230 GameTests.
+
+**The ki attack rework (phases 0 to 10) is complete.** Story mode, which the user asked to leave until last, comes next
+when they say so.

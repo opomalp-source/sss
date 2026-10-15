@@ -159,3 +159,12 @@ With ki bloom on (and no shader pack or Fabulous graphics), Settings → Effects
 - **Colour split:** red and blue pull apart at the screen's edges after big blows and blasts close by.
 - **Impact frames:** a frame or two of stark black and white for the biggest impacts. These are never shown with reduce
   flashing on.
+
+## Performance
+
+- **Quality:** Settings → Effects → Ki attack quality (low, medium, high, ultra) sets the particle cap, mesh detail,
+  and how many ki balls may draw in full each frame (24, 48, 96, 160).
+- **Cheap drawing:** past that budget, or farther than 64 blocks (40 at low and medium quality), a ball draws as a
+  glow with a plain core.
+- **Low quality** also turns off the heat shimmer and thins the lightning in clashes and waves.
+- **Stats:** turn on `showDebugStats` in the client config to see the last frame's counts and fps on screen.

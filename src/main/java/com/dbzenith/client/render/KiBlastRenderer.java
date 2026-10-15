@@ -123,6 +123,16 @@ public class KiBlastRenderer extends EntityRenderer<KiBlastEntity> {
         double dist = Math.sqrt(ex * ex + ey * ey + ez * ez);
         int q = com.dbzenith.client.fx.KiParticles.quality();
         int detail = Math.min(q == 0 ? 0 : q == 1 ? 1 : 2, dist < 16 ? 2 : dist < 48 ? 1 : 0);
+        if (!com.dbzenith.client.fx.KiFxStats.blast(dist)) {                  // far, or past the frame's budget: a glow and a plain core (phase 10)
+            var lastC = pose.last();
+            LEFT.set(entityRenderDispatcher.camera.getLeftVector());
+            UP.set(entityRenderDispatcher.camera.getUpVector());
+            com.dbzenith.client.fx.KiEnergy.billboard(buffers.getBuffer(com.dbzenith.client.fx.KiEnergy.flat()), lastC.pose(), lastC.normal(), 0, (float) mid, 0, LEFT, UP,
+                    size * 1.1f, com.dbzenith.client.fx.KiEnergy.argb(c, 160), com.dbzenith.client.fx.KiEnergy.HALO);
+            com.dbzenith.client.fx.KiEnergy.sphere(buffers.getBuffer(com.dbzenith.client.fx.KiEnergy.solid()), lastC.pose(), lastC.normal(), 0, (float) mid, 0, size * 0.3f,
+                    com.dbzenith.client.fx.KiEnergy.argb(look.core, 255), com.dbzenith.client.fx.KiEnergy.CORE, 0, 0);
+            return;
+        }
         float flick = 1f + (0.05f * Mth.sin(t * 0.9f) + 0.03f * Mth.sin(t * 2.3f)) * look.flicker * com.dbzenith.client.fx.CameraFx.flicker();
         float r = size * 0.5f * flick;
         float my = (float) mid;

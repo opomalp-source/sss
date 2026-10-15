@@ -36,6 +36,8 @@ public final class KiBloom {
     private static TextureTarget glow, a, b, scene;
     private static final ResourceLocation NOISE = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/ki_noise.png");
     private static boolean used, inside;
+    /** Inside the world pass: light drawn outside it (the HUD portrait) goes straight onto the picture, not into the bloom. */
+    private static boolean inLevel;
 
     private KiBloom() {}
 
@@ -62,7 +64,7 @@ public final class KiBloom {
 
     /** Light is about to be drawn: into the glow target (made ready on the first use each frame). */
     public static void begin() {
-        if (!active()) return;
+        if (!active() || !inLevel) return;
         RenderTarget main = Minecraft.getInstance().getMainRenderTarget();
         if (glow == null || glow.width != main.width || glow.height != main.height) resize(main);
         if (!used) {
@@ -96,7 +98,9 @@ public final class KiBloom {
     public static final class Composite {
         @SubscribeEvent
         public static void onRenderLevel(RenderLevelStageEvent event) {
+            if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SKY) inLevel = true;
             if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) return;
+            inLevel = false;
             float pt = event.getPartialTick();
             float aberration = CameraFx.aberration(pt), impact = CameraFx.impact();
             boolean wasUsed = used;
@@ -131,10 +135,14 @@ public final class KiBloom {
                 post.setSampler("GlowSampler", b.getColorTextureId());
                 post.setSampler("NoiseSampler", mc.getTextureManager().getTexture(NOISE).getId());
                 set(post, "Time", ((mc.level == null ? 0 : mc.level.getGameTime() % 24000) + pt) / 20f);
-                set(post, "Haze", wasUsed ? DBZConfig.CLIENT.heatHaze.get().floatValue() : 0f);
+                set(post, "Haze", wasUsed && KiParticles.quality() > 0 ? DBZConfig.CLIENT.heatHaze.get().floatValue() : 0f);   // none at low quality (phase 10)
                 set(post, "Aberration", aberration);
                 set(post, "Impact", impact);
                 draw(post, scene, 1f, 0, 0);
+                for (int unit = 2; unit >= 0; unit--) {                          // leave the texture units as found: the HUD draws next
+                    RenderSystem.activeTexture(org.lwjgl.opengl.GL13.GL_TEXTURE0 + unit);
+                    RenderSystem.bindTexture(0);
+                }
             }
 
             if (wasUsed) {                                                   // onto the picture: the light itself, then its glow
