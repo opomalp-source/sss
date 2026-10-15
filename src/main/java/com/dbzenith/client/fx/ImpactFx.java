@@ -160,6 +160,9 @@ public final class ImpactFx {
                     CameraFx.kick(0.6f);
                     CameraFx.flash(tint, 0.35f);
                 }
+                double seen = mc.gameRenderer.getMainCamera().getPosition().distanceTo(pos);   // phase 9: the colour split, and for the biggest an impact frame
+                if (seen < 12 + 3 * s) CameraFx.aberrate(Math.min(1f, s / 5f) * (float) (1 - seen / (12 + 3 * s)) * 1.4f);
+                if (s >= 5 && seen < 10 + 3 * s) CameraFx.impactFrame();
             }
             case ImpactPacket.WAVE, ImpactPacket.STUN_WAVE, ImpactPacket.FLARE -> KiWaveFx.start(m);   // the ki attack rework, phase 5
             case ImpactPacket.CRATER -> torn(level, pos, s, rnd);                // phase 6: the ground torn open
@@ -286,6 +289,9 @@ public final class ImpactFx {
      */
     private static void torn(ClientLevel level, Vec3 pos, float r, RandomSource rnd) {
         CameraFx.shakeAt(pos, 0.15f + 0.05f * r, 16 + 3 * r);
+        double seen = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().distanceTo(pos);
+        if (r >= 6 && seen < 3 * r) CameraFx.aberrate(0.5f * (float) (1 - seen / (3 * r)));
+        if (r >= 10 && seen < 2.5 * r) CameraFx.impactFrame();
         if (r < 0.9f) {                                                         // only cracked: a scuff and a puff
             Vec3 ground = groundBelow(level, pos, 3);
             if (ground != null) crater(level, ground, 0.9f, 6);

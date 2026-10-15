@@ -32,8 +32,9 @@ import java.io.IOException;
  * config {@code kiBloom} (0 off). Off with Fabulous graphics or a shader pack, where everything draws as before.
  */
 public final class KiBloom {
-    private static ShaderInstance blur, add;
-    private static TextureTarget glow, a, b;
+    private static ShaderInstance blur, add, post;
+    private static TextureTarget glow, a, b, scene;
+    private static final ResourceLocation NOISE = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/ki_noise.png");
     private static boolean used, inside;
 
     private KiBloom() {}
@@ -46,6 +47,8 @@ public final class KiBloom {
                     DefaultVertexFormat.POSITION_TEX), s -> blur = s);
             event.registerShader(new ShaderInstance(event.getResourceProvider(), new ResourceLocation(DBZenith.MOD_ID, "bloom_add"),
                     DefaultVertexFormat.POSITION_TEX), s -> add = s);
+            event.registerShader(new ShaderInstance(event.getResourceProvider(), new ResourceLocation(DBZenith.MOD_ID, "ki_post"),
+                    DefaultVertexFormat.POSITION_TEX), s -> post = s);
         }
     }
 
@@ -80,45 +83,75 @@ public final class KiBloom {
     }
 
     private static void resize(RenderTarget main) {
-        if (glow != null) { glow.destroyBuffers(); a.destroyBuffers(); b.destroyBuffers(); }
+        if (glow != null) { glow.destroyBuffers(); a.destroyBuffers(); b.destroyBuffers(); scene.destroyBuffers(); }
         glow = new TextureTarget(main.width, main.height, true, Minecraft.ON_OSX);
+        scene = new TextureTarget(main.width, main.height, false, Minecraft.ON_OSX);
         int hw = Math.max(1, main.width / 2), hh = Math.max(1, main.height / 2);
         a = new TextureTarget(hw, hh, false, Minecraft.ON_OSX);
         b = new TextureTarget(hw, hh, false, Minecraft.ON_OSX);
-        for (TextureTarget t : new TextureTarget[]{glow, a, b}) t.setFilterMode(GL11.GL_LINEAR);
+        for (TextureTarget t : new TextureTarget[]{glow, a, b, scene}) t.setFilterMode(GL11.GL_LINEAR);
     }
 
     @Mod.EventBusSubscriber(modid = DBZenith.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
     public static final class Composite {
         @SubscribeEvent
         public static void onRenderLevel(RenderLevelStageEvent event) {
-            if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL || !used) return;
+            if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) return;
+            float pt = event.getPartialTick();
+            float aberration = CameraFx.aberration(pt), impact = CameraFx.impact();
+            boolean wasUsed = used;
+            boolean postNow = post != null && active() && (wasUsed && DBZConfig.CLIENT.heatHaze.get() > 0.01 || aberration > 0.01f || impact > 0.01f);
+            if (!wasUsed && !postNow) return;
             used = false;
             end();
-            if (glow == null) return;
             RenderTarget main = Minecraft.getInstance().getMainRenderTarget();
+            if (glow == null || glow.width != main.width || glow.height != main.height) {
+                if (!wasUsed) resize(main);
+                else return;
+            }
             float strength = DBZConfig.CLIENT.kiBloom.get().floatValue();
             RenderSystem.disableDepthTest();
             RenderSystem.depthMask(false);
             RenderSystem.enableBlend();
 
-            // the blur, at half size: across, down, then once more wider
-            RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-            pass(blur, glow, a, 1.5f / glow.width, 0);
-            pass(blur, a, b, 0, 1.5f / glow.height);
-            pass(blur, b, a, 3f / glow.width, 0);
-            pass(blur, a, b, 0, 3f / glow.height);
+            if (wasUsed) {                                                   // the blur, at half size: across, down, then once more wider
+                RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+                pass(blur, glow, a, 1.5f / glow.width, 0);
+                pass(blur, a, b, 0, 1.5f / glow.height);
+                pass(blur, b, a, 3f / glow.width, 0);
+                pass(blur, a, b, 0, 3f / glow.height);
+            }
+            if (postNow) {                                                   // the ki attack rework, phase 9: shimmer, colour split, impact frame
+                scene.setClearColor(0, 0, 0, 0);
+                scene.clear(Minecraft.ON_OSX);
+                scene.bindWrite(true);
+                draw(add, main, 1f, 0, 0);                                  // a copy of the picture to read from
+                main.bindWrite(true);
+                Minecraft mc = Minecraft.getInstance();
+                post.setSampler("GlowSampler", b.getColorTextureId());
+                post.setSampler("NoiseSampler", mc.getTextureManager().getTexture(NOISE).getId());
+                set(post, "Time", ((mc.level == null ? 0 : mc.level.getGameTime() % 24000) + pt) / 20f);
+                set(post, "Haze", wasUsed ? DBZConfig.CLIENT.heatHaze.get().floatValue() : 0f);
+                set(post, "Aberration", aberration);
+                set(post, "Impact", impact);
+                draw(post, scene, 1f, 0, 0);
+            }
 
-            // onto the picture: the light itself, then its glow
-            RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
-            main.bindWrite(true);
-            draw(add, glow, 1f, 0, 0);
-            draw(add, b, 0.7f * strength, 0, 0);
+            if (wasUsed) {                                                   // onto the picture: the light itself, then its glow
+                RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
+                main.bindWrite(true);
+                draw(add, glow, 1f, 0, 0);
+                draw(add, b, 0.7f * strength, 0, 0);
+            }
 
             RenderSystem.defaultBlendFunc();
             RenderSystem.depthMask(true);
             RenderSystem.enableDepthTest();
         }
+    }
+
+    private static void set(ShaderInstance shader, String name, float value) {
+        if (shader.getUniform(name) != null) shader.getUniform(name).set(value);
     }
 
     private static void pass(ShaderInstance shader, RenderTarget from, TextureTarget to, float dx, float dy) {

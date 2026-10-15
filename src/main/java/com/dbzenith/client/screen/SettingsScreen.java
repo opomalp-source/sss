@@ -63,6 +63,9 @@ public class SettingsScreen extends Screen {
                 o.add(new Option("aura_renderer", c.auraRenderer, 0, 2, new String[]{"auto", "shader", "plain"}));
                 o.add(new Option("ki_bloom", c.kiBloom, 0, 2, null));
                 o.add(new Option("ki_quality", c.kiQuality, 0, 3, new String[]{"low", "medium", "high", "ultra"}));
+                o.add(new Option("heat_haze", c.heatHaze, 0, 1, null));                             // the ki attack rework, phase 9
+                o.add(new Option("chromatic_aberration", c.chromaticAberration, 0, 0, null));
+                o.add(new Option("impact_frames", c.impactFrames, 0, 0, null));
                 o.add(new Option("first_person_aura", c.firstPersonAura, 0, 0, null));
                 o.add(new Option("afterimages", c.afterimages, 0, 0, null));
                 o.add(new Option("battle_damage", c.battleDamage, 0, 0, null));

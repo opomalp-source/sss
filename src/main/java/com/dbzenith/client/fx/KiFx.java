@@ -30,6 +30,7 @@ public final class KiFx {
         if (beam.getOwner() == mc.player) {
             CameraFx.kick(0.5f);
             CameraFx.flash(FxDraw.mix(beam.getColor(), 0xFFFFFF, 0.5f), 0.25f);
+            CameraFx.aberrate(0.35f + 0.1f * Math.min(3, beam.getWidth()));          // phase 9
         }
         CameraFx.shakeAt(beam.position(), 0.2f + 0.1f * w, 24);
     }

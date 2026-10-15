@@ -21,6 +21,7 @@ Under `assets/dbzenith/shaders/core/`.
 |---|---|
 | `ki_energy.json`, `.vsh`, `.fsh` | The energy shader. It is additive and goes into the bloom. The mode arrives in the overlay UV (`UV1.x`): 0 shell, 1 core, 2 plasma strands, 3 halo, 4 ribbon, 5 tint. It uses `GameTime` and samples `Sampler0` (the noise). |
 | `ki_energy_tint.json` | The same programs, blended normally rather than added. It draws the see-through coloured body under the glow, so attacks keep their colour against a bright sky. |
+| `ki_post.json`, `.fsh` (with `bloom.vsh`) | The post pass (phase 9): heat shimmer masked by the bloom's blurred glow, the colour split, the impact frame. Samplers: the picture, the glow, the noise; uniforms `Time`, `Haze`, `Aberration`, `Impact`. |
 
 With an Oculus or Iris shader pack on, neither is used and the older plain look is drawn.
 
@@ -66,4 +67,3 @@ None of these exist yet. Each would get a placeholder when its phase lands.
 | 6 | `crater_scorch.png` | 128x128, a dark scorched ring fading out, for crater floors |
 | 6 | `impact_plume.png` | 64x256 strip of 4 frames: a rising dust and smoke plume, alpha |
 | 6 | `impact_big` | A huge layered explosion (crack, boom, roar), 3 to 5 s, 2 variants |
-| 9 | `heat_distort.png` | 64x64 normal-map-style noise for heat shimmer (RG channels), tileable |

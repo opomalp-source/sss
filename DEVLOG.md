@@ -3324,3 +3324,27 @@ answers: move all built-ins to JSON; for charging movement, my judgement; very b
 - **Tests:** `CombatDepth2Tests.strongerBeamWinsTheStruggle` checks the two beams' clash roles. 230 GameTests.
 - **Checked in the dev client:** two soldiers clashing Kamehamehas, watched from the side. The orb was pushed toward
   the weaker one, with lightning, rings and sparks.
+
+## 2026-10-15 — Ki attack rework, phase 9: post-processing (v0.125.0)
+- **One post pass** (`ki_post` shader, run by `KiBloom` after the bloom's blur and before its glow is added). It reads
+  a copy of the finished picture:
+  - **Heat shimmer:** the air ripples round ki light (beams, charging orbs, auras, big spheres) with two layers of
+    drifting noise. The bloom's blurred glow is the mask, so it shimmers only where there is light and fades out
+    round it. Setting `heatHaze` (0 to 100%); it needs ki bloom.
+  - **Colour split:** red and blue pull apart toward the screen's edges for a moment after:
+    - explosions close by (by size and distance);
+    - big craters;
+    - firing a beam;
+    - letting a big charge go.
+    Setting `chromaticAberration`; it fades over about 15 ticks (`CameraFx.aberrate`).
+  - **Impact frames:** for the biggest impacts (explosions of size 5 or more close by, craters of radius 10 or more),
+    a stark black-and-white negative, full for a tick and fading over two more (`CameraFx.impactFrame`). Setting
+    `impactFrames`; always off with reduce flashing.
+- The pass runs only when something needs it: ki light this frame with shimmer on, or a split or impact frame under
+  way. It is off with Fabulous graphics or a shader pack, like the bloom.
+- **Settings → Effects:** Heat shimmer, Colour split, Impact frames.
+- 230 GameTests.
+- **Checked in the dev client:**
+  - charging and firing a Kamehameha at spawn, where the picture was intact (a black box and missing ground seen at
+    x=600 turned out to be chunks that hadn't loaded yet);
+  - an explosion's flash.

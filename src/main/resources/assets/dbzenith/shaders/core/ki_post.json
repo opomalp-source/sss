@@ -1,0 +1,17 @@
+{
+    "blend": {
+        "func": "add",
+        "srcrgb": "1",
+        "dstrgb": "0"
+    },
+    "vertex": "dbzenith:bloom",
+    "fragment": "dbzenith:ki_post",
+    "attributes": [ "Position", "UV0" ],
+    "samplers": [ { "name": "DiffuseSampler" }, { "name": "GlowSampler" }, { "name": "NoiseSampler" } ],
+    "uniforms": [
+        { "name": "Time", "type": "float", "count": 1, "values": [ 0.0 ] },
+        { "name": "Haze", "type": "float", "count": 1, "values": [ 0.0 ] },
+        { "name": "Aberration", "type": "float", "count": 1, "values": [ 0.0 ] },
+        { "name": "Impact", "type": "float", "count": 1, "values": [ 0.0 ] }
+    ]
+}

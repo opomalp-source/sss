@@ -151,3 +151,11 @@ To try it: fire a destructive attack at open ground away from spawn. For example
 - **Screen flash:** scales every full-screen flash (0% turns them off).
 - **Reduce flashing:** keeps flashes faint and slows lightning, arcs and flicker to a quarter, for players sensitive to
   flashing light.
+
+## Post-processing
+
+With ki bloom on (and no shader pack or Fabulous graphics), Settings → Effects offers three post-processing effects:
+- **Heat shimmer:** the air ripples round ki light.
+- **Colour split:** red and blue pull apart at the screen's edges after big blows and blasts close by.
+- **Impact frames:** a frame or two of stark black and white for the biggest impacts. These are never shown with reduce
+  flashing on.

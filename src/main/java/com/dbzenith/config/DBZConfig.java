@@ -783,6 +783,9 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue screenShake, screenFlash;
         /** Accessibility (the ki attack rework, phase 7): flashes capped low, flicker and strobing slowed. */
         public final ForgeConfigSpec.BooleanValue reduceFlashing;
+        /** Post-processing (the ki attack rework, phase 9). */
+        public final ForgeConfigSpec.DoubleValue heatHaze;
+        public final ForgeConfigSpec.BooleanValue chromaticAberration, impactFrames;
         public final ForgeConfigSpec.BooleanValue hitstop;
         public final ForgeConfigSpec.BooleanValue afterimages;
         public final ForgeConfigSpec.BooleanValue firstPersonAura;
@@ -870,6 +873,12 @@ public final class DBZConfig {
                     .defineInRange("screenFlash", 1.0, 0.0, 1.0);
             reduceFlashing = b.comment("Accessibility: keep flashes faint and slow down flickering and strobing (lightning, crackling ki)")
                     .define("reduceFlashing", false);
+            heatHaze = b.comment("Heat shimmer round ki light (beams, charging orbs, auras): its strength (0 = off). Needs ki bloom on")
+                    .defineInRange("heatHaze", 1.0, 0.0, 1.0);
+            chromaticAberration = b.comment("A red/blue split toward the screen's edges for a moment after big blows and blasts close by")
+                    .define("chromaticAberration", true);
+            impactFrames = b.comment("Anime impact frames: a frame or two of stark black and white for the biggest impacts (never with reduce flashing)")
+                    .define("impactFrames", true);
             hitstop = b.comment("Freeze the fighters' animations for a few frames when a blow lands")
                     .define("hitstop", true);
             afterimages = b.comment("Draw afterimages behind dashing and fast-flying fighters")

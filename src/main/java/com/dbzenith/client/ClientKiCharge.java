@@ -48,6 +48,7 @@ public final class ClientKiCharge {
                 if (f > 0.3f) {
                     com.dbzenith.client.fx.CameraFx.rush();
                     com.dbzenith.client.fx.CameraFx.shake(0.15f + 0.35f * f);
+                    com.dbzenith.client.fx.CameraFx.aberrate(0.2f + 0.5f * f);                // phase 9
                 }
             }
             return;

@@ -80,6 +80,29 @@ public final class CameraFx {
         return calm() ? 0.25f : 1f;
     }
 
+    private static float aberration, aberrationO;
+    private static int impactFrame;
+
+    /** Red and blue pulling apart toward the screen's edges for a moment, 0..1 (phase 9). */
+    public static void aberrate(float amount) {
+        if (!DBZConfig.CLIENT.chromaticAberration.get()) return;
+        aberration = Math.max(aberration, Math.min(1f, amount));
+    }
+
+    public static float aberration(float partial) {
+        return Mth.lerp(partial, aberrationO, aberration);
+    }
+
+    /** An anime impact frame: a frame or two of stark black and white (phase 9; never with reduce flashing). */
+    public static void impactFrame() {
+        if (DBZConfig.CLIENT.impactFrames.get() && !calm()) impactFrame = 3;
+    }
+
+    /** The impact frame now: full on the first tick, fading over the next two. */
+    public static float impact() {
+        return impactFrame >= 3 ? 1f : impactFrame == 2 ? 0.55f : impactFrame == 1 ? 0.2f : 0f;
+    }
+
     private static float focus, focusO;
 
     /** Your own charge drawing the view in a little, 0..1 (set every tick while charging). */
@@ -131,6 +154,9 @@ public final class CameraFx {
         lines = Math.max(0f, lines - 0.12f);
         focusO = focus;
         focus = Math.max(0f, focus - 0.08f);
+        aberrationO = aberration;
+        aberration = Math.max(0f, aberration - 0.07f);
+        if (impactFrame > 0) impactFrame--;
     }
 
     @SubscribeEvent
