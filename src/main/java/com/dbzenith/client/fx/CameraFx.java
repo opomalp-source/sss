@@ -31,6 +31,11 @@ public final class CameraFx {
         trauma = Math.min(1f, trauma + amount);
     }
 
+    /** A steady rumble: the shake held at least this high while it lasts (set every tick), 0..1. */
+    public static void rumble(float level) {
+        trauma = Math.max(trauma, Math.min(1f, level));
+    }
+
     /** Shake scaled down with the camera's distance from {@code at}: full strength up close, none beyond {@code radius}. */
     public static void shakeAt(Vec3 at, float amount, double radius) {
         Minecraft mc = Minecraft.getInstance();
@@ -50,8 +55,36 @@ public final class CameraFx {
     }
 
     public static void flash(int rgb, float alpha) {
+        alpha *= DBZConfig.CLIENT.screenFlash.get().floatValue();                // the player's flash strength, capped low for those sensitive to it
+        if (calm()) alpha = Math.min(alpha, 0.2f);
+        if (alpha <= 0) return;
         if (alpha >= flash) flashColor = rgb;
         flash = Math.max(flash, alpha);
+    }
+
+    /** Reduce flashing is on (accessibility, the ki attack rework, phase 7). */
+    public static boolean calm() {
+        return DBZConfig.CLIENT.reduceFlashing.get();
+    }
+
+    /**
+     * Which strike a flickering effect is on at time {@code t} (ticks), re-struck every {@code every} ticks: lightning,
+     * arcs. With reduce flashing on it changes four times as slowly.
+     */
+    public static long strike(float t, float every) {
+        return (long) (t / (calm() ? every * 4 : every));
+    }
+
+    /** How much a flicker swings (1 normally, a quarter with reduce flashing on). */
+    public static float flicker() {
+        return calm() ? 0.25f : 1f;
+    }
+
+    private static float focus, focusO;
+
+    /** Your own charge drawing the view in a little, 0..1 (set every tick while charging). */
+    public static void focus(float amount) {
+        focus = Math.max(focus, amount);
     }
 
     public static float flashAlpha(float partial) {
@@ -96,6 +129,8 @@ public final class CameraFx {
         flash = Math.max(0f, flash - 0.08f);
         linesO = lines;
         lines = Math.max(0f, lines - 0.12f);
+        focusO = focus;
+        focus = Math.max(0f, focus - 0.08f);
     }
 
     @SubscribeEvent
@@ -121,9 +156,9 @@ public final class CameraFx {
         if (devZoom > 0) event.setFOV(devZoom);
         float p = (float) event.getPartialTick();
         float k = Mth.lerp(p, kickO, kick);
-        float r = Mth.lerp(p, rushO, rush);
-        if ((k < 0.01f && r < 0.01f) || !DBZConfig.CLIENT.fovEffects.get()) return;
-        event.setFOV(event.getFOV() * (1 - 0.08f * k + 0.09f * r));
+        float r = Mth.lerp(p, rushO, rush), fc = Mth.lerp(p, focusO, focus);
+        if ((k < 0.01f && r < 0.01f && fc < 0.01f) || !DBZConfig.CLIENT.fovEffects.get()) return;
+        event.setFOV(event.getFOV() * (1 - 0.08f * k + 0.09f * r - 0.06f * fc));   // a charge draws the view in a little (phase 7)
     }
 
     /** Smooth pseudo-noise in about [-1, 1]: a few unrelated sine waves. */

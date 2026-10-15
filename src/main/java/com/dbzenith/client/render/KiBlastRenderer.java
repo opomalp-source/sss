@@ -123,7 +123,7 @@ public class KiBlastRenderer extends EntityRenderer<KiBlastEntity> {
         double dist = Math.sqrt(ex * ex + ey * ey + ez * ez);
         int q = com.dbzenith.client.fx.KiParticles.quality();
         int detail = Math.min(q == 0 ? 0 : q == 1 ? 1 : 2, dist < 16 ? 2 : dist < 48 ? 1 : 0);
-        float flick = 1f + (0.05f * Mth.sin(t * 0.9f) + 0.03f * Mth.sin(t * 2.3f)) * look.flicker;
+        float flick = 1f + (0.05f * Mth.sin(t * 0.9f) + 0.03f * Mth.sin(t * 2.3f)) * look.flicker * com.dbzenith.client.fx.CameraFx.flicker();
         float r = size * 0.5f * flick;
         float my = (float) mid;
         var last = pose.last();

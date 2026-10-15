@@ -185,7 +185,7 @@ public final class KiWaveFx {
         for (int pass = 0; pass < 2; pass++) {                                         // a tinted underlay (its colour against the sky), then the glow
             var type = pass == 0 ? KiEnergy.tint() : KiEnergy.flat();
             VertexConsumer vc = buffers.getBuffer(type);
-            RandomSource rnd = RandomSource.create(w.seed + (long) age);               // the same bolts in both passes
+            RandomSource rnd = RandomSource.create(w.seed + CameraFx.strike(age, 1));  // the same bolts in both passes (re-struck slower with reduce flashing)
             for (int b = 0; b < 7; b++) {
                 Vec3 d = cone(w.dir, 0.65, rnd);
                 float px = x, py = y, pz = z;
@@ -216,7 +216,7 @@ public final class KiWaveFx {
     /** A burst of white light at the face, rays shooting out from it, all fading fast. */
     private static void flare(MultiBufferSource.BufferSource buffers, Matrix4f m, Matrix3f n, float x, float y, float z, Wave w, float k) {
         VertexConsumer flat = buffers.getBuffer(KiEnergy.flat());
-        float f = (1 - k) * (1 - k);
+        float f = (1 - k) * (1 - k) * (CameraFx.calm() ? 0.35f : 1f);                 // dimmed with reduce flashing (phase 7)
         KiEnergy.billboard(flat, m, n, x, y, z, LEFT, UP, 2 + 10 * (float) Math.sqrt(k), KiEnergy.argb(0xFFFFFF, (int) (255 * f)), KiEnergy.HALO);
         KiEnergy.billboard(flat, m, n, x, y, z, LEFT, UP, 1.2f + 4 * k, KiEnergy.argb(w.color, (int) (255 * f)), KiEnergy.HALO);
         RandomSource rnd = RandomSource.create(w.seed);

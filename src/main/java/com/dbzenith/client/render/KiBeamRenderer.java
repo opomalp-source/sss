@@ -149,7 +149,7 @@ public class KiBeamRenderer extends EntityRenderer<KiBeamEntity> {
         double far = eye.length();
         int sides = q == 0 || far > 64 ? 8 : q == 1 || far > 24 ? 12 : 16;
         int rings = Math.max(4, Math.min(q >= 2 ? 40 : 20, (int) (length / Math.max(0.5f, width))));
-        float flick = 1f + 0.06f * Mth.sin(t * 1.9f) + 0.04f * Mth.sin(t * 4.7f);
+        float flick = 1f + (0.06f * Mth.sin(t * 1.9f) + 0.04f * Mth.sin(t * 4.7f)) * com.dbzenith.client.fx.CameraFx.flicker();
         float r0 = width * 0.55f * flick, r1 = width * 0.78f * flick;           // it widens as it travels
         float flow = -t * 0.12f;
         float born = Math.min(1, beam.tickCount / 4f);                          // fired: a flash that settles
@@ -197,7 +197,7 @@ public class KiBeamRenderer extends EntityRenderer<KiBeamEntity> {
                 first = false;
             }
         }
-        java.util.Random rnd = new java.util.Random(beam.getId() * 977L + (long) (t / 2));   // lightning off its edges, re-struck every other tick
+        java.util.Random rnd = new java.util.Random(beam.getId() * 977L + com.dbzenith.client.fx.CameraFx.strike(t, 2));   // lightning off its edges, re-struck every other tick (slower with reduce flashing)
         int arcs = q == 0 ? 1 : 2 + (int) (length / 16);
         for (int a = 0; a < arcs; a++) {
             if (rnd.nextFloat() < 0.4f) continue;

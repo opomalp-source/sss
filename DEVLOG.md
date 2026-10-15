@@ -3281,3 +3281,22 @@ answers: move all built-ins to JSON; for charging movement, my judgement; very b
 - **Checked in the dev client:** a destructive test ball (`test_crater` in the dev datapack) fired straight down. A
   great bowl was carved, with its lip of earth and blocks flung out, under the energy dome and the plume. The dev
   world's bedrock layer flattened its floor.
+
+## 2026-10-15 — Ki attack rework, phase 7: camera and accessibility (v0.123.0)
+- **Camera feel for your own attacks** (with `fovEffects` on):
+  - **Charging:** the view is drawn in a little as the charge grows, up to 6% (`CameraFx.focus`). This is a deliberate
+    focus, unlike the zoom from being slowed, which stays gone.
+  - **Letting go:** a charge past 30% sends the view rushing out with a jolt, harder the fuller it was.
+  - **Holding a beam:** the view rumbles while it pours out, harder for a wider beam (`CameraFx.rumble` holds the
+    shake at a level instead of piling it up).
+- **Accessibility** (Settings → Camera):
+  - **Screen flash** (`screenFlash`, 0 to 100%): the strength of every full-screen flash (explosions close by, beams
+    firing, the Solar Flare, transformations). 0% turns them off.
+  - **Reduce flashing** (`reduceFlashing`):
+    - flashes are capped faint;
+    - lightning and arcs re-strike four times as slowly (`CameraFx.strike`): the beam's edge lightning, the charge
+      orb's arcs, the Paralysis Wave;
+    - the energy's flicker swings a quarter as far (`CameraFx.flicker`);
+    - the Solar Flare's burst is dimmed.
+  - **Screen shake** (`screenShake`) already scaled every shake, including the new rumbles.
+- 230 GameTests.

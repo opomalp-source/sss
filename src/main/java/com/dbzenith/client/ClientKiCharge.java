@@ -41,7 +41,15 @@ public final class ClientKiCharge {
 
     public static void set(KiChargePackets.State m) {
         if (m.fraction() < 0) {
-            CHARGES.remove(m.entityId());
+            Charge was = CHARGES.remove(m.entityId());
+            Minecraft mc = Minecraft.getInstance();
+            if (was != null && mc.player != null && m.entityId() == mc.player.getId()) {   // your own let go (phase 7): the view rushes out, a jolt
+                float f = shownFraction(was, 0);
+                if (f > 0.3f) {
+                    com.dbzenith.client.fx.CameraFx.rush();
+                    com.dbzenith.client.fx.CameraFx.shake(0.15f + 0.35f * f);
+                }
+            }
             return;
         }
         long now = Minecraft.getInstance().level == null ? 0 : Minecraft.getInstance().level.getGameTime();
@@ -180,7 +188,7 @@ public final class ClientKiCharge {
             var flat = buffers.getBuffer(com.dbzenith.client.fx.KiEnergy.flat());
             com.dbzenith.client.fx.KiEnergy.billboard(flat, m, n, x, y, z, LEFT, UP, r * 2.2f * pulse, com.dbzenith.client.fx.KiEnergy.argb(c.color(), (int) (45 + 45 * f)), com.dbzenith.client.fx.KiEnergy.HALO);
             if (!firstPerson && f > 0.5f) {                                      // arcs of ki snapping round it
-                java.util.Random rnd = new java.util.Random(en.getKey() * 31L + (long) (t / 2));
+                java.util.Random rnd = new java.util.Random(en.getKey() * 31L + com.dbzenith.client.fx.CameraFx.strike(t, 2));
                 int arcs = 1 + (int) ((f - 0.5f) * 6);
                 for (int a = 0; a < arcs; a++) {
                     if (rnd.nextFloat() < 0.35f) continue;
@@ -254,6 +262,7 @@ public final class ClientKiCharge {
             }
             float f = shownFraction(c, 0);
             Hum hum = HUMS.get(en.getKey());
+            if (e == mc.player) com.dbzenith.client.fx.CameraFx.focus(f);       // your own charge draws the view in a little (phase 7)
             if (hum == null || hum.isStopped()) {
                 hum = new Hum(e);
                 HUMS.put(en.getKey(), hum);

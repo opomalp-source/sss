@@ -46,6 +46,12 @@ public final class KiFx {
                     0.55f, 0.9f + level.random.nextFloat() * 0.3f, false);
     }
 
+    /** One client tick of a beam: its caster's view rumbles while it pours out, harder for a wider beam (phase 7). */
+    public static void beamTick(com.dbzenith.skill.KiBeamEntity beam) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null && beam.getOwner() == mc.player) CameraFx.rumble(0.25f + 0.1f * Math.min(3, beam.getWidth()));
+    }
+
     /** One client tick of a ki blast: remember where it is (the trail), shed motes and the odd spark. */
     public static void blastTick(KiBlastEntity b) {
         double cx = b.getX(), cy = b.getY() + b.getBbHeight() / 2, cz = b.getZ();

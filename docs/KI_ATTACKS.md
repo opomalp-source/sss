@@ -138,3 +138,12 @@ A destructive attack (`"destructive": true`) tears the land up where it lands, a
 
 To try it: fire a destructive attack at open ground away from spawn. For example, a datapack attack with
 `"explosion": 5.0, "destructive": true`, fired with `/dbz cast @s <id> 1` while looking down.
+
+## Camera and accessibility
+
+- **Your own attacks:** the view is drawn in a little while you charge, rushes out with a jolt when you let a big charge
+  go, and rumbles while you hold a beam. Turn these off with Settings → Camera → FOV effects.
+- **Screen shake:** scales every shake.
+- **Screen flash:** scales every full-screen flash (0% turns them off).
+- **Reduce flashing:** keeps flashes faint and slows lightning, arcs and flicker to a quarter, for players sensitive to
+  flashing light.

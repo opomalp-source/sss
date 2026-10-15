@@ -780,7 +780,9 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue shoulderCamera, startThirdPerson;
         public final ForgeConfigSpec.BooleanValue flightMomentum, flightEffects, flightLookSteering, flightBodyLag, flightCinematicCamera;
         public final ForgeConfigSpec.DoubleValue lockOnRange, lockOnCameraSpeed, lockOnFreeLook;
-        public final ForgeConfigSpec.DoubleValue screenShake;
+        public final ForgeConfigSpec.DoubleValue screenShake, screenFlash;
+        /** Accessibility (the ki attack rework, phase 7): flashes capped low, flicker and strobing slowed. */
+        public final ForgeConfigSpec.BooleanValue reduceFlashing;
         public final ForgeConfigSpec.BooleanValue hitstop;
         public final ForgeConfigSpec.BooleanValue afterimages;
         public final ForgeConfigSpec.BooleanValue firstPersonAura;
@@ -864,6 +866,10 @@ public final class DBZConfig {
             b.push("effects");
             screenShake = b.comment("Camera shake strength from hits, explosions and landings (0 = off)")
                     .defineInRange("screenShake", 1.0, 0.0, 2.0);
+            screenFlash = b.comment("Full-screen flashes from explosions, beams firing, the Solar Flare and transformations: their strength (0 = none)")
+                    .defineInRange("screenFlash", 1.0, 0.0, 1.0);
+            reduceFlashing = b.comment("Accessibility: keep flashes faint and slow down flickering and strobing (lightning, crackling ki)")
+                    .define("reduceFlashing", false);
             hitstop = b.comment("Freeze the fighters' animations for a few frames when a blow lands")
                     .define("hitstop", true);
             afterimages = b.comment("Draw afterimages behind dashing and fast-flying fighters")

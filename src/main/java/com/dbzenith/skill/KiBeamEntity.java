@@ -130,7 +130,10 @@ public class KiBeamEntity extends Entity {
     @Override
     public void tick() {
         super.tick();
-        if (level().isClientSide) return;
+        if (level().isClientSide) {
+            com.dbzenith.client.fx.KiFx.beamTick(this);                          // the caster's view rumbles while it pours out (phase 7)
+            return;
+        }
         Entity owner = getOwner();
         if (owner == null || !owner.isAlive() || tickCount > lifeTicks) {
             finish();

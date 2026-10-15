@@ -287,7 +287,7 @@ to both mods folders.
   - Paused after phase 4 for the user's feedback; they said "go on" (2026-10-15).
 - [x] Phase 5 (v0.121.0) Barrage (streamed shot by shot, palm flashes, zaps), disc (spinning blade mesh, whine), homing (seeker ring, lock-on marker, warble), bursts and waves (energy dome, ground ring, lightning fan, solar flare), new sounds
 - [x] Phase 6 (v0.122.0) Impacts and terrain: huge ki craters carved over ticks (scorched floor, raised lip, flung blocks), optional regrowth, own explosions (no vanilla puffs or bang), energy dome, smoke plume, crater dust
-- [ ] Phase 7 Camera effects, accessibility (reduce flashing/shake)
+- [x] Phase 7 (v0.123.0) Camera: charge focus, release rush, beam rumble; accessibility: screen flash strength, reduce flashing (faint flashes, slower strobing and flicker)
 - [ ] Phase 8 Beam clash v2
 - [ ] Phase 9 Post-processing and polish (heat distortion, chromatic aberration)
 - [ ] Phase 10 Performance pass, quality presets
