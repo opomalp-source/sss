@@ -72,6 +72,15 @@ public final class ModItems {
     public static final RegistryObject<Item> PROSTHETIC_LEG = ITEMS.register("prosthetic_leg",
             () -> new com.dbzenith.item.ProstheticItem(new Item.Properties().stacksTo(4), false));
     public static final java.util.List<RegistryObject<Item>> GI = gi();
+    /** Head clothing (the clothing rework): Piccolo's turban, a bandana, a headband. */
+    public static final java.util.Map<com.dbzenith.item.HeadwearItem.Kind, RegistryObject<Item>> HEADWEAR = headwear();
+
+    private static java.util.Map<com.dbzenith.item.HeadwearItem.Kind, RegistryObject<Item>> headwear() {
+        java.util.Map<com.dbzenith.item.HeadwearItem.Kind, RegistryObject<Item>> out = new java.util.EnumMap<>(com.dbzenith.item.HeadwearItem.Kind.class);
+        for (com.dbzenith.item.HeadwearItem.Kind k : com.dbzenith.item.HeadwearItem.Kind.values())
+            out.put(k, ITEMS.register(k.id(), () -> new com.dbzenith.item.HeadwearItem(k, new Item.Properties())));
+        return out;
+    }
 
     private static java.util.List<RegistryObject<Item>> gi() {
         java.util.List<RegistryObject<Item>> out = new java.util.ArrayList<>();

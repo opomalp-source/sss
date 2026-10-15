@@ -74,7 +74,7 @@ public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         HairTransformation.Frame transition = HairTransformation.sample(player, state, partialTick);
         Form shape = transition.target().isEmpty() ? form : Forms.byId(state.form());
         HairShape hair;                                                          // the own hair in this form, or on its way to the next
-        if (GearLayer.turban(player)) hair = HairShape.BALD;                     // a turban covers the hair
+        if (GearLayer.hairCovered(player)) hair = HairShape.BALD;                // a turban or a bandana covers the hair
         else if (transition.target().isEmpty()) hair = HairCodes.shape(state.hairCode(), shape);
         else {
             float p = transition.progress();

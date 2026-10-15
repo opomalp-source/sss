@@ -19,6 +19,7 @@ public class ArtGen {
             if (args[1].equals("training_dummy")) TrainingDummy.make();
             if (args[1].equals("meters")) MeterArt.all();
             if (args[1].equals("masters")) NpcArt.masters();
+            if (args[1].equals("gear")) Gear.all();                           // the clothes (the clothing rework)
             System.out.println("ArtGen done: " + args[1]);
             return;
         }
@@ -1744,43 +1745,122 @@ public class ArtGen {
             return ring || flame;
         }
 
+        // ---------------------------------------------------------- shared (the clothing rework)
+
+        /** Cloth in the painted style, with light from above: flat tones by face, long folds, shade toward the bottom. */
+        static int fabric(int[] r, Face f, int x, int y, int w, int h, int seed) {
+            double uu = u(x, w), vv = v(y, h);
+            double l = Painted.BASE + Painted.face(f);
+            if (f == Face.BOTTOM) l = Painted.MID;
+            if (uu < 0.08 || uu > 0.92) l -= 0.08;
+            if (f != Face.TOP && f != Face.BOTTOM) l += vv < 0.1 ? 0.04 : vv > 0.88 ? -0.05 : 0;
+            double n = Hd.smooth(x * 1.6, y * 0.45, 5, seed);                                      // long, mostly vertical folds
+            if (Math.abs(n - 0.5) < 0.022) l -= 0.15;
+            else if (n > 0.5 && n < 0.56) l -= 0.06;
+            return HdRaces.tone(r, l);
+        }
+
+        static int shade(int[] r) {
+            return HdRaces.tone(r, Painted.SHADE);
+        }
+
+        /** A dashed seam down the middle of a side face. */
+        static boolean seam(Face f, double uu, int y, int w) {
+            return (f == Face.LEFT || f == Face.RIGHT) && Math.abs(uu - 0.5) * w < 0.55 && (y / 2) % 2 == 0;
+        }
+
+        /** Keeps only what {@code keep} says is thick (for a shell texture), else transparent. */
+        interface Keep {
+            boolean at(Face f, double uu, double vv);
+        }
+
+        static FaceFn only(FaceFn fn, Keep keep) {
+            return (f, x, y, w, h) -> keep.at(f, u(x, w), v(y, h)) ? fn.at(f, x, y, w, h) : 0;
+        }
+
+        /** The shell of a top: the same paint, only where it is thick (the clothing rework: drawn standing off the body). */
+        static void shell(Hd.HdSkin top, Keep body, Keep arm, String path) throws IOException {
+            Hd.HdSkin s = new Hd.HdSkin();
+            if (top.body != null && body != null) s.body = only(top.body, body);
+            if (top.arm != null && arm != null) s.arm = only(top.arm, arm);
+            s.save(path);
+        }
+
+        /** A sash round the waist (v 0.765 .. 0.9): its edges, a fold along it, the knot off to one side with creases running out of it. */
+        static int sash(int[] sa, Face f, int x, int y, int w, int h) {
+            double uu = u(x, w), vv = v(y, h);
+            if (row(vv, 0.77, h) || row(vv, 0.895, h)) return ink(sa);
+            if (f == Face.FRONT) {
+                double k = Math.abs(uu - 0.36);
+                if (k < 0.09) return k > 0.065 ? ink(sa) : flat(sa, f, vv < 0.83 ? 0.1 : 0.02);
+                if (Painted.one(x, y, w, h, 0.46, 0.8, 0.62, 0.79, 0.86, 0.81) < Painted.LINE
+                        || Painted.one(x, y, w, h, 0.46, 0.865, 0.7, 0.875) < Painted.LINE) return shade(sa);
+            }
+            return flat(sa, f, row(vv, 0.835, h) ? -0.07 : 0.02);
+        }
+
+        // ---------------------------------------------------------- gi
+
         static void gi(String set, int clothC, int sashC, int bootC, int underC, boolean emblem) throws IOException {
             int[] cl = ramp(clothC, 6), sa = ramp(sashC, 5), bt = ramp(bootC, 5), un = ramp(underC, 5), white = ramp(0xFFF4F0E8, 4);
+            int seed = set.hashCode();
             Hd.HdSkin top = new Hd.HdSkin();
             top.body = (f, x, y, w, h) -> {
                 double uu = u(x, w), vv = v(y, h);
                 if (f == Face.BOTTOM || vv > 0.9) return 0;
-                if (vv >= 0.765) {                                                                  // the sash and its knot
-                    if (row(vv, 0.77, h) || row(vv, 0.895, h)) return ink(sa);
-                    if (f == Face.FRONT && Math.abs(uu - 0.36) < 0.09) return Math.abs(uu - 0.36) > 0.065 ? ink(sa) : flat(sa, f, 0.06);
-                    return flat(sa, f, 0);
-                }
+                if (vv >= 0.765) return sash(sa, f, x, y, w, h);
                 if (f == Face.FRONT) {
                     double d = Math.abs(uu - 0.5), edge = (0.4 - vv) * 1.0;
-                    if (vv < 0.4 && d < edge - 0.04) return flat(un, f, 0);                          // undershirt in the V
+                    if (vv < 0.4 && d < edge - 0.04) return flat(un, f, vv < 0.06 ? -0.1 : 0);       // undershirt in the V, shadowed under the collar
                     if (vv < 0.4 && d < edge + 0.02) return ink(cl);                                 // the collar's edge
+                    if (vv < 0.42 && d < edge + 0.06) return flat(cl, f, 0.07);                      // the lapel catches the light
                     if (Painted.one(x, y, w, h, 0.5, 0.4, 0.66, 0.765) < Painted.LINE) return ink(cl);   // where the gi wraps over
+                    if (Painted.sym(x, y, w, h, 0.02, 0.2, 0.15, 0.32, 0.22, 0.4) < Painted.LINE) return shade(cl);   // folds from the armpits
+                    if (Painted.sym(x, y, w, h, 0.08, 0.69, 0.22, 0.745) < Painted.LINE
+                            || Painted.one(x, y, w, h, 0.56, 0.68, 0.7, 0.745) < Painted.LINE) return shade(cl);   // gathered above the sash
                 }
-                if (f == Face.BACK && emblem && emblem(uu, vv, 0.5, 0.3, 0.22)) {
-                    double dx = (uu - 0.5) / 0.22, dy = (vv - 0.3) / 0.22 * 1.5, dd = Math.hypot(dx, dy);
-                    return dd > 0.74 && dd < 0.8 || dd > 0.98 ? ink(cl) : white[2];
+                if (f == Face.BACK) {
+                    if (emblem && emblem(uu, vv, 0.5, 0.3, 0.22)) {
+                        double dx = (uu - 0.5) / 0.22, dy = (vv - 0.3) / 0.22 * 1.5, dd = Math.hypot(dx, dy);
+                        return dd > 0.74 && dd < 0.8 || dd > 0.98 ? ink(cl) : white[2];
+                    }
+                    if (Painted.sym(x, y, w, h, 0.04, 0.12, 0.16, 0.2) < Painted.LINE) return shade(cl);   // over the shoulder blades
+                    if (Painted.one(x, y, w, h, 0.3, 0.7, 0.42, 0.745) < Painted.LINE || Painted.one(x, y, w, h, 0.62, 0.71, 0.72, 0.745) < Painted.LINE)
+                        return shade(cl);
                 }
-                return cloth(cl, f, x, y, w, h, set.hashCode());
+                if (f == Face.LEFT || f == Face.RIGHT) {
+                    if (seam(f, uu, y, w)) return HdRaces.tone(cl, Painted.MID);
+                    if (Painted.one(x, y, w, h, 0.15, 0.06, 0.5, 0.18, 0.85, 0.07) < Painted.LINE) return shade(cl);   // under the arm
+                }
+                return fabric(cl, f, x, y, w, h, seed);
             };
             top.arm = (f, x, y, w, h) -> {
                 double vv = v(y, h);
                 if (f == Face.TOP) return flat(cl, f, 0);
-                if (vv < 0.36) return row(vv, 0.35, h) ? ink(cl) : cloth(cl, f, x, y, w, h, set.hashCode() + 1);   // short sleeves
-                if (vv >= 0.72 && vv < 0.87 && f != Face.BOTTOM) {                                  // wristbands
+                if (vv < 0.36) {                                                                     // short sleeves
+                    if (row(vv, 0.35, h)) return ink(cl);
+                    if (vv > 0.3) return flat(cl, f, -0.07);                                         // the turned hem
+                    if (f != Face.BOTTOM && Painted.one(x, y, w, h, 0.1, 0.06, 0.5, 0.2, 0.9, 0.12) < Painted.LINE) return shade(cl);
+                    return fabric(cl, f, x, y, w, h, seed + 1);
+                }
+                if (vv >= 0.72 && vv < 0.87 && f != Face.BOTTOM) {                                  // wristbands, stitched
                     if (row(vv, 0.725, h) || row(vv, 0.865, h)) return ink(sa);
+                    if ((row(vv, 0.75, h) || row(vv, 0.84, h)) && x % 2 == 0) return HdRaces.tone(sa, Painted.MID);
                     return flat(sa, f, row(vv, 0.795, h) ? 0.08 : 0);
                 }
                 return 0;
             };
             top.save("entity/gear/" + set + "_top.png");
+            shell(top, (f, uu, vv) -> f != Face.BOTTOM && vv >= 0.765 && vv <= 0.9, (f, uu, vv) -> f != Face.BOTTOM && vv >= 0.72 && vv < 0.87,
+                    "entity/gear/" + set + "_top_shell.png");
 
             Hd.HdSkin pants = new Hd.HdSkin();
-            pants.body = (f, x, y, w, h) -> v(y, h) > 0.88 && f != Face.TOP ? cloth(cl, f, x, y, w, h, set.hashCode() + 2) : 0;
+            pants.body = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (vv <= 0.88 || f == Face.TOP) return 0;
+                if (f == Face.FRONT && (x * 6 / w) % 2 == 0 && row(vv, 0.94, h)) return shade(cl);   // gathered at the waist
+                return fabric(cl, f, x, y, w, h, seed + 2);
+            };
             pants.leg = (f, x, y, w, h) -> {
                 double vv = v(y, h);
                 if (f == Face.BOTTOM || vv > 0.78) return 0;
@@ -1788,66 +1868,131 @@ public class ArtGen {
                 double fold = Math.min(Painted.one(x, y, w, h, 0.3, 0.04, 0.37, 0.4), Painted.one(x, y, w, h, 0.72, 0.12, 0.64, 0.38));
                 fold = Math.min(fold, Painted.one(x, y, w, h, 0.2, 0.5, 0.5, 0.55, 0.8, 0.5));
                 fold = Math.min(fold, Painted.one(x, y, w, h, 0.15, 0.68, 0.5, 0.72, 0.85, 0.67));
-                if (fold < Painted.LINE) return HdRaces.tone(cl, Painted.SHADE);
-                return flat(cl, f, (u(x, w) < 0.1 || u(x, w) > 0.9) ? -0.1 : 0);
+                fold = Math.min(fold, Painted.one(x, y, w, h, 0.25, 0.44, 0.45, 0.41, 0.62, 0.45));   // the knee
+                if (fold < Painted.LINE) return shade(cl);
+                if (seam(f, u(x, w), y, w)) return HdRaces.tone(cl, Painted.MID);
+                if (vv > 0.7) return flat(cl, f, -0.06);                                             // bunched over the boots
+                return fabric(cl, f, x, y, w, h, seed + 3);
             };
             pants.save("entity/gear/" + set + "_pants.png");
 
             Hd.HdSkin boots = new Hd.HdSkin();
             boots.leg = (f, x, y, w, h) -> {
-                double vv = v(y, h);
+                double uu = u(x, w), vv = v(y, h);
                 if (f == Face.BOTTOM) return ink(bt);
                 if (vv < 0.72) return 0;
-                if (row(vv, 0.725, h) || vv > 0.955) return ink(bt);                               // the cuff's edge, the sole
-                if (vv < 0.78) return flat(sa, f, 0.02);                                           // a coloured cuff
-                if (row(vv, 0.82, h) || row(vv, 0.87, h)) return HdRaces.tone(bt, Painted.SHADE);   // wraps
-                return flat(bt, f, (u(x, w) < 0.12 || u(x, w) > 0.88) ? -0.1 : 0);
+                if (row(vv, 0.725, h) || vv > 0.96) return ink(bt);                                // the cuff's edge, the sole
+                if (vv > 0.93) return HdRaces.tone(bt, Painted.MID);                               // the sole's side
+                if (vv < 0.78) return flat(sa, f, row(vv, 0.75, h) && x % 2 == 0 ? -0.1 : 0.02);   // a coloured cuff, stitched
+                if (f == Face.FRONT || f == Face.BACK) {                                              // wraps crossing over
+                    if (Painted.one(x, y, w, h, 0.08, 0.79, 0.92, 0.9) < Painted.LINE || Painted.one(x, y, w, h, 0.92, 0.79, 0.08, 0.9) < Painted.LINE)
+                        return shade(bt);
+                } else if (row(vv, 0.82, h) || row(vv, 0.87, h)) return shade(bt);
+                if (f == Face.FRONT && vv > 0.9) return flat(bt, f, 0.06);                          // the toe catches the light
+                return flat(bt, f, (uu < 0.12 || uu > 0.88) ? -0.1 : 0);
             };
             boots.save("entity/gear/" + set + "_boots.png");
         }
 
+        // ---------------------------------------------------------- battle armour
+
         static void battleArmor() throws IOException {
-            battleArmor("battle_armor", 0xFFECEEF2, 0xFFD8B040, 0xFF2A2E48);
-            battleArmor("frost_armor", 0xFFF2F0F6, 0xFF8A4AC8, 0xFF1C1A24);                    // Frost Demon armour: white plate, purple trim
+            battleArmor("battle_armor", 0xFFECEEF2, 0xFFD8B040, 0xFF2A2E48, false);
+            battleArmor("frost_armor", 0xFFF2F0F6, 0xFF8A4AC8, 0xFF1C1A24, true);              // the Frieza Force: white plate, purple trim
         }
 
-        static void battleArmor(String name, int plateC, int trimC, int suitC) throws IOException {
+        /** The plate over the torso (v below 0.72): chest plates, abs in rows, the spine and shoulder blades, straps, a lower rim. */
+        static int armourPlate(int[] plate, int[] gold, boolean frieza, Face f, int x, int y, int w, int h) {
+            double uu = u(x, w), vv = v(y, h);
+            if (vv > 0.665) {                                                                       // the rim along the bottom
+                if (row(vv, 0.715, h) || row(vv, 0.668, h)) return ink(frieza ? gold : plate);
+                return frieza ? flat(gold, f, 0) : flat(plate, f, -0.1);
+            }
+            boolean strap = vv < 0.1 && (uu < 0.28 || uu > 0.72);
+            if ((f == Face.FRONT || f == Face.BACK) && strap) return row(vv, 0.095, h) ? ink(gold) : flat(gold, f, 0);
+            double l = Painted.BASE + Painted.face(f) + 0.02 + (vv < 0.08 ? 0.04 : 0);
+            if (f == Face.FRONT) {
+                if (Painted.sym(x, y, w, h, 0.5, 0.12, 0.36, 0.13, 0.17, 0.19, 0.09, 0.29, 0.13, 0.4, 0.31, 0.44, 0.5, 0.41) < Painted.LINE) return ink(plate);
+                if (Math.abs(uu - 0.5) * w < 0.55 && vv < 0.44) return ink(plate);                   // the ridge down the middle
+                if (vv < 0.43) {
+                    if (Painted.ell(uu, vv, 0.31, 0.22, 0.08, 0.05) || Painted.ell(uu, vv, 0.69, 0.22, 0.08, 0.05)) return HdRaces.tone(plate, 1.07);   // gloss
+                    if (vv > 0.34) l = Painted.MID;                                                  // the underside of the chest
+                } else {                                                                             // the abs, in three rows
+                    for (double r : new double[]{0.475, 0.56, 0.645}) {
+                        if (row(vv, r, h)) return ink(plate);
+                        if (vv > r && vv < r + 0.025) l += 0.06;                                    // a lit top edge
+                        if (vv < r && vv > r - 0.025) l -= 0.08;                                    // shadow above the next
+                    }
+                    if (Math.abs(uu - 0.5) * w < 0.55) return ink(plate);
+                    if (uu < 0.1 || uu > 0.9) l -= 0.08;
+                }
+            } else if (f == Face.BACK) {
+                if (Math.abs(uu - 0.5) * w < 0.55) return ink(plate);                               // the spine ridge
+                if (Math.abs(uu - 0.5) * w < 2) l = Painted.MID;
+                if (Painted.sym(x, y, w, h, 0.5, 0.12, 0.3, 0.14, 0.12, 0.26, 0.16, 0.42, 0.5, 0.44) < Painted.LINE) return ink(plate);   // the shoulder blades
+                if (vv > 0.36 && vv < 0.44) l -= 0.06;
+            } else if (f == Face.TOP) {
+                return flat(gold, f, 0);                                                            // the straps over the shoulders
+            } else if (f == Face.LEFT || f == Face.RIGHT) {
+                if (row(vv, 0.36, h)) return ink(plate);                                            // where the front and back plates meet
+                if (uu < 0.1 || uu > 0.9) l -= 0.08;
+            }
+            return HdRaces.tone(plate, l);
+        }
+
+        static void battleArmor(String name, int plateC, int trimC, int suitC, boolean frieza) throws IOException {
             int[] plate = ramp(plateC, 6), gold = ramp(trimC, 5), suit = ramp(suitC, 6);
             Hd.HdSkin top = new Hd.HdSkin();
             top.body = (f, x, y, w, h) -> {
                 double uu = u(x, w), vv = v(y, h);
                 if (f == Face.BOTTOM) return 0;
-                if (f == Face.TOP) return flat(gold, f, 0);                                         // the shoulder straps
-                if (vv < 0.72) {
-                    if (f == Face.FRONT || f == Face.BACK) {
-                        if (vv < 0.08 && (uu < 0.3 || uu > 0.7)) return row(vv, 0.075, h) ? ink(gold) : flat(gold, f, 0);
-                        if (f == Face.FRONT && vv > 0.42 && (row(vv, 0.5, h) || row(vv, 0.61, h)) && uu > 0.12 && uu < 0.88) return ink(plate);
-                    }
-                    return HdRaces.paintedPlate(plate, f, uu, vv, 0, 0, 1, 0.72);
-                }
+                if (vv < 0.72 || f == Face.TOP) return armourPlate(plate, gold, frieza, f, x, y, w, h);
                 if (row(vv, 0.735, h)) return ink(suit);
-                return cloth(suit, f, x, y, w, h, 301);                                            // the bodysuit below
+                if (seam(f, uu, y, w)) return HdRaces.tone(suit, Painted.MID);
+                return fabric(suit, f, x, y, w, h, 301);                                         // the bodysuit below
             };
             top.arm = (f, x, y, w, h) -> {
-                double vv = v(y, h);
-                if (vv >= 0.82) return row(vv, 0.825, h) ? ink(plate) : flat(plate, f, 0);         // gloves
-                return cloth(suit, f, x, y, w, h, 302);
+                double uu = u(x, w), vv = v(y, h);
+                if (vv >= 0.82) {                                                                   // gloves: a thick cuff, the back of the hand, knuckles
+                    if (row(vv, 0.825, h) || row(vv, 0.875, h)) return ink(plate);
+                    if (vv < 0.875) return flat(plate, f, 0.06);
+                    if (f == Face.FRONT && row(vv, 0.94, h) && x % 3 != 0) return HdRaces.tone(plate, Painted.MID);
+                    if (f == Face.BOTTOM) return HdRaces.tone(plate, Painted.MID);
+                    return flat(plate, f, (uu < 0.12 || uu > 0.88) ? -0.08 : 0);
+                }
+                if (f == Face.RIGHT && Math.abs(uu - 0.5) * w < 0.55) return HdRaces.tone(suit, Painted.MID);   // the sleeve's seam
+                if (f != Face.BOTTOM && Painted.one(x, y, w, h, 0.15, 0.48, 0.5, 0.52, 0.85, 0.47) < Painted.LINE) return shade(suit);   // the elbow
+                return fabric(suit, f, x, y, w, h, 302);
             };
             top.save("entity/gear/" + name + "_top.png");
+            shell(top, (f, uu, vv) -> f != Face.BOTTOM && (vv < 0.72 || f == Face.TOP), (f, uu, vv) -> vv >= 0.82,
+                    "entity/gear/" + name + "_top_shell.png");
 
             Hd.HdSkin pants = new Hd.HdSkin();
-            pants.body = (f, x, y, w, h) -> v(y, h) > 0.88 && f != Face.TOP ? cloth(suit, f, x, y, w, h, 303) : 0;
-            pants.leg = (f, x, y, w, h) -> v(y, h) > 0.72 || f == Face.BOTTOM ? 0 : cloth(suit, f, x, y, w, h, 304);
+            pants.body = (f, x, y, w, h) -> v(y, h) > 0.88 && f != Face.TOP ? fabric(suit, f, x, y, w, h, 303) : 0;
+            pants.leg = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (vv > 0.72 || f == Face.BOTTOM) return 0;
+                if (seam(f, u(x, w), y, w)) return HdRaces.tone(suit, Painted.MID);
+                if (Painted.one(x, y, w, h, 0.2, 0.45, 0.5, 0.42, 0.8, 0.46) < Painted.LINE) return shade(suit);   // the knee
+                return fabric(suit, f, x, y, w, h, 304);
+            };
             pants.save("entity/gear/" + name + "_pants.png");
 
             Hd.HdSkin boots = new Hd.HdSkin();
             boots.leg = (f, x, y, w, h) -> {
-                double vv = v(y, h);
+                double uu = u(x, w), vv = v(y, h);
                 if (f == Face.BOTTOM) return ink(plate);
                 if (vv < 0.7) return 0;
-                if (row(vv, 0.705, h) || vv > 0.955) return ink(plate);
-                if (vv > 0.86 && f == Face.FRONT) return row(vv, 0.865, h) ? ink(gold) : flat(gold, f, 0);   // toe caps
-                return flat(plate, f, (u(x, w) < 0.12 || u(x, w) > 0.88) ? -0.1 : 0);
+                if (row(vv, 0.705, h) || vv > 0.96) return ink(plate);
+                if (vv < 0.75) return flat(gold, f, row(vv, 0.73, h) ? 0.08 : 0);                  // a trimmed top
+                if (row(vv, 0.752, h)) return ink(plate);
+                if (vv > 0.93) return HdRaces.tone(plate, Painted.MID);                             // the sole's side
+                if (f == Face.FRONT) {
+                    if (vv > 0.87) return row(vv, 0.872, h) ? ink(gold) : flat(gold, f, vv < 0.9 ? 0.06 : 0);   // toe caps
+                    if (Painted.one(x, y, w, h, 0.18, 0.76, 0.2, 0.83, 0.5, 0.86, 0.8, 0.83, 0.82, 0.76) < Painted.LINE) return ink(plate);   // the shin plate
+                }
+                return flat(plate, f, (uu < 0.12 || uu > 0.88) ? -0.1 : vv < 0.8 ? 0.04 : 0);
             };
             boots.save("entity/gear/" + name + "_boots.png");
         }
@@ -1873,6 +2018,7 @@ public class ArtGen {
                 return row(vv, 0.805, h) ? ink(white) : flat(white, f, 0);                         // gloves
             };
             top.save("entity/gear/majin_top.png");
+            shell(top, (f, uu, vv) -> f != Face.BOTTOM && vv > 0.655 && vv <= 0.7, (f, uu, vv) -> vv >= 0.8, "entity/gear/majin_top_shell.png");
 
             Hd.HdSkin pants = new Hd.HdSkin();
             pants.body = (f, x, y, w, h) -> {
@@ -1946,6 +2092,7 @@ public class ArtGen {
                 return 0;
             };
             top.save("entity/gear/fusion_top.png");
+            shell(top, (f, uu, vv) -> f != Face.BOTTOM && vv >= 0.72 && vv <= 0.9, (f, uu, vv) -> f != Face.BOTTOM && vv >= 0.74 && vv < 0.9, "entity/gear/fusion_top_shell.png");
 
             Hd.HdSkin pants = new Hd.HdSkin();
             pants.body = (f, x, y, w, h) -> v(y, h) > 0.88 && f != Face.TOP ? cloth(white, f, x, y, w, h, 602) : 0;
@@ -1993,6 +2140,7 @@ public class ArtGen {
                 return cloth(red, f, x, y, w, h, 502);
             };
             top.save("entity/gear/hoodie_top.png");
+            shell(top, (f, uu, vv) -> f != Face.BOTTOM && vv > 0.86 && vv <= 0.92, (f, uu, vv) -> vv > 0.79 && vv <= 0.86, "entity/gear/hoodie_top_shell.png");
 
             Hd.HdSkin pants = new Hd.HdSkin();
             pants.body = (f, x, y, w, h) -> v(y, h) > 0.88 && f != Face.TOP ? cloth(black, f, x, y, w, h, 503) : 0;

@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["SAS"],
+  "key": {"A": {"item": "minecraft:red_wool"}, "S": {"item": "minecraft:string"}},
+  "result": {"item": "dbzenith:headband"}
+}

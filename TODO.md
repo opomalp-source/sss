@@ -284,7 +284,7 @@ Most of these already exist in a first version; each step upgrades what is there
 - [x] (v0.129.0) Ultra Instinct and Mastered Ultra Instinct as techniques; UI and God auras after the user's pictures
 - [x] (v0.131.0) Transformation burst (aura phase 6), aura settings and light (phase 7)
 - [x] (v0.130.0) Great Ape: only at a full moon, after looking at it six seconds (heartbeat, red pulse); a new ape model (ApeShape, GreatApeGen) with breathing, stomping walk, swipes, roar and chest beats; the camera stands back for giants
-- [ ] Clothing and armor: better textures, parts that stick out (Frieza Force shoulder pads), head clothing as items (Piccolo's turban)
+- [x] (v0.132.0) Clothing and armor: richer painted textures, thick parts standing off the body (plates, gloves, boots, sashes), layered Saiyan pads and sweeping Frieza Force pads; head clothing as items (Piccolo's turban, bandana, headband)
 - [ ] A real-play feel pass
 
 # Ki attack rework (user spec, 2026-10-14): cinematic attacks and sound, data-driven

@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["AAA", "S S"],
+  "key": {"A": {"item": "minecraft:orange_wool"}, "S": {"item": "minecraft:string"}},
+  "result": {"item": "dbzenith:bandana"}
+}

@@ -56,6 +56,23 @@ public final class GearTests {
     }
 
     @GameTest(template = EMPTY)
+    public static void headClothingIsWornOnTheHead(GameTestHelper helper) {
+        ServerPlayer p = TestPlayers.create(helper);
+        for (com.dbzenith.item.HeadwearItem.Kind k : com.dbzenith.item.HeadwearItem.Kind.values()) {
+            ItemStack hat = new ItemStack(ModItems.HEADWEAR.get(k).get());
+            helper.assertTrue(hat.getItem() instanceof net.minecraft.world.item.ArmorItem a && a.getEquipmentSlot() == EquipmentSlot.HEAD, k + " goes on the head");
+            p.setItemSlot(EquipmentSlot.HEAD, hat);
+            helper.assertTrue(com.dbzenith.item.HeadwearItem.worn(p) == k, k + " is worn");
+        }
+        helper.assertTrue(com.dbzenith.item.HeadwearItem.Kind.TURBAN.coversHair() && !com.dbzenith.item.HeadwearItem.Kind.HEADBAND.coversHair(),
+                "a turban covers the hair, a headband doesn't");
+        var recipe = helper.getLevel().getRecipeManager().byKey(new net.minecraft.resources.ResourceLocation(DBZenith.MOD_ID, "turban"));
+        helper.assertTrue(recipe.isPresent(), "Piccolo's turban can be made");
+        TestPlayers.remove(helper, p);
+        helper.succeed();
+    }
+
+    @GameTest(template = EMPTY)
     public static void scouterReadsAndOverloads(GameTestHelper helper) {
         ServerPlayer p = TestPlayers.create(helper);
         Zombie z = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(1, 1, 1));

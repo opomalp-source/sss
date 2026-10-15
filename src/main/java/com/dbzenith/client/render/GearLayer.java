@@ -59,13 +59,25 @@ public class GearLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         return TEXTURES.computeIfAbsent(set.id() + "_" + piece, k -> new ResourceLocation(DBZenith.MOD_ID, "textures/entity/gear/" + k + ".png"));
     }
 
-    /** Whether the player wears a turban (the Namekian garb), which hides the hair. */
+    /** Whether the player wears Piccolo's turban (on the head; the clothing rework), which hides hair and antennae. */
     public static boolean turban(Player player) {
-        return ArtStyle.get() != ArtStyle.CLASSIC && worn(player, EquipmentSlot.CHEST) == GiArmorItem.Set.NAMEKIAN;
+        return ArtStyle.get() != ArtStyle.CLASSIC && com.dbzenith.item.HeadwearItem.worn(player) == com.dbzenith.item.HeadwearItem.Kind.TURBAN;
+    }
+
+    /** Whether something on the head covers the hair (a turban or a bandana). */
+    public static boolean hairCovered(Player player) {
+        if (ArtStyle.get() == ArtStyle.CLASSIC) return false;
+        var k = com.dbzenith.item.HeadwearItem.worn(player);
+        return k == com.dbzenith.item.HeadwearItem.Kind.TURBAN || k == com.dbzenith.item.HeadwearItem.Kind.BANDANA;
     }
 
     static GiArmorItem.Set worn(Player player, EquipmentSlot slot) {
         return player.getItemBySlot(slot).getItem() instanceof GiArmorItem gi ? gi.set() : null;
+    }
+
+    /** The thick parts of a top (armour plates, gloves, wristbands, the sash), drawn standing off the body (the clothing rework). */
+    static ResourceLocation shell(GiArmorItem.Set set) {
+        return texture(set, "top_shell");
     }
 
     @Override
@@ -73,43 +85,82 @@ public class GearLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
                        float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
         if (player.isInvisible() || ArtStyle.get() == ArtStyle.CLASSIC) return;
         GiArmorItem.Set top = worn(player, EquipmentSlot.CHEST), pants = worn(player, EquipmentSlot.LEGS), boots = worn(player, EquipmentSlot.FEET);
+        com.dbzenith.item.HeadwearItem.Kind hat = com.dbzenith.item.HeadwearItem.worn(player);
         PublicStatePacket fused = ClientPublicStates.get(player.getId());
         if (fused != null && fused.has(PublicStatePacket.FUSED_DANCE)) top = pants = boots = GiArmorItem.Set.FUSION;   // the dance's outfit (12c)
-        if (top == null && pants == null && boots == null) return;
-        if (pants != null) renderColoredCutoutModel(getParentModel(), texture(pants, "pants"), pose, buffers, light, player, 1f, 1f, 1f);
-        if (boots != null) renderColoredCutoutModel(getParentModel(), texture(boots, "boots"), pose, buffers, light, player, 1f, 1f, 1f);
-        if (top != null) renderColoredCutoutModel(getParentModel(), texture(top, "top"), pose, buffers, light, player, 1f, 1f, 1f);
-
-        model.follow(getParentModel());
-        VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(PARTS));
+        if (top == null && pants == null && boots == null && hat == null) return;
         int o = OverlayTexture.NO_OVERLAY;
+        model.follow(getParentModel());
+        if (pants != null) renderColoredCutoutModel(getParentModel(), texture(pants, "pants"), pose, buffers, light, player, 1f, 1f, 1f);
+        PlayerModel<AbstractClientPlayer> m = getParentModel();
+        if (top != null) {
+            renderColoredCutoutModel(m, texture(top, "top"), pose, buffers, light, player, 1f, 1f, 1f);
+            thick(m, shell(top), pose, buffers, light, player, 1.1f, m.body, m.rightArm, m.leftArm);   // plates, gloves, bands: standing off the body
+        }
+        if (boots != null) thick(m, texture(boots, "boots"), pose, buffers, light, player, 1.13f, m.rightLeg, m.leftLeg);   // boots, thick
+
+        VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(PARTS));
         if (pants == GiArmorItem.Set.MAJIN || pants == GiArmorItem.Set.FUSION) piece(pose, vc, light, o, GearModel.Piece.BAGGY, 0, 0xF2F0F4);
+        if (hat != null) {                                                         // head clothing (the clothing rework)
+            switch (hat) {
+                case TURBAN -> {
+                    piece(pose, vc, light, o, GearModel.Piece.TURBAN, 0, hat.color);
+                    piece(pose, vc, light, o, GearModel.Piece.TURBAN_BAND, 0, hat.accent);
+                }
+                case BANDANA -> {
+                    piece(pose, vc, light, o, GearModel.Piece.BANDANA, 0, hat.color);
+                    piece(pose, vc, light, o, GearModel.Piece.BANDANA_KNOT, 0, hat.accent);
+                }
+                case HEADBAND -> {
+                    piece(pose, vc, light, o, GearModel.Piece.HEADBAND, 0, hat.color);
+                    piece(pose, vc, light, o, GearModel.Piece.HEADBAND_TAILS, Cloth.chain(player, "headband", Cloth.SASH, ageInTicks), hat.color);
+                }
+            }
+        }
         if (top == null) return;
         Cloth.Chain sash = Cloth.chain(player, "sash", Cloth.SASH, ageInTicks);   // CX-44: the sash ends and the cape swing on springs
         switch (top) {
             case TURTLE -> piece(pose, vc, light, o, GearModel.Piece.SASH_TAILS, sash, 0x2852C8);
             case DEMON -> piece(pose, vc, light, o, GearModel.Piece.SASH_TAILS, sash, 0xC02838);
-            case BATTLE_ARMOR -> {
+            case BATTLE_ARMOR -> {                                                 // Saiyan armour: layered pads flaring down and out
                 piece(pose, vc, light, o, GearModel.Piece.PADS, 0, 0xECEEF2);
+                piece(pose, vc, light, o, GearModel.Piece.PAD_LIP, 0, 0xE2E4EA);
                 piece(pose, vc, light, o, GearModel.Piece.PAD_TRIM, 0, 0xD8B040);
             }
             case NAMEKIAN -> {
                 piece(pose, vc, light, o, GearModel.Piece.CAPE, Cloth.chain(player, "cape", Cloth.CAPE, ageInTicks), 0xF4F2EC);
                 piece(pose, vc, light, o, GearModel.Piece.NAMEK_PADS, 0, 0xF4F2EC);
                 piece(pose, vc, light, o, GearModel.Piece.SASH_TAILS, sash, 0x40B0E0);
-                piece(pose, vc, light, o, GearModel.Piece.TURBAN, 0, 0xF4F2EC);
-                piece(pose, vc, light, o, GearModel.Piece.TURBAN_BAND, 0, 0x6A3A9A);
             }
             case MAJIN -> { }
             case HOODIE -> piece(pose, vc, light, o, GearModel.Piece.HOOD, 0, 0xC8283A);
-            case FROST_ARMOR -> {
-                piece(pose, vc, light, o, GearModel.Piece.PADS, 0, 0x8A4AC8);
-                piece(pose, vc, light, o, GearModel.Piece.PAD_TRIM, 0, 0xF2F0F6);
+            case FROST_ARMOR -> {                                                  // the Frieza Force: pads sweeping up like wings
+                piece(pose, vc, light, o, GearModel.Piece.FROST_PADS, 0, 0x8A4AC8);
+                piece(pose, vc, light, o, GearModel.Piece.FROST_PAD_TRIM, 0, 0xF2F0F6);
             }
             case FUSION -> {
                 piece(pose, vc, light, o, GearModel.Piece.PADS, 0, 0xEAB830);
+                piece(pose, vc, light, o, GearModel.Piece.PAD_LIP, 0, 0xE0AE28);
                 piece(pose, vc, light, o, GearModel.Piece.PAD_TRIM, 0, 0x1F6F80);
             }
+        }
+    }
+
+    /**
+     * Draws {@code tex} on the figure with {@code parts} made wider and deeper by {@code s} (the clothing rework): what is
+     * thick (plates, gloves, boots) stands off the body, following every bend and segment of the limbs as the body
+     * itself does. The texture holds only those parts.
+     */
+    private void thick(PlayerModel<AbstractClientPlayer> m, ResourceLocation tex, PoseStack pose, MultiBufferSource buffers, int light,
+                       AbstractClientPlayer player, float s, net.minecraft.client.model.geom.ModelPart... parts) {
+        for (var p : parts) {
+            p.xScale *= s;
+            p.zScale *= s;
+        }
+        renderColoredCutoutModel(m, tex, pose, buffers, light, player, 1f, 1f, 1f);
+        for (var p : parts) {
+            p.xScale /= s;
+            p.zScale /= s;
         }
     }
 

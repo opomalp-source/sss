@@ -3656,3 +3656,47 @@ Third phase of the "auras, apes and clothes" request: aura rework phases 6 and 7
   - Super Saiyan, Super Saiyan God and Blue transformations by day: the pillar, dome, cracks under God, no blocky
     particles;
   - Super Saiyan, Blue and UI auras at night, their colours on the ground.
+
+## 2026-10-15 — Clothes and armour reworked; head clothing (v0.132.0)
+Fourth phase of the "auras, apes and clothes" request. The user: rework the clothing and armour textures, let things
+stick out (the Frieza Force soldiers' shoulder pads and the like), make it look very good, and add head clothing such
+as Piccolo's turban as its own item. Player guide: `docs/CLOTHES.md`.
+
+The user installed Python and ffmpeg. `gen_auras.py` now keeps the hand-made auras in its `KEEP` set (no more
+commented-out lines) and reproduces every aura file. The motion and style generators run too and are in sync. A
+committed `.pyc` is gone and `__pycache__` is ignored.
+
+- **Painted textures (`ArtGen` `Gear`, run alone with `java tools/ArtGen.java only gear`):**
+  - Gi: the lapel catching the light, folds from the armpits and over the shoulder blades, the cloth gathered above
+    the sash, side seams, a sash with a fold and creases from the knot, sleeve folds and a turned hem, stitched
+    wristbands, knee folds, the trousers bunched over the boots, crossing wraps, a lit toe and a sole.
+  - Battle armour: outlined chest plates with gloss, a ridge down the middle, three rows of abs with lit edges, a
+    spine ridge and shoulder blades behind, the side seams of the plate, a shaded lower rim (purple on the Frieza
+    Force armour), the bodysuit's seams, elbows and knees, gloves with a thick cuff and knuckles, boots with a trimmed
+    top, a shin plate and toe caps.
+  - Shared helpers: `fabric` (cloth lit from above), `seam`, `sash`, `shell`.
+- **Thick parts stand off the body (`GearLayer.thick`):**
+  - Each top also has a `_top_shell` texture with only its thick parts: plates and straps, gloves, wristbands,
+    sashes, hems and cuffs.
+  - It is drawn on the figure itself with the body and arms widened by a tenth, and boots on the legs widened by an
+    eighth. So they follow every bend and limb segment, and the boots cover the 3D feet.
+  - (Separate shell boxes were tried first. They couldn't bend with the elbows and knees, and the feet poked out
+    through the boots.)
+- **3D pieces (`GearModel`):**
+  - Saiyan pads in layers: a plate over the shoulder, a lip flaring down and out at its edge, a gold trim along the
+    lip. The fusion outfit's pads are layered the same way.
+  - The Frieza Force armour's pads sweep up and out in two tiers, with a white trim.
+- **Head clothing (`HeadwearItem`, head slot, one point of armour):**
+  - Piccolo's Turban: a band and a dome in rounded tiers with a fold up the front. It covers the hair and a
+    Namekian's antennae, and is no longer part of the Namekian top.
+  - Bandana: Pan's orange, over the top of the head, with a band and a knot at the back with two ends. It covers the
+    hair.
+  - Headband: red, its two tails swinging behind on a cloth chain.
+  - Recipes, icons (`tools/HeadwearIcons.java`), names and hints.
+- **Tests:** head clothing goes on the head, is worn, the turban covers the hair, its recipe loads. 242 GameTests.
+- **Checked in the dev client:**
+  - all eight outfits front on (Saiyan pads, the Frieza Force pads after lowering them, armour plates and gloves
+    standing off the body, thick boots over the feet);
+  - the turban, bandana and headband;
+  - the armour in a fighting stance with bent elbows: the gloves stay on.
+- NPC skins dressed in these outfits (soldiers, the brute) are baked images from an earlier run and keep the old look.
