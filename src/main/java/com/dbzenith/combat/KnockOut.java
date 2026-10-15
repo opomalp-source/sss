@@ -135,6 +135,7 @@ public final class KnockOut {
         if (Carry.isCarrying(v)) Carry.drop(v, false);                        // whoever they carried falls with them
         Grip.breakFor(v);
         if (v instanceof ServerPlayer p) {
+            Scars.downed(p, source);                                            // going down marks you (the feel pass)
             PlayerData data = ModCapabilities.get(p).orElse(null);
             double tough = data == null ? 0 : data.getAttribute(Attribute.CONSTITUTION);
             d.total = (int) (DBZConfig.SERVER.knockOutSeconds.get() * 20 * (1 + Math.min(0.5, tough / 400.0)));

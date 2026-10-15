@@ -53,7 +53,9 @@ public class WoundTests {
         Limbs.State s = Limbs.of(p);
         Limbs.sever(p, Limb.LEFT_ARM);
         h.assertTrue(s.stump(Limb.LEFT_ARM) == Limbs.OPEN && Limbs.openWound(p), "a human's cut stays open");
+        h.assertTrue(Limbs.healingFactor(p) < 0.5, "an open wound slows healing");
         h.assertTrue(Limbs.sear(p) && s.stump(Limb.LEFT_ARM) == Limbs.SEARED && !Limbs.openWound(p), "seared shut with ki");
+        h.assertTrue(Limbs.healingFactor(p) == 1.0, "closed: healing as usual");
         Limbs.sever(p, Limb.RIGHT_LEG);
         h.assertTrue(Limbs.stopBleeding(p) && s.stump(Limb.RIGHT_LEG) == Limbs.BANDAGED, "or bandaged");
         Limbs.sever(p, Limb.LEFT_LEG, true);

@@ -3700,3 +3700,23 @@ committed `.pyc` is gone and `__pycache__` is ignored.
   - the turban, bandana and headband;
   - the armour in a fighting stance with bent elbows: the gloves stay on.
 - NPC skins dressed in these outfits (soldiers, the brute) are baked images from an earlier run and keep the old look.
+
+## 2026-10-15 — Feel pass on the new systems (v0.133.0)
+Last phase of the "auras, apes and clothes" request: checking how the new wound and scar systems play against the
+game's own numbers (`run-gametest/balance-report*.md`), and fixing what didn't hold up.
+
+- **Scars were almost never earned.**
+  - The numbers: a soldier needs about 14 hits to beat you (about 7% a blow), a tyrant boss about 8 (12.5%). A scar
+    needed a single blow of a fifth of your health, which only the biggest ki attacks reach. That doesn't match the
+    user's "warriors that fight a lot and get hurt a lot get scars".
+  - Now a blow of 15% can scar (the chance still grows with the blow and is best for blades), and going down (knocked
+    out) leaves a scar 65% of the time where the last blow landed (`Scars.downed`, from `KnockOut.knockOut`). Still
+    one a minute at most.
+- **Open wounds didn't need closing.**
+  - Out of a fight the body heals 1% a second, and an open stump seeps 0.4%: it healed faster than it bled, so
+    leaving a stump open cost nothing.
+  - Now an open stump (never bandaged, seared or healed) slows the body's healing to a third
+    (`Limbs.healingFactor`, in `KiTicker`'s regen): net about +0.0% a second until it is closed.
+- Checked and left alone: crawling speed (an eighth of walking, about 0.4 blocks a second: a crawl); the moon's six
+  seconds; Ultra Instinct's ki burn (about 80 seconds from full in the Sign).
+- **Tests:** the wound test checks that an open stump slows healing and a closed one doesn't. 242 GameTests.

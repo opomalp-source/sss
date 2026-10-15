@@ -91,7 +91,8 @@ fighter. The direction you hold picks the finisher:
 ## Closing a wound
 
 Only Namekians and Majins close and regrow a lost limb on their own. Anyone else has to close it, or it keeps seeping
-(0.4% of health a second) after the first bleeding is over:
+(0.4% of health a second) after the first bleeding is over, and while it is open your body heals at only a third of
+its usual pace:
 
 - a **Bandage** binds it;
 - **Sneak + Ki Blast** sears it shut with your own ki: a tenth of your ki, and it hurts;
@@ -107,8 +108,9 @@ hunch over it, straining, then stand tall and thrust the new arm out (or stamp t
 
 - **Battle damage** follows the fighter: the rips show their own skin, cuts are in their own blood's colour, and
   bruises are made from their skin. Each fighter has one of three layouts, so it doesn't look the same on everyone.
-- **Scars are earned:** a heavy wound (a fifth of your health or more in one blow) can leave one, more likely the
-  harder it was and for a blade. At most one a minute, fourteen in all.
+- **Scars are earned:** a heavy wound (15% of your health or more in one blow) can leave one, more likely the harder
+  it was and for a blade, and going down (knocked out) leaves one most of the time. At most one a minute, fourteen in
+  all.
   - It goes where the blow landed: the side it came from, high or low; a hard blow high from the front can scar the
     face.
   - What made it shows: a blade or ki disc leaves a fine line (long ones sometimes with stitch marks), a ki blast or

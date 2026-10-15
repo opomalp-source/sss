@@ -526,6 +526,14 @@ public final class Limbs {
         if (any) changed(e);
     }
 
+    /**
+     * How fast the body heals with its wounds (the feel pass): an open stump, never closed, slows healing to a third,
+     * so leaving it costs something even out of a fight.
+     */
+    public static double healingFactor(LivingEntity e) {
+        return openWound(e) ? 0.35 : 1.0;
+    }
+
     /** Has an open stump (it needs closing: a bandage, searing it with ki, a Senzu Bean, healing). */
     public static boolean openWound(LivingEntity e) {
         State s = of(e);

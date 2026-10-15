@@ -26,8 +26,9 @@ import java.util.List;
  * Battle scars (the limbs rework; the user: "warriors that fight a lot and get hurt a lot should get scars that look good
  * and convincing, and make sense"). Earned, not picked:
  * <ul>
- *   <li>A heavy wound (a fifth of your health or more in one blow) can leave a scar, more surely the deeper it went and
- *       for a blade. One a minute at most; fourteen in all (a new one then takes the place of the faintest).</li>
+ *   <li>A heavy wound (15% of your health or more in one blow) can leave a scar, more surely the deeper it went and for
+ *       a blade; going down (knocked out) leaves one most of the time. One a minute at most; fourteen in all (a new one
+ *       then takes the place of the faintest).</li>
  *   <li>It goes where the blow landed: the side it came from, high or low, the face for a hard blow high from the
  *       front.</li>
  *   <li>Its kind is what made it: a blade or a ki disc cuts a line (some healed with stitches), a ki blast or beam
@@ -127,15 +128,29 @@ public final class Scars {
 
     /** A blow of {@code share} of their health: maybe a scar, where it landed. Returns whether it left one. */
     public static boolean earn(LivingEntity p, DamageSource src, float share) {
-        if (share < 0.2f) return false;
+        if (share < 0.15f) return false;
         long now = p.level().getGameTime();
         long last = p.getPersistentData().contains("dbzenith_scar_last") ? p.getPersistentData().getLong("dbzenith_scar_last") : Long.MIN_VALUE / 2;
         if (now - last < 1200) return false;                               // one a minute at most
         int kind = kind(src);
-        float chance = (kind == CUT ? 0.55f : kind == BURN ? 0.4f : 0.3f) + (share - 0.2f);
+        float chance = (kind == CUT ? 0.55f : kind == BURN ? 0.4f : 0.3f) + (share - 0.15f) * 1.2f;
         if (p.getRandom().nextFloat() > chance) return false;
         p.getPersistentData().putLong("dbzenith_scar_last", now);
         add(p, place(p, src, kind, share));
+        return true;
+    }
+
+    /**
+     * Going down (knocked out) leaves a scar most of the time, where the last blow landed (the feel pass: a hard fight
+     * marks you even when no single blow was huge). The one-a-minute limit holds.
+     */
+    public static boolean downed(LivingEntity p, DamageSource src) {
+        if (!(p instanceof ServerPlayer sp) || sp.isCreative() || sp.isSpectator()) return false;
+        long now = p.level().getGameTime();
+        long last = p.getPersistentData().contains("dbzenith_scar_last") ? p.getPersistentData().getLong("dbzenith_scar_last") : Long.MIN_VALUE / 2;
+        if (now - last < 1200 || p.getRandom().nextFloat() > 0.65f) return false;
+        p.getPersistentData().putLong("dbzenith_scar_last", now);
+        add(p, place(p, src, kind(src), 0.35f));
         return true;
     }
 

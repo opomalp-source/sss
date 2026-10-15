@@ -84,7 +84,8 @@ public final class KiTicker {
         }
         if (now - data.getLastDamagedTick() > c.bodyRegenDelayTicks.get() * race.regenDelayFactor() && !com.dbzenith.combat.KnockOut.isDown(player)) {   // not while knocked out (CX-51)
             data.setBody(data.getBody() + perTick(s.maxBody(), c.bodyRegenPercentPerSecond.get()) * race.regenMultiplier()
-                    * com.dbzenith.race.RacialSkills.factor(data, com.dbzenith.race.RacialSkill.Stat.BODY_REGEN));
+                    * com.dbzenith.race.RacialSkills.factor(data, com.dbzenith.race.RacialSkill.Stat.BODY_REGEN)
+                    * com.dbzenith.combat.Limbs.healingFactor(player));                  // an open wound slows healing (the feel pass)
         }
 
         com.dbzenith.item.GiArmorItem.updateBonus(player, data);
