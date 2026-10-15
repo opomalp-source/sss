@@ -38,3 +38,4 @@ logs/
 
 # per-machine settings (installMod mods folders)
 local.properties
+__pycache__/
