@@ -194,5 +194,9 @@
   "disc_whine": {
     "subtitle": "subtitles.dbzenith.disc_whine",
     "sounds": ["dbzenith:disc_whine"]
+  },
+  "beam_clash": {
+    "subtitle": "subtitles.dbzenith.beam_clash",
+    "sounds": ["dbzenith:beam_clash"]
   }
 }

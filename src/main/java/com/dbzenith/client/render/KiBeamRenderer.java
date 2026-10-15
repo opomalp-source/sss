@@ -220,6 +220,77 @@ public class KiBeamRenderer extends EntityRenderer<KiBeamEntity> {
         com.dbzenith.client.fx.KiEnergy.billboard(flat, m, n, 0, 0, 0, LEFT, UP, r0 * 2.6f, com.dbzenith.client.fx.KiEnergy.argb(c, 90), com.dbzenith.client.fx.KiEnergy.HALO);
         if (born < 1) com.dbzenith.client.fx.KiEnergy.billboard(flat, m, n, 0, 0, 0, LEFT, UP, width * (3 + 5 * (1 - born)),
                 com.dbzenith.client.fx.KiEnergy.argb(0xFFFFFF, (int) (255 * (1 - born))), com.dbzenith.client.fx.KiEnergy.HALO);
+        if (beam.clashRole() == 1) clash(beam, buffers, m, n, hx, hy, hz, dx, dy, dz, px, py, pz, qx, qy, qz, width, c, t, ex, ey, ez);
+    }
+
+    private static final org.joml.Matrix3f CLASH_ROT = new org.joml.Matrix3f();
+
+    /**
+     * Beam clash v2 (the ki attack rework, phase 8), drawn by the leading beam where the two meet:
+     * <ul>
+     *   <li>a churning orb that swells as the clash goes on, tinted toward whoever is winning, white-hot inside;</li>
+     *   <li>lightning thrown out sideways, in both beams' colours, re-struck every other tick;</li>
+     *   <li>shock rings pulsing out across the beams' path, faster as it nears its end.</li>
+     * </ul>
+     * (p, q) span the plane across the beams.
+     */
+    private static void clash(KiBeamEntity beam, MultiBufferSource buffers, org.joml.Matrix4f m, org.joml.Matrix3f n, float hx, float hy, float hz,
+                              float dx, float dy, float dz, float px, float py, float pz, float qx, float qy, float qz, float width, int c, float t,
+                              float ex, float ey, float ez) {
+        int other = beam.clashColor();
+        float push = beam.clashPush(), held = Math.min(1f, beam.clashAge() / (float) com.dbzenith.skill.BeamStruggle.MAX_TICKS);
+        int mid = FxDraw.mix(c, other, Mth.clamp(0.5f - 0.5f * push, 0, 1));    // tinted toward whoever is winning
+        int deep = com.dbzenith.client.fx.BigSphere.vivid(mid);
+        float w = Math.max(0.6f, width);
+        float rr = w * (1.4f + 1.3f * held) * (1 + 0.08f * Mth.sin(t * (1.2f + 2f * held)) * com.dbzenith.client.fx.CameraFx.flicker());
+
+        com.dbzenith.client.fx.KiEnergy.sphere(buffers.getBuffer(com.dbzenith.client.fx.KiEnergy.tint()), m, n, hx, hy, hz, rr * 0.95f,
+                com.dbzenith.client.fx.KiEnergy.argb(deep, 150), com.dbzenith.client.fx.KiEnergy.TINT, 2, 0);
+        var solid = buffers.getBuffer(com.dbzenith.client.fx.KiEnergy.solid());
+        CLASH_ROT.rotationXYZ(0.6f, t * 0.04f, -0.3f);
+        com.dbzenith.client.fx.KiEnergy.sphere(solid, m, n, hx, hy, hz, rr, com.dbzenith.client.fx.KiEnergy.argb(deep, 220), com.dbzenith.client.fx.KiEnergy.SHELL, 2, t * 0.02f, CLASH_ROT);
+        CLASH_ROT.rotationXYZ(-1.1f, -t * 0.06f, 0.8f);
+        com.dbzenith.client.fx.KiEnergy.sphere(solid, m, n, hx, hy, hz, rr * 1.06f, com.dbzenith.client.fx.KiEnergy.argb(FxDraw.mix(mid, 0xFFFFFF, 0.5f), 190),
+                com.dbzenith.client.fx.KiEnergy.STRANDS, 2, -t * 0.03f, CLASH_ROT);
+        com.dbzenith.client.fx.KiEnergy.sphere(solid, m, n, hx, hy, hz, rr * 0.6f, com.dbzenith.client.fx.KiEnergy.argb(0xFFFFFF, 255), com.dbzenith.client.fx.KiEnergy.CORE, 1, 0);
+
+        var flat = buffers.getBuffer(com.dbzenith.client.fx.KiEnergy.flat());
+        com.dbzenith.client.fx.KiEnergy.billboard(flat, m, n, hx, hy, hz, LEFT, UP, rr * 3.2f, com.dbzenith.client.fx.KiEnergy.argb(mid, 90), com.dbzenith.client.fx.KiEnergy.HALO);
+        com.dbzenith.client.fx.KiEnergy.billboard(flat, m, n, hx, hy, hz, LEFT, UP, rr * 1.7f, com.dbzenith.client.fx.KiEnergy.argb(0xFFFFFF, 120), com.dbzenith.client.fx.KiEnergy.HALO);
+        java.util.Random rnd = new java.util.Random(beam.getId() * 131L + com.dbzenith.client.fx.CameraFx.strike(t, 2));
+        int arcs = 8 + (int) (6 * held);
+        for (int a = 0; a < arcs; a++) {                                       // lightning thrown out sideways
+            double ang = rnd.nextDouble() * Math.PI * 2;
+            float ox = (float) (px * Math.cos(ang) + qx * Math.sin(ang)), oy = (float) (py * Math.cos(ang) + qy * Math.sin(ang)), oz = (float) (pz * Math.cos(ang) + qz * Math.sin(ang));
+            float reach = rr * (1.6f + rnd.nextFloat() * 1.8f);
+            int col = a % 2 == 0 ? c : other;
+            float lx = hx + ox * rr * 0.8f, ly = hy + oy * rr * 0.8f, lz = hz + oz * rr * 0.8f;
+            for (int s = 1; s <= 4; s++) {
+                float out = rr * 0.8f + (reach - rr * 0.8f) * s / 4f, along = (rnd.nextFloat() - 0.5f) * rr * 0.6f;
+                float jx = (rnd.nextFloat() - 0.5f) * rr * 0.4f, jy = (rnd.nextFloat() - 0.5f) * rr * 0.4f, jz = (rnd.nextFloat() - 0.5f) * rr * 0.4f;
+                float nx = hx + ox * out + dx * along + jx, ny = hy + oy * out + dy * along + jy, nz = hz + oz * out + dz * along + jz;
+                float wa = rr * 0.09f * (1 - (s - 1) / 4f), wb = rr * 0.09f * (1 - s / 4f) + 0.01f;
+                com.dbzenith.client.fx.KiEnergy.ribbon(flat, m, n, lx, ly, lz, nx, ny, nz, ex, ey, ez, wa * 2.2f, wb * 2.2f, col, 110, 60, 0, 1, com.dbzenith.client.fx.KiEnergy.RIBBON);
+                com.dbzenith.client.fx.KiEnergy.ribbon(flat, m, n, lx, ly, lz, nx, ny, nz, ex, ey, ez, wa, wb, FxDraw.mix(col, 0xFFFFFF, 0.6f), 240, 180, 0, 1, com.dbzenith.client.fx.KiEnergy.RIBBON);
+                lx = nx; ly = ny; lz = nz;
+            }
+        }
+        float period = 14 - 8 * held;                                          // shock rings, faster toward the end
+        for (int k = 0; k < 2; k++) {
+            float phase = ((t / period) + k * 0.5f) % 1f;
+            float ring = rr * (1.1f + 4.5f * phase);
+            int alpha = (int) (200 * (1 - phase) * (1 - phase));
+            int segs = 36;
+            for (int i = 0; i < segs; i++) {
+                double a0 = Math.PI * 2 * i / segs, a1 = Math.PI * 2 * (i + 1) / segs;
+                float x0 = hx + (float) (px * Math.cos(a0) + qx * Math.sin(a0)) * ring, y0 = hy + (float) (py * Math.cos(a0) + qy * Math.sin(a0)) * ring,
+                        z0 = hz + (float) (pz * Math.cos(a0) + qz * Math.sin(a0)) * ring;
+                float x1 = hx + (float) (px * Math.cos(a1) + qx * Math.sin(a1)) * ring, y1 = hy + (float) (py * Math.cos(a1) + qy * Math.sin(a1)) * ring,
+                        z1 = hz + (float) (pz * Math.cos(a1) + qz * Math.sin(a1)) * ring;
+                com.dbzenith.client.fx.KiEnergy.ribbon(flat, m, n, x0, y0, z0, x1, y1, z1, ex, ey, ez, rr * 0.18f, rr * 0.18f, FxDraw.mix(mid, 0xFFFFFF, 0.4f),
+                        alpha, alpha, 0, 1, com.dbzenith.client.fx.KiEnergy.RIBBON);
+            }
+        }
     }
 
     /** Quad from the origin to {@code end}, offset +-{@code halfWidth}; texture v runs from {@code v0} to {@code v1} along the beam. */

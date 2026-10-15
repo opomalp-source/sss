@@ -52,6 +52,7 @@ OGG Vorbis, mono, 44.1 kHz, under `assets/dbzenith/sounds/`. Events are in `soun
 | `ki_crackle` | `ki_crackle_1..2` | about 1.9 s | A paralysing discharge: snapping arcs over a buzzing hum |
 | `ki_flash` | `ki_flash` | about 3.4 s with its tail | Solar Flare: a bright shimmering chord over a hiss of light |
 | `disc_whine` | `disc_whine` (**loops**) | 1.15 s, seamless | A spinning disc in flight: a thin keen whine with a fast flutter. It replaces `ki_travel` for discs and follows them with doppler. |
+| `beam_clash` | `beam_clash` (**loops**) | 2 s, seamless | Two beams grinding against each other: a straining roar, a grinding buzz, crackle, a rising whine. Played at the clash point, louder and higher as the clash goes on. |
 
 Each attack's data file can name its own sound events in `look.sounds` (see [KI_ATTACKS.md](KI_ATTACKS.md)), so a
 resource pack can give one attack a sound of its own without replacing the shared ones.
@@ -65,5 +66,4 @@ None of these exist yet. Each would get a placeholder when its phase lands.
 | 6 | `crater_scorch.png` | 128x128, a dark scorched ring fading out, for crater floors |
 | 6 | `impact_plume.png` | 64x256 strip of 4 frames: a rising dust and smoke plume, alpha |
 | 6 | `impact_big` | A huge layered explosion (crack, boom, roar), 3 to 5 s, 2 variants |
-| 8 | `beam_clash` loop | Two beams grinding against each other: a roar and crackle, 2 s, seamless |
 | 9 | `heat_distort.png` | 64x64 normal-map-style noise for heat shimmer (RG channels), tileable |

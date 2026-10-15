@@ -80,6 +80,8 @@ public final class BeamStruggle {
             BeamStruggle s = new BeamStruggle(self, other, t);
             self.struggle = s;
             other.struggle = s;
+            self.setClash(1, other.getColor());                              // clients draw the clash from the leading beam (phase 8)
+            other.setClash(2, self.getColor());
             BY_OWNER.put(self.getOwner().getUUID(), s);
             BY_OWNER.put(other.getOwner().getUUID(), s);
             for (KiBeamEntity beam : new KiBeamEntity[]{self, other}) {
@@ -153,6 +155,8 @@ public final class BeamStruggle {
         Vec3 clash = from.add(to.subtract(from).scale(t));
         a.holdTo(clash);
         b.holdTo(clash);
+        a.clashState((float) (t * 2 - 1), ticks);
+        b.clashState((float) (1 - t * 2), ticks);
         Level level = a.level();
         if (level instanceof ServerLevel sl) {
             if (ticks % 4 == 0) {
@@ -194,9 +198,13 @@ public final class BeamStruggle {
                     ImpactPacket.at(lv.getBoundingBox().getCenter(), winner.direction(), ImpactPacket.EXPLOSION, 4f, winner.getColor(),
                             winner.getOwner() == null ? -1 : winner.getOwner().getId()).send(sl);
                 }
-            } else {
-                KiExplosion.blast(sl, a, clash.x, clash.y, clash.z, 3f);                  // its own look and sound (the ki attack rework, phase 6)
-                ImpactPacket.at(clash, a.direction(), ImpactPacket.EXPLOSION, 4.5f, mixColor(a.getColor(), b.getColor()), -1).send(sl);
+            } else {                                                           // a draw: the longer it held, the bigger it goes (phase 8)
+                float held = Math.min(1f, ticks / (float) MAX_TICKS);
+                KiExplosion.blast(sl, a, clash.x, clash.y, clash.z, 3f + 3f * held);
+                ImpactPacket.at(clash, a.direction(), ImpactPacket.EXPLOSION, 4.5f + 4f * held, mixColor(a.getColor(), b.getColor()), -1)
+                        .withFeel(a.destructive || b.destructive ? ImpactPacket.DIGS : 0, -1).send(sl);
+                if (a.destructive || b.destructive)
+                    com.dbzenith.combat.Destruction.ki(sl, clash, new Vec3(0, 1, 0), 1.6 + 1.6 * held, a.getOwner() != null ? a.getOwner() : a);
             }
             update(oa, 0, 0, 0, false);
             update(ob, 0, 0, 0, false);
@@ -204,8 +212,13 @@ public final class BeamStruggle {
                 if (o instanceof ServerPlayer p) ModNetwork.sendToTrackingAndSelf(p, new AnimEventPacket(p.getId(), AnimEventPacket.STOP, 0));
             }
         }
-        a.discard();
-        b.discard();
+        if (winner != null) {                                                   // the winner pours on through (phase 8)
+            (winner == a ? b : a).discard();
+            winner.pourThrough();
+        } else {
+            a.discard();
+            b.discard();
+        }
     }
 
     private static void update(Entity owner, float balance, int mine, int theirs, boolean active) {

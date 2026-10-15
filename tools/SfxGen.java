@@ -74,6 +74,8 @@ public final class SfxGen {
         for (int v = 0; v < 2; v++) save("ki_crackle", v, kiCrackle(v));
         save("ki_flash", 0, kiFlash());
         save("disc_whine", 0, loop(discWhine(), 0.25));
+        // phase 8: the beam clash
+        save("beam_clash", 0, loop(beamClash(), 0.4));
         writeSoundsJson();
         System.out.println("SfxGen done: " + EVENTS.size() + " events");
     }
@@ -1035,6 +1037,26 @@ public final class SfxGen {
         mix(out, whine, 0.45);
         mix(out, saw, 0.2);
         mix(out, air, 0.3);
+        return out;
+    }
+
+    // ================================================================== ki attack rework, phase 8
+
+    /** Two beams grinding against each other (looped): a deep straining roar, a grinding buzz, crackle, a rising whine. */
+    static double[] beamClash() {
+        double[] out = buf(2.4);
+        double[] roar = lowpass(add(brown(out.length), scale(saw(out.length, t -> 48 + 4 * Math.sin(2 * Math.PI * 0.8 * t), 0.6), 0.6)), t -> 420);
+        mul(roar, shape(out.length, t -> 0.75 + 0.25 * Math.sin(2 * Math.PI * 2.5 * t)));
+        double[] grind = bandpass(saw(out.length, t -> 96 + 8 * Math.sin(2 * Math.PI * 7 * t), 0.9), t -> 900, 0.7);
+        mul(grind, shape(out.length, t -> 0.6 + 0.4 * Math.sin(2 * Math.PI * 11 * t)));
+        double[] zap = highpass(noise(out.length), 3000);
+        mul(zap, crackle(out.length, 1.2, 141));
+        double[] whine = sine(out.length, t -> 620 + 40 * Math.sin(2 * Math.PI * 0.5 * t));
+        mix(out, roar, 1.0);
+        mix(out, grind, 0.35);
+        mix(out, zap, 0.35);
+        mix(out, whine, 0.06);
+        saturate(out, 1.6);
         return out;
     }
 

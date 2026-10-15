@@ -50,6 +50,39 @@ public final class KiFx {
     public static void beamTick(com.dbzenith.skill.KiBeamEntity beam) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null && beam.getOwner() == mc.player) CameraFx.rumble(0.25f + 0.1f * Math.min(3, beam.getWidth()));
+        if (beam.clashRole() == 1) clashTick(beam);
+    }
+
+    private static final java.util.Set<Integer> CLASH_SOUNDS = new java.util.HashSet<>();
+
+    /**
+     * A beam clash (phase 8), each tick from the leading beam: sparks spraying out across the beams in both colours, the
+     * ground below answering, everyone near feeling it, and its grinding roar.
+     */
+    private static void clashTick(com.dbzenith.skill.KiBeamEntity beam) {
+        Minecraft mc = Minecraft.getInstance();
+        net.minecraft.world.phys.Vec3 dir = beam.direction(), at = beam.position().add(dir.scale(beam.getLength()));
+        float held = Math.min(1f, beam.clashAge() / (float) com.dbzenith.skill.BeamStruggle.MAX_TICKS);
+        float r = Math.max(0.6f, beam.getWidth()) * (1.4f + 1.3f * held);
+        RandomSource rnd = beam.level().random;
+        net.minecraft.world.phys.Vec3 p = dir.cross(Math.abs(dir.y) > 0.9 ? new net.minecraft.world.phys.Vec3(1, 0, 0) : new net.minecraft.world.phys.Vec3(0, 1, 0)).normalize(),
+                q = dir.cross(p).normalize();
+        int n = KiParticles.scaled(4 + (int) (4 * held));
+        for (int i = 0; i < n; i++) {
+            double a = rnd.nextDouble() * Math.PI * 2, v = 0.35 + rnd.nextDouble() * 0.4;
+            net.minecraft.world.phys.Vec3 out = p.scale(Math.cos(a)).add(q.scale(Math.sin(a)));
+            int col = rnd.nextBoolean() ? beam.getColor() : beam.clashColor();
+            KiParticles.add(rnd.nextInt(3) == 0 ? KiParticles.EMBER : KiParticles.SPARK, at.x + out.x * r, at.y + out.y * r, at.z + out.z * r,
+                    out.x * v + dir.x * (rnd.nextDouble() - 0.5) * 0.2, out.y * v + 0.04, out.z * v + dir.z * (rnd.nextDouble() - 0.5) * 0.2,
+                    0.5f + rnd.nextFloat() * 0.5f, FxDraw.mix(col, 0xFFFFFF, rnd.nextFloat() * 0.5f), 8 + rnd.nextInt(10), 0.9f, 0.02f);
+        }
+        BigSphere.tick(beam.level(), at, r, beam.getColor(), held > 0.3f);       // the ground below answers
+        if (mc.player != null) {
+            double d = mc.player.position().distanceTo(at);
+            if (d < 28) CameraFx.rumble((0.2f + 0.3f * held) * (float) (1 - d / 28));
+        }
+        if (CLASH_SOUNDS.add(beam.getId())) com.dbzenith.client.ClientSounds.clash(beam);
+        if (CLASH_SOUNDS.size() > 16) CLASH_SOUNDS.clear();
     }
 
     /** One client tick of a ki blast: remember where it is (the trail), shed motes and the odd spark. */

@@ -173,6 +173,38 @@ public final class ClientSounds {
         }
     }
 
+    /** A beam clash (phase 8): its grinding roar at the clash point, louder and higher as it goes on, until it ends. */
+    public static void clash(com.dbzenith.skill.KiBeamEntity beam) {
+        Minecraft.getInstance().getSoundManager().play(new Clash(beam));
+    }
+
+    static final class Clash extends AbstractTickableSoundInstance {
+        final com.dbzenith.skill.KiBeamEntity beam;
+
+        Clash(com.dbzenith.skill.KiBeamEntity beam) {
+            super(ModSounds.BEAM_CLASH.get(), SoundSource.PLAYERS, SoundInstance.createUnseededRandom());
+            this.beam = beam;
+            this.looping = true;
+            this.delay = 0;
+            this.volume = 0.01f;
+        }
+
+        @Override
+        public void tick() {
+            if (beam.isRemoved() || beam.clashRole() != 1) { stop(); return; }
+            Vec3 at = beam.position().add(beam.direction().scale(beam.getLength()));
+            x = at.x; y = at.y; z = at.z;
+            float held = Math.min(1f, beam.clashAge() / (float) com.dbzenith.skill.BeamStruggle.MAX_TICKS);
+            volume = Math.min(volume + 0.15f, 1.4f + 0.8f * held);
+            pitch = 0.85f + 0.35f * held;
+        }
+
+        @Override
+        public boolean canStartSilent() {
+            return true;
+        }
+    }
+
     /** A bare-handed swing cuts the air. */
     public static void swing(AbstractClientPlayer player) {
         if (player.level() instanceof ClientLevel level) at(level, player.position().add(0, 1.2, 0), ModSounds.WHOOSH.get(), 0.45f, 1.1f);

@@ -1685,6 +1685,7 @@
   "subtitles.dbzenith.ki_crackle": "Ki crackles",
   "subtitles.dbzenith.ki_flash": "Blinding flash",
   "subtitles.dbzenith.disc_whine": "Ki disc whines",
+  "subtitles.dbzenith.beam_clash": "Beams grind against each other",
   "key.dbzenith.lock_on": "Lock-On (Shift: next foe)",
   "message.dbzenith.lock_none": "No one in sight to lock onto",
   "message.dbzenith.input_flood": "Kicked: too many combat inputs (flooding or a broken client)",

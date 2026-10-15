@@ -65,6 +65,7 @@ public final class ModSounds {
     public static final RegistryObject<SoundEvent> KI_CRACKLE = sound("ki_crackle");
     public static final RegistryObject<SoundEvent> KI_FLASH = sound("ki_flash");
     public static final RegistryObject<SoundEvent> DISC_WHINE = sound("disc_whine");
+    public static final RegistryObject<SoundEvent> BEAM_CLASH = sound("beam_clash");         // phase 8
 
     private ModSounds() {}
 

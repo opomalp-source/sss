@@ -3300,3 +3300,27 @@ answers: move all built-ins to JSON; for charging movement, my judgement; very b
     - the Solar Flare's burst is dimmed.
   - **Screen shake** (`screenShake`) already scaled every shake, including the new rumbles.
 - 230 GameTests.
+
+## 2026-10-15 — Ki attack rework, phase 8: beam clash v2 (v0.124.0)
+- **The clash, seen** (`KiBeamRenderer.clash`, drawn by the leading beam where the two meet):
+  - a churning orb, its shell and strands each turning on its own axis round a white-hot core. It swells as the
+    clash goes on and is tinted toward whoever is winning (its colour leans to the stronger side);
+  - lightning thrown out sideways in both beams' colours, more as it goes on, re-struck every other tick (slower with
+    reduce flashing);
+  - two shock rings pulsing out across the beams' path, coming faster toward the end.
+- **The clash, felt** (`KiFx.clashTick`):
+  - sparks and embers spray out across the beams in both colours;
+  - the ground below answers (dust and stones lifting, `BigSphere.tick`);
+  - everyone within 28 blocks feels a rumble that grows as it goes on.
+- **The clash, heard:** a new looping `beam_clash` sound (a straining roar, a grinding buzz, crackle, a rising whine)
+  at the clash point, louder and higher as it goes on.
+- **Synced for clients:** `KiBeamEntity` carries its role in a clash (leading or the other side), the other beam's
+  colour, the push and the clash's age.
+- **Endings:**
+  - **Draw:** the explosion grows with how long the clash held (power 3 to 6, an impact of 4.5 to 8.5), and digs a
+    crater if either beam is destructive.
+  - **Win:** the winning beam is freed and pours on through the loser for 14 ticks before it fades, instead of
+    vanishing.
+- **Tests:** `CombatDepth2Tests.strongerBeamWinsTheStruggle` checks the two beams' clash roles. 230 GameTests.
+- **Checked in the dev client:** two soldiers clashing Kamehamehas, watched from the side. The orb was pushed toward
+  the weaker one, with lightning, rings and sparks.

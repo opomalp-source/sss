@@ -115,6 +115,9 @@ public final class CombatDepth2Tests {
             boolean locked = !helper.getLevel().getEntitiesOfClass(KiBeamEntity.class, strong.getBoundingBox().inflate(20)).isEmpty()
                     && com.dbzenith.skill.BeamStruggle.isStruggling(strong);
             helper.assertTrue(locked, "two beams meeting head-on lock into a struggle");
+            java.util.Set<Integer> roles = new java.util.HashSet<>();
+            for (KiBeamEntity beam : helper.getLevel().getEntitiesOfClass(KiBeamEntity.class, strong.getBoundingBox().inflate(20))) roles.add(beam.clashRole());
+            helper.assertTrue(roles.contains(1) && roles.contains(2), "clients are told which beam draws the clash, and the other side (phase 8): " + roles);
         });
         helper.succeedWhen(() -> {
             helper.assertTrue(!com.dbzenith.skill.BeamStruggle.isStruggling(strong), "struggle still going");

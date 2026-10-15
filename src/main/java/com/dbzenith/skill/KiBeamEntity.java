@@ -32,6 +32,12 @@ public class KiBeamEntity extends Entity {
     private static final EntityDataAccessor<Float> WIDTH = SynchedEntityData.defineId(KiBeamEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Integer> COLOR = SynchedEntityData.defineId(KiBeamEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> OWNER = SynchedEntityData.defineId(KiBeamEntity.class, EntityDataSerializers.INT);
+    /** Beam clash v2 (the ki attack rework, phase 8), for the clients: 0 free, 1 leading a clash (it draws the clash), 2 the other side;
+     *  the other beam's colour; the push (-1 losing .. 1 winning); the clash's age in ticks. */
+    private static final EntityDataAccessor<Integer> CLASH = SynchedEntityData.defineId(KiBeamEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> CLASH_COLOR = SynchedEntityData.defineId(KiBeamEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Float> CLASH_PUSH = SynchedEntityData.defineId(KiBeamEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Integer> CLASH_AGE = SynchedEntityData.defineId(KiBeamEntity.class, EntityDataSerializers.INT);
 
     public static final float MAX_RANGE = 48f;
 
@@ -45,7 +51,7 @@ public class KiBeamEntity extends Entity {
     private int lifeTicks = 30;
     private float explosionPower;
     /** Tears the land up where it strikes (CX-20). */
-    private boolean destructive = true;
+    boolean destructive = true;
     private boolean hitBlock;
     BeamStruggle struggle;          // locked with another beam (server only)
 
@@ -110,6 +116,10 @@ public class KiBeamEntity extends Entity {
         entityData.define(WIDTH, 0.6f);
         entityData.define(COLOR, 0xFFFFFF);
         entityData.define(OWNER, -1);
+        entityData.define(CLASH, 0);
+        entityData.define(CLASH_COLOR, 0xFFFFFF);
+        entityData.define(CLASH_PUSH, 0f);
+        entityData.define(CLASH_AGE, 0);
     }
 
     private void anchorTo(Entity owner) {
@@ -228,6 +238,43 @@ public class KiBeamEntity extends Entity {
 
     double damagePerPulse() {
         return damagePerPulse;
+    }
+
+    // ------------------------------------------------------------------ beam clash v2 (the ki attack rework, phase 8)
+
+    void setClash(int role, int otherColor) {
+        entityData.set(CLASH, role);
+        entityData.set(CLASH_COLOR, otherColor);
+    }
+
+    void clashState(float push, int age) {
+        entityData.set(CLASH_PUSH, push);
+        entityData.set(CLASH_AGE, age);
+    }
+
+    /** 0 free, 1 leading a clash, 2 the other side of one. */
+    public int clashRole() {
+        return entityData.get(CLASH);
+    }
+
+    public int clashColor() {
+        return entityData.get(CLASH_COLOR);
+    }
+
+    /** How the clash is going for this beam: -1 being driven back to its caster .. 1 about to win. */
+    public float clashPush() {
+        return entityData.get(CLASH_PUSH);
+    }
+
+    public int clashAge() {
+        return entityData.get(CLASH_AGE);
+    }
+
+    /** Won a clash: free again, it pours on through for a moment before it fades. */
+    void pourThrough() {
+        struggle = null;
+        entityData.set(CLASH, 0);
+        lifeTicks = tickCount + 14;
     }
 
     @Override

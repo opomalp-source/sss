@@ -71,7 +71,7 @@ coloured against a bright sky. With an Oculus or Iris shader pack on, the shader
 look is drawn instead. The client setting `kiQuality` (Settings → Effects) trades mesh detail and particle counts for
 speed.
 
-## Trying them in game (phases 1 to 6)
+## Trying them in game (phases 1 to 8)
 
 The commands below need cheats. `/dbz charge <player> <id>` starts a charge as if the key were held, skipping the deck
 and the meter; `/dbz charge <player> release` lets it go. `/dbz cast <entity> <id> <damage>` makes any entity fire an
@@ -111,6 +111,10 @@ attack.
     the ground cracks.
   - **Paralysis Wave:** a fan of yellow lightning thrown forward.
   - **Solar Flare:** a burst of light with rays; anyone facing it is whited out.
+- **Beam clash (phase 8):** two fighters fire beams at each other head-on. For example, two NPCs with
+  `/dbz cast <npc> wave_beam 1` while they face each other. An orb swells where the beams meet, tinted toward the one
+  winning, with lightning, shock rings, sparks and a grinding roar. Mash the ki key to push; the Ki Blast key spends a
+  bar for a surge. A draw explodes bigger the longer it held; a winner's beam pours on through.
 - **Your own attack:** make a datapack with `data/<ns>/ki_attacks/<id>.json` (start from `/dbz kiattacks export`), then
   `/reload`.
   - A slow test ball: `{"style":"ball","speed":0.012,"size":3.0,"life":400,"color":"#FF7A30","look":{"sphere":"nova"}}`.
