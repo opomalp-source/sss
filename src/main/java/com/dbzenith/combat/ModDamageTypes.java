@@ -27,6 +27,12 @@ public final class ModDamageTypes {
     public static final ResourceKey<DamageType> HAKAI =
             ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(DBZenith.MOD_ID, "hakai"));
 
+    /** The knocked-out rework: finished off by a grip, or bled out where they lay. */
+    public static final ResourceKey<DamageType> FINISHED =
+            ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(DBZenith.MOD_ID, "finished"));
+    public static final ResourceKey<DamageType> BLED_OUT =
+            ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(DBZenith.MOD_ID, "bled_out"));
+
     private ModDamageTypes() {}
 
     /** A ki blast hit. The hurt amount passed with this source is raw DBZ damage, converted in CombatEvents. */
@@ -47,6 +53,16 @@ public final class ModDamageTypes {
     /** Erased by a Hakai: certain death, like absorption. */
     public static DamageSource hakai(Level level, Entity destroyer) {
         return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(HAKAI), destroyer, destroyer);
+    }
+
+    /** Finished off by {@code by}'s grip. */
+    public static DamageSource finished(Level level, Entity by) {
+        return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(FINISHED), by, by);
+    }
+
+    /** Bled out ({@code after}: who put them down, or null). */
+    public static DamageSource bledOut(Level level, Entity after) {
+        return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(BLED_OUT), after, after);
     }
 
     public static DamageSource strike(Level level, Entity attacker) {

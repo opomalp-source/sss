@@ -56,4 +56,13 @@ public final class ModEntities {
     public static void register(IEventBus modBus) {
         ENTITIES.register(modBus);
     }
+
+    /** A limb cut off in battle (the knocked-out rework). */
+    public static final RegistryObject<EntityType<com.dbzenith.combat.SeveredLimb>> SEVERED_LIMB = ENTITIES.register("severed_limb",
+            () -> EntityType.Builder.<com.dbzenith.combat.SeveredLimb>of(com.dbzenith.combat.SeveredLimb::new, MobCategory.MISC)
+                    .sized(0.3f, 0.3f)
+                    .clientTrackingRange(6)
+                    .updateInterval(2)
+                    .noSave()
+                    .build("severed_limb"));
 }

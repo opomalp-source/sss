@@ -275,6 +275,10 @@ Most of these already exist in a first version; each step upgrades what is there
 - [x] CX-53 (v0.114.0) Limbs: per-limb damage, broken limbs that can't be used (arms: no punching or firing with that hand; legs: limping, crawling), cut off by cutting attacks or overwhelming blows; NPCs and bosses too
 - [x] CX-54 (v0.115.0) Recovery: Namekians and Majins regrow limbs, prosthetics (crafted, fitted, mechanical look) for everyone else, a Dragon Ball wish restores them, broken limbs heal slowly (at once with a Senzu Bean)
 
+# Knocked out, carry, grip, limbs, clothes rework (user request, 2026-10-15)
+- [x] (v0.127.0) Custom carry (fixes the carried player's screen), grip finishers (six; the only way to kill the downed), help-up, timers and prompts, race-coloured blood and bleeding wounds, flying severed limbs, bandages, clothes torn until mended (sewing kit), NPCs grip downed players
+- [ ] The user's feedback; more finishers or carry variants if wanted
+
 # Ki attack rework (user spec, 2026-10-14): cinematic attacks and sound, data-driven
 Decided with the user: all built-in attacks as JSON; charging locks movement for big attacks (best judgement);
 very big craters; light faked (ground glow + bloom); procedural 3D glowing meshes; run phases 1-4 then stop; install

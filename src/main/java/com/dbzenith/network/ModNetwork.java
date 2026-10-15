@@ -13,7 +13,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
  * so mismatched client/server versions are refused at login instead of desyncing.
  */
 public final class ModNetwork {
-    private static final String PROTOCOL = "38";
+    private static final String PROTOCOL = "39";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(DBZenith.MOD_ID, "main"),
@@ -202,6 +202,14 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(com.dbzenith.skill.KiAttackData.Packet.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)   // ki attacks as data
                 .encoder(com.dbzenith.skill.KiAttackData.Packet::encode).decoder(com.dbzenith.skill.KiAttackData.Packet::decode)
                 .consumerMainThread(com.dbzenith.skill.KiAttackData.Packet::handle).add();
+        CHANNEL.messageBuilder(CarryPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)                       // the knocked-out rework
+                .encoder(CarryPacket::encode).decoder(CarryPacket::decode).consumerMainThread(CarryPacket::handle).add();
+        CHANNEL.messageBuilder(GripPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(GripPacket::encode).decoder(GripPacket::decode).consumerMainThread(GripPacket::handle).add();
+        CHANNEL.messageBuilder(DownedActionPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(DownedActionPacket::encode).decoder(DownedActionPacket::decode).consumerMainThread(DownedActionPacket::handle).add();
+        CHANNEL.messageBuilder(ClothesPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(ClothesPacket::encode).decoder(ClothesPacket::decode).consumerMainThread(ClothesPacket::handle).add();
     }
 
     public static void sendTo(ServerPlayer player, Object packet) {

@@ -43,6 +43,7 @@ public final class ClientSetup {
         event.registerBelowAll("aura_edge", new com.dbzenith.client.fx.AuraEdgeOverlay());
         event.registerAboveAll("hud", new DbzHud());
         event.registerAboveAll("knocked_out", new ClientKnockouts.Overlay());                  // CX-51
+        event.registerAboveAll("downed_prompt", new DownedHud.Prompt());                        // the knocked-out rework
         event.registerAboveAll("limbs", new com.dbzenith.client.ui.LimbsOverlay());              // CX-53
         event.registerAboveAll("enemy_panel", new com.dbzenith.client.ui.EnemyPanel());          // CX-19 phase 8
         event.registerAboveAll("callouts", new com.dbzenith.client.ui.CalloutOverlay());
@@ -107,6 +108,7 @@ public final class ClientSetup {
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.KI_BLAST.get(), KiBlastRenderer::new);
         event.registerEntityRenderer(ModEntities.KI_BEAM.get(), KiBeamRenderer::new);
+        event.registerEntityRenderer(ModEntities.SEVERED_LIMB.get(), com.dbzenith.client.render.SeveredLimbRenderer::new);   // the knocked-out rework
         event.registerEntityRenderer(ModEntities.FALSE_MOON.get(), FalseMoonRenderer::new);
         event.registerEntityRenderer(ModEntities.DRAGON_SPIRIT.get(), DragonSpiritRenderer::new);
         event.registerEntityRenderer(ModEntities.SPACE_POD.get(), com.dbzenith.client.render.SpacePodRenderer::new);

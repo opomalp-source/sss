@@ -730,6 +730,45 @@ public final class DBZCommand {
                             ctx.getSource().sendSuccess(() -> Component.literal("Wrote the ki attacks to " + dir), true);
                             return 1;
                         })))
+                .then(Commands.literal("knockout")   // the knocked-out rework: put fighters down, as a lethal blow would
+                        .then(Commands.argument("targets", EntityArgument.entities()).executes(ctx -> {
+                            int n = 0;
+                            for (net.minecraft.world.entity.Entity e : EntityArgument.getEntities(ctx, "targets")) {
+                                if (e instanceof LivingEntity l && !com.dbzenith.combat.KnockOut.isDown(l)) {
+                                    com.dbzenith.combat.KnockOut.knockOut(l, l.damageSources().generic());
+                                    n++;
+                                }
+                            }
+                            int count = n;
+                            ctx.getSource().sendSuccess(() -> Component.literal("Knocked out " + count), true);
+                            return n;
+                        })))
+                .then(Commands.literal("carry")      // pick a downed fighter up (or let go: no target)
+                        .then(Commands.argument("carrier", EntityArgument.entity())
+                                .executes(ctx -> {
+                                    if (EntityArgument.getEntity(ctx, "carrier") instanceof LivingEntity c) com.dbzenith.combat.Carry.drop(c, false);
+                                    return 1;
+                                })
+                                .then(Commands.argument("target", EntityArgument.entity()).executes(ctx -> {
+                                    boolean ok = EntityArgument.getEntity(ctx, "carrier") instanceof LivingEntity c && EntityArgument.getEntity(ctx, "target") instanceof LivingEntity t
+                                            && com.dbzenith.combat.Carry.pickUp(c, t);
+                                    ctx.getSource().sendSuccess(() -> Component.literal(ok ? "Carrying" : "Can't carry that"), true);
+                                    return ok ? 1 : 0;
+                                }))))
+                .then(Commands.literal("grip")       // finish a downed fighter with a finisher
+                        .then(Commands.argument("gripper", EntityArgument.entity())
+                                .then(Commands.argument("target", EntityArgument.entity())
+                                        .then(Commands.argument("finisher", StringArgumentType.word())
+                                                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(Arrays.stream(com.dbzenith.combat.Grip.Finisher.values()).map(com.dbzenith.combat.Grip.Finisher::key), b))
+                                                .executes(ctx -> {
+                                                    String name = StringArgumentType.getString(ctx, "finisher");
+                                                    com.dbzenith.combat.Grip.Finisher f = Arrays.stream(com.dbzenith.combat.Grip.Finisher.values()).filter(x -> x.key().equals(name)).findFirst()
+                                                            .orElse(com.dbzenith.combat.Grip.Finisher.KI_EXECUTION);
+                                                    boolean ok = EntityArgument.getEntity(ctx, "gripper") instanceof LivingEntity g && EntityArgument.getEntity(ctx, "target") instanceof LivingEntity t
+                                                            && com.dbzenith.combat.Grip.start(g, t, f);
+                                                    ctx.getSource().sendSuccess(() -> Component.literal(ok ? "Gripping: " + name : "Can't grip that"), true);
+                                                    return ok ? 1 : 0;
+                                                })))))
                 .then(Commands.literal("limb")   // CX-53: break, cut off or heal a fighter's limbs
                         .then(Commands.argument("targets", EntityArgument.entities())
                                 .then(Commands.argument("limb", StringArgumentType.word())

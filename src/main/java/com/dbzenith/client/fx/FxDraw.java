@@ -23,6 +23,12 @@ public final class FxDraw {
     /** A square facing the camera ({@code camera} is the camera's orientation), spun by {@code spin} radians. */
     public static void billboard(PoseStack pose, VertexConsumer vc, Quaternionf camera, double x, double y, double z, float size,
                                  float spin, float u0, float v0, float u1, float v1, int rgb, int alpha) {
+        billboard(pose, vc, camera, x, y, z, size, spin, u0, v0, u1, v1, rgb, alpha, LightTexture.FULL_BRIGHT);
+    }
+
+    /** The same, lit by {@code light} (blood, dust: things that don't glow). */
+    public static void billboard(PoseStack pose, VertexConsumer vc, Quaternionf camera, double x, double y, double z, float size,
+                                 float spin, float u0, float v0, float u1, float v1, int rgb, int alpha, int light) {
         pose.pushPose();
         pose.translate(x, y, z);
         pose.mulPose(camera);
@@ -30,7 +36,6 @@ public final class FxDraw {
         pose.scale(size, size, size);
         Matrix4f m = pose.last().pose();
         Matrix3f n = pose.last().normal();
-        int light = LightTexture.FULL_BRIGHT;
         vertex(vc, m, n, -0.5f, -0.5f, 0, u0, v1, rgb, alpha, light);
         vertex(vc, m, n, 0.5f, -0.5f, 0, u1, v1, rgb, alpha, light);
         vertex(vc, m, n, 0.5f, 0.5f, 0, u1, v0, rgb, alpha, light);

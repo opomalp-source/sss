@@ -27,7 +27,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -38,34 +37,35 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.WeakHashMap;
 
 /**
- * Knocked out (CX-51, the user: "when the health bar drops to zero you don't die immediately, you are in a knocked state
- * on the ground; if you're strong you can still crawl around; you can be saved by other players with Senzu Beans, or
- * carried, and finished by other players").
+ * Knocked out (CX-51, reworked: the knocked-out rework). What would kill a fighter (a player, or an NPC fighter) puts
+ * them down on the ground instead.
  * <ul>
- *   <li>What would kill a fighter (a player, or an NPC fighter) puts them down on the ground instead, with the last
- *       sliver of health. Duels keep their own knockout (they cancel the death first); creative players, /kill and the
- *       void still kill outright.</li>
- *   <li>Down, they can't fight, fly, use ki or heal on their own. A strong one (Strength + Constitution at least
- *       {@code knockOutCrawlStrength}) can crawl slowly; the rest just lie there.</li>
- *   <li>They bleed out after {@code knockOutSeconds} (tougher fighters last up to half again longer; NPC fighters
- *       {@code knockOutNpcSeconds}). Any blow from someone finishes them at once. A player can give up by holding sneak.</li>
- *   <li>Saved: someone feeds them a Senzu Bean (right-click them holding one), or heals them back over a fifth of their
- *       health (Ki Heal, a Namekian's healing).</li>
- *   <li>Carried: sneak and right-click a downed fighter with an empty hand to pick them up over your shoulder (you walk
- *       slower); hold sneak for a second to put them down. They can't climb off.</li>
+ *   <li><b>Down:</b> they can't fight, fly, use ki or heal on their own. A strong one (Strength + Constitution at least
+ *       {@code knockOutCrawlStrength}) can crawl; the rest just lie there. Duels keep their own knockout; creative
+ *       players, /kill and the void still kill outright.</li>
+ *   <li><b>The end</b> comes only two ways: their time runs out ({@code knockOutSeconds}; tougher fighters last up to
+ *       half again longer; NPC fighters {@code knockOutNpcSeconds}), or someone grips them ({@link Grip}). Blows no
+ *       longer finish them: each one shortens their time instead. A player can give up by holding sneak, which runs
+ *       their time out.</li>
+ *   <li><b>Saved:</b> a Senzu Bean (right-click them holding one) brings them back at full strength; healing them past a
+ *       fifth of their health (Ki Heal, a Namekian's healing) gets them up; or a friend helps them up by holding
+ *       right-click on them with an empty hand for five seconds (back up with a quarter of their health).</li>
+ *   <li><b>Carried:</b> sneak and right-click them with an empty hand ({@link Carry}).</li>
  * </ul>
  */
 @Mod.EventBusSubscriber(modid = DBZenith.MOD_ID)
 public final class KnockOut {
     private static final UUID SLOW = UUID.fromString("c51d7a10-3e1b-4c5a-9e1d-0c51ab7e0001");
-    private static final UUID CARRY_SLOW = UUID.fromString("c51d7a10-3e1b-4c5a-9e1d-0c51ab7e0002");
     /** Healed past this share of their health, the downed get back up. */
     private static final float REVIVE_AT = 0.2f;
+    /** Helping someone up takes this long (ticks of holding right-click on them). */
+    public static final int HELP_TICKS = 100;
 
     static final class Down {
         long until;
@@ -76,9 +76,15 @@ public final class KnockOut {
         boolean ending;
     }
 
+    /** Someone helping a downed fighter up: who, how far along (ticks), when they last held on. */
+    private static final class Help {
+        LivingEntity victim;
+        int progress;
+        long last;
+    }
+
     private static final Map<LivingEntity, Down> DOWN = new WeakHashMap<>();
-    private static final Map<UUID, Integer> PUTTING_DOWN = new HashMap<>();
-    private static boolean letGo;
+    private static final Map<UUID, Help> HELPING = new HashMap<>();
 
     private KnockOut() {}
 
@@ -86,6 +92,19 @@ public final class KnockOut {
     public static boolean isDown(LivingEntity e) {
         Down d = DOWN.get(e);
         return d != null && !d.ending;
+    }
+
+    /** Everyone down right now. */
+    public static List<LivingEntity> downed() {
+        List<LivingEntity> out = new ArrayList<>();
+        for (Map.Entry<LivingEntity, Down> e : DOWN.entrySet()) if (!e.getValue().ending) out.add(e.getKey());
+        return out;
+    }
+
+    /** Ticks left before this downed fighter bleeds out (-1 if not down). */
+    public static int ticksLeft(LivingEntity e) {
+        Down d = DOWN.get(e);
+        return d == null || d.ending ? -1 : (int) Math.max(0, d.until - e.level().getGameTime());
     }
 
     /** Who can be knocked out instead of dying: players (not creative or spectating) and NPC fighters. */
@@ -113,6 +132,8 @@ public final class KnockOut {
     public static void knockOut(LivingEntity v, DamageSource source) {
         long now = v.level().getGameTime();
         Down d = new Down();
+        if (Carry.isCarrying(v)) Carry.drop(v, false);                        // whoever they carried falls with them
+        Grip.breakFor(v);
         if (v instanceof ServerPlayer p) {
             PlayerData data = ModCapabilities.get(p).orElse(null);
             double tough = data == null ? 0 : data.getAttribute(Attribute.CONSTITUTION);
@@ -146,25 +167,35 @@ public final class KnockOut {
         DOWN.put(v, d);
         speed(v, d.crawl ? -0.8 : -1.0);
         v.level().playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.2f, 0.6f);
+        v.level().playSound(null, v.getX(), v.getY(), v.getZ(), com.dbzenith.registry.ModSounds.LAND.get(), SoundSource.PLAYERS, 1.2f, 0.7f);
+        Blood.spill(v, v.position().add(0, v.getBbHeight() * 0.4, 0), 10);
         if (source.getEntity() instanceof ServerPlayer attacker && attacker != v)
             attacker.displayClientMessage(Component.translatable("message.dbzenith.knocked_out_foe", v.getDisplayName()), true);
         broadcast(v, d);
     }
 
-    /** They get back up (saved, healed). */
+    /** They get back up (saved, healed, helped). */
     public static void standUp(LivingEntity v) {
         Down d = DOWN.remove(v);
         if (d == null) return;
+        Carry.release(v);
+        Grip.breakFor(v);
         restore(v, d);
         if (v instanceof ServerPlayer p) p.displayClientMessage(Component.translatable("message.dbzenith.revived"), true);
         broadcast(v, null);
     }
 
-    /** Finished: by a blow, bleeding out, or giving up. */
+    /** Finished by {@code by} (as a grip does): they die by that fighter's hand. */
+    public static void finishBy(LivingEntity v, LivingEntity by) {
+        finish(v, ModDamageTypes.finished(v.level(), by));
+    }
+
+    /** Finished: gripped, bled out, or given up. */
     static void finish(LivingEntity v, DamageSource source) {
         Down d = DOWN.get(v);
         if (d == null || d.ending) return;
         d.ending = true;
+        Carry.release(v);
         v.setHealth(0);
         v.die(source);                                                        // the death event lets them go (they are down)
         if (DOWN.containsKey(v)) end(v, d);
@@ -172,6 +203,7 @@ public final class KnockOut {
 
     private static void end(LivingEntity v, Down d) {
         DOWN.remove(v);
+        Carry.release(v);
         restore(v, d);
         broadcast(v, null);
     }
@@ -179,27 +211,20 @@ public final class KnockOut {
     private static void restore(LivingEntity v, Down d) {
         speed(v, 0);
         v.removeEffect(ModEffects.KI_SEAL.get());
+        v.setNoGravity(false);
         if (v instanceof Mob m && !d.hadNoAi) m.setNoAi(false);
-        if (v.getVehicle() instanceof Player) {
-            letGo = true;
-            v.stopRiding();
-            letGo = false;
-        }
     }
 
     /** The source a bleed-out or a give-up dies of: whoever put them down, if anyone did. */
     private static DamageSource endSource(LivingEntity v) {
-        LivingEntity last = v.getLastHurtByMob();
-        if (last instanceof Player p) return v.damageSources().playerAttack(p);
-        if (last != null) return v.damageSources().mobAttack(last);
-        return v.damageSources().generic();
+        return ModDamageTypes.bledOut(v.level(), v.getLastHurtByMob());
     }
 
     // ------------------------------------------------------------------ while down
 
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || DOWN.isEmpty() && PUTTING_DOWN.isEmpty()) return;
+        if (event.phase != TickEvent.Phase.END || DOWN.isEmpty()) return;
         for (Map.Entry<LivingEntity, Down> e : new ArrayList<>(DOWN.entrySet())) {
             LivingEntity v = e.getKey();
             Down d = e.getValue();
@@ -214,11 +239,12 @@ public final class KnockOut {
                 standUp(v);
                 continue;
             }
+            if (Grip.isGripped(v)) continue;                                  // in someone's hands: the grip decides
             if (v instanceof ServerPlayer p) {
                 ModCapabilities.get(p).ifPresent(data -> {
                     if (data.isFlying()) com.dbzenith.ki.FlightHandler.stop(p, data);
                 });
-                if (p.isShiftKeyDown() && !(p.getVehicle() instanceof Player)) {   // giving up
+                if (p.isShiftKeyDown() && !Carry.isCarried(p)) {             // giving up: three seconds of sneaking runs the time out
                     if (++d.giveUp >= 60) {
                         finish(v, endSource(v));
                         continue;
@@ -231,31 +257,8 @@ public final class KnockOut {
             }
             if (now % 40 == 0) broadcast(v, d);                               // keep newcomers and the clock in step
         }
-        // carriers: hold sneak a second to put them down; carrying slows you
-        for (ServerPlayer p : net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers()) {
-            boolean carrying = p.getPassengers().stream().anyMatch(r -> r instanceof LivingEntity l && isDown(l));
-            AttributeInstance speed = p.getAttribute(Attributes.MOVEMENT_SPEED);
-            if (speed != null) {
-                if (carrying && speed.getModifier(CARRY_SLOW) == null)
-                    speed.addTransientModifier(new AttributeModifier(CARRY_SLOW, "dbzenith carrying", -0.3, AttributeModifier.Operation.MULTIPLY_TOTAL));
-                else if (!carrying && speed.getModifier(CARRY_SLOW) != null) speed.removeModifier(CARRY_SLOW);
-            }
-            if (!carrying) {
-                PUTTING_DOWN.remove(p.getUUID());
-                continue;
-            }
-            int held = p.isShiftKeyDown() ? PUTTING_DOWN.merge(p.getUUID(), 1, Integer::sum) : 0;
-            if (!p.isShiftKeyDown()) PUTTING_DOWN.remove(p.getUUID());
-            if (held >= 20) {
-                PUTTING_DOWN.remove(p.getUUID());
-                letGo = true;
-                for (Entity r : new ArrayList<>(p.getPassengers())) {
-                    r.stopRiding();
-                    r.setPos(p.position().add(p.getLookAngle().multiply(1, 0, 1).normalize().scale(1.2)));
-                }
-                letGo = false;
-            }
-        }
+        long now = net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer().overworld().getGameTime();
+        HELPING.values().removeIf(h -> now - h.last > 12 || !isDown(h.victim));
     }
 
     private static void speed(LivingEntity v, double amount) {
@@ -265,20 +268,28 @@ public final class KnockOut {
         if (amount != 0) a.addTransientModifier(new AttributeModifier(SLOW, "dbzenith knocked out", amount, AttributeModifier.Operation.MULTIPLY_TOTAL));
     }
 
-    // ------------------------------------------------------------------ others: finish, save, carry
+    // ------------------------------------------------------------------ others: blows, saving, carrying
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onAttack(LivingAttackEvent event) {
         LivingEntity v = event.getEntity();
         if (v.level().isClientSide) return;
         Entity by = event.getSource().getEntity();
-        if (by instanceof LivingEntity a && isDown(a) && a != v) {             // the downed can't fight
+        if (by instanceof LivingEntity a && (isDown(a) || Carry.isCarrying(a)) && a != v) {   // the downed can't fight; nor can arms that are full
             event.setCanceled(true);
             return;
         }
         if (isDown(v) && by instanceof LivingEntity a && a != v) {
-            event.setCanceled(true);                                          // a blow while down finishes them
-            finish(v, event.getSource());
+            event.setCanceled(true);                                          // a blow no longer finishes them: only a grip does
+            Down d = DOWN.get(v);
+            if (d == null || Grip.isGripped(v)) return;
+            long now = v.level().getGameTime();
+            d.until -= Math.max(40, d.total / 12);                             // but every blow costs them time
+            Blood.spill(v, v.position().add(0, v.getBbHeight() * 0.35, 0), 6);
+            v.level().playSound(null, v.getX(), v.getY(), v.getZ(), com.dbzenith.registry.ModSounds.PUNCH_HEAVY.get(), SoundSource.PLAYERS, 0.8f, 0.8f);
+            if (d.until <= now) d.until = now + 1;
+            broadcast(v, d);
+            if (a instanceof ServerPlayer p) p.displayClientMessage(Component.translatable("message.dbzenith.grip_hint", v.getDisplayName()), true);
         }
     }
 
@@ -286,8 +297,12 @@ public final class KnockOut {
     public static void onInteract(PlayerInteractEvent.EntityInteract event) {
         if (!(event.getTarget() instanceof LivingEntity v) || event.getLevel().isClientSide || !isDown(v)) return;
         Player helper = event.getEntity();
+        if (isDown(helper) || Grip.isGripped(v)) return;
         ItemStack held = event.getItemStack();
-        if (feed(helper, v, held) || held.isEmpty() && helper.isShiftKeyDown() && carry(helper, v)) {
+        boolean done = feed(helper, v, held)
+                || held.isEmpty() && helper.isShiftKeyDown() && Carry.pickUp(helper, v)
+                || held.isEmpty() && !helper.isShiftKeyDown() && help(helper, v);
+        if (done) {
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.SUCCESS);
         }
@@ -306,26 +321,51 @@ public final class KnockOut {
         return true;
     }
 
-    /** Picks a downed fighter up over the shoulder. */
-    public static boolean carry(Player helper, LivingEntity v) {
-        if (!isDown(v) || !helper.getPassengers().isEmpty() || v.getVehicle() != null) return false;
-        v.startRiding(helper, true);                                      // over the shoulder
-        helper.displayClientMessage(Component.translatable("message.dbzenith.carrying", v.getDisplayName()), true);
+    /**
+     * Helping a downed fighter up: holding right-click on them with an empty hand (the game repeats the click while it
+     * is held). Five seconds of it and they are back on their feet with a quarter of their health.
+     */
+    public static boolean help(Player helper, LivingEntity v) {
+        if (!isDown(v) || Carry.isCarried(v) || helper.distanceTo(v) > 3.5) return false;
+        long now = v.level().getGameTime();
+        Help h = HELPING.get(helper.getUUID());
+        if (h == null || h.victim != v || now - h.last > 12) {
+            h = new Help();
+            h.victim = v;
+            h.last = now;
+            HELPING.put(helper.getUUID(), h);
+        }
+        h.progress += (int) Math.max(1, now - h.last);
+        h.last = now;
+        if (h.progress >= HELP_TICKS) {
+            HELPING.remove(helper.getUUID());
+            revive(v, 0.25f);
+            helper.displayClientMessage(Component.translatable("message.dbzenith.helped_up", v.getDisplayName()), true);
+        } else {
+            helper.displayClientMessage(Component.translatable("message.dbzenith.helping_up", v.getDisplayName(),
+                    Math.min(99, h.progress * 100 / HELP_TICKS)), true);
+            if (v instanceof Player p) p.displayClientMessage(Component.translatable("message.dbzenith.being_helped", helper.getDisplayName()), true);
+        }
         return true;
     }
 
-    /** No healing on your own while down (food, regeneration): only a Senzu Bean or someone's healing brings you round. */
+    /** Back up with {@code share} of their health. */
+    public static void revive(LivingEntity v, float share) {
+        if (!isDown(v)) return;
+        if (v instanceof ServerPlayer p) ModCapabilities.get(p).ifPresent(data -> {
+            data.setBody(data.getDerived().maxBody() * share);
+            BodyHealth.mirror(p, data);
+            data.markDirty();
+        });
+        v.setHealth(Math.max(v.getHealth(), v.getMaxHealth() * share));
+        v.level().playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6f, 1.4f);
+        standUp(v);
+    }
+
+    /** No healing on your own while down (food, regeneration): only a Senzu Bean or someone's help brings you round. */
     @SubscribeEvent
     public static void onHeal(net.minecraftforge.event.entity.living.LivingHealEvent event) {
         if (!event.getEntity().level().isClientSide && isDown(event.getEntity())) event.setCanceled(true);
-    }
-
-    /** The carried can't climb off; only putting them down (or getting up) lets them go. */
-    @SubscribeEvent
-    public static void onMount(EntityMountEvent event) {
-        if (letGo || !event.isDismounting() || event.getLevel().isClientSide) return;
-        if (event.getEntityMounting() instanceof LivingEntity v && isDown(v) && event.getEntityBeingMounted() instanceof Player)
-            event.setCanceled(true);
     }
 
     /** Someone starts seeing a downed fighter: tell them. */

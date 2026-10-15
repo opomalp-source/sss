@@ -38,6 +38,8 @@ public final class NpcActions {
         IAnimation motion;
         Fighter.State shown = Fighter.State.IDLE;
         long hitstopUntil, heavyHintUntil, actionAt = Long.MIN_VALUE / 2;
+        /** A stance clip forced over the fighter states (carried, carrying: the knocked-out rework). */
+        KeyframeAnimation forced;
         int lastHurtTime;
 
         Track(LivingEntity entity) {
@@ -125,7 +127,14 @@ public final class NpcActions {
                 t.stanceSpeed.speed = 1f;
                 t.actionSpeed.speed = 1f;
             }
-            stance(t, com.dbzenith.client.ClientKnockouts.isDown(e.getId()) ? Fighter.State.KNOCKDOWN : FighterStates.get(e.getId()));   // knocked out lies down too (CX-51)
+            KeyframeAnimation forced = com.dbzenith.client.ClientCarry.isCarried(e.getId()) ? Anims.custom("carried", Anims.CARRIED)
+                    : com.dbzenith.client.ClientCarry.isCarrying(e.getId()) ? Anims.custom("carrying", Anims.CARRYING) : null;
+            if (forced != t.forced) {                                           // carried or carrying (the knocked-out rework)
+                t.forced = forced;
+                if (forced != null) t.stance.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(4, Ease.INOUTSINE), new KeyframeAnimationPlayer(forced));
+                else t.shown = null;                                            // back to the fighter states: shown afresh
+            }
+            if (forced == null) stance(t, com.dbzenith.client.ClientKnockouts.isDown(e.getId()) ? Fighter.State.KNOCKDOWN : FighterStates.get(e.getId()));   // knocked out lies down too (CX-51)
             if (e.hurtTime > t.lastHurtTime && e.isAlive() && now - t.actionAt > 1) {     // struck: reel (unless its own move just began)
                 boolean heavy = now <= t.heavyHintUntil || t.shown == Fighter.State.LAUNCHED || t.shown == Fighter.State.KNOCKDOWN;
                 play(e, heavy ? Anims.custom("hit_heavy", Anims.HIT_HEAVY) : Anims.custom("hit_light", Anims.HIT_LIGHT));

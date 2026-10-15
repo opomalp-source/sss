@@ -18,7 +18,8 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 /**
- * Battle damage (CX-47): a fighter shows the fight on them. Below 70% health the clothes start to rip (skin showing
+ * Battle damage (CX-47): a fighter shows the fight on them. (The knocked-out rework: the rips now come from how torn the
+ * clothes are, {@link #torn}, and stay until they are mended; only the bruises and grime still follow health.) Below 70% health the clothes start to rip (skin showing
  * through, in the fighter's own skin tone), with frayed edges, scratches and grime; below 45% and 20% more of it, and
  * bruises. Heavy blows and hard landings cover them in dust, which wears off over a minute (at once in water). The rips
  * mend as health comes back. Textures from {@code tools/BattleDamageGen.java}; client config {@code battleDamage}.
@@ -51,7 +52,26 @@ public class BattleDamageLayer<T extends LivingEntity, M extends HumanoidModel<T
         super(parent);
     }
 
-    /** 0 unhurt .. 3 in tatters, from health. */
+    /** How torn each fighter's own clothes are, as last heard (the knocked-out rework). */
+    private static final it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap CLOTHES = new it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap();
+
+    public static void clothes(int entityId, int level) {
+        if (level <= 0) CLOTHES.remove(entityId);
+        else CLOTHES.put(entityId, level);
+    }
+
+    /**
+     * How torn the clothes are, 0 whole .. 3 in tatters (the knocked-out rework: it stays until mended). The most worn
+     * gi piece worn, or the fighter's own clothes; anything else (a mob with no record of it) by health as before.
+     */
+    public static int torn(LivingEntity e) {
+        int gi = com.dbzenith.combat.Clothes.shown(e);
+        if (gi >= 0) return gi;
+        if (com.dbzenith.combat.Clothes.eligible(e)) return CLOTHES.getOrDefault(e.getId(), 0);
+        return level(e);
+    }
+
+    /** 0 unhurt .. 3 battered, from health: the bruises, scratches and grime. */
     public static int level(LivingEntity e) {
         float max = e.getMaxHealth();
         if (max <= 0) return 0;
@@ -65,13 +85,13 @@ public class BattleDamageLayer<T extends LivingEntity, M extends HumanoidModel<T
         if (e.isInvisible() || !DBZConfig.CLIENT.battleDamage.get()) return;
         ResourceLocation[] tex = TEX[ArtStyle.hiRes() ? 1 : 0];
         int overlay = LivingEntityRenderer.getOverlayCoords(e, 0);
-        int level = level(e);
-        if (level > 0) {
+        int torn = torn(e), marks = Math.max(torn, level(e));
+        if (torn > 0) {
             PublicStatePacket state = ClientPublicStates.get(e.getId());
             int skin = state != null && state.skinTone() >= 0 ? state.skinTone() : DEFAULT_SKIN;
-            draw(pose, buffers, tex[level - 1], light, overlay, skin, 1f);       // skin through the rips
-            draw(pose, buffers, tex[level + 2], light, overlay, 0xFFFFFF, 1f);   // their edges, scratches, bruises, grime
+            draw(pose, buffers, tex[torn - 1], light, overlay, skin, 1f);        // skin through the rips (they stay until mended)
         }
+        if (marks > 0) draw(pose, buffers, tex[marks + 2], light, overlay, 0xFFFFFF, 1f);   // the rips' edges, scratches, bruises, grime
         float dust = dust(e, ageInTicks);
         if (dust > 0.02f) draw(pose, buffers, tex[6], light, overlay, 0xFFFFFF, Math.min(1f, dust));
     }

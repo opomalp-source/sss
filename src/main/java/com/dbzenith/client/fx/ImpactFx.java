@@ -67,6 +67,10 @@ public final class ImpactFx {
     // ------------------------------------------------------------------ server impacts
 
     public static void onImpact(ImpactPacket m) {
+        if (m.kind() == ImpactPacket.BLOOD) {                                   // the knocked-out rework: blood, not a blow
+            BloodFx.onImpact(m);
+            return;
+        }
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
         if (level == null) return;

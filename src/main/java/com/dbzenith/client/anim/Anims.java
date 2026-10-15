@@ -734,7 +734,7 @@ public final class Anims {
 
     /** Knocked out and carried (CX-51): draped face down over someone's shoulder, arms and legs hanging, swaying. */
     public static final KeyframeAnimation CARRIED = loop(40, a -> {
-        a.tilt(0, 90, 17f, Ease.INOUTSINE).tilt(20, 86, 17.4f, Ease.INOUTSINE).tilt(40, 90, 17f, Ease.INOUTSINE);
+        a.tilt(0, 90, 0f, Ease.INOUTSINE).tilt(20, 86, 0.4f, Ease.INOUTSINE).tilt(40, 90, 0f, Ease.INOUTSINE);   // (placed on the shoulder by Carry.shoulder)
         a.rot("rightArm", 0, -88, 0, 6, Ease.INOUTSINE).rot("rightArm", 20, -96, 0, 2, Ease.INOUTSINE).rot("rightArm", 40, -88, 0, 6, Ease.INOUTSINE);
         a.rot("leftArm", 0, -94, 0, -4, Ease.INOUTSINE).rot("leftArm", 20, -86, 0, -6, Ease.INOUTSINE).rot("leftArm", 40, -94, 0, -4, Ease.INOUTSINE);
         a.rot("rightLeg", 0, -84, 0, 4, Ease.INOUTSINE).rot("rightLeg", 20, -92, 0, 2, Ease.INOUTSINE).rot("rightLeg", 40, -84, 0, 4, Ease.INOUTSINE);
@@ -742,6 +742,171 @@ public final class Anims {
         a.rot("head", 0, 30, 10, 0, Ease.INOUTSINE).rot("head", 20, 36, 6, 0, Ease.INOUTSINE).rot("head", 40, 30, 10, 0, Ease.INOUTSINE);
     });
 
+
+    // ------------------------------------------------------------------ carrying and gripping (the knocked-out rework)
+
+    /** Carrying someone over the right shoulder: the right arm up over their legs, holding them on; the rest free to walk and look. */
+    public static final KeyframeAnimation CARRYING = loop(40, a -> {
+        Pose p = new Pose().r("torso", 7, 0, 0).limb("rightArm", -166, 8, 14, 112).freeing("rightLeg", "leftLeg", "leftArm", "head");
+        a.pose(0, p, Ease.INOUTSINE).pose(20, p.copy().r("torso", 9, 0, 0).limb("rightArm", -162, 8, 16, 116), Ease.INOUTSINE).pose(40, p, Ease.INOUTSINE);
+    });
+
+    /** Picking someone up: down on one knee, arms under them, and up, hauling them onto the shoulder. */
+    public static final KeyframeAnimation PICK_UP = once(16, a -> {
+        Pose low = new Pose().at(0, 6, 0).r("torso", 48, 0, 0).r("head", -20, 0, 0)
+                .limb("rightArm", -60, 0, 10, 30).limb("leftArm", -60, 0, -10, 30).limb("rightLeg", -50, 0, 6, 100).limb("leftLeg", 30, 0, -4, 110);
+        Pose up = new Pose().r("torso", 7, 0, 0).limb("rightArm", -166, 8, 14, 112).limb("leftArm", -20, 0, -8, 20);
+        a.pose(0, fight(), Ease.LINEAR).pose(6, low, Ease.OUTQUAD).pose(10, low.copy().move(0, -1, 0), Ease.LINEAR).pose(16, up, Ease.INOUTQUAD);
+    });
+
+    /** The finisher a gripper plays, by {@code Grip.Finisher} ordinal. */
+    public static KeyframeAnimation gripper(int finisher) {
+        return switch (finisher) {
+            case 1 -> custom("grip_skull_slam", GRIP_SKULL_SLAM);
+            case 2 -> custom("grip_stomp", GRIP_STOMP);
+            case 3 -> custom("grip_bear_hug", GRIP_BEAR_HUG);
+            case 4 -> custom("grip_elbow_drop", GRIP_ELBOW_DROP);
+            case 5 -> custom("grip_ki_spear", GRIP_KI_SPEAR);
+            default -> custom("grip_ki_execution", GRIP_KI_EXECUTION);
+        };
+    }
+
+    /** What the one in the grip goes through, by finisher. */
+    public static KeyframeAnimation gripped(int finisher) {
+        return switch (finisher) {
+            case 1 -> custom("gripped_skull_slam", GRIPPED_SKULL_SLAM);
+            case 2 -> custom("gripped_stomp", GRIPPED_STOMP);
+            case 3 -> custom("gripped_bear_hug", GRIPPED_BEAR_HUG);
+            case 4 -> custom("gripped_elbow_drop", GRIPPED_ELBOW_DROP);
+            case 5 -> custom("gripped_ki_spear", GRIPPED_KI_SPEAR);
+            default -> custom("gripped_ki_execution", GRIPPED_KI_EXECUTION);
+        };
+    }
+
+    private static Pose stand() {
+        return new Pose().limb("rightArm", 0, 0, 6, 8).limb("leftArm", 0, 0, -6, 8).limb("rightLeg", 0, 0, 2, 0).limb("leftLeg", 0, 0, -2, 0);
+    }
+
+    /** Lying on the back where they fell (as {@link #DOWNED}). */
+    private static Pose lying() {
+        return new Pose().tilt(-90).at(0, 9.5f, 0).limb("rightArm", -10, 0, 40, 10).limb("leftArm", 0, 0, -25, 10)
+                .limb("rightLeg", -10, 0, 8, 30).limb("leftLeg", 0, 0, -6, 0).r("head", -15, 20, 0);
+    }
+
+    /** Held up off the ground, limp: head lolling, arms and legs hanging. */
+    private static Pose dangling() {
+        return new Pose().r("head", 34, 8, 0).r("torso", 6, 0, 0).limb("rightArm", 6, 0, 10, 14).limb("leftArm", 4, 0, -12, 18)
+                .limb("rightLeg", 6, 0, 4, 12).limb("leftLeg", -2, 0, -4, 18);
+    }
+
+    /** Hauled up by the collar with one hand, the other palm pressed to the chest: a ki blast point-blank. */
+    public static final KeyframeAnimation GRIP_KI_EXECUTION = once(54, a -> {
+        Pose grab = new Pose().at(0, 4, 0).r("torso", 42, 0, 0).limb("leftArm", -72, 0, -6, 12).limb("rightArm", -20, 0, 18, 30)
+                .limb("rightLeg", -30, 0, 6, 60).limb("leftLeg", 20, 0, -6, 50);
+        Pose hold = stand().r("torso", -4, 0, 0).limb("leftArm", -98, 8, -4, 22);
+        Pose cock = hold.copy().r("torso", -2, -22, 0).limb("rightArm", -42, 0, 26, 104);
+        Pose blast = hold.copy().r("torso", 6, 18, 0).limb("rightArm", -96, -12, 0, 4).limb("rightLeg", -14, 0, 6, 10);
+        Pose recoil = blast.copy().r("torso", -10, 18, 0).limb("rightArm", -108, -12, 0, 0).move(0, 0, 1.5f);
+        a.pose(0, stand(), Ease.LINEAR).pose(8, grab, Ease.OUTQUAD).pose(12, grab, Ease.LINEAR).pose(20, hold, Ease.INOUTQUAD)
+                .pose(26, cock, Ease.OUTQUAD).pose(34, cock.copy().r("torso", -3, -24, 0), Ease.LINEAR).pose(37, blast, Ease.OUTEXPO)
+                .pose(41, recoil, Ease.OUTQUAD).pose(54, stand(), Ease.INOUTQUAD);
+    });
+
+    public static final KeyframeAnimation GRIPPED_KI_EXECUTION = once(54, a -> {
+        Pose held = dangling().r("head", -20, 0, 0).limb("rightArm", -30, 0, 20, 40);   // a hand clutching at the wrist
+        a.pose(0, lying(), Ease.LINEAR).pose(12, lying(), Ease.LINEAR).pose(18, held, Ease.INOUTQUAD).pose(34, held.copy().r("head", -10, 0, 0), Ease.LINEAR)
+                .pose(38, held.copy().tilt(-30).r("head", -40, 0, 0).limb("rightArm", -40, 0, 50, 10).limb("leftArm", -40, 0, -50, 10), Ease.OUTEXPO)
+                .pose(54, held.copy().tilt(-50), Ease.OUTQUAD);
+    });
+
+    /** Lifted high by the head and driven down into the ground. */
+    public static final KeyframeAnimation GRIP_SKULL_SLAM = once(50, a -> {
+        Pose grab = new Pose().at(0, 4, 0).r("torso", 46, 0, 0).limb("rightArm", -66, 0, 8, 14).limb("leftArm", -20, 0, -14, 30)
+                .limb("rightLeg", -26, 0, 6, 56).limb("leftLeg", 22, 0, -6, 46);
+        Pose up = stand().at(0, -0.8f, 0).r("torso", -12, 0, 0).r("head", -30, 0, 0).limb("rightArm", -172, 0, 4, 10).limb("leftArm", -150, 0, -10, 30);
+        Pose slam = new Pose().at(0, 5, 0).r("torso", 58, 0, 0).limb("rightArm", -34, 0, 6, 0).limb("leftArm", -10, 0, -30, 20)
+                .limb("rightLeg", -40, 0, 8, 80).limb("leftLeg", 34, 0, -8, 70);
+        a.pose(0, stand(), Ease.LINEAR).pose(8, grab, Ease.OUTQUAD).pose(12, grab, Ease.LINEAR).pose(24, up, Ease.INOUTQUAD).pose(28, up.copy().r("torso", -16, 0, 0), Ease.LINEAR)
+                .pose(35, slam, Ease.INEXPO).pose(40, slam.copy().move(0, 0.6f, 0), Ease.LINEAR).pose(50, stand(), Ease.INOUTQUAD);
+    });
+
+    public static final KeyframeAnimation GRIPPED_SKULL_SLAM = once(50, a -> {
+        Pose hung = dangling().r("head", -10, 0, 0).limb("rightArm", -60, 0, 20, 60).limb("leftArm", -55, 0, -20, 70);   // clawing at the hand
+        a.pose(0, lying(), Ease.LINEAR).pose(12, lying(), Ease.LINEAR).pose(20, hung, Ease.INOUTQUAD).pose(28, hung.copy().limb("rightLeg", -10, 0, 6, 20), Ease.LINEAR)
+                .pose(33, hung.copy().tilt(-60), Ease.INQUAD).pose(36, lying().limb("rightArm", -60, 0, 60, 0).limb("leftArm", -60, 0, -60, 0), Ease.OUTEXPO)
+                .pose(50, lying(), Ease.OUTQUAD);
+    });
+
+    /** A knee raised high and a stomp to the chest that cracks the ground. */
+    public static final KeyframeAnimation GRIP_STOMP = once(36, a -> {
+        Pose raise = stand().at(0, -1, 0).r("torso", -6, 0, 0).limb("rightLeg", -98, 0, 6, 104).limb("rightArm", -30, 0, 40, 40).limb("leftArm", -20, 0, -40, 40);
+        Pose stomp = new Pose().at(0, 2.5f, -1).r("torso", 18, 0, 0).limb("rightLeg", -26, 0, 4, 14).limb("leftLeg", 18, 0, -4, 36)
+                .limb("rightArm", 30, 0, 30, 20).limb("leftArm", 34, 0, -30, 20);
+        a.pose(0, stand(), Ease.LINEAR).pose(12, raise, Ease.OUTQUAD).pose(18, raise.copy().move(0, -0.6f, 0), Ease.LINEAR).pose(22, stomp, Ease.INEXPO)
+                .pose(26, stomp.copy().move(0, 0.5f, 0), Ease.LINEAR).pose(36, stand(), Ease.INOUTQUAD);
+    });
+
+    public static final KeyframeAnimation GRIPPED_STOMP = once(36, a -> {
+        a.pose(0, lying(), Ease.LINEAR).pose(16, lying().limb("rightArm", -80, 0, 20, 30), Ease.INOUTQUAD).pose(21, lying().limb("rightArm", -80, 0, 20, 30), Ease.LINEAR)
+                .pose(23, lying().at(0, 9.9f, 0).limb("rightArm", -10, 0, 70, 0).limb("leftArm", -10, 0, -70, 0).limb("rightLeg", -30, 0, 10, 40).limb("leftLeg", -30, 0, -10, 40), Ease.OUTEXPO)
+                .pose(36, lying(), Ease.OUTQUAD);
+    });
+
+    /** Lifted into a crushing hug, squeezing until something gives. */
+    public static final KeyframeAnimation GRIP_BEAR_HUG = once(62, a -> {
+        Pose reach = new Pose().at(0, 4, 0).r("torso", 30, 0, 0).limb("rightArm", -64, 20, 10, 30).limb("leftArm", -64, -20, -10, 30)
+                .limb("rightLeg", -24, 0, 8, 50).limb("leftLeg", 22, 0, -8, 44);
+        Pose hug = stand().r("torso", -14, 0, 0).r("head", 10, 0, 0).limb("rightArm", -82, 34, 0, 112).limb("leftArm", -82, -34, 0, 112);
+        Pose squeeze = hug.copy().r("torso", -20, 0, 0).limb("rightArm", -80, 40, 0, 126).limb("leftArm", -80, -40, 0, 126);
+        a.pose(0, stand(), Ease.LINEAR).pose(10, reach, Ease.OUTQUAD).pose(20, hug, Ease.INOUTQUAD);
+        for (int t = 26; t <= 40; t += 7) a.pose(t, squeeze, Ease.OUTQUAD).pose(t + 3, hug, Ease.INOUTSINE);
+        a.pose(46, squeeze.copy().r("torso", -26, 0, 0), Ease.OUTEXPO).pose(52, hug.copy().limb("rightArm", -50, 40, 20, 20).limb("leftArm", -50, -40, -20, 20), Ease.OUTQUAD)
+                .pose(62, stand(), Ease.INOUTQUAD);
+    });
+
+    public static final KeyframeAnimation GRIPPED_BEAR_HUG = once(62, a -> {
+        Pose pinned = stand().r("head", -26, 0, 0).limb("rightArm", 0, 0, 4, 10).limb("leftArm", 0, 0, -4, 10).limb("rightLeg", 4, 0, 4, 10).limb("leftLeg", 4, 0, -4, 16);
+        a.pose(0, lying(), Ease.LINEAR).pose(12, lying(), Ease.LINEAR).pose(20, pinned, Ease.INOUTQUAD);
+        for (int t = 26; t <= 40; t += 7) a.pose(t, pinned.copy().r("head", -40, 0, 0).limb("rightLeg", -14, 0, 4, 30), Ease.OUTQUAD).pose(t + 3, pinned, Ease.INOUTSINE);
+        a.pose(46, pinned.copy().r("head", -50, 0, 0), Ease.OUTEXPO).pose(50, dangling().r("head", 48, 0, 0), Ease.OUTQUAD).pose(62, dangling().tilt(-40), Ease.INQUAD);
+    });
+
+    /** A leap and an elbow driven down from above. */
+    public static final KeyframeAnimation GRIP_ELBOW_DROP = once(46, a -> {
+        Pose crouch = new Pose().at(0, 6, 0).r("torso", 30, 0, 0).limb("rightArm", 30, 0, 20, 30).limb("leftArm", 30, 0, -20, 30)
+                .limb("rightLeg", -50, 0, 6, 100).limb("leftLeg", -50, 0, -6, 100);
+        Pose air = new Pose().at(0, -30, 0).r("torso", 10, 0, 0).limb("rightArm", -160, 0, 20, 30).limb("leftArm", -150, 0, -20, 30)
+                .limb("rightLeg", -40, 0, 6, 100).limb("leftLeg", -30, 0, -6, 90);
+        Pose apex = new Pose().at(0, -34, -4).tilt(40).limb("rightArm", -110, 0, 30, 145).limb("leftArm", -40, 0, -30, 60)
+                .limb("rightLeg", -50, 0, 6, 110).limb("leftLeg", -40, 0, -6, 100);
+        Pose drop = new Pose().at(0, 7, -15).tilt(72).limb("rightArm", -70, 0, 30, 150).limb("leftArm", -30, 0, -30, 60)
+                .limb("rightLeg", -20, 0, 6, 60).limb("leftLeg", -10, 0, -6, 50);
+        a.pose(0, stand(), Ease.LINEAR).pose(8, crouch, Ease.OUTQUAD).pose(14, air, Ease.OUTQUAD).pose(22, apex, Ease.OUTSINE)
+                .pose(32, drop, Ease.INEXPO).pose(38, drop.copy().move(0, 0.8f, 0), Ease.LINEAR).pose(46, stand(), Ease.INOUTQUAD);
+    });
+
+    public static final KeyframeAnimation GRIPPED_ELBOW_DROP = once(46, a -> {
+        a.pose(0, lying(), Ease.LINEAR).pose(24, lying().limb("rightArm", -80, 0, 30, 40).limb("leftArm", -80, 0, -30, 40), Ease.INOUTQUAD)
+                .pose(33, lying().at(0, 9.9f, 0).limb("rightArm", -10, 0, 70, 0).limb("leftArm", -10, 0, -70, 0).limb("rightLeg", -40, 0, 10, 50).limb("leftLeg", -40, 0, -10, 50), Ease.OUTEXPO)
+                .pose(46, lying(), Ease.OUTQUAD);
+    });
+
+    /** Held by the shoulder, a hand sheathed in ki drawn back and driven clean through. */
+    public static final KeyframeAnimation GRIP_KI_SPEAR = once(44, a -> {
+        Pose hold = stand().limb("leftArm", -86, 10, 0, 30);
+        Pose draw = hold.copy().r("torso", 0, -26, 0).limb("rightArm", -22, 0, 26, 84).limb("rightLeg", 10, 0, 6, 10);
+        Pose thrust = hold.copy().at(0, 0.5f, -2).r("torso", 14, 22, 0).limb("rightArm", -92, -6, 0, 0).limb("rightLeg", -24, 0, 6, 24).limb("leftLeg", 14, 0, -6, 20);
+        a.pose(0, stand(), Ease.LINEAR).pose(8, hold, Ease.OUTQUAD).pose(16, draw, Ease.INOUTQUAD).pose(26, draw.copy().r("torso", 0, -30, 0), Ease.LINEAR)
+                .pose(28, thrust, Ease.OUTEXPO).pose(36, thrust, Ease.LINEAR).pose(40, draw.copy().limb("rightArm", -60, 0, 20, 40), Ease.INOUTQUAD).pose(44, stand(), Ease.INOUTQUAD);
+    });
+
+    public static final KeyframeAnimation GRIPPED_KI_SPEAR = once(44, a -> {
+        Pose held = dangling().r("head", 8, 0, 0);
+        Pose pierced = held.copy().r("torso", -24, 0, 0).r("head", -38, 0, 0).limb("rightArm", -20, 0, 44, 10).limb("leftArm", -20, 0, -44, 10)
+                .limb("rightLeg", -8, 0, 6, 10).limb("leftLeg", -10, 0, -6, 12);
+        a.pose(0, lying(), Ease.LINEAR).pose(8, lying(), Ease.LINEAR).pose(14, held, Ease.INOUTQUAD).pose(27, held, Ease.LINEAR).pose(29, pierced, Ease.OUTEXPO)
+                .pose(36, pierced.copy().r("head", -30, 0, 0), Ease.LINEAR).pose(44, dangling().r("head", 50, 0, 0), Ease.INOUTQUAD);
+    });
 
     // ------------------------------------------------------------------ badly hurt (CX-52)
 

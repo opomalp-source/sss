@@ -42,6 +42,7 @@ public final class KiCreator2Tests {
 
     @GameTest(template = EMPTY)
     public static void kiTypesAndHitModifiersApply(GameTestHelper helper) {
+        helper.getLevel().getEntitiesOfClass(Zombie.class, new net.minecraft.world.phys.AABB(helper.absolutePos(BlockPos.ZERO)).inflate(10)).forEach(Zombie::discard);   // earlier tests' dummies on this spot would take the chain's jumps
         Zombie a = dummy(helper, new BlockPos(1, 2, 1)), b = dummy(helper, new BlockPos(3, 2, 1)), c = dummy(helper, new BlockPos(1, 2, 3));
         ServerPlayer p = TestPlayers.create(helper);
         Vec3 push = new Vec3(1, 0, 0);

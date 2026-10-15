@@ -3375,3 +3375,86 @@ answers: move all built-ins to JSON; for charging movement, my judgement; very b
 
 **The ki attack rework (phases 0 to 10) is complete.** Story mode, which the user asked to leave until last, comes next
 when they say so.
+
+## 2026-10-15 — Knocked out, carrying, gripping, limbs and clothes, reworked (v0.127.0)
+The user: make the knocked, carry, grip and limbs systems "1000 times better". Carrying someone showed nothing on their
+screen and sometimes didn't work. Fresh cuts should bleed, in each race's colour as in the show. Ruined clothes should
+stay ruined until repaired. The only way to kill someone who is down should be to grip them with a button (gripping
+means finishing off), with various animations. Player guide: `docs/KNOCKOUT.md`.
+
+- **Carrying, rebuilt (`Carry`):**
+  - **The bug:** it used vanilla riding, a player riding a player, which Minecraft handles badly. The carried
+    player's own game could climb off by itself while the server held them on, so their screen showed nothing and the
+    carry sometimes failed.
+  - **Now:** the carried fighter is placed on the carrier's right shoulder every tick by the server and by every
+    client, from the same rule (`Carry.shoulder`). The carried player's game places itself the same way.
+  - **Pose:** draped face down, head down the carrier's back, legs in front; the carrier's right arm over their legs
+    (`Anims.CARRYING`, after a `PICK_UP`).
+  - **Controls:** hold Sneak to put them down gently, or attack to throw them. Carrying, you walk 30% slower and can't
+    sprint, attack or use ki.
+  - **Drops:** being knocked down, stunned or teleported drops them.
+  - **Sync:** `CarryPacket`; NPCs carry and are carried with the same clips.
+- **Gripping (`Grip`):** the only way to kill a downed fighter besides their time running out.
+  - **Blows:** they no longer finish anyone. They cost a twelfth of the total time (at least two seconds) and draw
+    blood, with a hint to grip.
+  - **The key:** the grip key (F; it stands in for swap-hands only while there is someone to grip) picks a finisher
+    by the direction held: Ki Execution, Skull Slam, Bear Hug, Stomp, Elbow Drop, Ki Spear.
+  - **Animation:** each finisher has a gripper animation and a victim animation, and a timeline for where the victim
+    is held (`Grip.victimOffset`, shared by the server and the clients). Ki finishers gather ki at the hand.
+  - **Killing frame:** an impact, an impact frame, a shake, the colour split and cracks for the slams.
+  - **Breaking it:** a blow of 6% of the gripper's health (by health lost, any cause), a stun or a knockdown breaks
+    it, and the victim lives on.
+  - **NPCs:** NPC fighters walk up to a downed player they were fighting, pause three seconds, and grip.
+  - **Screens:** the victim's screen flashes "... is finishing you!".
+  - **Deaths read** "finished off by ..." or "bled out after a fight with ..." (new damage types `finished` and
+    `bled_out`).
+  - **Packets:** `GripPacket`, `DownedActionPacket`.
+- **Helping up:** hold right-click on a downed fighter with an empty hand for five seconds (`KnockOut.HELP_TICKS`) and
+  they are back up with a quarter of their health. Both sides see the progress.
+- **On screen (`DownedHud`):**
+  - over every downed fighter, a timer bar (green to red) and the seconds left;
+  - looking at one up close, prompts for grip (and which direction gives which finisher), carry, help up, or the
+    Senzu Bean;
+  - carrying someone, how to put them down or throw them.
+  - The downed player's screen shows who is carrying them, or flashes a warning while they are gripped.
+- **Blood (`Blood`, `BloodFx`):** each race's colour, as in the show.
+  - **Colours:** red for Earthlings and Saiyans, Piccolo's violet for Namekians, Frieza's purple, pink goo for Majins
+    (fat slow blobs), dark oil with sparks for androids, red with sparks for cyborgs, Cell's purple for bio-androids.
+    Made-up colours for the rest: near black for vampires, green for generic aliens, amber for Core People.
+  - **On the client:** drops fly and fall, leaving splats on the ground that dry darker and fade over a minute, lit
+    by the world (not glowing).
+  - **When:** going down, being hit while down, hard blows (an eighth of health or more), the killing frame.
+  - **Textures** from `tools/BloodGen.java`: `blood_drop`, `blood_splat_1..3`, and the bandage and sewing kit icons.
+- **Limbs:**
+  - **Fresh cuts bleed:** twenty seconds from a blade, six when seared by ki (smoke).
+  - **Stumps:** the stump drips and spurts with the heartbeat and drains 1% of max health a second per wound, which
+    can knock a fighter out.
+  - **The limb flies off** (`SeveredLimb` entity): it tumbles in the fighter's skin tone, the cut end in their
+    blood's colour, bleeds where it lies, and is gone after a minute.
+  - **Bandages** (new item: 3 paper + 1 string makes 2) stop the bleeding and tend the most hurt limb. Use one on
+    yourself or someone else, even someone down. Senzu Beans and healing stop it too.
+  - Bleeding is in `LimbsPacket`.
+- **Clothes stay torn until mended (`Clothes`):**
+  - **A gi** takes hard blows (4% of health or more) in its durability and never wears right out. It shows torn,
+    ripped, then in tatters by its most worn piece.
+  - **Without a gi,** a fighter's own clothes (players' outfits, NPC uniforms) keep their wear (`ClothesPacket`), even
+    over a death.
+  - **The rips** come from that wear now, not health; bruises and grime still follow health (`BattleDamageLayer.torn`).
+  - **Mending:** a **Sewing Kit** (new item, six uses) mends your clothes and patches each gi piece halfway; an anvil
+    and the gi's material finish it. Senzu Beans heal the body, not the clothes.
+- **Commands:** `/dbz knockout`, `/dbz carry`, `/dbz grip`.
+- **Network protocol 39.**
+- **Tests:**
+  - `KnockOutTests` rewritten: carried on the shoulder and not by riding; blows cost time and only a grip finishes;
+    a hard hit breaks a grip; a friend helps them up; NPCs bleed out; a cut limb bleeds, flies off and is bandaged.
+  - New `ClothesTests`: tears stay until mended, and a gi takes the wear and never wears out.
+  - `QuestTests` finish the downed with a grip.
+  - `KiCreator2Tests` clears earlier tests' dummies from its spot: the new tests shifted the layout, and leftover
+    zombies took the chain's jumps.
+  - 234 GameTests.
+- **Checked in the dev client:**
+  - Dev carrying a downed soldier, seen from the front and from behind;
+  - the Ki Execution (hauled up, ki at the hand, the killing flash and impact frame) and the Skull Slam (lifted
+    overhead, slammed, dust);
+  - an NPC soldier walking up to a downed Dev and gripping him, Dev's screen warning him;
+  - a soldier's arm and a Namekian's arm cut off: the arms fly, red and violet blood, splats.

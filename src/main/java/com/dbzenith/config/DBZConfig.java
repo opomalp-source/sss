@@ -351,7 +351,7 @@ public final class DBZConfig {
                     .defineInRange("bodyRegenPercentPerSecond", 1.0, 0.0, 100.0);
             bodyRegenDelayTicks = b.comment("Ticks after taking damage before body regen starts")
                     .defineInRange("bodyRegenDelayTicks", 100, 0, 72000);
-            knockOut = b.comment("At zero health fighters (players and NPC fighters) are knocked out on the ground instead of dying at once: they bleed out after a while, a blow finishes them, a Senzu Bean or healing saves them, and others can carry them")
+            knockOut = b.comment("At zero health fighters (players and NPC fighters) are knocked out on the ground instead of dying at once: they bleed out after a while, only a grip (F) finishes them (blows cost them time), a Senzu Bean, healing or a friend helping them up saves them, and others can carry them")
                     .define("knockOut", true);
             knockOutSeconds = b.comment("How long a knocked-out player lasts before bleeding out (seconds; tougher fighters last up to half again)")
                     .defineInRange("knockOutSeconds", 45, 5, 600);

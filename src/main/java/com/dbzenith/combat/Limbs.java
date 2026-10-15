@@ -80,6 +80,9 @@ public final class Limbs {
     public static final class State {
         public final byte[] health = {100, 100, 100, 100};
         public int severed, prosthetic;
+        /** Bleeding limbs (a bit mask; the knocked-out rework): fresh cuts, until {@link #bleedUntil}. */
+        public int bleeding;
+        final long[] bleedUntil = new long[4];
         long lastHit;
         /** When each lost limb grows back (Namekians, Majins; 0 not set yet). */
         final long[] regrowAt = new long[4];
@@ -94,6 +97,10 @@ public final class Limbs {
 
         public boolean prosthetic(Limb l) {
             return (prosthetic & 1 << l.ordinal()) != 0;
+        }
+
+        public boolean bleeding(Limb l) {
+            return (bleeding & 1 << l.ordinal()) != 0;
         }
 
         /** Can this limb be used (not cut off, or replaced, and not broken)? */
@@ -116,7 +123,7 @@ public final class Limbs {
         }
 
         public boolean whole() {
-            return severed == 0 && health[0] == 100 && health[1] == 100 && health[2] == 100 && health[3] == 100;
+            return severed == 0 && bleeding == 0 && health[0] == 100 && health[1] == 100 && health[2] == 100 && health[3] == 100;
         }
 
         CompoundTag save() {
@@ -165,7 +172,7 @@ public final class Limbs {
     }
 
     private static LimbsPacket packet(LivingEntity e, State s) {
-        return new LimbsPacket(e.getId(), s.health.clone(), s.severed, s.prosthetic);
+        return new LimbsPacket(e.getId(), s.health.clone(), s.severed, s.prosthetic, s.bleeding);
     }
 
     private static void broadcast(LivingEntity e, State s) {
@@ -179,6 +186,7 @@ public final class Limbs {
         for (int i = 0; i < 4; i++) s.health[i] = m.health()[i];
         s.severed = m.severed();
         s.prosthetic = m.prosthetic();
+        s.bleeding = m.bleeding();
         if (s.whole()) CLIENT.remove(m.entityId());
         else CLIENT.put(m.entityId(), s);
     }
@@ -194,21 +202,27 @@ public final class Limbs {
         float share = event.getAmount() / Math.max(1f, v.getMaxHealth());
         if (share < 0.01f) return;
         DamageSource source = event.getSource();
+        if (share >= 0.12f) Blood.spill(v, v.position().add(0, v.getBbHeight() * 0.6, 0), Math.min(24, (int) (share * 40)));   // a hard blow draws blood (the knocked-out rework)
         boolean cutting = cutting(source), overwhelming = share >= 0.33f;
         if (!cutting && !overwhelming && v.getRandom().nextFloat() > 0.55f) return;   // not every blow finds a limb
         Limb limb = pick(v, source);
-        hit(v, limb, share * 180f, cutting, overwhelming);
+        hit(v, limb, share * 180f, cutting, overwhelming, source.getDirectEntity() instanceof com.dbzenith.skill.KiBlastEntity);
     }
 
     /** {@code amount}% off a limb; a cutting or overwhelming blow can take a broken one off. */
     public static void hit(LivingEntity v, Limb limb, float amount, boolean cutting, boolean overwhelming) {
+        hit(v, limb, amount, cutting, overwhelming, false);
+    }
+
+    /** The same; {@code seared}: cut by ki, which sears the wound (it bleeds far less). */
+    public static void hit(LivingEntity v, Limb limb, float amount, boolean cutting, boolean overwhelming, boolean seared) {
         State s = of(v);
         if (s.severed(limb) && !s.prosthetic(limb)) return;                // nothing left to hit (a prosthetic can be)
         int before = s.health(limb);
         int after = Math.max(0, Math.round(before - amount));
         s.lastHit = v.level().getGameTime();
         if ((cutting && before <= USABLE + 10 || overwhelming && before == 0) && after == 0) {
-            sever(v, limb);
+            sever(v, limb, seared);
             return;
         }
         s.health[limb.ordinal()] = (byte) after;
@@ -252,7 +266,17 @@ public final class Limbs {
 
     /** Lost: gone from the body, whatever that hand held dropped. */
     public static void sever(LivingEntity v, Limb limb) {
+        sever(v, limb, false);
+    }
+
+    /**
+     * The same; {@code seared}: cut by ki, the wound burnt shut, so it bleeds for six seconds instead of twenty. Either
+     * way the limb flies off ({@link SeveredLimb}) and the stump spurts (the knocked-out rework).
+     */
+    public static void sever(LivingEntity v, Limb limb, boolean seared) {
         State s = of(v);
+        s.bleeding |= 1 << limb.ordinal();
+        s.bleedUntil[limb.ordinal()] = v.level().getGameTime() + (seared ? 120 : 400);
         s.severed |= 1 << limb.ordinal();
         int regrow = regrowTicks(v);
         if (regrow >= 0) s.regrowAt[limb.ordinal()] = v.level().getGameTime() + regrow;
@@ -260,8 +284,12 @@ public final class Limbs {
         s.health[limb.ordinal()] = 0;
         if (v.level() instanceof ServerLevel level) {
             Vec3 at = v.position().add(0, limb.arm() ? v.getBbHeight() * 0.65 : v.getBbHeight() * 0.25, 0);
-            level.sendParticles(new DustParticleOptions(new Vector3f(0.55f, 0.05f, 0.05f), 1.4f), at.x, at.y, at.z, 24, 0.25, 0.25, 0.25, 0.05);
-            level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 10, 0.2, 0.2, 0.2, 0.02);
+            double yr = Math.toRadians(v.yBodyRot);
+            Vec3 out = new Vec3(-Math.cos(yr), 0, -Math.sin(yr)).scale(limb == Limb.RIGHT_ARM || limb == Limb.RIGHT_LEG ? 1 : -1);
+            Vec3 socket = at.add(out.scale(v.getBbWidth() * (limb.arm() ? 0.6 : 0.25)));
+            Blood.spurt(v, socket, out.add(0, 0.6, 0).normalize(), seared ? 12 : 34);   // the stump spurts
+            if (seared) level.sendParticles(ParticleTypes.SMOKE, socket.x, socket.y, socket.z, 10, 0.1, 0.1, 0.1, 0.02);   // ki sears it
+            SeveredLimb.throwOff(v, limb, socket, out);                              // and the limb flies
             level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.2f, 0.5f);
             level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.SKELETON_HURT, SoundSource.PLAYERS, 1.2f, 0.4f);
         }
@@ -286,6 +314,10 @@ public final class Limbs {
         if (e.level().isClientSide || !eligible(e)) return;
         State s = of(e);
         boolean any = false;
+        if (s.bleeding != 0) {
+            s.bleeding = 0;
+            any = true;
+        }
         for (Limb l : Limb.values()) {
             if (s.severed(l) && !s.prosthetic(l) || s.health(l) >= 100) continue;
             s.health[l.ordinal()] = 100;
@@ -306,6 +338,7 @@ public final class Limbs {
         }
         s.severed = 0;
         s.prosthetic = 0;
+        s.bleeding = 0;
         changed(e);
     }
 
@@ -349,6 +382,73 @@ public final class Limbs {
             level.playSound(null, e.getX(), e.getY(), e.getZ(), majin ? SoundEvents.SLIME_SQUISH : SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1f, majin ? 0.7f : 0.6f);
         }
         if (e instanceof Player p) p.displayClientMessage(Component.translatable("message.dbzenith.limb_regrown", Component.translatable("limb.dbzenith." + l.key())), true);
+        changed(e);
+    }
+
+    // ------------------------------------------------------------------ bleeding (the knocked-out rework)
+
+    /**
+     * Once a second while a wound is fresh: a share of health drains away (1% of the most for each bleeding limb), and
+     * a wound that has run its course stops. Bleeding out can knock a fighter down. Down, they don't bleed more: their
+     * own clock runs.
+     */
+    private static void bleed(LivingEntity e, State s) {
+        long now = e.level().getGameTime();
+        int open = 0;
+        for (Limb l : Limb.values()) {
+            if (!s.bleeding(l)) continue;
+            if (now >= s.bleedUntil[l.ordinal()]) s.bleeding &= ~(1 << l.ordinal());
+            else open++;
+        }
+        if (open == 0) {
+            changed(e);
+            return;
+        }
+        if (KnockOut.isDown(e) || e instanceof Player p && (p.isCreative() || p.isSpectator())) return;
+        float loss = e.getMaxHealth() * 0.01f * open;
+        if (e instanceof ServerPlayer p) {
+            com.dbzenith.data.PlayerData data = com.dbzenith.data.ModCapabilities.get(p).orElse(null);
+            if (data != null) {
+                double body = data.getBody() - data.getDerived().maxBody() * 0.01 * open;
+                if (body <= 0 && KnockOut.eligible(p)) {
+                    KnockOut.knockOut(p, p.damageSources().generic());
+                    return;
+                }
+                data.setBody(Math.max(1, body));
+                BodyHealth.mirror(p, data);
+                data.markDirty();
+                return;
+            }
+        }
+        if (e.getHealth() - loss <= 0 && KnockOut.eligible(e)) KnockOut.knockOut(e, e.damageSources().generic());
+        else e.setHealth(Math.max(1, e.getHealth() - loss));
+    }
+
+    /** Stops every wound bleeding (a bandage, healing). Returns whether any was. */
+    public static boolean stopBleeding(LivingEntity e) {
+        if (e.level().isClientSide || !eligible(e)) return false;
+        State s = of(e);
+        if (s.bleeding == 0) return false;
+        s.bleeding = 0;
+        changed(e);
+        return true;
+    }
+
+    /** The most hurt limb still on the body (a bandage tends it), or null if all are whole. */
+    public static Limb worst(LivingEntity e) {
+        State s = of(e);
+        Limb worst = null;
+        for (Limb l : Limb.values()) {
+            if (s.severed(l) && !s.prosthetic(l) || s.health(l) >= 100) continue;
+            if (worst == null || s.health(l) < s.health(worst)) worst = l;
+        }
+        return worst;
+    }
+
+    /** Adds {@code amount} health to a limb (a bandage). */
+    public static void tend(LivingEntity e, Limb l, int amount) {
+        State s = of(e);
+        s.health[l.ordinal()] = (byte) Math.min(100, s.health(l) + amount);
         changed(e);
     }
 
@@ -400,6 +500,7 @@ public final class Limbs {
                 }
             }
         }
+        if (s.bleeding != 0 && e.tickCount % 20 == 0) bleed(e, s);            // fresh wounds bleed (the knocked-out rework)
         long now = e.level().getGameTime();                                   // broken limbs mend slowly on their own
         if (now - s.lastHit > 300 && !KnockOut.isDown(e)) {
             boolean any = false;
@@ -450,6 +551,11 @@ public final class Limbs {
             SERVER.remove(p);
             broadcast(p, of(p));
         }
+    }
+
+    /** Every fighter with hurt limbs this client knows of (entity id to state). */
+    public static Map<Integer, State> clientStates() {
+        return CLIENT;
     }
 
     /** Clears the client copy (leaving a world). */

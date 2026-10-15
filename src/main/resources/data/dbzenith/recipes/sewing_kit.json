@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [" N ", "SLS"],
+  "key": {"N": {"item": "minecraft:iron_nugget"}, "S": {"item": "minecraft:string"}, "L": {"item": "minecraft:leather"}},
+  "result": {"item": "dbzenith:sewing_kit"}
+}

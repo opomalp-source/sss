@@ -29,8 +29,10 @@ public final class ModKeys {
     public static final KeyMapping KI_BLAST = key("ki_blast", GLFW.GLFW_KEY_C);
     /** Lock-on (CX-19): tap to lock onto a foe or let go; with Shift, the next foe. */
     public static final KeyMapping LOCK_ON = key("lock_on", GLFW.GLFW_KEY_N);
+    /** Grip (the knocked-out rework): finish off a downed fighter in front of you; the direction held picks how. F, standing in for swapping hands only while someone is there to grip. */
+    public static final KeyMapping GRIP = key("grip", GLFW.GLFW_KEY_F);
 
-    public static final KeyMapping[] ALL = {CHARGE, LOWER_RELEASE, FLY, GUARD, KI_ATTACK, NEXT_TECHNIQUE, HEAVY, DASH, TRANSFORM, STATS, RADIAL, RACIAL, SKILL, KAIOKEN, PVP, KI_BLAST, LOCK_ON};
+    public static final KeyMapping[] ALL = {CHARGE, LOWER_RELEASE, FLY, GUARD, KI_ATTACK, NEXT_TECHNIQUE, HEAVY, DASH, TRANSFORM, STATS, RADIAL, RACIAL, SKILL, KAIOKEN, PVP, KI_BLAST, LOCK_ON, GRIP};
 
     private ModKeys() {}
 

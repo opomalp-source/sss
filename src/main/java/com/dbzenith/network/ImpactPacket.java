@@ -26,6 +26,8 @@ public record ImpactPacket(float x, float y, float z, float dx, float dy, float 
     public static final int DEFLECT = 8;
     /** The ki attack rework, phase 5: a burst of ki all round (scale: its radius), a paralysing discharge thrown forward, a blinding flash. */
     public static final int WAVE = 9, STUN_WAVE = 10, FLARE = 11;
+    /** The knocked-out rework: blood spilt (scale: about how many drops; colour: the race's; flags: style << 4, bit 1 a directed spurt). */
+    public static final int BLOOD = 13;
     /** Phase 6: the ground torn open (scale: the crater's radius): dust, debris, a rumble; no light. */
     public static final int CRATER = 12;
 

@@ -56,7 +56,7 @@ public final class ClientKnockouts {
             return;
         }
         if (mc.player == null || !isDown(mc.player.getId())) return;
-        if (!(mc.player.getVehicle() instanceof Player)) {                     // you crawl head first, the way you look
+        if (!ClientCarry.isCarried(mc.player.getId()) && !ClientGrip.isGripped(mc.player.getId())) {   // you crawl head first, the way you look
             mc.player.yBodyRot = mc.player.getYRot();
             mc.player.yBodyRotO = mc.player.yRotO;
         }
@@ -90,7 +90,7 @@ public final class ClientKnockouts {
     @SubscribeEvent(priority = net.minecraftforge.eventbus.api.EventPriority.LOW)
     public static void onCamera(net.minecraftforge.client.event.ViewportEvent.ComputeCameraAngles event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null || !isDown(mc.player.getId()) || mc.player.getVehicle() instanceof Player) return;
+        if (mc.player == null || mc.level == null || !isDown(mc.player.getId()) || ClientCarry.isCarried(mc.player.getId()) || ClientGrip.isGripped(mc.player.getId())) return;
         var cam = event.getCamera();
         boolean detached = cam.isDetached();
         double down = detached ? 0.95 : 1.25, back = detached ? 0.8 : 0;
@@ -145,7 +145,24 @@ public final class ClientKnockouts {
             String secs = String.format("%.0f s", left / 20f);
             g.drawString(font, secs, width / 2 - font.width(secs) / 2, by + 9, 0xFFE0C0C0, true);
             int y = by + 24;
-            boolean carried = mc.player.getVehicle() instanceof Player;
+            boolean carried = ClientCarry.isCarried(mc.player.getId());
+            ClientGrip.Session grip = ClientGrip.of(mc.player.getId());
+            if (grip != null && grip.victim() == mc.player.getId()) {           // someone is finishing you: only a friend's blow can stop it
+                var gripper = mc.level.getEntity(grip.gripper());
+                Component warn = Component.translatable("hud.dbzenith.being_gripped", gripper == null ? Component.literal("?") : gripper.getDisplayName());
+                g.pose().pushPose();
+                g.pose().translate(width / 2f, y, 0);
+                g.pose().scale(1.5f, 1.5f, 1);
+                g.drawString(font, warn, -font.width(warn) / 2, 0, ((int) now / 4) % 2 == 0 ? 0xFFFF3A2A : 0xFFFFC0B0, true);
+                g.pose().popPose();
+                return;
+            }
+            if (carried) {
+                var carrier = mc.level.getEntity(ClientCarry.carrierOf(mc.player.getId()));
+                Component by2 = Component.translatable("hud.dbzenith.carried_by", carrier == null ? Component.literal("?") : carrier.getDisplayName());
+                g.drawString(font, by2, width / 2 - font.width(by2) / 2, y, 0xFFF0D0A0, true);
+                y += 13;
+            }
             for (String key : new String[]{carried ? "hud.dbzenith.knocked_out_carried" : d.crawl() ? "hud.dbzenith.knocked_out_crawl" : null,
                     "hud.dbzenith.knocked_out_help", carried ? null : "hud.dbzenith.knocked_out_give_up"}) {
                 if (key == null) continue;
