@@ -773,7 +773,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue showDebugOverlay;
         public final ForgeConfigSpec.BooleanValue customHotbar;
         public final ForgeConfigSpec.BooleanValue hideVanillaHearts;
-        public final ForgeConfigSpec.BooleanValue transformCutIn, transformCinematic, battleDamage, ultimateCinematic, damagePopups, prediction, enemyPanel, combatCallouts, comboCounter, combatLog, hitboxOverlay, pvpCamera;
+        public final ForgeConfigSpec.BooleanValue transformCutIn, transformCinematic, transformBurst, battleDamage, ultimateCinematic, damagePopups, prediction, enemyPanel, combatCallouts, comboCounter, combatLog, hitboxOverlay, pvpCamera;
         public final ForgeConfigSpec.IntValue crosshairDotMode, crosshairStyle, crosshairSize, crosshairColor;
         public final ForgeConfigSpec.DoubleValue crosshairOpacity;
         public final ForgeConfigSpec.DoubleValue shoulderOffset, shoulderHeight;
@@ -790,7 +790,8 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue afterimages;
         public final ForgeConfigSpec.BooleanValue firstPersonAura;
         public final ForgeConfigSpec.DoubleValue hudScale, kiBloom, speedFovLimit;
-        public final ForgeConfigSpec.IntValue auraDetail;
+        public final ForgeConfigSpec.IntValue auraDetail, ownAura, auraIntensity;
+        public final ForgeConfigSpec.BooleanValue auraGround, auraLight;
         public final ForgeConfigSpec.IntValue auraRenderer;
         public final ForgeConfigSpec.BooleanValue fovEffects;
         public final ForgeConfigSpec.BooleanValue speedLines;
@@ -814,6 +815,8 @@ public final class DBZConfig {
                     .define("transformCutIn", true);
             transformCinematic = b.comment("When you transform in third person, the camera circles round to your front and holds on the burst (CX-43)")
                     .define("transformCinematic", true);
+            transformBurst = b.comment("A transformation bursting out: a pillar of light, a dome of energy, the ground answering, sparks after (CX-24 phase 6)")
+                    .define("transformBurst", true);
             battleDamage = b.comment("Fighters show the fight: clothes rip, scratches and bruises as health falls, dust after heavy blows (CX-47)")
                     .define("battleDamage", true);
             ultimateCinematic = b.comment("Play the cinematic (a cut-in with the technique's name, the screen darkening, a shake) when an ultimate is fired near you")
@@ -889,6 +892,14 @@ public final class DBZConfig {
                     .defineInRange("auraDetail", 1, 0, 2);
             auraRenderer = b.comment("How auras are drawn: 0 auto (their own shader, the plain one while a shader pack is on), 1 always their own shader, 2 always the plain one")
                     .defineInRange("auraRenderer", 0, 0, 2);
+            ownAura = b.comment("Your own aura (CX-24 phase 7): 0 as everyone sees it, 1 faint, 2 hidden (others still see it)")
+                    .defineInRange("ownAura", 0, 0, 2);
+            auraIntensity = b.comment("How strongly auras show, in percent (25 to 150)")
+                    .defineInRange("auraIntensity", 100, 25, 150);
+            auraGround = b.comment("Auras light rings on the ground while charging and bursting")
+                    .define("auraGround", true);
+            auraLight = b.comment("Auras cast their light: a glow of their colour on the ground round the fighter")
+                    .define("auraLight", true);
             fovEffects = b.comment("Zoom punch on heavy blows and the widening rush on dashes")
                     .define("fovEffects", true);
             speedLines = b.comment("Anime speed lines at the edges of the screen when flying flat out or dashing (first person)")

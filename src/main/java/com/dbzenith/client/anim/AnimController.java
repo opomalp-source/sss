@@ -189,7 +189,7 @@ public final class AnimController {
             if (PlayerData.BASE_FORM.equals(form)) play(player, t, Anims.POWER_DOWN, now, 0);
             else {
                 play(player, t, Anims.transformFor(state.raceEnum()), now, 30);
-                com.dbzenith.client.fx.ImpactFx.transformBurst(player, state.auraColor());
+                com.dbzenith.client.fx.TransformBurst.burst(player, form, state.auraColor());   // CX-24 phase 6
                 if (player == Minecraft.getInstance().player) {
                     com.dbzenith.client.ui.CutInOverlay.play(net.minecraft.network.chat.Component.translatable(
                             com.dbzenith.transform.Forms.byId(form).translationKey()), state.auraColor());

@@ -56,11 +56,16 @@ public class SettingsScreen extends Screen {
                 o.add(new Option("hide_hearts", c.hideVanillaHearts, 0, 0, null));
                 o.add(new Option("cut_in", c.transformCutIn, 0, 0, null));
                 o.add(new Option("transform_cinematic", c.transformCinematic, 0, 0, null));
+                o.add(new Option("transform_burst", c.transformBurst, 0, 0, null));
                 o.add(new Option("debug_stats", c.showDebugOverlay, 0, 0, null));
             }
             case EFFECTS -> {
                 o.add(new Option("aura_detail", c.auraDetail, 0, 2, new String[]{"low", "normal", "high"}));
                 o.add(new Option("aura_renderer", c.auraRenderer, 0, 2, new String[]{"auto", "shader", "plain"}));
+                o.add(new Option("own_aura", c.ownAura, 0, 2, new String[]{"full", "faint", "hidden"}));
+                o.add(new Option("aura_intensity", c.auraIntensity, 25, 150, null, "%"));
+                o.add(new Option("aura_ground", c.auraGround, 0, 0, null));
+                o.add(new Option("aura_light", c.auraLight, 0, 0, null));
                 o.add(new Option("ki_bloom", c.kiBloom, 0, 2, null));
                 o.add(new Option("ki_quality", c.kiQuality, 0, 3, new String[]{"low", "medium", "high", "ultra"}));
                 o.add(new Option("heat_haze", c.heatHaze, 0, 1, null));                             // the ki attack rework, phase 9

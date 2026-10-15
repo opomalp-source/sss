@@ -107,7 +107,10 @@ public final class IdentityTests {
             double chance = DBZConfig.SERVER.tailCutChance.get();
             DBZConfig.SERVER.tailCutChance.set(1.0);
             try {
-                p.hurt(p.damageSources().mobAttack(zombie), 2f);
+                for (int i = 0; i < 6 && d.hasTail(); i++) {                    // a blow can be dodged or land in the invulnerable frames: a few tries
+                    p.invulnerableTime = 0;
+                    p.hurt(p.damageSources().mobAttack(zombie), 2f);
+                }
             } finally {
                 DBZConfig.SERVER.tailCutChance.set(chance);
             }

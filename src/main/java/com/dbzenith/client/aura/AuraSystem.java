@@ -144,6 +144,8 @@ public final class AuraSystem {
     private static final Int2ObjectOpenHashMap<State> STATES = new Int2ObjectOpenHashMap<>();
     private static final AuraShell SHELL = new AuraShell();
     private static final State[] DRAW = new State[MAX_DRAWN];
+    /** This fighter's share of the aura, from the settings (intensity, your own aura). */
+    private static float drawScale = 1;
     private static final LivingEntity[] DRAW_ENTITY = new LivingEntity[MAX_DRAWN];
     private static final float[] DRAW_DIST = new float[MAX_DRAWN];
     private static final Vector3f LEFT = new Vector3f(), UP = new Vector3f();
@@ -350,6 +352,12 @@ public final class AuraSystem {
                 State s = DRAW[i];
                 float ox = (float) (Mth.lerp(pt, e.xo, e.getX()) - cx), oy = (float) (Mth.lerp(pt, e.yo, e.getY()) - cy),
                         oz = (float) (Mth.lerp(pt, e.zo, e.getZ()) - cz);
+                drawScale = DBZConfig.CLIENT.auraIntensity.get() / 100f;            // the settings (CX-24 phase 7): intensity, and your own aura
+                if (e == mc.player) drawScale *= switch (DBZConfig.CLIENT.ownAura.get()) { case 1 -> 0.35f; case 2 -> 0f; default -> 1f; };
+                if (drawScale <= 0.01f) {
+                    s.form.drawn = s.tech.drawn = false;
+                    continue;
+                }
                 boolean eyes = e == mc.player && !camera.isDetached();          // your own, from your eyes: particles only
                 draw(s, e, pt, ox, oy, oz, t, DRAW_DIST[i], shader, eyes, pose, buffers);
             }
@@ -384,12 +392,27 @@ public final class AuraSystem {
             }
         }
         buffers.endBatch(FxRenderTypes.additive(DOT));
-        VertexConsumer rings = buffers.getBuffer(FxRenderTypes.additive(RING));
-        for (int i = 0; i < n; i++) {
-            Slot sl = DRAW[i].form.drawn ? DRAW[i].form : DRAW[i].tech;
-            if (sl.drawn && DRAW_DIST[i] < 48) ground(pose, rings, DRAW[i], sl, t);
+        if (DBZConfig.CLIENT.auraGround.get()) {
+            VertexConsumer rings = buffers.getBuffer(FxRenderTypes.additive(RING));
+            for (int i = 0; i < n; i++) {
+                Slot sl = DRAW[i].form.drawn ? DRAW[i].form : DRAW[i].tech;
+                if (sl.drawn && DRAW_DIST[i] < 48) ground(pose, rings, DRAW[i], sl, t);
+            }
+            buffers.endBatch(FxRenderTypes.additive(RING));
         }
-        buffers.endBatch(FxRenderTypes.additive(RING));
+        if (DBZConfig.CLIENT.auraLight.get()) {                                    // the aura's light on the ground round them (CX-24 phase 7)
+            for (int i = 0; i < n; i++) {
+                Slot sl = DRAW[i].form.drawn ? DRAW[i].form : DRAW[i].tech;
+                if (!sl.drawn || DRAW_DIST[i] >= 40 || sl.def.light <= 0) continue;
+                LivingEntity e = DRAW_ENTITY[i];
+                Vec3 below = com.dbzenith.client.fx.BigSphere.groundBelow(mc.level, e.position().add(0, 0.3, 0), 8);
+                if (below == null) continue;
+                float height = (float) (e.getY() - below.y);
+                float strength = Mth.clamp(sl.fade, 0, 1.5f) * sl.def.light / 9f * (0.6f + 0.5f * sl.charge);
+                com.dbzenith.client.fx.BigSphere.groundGlow(pose, buffers, new Vec3(below.x - cx, below.y - cy, below.z - cz),
+                        sl.radius * 1.1f, height, sl.def.edge, strength);
+            }
+        }
         for (int i = 0; i < n; i++) {
             DRAW[i] = null;
             DRAW_ENTITY[i] = null;
@@ -495,7 +518,7 @@ public final class AuraSystem {
         if (detail == 0) lod *= 0.65f;
         if (detail == 2) lod = Math.min(1f, lod * 1.3f);
         int rings = Math.max(8, Math.round(40 * lod)), segs = Math.max(12, Math.round(64 * lod));   // fine enough up close that the outline shows no facets
-        float fade = sl.fade;
+        float fade = sl.fade * drawScale;                                        // (over 100% intensity: denser, up to each layer's full opacity)
         if (-oy > bottom && -oy < bottom + height) {                            // the eye inside the shell: thin it out, smoothly
             float near = Mth.sqrt(ox * ox + oz * oz) / Math.max(0.1f, radius);
             fade *= 0.45f + 0.55f * AuraShell.smooth(0.6f, 1.05f, near);

@@ -228,14 +228,14 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 - [x] CX-21 (v0.69.0) Knockback and destruction: combos and hard blows send fighters flying by force; craters sized by force and impact speed on walls and ground; ki blasts and beams leave craters and carve; a Craters/Calm toggle in the Ki creator; [destruction] config
 - [x] CX-22 (v0.70.0) Proportions (tapered torso, fuller limbs, NPCs shaped too), the floating torso fixed for every layer (RigFix), all 16 styles redone (108 clips) with verified poses, the dev pose sheet
 - [x] CX-23 (v0.71.0) Charged ki attacks (hold R: up to 30 s for beams, longer for ultimates, bigger and stronger, ki drain, orb and pose, gauge) and held transformations (hold J, the bar falls back when let go, paid on completion)
-- [ ] CX-24 Auras reworked (animated, volumetric, data-driven), after the user's Godot prototype
+- [x] CX-24 Auras reworked (animated, volumetric, data-driven), after the user's Godot prototype
   - [x] phase 1 (v0.72.0) The shell (own shader, glow, inner haze, sparkles, plain fallback for shader packs), data files, Super Saiyan Blue; /dbzaura
   - [x] phase 2 (v0.73.0) Layers as data, animation and states (idle, charging, flying trail, hit flare, burst), extends, live tweaking
   - [x] phase 3 (v0.74.0) Kaioken (X2-X10, X20+ tiers) over other auras, stacking; flame tongues; every form from data; charge lock; auto-deploy
   - [x] phase 4 (v0.74.0) Super Saiyan and Super Saiyan God from data (and the other forms)
   - [x] phase 5 (v0.129.0) Ultra Instinct a technique over any form (anyone taught by Whis), its own auras after the user's picture (wispy blue-violet, dashed light streaks), silver eyes and Mastered silver hair, body shine, afterimages on dodges; Super Saiyan God's aura redone as a fire (the user's picture)
-  - [ ] phase 6 Transformation burst, ground effects, light
-  - [ ] phase 7 Performance and config (quality, light, ground, own aura, intensity), live tweaking
+  - [x] phase 6 (v0.131.0) Transformation burst: a pillar of light, a dome of energy, ground glow, cracks, dust and debris, sparks after, colour split and impact frame for great forms
+  - [x] phase 7 (v0.131.0) Settings: your own aura (full, faint, hidden), intensity, ground rings, aura light (a glow of its colour on the ground); live tweaking was already there (/dbzaura set)
 - [x] CX-34 (v0.89.0) Hair in every form: each stock style sculpted per look (base, Super Saiyan, SSJ2, SSJ3, SSJ4, God, Beast) after the characters, transformations morph lock by lock and grow from the roots; offline look sheets (tools/hair-looks.init.gradle)
 - [x] CX-35 (v0.90.0) The hair rebuilt from scratch after the show's designs (smooth tapering locks over a fitted scalp, every style in every look) and moving (per-lock physics: lag, swing, gravity, wind, aura, collisions); docs/HAIR.md
 - [x] CX-35b (v0.91.0) Hair shading: a lock texture with outlines and strand lines, a gloss decal, crisp cel tones with hue-shifted shadows, painted rather than lit
@@ -282,7 +282,7 @@ Most of these already exist in a first version; each step upgrades what is there
 
 # Auras, apes and clothes (user request, 2026-10-15)
 - [x] (v0.129.0) Ultra Instinct and Mastered Ultra Instinct as techniques; UI and God auras after the user's pictures
-- [ ] Transformation burst (aura phase 6), aura quality and performance (phase 7)
+- [x] (v0.131.0) Transformation burst (aura phase 6), aura settings and light (phase 7)
 - [x] (v0.130.0) Great Ape: only at a full moon, after looking at it six seconds (heartbeat, red pulse); a new ape model (ApeShape, GreatApeGen) with breathing, stomping walk, swipes, roar and chest beats; the camera stands back for giants
 - [ ] Clothing and armor: better textures, parts that stick out (Frieza Force shoulder pads), head clothing as items (Piccolo's turban)
 - [ ] A real-play feel pass

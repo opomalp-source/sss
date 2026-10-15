@@ -301,6 +301,16 @@ public final class ImpactFx {
 
     private static final int DUST = 0x7A6A55;
 
+    /** A ring of dust rolling out across the ground from {@code ground} to about {@code radius} (a transformation, CX-24 phase 6). */
+    public static void dustRing(Vec3 ground, float radius, int puffs) {
+        RandomSource rnd = Minecraft.getInstance().level == null ? RandomSource.create() : Minecraft.getInstance().level.random;
+        for (int i = 0; i < puffs; i++) {
+            double a = i * Math.PI * 2 / puffs + rnd.nextDouble() * 0.3;
+            add(Kind.SMOKE, ground.add(Math.cos(a) * radius * 0.35, 0.25, Math.sin(a) * radius * 0.35), new Vec3(Math.cos(a) * 0.09, 0.01, Math.sin(a) * 0.09),
+                    DUST + 0x0A0A0A * rnd.nextInt(3), 0.35f * radius, (0.5f + rnd.nextFloat() * 0.4f) * radius, 35 + rnd.nextInt(25), 160);
+        }
+    }
+
     /**
      * The ground torn open (the ki attack rework, phase 6), for a crater of radius {@code r}: a ring of dust rolling out
      * over the rim, earth flung up and out, and for a big one a column of dust rising from the middle. The crater itself

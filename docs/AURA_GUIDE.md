@@ -146,7 +146,11 @@ Packs with strong bloom (Complementary, BSL) can make auras look brighter.
 
 ## Coming in later phases
 
-The transformation sequence, dynamic light, NPC auras, and the quality settings.
+NPC auras.
+
+## Settings (Settings → Effects)
+
+Aura detail and shader, your own aura (full, faint or hidden: others always see it), aura intensity (25 to 150%), aura ground rings, and aura light (a glow of the aura's colour on the ground round the fighter; the file's `light`, 0 to 15, sets how strong). A transformation bursts out with a pillar of light, a dome of energy and the ground answering (setting: Transformation burst).
 
 ## Ultra Instinct
 

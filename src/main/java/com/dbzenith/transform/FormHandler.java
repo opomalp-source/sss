@@ -219,7 +219,7 @@ public final class FormHandler {
         data.recomputeIfStale();
         if (!Kaioken.formAllows(form)) Kaioken.stop(player, data, true);
         if (!form.allowsFlight() && data.isFlying()) com.dbzenith.ki.FlightHandler.stop(player, data);
-        burst(player.serverLevel(), player, form.auraColor(), form.isBase() ? 12 : 40);
+        if (form.isBase()) burst(player.serverLevel(), player, form.auraColor(), 10);   // powering down: a puff (a new form's burst is drawn by the clients, CX-24 phase 6)
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
                 form.isBase() ? com.dbzenith.registry.ModSounds.POWER_DOWN.get() : com.dbzenith.registry.ModSounds.TRANSFORM.get(), SoundSource.PLAYERS, form.isBase() ? 0.8f : 1.3f, 1f);
         player.refreshDimensions();

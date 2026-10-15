@@ -3627,3 +3627,32 @@ only at a full moon, and they should have to look at it a while. Player guide: `
 - **Checked in the dev client:** the roar and chest beat; the ape standing, from the front, the side and behind
   (glowing eyes, fangs, tail). The ape stays only under open sky: the dev world's lookout over spawn covers it there,
   correctly.
+
+## 2026-10-15 — The transformation burst and the aura settings (v0.131.0)
+Third phase of the "auras, apes and clothes" request: aura rework phases 6 and 7, which finishes CX-24.
+
+- **The transformation burst (`TransformBurst`):** when a new form breaks out (seen by `AnimController`), scaled by
+  the form's tier (and size):
+  - a pillar of light shoots into the sky from where they stand (white core in the aura's colour, a tint underlay
+    so it shows by day), then lifts off the ground and fades;
+  - a dome of energy blasts out with its ring across the ground (`KiWaveFx.dome`), with the old flash, rings and
+    shake;
+  - a short-lived glow on the ground; lasting cracks from the bigger forms; a ring of dust rolling out
+    (`ImpactFx.dustRing`); earth flung up;
+  - sparks of the new power rising round them for two and a half seconds;
+  - close by, tier 3 and up add a colour split, tier 4 and up an anime impact frame.
+  - The server's old vanilla dust burst (big blocky particles) is gone for new forms; powering down keeps a puff.
+- **Settings (CX-24 phase 7):**
+  - transformation burst (on/off);
+  - your own aura: full, faint or hidden (`ownAura`; others still see it);
+  - aura intensity 25-150%;
+  - aura ground rings (on/off);
+  - aura light (on/off): auras finally use their files' `light`, a glow of their colour on the ground round the
+    fighter, stronger while charging and fainter the higher they fly.
+  - Live tweaking was already there (`/dbzaura set`).
+- **Tests:** the tail-cut test was flaky (a single blow could be dodged or land in invulnerability frames); it now
+  tries up to six blows. 241 GameTests.
+- **Checked in the dev client:**
+  - Super Saiyan, Super Saiyan God and Blue transformations by day: the pillar, dome, cracks under God, no blocky
+    particles;
+  - Super Saiyan, Blue and UI auras at night, their colours on the ground.
