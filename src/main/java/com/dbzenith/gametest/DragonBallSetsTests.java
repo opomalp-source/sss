@@ -93,7 +93,7 @@ public final class DragonBallSetsTests {
         helper.assertTrue(d.getImmortalUntil() == Wish.FOREVER, "forever");
         Wish.IMMORTALITY.grant(p);
         helper.assertTrue(d.getImmortalUntil() == Wish.FOREVER, "the Eternal Dragon's lesser wish does not cut it short");
-        helper.runAfterDelay(SPAWN_PROTECTION, () -> {
+        Delays.after(helper, SPAWN_PROTECTION, () -> {
             p.hurt(p.damageSources().generic(), 100_000f);
             helper.assertTrue(p.isAlive() && d.getBody() >= 1, "truly immortal");
             Wish.MORTALITY.grant(p);

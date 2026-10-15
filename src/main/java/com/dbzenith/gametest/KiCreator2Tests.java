@@ -78,7 +78,7 @@ public final class KiCreator2Tests {
         TechniqueHandler.spawn(helper.getLevel(), p, mine, 60);
         Zombie z = dummy(helper, new BlockPos(5, 2, 4));
         float hp = z.getHealth();
-        helper.runAfterDelay(10, () -> {
+        Delays.after(helper, 10, () -> {
             helper.assertTrue(z.getHealth() == hp, "the mine waits while no one is near");
             var mines = helper.getLevel().getEntitiesOfClass(com.dbzenith.skill.KiBlastEntity.class, p.getBoundingBox().inflate(16), b -> b.getOwner() == p);   // its own (other tests nearby fire too)
             helper.assertTrue(mines.size() == 1, "one mine is out");

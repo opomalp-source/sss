@@ -81,7 +81,7 @@ public final class LockOnTests {
         helper.assertTrue(out.size() == 1, "one blast");
         KiBlastEntity blast = out.get(0);
         double before = blast.getDeltaMovement().x;                              // the pig is off to +x
-        helper.runAfterDelay(4, () -> {
+        Delays.after(helper, 4, () -> {
             double after = blast.getDeltaMovement().x;
             helper.assertTrue(after > before + 0.03, "it bends toward the pig: " + before + " -> " + after);
             blast.discard();

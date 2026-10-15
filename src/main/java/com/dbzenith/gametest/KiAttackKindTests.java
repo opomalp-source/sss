@@ -34,9 +34,9 @@ public class KiAttackKindTests {
         Zombie caster = h.spawnWithNoFreeWill(EntityType.ZOMBIE, 2, 2, 2);
         TechniqueHandler.spawn(h.getLevel(), caster, barrage, 1);
         int first = blasts(caster);
-        h.runAfterDelay(5, () -> {
+        Delays.after(h, 5, () -> {
             int some = blasts(caster);
-            h.runAfterDelay(9, () -> {
+            Delays.after(h, 9, () -> {
                 int all = blasts(caster);
                 KiAttackData.apply(shipped);
                 h.assertTrue(first == 1, "only the first shot goes at once, not all six: " + first);

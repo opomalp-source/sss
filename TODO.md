@@ -283,7 +283,7 @@ Most of these already exist in a first version; each step upgrades what is there
 # Auras, apes and clothes (user request, 2026-10-15)
 - [x] (v0.129.0) Ultra Instinct and Mastered Ultra Instinct as techniques; UI and God auras after the user's pictures
 - [ ] Transformation burst (aura phase 6), aura quality and performance (phase 7)
-- [ ] Great Ape: only at a full moon, after looking at it a while; a real ape model and animations
+- [x] (v0.130.0) Great Ape: only at a full moon, after looking at it six seconds (heartbeat, red pulse); a new ape model (ApeShape, GreatApeGen) with breathing, stomping walk, swipes, roar and chest beats; the camera stands back for giants
 - [ ] Clothing and armor: better textures, parts that stick out (Frieza Force shoulder pads), head clothing as items (Piccolo's turban)
 - [ ] A real-play feel pass
 

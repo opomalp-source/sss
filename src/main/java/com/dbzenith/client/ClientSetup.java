@@ -43,6 +43,7 @@ public final class ClientSetup {
         event.registerBelowAll("aura_edge", new com.dbzenith.client.fx.AuraEdgeOverlay());
         event.registerAboveAll("hud", new DbzHud());
         event.registerAboveAll("knocked_out", new ClientKnockouts.Overlay());                  // CX-51
+        event.registerAboveAll("moon_gaze", new MoonGazeOverlay());                             // the Great Ape rework
         event.registerAboveAll("downed_prompt", new DownedHud.Prompt());                        // the knocked-out rework
         event.registerAboveAll("limbs", new com.dbzenith.client.ui.LimbsOverlay());              // CX-53
         event.registerAboveAll("enemy_panel", new com.dbzenith.client.ui.EnemyPanel());          // CX-19 phase 8

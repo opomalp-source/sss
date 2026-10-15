@@ -72,6 +72,29 @@ public final class ShoulderCam {
         amount = shoulder ? Math.min(1f, amount + 0.2f) : Math.max(0f, amount - 0.2f);
     }
 
+    /**
+     * A giant form (the Great Ape) seen from outside: the camera stands back in proportion, so the whole ape is in view
+     * (as far as there is room behind it).
+     */
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onGiantCamera(ViewportEvent.ComputeCameraAngles event) {
+        Camera cam = event.getCamera();
+        Minecraft mc = Minecraft.getInstance();
+        if (!cam.isDetached() || mc.level == null || !(cam.getEntity() instanceof net.minecraft.world.entity.player.Player p)) return;
+        float s = com.dbzenith.transform.GreatApe.scaleOf(p);
+        if (s <= 1.01f) return;
+        double back = (s - 1) * 4;
+        Vec3 from = cam.getPosition();
+        Vector3f look = cam.getLookVector();
+        Vec3 to = from.subtract(look.x() * back, look.y() * back, look.z() * back);
+        BlockHitResult hit = mc.level.clip(new ClipContext(from, to, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, p));
+        double room = hit.getType() == HitResult.Type.MISS ? back : Math.max(0, hit.getLocation().distanceTo(from) - 0.3);
+        try {
+            MOVE.invoke(cam, -room, 0.0, 0.0);                                    // move(forward, up, left)
+        } catch (ReflectiveOperationException ignored) {
+        }
+    }
+
     /** After the camera is placed (and before the world is drawn from it): slide it over the shoulder. */
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onCameraAngles(ViewportEvent.ComputeCameraAngles event) {

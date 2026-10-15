@@ -103,7 +103,7 @@ public final class IdentityTests {
         d.setTail(true);
         Zombie zombie = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(1, 1, 1));
         zombie.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
-        helper.runAfterDelay(SPAWN_PROTECTION, () -> {
+        Delays.after(helper, SPAWN_PROTECTION, () -> {
             double chance = DBZConfig.SERVER.tailCutChance.get();
             DBZConfig.SERVER.tailCutChance.set(1.0);
             try {

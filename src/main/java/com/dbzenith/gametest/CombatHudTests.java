@@ -39,7 +39,7 @@ public final class CombatHudTests {
         a.lookAt(EntityAnchorArgument.Anchor.EYES, b.getEyePosition());
         helper.assertTrue(FoeFocus.foe(a) == null, "no foe before a fight");
         helper.assertTrue(CombatEngine.press(a, new Moves.Input(Move.Button.LIGHT, Move.Dir.NEUTRAL, false, false, true)), "a jab");
-        helper.runAfterDelay(8, () -> {
+        Delays.after(helper, 8, () -> {
             helper.assertTrue(FoeFocus.foe(a) == b, "the attacker faces the one they hit");
             helper.assertTrue(FoeFocus.foe(b) == a, "and the victim the one who hit them");
             Pig pig = helper.spawn(EntityType.PIG, new BlockPos(1, 2, 8));

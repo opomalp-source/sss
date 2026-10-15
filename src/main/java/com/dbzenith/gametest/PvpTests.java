@@ -44,7 +44,7 @@ public final class PvpTests {
     @GameTest(template = EMPTY, timeoutTicks = 200)
     public static void pvpModeRules(GameTestHelper helper) {
         ServerPlayer[] p = pair(helper, 300);
-        helper.runAfterDelay(70, () -> rules(helper, p));                   // new players are untouchable for their first 3 seconds
+        Delays.after(helper, 70, () -> rules(helper, p));                   // new players are untouchable for their first 3 seconds
     }
 
     private static void rules(GameTestHelper helper, ServerPlayer[] p) {

@@ -50,7 +50,7 @@ public class NimbusTests {
         h.assertTrue(!p.isPassenger(),"sent away: the rider gets off");
         h.assertTrue(p.hasEffect(net.minecraft.world.effect.MobEffects.SLOW_FALLING),"high up: the rider drifts down");
         h.assertTrue(!p.startRiding(n),"a leaving cloud cannot be mounted");
-        h.runAfterDelay(NimbusEntity.LEAVE_TICKS+5,()-> {
+        Delays.after(h, NimbusEntity.LEAVE_TICKS+5,()-> {
             h.assertTrue(n.isRemoved(),"dissolved");
             NimbusBond.setBound(p,false);TestPlayers.remove(h,p);h.succeed();
         });

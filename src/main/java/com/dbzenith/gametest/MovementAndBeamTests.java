@@ -37,7 +37,7 @@ public final class MovementAndBeamTests {
         player.setGameMode(GameType.SURVIVAL);
         PlayerData d = ModCapabilities.getOrThrow(player);
         Zombie zombie = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(1, 1, 1));
-        helper.runAfterDelay(SPAWN_PROTECTION, () -> {
+        Delays.after(helper, SPAWN_PROTECTION, () -> {
             // sideways: a forward dash at whatever stands in front (other tests share the area) would be a super dash
             double stamina = d.getStamina();
             helper.assertTrue(DashHandler.dash(player, 0, 1), "dash should succeed");

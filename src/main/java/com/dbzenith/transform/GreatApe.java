@@ -29,23 +29,75 @@ public final class GreatApe {
         return (data.getRace() == Race.SAIYAN || data.getRace() == Race.HALF_SAIYAN) && data.hasTail();
     }
 
-    /** Called once per second from KiTicker. */
+    /** Seconds of looking at the moon before the change takes them (the user: "they have to look at the full moon for a while"). */
+    public static final int GAZE_SECONDS = 6;
+    /** How close to the moon the look must be (cosine of about 14 degrees). */
+    private static final double GAZE_CONE = 0.97;
+
+    /**
+     * Called once per second from KiTicker. A Saiyan with a tail turns only under a full moon (or a false moon), and only
+     * after looking at it for {@link #GAZE_SECONDS} seconds: their heart pounds harder each second they stare (heard,
+     * and shown at the screen's edges, {@code PlayerData.getMoonGaze}); looking away lets it calm again. Once a Great
+     * Ape, losing the moon (its night ending, a roof, the false moon gone) or the tail turns them back, exhausted.
+     */
     public static void tick(ServerPlayer player, PlayerData data) {
         boolean moon = seesMoon(player);
         boolean ape = Forms.GREAT_APE.id().equals(data.getFormId());
-        if (!ape && moon && canTransform(data) && !data.isTransformed()) {
-            FormHandler.enter(player, data, Forms.GREAT_APE);
-            player.displayClientMessage(Component.translatable("message.dbzenith.great_ape"), true);
-        } else if (ape && (!moon || !canTransform(data))) {
-            FormHandler.revertToBase(player, data);
-            data.setStamina(0);
-            player.displayClientMessage(Component.translatable("message.dbzenith.great_ape_end"), true);
+        if (ape) {
+            data.setMoonGaze(0);
+            if (!moon || !canTransform(data)) {
+                FormHandler.revertToBase(player, data);
+                data.setStamina(0);
+                player.displayClientMessage(Component.translatable("message.dbzenith.great_ape_end"), true);
+            }
+            return;
         }
+        boolean gazing = moon && canTransform(data) && !data.isTransformed() && lookingAtMoon(player);
+        int gaze = gazing ? data.getMoonGaze() + 1 : Math.max(0, data.getMoonGaze() - 2);
+        data.setMoonGaze(gaze);
+        if (gazing) {                                                               // the heartbeat, louder and quicker each second
+            float k = gaze / (float) GAZE_SECONDS;
+            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), net.minecraft.sounds.SoundEvents.WARDEN_HEARTBEAT,
+                    net.minecraft.sounds.SoundSource.PLAYERS, 0.6f + 1.2f * k, 0.8f + 0.5f * k);
+            if (gaze == 2) player.displayClientMessage(Component.translatable("message.dbzenith.moon_gaze"), true);
+        }
+        if (gaze >= GAZE_SECONDS) {
+            data.setMoonGaze(0);
+            FormHandler.enter(player, data, Forms.GREAT_APE);
+            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), net.minecraft.sounds.SoundEvents.RAVAGER_ROAR,   // the roar
+                    net.minecraft.sounds.SoundSource.PLAYERS, 3f, 0.45f);
+            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), net.minecraft.sounds.SoundEvents.ENDER_DRAGON_GROWL,
+                    net.minecraft.sounds.SoundSource.PLAYERS, 1.5f, 0.6f);
+            player.displayClientMessage(Component.translatable("message.dbzenith.great_ape"), true);
+        }
+    }
+
+    /** Is the player's look on the moon (the full moon in the sky, or a risen false moon nearby)? */
+    public static boolean lookingAtMoon(Player player) {
+        net.minecraft.world.phys.Vec3 look = player.getViewVector(1f);
+        if (isFullMoonNight(player.level()) && look.dot(moonDirection(player.level(), 1f)) > GAZE_CONE) return true;
+        net.minecraft.world.phys.Vec3 eye = player.getEyePosition();
+        for (FalseMoonEntity m : player.level().getEntitiesOfClass(FalseMoonEntity.class,
+                player.getBoundingBox().inflate(FALSE_MOON_RANGE, 160, FALSE_MOON_RANGE), FalseMoonEntity::isRisen)) {
+            if (look.dot(m.position().subtract(eye).normalize()) > GAZE_CONE) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Where the moon is in the sky, as a unit vector: the sky turns about the east-west axis, the sun rising in the east
+     * (+x), the moon opposite it.
+     */
+    public static net.minecraft.world.phys.Vec3 moonDirection(Level level, float partial) {
+        double a = level.getTimeOfDay(partial) * Math.PI * 2;
+        return new net.minecraft.world.phys.Vec3(Math.sin(a), -Math.cos(a), 0);
     }
 
     public static boolean seesMoon(Player player) {
         Level level = player.level();
-        boolean sky = level.canSeeSky(player.blockPosition().above((int) Math.ceil(player.getBbHeight())));
+        // open sky over the head: nothing solid above it (the heightmap; sky light high above a giant can be unlit)
+        int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, player.getBlockX(), player.getBlockZ());
+        boolean sky = player.getY() + player.getBbHeight() >= top - 0.5 || level.canSeeSky(player.blockPosition().above((int) Math.ceil(player.getBbHeight())));
         if (!sky) return false;
         return isFullMoonNight(level) || nearFalseMoon(player);
     }

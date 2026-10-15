@@ -58,7 +58,7 @@ public final class EvasionTests {
         helper.assertTrue(!Evasion.dashKey(b, bd, 0, 0), "an ordinary dash (it opens the vanish window)");
         helper.assertTrue(CombatEngine.press(a, JAB), "the jab comes");
         float health = b.getHealth();
-        helper.runAfterDelay(5, () -> {
+        Delays.after(helper, 5, () -> {
             helper.assertTrue(b.getHealth() == health, "it misses");
             Vec3 toB = b.position().subtract(a.position());
             helper.assertTrue(toB.dot(a.getLookAngle()) < 0 && toB.length() < 2.5, "the defender is behind the attacker: " + toB);
@@ -74,7 +74,7 @@ public final class EvasionTests {
         PlayerData bd = ModCapabilities.getOrThrow(b);
         GuardRules.raise(bd, helper.getLevel().getGameTime());
         CombatEngine.press(a, JAB);
-        helper.runAfterDelay(4, () -> {
+        Delays.after(helper, 4, () -> {
             // the parry shows in the counter it opens (health can be touched by other tests' stray explosions)
             helper.assertTrue(com.dbzenith.combat.engine.Evasion.counterReady(b, helper.getLevel().getGameTime()), "parried: the counter is open");
             GuardRules.lower(bd);

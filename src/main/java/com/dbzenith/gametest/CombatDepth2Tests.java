@@ -89,7 +89,7 @@ public final class CombatDepth2Tests {
         blast.setDeltaMovement(0, 0, 1.2);
         helper.getLevel().addFreshEntity(blast);
         double body = d.getBody();
-        helper.runAfterDelay(6, () -> {
+        Delays.after(helper, 6, () -> {
             helper.assertTrue(blast.getOwner() == defender, "the blast now belongs to the defender");
             helper.assertTrue(d.getBody() >= body, "and did them no harm");
             TestPlayers.remove(helper, defender);
@@ -111,7 +111,7 @@ public final class CombatDepth2Tests {
         float before = weak.getHealth();
         TechniqueHandler.spawn(helper.getLevel(), strong, Techniques.WAVE_BEAM, 400);
         TechniqueHandler.spawn(helper.getLevel(), weak, Techniques.WAVE_BEAM, 40);
-        helper.runAfterDelay(8, () -> {
+        Delays.after(helper, 8, () -> {
             boolean locked = !helper.getLevel().getEntitiesOfClass(KiBeamEntity.class, strong.getBoundingBox().inflate(20)).isEmpty()
                     && com.dbzenith.skill.BeamStruggle.isStruggling(strong);
             helper.assertTrue(locked, "two beams meeting head-on lock into a struggle");

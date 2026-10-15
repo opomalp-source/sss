@@ -27,7 +27,7 @@ public class WoundsTests {
         h.assertTrue(w > 0.6f && w < 0.8f, "at a tenth: badly hurt " + w);
         h.assertTrue(Wounds.cooldown(p) > 1.4 && Wounds.kiSpeed(p) < 0.8f && Wounds.flight(p) < 0.8f, "slower ki, longer cooldowns, slower flight");
         Wounds.update(p);
-        h.runAfterDelay(1, () -> {
+        Delays.after(h, 1, () -> {
             double after = p.getAttributeValue(Attributes.MOVEMENT_SPEED);
             h.assertTrue(after < before * 0.75, "moves slower: " + before + " -> " + after);
             TestPlayers.remove(h, p);

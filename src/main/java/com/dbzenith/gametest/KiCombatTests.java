@@ -99,7 +99,7 @@ public final class KiCombatTests {
         ad.setSpecial(0);
         bd.setSpecial(0);
         helper.assertTrue(CombatEngine.press(a, new Moves.Input(Move.Button.LIGHT, Move.Dir.NEUTRAL, false, false, true)), "a jab");
-        helper.runAfterDelay(6, () -> {
+        Delays.after(helper, 6, () -> {
             helper.assertTrue(ad.getSpecial() > 0, "landing it builds meter: " + ad.getSpecial());
             helper.assertTrue(bd.getSpecial() > 0, "taking it too: " + bd.getSpecial());
             helper.assertTrue(ad.getSpecial() > bd.getSpecial(), "more for landing it");

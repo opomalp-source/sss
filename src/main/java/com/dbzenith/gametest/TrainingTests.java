@@ -45,7 +45,7 @@ public final class TrainingTests {
         BlockPos abs = helper.absolutePos(pos);
         p.teleportTo(abs.getX() + 2.5, abs.getY(), abs.getZ() + 0.5);
         PlayerData d = ModCapabilities.getOrThrow(p);
-        helper.runAfterDelay(15, () -> {
+        Delays.after(helper, 15, () -> {
             long now = helper.getLevel().getGameTime();
             helper.assertTrue(d.getGravity(now) == 100, "player in range should feel 100g, felt " + d.getGravity(now));
             double body = d.getBody();

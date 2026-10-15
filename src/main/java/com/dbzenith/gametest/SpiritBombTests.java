@@ -39,11 +39,11 @@ public final class SpiritBombTests {
         helper.assertTrue(bomb != null && bomb.isHovering(), "it hovers overhead, gathering");
         float size0 = bomb.getSize();
         fd.setCharging(true);                                                            // the friend lends their energy
-        helper.runAfterDelay(30, () -> {
+        Delays.after(helper, 30, () -> {
             helper.assertTrue(bomb.gathered() > 0 && bomb.getSize() > size0, "it grows: " + bomb.gathered() + " ki, size " + bomb.getSize());
             helper.assertTrue(bomb.spares(friend) && bomb.spares(caster), "the giver and the thrower are spared");
             helper.assertTrue(TechniqueHandler.use(caster, Techniques.SPIRIT_BOMB, true) == TechniqueHandler.Result.FIRED, "cast again");
-            helper.runAfterDelay(2, () -> {
+            Delays.after(helper, 2, () -> {
                 helper.assertTrue(!bomb.isHovering(), "thrown");
                 fd.setCharging(false);
                 bomb.discard();

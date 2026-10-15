@@ -89,11 +89,11 @@ public final class DestructionTests {
         int planned = Destruction.ki(level, top(o), new Vec3(0, 1, 0), 2.0, p);
         helper.assertTrue(planned > 200, "it takes a great bite: " + planned);
         helper.assertTrue(level.getBlockState(struck).is(Blocks.STONE), "a big one is carved over the next ticks, not all at once");
-        helper.runAfterDelay(4, () -> {
+        Delays.after(helper, 4, () -> {
             int left = count(helper, o, Blocks.STONE);
             helper.assertTrue(level.getBlockState(struck).isAir() && left < full / 2, "carved out: " + left + " of " + full + " stone left");
         });
-        helper.runAfterDelay(60, () -> {
+        Delays.after(helper, 60, () -> {
             int back = count(helper, o, Blocks.STONE);
             c.pvpSpawnSafeRadius.set(spawnSafe);
             c.craterRegrowSeconds.set(regrow);

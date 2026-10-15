@@ -74,7 +74,7 @@ public final class CombatFeelTests {
         face(back, back.position().add(back.position().subtract(a2.position())));     // turned away
         float hf = front.getHealth(), hb = back.getHealth();
         helper.assertTrue(CombatEngine.press(a1, JAB) && CombatEngine.press(a2, JAB), "two jabs");
-        helper.runAfterDelay(10, () -> {
+        Delays.after(helper, 10, () -> {
             float lf = hf - front.getHealth(), lb = hb - back.getHealth();
             helper.assertTrue(lf > 0 && lb > 0, "both land: " + lf + " / " + lb);
             helper.assertTrue(lb > lf * 1.1f, "from behind it is a critical: " + lf + " / " + lb);

@@ -3584,3 +3584,46 @@ turban as its own item); and a feel pass. Done in phases; this is the first. Pla
   scheduled a delay inside a delay crashed the test server's timer map; flattened. 241 GameTests.
 - **Checked in the dev client:** Mastered UI and the Sign, by day and night (silver hair; blue-violet wisps,
   streaks); God's fire by day and night.
+
+## 2026-10-15 — The Great Ape: the full moon and a new body (v0.130.0)
+Second phase of the "auras, apes and clothes" request. The user: Saiyans shouldn't turn just because it's night,
+only at a full moon, and they should have to look at it a while. Player guide: `docs/GREAT_APE.md`.
+
+- **The change (`GreatApe.tick`):**
+  - It always needed a full moon (moon phase 0). A new world's first night is always one, which made it feel like
+    "any night".
+  - Now the Saiyan must look at the moon (within about 14 degrees; `moonDirection` from the time of day) for six
+    seconds (`GAZE_SECONDS`). Each second of staring, a heartbeat plays, louder and quicker. Looking away lets the
+    count fall two a second.
+  - A false moon works the same way.
+  - The count is `PlayerData.moonGaze` (synced to the player). `MoonGazeOverlay` pulses the screen's edges red with
+    the heartbeat, deeper as it builds; no text past a single line at the second second.
+  - The change roars (a ravager's roar low, a dragon's growl).
+  - The open-sky check now uses the heightmap. The sky light six blocks over a giant's head can be unlit in an empty
+    section, which turned apes straight back.
+- **A new body (`ApeShape`, `GreatApeModel`):**
+  - `ApeShape` is plain data, shared by the model and the painter: 23 parts, 38 boxes, its texture layout packed in
+    code.
+  - The body: hunched; a barrel chest with a bare chest and belly; a hump behind the neck; arms in three parts
+    reaching the ground; short bent legs and long feet; a big head with a brow, muzzle, nose, fangs, a jaw that
+    opens, ears and cheek tufts; a tail in four segments.
+  - Animation: breathing, a snarl now and then, a stomping walk that rolls side to side with the arms swinging, an
+    overhead swipe and smash, arms up in the air, the tail swaying down its length. The change brings a roar (head
+    back, arms spread, shaking), then chest beats (`FormScaleRenderer` times it).
+  - The eyes glow in their own pass (`great_ape_eyes.png`).
+- **Textures (`tools/GreatApeGen.java`, 512x256):**
+  - Fur in staggered tufts, each lighter at the root with a soft shadow under the tip, lit above and shadowed below.
+  - Tan skin with pecs, belly ridges, fingers and toes; a tan face mask; yellow eyes with red irises and slit
+    pupils.
+  - Three furs: brown, gold (golden ape), green-gold (legendary).
+- **Camera:** in third person a giant form pulls the camera back in proportion (as far as there is room), so the
+  whole ape is in view (`ShoulderCam.onGiantCamera`).
+- **Tests:**
+  - The false-moon test now checks that looking away does nothing and that it takes the full six seconds.
+  - Fixed a test-server crash: steps scheduled from inside another delayed step landed in GameTest's timer map while
+    it was being walked, and a rehash crashed the server, now and then. Every test delay now goes through
+    `gametest/Delays`, which hands steps over at the start of the next tick.
+  - 241 GameTests, stable over three runs.
+- **Checked in the dev client:** the roar and chest beat; the ape standing, from the front, the side and behind
+  (glowing eyes, fangs, tail). The ape stays only under open sky: the dev world's lookout over spawn covers it there,
+  correctly.

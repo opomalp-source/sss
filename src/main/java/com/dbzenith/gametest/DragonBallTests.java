@@ -77,7 +77,7 @@ public final class DragonBallTests {
         ServerPlayer p = TestPlayers.create(helper);
         p.setGameMode(GameType.SURVIVAL);
         PlayerData d = ModCapabilities.getOrThrow(p);
-        helper.runAfterDelay(SPAWN_PROTECTION, () -> {
+        Delays.after(helper, SPAWN_PROTECTION, () -> {
             Wish.IMMORTALITY.grant(p);
             p.hurt(p.damageSources().generic(), 100_000f);
             helper.assertTrue(p.isAlive() && d.getBody() >= 1, "immortal players survive a lethal hit");

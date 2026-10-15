@@ -77,7 +77,7 @@ public final class CombatTests {
         ServerPlayer player = TestPlayers.create(helper);
         player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
         PlayerData d = ModCapabilities.getOrThrow(player);
-        helper.runAfterDelay(SPAWN_PROTECTION, () -> {
+        Delays.after(helper, SPAWN_PROTECTION, () -> {
         double max = d.getDerived().maxBody();
         player.hurt(player.damageSources().generic(), 2.0f);
         double expected = Math.max(DamageCalculator.fromVanilla(2.0) * DBZConfig.SERVER.minDamageFraction.get(),
@@ -95,7 +95,7 @@ public final class CombatTests {
         ServerPlayer player = TestPlayers.create(helper);
         player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
         PlayerData d = ModCapabilities.getOrThrow(player);
-        helper.runAfterDelay(SPAWN_PROTECTION, () -> {
+        Delays.after(helper, SPAWN_PROTECTION, () -> {
         player.hurt(player.damageSources().generic(), 1000f); // 10,000 body damage
         helper.assertTrue(com.dbzenith.combat.KnockOut.isDown(player) && !player.isDeadOrDying(), "at zero body the player is knocked out, not dead (CX-51)");
         player.invulnerableTime = 0;

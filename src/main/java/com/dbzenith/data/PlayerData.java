@@ -1267,6 +1267,8 @@ public class PlayerData {
     private int kaiokenStage;
     /** Ultra Instinct, a technique over the form: 0 none, 1 the Sign, 2 Mastered (synced, not saved). */
     private int ultraInstinct;
+    /** Seconds spent looking at a full moon, building to the Great Ape (synced, not saved). */
+    private int moonGaze;
     private int risingCharge, risingAge;
 
     public int getSkillLevel(String id) {
@@ -1302,6 +1304,18 @@ public class PlayerData {
         if (s != kaiokenStage) {
             kaiokenStage = s;
             invalidateDerived();
+        }
+    }
+
+    public int getMoonGaze() {
+        return moonGaze;
+    }
+
+    public void setMoonGaze(int seconds) {
+        int s = Math.max(0, seconds);
+        if (s != moonGaze) {
+            moonGaze = s;
+            markDirty();
         }
     }
 
@@ -2139,6 +2153,7 @@ public class PlayerData {
         tag.putInt("racialMask", racialMask);
         tag.putInt("kaioken", kaiokenStage);
         tag.putInt("ultraInstinct", ultraInstinct);
+        tag.putInt("moonGaze", moonGaze);
         CompoundTag cs = new CompoundTag();
         combat.save(cs);
         tag.put("combat", cs);
@@ -2170,6 +2185,7 @@ public class PlayerData {
         racialMask = tag.getInt("racialMask");
         kaiokenStage = tag.getInt("kaioken");
         ultraInstinct = tag.getInt("ultraInstinct");
+        moonGaze = tag.getInt("moonGaze");
         combat.load(tag.getCompound("combat"));
         risingCharge = tag.getInt("risingCharge");
         trainingWith = tag.getString("trainingWith");

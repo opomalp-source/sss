@@ -216,10 +216,17 @@ public final class FormTests {
         PlayerData h = ModCapabilities.getOrThrow(human);
         float normalHeight = saiyan.getBbHeight();
         GreatApe.spawnFalseMoon(helper.getLevel(), saiyan.getX(), saiyan.getY() + 3, saiyan.getZ());
-        helper.runAfterDelay(FalseMoonEntity.RISE_TICKS + 5, () -> {
+        Delays.after(helper, FalseMoonEntity.RISE_TICKS + 5, () -> {
             helper.assertTrue(GreatApe.seesMoon(saiyan), "the risen false moon should be visible");
+            saiyan.setXRot(0);                                                  // looking away: nothing happens
+            for (int i = 0; i < GreatApe.GAZE_SECONDS + 2; i++) GreatApe.tick(saiyan, d);
+            helper.assertTrue(!d.isTransformed() && d.getMoonGaze() == 0, "only looking at the moon changes them");
+            saiyan.setXRot(-90);                                                // staring up at it
+            human.setXRot(-90);
+            for (int i = 0; i < GreatApe.GAZE_SECONDS - 1; i++) GreatApe.tick(saiyan, d);
+            helper.assertTrue(!d.isTransformed() && d.getMoonGaze() == GreatApe.GAZE_SECONDS - 1, "not yet: it takes a while");
             GreatApe.tick(saiyan, d);
-            GreatApe.tick(human, h);
+            for (int i = 0; i < GreatApe.GAZE_SECONDS; i++) GreatApe.tick(human, h);
             helper.assertTrue("great_ape".equals(d.getFormId()), "Saiyan with a tail should become a Great Ape, was " + d.getFormId());
             helper.assertTrue(!h.isTransformed(), "humans are unaffected");
             helper.assertTrue(saiyan.getBbHeight() > normalHeight * 2.5f, "Great Ape should be giant: " + saiyan.getBbHeight());

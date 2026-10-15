@@ -54,12 +54,12 @@ public final class NetcodeTests {
     public static void lagCompensationHitsWhereTheyWere(GameTestHelper helper) {
         Pig near = pig(helper, new BlockPos(3, 2, 1)), far = pig(helper, new BlockPos(3, 2, 9));
         ServerPlayer laggy = attacker(helper, new BlockPos(1, 2, 1), near, 300), quick = attacker(helper, new BlockPos(1, 2, 9), far, 0);
-        helper.runAfterDelay(12, () -> {                                        // a history builds up
+        Delays.after(helper, 12, () -> {                                        // a history builds up
             near.teleportTo(near.getX(), near.getY(), near.getZ() + 3);        // both step aside, out of reach
             far.teleportTo(far.getX(), far.getY(), far.getZ() + 3);
             float hn = near.getHealth(), hf = far.getHealth();
             helper.assertTrue(CombatEngine.press(laggy, JAB) && CombatEngine.press(quick, JAB), "two jabs");
-            helper.runAfterDelay(8, () -> {
+            Delays.after(helper, 8, () -> {
                 helper.assertTrue(near.getHealth() < hn, "300 ms of ping: the jab lands where the pig was seen");
                 helper.assertTrue(far.getHealth() == hf, "no ping: it misses where the pig is");
                 near.discard();

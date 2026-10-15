@@ -67,13 +67,13 @@ public final class CombatV4Tests {
         ServerPlayer a = fighter(helper, Vec3.atBottomCenterOf(helper.absolutePos(new BlockPos(1, 2, 1))), pig);
         helper.assertTrue(CombatEngine.press(a, in(Move.Button.LIGHT, Move.Dir.NEUTRAL, false, false, true)), "the jab starts");
         helper.assertTrue(CombatEngine.peek(a).move().id.equals("light_1"), "light_1");
-        helper.runAfterDelay(6, () -> {
+        Delays.after(helper, 6, () -> {
             float after1 = pig.getHealth();
             helper.assertTrue(after1 < 1000, "the jab lands: " + after1);
             a.lookAt(EntityAnchorArgument.Anchor.EYES, pig.getEyePosition());
             helper.assertTrue(CombatEngine.press(a, in(Move.Button.LIGHT, Move.Dir.NEUTRAL, false, false, true)), "the next press");
             helper.assertTrue(CombatEngine.peek(a).move().id.equals("light_2"), "continues the chain: " + CombatEngine.describe(a));
-            helper.runAfterDelay(6, () -> {
+            Delays.after(helper, 6, () -> {
                 Fighter victim = CombatEngine.peek(pig);
                 helper.assertTrue(victim != null && victim.comboHits() == 2, "two hits of one combo: " + (victim == null ? -1 : victim.comboHits()));
                 pig.discard();
@@ -90,7 +90,7 @@ public final class CombatV4Tests {
         double y0 = pig.getY();
         helper.assertTrue(CombatEngine.press(a, in(Move.Button.HEAVY, Move.Dir.NEUTRAL, true, false, true)), "the uppercut starts");
         helper.assertTrue(CombatEngine.peek(a).move().id.equals("heavy_uppercut"), "heavy_uppercut");
-        helper.runAfterDelay(14, () -> {                                     // the hitstop holds the launch a few ticks (phase 5)
+        Delays.after(helper, 14, () -> {                                     // the hitstop holds the launch a few ticks (phase 5)
             helper.assertTrue(pig.getY() > y0 + 1.0, "launched: " + (pig.getY() - y0));
             pig.discard();
             TestPlayers.remove(helper, a);

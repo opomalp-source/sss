@@ -116,7 +116,7 @@ public final class CombatDepthTests {
         net.minecraft.world.entity.animal.Cow mob = helper.spawn(EntityType.COW, new BlockPos(2, 1, 1));
         mob.setPos(mob.getX(), mob.getY(), p.getZ());
         float start = mob.getHealth();
-        helper.runAfterDelay(2, () -> {
+        Delays.after(helper, 2, () -> {
             helper.assertTrue(TechniqueHandler.use(p, Techniques.GRAB_THROW, true) == TechniqueHandler.Result.FIRED, "grab");
             helper.assertTrue(GrabThrow.isHolding(p) && ModEffects.isStunned(mob), "holding a stunned mob");
             ModCapabilities.getOrThrow(p).setCooldown(Techniques.GRAB_THROW.id(), 0);
@@ -139,12 +139,12 @@ public final class CombatDepthTests {
         p.setGameMode(GameType.CREATIVE); // no ki cost
         helper.assertTrue(TechniqueHandler.use(p, Techniques.GATHERING_SPHERE, true) == TechniqueHandler.Result.FIRED, "fires");
         KiBlastEntity[] sphere = new KiBlastEntity[1];
-        helper.runAfterDelay(5, () -> {
+        Delays.after(helper, 5, () -> {
             sphere[0] = helper.getLevel().getEntitiesOfClass(KiBlastEntity.class, p.getBoundingBox().inflate(8)).stream().findFirst().orElse(null);
             helper.assertTrue(sphere[0] != null && sphere[0].isHovering(), "hovering while it forms");
             helper.assertTrue(sphere[0].getY() > p.getEyeY() + 1, "above the head");
         });
-        helper.runAfterDelay(40, () -> {
+        Delays.after(helper, 40, () -> {
             helper.assertTrue(!sphere[0].isHovering() && sphere[0].getDeltaMovement().length() > 0.5, "then hurled");
             sphere[0].discard();
             TestPlayers.remove(helper, p);
