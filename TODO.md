@@ -43,7 +43,7 @@ Resume from the first unchecked item. Each phase ends with a git tag.
 - [x] Tail cutting (blades, 10%; a Great Ape shrinks back) and regrowth after 3 days
 - [x] Mastery per form (time in form x spirit / tier; up to -75% drain, +20% bonus)
 - [x] J transform / Shift+J revert; Forms screen (from K) with target selection; hair (4 styles), eye color, form aura, lightning sparks
-- [ ] Real art: hair model/textures, Great Ape model (GeckoLib) instead of a scaled player
+- [x] Real art: hair model/textures (CX-34, CX-35), the Great Ape model (v0.130.0, its own model, no GeckoLib)
 - [x] ~~Overdrive~~ (removed in v0.25.1 at the user's request: Kaioken covers it, and does it better) (N / Shift+N): x2-x20 levels gated by mastery, body+stamina drain, backlash; stacks with base and Blue only
 - [x] Tag `phase-2-transformations`
 
@@ -123,7 +123,7 @@ Brief v2 raises the bar: every feature needs real models, animation, VFX, sound 
 ## V2-H — World and content
 - [ ] Home-world plateau pillars, a sky lookout hub, more planets (a cold tyrant's world, a sacred realm), dungeons
 - [ ] Original weapons with 3D item models; GeckoLib bosses with animations
-- [ ] Bloom / post-processing for energy (custom post chain)
+- [x] Bloom / post-processing for energy (the ki attack rework, phases 9-10)
 
 # Content expansion (CX) — see docs/CONTENT_EXPANSION.md
 - [x] CX-1 Settings menu (pause menu, mod list Config, wheel; HUD / effects / camera / controls)
