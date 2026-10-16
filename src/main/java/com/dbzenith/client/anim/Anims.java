@@ -582,36 +582,66 @@ public final class Anims {
      * then fists pounding the chest, one and the other, before it settles into a heavy stance.
      */
     public static final KeyframeAnimation APE_ROAR = once(com.dbzenith.transform.ApeChange.END, a -> {
-        Pose hunch = new Pose().at(0, 2.4f, 0).r("torso", 30, 0, 0).r("head", 18, 0, 0)
-                .limb("rightArm", -20, -15, 22, 70).limb("leftArm", -20, 15, -22, 70)
-                .limb("rightLeg", -6, 0, 14, 36).limb("leftLeg", -6, 0, -14, 36);
-        Pose roar = new Pose().at(0, 0.2f, 0).r("torso", -22, 0, 0).r("head", -42, 0, 0)
-                .limb("rightArm", -25, 0, 100, 25).limb("leftArm", -25, 0, -100, 25)
-                .limb("rightLeg", 0, 0, 18, 8).limb("leftLeg", 0, 0, -18, 8);
-        Pose beat = new Pose().at(0, 0.8f, 0).r("torso", -10, 0, 0).r("head", -18, 0, 0)
-                .limb("rightLeg", 0, 0, 14, 12).limb("leftLeg", 0, 0, -14, 12);
-        a.pose(0, new Pose().at(0, 1.0f, 0), Ease.LINEAR).pose(10, hunch, Ease.INOUTQUAD);
-        for (int t = 16; t <= 56; t += 8) {                                    // painful breaths as the body swells
-            float side = (t % 16 == 0 ? 1 : -1);
-            a.pose(t, hunch.copy().move(0, side * 0.3f, 0).r("torso", 30 + side * 4, side * 3, 0)
-                    .r("head", 18, side * 8, side * 4), Ease.INOUTSINE);
+        Pose seize = apeRest().at(0, 2.8f, 0).r("torso", 26, 0, 0).r("head", 20, 0, 0)
+                .limb("rightArm", -135, -20, 42, 112).limb("leftArm", -135, 20, -42, 112)
+                .limb("rightLeg", -12, 0, 12, 32).limb("leftLeg", -12, 0, -12, 32);
+        Pose brace = apeRest().at(0, 3.2f, 0).r("torso", 36, 0, 0).r("head", 2, 0, 0)
+                .limb("rightArm", -42, -12, 30, 68).limb("leftArm", -42, 12, -30, 68)
+                .limb("rightLeg", -18, 0, 15, 44).limb("leftLeg", -18, 0, -15, 44);
+        Pose arch = apeRest().at(0, 0.5f, 0).r("torso", -14, 0, 0).r("head", -30, 0, 0)
+                .limb("rightArm", 8, -16, 38, 35).limb("leftArm", 8, 16, -38, 35);
+        Pose roar = apeRest().at(0, 0.4f, 0).r("torso", -12, -4, 0).r("head", -35, 0, 0)
+                .limb("rightArm", -32, -18, 56, 52).limb("leftArm", -24, 18, -48, 46);
+        a.pose(0, apeRest().r("head", -24, 0, 0), Ease.LINEAR)
+                .pose(12, seize, Ease.INOUTQUAD)
+                .pose(24, seize.copy().r("torso", 32, -6, 3).r("head", 24, 8, 0), Ease.INOUTSINE)
+                .pose(38, brace, Ease.INOUTQUAD)
+                .pose(50, arch, Ease.INOUTQUAD)                                  // chest and armour expand with the first surge
+                .pose(62, brace.copy().r("torso", 28, 7, -3), Ease.INOUTQUAD)
+                .pose(76, arch.copy().r("head", -22, -7, 0), Ease.INOUTQUAD)
+                .pose(90, brace.copy().r("head", -10, 0, 0), Ease.INOUTQUAD)
+                .pose(106, roar, Ease.OUTQUAD);
+        for (int t = 110; t <= 138; t += 4) {
+            float breath = t % 8 == 2 ? 1 : -1;
+            a.pose(t, roar.copy().r("torso", -12 + breath * 1.5f, -4, 0)
+                    .r("head", -35 + breath * 2, breath * 2, 0), Ease.INOUTSINE);
         }
-        a.pose(64, hunch.copy().r("head", -12, 0, 0), Ease.INOUTQUAD);
-        a.pose(72, roar, Ease.OUTQUAD);
-        for (int t = 74; t <= 104; t += 2) {                                         // shaking with the roar
-            float s = (t % 4 == 0 ? 1 : -1) * 0.35f;
-            a.pose(t, roar.copy().move(s, 0, 0).r("head", -42, s * 8, s * 3), Ease.LINEAR);
-        }
-        a.pose(108, roar, Ease.INOUTSINE);
-        for (int i = 0; i < 8; i++) {                                               // fists on the chest, one and the other
-            boolean right = i % 2 == 0;
-            Pose p = beat.copy()
-                    .limb("rightArm", right ? -72 : -96, -38, right ? 18 : 40, right ? 128 : 96)
-                    .limb("leftArm", right ? -96 : -72, 38, right ? -40 : -18, right ? 96 : 128);
-            a.pose(116 + i * 4, p, i == 0 ? Ease.INOUTQUAD : Ease.OUTQUAD);
-        }
-        a.pose(160, new Pose().at(0, 1.0f, 0), Ease.INOUTQUAD);
+        Pose fists = apeRest().r("torso", 6, 0, 0).r("head", -8, 0, 0)
+                .limb("rightArm", -70, -30, 34, 104).limb("leftArm", -56, 30, -28, 96);
+        a.pose(146, fists, Ease.INOUTQUAD)
+                .pose(152, fists.copy().limb("rightArm", -52, -34, 20, 130).r("torso", 10, -5, 0), Ease.INQUAD)
+                .pose(160, fists.copy().limb("rightArm", -78, -20, 40, 92), Ease.OUTQUAD)
+                .pose(168, fists.copy().limb("leftArm", -52, 34, -20, 130).r("torso", 10, 5, 0), Ease.INQUAD)
+                .pose(178, apeRest().r("head", 4, 0, 0), Ease.INOUTQUAD)
+                .pose(190, apeRest(), Ease.INOUTSINE);
     });
+
+    private static Pose apeRest() {
+        return new Pose().at(0, 1.6f, 0).r("torso", 14, 0, 0).r("head", -8, 0, 0)
+                .limb("rightArm", -18, -8, 18, 26).limb("leftArm", -18, 8, -18, 26)
+                .limb("rightLeg", -6, 0, 10, 18).limb("leftLeg", -6, 0, -10, 18);
+    }
+
+    public static final KeyframeAnimation APE_STOMP_RIGHT = apeStomp(true), APE_STOMP_LEFT = apeStomp(false);
+
+    private static KeyframeAnimation apeStomp(boolean right) {
+        return once(com.dbzenith.transform.ApeStomp.DURATION, a -> {
+            int side = right ? 1 : -1;
+            String leg = right ? "rightLeg" : "leftLeg";
+            Pose load = apeRest().at(-side * 0.9f, 0.6f, 0).r("torso", 4, -side * 8, -side * 5)
+                    .limb(leg, -64, 0, side * 12, 76)
+                    .limb("rightArm", -8, -12, 34, 40).limb("leftArm", -8, 12, -34, 40);
+            Pose hit = apeRest().at(side * 0.35f, 3.3f, -0.4f).r("torso", 25, side * 7, side * 3)
+                    .limb(leg, -6, 0, side * 12, 26)
+                    .limb("rightArm", -32, -8, 20, 52).limb("leftArm", -32, 8, -20, 52);
+            a.pose(0, apeRest(), Ease.LINEAR).pose(10, load, Ease.INOUTQUAD)
+                    .pose(17, load.copy().limb(leg, -72, 0, side * 12, 86), Ease.INOUTSINE)
+                    .pose(com.dbzenith.transform.ApeStomp.CONTACT, hit, Ease.INQUAD)
+                    .pose(24, hit.copy().move(0, 0.4f, 0), Ease.OUTQUAD)
+                    .pose(34, apeRest().r("torso", 20, 0, 0), Ease.INOUTQUAD)
+                    .pose(48, apeRest(), Ease.INOUTSINE);
+        });
+    }
 
     /** Light hit: the head snaps aside, the torso recoils half a step back, then the guard comes back up. */
     public static final KeyframeAnimation HIT_LIGHT = once(12, a -> {

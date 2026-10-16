@@ -41,10 +41,18 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
     public static final int RACE_LOOK = 256;
     /** In PvP mode (CX-19). */
     public static final int PVP = 1 << 15;
+    public static final int MOON_EYES = 1 << 16;
     /** Bits 20-27: the Kaioken stage (x2 = 2 ... x20 = 20), for the aura's red layer (CX-24). */
     public static final int KAIOKEN_SHIFT = 20;
     /** Bits 28-29: Ultra Instinct, 1 the Sign, 2 Mastered (a technique over the form; CX-24 phase 5). */
     public static final int UI_SHIFT = 28;
+
+    public static PublicStatePacket of(net.minecraft.world.entity.player.Player player, PlayerData d) {
+        PublicStatePacket state = of(player.getId(), d);
+        boolean eyes = com.dbzenith.transform.GreatApe.canTransform(d) && !d.isTransformed()
+                && com.dbzenith.transform.GreatApe.seesMoon(player) && com.dbzenith.transform.GreatApe.lookingAtMoon(player);
+        return state.withFlags(eyes ? state.flags | MOON_EYES : state.flags, state.fusedName);
+    }
 
     public static PublicStatePacket of(int entityId, PlayerData d) {
         int flags = (d.isCharging() ? CHARGING : 0) | (d.isFlying() ? FLYING : 0)

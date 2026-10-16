@@ -68,11 +68,13 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         opacity = 1f;
         if (changingApe) {
             float t = ApeTransformation.age(player, partialTick);
-            opacity = 1 - com.dbzenith.transform.ApeChange.phase(t, 32, 64);
+            opacity = 1 - com.dbzenith.transform.ApeChange.phase(t, 48, 88);
             if (opacity <= 0) return;
             state = ApeTransformation.before(player);
         }
-        if (!active(state)) return;
+        boolean moonEyes = changingApe || state != null && state.has(PublicStatePacket.MOON_EYES);
+        boolean onlyEyes = !active(state);
+        if (onlyEyes && !moonEyes) return;
         Form form = FormHairLayer.flicker(player, state, ageInTicks);
         boolean hd = ArtStyle.hiRes();
         textures = hd ? TEXTURES_HD : TEXTURES;
@@ -119,26 +121,40 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
             if (cycle < 2.5f || twice && cycle >= 5 && cycle < 7.5f) eyes = FaceParts.EYES_CLOSED;
         }
         int overlay = LivingEntityRenderer.getOverlayCoords(player, 0);
+        if (moonEyes) eyes = FaceParts.EYES_WIDE;
 
         // a race skin's own face colours, unless the player chose their own
         FaceDefaults.Face race = raceSkin(state) ? FaceDefaults.of(RaceSkinLayer.skinName(state.raceEnum(), state.variantEnum())) : null;
-        boolean glowing = !form.isBase() && form.eyeColor() >= 0 || state.ultraInstinct() > 0;
+        boolean glowing = !moonEyes && (!form.isBase() && form.eyeColor() >= 0 || state.ultraInstinct() > 0);
         int iris = form.eyeColor() >= 0 ? form.eyeColor() : state.eyeColor() >= 0 ? state.eyeColor() : race != null ? race.iris() : 0x1E1610;
         if (state.ultraInstinct() > 0) iris = state.ultraInstinct() == 2 ? FormHairLayer.UI_EYES : FormHairLayer.UI_SIGN_EYES;   // Ultra Instinct's silver eyes
         boolean whites = race == null || race.whites() || state.eyeColor() >= 0;
-        draw(pose, buffers, Part.EYES.ordinal(), eyes, light, overlay, whites ? 0xFFFFFF : iris);     // no whites: the whole eye is dark
-        pose.pushPose();                                                       // the eyes glance (CX-42): irises and pupils shift a touch sideways
-        float glance = glance(player, ageInTicks, eyes);
-        float headYaw = getParentModel().head.yRot;
-        pose.translate(glance * Mth.cos(headYaw), 0, -glance * Mth.sin(headYaw));
-        draw(pose, buffers, IRIS, eyes, glowing ? LightTexture.FULL_BRIGHT : light, overlay, iris);
-        if (hd) draw(pose, buffers, PUPIL, eyes, glowing ? LightTexture.FULL_BRIGHT : light, overlay, 0xFFFFFF);   // pupils and the shine
-        if (glowing) {                                                         // eyes that burn: an emissive pass over the iris
-            ResourceLocation glow = textures[IRIS][Math.max(0, Math.min(textures[IRIS].length - 1, eyes))];
-            getParentModel().renderToBuffer(pose, buffers.getBuffer(RenderType.eyes(glow)), LightTexture.FULL_BRIGHT, overlay,
-                    ((iris >> 16) & 255) / 255f * 0.8f, ((iris >> 8) & 255) / 255f * 0.8f, (iris & 255) / 255f * 0.8f, opacity);
+        draw(pose, buffers, Part.EYES.ordinal(), eyes, moonEyes ? LightTexture.FULL_BRIGHT : light, overlay, moonEyes || whites ? 0xFFFFFF : iris);
+        if (moonEyes) {
+            // Full-bright entity lighting still shades normals grey. An emissive pass keeps the moon eyes white.
+            // The white-of-eye texture leaves holes for irises: fill those masks white as well, without pupils.
+            draw(pose, buffers, IRIS, eyes, LightTexture.FULL_BRIGHT, overlay, 0xFFFFFF);
+            ResourceLocation whiteEyes = textures[Part.EYES.ordinal()][eyes];
+            getParentModel().renderToBuffer(pose, buffers.getBuffer(RenderType.eyes(whiteEyes)), LightTexture.FULL_BRIGHT, overlay,
+                    opacity, opacity, opacity, opacity);
+            getParentModel().renderToBuffer(pose, buffers.getBuffer(RenderType.eyes(textures[IRIS][eyes])), LightTexture.FULL_BRIGHT, overlay,
+                    opacity, opacity, opacity, opacity);
         }
-        pose.popPose();
+        if (!moonEyes) {
+            pose.pushPose();                                                   // irises and pupils glance sideways
+            float glance = glance(player, ageInTicks, eyes);
+            float headYaw = getParentModel().head.yRot;
+            pose.translate(glance * Mth.cos(headYaw), 0, -glance * Mth.sin(headYaw));
+            draw(pose, buffers, IRIS, eyes, glowing ? LightTexture.FULL_BRIGHT : light, overlay, iris);
+            if (hd) draw(pose, buffers, PUPIL, eyes, glowing ? LightTexture.FULL_BRIGHT : light, overlay, 0xFFFFFF);
+            if (glowing) {
+                ResourceLocation glow = textures[IRIS][Math.max(0, Math.min(textures[IRIS].length - 1, eyes))];
+                getParentModel().renderToBuffer(pose, buffers.getBuffer(RenderType.eyes(glow)), LightTexture.FULL_BRIGHT, overlay,
+                        ((iris >> 16) & 255) / 255f * 0.8f, ((iris >> 8) & 255) / 255f * 0.8f, (iris & 255) / 255f * 0.8f, opacity);
+            }
+            pose.popPose();
+        }
+        if (onlyEyes) return;
         int hair = form.hairColor() >= 0 ? form.hairColor() : race != null ? race.brow() : state.hairColor() >= 0 ? state.hairColor() : 0x3A2414;
         if (state.ultraInstinct() == 2) hair = FormHairLayer.UI_HAIR;              // Mastered: silver brows too
         if (!FormShape.browRidge(form.id())) draw(pose, buffers, Part.BROWS.ordinal(), brows, light, overlay, race != null && form.hairColor() < 0 ? hair : darken(hair, 0.8f));

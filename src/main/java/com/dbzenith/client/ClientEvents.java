@@ -51,6 +51,19 @@ public final class ClientEvents {
         Minecraft mc = Minecraft.getInstance();
         devAutoReconnect(mc);
         if (mc.level == null || mc.player == null) return;
+        if (DEV_AUTOMATION && (seqLeft > 0 || pendingShot != null) && mc.screen instanceof net.minecraft.client.gui.screens.PauseScreen)
+            mc.setScreen(null);                                                // keep scripted dev clips clear when the test window loses focus
+        if (DEV_AUTOMATION && (pendingShot != null && pendingShot.contains("moonlock")
+                || seqLeft > 0 && seqName != null && seqName.contains("moonlock"))) {
+            var moon = com.dbzenith.transform.GreatApe.moonDirection(mc.level, 1);
+            float yaw = (float) Math.toDegrees(Math.atan2(moon.z, moon.x)) - 90;
+            float pitch = -(float) Math.toDegrees(Math.asin(moon.y));
+            mc.player.setYRot(yaw);
+            mc.player.setXRot(pitch);
+            mc.player.yRotO = mc.player.yHeadRot = mc.player.yHeadRotO = mc.player.yBodyRot = mc.player.yBodyRotO = yaw;
+            mc.player.xRotO = pitch;
+            mc.player.input.forwardImpulse = mc.player.input.leftImpulse = 0;
+        }
         ClientHooks.maybeOpenCreation();
         ticksInWorld++;
         if (seqLeft > 0) {                                                       // a clip: one frame a tick (dev only)

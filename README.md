@@ -3,11 +3,12 @@
 A Dragon Ball-inspired total-conversion mod for **Minecraft 1.20.1 / NeoForge 47.1.106**. Mod id `dbzenith`.
 Status, roadmap and decisions: [TODO.md](TODO.md), [FEATURE_MATRIX.md](FEATURE_MATRIX.md), [DEVLOG.md](DEVLOG.md), [BRIEF.md](BRIEF.md).
 
-## Latest release: 0.135.0
+## Latest release: 0.136.0
 
 Download the tested mod from the [`builds` branch](https://github.com/opomalp-source/sss/tree/builds).
-The Great Ape now grows out of the player's body: straining breaths, spreading fur, a growing muzzle and mane,
-then the full-sized roar and chest beats. The camera follows the growth and gives the roar extra room.
+The Great Ape fights with ground stomps, with a wind-up, shockwave and recovery. Its transformation has a new
+head-clutch, bracing and growth sequence, white eyes while staring at the moon, and battle armour that stays visible
+throughout the change. New hunched idle and walking clips suit its weight.
 Details: [Great Ape](docs/GREAT_APE.md), [handoff](HANDOFF.md), [development log](DEVLOG.md).
 
 Build the complete mod from this checkout with Gradle; `tools/release.sh` publishes the tested jar for the updater.

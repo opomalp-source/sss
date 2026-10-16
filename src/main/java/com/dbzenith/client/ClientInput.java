@@ -65,10 +65,11 @@ public final class ClientInput {
 
         while (ModKeys.HEAVY.consumeClick()) {                         // a heavy: the finisher of a combo (CX-19)
             byte push = com.dbzenith.network.MeleeInputPacket.push(mc.player.input.forwardImpulse, mc.player.input.leftImpulse);
-            Prediction.melee(true, push);                                // shown at once (phase 7)
+            if (!com.dbzenith.client.render.ApeLook.is(mc.player)) Prediction.melee(true, push);
             ModNetwork.sendToServer(new com.dbzenith.network.MeleeInputPacket(true, push));
         }
         while (ModKeys.DASH.consumeClick()) {
+            if (com.dbzenith.client.render.ApeLook.is(mc.player)) continue;
             float fw = mc.player.input.forwardImpulse, st = mc.player.input.leftImpulse;
             boolean predicted = Prediction.dash(fw, st);                 // a plain dash moves you at once (phase 7)
             ModNetwork.sendToServer(new DashPacket(fw, st, predicted));
@@ -148,7 +149,14 @@ public final class ClientInput {
     @net.minecraftforge.eventbus.api.SubscribeEvent
     public static void onAttackKey(net.minecraftforge.client.event.InputEvent.InteractionKeyMappingTriggered event) {
         Minecraft mc = Minecraft.getInstance();
-        if (!event.isAttack() || mc.player == null || !mc.player.getMainHandItem().isEmpty() || mc.player.isSpectator()) return;
+        if (!event.isAttack() || mc.player == null || mc.player.isSpectator()) return;
+        if (com.dbzenith.client.render.ApeLook.is(mc.player)) {
+            event.setCanceled(true);
+            event.setSwingHand(false);
+            ModNetwork.sendToServer(new com.dbzenith.network.MeleeInputPacket(false, (byte) 0));
+            return;
+        }
+        if (!mc.player.getMainHandItem().isEmpty()) return;
         if (!ClientPvp.on()) return;                                     // PvP off: a plain vanilla punch (CX-20)
         if (mc.hitResult != null && mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK && !foeAhead(mc)) return;
         event.setCanceled(true);

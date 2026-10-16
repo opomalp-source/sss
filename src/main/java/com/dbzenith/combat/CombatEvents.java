@@ -184,7 +184,7 @@ public final class CombatEvents {
             com.dbzenith.combat.engine.CombatEngine.outcomeGuarded = guarded;
         }
         int feel = isStrike ? com.dbzenith.combat.engine.CombatEngine.pendingFlags : 0;     // critical, counter, Z-hit (CX-19e)
-        if (impact >= 0 && source.getEntity() != null && victim.level() instanceof net.minecraft.server.level.ServerLevel level) {
+        if (impact >= 0 && impact != ImpactPacket.APE_STOMP && source.getEntity() != null && victim.level() instanceof net.minecraft.server.level.ServerLevel level) {
             int hitstop = com.dbzenith.combat.engine.CombatEngine.hitstopTicks(isStrike ? com.dbzenith.combat.engine.CombatEngine.pendingHitstop : -1, impact, feel);
             ImpactPacket.melee(source.getEntity(), victim, impact).withFeel(feel, hitstop).send(level);
         }

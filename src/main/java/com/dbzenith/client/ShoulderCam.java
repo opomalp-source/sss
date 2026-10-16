@@ -87,7 +87,7 @@ public final class ShoulderCam {
         float s = com.dbzenith.client.render.ApeTransformation.scale(p, (float) event.getPartialTick());
         float age = com.dbzenith.client.render.ApeTransformation.age(p, (float) event.getPartialTick());
         float roarRoom = com.dbzenith.client.render.ApeLook.is(p)
-                ? com.dbzenith.transform.ApeChange.phase(age, 48, 72) * (1 - com.dbzenith.transform.ApeChange.phase(age, 148, com.dbzenith.transform.ApeChange.CAMERA_END)) : 0;
+                ? com.dbzenith.transform.ApeChange.phase(age, 80, com.dbzenith.transform.ApeChange.ROAR) * (1 - com.dbzenith.transform.ApeChange.phase(age, 174, com.dbzenith.transform.ApeChange.CAMERA_END)) : 0;
         double y = Mth.lerp(event.getPartialTick(), p.yo, p.getY());
         double x = Mth.lerp(event.getPartialTick(), p.xo, p.getX());
         double z = Mth.lerp(event.getPartialTick(), p.zo, p.getZ());

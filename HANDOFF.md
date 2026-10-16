@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.135.0, 2026-10-16)
+# Handoff: where Dragon Block Zenith stands (v0.136.0, 2026-10-16)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.135.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.136.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -58,6 +58,12 @@
   - 246 GameTests; front/rear growth recordings, restored face, mane framing, battle armour, first-person rise and
     wall collision checked in devshots. Guide: `docs/GREAT_APE.md`.
 
+- **v0.136.0:** user feedback on the Great Ape addressed: ground-stomp offense only (primary/heavy attack), 20-tick
+  wind-up, one contact, recovery/cooldown, support/wall/elevation/PvP/limb checks; planted feet during growth and
+  attacks. Rewritten transformation choreography and original ape idle/walk motion clips. Armour depth fixed so
+  fur cannot cover surviving battle armour during growth. White pupil-less eyes while staring at the moon, synced
+  to observers and restored immediately when looking away. 248 GameTests. Protocol 41.
+
 ## Known gaps and ideas
 
 - NPC skins dressed in the outfits (soldiers, the brute) are baked images and keep the old outfit look. Re-baking
@@ -66,8 +72,8 @@
 - Scars are drawn on the body layer, so a shirt painted into a plain Minecraft skin doesn't cover them (a gi or a
   jacket layer does).
 - Regrowth isn't animated in your own first-person view.
-- The Great Ape has no mouth blast (it has no techniques at all). The new growth/roar/camera sequence has devshot
-  recordings; the user's feedback on its feel, locomotion and footfall shake is still useful.
+- The Great Ape deliberately attacks only by ground stomps now, as requested. Seek play feedback on the wind-up,
+  impact, recovery, new locomotion and giant camera; do not add a mouth blast without a new request.
 - A true duel simulation (player against NPC, every race) for pacing hasn't been built: the feel pass used the
   balance reports (`BalanceReport`, `BalanceReport2`, written to run-gametest/*.md).
 - Open TODO items: more content (bosses, planets, a space dimension), the original sound set, Animation v5 (combat

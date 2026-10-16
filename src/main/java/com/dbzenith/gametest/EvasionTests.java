@@ -50,7 +50,7 @@ public final class EvasionTests {
         helper.succeed();
     }
 
-    @GameTest(template = EMPTY, timeoutTicks = 80)
+    @GameTest(template = EMPTY, batch = "evasion_vanish", timeoutTicks = 80)
     public static void aVanishDodgesAndCounters(GameTestHelper helper) {
         ServerPlayer[] p = pair(helper);
         ServerPlayer a = p[0], b = p[1];

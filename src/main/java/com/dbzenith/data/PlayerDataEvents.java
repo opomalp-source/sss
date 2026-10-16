@@ -86,7 +86,7 @@ public final class PlayerDataEvents {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
         ModCapabilities.get(player).ifPresent(data -> {
             KiTicker.tick(player, data);
-            PublicStatePacket state = PublicStatePacket.of(player.getId(), data);
+            PublicStatePacket state = PublicStatePacket.of(player, data);
             if (state.stateHash() != data.getLastPublicStateHash()) {
                 data.setLastPublicStateHash(state.stateHash());
                 ModNetwork.sendToTrackingAndSelf(player, state);
@@ -107,7 +107,7 @@ public final class PlayerDataEvents {
     public static void startTracking(PlayerEvent.StartTracking event) {
         if (event.getTarget() instanceof ServerPlayer target && event.getEntity() instanceof ServerPlayer viewer) {
             ModCapabilities.get(target).ifPresent(d -> {
-                ModNetwork.sendTo(viewer, PublicStatePacket.of(target.getId(), d));
+                ModNetwork.sendTo(viewer, PublicStatePacket.of(target, d));
                 ModNetwork.sendTo(viewer, new com.dbzenith.style.StylePackets.Slots(target.getId(), d.styleSlotsCode()));   // CX-20
             });
         }

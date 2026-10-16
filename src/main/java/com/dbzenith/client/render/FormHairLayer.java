@@ -87,6 +87,7 @@ public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         int ui = state.ultraInstinct();                                          // Ultra Instinct, over the form (CX-24 phase 5): silver eyes; Mastered, silver hair
         if (ui == 2 && !goldCharge) hairColor = UI_HAIR;
         if (ui > 0) eyeColor = ui == 2 ? UI_EYES : UI_SIGN_EYES;
+        if (state.has(PublicStatePacket.MOON_EYES)) eyeColor = -1;
         boolean ape = ApeLook.is(state);                                          // the Great Ape: its own hairstyle grown wild in the fur's colour, its own red eyes
         if (ape) {
             float coat = com.dbzenith.transform.ApeChange.fur(ApeTransformation.age(player, partialTick));

@@ -215,19 +215,36 @@ public final class FormTests {
         ServerPlayer human = TestPlayers.create(helper);
         PlayerData h = ModCapabilities.getOrThrow(human);
         float normalHeight = saiyan.getBbHeight();
-        GreatApe.spawnFalseMoon(helper.getLevel(), saiyan.getX(), saiyan.getY() + 3, saiyan.getZ());
+        // Template-relative Y can be underground outside the test pad; use the actual surface height.
+        var anchor = net.minecraft.world.phys.Vec3.atBottomCenterOf(helper.absolutePos(new net.minecraft.core.BlockPos(200, 0, -200)));
+        int chunkX = net.minecraft.util.Mth.floor(anchor.x) >> 4, chunkZ = net.minecraft.util.Mth.floor(anchor.z) >> 4;
+        helper.getLevel().setChunkForced(chunkX, chunkZ, true);
+        helper.getLevel().getChunk(chunkX, chunkZ);                              // height queries on unloaded chunks report the world's minimum Y
+        var at = new net.minecraft.world.phys.Vec3(anchor.x,
+                helper.getLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, net.minecraft.util.Mth.floor(anchor.x), net.minecraft.util.Mth.floor(anchor.z)) + 4,
+                anchor.z);
+        saiyan.teleportTo(at.x, at.y, at.z);
+        human.teleportTo(at.x + 3, at.y, at.z);
+        FalseMoonEntity moon = GreatApe.spawnFalseMoon(helper.getLevel(), saiyan.getX(), saiyan.getY() + 3, saiyan.getZ());
         Delays.after(helper, FalseMoonEntity.RISE_TICKS + 5, () -> {
-            helper.assertTrue(GreatApe.seesMoon(saiyan), "the risen false moon should be visible");
+            helper.assertTrue(GreatApe.seesMoon(saiyan), "the risen false moon should be visible: age=" + moon.tickCount
+                    + " risen=" + moon.isRisen() + " removed=" + moon.isRemoved() + " player=" + saiyan.position()
+                    + " moon=" + moon.position() + " top=" + helper.getLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, saiyan.getBlockX(), saiyan.getBlockZ())
+                    + " near=" + GreatApe.nearFalseMoon(saiyan));
             saiyan.setXRot(0);                                                  // looking away: nothing happens
+            helper.assertTrue(!com.dbzenith.network.PublicStatePacket.of(saiyan, d).has(com.dbzenith.network.PublicStatePacket.MOON_EYES), "looking away keeps the normal eyes");
             for (int i = 0; i < GreatApe.GAZE_SECONDS + 2; i++) GreatApe.tick(saiyan, d);
             helper.assertTrue(!d.isTransformed() && d.getMoonGaze() == 0, "only looking at the moon changes them");
             saiyan.setXRot(-90);                                                // staring up at it
             human.setXRot(-90);
+            helper.assertTrue(com.dbzenith.network.PublicStatePacket.of(saiyan, d).has(com.dbzenith.network.PublicStatePacket.MOON_EYES), "the Saiyan's eyes whiten as they stare");
+            helper.assertTrue(!com.dbzenith.network.PublicStatePacket.of(human, h).has(com.dbzenith.network.PublicStatePacket.MOON_EYES), "the moon does not whiten a human's eyes");
             for (int i = 0; i < GreatApe.GAZE_SECONDS - 1; i++) GreatApe.tick(saiyan, d);
             helper.assertTrue(!d.isTransformed() && d.getMoonGaze() == GreatApe.GAZE_SECONDS - 1, "not yet: it takes a while");
             GreatApe.tick(saiyan, d);
             for (int i = 0; i < GreatApe.GAZE_SECONDS; i++) GreatApe.tick(human, h);
             helper.assertTrue("great_ape".equals(d.getFormId()), "Saiyan with a tail should become a Great Ape, was " + d.getFormId());
+            helper.assertTrue(!com.dbzenith.network.PublicStatePacket.of(saiyan, d).has(com.dbzenith.network.PublicStatePacket.MOON_EYES), "the completed ape has its red eyes instead");
             helper.assertTrue(!h.isTransformed(), "humans are unaffected");
             helper.assertTrue(saiyan.getBbHeight() > normalHeight * 2.5f, "Great Ape should be giant: " + saiyan.getBbHeight());
             d.setTail(false);
@@ -235,6 +252,8 @@ public final class FormTests {
             helper.assertTrue(!d.isTransformed() && saiyan.getBbHeight() == normalHeight, "losing the tail ends the transformation");
             TestPlayers.remove(helper, saiyan);
             TestPlayers.remove(helper, human);
+            moon.discard();
+            helper.getLevel().setChunkForced(chunkX, chunkZ, false);
             helper.succeed();
         });
     }

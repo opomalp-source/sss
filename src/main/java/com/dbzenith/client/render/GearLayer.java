@@ -91,10 +91,10 @@ public class GearLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         if (top == null && pants == null && boots == null && hat == null) return;
         int o = OverlayTexture.NO_OVERLAY;
         model.follow(getParentModel());
-        if (pants != null) renderColoredCutoutModel(getParentModel(), texture(pants, "pants"), pose, buffers, light, player, 1f, 1f, 1f);
+        if (pants != null) thick(getParentModel(), texture(pants, "pants"), pose, buffers, light, player, 1.008f, getParentModel().body, getParentModel().rightLeg, getParentModel().leftLeg);
         PlayerModel<AbstractClientPlayer> m = getParentModel();
         if (top != null) {
-            renderColoredCutoutModel(m, texture(top, "top"), pose, buffers, light, player, 1f, 1f, 1f);
+            thick(m, texture(top, "top"), pose, buffers, light, player, 1.008f, m.body, m.rightArm, m.leftArm);
             thick(m, shell(top), pose, buffers, light, player, 1.1f, m.body, m.rightArm, m.leftArm);   // plates, gloves, bands: standing off the body
         }
         if (boots != null) thick(m, texture(boots, "boots"), pose, buffers, light, player, 1.13f, m.rightLeg, m.leftLeg);   // boots, thick
@@ -155,11 +155,13 @@ public class GearLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
                        AbstractClientPlayer player, float s, net.minecraft.client.model.geom.ModelPart... parts) {
         for (var p : parts) {
             p.xScale *= s;
+            p.yScale *= 1.008f;                                                  // above the growing fur on every face, including shoulders and knees
             p.zScale *= s;
         }
         renderColoredCutoutModel(m, tex, pose, buffers, light, player, 1f, 1f, 1f);
         for (var p : parts) {
             p.xScale /= s;
+            p.yScale /= 1.008f;
             p.zScale /= s;
         }
     }

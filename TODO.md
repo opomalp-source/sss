@@ -290,7 +290,8 @@ Most of these already exist in a first version; each step upgrades what is there
 
 # Great Ape growth and camera (user request, 2026-10-16)
 - [x] (v0.135.0) First transformation: straining breaths, progressive growth, fur spreading over the body, muzzle and ears growing, hair becoming the mane, original strained face fading into the ape; full-sized roar with sound/dust/shake and chest beats; camera follows visible growth, frames the torso, makes room for the roar, rises smoothly in first person and checks its corners against walls
-- [ ] User feedback on the growth/camera sequence, then further Great Ape locomotion and combat animation polish
+- [x] (v0.136.0) Feedback pass: grounded stomp attacks only, timed contact and recovery, server damage gate, new transformation choreography, hunched ape idle/walk clips, battle armour visible throughout fur growth, white eyes while gazing at the moon
+- [ ] User play feedback on the stomp, transformation and giant camera
 
 # Ki attack rework (user spec, 2026-10-14): cinematic attacks and sound, data-driven
 Decided with the user: all built-in attacks as JSON; charging locks movement for big attacks (best judgement);

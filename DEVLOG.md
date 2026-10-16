@@ -3806,3 +3806,52 @@ gets bigger and hairier. Player guide: `docs/GREAT_APE.md`.
   feedback; no mouth blast yet. Story remains last.
 - **Docs/release.** Updated guide, TODO, handoff and stale README release/build notes. Release scripts now stage
   the README, use the actual Codex co-author, and fail when publishing fails instead of reporting false success.
+
+## 2026-10-16 — Great Ape: ground stomps, fitting motion, armour throughout growth, white moon eyes (v0.136.0)
+The user wanted a much stronger Great Ape pass: only ground stomps for damage, better-fitting animation, battle
+armour visible throughout growth, and white eyes when staring at the full moon. Guide: `docs/GREAT_APE.md`.
+
+- **Ground Stomp (`transform/ApeStomp`).** Primary attack and heavy attack request the same attack, even with an
+  item held and outside PvP mode. Weight shifts over one leg, the other knee rises, the foot drives down at tick 20,
+  the body compresses and recovers to tick 48. Feet alternate (a broken/severed leg is avoided). The next attack
+  starts no earlier than tick 56. Survival cost: 6% of maximum stamina. The feet are planted during the action.
+- **Real server contact.** One impact, once per target, around the striking foot (5.5 blocks for the normal ape),
+  with distance falloff and normal combat damage conversion/defence. Solid ground, grounded stance, usable legs,
+  sufficient stamina and free movement state are required. The wind-up cancels when airborne, stunned, downed,
+  moved away or taken to another dimension. Walls, elevation, allies and PvP rules are checked; safe zones reject
+  the attack. Dust, ground cracks, a shock ring, low thuds and shake land at contact, without per-victim duplicate
+  stomp effects. Normal walking and landing effects remain cosmetic.
+- **Only stomp offense.** Server humanoid move/chain/super-dash state is cleared for apes; client input avoids
+  predicting human punches, and bare/weapon/ki damage outside a stomp is refused server-side. Dash input is blocked.
+  Existing form restrictions still forbid flight and ki techniques. Natural bleed-out keeps its original attacker
+  attribution and is allowed to finish normally. Growth also plants the feet until its animation ends.
+- **Transformation rewritten.** Clutching the head, bracing the knees, the chest arching and collapsing through
+  growth surges, then rising into a low-armed, asymmetrical roar; two deliberate chest beats, then a hunched idle.
+  Shared timing: growth 16-92, roar 106-142, recovery to 190, camera recovery to 210. Original `idle_ape` and
+  `walk_ape` clips inherit the heavy clips with low bent arms and a hunched trunk; all three ape variants use them.
+- **Armour actually stays visible.** The old global enlargement of the translucent coat put fur outside the
+  painted armour, which covered it until the blend ended. Fur now sits just above each part; all clothing surfaces,
+  including pants and gloves, sit farther out on every axis. Pads keep following the animated model. Battle armour
+  is never hidden or removed as part of the visual transition.
+- **White moon eyes.** A public-state flag is computed from the actual valid moon, tail/race and gaze every server
+  tick, for the owner and observers. It clears immediately when looking away. The face uses white eye and iris masks
+  without pupils, with an emissive pass to avoid grey eyes in shadow; it also works over ordinary Minecraft skins.
+  White eyes continue into the early change and give way to the ape's red eyes. Protocol 41 covers the new meanings.
+- **Verification.** 248 GameTests, including actual stomp wind-up/contact/recovery, blocked ordinary weapon damage,
+  airborne rejection, walls, overhead targets, radius limits and movement restoration. Moon tests check white eyes
+  while gazing, normal eyes when looking away, unaffected humans and red-eyed completed apes. Embedded test players
+  do not hold chunk tickets: the isolated stomp fixture keeps its target chunks loaded and cleans its platform up.
+  The existing vanish-health check was isolated in its own batch after repeated interference from other concurrent
+  combat tests; its health, position and counter assertions remain intact. All temporary combat diagnostics were removed.
+  The moon fixture now uses loaded open sky instead of a random spawn that could be under the lookout; its moon
+  is discarded afterwards. All original moon/gaze/transform assertions are retained.
+  Both isolated fixtures load the terrain before querying height: an unloaded chunk reports minimum build Y,
+  which otherwise puts a supposedly above-ground actor underground.
+- **Dev tooling.** Scripted sequences clear the pause menu; optional `moonlock` in a devshot name tracks the actual
+  moon during a recording, keeping eye checks reproducible despite mouse movement. Inert in ordinary clients.
+- No borrowed assets. Story remains last. Ground-stomp-only offense is intentional; do not add a mouth blast
+  unless the user changes that request.
+- **Visual review:** the natural full moon near the horizon, white pupil-less eyes before growth, the head-clutch /
+  bracing / arching / low roar / chest beats, and battle armour throughout the coat transition were recorded with
+  devshots. A second clip checks alternating left/right knee lift, foot contact and ground effects; a durable cow
+  took damage at contact (1000 to 986.9 health in that scene). Preview GIFs and an eye close-up were exported.

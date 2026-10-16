@@ -1,0 +1,13 @@
+{
+  "_doc": "Great Ape: low shoulders, weight settled over wide feet, arms hanging forward, slow heavy breathing.",
+  "base": "idle_heavy",
+  "speed": 0.8,
+  "offset": {
+    "torso": {"rot": [14, 0, 0]},
+    "head": {"rot": [-8, 0, 0]},
+    "rightArm": {"rot": [-18, -8, 5], "bend": 16},
+    "leftArm": {"rot": [-18, 8, -5], "bend": 16},
+    "rightLeg": {"rot": [-5, 0, 3], "bend": 8},
+    "leftLeg": {"rot": [-5, 0, -3], "bend": 8}
+  }
+}

@@ -53,20 +53,19 @@ public class ApeLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abst
         } else {
             // Fur takes the shoulders first, then the trunk and legs, finally the face.
             pose.pushPose();
-            pose.scale(1.002f, 1.002f, 1.002f);
             var fur = buffers.getBuffer(RenderType.entityTranslucent(ApeLook.body(state.form())));
-            coat(model.rightArm, pose, fur, light, overlay, t, 14, 42);
-            coat(model.leftArm, pose, fur, light, overlay, t, 16, 44);
-            coat(model.body, pose, fur, light, overlay, t, 20, 50);
-            coat(model.rightLeg, pose, fur, light, overlay, t, 24, 56);
-            coat(model.leftLeg, pose, fur, light, overlay, t, 26, 58);
-            coat(model.head, pose, fur, light, overlay, t, 32, 64);
+            coat(model.rightArm, pose, fur, light, overlay, t, 20, 60);
+            coat(model.leftArm, pose, fur, light, overlay, t, 22, 62);
+            coat(model.body, pose, fur, light, overlay, t, 28, 70);
+            coat(model.rightLeg, pose, fur, light, overlay, t, 34, 76);
+            coat(model.leftLeg, pose, fur, light, overlay, t, 36, 78);
+            coat(model.head, pose, fur, light, overlay, t, 48, 88);
             pose.popPose();
         }
         if (!model.head.visible) return;                                         // first person: the arm alone
         float face = com.dbzenith.transform.ApeChange.face(t);
         if (face > 0.75f) model.head.render(pose, buffers.getBuffer(RenderType.eyes(ApeLook.EYES)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
-                1f, 1f, 1f, com.dbzenith.transform.ApeChange.phase(t, 54, 68));
+                1f, 1f, 1f, com.dbzenith.transform.ApeChange.phase(t, 78, 92));
 
         float open = 0.08f + 0.25f * (float) Math.pow(Math.max(0, Mth.sin(age * 0.045f)), 8);   // a snarl now and then
         if (t >= ROAR_FROM - 4 && t < ROAR_TO + 6) {                             // the roar: the jaw thrown wide, shaking
@@ -90,6 +89,17 @@ public class ApeLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abst
                              com.mojang.blaze3d.vertex.VertexConsumer fur, int light, int overlay,
                              float tick, float from, float to) {
         float alpha = com.dbzenith.transform.ApeChange.phase(tick, from, to);
-        if (alpha > 0) part.render(pose, fur, light, overlay, 1f, 1f, 1f, alpha);
+        if (alpha <= 0) return;
+        float x = part.xScale, y = part.yScale, z = part.zScale;
+        try {
+            part.xScale *= 1.001f;
+            part.yScale *= 1.001f;
+            part.zScale *= 1.001f;
+            part.render(pose, fur, light, overlay, 1f, 1f, 1f, alpha);
+        } finally {
+            part.xScale = x;
+            part.yScale = y;
+            part.zScale = z;
+        }
     }
 }

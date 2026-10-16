@@ -217,7 +217,7 @@ public final class AnimController {
 
         // bare-handed swings become a combo; a weapon or tool keeps vanilla's swing
         boolean swinging = player.swinging;
-        if (swinging && !t.wasSwinging && now >= t.suppressSwingUntil && player.getMainHandItem().isEmpty()) {
+        if (!isApe(form) && swinging && !t.wasSwinging && now >= t.suppressSwingUntil && player.getMainHandItem().isEmpty()) {
             com.dbzenith.client.ClientSounds.swing(player);
             float pitch = player.getXRot();
             if (pitch < -35) play(player, t, Anims.LAUNCHER, now, 0);
@@ -272,6 +272,7 @@ public final class AnimController {
             return;
         }
         KeyframeAnimation anim = switch (msg.kind()) {
+            case AnimEventPacket.APE_STOMP -> msg.data() == 1 ? Anims.APE_STOMP_RIGHT : Anims.APE_STOMP_LEFT;
             case AnimEventPacket.VOLLEY -> Anims.KI_VOLLEY;
             case AnimEventPacket.BEAM -> Anims.beamFor(com.dbzenith.client.ClientKiCharge.lastTechnique(msg.entityId()), msg.data());
             case AnimEventPacket.THROW -> Anims.kiThrow(msg.data());
@@ -290,7 +291,7 @@ public final class AnimController {
             case AnimEventPacket.STUMBLE -> Anims.STUMBLE;
             default -> com.dbzenith.combat.Wounds.wounded(player) > 0.3f ? Anims.KI_BLAST_WOUNDED : Anims.KI_BLAST;   // one-handed, badly hurt (CX-52)
         };
-        play(player, t, anim, now, 0);
+        play(player, t, anim, now, msg.kind() == AnimEventPacket.APE_STOMP ? com.dbzenith.transform.ApeStomp.DURATION : 0);
         t.suppressSwingUntil = now + 3;
         t.lastEventTick = now;
         if (msg.kind() == AnimEventPacket.DASH) {

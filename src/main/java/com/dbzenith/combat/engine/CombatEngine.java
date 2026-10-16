@@ -79,6 +79,7 @@ public final class CombatEngine {
 
     /** A press from a fighter. Returns whether a move started now (false: refused, or buffered for later). */
     public static boolean press(LivingEntity e, Moves.Input in) {
+        if (e instanceof ServerPlayer p && com.dbzenith.transform.ApeStomp.isApe(p)) return com.dbzenith.transform.ApeStomp.press(p);
         if (!com.dbzenith.combat.PvpRules.combatOn(e)) return false;          // PvP off: no combat moves (CX-20)
         Fighter f = of(e);
         long now = e.level().getGameTime();
@@ -175,6 +176,11 @@ public final class CombatEngine {
 
     static void tick(Fighter f, long now) {
         LivingEntity e = f.entity;
+        if (e instanceof ServerPlayer p && com.dbzenith.transform.ApeStomp.isApe(p)) {
+            f.move = null;
+            f.buffered = null;
+            f.superDashTarget = null;
+        }
         DBZConfig.Server c = DBZConfig.SERVER;
         if (f.freezeUntil > 0) {                                                // hitstop
             if (now < f.freezeUntil) {

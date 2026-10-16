@@ -193,6 +193,7 @@ public final class GiantBody {
 
     /** Called when a form is entered: a Great Ape's change tears the clothes (not when it was a giant already). */
     public static void onFormEntered(ServerPlayer player, Form from, Form to) {
+        ApeStomp.entered(player, from, to);
         if (GreatApe.isApeForm(to.id()) && !GreatApe.isApeForm(from.id())) tearClothes(player);
         player.refreshDimensions();
     }

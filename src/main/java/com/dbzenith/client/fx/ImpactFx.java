@@ -67,6 +67,15 @@ public final class ImpactFx {
     // ------------------------------------------------------------------ server impacts
 
     public static void onImpact(ImpactPacket m) {
+        if (m.kind() == ImpactPacket.APE_STOMP) {
+            var mc = Minecraft.getInstance();
+            if (mc.level == null) return;
+            Vec3 at = new Vec3(m.x(), m.y(), m.z());
+            crater(mc.level, at, m.scale() * 0.7f, 36);
+            dustRing(at, m.scale(), 32);
+            CameraFx.shakeAt(at, 0.65f, 80);
+            return;
+        }
         if (m.kind() == ImpactPacket.BLOOD) {                                   // the knocked-out rework: blood, not a blow
             BloodFx.onImpact(m);
             return;

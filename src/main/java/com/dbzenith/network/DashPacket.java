@@ -25,6 +25,7 @@ public record DashPacket(float forward, float strafe, boolean predicted) {
     public static void handle(DashPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ServerPlayer player = ctx.get().getSender();
         if (!InputGuard.allow(player, InputGuard.Kind.DASH)) return;
+        if (com.dbzenith.transform.ApeStomp.isApe(player)) return;
         boolean sane = Float.isFinite(msg.forward) && Float.isFinite(msg.strafe) && Math.abs(msg.forward) <= 1.01f && Math.abs(msg.strafe) <= 1.01f;
         if (InputGuard.sane(player, sane, "dash " + msg.forward + "," + msg.strafe)) DashHandler.dash(player, msg.forward, msg.strafe, msg.predicted);
     }
