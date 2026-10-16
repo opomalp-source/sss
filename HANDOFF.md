@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.137.0, 2026-10-16)
+# Handoff: where Dragon Block Zenith stands (v0.138.0, 2026-10-16)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.137.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.138.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -94,3 +94,8 @@
 ## v0.137.0 camera follow-up
 F5 front/rear cameras pivot at the eyes for every scaled form, with visible-growth smoothing for Great Ape.
 The transformation cinematic also targets eye height. Giant distance and collision checks remain.
+
+## v0.138.0 Great Ape eye visibility follow-up
+The v0.137 camera change alone left the chin raised: idle/walk head offsets compounded the rig's head counter.
+Offsets now balance that counter for a forward gaze. Local front F5 renders neutral look pitch independently
+of camera pitch; gameplay aim, observers, rear/first-person views and authored action poses keep their behavior.

@@ -33,6 +33,10 @@ public class PhysiqueModel<T extends LivingEntity> extends PlayerModel<T> {
 
     @Override
     public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float age, float headYaw, float headPitch) {
+        // Front F5 is an inspection view: orbiting it must not tip the ape's face away from the viewer.
+        var mc = net.minecraft.client.Minecraft.getInstance();
+        if (entity == mc.player && mc.player != null && mc.options.getCameraType().isMirrored()
+                && ApeLook.is(mc.player)) headPitch = 0;
         super.setupAnim(entity, limbSwing, limbSwingAmount, age, headYaw, headPitch);
         LimbSegments.pose(this);
     }

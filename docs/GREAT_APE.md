@@ -77,3 +77,8 @@ A Saiyan or half-Saiyan with a tail can turn into a Great Ape.
   ordering when editing either layer, including pants and gloves, to avoid the v0.135 transition hiding armour.
 - Textures: `tools/GreatApeGen.java` paints the fur bodies (player skin layout), the face parts (the `ApeShape`
   layout) and the eyes; run `java -cp build/classes/java/main tools/GreatApeGen.java` after compiling.
+
+### Front F5 face view (v0.138.0)
+The resting head faces forward instead of tipping the chin upward. In your front F5 view, camera pitch does not
+change the local head's look pitch, so you can raise the view to inspect the eyes. Gameplay aim and the head
+movement seen by other players still follow your actual look. Roar and stomp animations keep their head poses.

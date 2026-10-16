@@ -3869,3 +3869,17 @@ armour visible throughout growth, and white eyes when staring at the full moon. 
 - Devshots reviewed in front/rear views: base, Great Ape growth, completed Great Ape, Giant Namekian scale and
   return to base. Cropped comparison checked with tools/dev/Crop.java. No new assets.
 - Fixed winshots.sh to quote the Java executable path for this machine's Program Files installation.
+
+## 2026-10-16 — Great Ape eyes visible in front F5 (v0.138.0)
+- The user's play check showed that raising F5 to find the eyes also raised the head, exposing the underside of
+  the muzzle. The previous eye-height camera change did not address this interaction.
+- The ape's idle/walk head offsets were negative, compounded by the motion rig's torso counter-rotation. Changed
+  those offsets to balance the hunched torso and give the resting face a forward gaze instead of a raised chin.
+- PhysiqueModel ignores look pitch only when rendering the local Great Ape in front F5. The camera can be tilted
+  independently to inspect the face. No entity rotations are changed: actual aiming, observers, first/rear views,
+  moon gaze, and the authored transformation/stomp head animations retain their behavior.
+- Verification: all 248 required GameTests passed on rerun. The first run had the existing timing-sensitive
+  perfect-guard counter assertion fail; no test assertions were changed. Java 17 build succeeds.
+- Devshots reviewed at neutral and +/-25-degree front camera pitch, rear view, growth and reversion. A cropped
+  before/after comparison shows the red eyes visible at neutral and from above. From below the muzzle naturally
+  occludes them, but the head no longer follows the inspection camera away as it rises. Direct local release only.

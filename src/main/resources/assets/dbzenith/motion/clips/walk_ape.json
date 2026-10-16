@@ -1,9 +1,9 @@
 {
-  "_doc": "Great Ape: a hunched, rolling giant's gait; low bent arms counter the planted steps instead of a human fighting stance.",
+  "_doc": "Great Ape: a hunched, rolling giant's gait; low bent arms counter the planted steps instead of a human fighting stance. Head offset balances the hunched torso counter for a forward gaze.",
   "base": "walk_heavy",
   "offset": {
     "torso": {"rot": [13, 0, 0]},
-    "head": {"rot": [-7, 0, 0]},
+    "head": {"rot": [16, 0, 0]},
     "rightArm": {"rot": [-22, -8, 4], "bend": 20},
     "leftArm": {"rot": [-22, 8, -4], "bend": 20},
     "rightLeg": {"bend": 6},

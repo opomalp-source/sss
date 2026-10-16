@@ -311,3 +311,4 @@ to both mods folders.
 - [x] Phase 10 (v0.126.0) Performance: per-frame budget and distance LOD for ki balls, low quality trims (no shimmer, fewer arcs and bolts), debug overlay stats, stress-tested; fixed the post pass blacking out the world with the HUD on (v0.125.0)
 
 - [x] (v0.137.0) F5 eye-height pivot in Great Ape and all scaled forms, including transformation cinematics; direct local installation by user request.
+- [x] (v0.138.0) Great Ape eyes visible in front F5: level resting head and separate local head look from camera pitch.
