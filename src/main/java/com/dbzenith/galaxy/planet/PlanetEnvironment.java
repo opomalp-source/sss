@@ -26,6 +26,7 @@ public final class PlanetEnvironment {
     private static final UUID GRAVITY=UUID.fromString("aa300aba-14ae-4204-a384-3c555f6e9041");
     private static final String AIR="dbzenithPlanetAir",GRACE="dbzenithPlanetGrace";
     public static double gravity(Level l){
+        if(com.dbzenith.galaxy.space.SpaceRuntime.isSpace(l))return 0;
         if(!PlanetConfig.GRAVITY.get())return 1;
         if(l.isClientSide)return com.dbzenith.client.ClientPlanet.gravity(l);
         var b=PlanetRuntime.body((ServerLevel)l);return b==null?1:b.gravity();
@@ -59,19 +60,21 @@ public final class PlanetEnvironment {
             air=p.getPersistentData().contains(AIR)?p.getPersistentData().getInt(AIR):300;protectedBy=protection(p,ModCapabilities.getOrThrow(p));
             if(p.server.overworld().getGameTime()<p.getPersistentData().getLong(GRACE))protectedBy="Landing grace";
         }
+        if(com.dbzenith.galaxy.space.SpaceRuntime.isSpace(p.level())){name=com.dbzenith.galaxy.space.SpaceRuntime.system(p.serverLevel()).name()+" / Space";g=0;atmos=GalaxyCatalog.Atmosphere.NONE.ordinal();air=p.getPersistentData().getInt(AIR);protectedBy=protection(p,ModCapabilities.getOrThrow(p));}
         ModNetwork.sendTo(p,new PlanetEnvironmentPacket(p.level().dimension().location().toString(),name,g,atmos,radius,air,protectedBy));
     }
     @SubscribeEvent public static void living(LivingEvent.LivingTickEvent e){if(e.getEntity().level() instanceof ServerLevel l)applyGravity(e.getEntity(),gravity(l));}
     @SubscribeEvent public static void fall(LivingFallEvent e){if(e.getEntity().level() instanceof ServerLevel l)e.setDamageMultiplier((float)(e.getDamageMultiplier()*gravity(l)));}
     @SubscribeEvent(priority=EventPriority.LOWEST) public static void player(TickEvent.PlayerTickEvent e){
         if(e.phase!=TickEvent.Phase.END||!(e.player instanceof ServerPlayer p))return;
-        var b=PlanetRuntime.body(p.serverLevel());if(b==null)return;
+        var b=PlanetRuntime.body(p.serverLevel());boolean orbit=com.dbzenith.galaxy.space.SpaceRuntime.isSpace(p.level());if(b==null&&!orbit)return;
+        var atmosphere=orbit?GalaxyCatalog.Atmosphere.NONE:b.atmosphere();
         var tag=p.getPersistentData();long now=p.server.overworld().getGameTime();
         if(!tag.contains(AIR))enter(p);
         boolean shield=!PlanetConfig.ATMOSPHERE.get()||!protection(p,ModCapabilities.getOrThrow(p)).isEmpty()||now<tag.getLong(GRACE);
         int air=tag.getInt(AIR);
-        if(shield||b.atmosphere()==GalaxyCatalog.Atmosphere.BREATHABLE)air=Math.min(300,air+4);
-        else {air=Math.max(0,air-drain(b.atmosphere(),now));p.setAirSupply(air);if(air==0&&now%20==0)p.hurt(p.damageSources().drown(),2f);}
+        if(shield||atmosphere==GalaxyCatalog.Atmosphere.BREATHABLE)air=Math.min(300,air+4);
+        else {air=Math.max(0,air-drain(atmosphere,now));p.setAirSupply(air);if(air==0&&now%20==0)p.hurt(p.damageSources().drown(),2f);}
         tag.putInt(AIR,air);if(now%20==0)sync(p);
     }
     @SubscribeEvent public static void arcs(TickEvent.LevelTickEvent e){

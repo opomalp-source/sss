@@ -70,7 +70,7 @@ public final class KiCombatTests {
         helper.succeed();
     }
 
-    @GameTest(template = EMPTY, timeoutTicks = 60)
+    @GameTest(template = EMPTY, timeoutTicks = 60, batch="charged_blast_hit")
     public static void aChargedBlastStunsAndBuildsMeter(GameTestHelper helper) {
         Pig pig = helper.spawn(EntityType.PIG, new BlockPos(1, 2, 6));
         pig.setNoAi(true);

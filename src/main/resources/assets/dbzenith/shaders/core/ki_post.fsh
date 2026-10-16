@@ -11,6 +11,7 @@ uniform float Time;                 // seconds
 uniform float Haze;
 uniform float Aberration;
 uniform float Impact;
+uniform float EntryHaze;
 
 in vec2 texCoord;
 out vec4 fragColor;
@@ -21,6 +22,7 @@ void main() {
     vec2 n1 = texture(NoiseSampler, fract(texCoord * vec2(5.0, 3.0) + vec2(Time * 0.07, -Time * 0.19))).rb - 0.5;
     vec2 n2 = texture(NoiseSampler, fract(texCoord * vec2(9.0, 6.0) - vec2(Time * 0.13, Time * 0.31))).rb - 0.5;
     vec2 uv = texCoord + (n1 + 0.5 * n2) * Haze * mask * 0.014;
+    uv += (n1 + 0.5*n2)*EntryHaze*smoothstep(0.22,0.64,length(texCoord-0.5))*0.008;
     vec2 c = uv - 0.5;
     vec2 off = c * Aberration * 0.025 * (0.25 + dot(c, c) * 2.5);
     vec3 col = vec3(texture(DiffuseSampler, uv + off).r, texture(DiffuseSampler, uv).g, texture(DiffuseSampler, uv - off).b);

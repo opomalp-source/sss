@@ -49,6 +49,7 @@ public final class GalaxyData extends SavedData {
         var d=discovery(ref); return d==null || d.name.isEmpty()?generated:d.name;
     }
     public static GalaxyCatalog.Id current(ServerPlayer p) {
+        var orbit=com.dbzenith.galaxy.space.SpaceRuntime.id(p.level().dimension());if(orbit!=null)return orbit;
         if(p.serverLevel().getChunkSource().getGenerator() instanceof com.dbzenith.galaxy.planet.PlanetGenerator g)return g.ref.system();
         return switch(p.level().dimension().location().toString()) {
             case "dbzenith:namek" -> GalaxyCatalog.NAMEK;

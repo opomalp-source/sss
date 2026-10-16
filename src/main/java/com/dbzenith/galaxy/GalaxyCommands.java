@@ -18,6 +18,8 @@ public final class GalaxyCommands {
     }
     public static LiteralArgumentBuilder<CommandSourceStack> branch() {
         return Commands.literal("galaxy").executes(c->{GalaxyService.open(c.getSource().getPlayerOrException());return 1;})
+            .then(Commands.literal("orbit").then(Commands.argument("players",EntityArgument.players()).executes(c->{int n=0;for(var p:EntityArgument.getPlayers(c,"players"))if(com.dbzenith.galaxy.space.SpaceRuntime.ascend(p))n++;return n;})))
+            .then(Commands.literal("approach").then(Commands.argument("players",EntityArgument.players()).then(Commands.argument("planet",IntegerArgumentType.integer(0,8)).executes(c->{int n=0;for(var p:EntityArgument.getPlayers(c,"players"))if(com.dbzenith.galaxy.space.SpaceRuntime.approach(p,IntegerArgumentType.getInteger(c,"planet")))n++;return n;}))))
             .then(Commands.literal("map").then(Commands.argument("players",EntityArgument.players()).executes(c->{
                 for(var p:EntityArgument.getPlayers(c,"players"))GalaxyService.open(p);return 1;
             })))

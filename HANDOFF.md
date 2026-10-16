@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.140.0, 2026-10-16)
+# Handoff: where Dragon Block Zenith stands (v0.141.0, 2026-10-16)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.140.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.141.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -127,3 +127,31 @@ HUD and the original suit; its opaque helmet outer layer was fixed to reveal the
 Next is Phase 3: real Space dimension, spheres/starfield, ascent/re-entry, zero-g and sound. Current planet skies
 are archetype colors, not orbital skies. Gas giants have no landing surface until upper-cloud travel exists.
 Keep galaxy catalogue v1 and terrain v1 stable after release. Story last; direct install only, no updater.
+
+## Galaxy / space request — Phase 3 (v0.141.0, 2026-10-17)
+Runtime per-system orbital space now connects supported planets at altitude512. Local orbital coordinates,
+independent entity lists/borders and a separate active-orbit cap avoid precision and multiplayer collisions.
+Surface/orbit handoffs preload chunks asynchronously, preserve bounded momentum and map re-entry to the
+matching surface position (departure anchor for close returns). Space Pods have a continuous launch option.
+Original static/surface worlds and galaxy/terrain-v1 catalogue contracts remain unchanged. Protocol44.
+
+Client: cached star/nebula VBO; original async procedural planetary material maps, angular-size mesh/texture
+LOD, lit spheres/terminators, rotating cloud shells, atmosphere rims, moons/rings, colored stars/corona/glare.
+Materials use public identity only, never server terrain seeds; a48-material cache closes on logout. Physical
+asteroid clusters are generated only in visited chunks of the inner belt. Stars burn/blind; gas upper clouds
+repel deep entry. Zero-g preserves drift; V enables existing ki-powered thrust/braking, Sprint boosts. Existing
+vacuum races, suits, barriers and pods protect. Original synthesized drone/breath/heartbeat/entry/music loops,
+wind fades and muffled one-shots. Arrival plasma/rim glow, rumble and shader heat shimmer use existing settings.
+
+All260 GameTests pass: three new space tests cover geometry/inertia, signed addresses/belt determinism/codecs,
+actual asynchronous ascent and entry, zero gravity, map identity, packet bounds and matching-location return.
+Sound fixture now validates both string and streamed-object JSON entries. An existing charged-blast hit fixture
+was isolated into its own batch after repeated concurrent interference; assertions unchanged. Dev screenshots
+and motion clips reviewed; ascent horizon and clip input duration corrected. Development-only profiling at
+1280x720/renderDistance7/max60fps showed approximately58-60fps in space,60fps on the planet. This is a local
+capped smoke check, not a broad performance guarantee. Dedicated-server and dev-client restart also exercised.
+
+Config dbzenith-planets.toml adds maxLoadedOrbits4 and orbitalTravel. Operator previews /dbz galaxy orbit
+<players> and /dbz galaxy approach <players> <planet index>. Guide: docs/GALAXY.md. Orbital vertical volume is
+bounded; interstellar travel is Phase5. Next: Phase4 authored orbital skies/weather/hazards, landmarks/NPC tables,
+cinematic landing discovery and scouter navigation. Story last. Direct install only; no updater/deploy.

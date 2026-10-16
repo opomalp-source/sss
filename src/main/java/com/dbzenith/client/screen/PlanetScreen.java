@@ -22,8 +22,10 @@ public class PlanetScreen extends Screen {
         Planet here = minecraft.level == null ? null : Planet.of(minecraft.level);
         Planet[] planets = Planet.values();
         addRenderableWidget(ThemedButton.of(Component.literal("Galaxy map"), b -> minecraft.player.connection.sendCommand("galaxy"))
-                .bounds(width / 2 - 100, height / 2 + planets.length * 12 + 18, 200, 20).build());
+                .bounds(width / 2 - 100, height / 2 + planets.length * 12 + 26, 200, 20).build());
         int top = height / 2 - planets.length * 12;
+        var orbit=ThemedButton.of(Component.literal("Launch into orbit"),b->{ModNetwork.sendToServer(new com.dbzenith.network.GalaxyPackets.Request(0,7,"0:0:0:0",0,"",0));onClose();}).bounds(width/2-100,top+planets.length*24,200,20).build();
+        orbit.active=minecraft.player!=null&&minecraft.player.isPassenger()&&!com.dbzenith.galaxy.space.SpaceRuntime.isSpace(minecraft.level);addRenderableWidget(orbit);
         for (int i = 0; i < planets.length; i++) {
             Planet p = planets[i];
             Button b = ThemedButton.of(Component.translatable(p.translationKey()), x -> {
@@ -42,7 +44,7 @@ public class PlanetScreen extends Screen {
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         DbzTheme.screenBackground(g, width, height);
         int top = height / 2 - Planet.values().length * 12;
-        DbzTheme.window(g, font, title, width / 2 - 112, top - 18, 224, Planet.values().length * 24 + 26);
+        DbzTheme.window(g, font, title, width / 2 - 112, top - 18, 224, Planet.values().length * 24 + 75);
         super.render(g, mouseX, mouseY, partialTick);
     }
 

@@ -3,12 +3,13 @@
 A Dragon Ball-inspired total-conversion mod for **Minecraft 1.20.1 / NeoForge 47.1.106**. Mod id `dbzenith`.
 Status, roadmap and decisions: [TODO.md](TODO.md), [FEATURE_MATRIX.md](FEATURE_MATRIX.md), [DEVLOG.md](DEVLOG.md), [BRIEF.md](BRIEF.md).
 
-## Latest release: 0.140.0
+## Latest release: 0.141.0
 
-Galaxy Phase 2: land on procedurally generated planets from `/galaxy` while holding a Space Pod. Worlds are
-created on demand, save your builds, and unload when idle. Gravity changes movement, projectiles, flight cost
-and training; hostile atmospheres require a sealed suit, pod, barrier or suitable race trait.
-Details, recipes and commands: [Galaxy](docs/GALAXY.md). Orbital space flight is the next phase.
+Galaxy Phase 3: fly through the atmosphere into a star system's orbital space. See original lit planet spheres,
+cloud layers, moons, rings and starfields; drift in zero gravity, use ki thrust/braking, and re-enter above the
+matching surface location. Space Pods can launch continuously into orbit. Sealed suits, race traits and barriers
+protect against vacuum; the sound mix fades from wind to breathing, heartbeat and quiet orbital ambience.
+Details and commands: [Galaxy](docs/GALAXY.md). Planet weather/skies and scouter exploration are next.
 Installed directly into the Minecraft mods folder; no updater publication.
 Build the complete mod from this checkout with Gradle; `tools/release.sh` installs the tested jar directly; updater publication is disabled by user request.
 

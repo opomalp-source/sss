@@ -29,7 +29,7 @@ public final class SoundTests {
                 String name = entry.getId().getPath();
                 helper.assertTrue(json.has(name), name + " is in sounds.json");
                 for (var s : json.getAsJsonObject(name).getAsJsonArray("sounds")) {
-                    String file = s.getAsString().replace("dbzenith:", "");
+                    String file = (s.isJsonObject()?s.getAsJsonObject().get("name").getAsString():s.getAsString()).replace("dbzenith:", "");
                     try (InputStream ogg = SoundTests.class.getResourceAsStream("/assets/dbzenith/sounds/" + file + ".ogg")) {
                         helper.assertTrue(ogg != null, file + ".ogg exists");
                         byte[] head = ogg.readNBytes(4);

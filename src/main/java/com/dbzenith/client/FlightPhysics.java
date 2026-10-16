@@ -60,6 +60,7 @@ public final class FlightPhysics {
     }
 
     private static boolean kiFlying(LocalPlayer p) {
+        if(com.dbzenith.galaxy.space.SpaceRuntime.isSpace(p.level()))return false;
         return p.getAbilities().flying && ClientPlayerData.hasData() && ClientPlayerData.get().isFlying()
                 && DBZConfig.CLIENT.flightMomentum.get() && !p.isSpectator() && !p.isPassenger();
     }
@@ -291,7 +292,7 @@ public final class FlightPhysics {
             }
             double cruise = Math.max(.05, player.getAbilities().getFlyingSpeed() * FlightModel.CRUISE);
             float f = (float) Mth.clamp((STATE.speed() - cruise * .25) / (cruise * 2.2), 0, 1);
-            volume = Math.max(.01f, f * f * .85f);
+            volume = Math.max(.001f, f * f * .85f)*(float)(1-com.dbzenith.client.space.SpaceClient.vacuum());
             pitch = .6f + .6f * f;
         }
 

@@ -317,7 +317,7 @@ to both mods folders.
 - [x] Phase 1 (v0.139.0) Deterministic versioned catalogue, bounded server-fed galaxy/sector/system/planet atlas,
   discovery SavedData, search, per-player waypoints, /galaxy and /dbz galaxy commands. Guide: docs/GALAXY.md.
 - [x] Phase 2 (v0.140.0) Runtime planets, parameterized chunk generator, physical gravity, atmosphere, sealed suits, caps and idle unload; saved builds and respawn/reconnect support
-- [ ] Phase 3 Space dimension, spheres/starfield, ascent/re-entry, zero-g, quiet sound mix
+- [x] Phase 3 (v0.141.0) Per-system orbital space instances, original lit/textured planet and cloud meshes, moons/rings/starfield, continuous ascent/re-entry with preloads/fades, zero-g inertia/ki thrust/braking, pod launch and quiet sound mix
 - [ ] Phase 4 Orbital skies, hazards/weather, landmarks/NPCs, landing discovery/naming, scouter HUD
 - [ ] Phase 5 Hyperspeed, cross-dimension Instant Transmission, iconic systems
 - [ ] Phase 6 Extend the existing protected/batched crater system

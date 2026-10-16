@@ -28,6 +28,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public class SpacePodEntity extends Entity {
     public static final int PARKED = 0, LAUNCHING = 1, LANDING = 2;
+    public static final int ORBIT_LAUNCH=3;
     private static final EntityDataAccessor<Integer> STATE = SynchedEntityData.defineId(SpacePodEntity.class, EntityDataSerializers.INT);
     private static final int LAUNCH_TICKS = 50;
 
@@ -66,6 +67,11 @@ public class SpacePodEntity extends Entity {
         level().playSound(null, getX(), getY(), getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 2f, 0.5f);
         return true;
     }
+    public boolean launchOrbit(ServerPlayer pilot){
+        if(state()!=PARKED||pilot.getVehicle()!=this||!com.dbzenith.galaxy.planet.PlanetConfig.SPACE.get()||com.dbzenith.galaxy.space.SpaceRuntime.surfaceRef(pilot.serverLevel())==null||com.dbzenith.data.ModCapabilities.getOrThrow(pilot).isDead())return false;
+        setState(ORBIT_LAUNCH);return true;
+    }
+    public void orbitRefused(){if(state()==ORBIT_LAUNCH)setState(LANDING);}
 
     /** A pod that comes down from the sky at {@code at} with {@code pilot} inside. */
     public static SpacePodEntity arrive(ServerPlayer pilot, Vec3 at) {
@@ -75,13 +81,24 @@ public class SpacePodEntity extends Entity {
         pilot.startRiding(pod, true);
         return pod;
     }
+    public static SpacePodEntity orbit(ServerPlayer pilot,Vec3 at,Vec3 velocity){
+        var pod=create(pilot.level(),at);pod.setDeltaMovement(velocity);pilot.level().addFreshEntity(pod);pilot.startRiding(pod,true);return pod;
+    }
 
     @Override
     public void tick() {
         super.tick();
         timer++;
         Vec3 v = getDeltaMovement();
+        if(com.dbzenith.galaxy.space.SpaceRuntime.isSpace(level())){
+            if(getFirstPassenger() instanceof Player pilot){
+                setYRot(pilot.getYRot());setXRot(pilot.getXRot());
+                setDeltaMovement(com.dbzenith.galaxy.space.SpaceMath.step(v,pilot.zza,pilot.xxa,0,pilot.isSprinting(),pilot.isSecondaryUseActive(),pilot.getYRot(),pilot.getXRot(),true));
+            }
+            move(MoverType.SELF,getDeltaMovement());return;
+        }
         switch (state()) {
+            case ORBIT_LAUNCH -> {setDeltaMovement(0,Math.min(2.2,v.y+.055),0);if(level().isClientSide)exhaust(3);}
             case LAUNCHING -> {
                 setDeltaMovement(0, Math.min(1.6, v.y + 0.06), 0);
                 if (level().isClientSide) exhaust(4);
@@ -170,7 +187,7 @@ public class SpacePodEntity extends Entity {
 
     @Override
     protected void readAdditionalSaveData(CompoundTag tag) {
-        entityData.set(STATE, tag.getInt("state") == LAUNCHING ? PARKED : tag.getInt("state")); // an interrupted launch just stays
+        entityData.set(STATE, tag.getInt("state") == LAUNCHING || tag.getInt("state")==ORBIT_LAUNCH ? PARKED : tag.getInt("state")); // an interrupted launch just stays
         timer = tag.getInt("timer");
         try {
             target = Planet.valueOf(tag.getString("target"));

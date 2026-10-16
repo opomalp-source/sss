@@ -87,6 +87,7 @@ public final class GalaxyService {
         if(!InputGuard.allow(p,InputGuard.Kind.GALAXY)) return;
         try {
             var center=GalaxyCatalog.Id.parse(r.id());
+            if(r.action()==7){if(p.getVehicle() instanceof com.dbzenith.world.SpacePodEntity pod)pod.launchOrbit(p);return;}
             if(r.action()==6){com.dbzenith.galaxy.planet.PlanetRuntime.travel(p,new GalaxyCatalog.Ref(center,r.planet()));return;}
             if(r.action()==WAYPOINT || r.action()==CLEAR_WAYPOINT) {
                 var data=GalaxyData.get(p.server);

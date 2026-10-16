@@ -104,7 +104,8 @@ public final class KiBloom {
             float pt = event.getPartialTick();
             float aberration = CameraFx.aberration(pt), impact = CameraFx.impact();
             boolean wasUsed = used;
-            boolean postNow = post != null && active() && (wasUsed && DBZConfig.CLIENT.heatHaze.get() > 0.01 || aberration > 0.01f || impact > 0.01f);
+            float entry=com.dbzenith.client.space.SpaceClient.entryIntensity()*DBZConfig.CLIENT.heatHaze.get().floatValue()*(CameraFx.calm()?.25f:1);
+            boolean postNow = post != null && active() && (wasUsed && DBZConfig.CLIENT.heatHaze.get() > 0.01 || aberration > 0.01f || impact > 0.01f || entry>.01f);
             if (!wasUsed && !postNow) return;
             used = false;
             end();
@@ -136,6 +137,7 @@ public final class KiBloom {
                 post.setSampler("NoiseSampler", mc.getTextureManager().getTexture(NOISE).getId());
                 set(post, "Time", ((mc.level == null ? 0 : mc.level.getGameTime() % 24000) + pt) / 20f);
                 set(post, "Haze", wasUsed && KiParticles.quality() > 0 ? DBZConfig.CLIENT.heatHaze.get().floatValue() : 0f);   // none at low quality (phase 10)
+                set(post,"EntryHaze",KiParticles.quality()>0?entry:0);
                 set(post, "Aberration", aberration);
                 set(post, "Impact", impact);
                 draw(post, scene, 1f, 0, 0);

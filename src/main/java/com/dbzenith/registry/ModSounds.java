@@ -68,6 +68,7 @@ public final class ModSounds {
     public static final RegistryObject<SoundEvent> BEAM_CLASH = sound("beam_clash");         // phase 8
 
     private ModSounds() {}
+    public static final RegistryObject<SoundEvent> SPACE_DRONE=sound("space_drone"),SPACE_BREATH=sound("space_breath"),SPACE_HEARTBEAT=sound("space_heartbeat"),SPACE_ENTRY=sound("space_entry"),SPACE_MUSIC=sound("space_music");
 
     private static RegistryObject<SoundEvent> sound(String name) {
         return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(DBZenith.MOD_ID, name)));

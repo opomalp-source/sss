@@ -118,6 +118,11 @@ public final class PlanetRuntime {
     }
     private static void configure(ServerLevel l){
         if(!(l.getChunkSource().getGenerator() instanceof PlanetGenerator g))return;
+        isolateBorder(l);
+        l.getWorldBorder().setCenter(0,0);l.getWorldBorder().setSize(g.radius*2d);l.getWorldBorder().setWarningBlocks(24);
+        l.getWorldBorder().setDamageSafeZone(1);l.getWorldBorder().setDamagePerBlock(.2);
+    }
+    public static void isolateBorder(ServerLevel l){
         try {
             var field=ObfuscationReflectionHelper.findField(WorldBorder.class,"f_61905_");
             @SuppressWarnings("unchecked") var listeners=(List<BorderChangeListener>)field.get(l.getServer().overworld().getWorldBorder());
@@ -125,11 +130,14 @@ public final class PlanetRuntime {
             for(var listener:new ArrayList<>(listeners))if(listener instanceof BorderChangeListener.DelegateBorderChangeListener delegate && target.get(delegate)==l.getWorldBorder())
                 l.getServer().overworld().getWorldBorder().removeListener(listener);
         }catch(ReflectiveOperationException ex){throw new IllegalStateException("Cannot isolate procedural planet border",ex);}
-        l.getWorldBorder().setCenter(0,0);l.getWorldBorder().setSize(g.radius*2d);l.getWorldBorder().setWarningBlocks(24);
-        l.getWorldBorder().setDamageSafeZone(1);l.getWorldBorder().setDamagePerBlock(.2);
     }
     public static boolean hasPod(ServerPlayer p){return p.isCreative() || p.getVehicle() instanceof SpacePodEntity || p.getMainHandItem().is(ModItems.SPACE_POD.get())||p.getOffhandItem().is(ModItems.SPACE_POD.get());}
     public static boolean travel(ServerPlayer p,GalaxyCatalog.Ref ref){return queue(p,ref,null,false);}
+    public static boolean pending(ServerPlayer p){return state(p.server).pending.containsKey(p.getUUID());}
+    public static boolean reenter(ServerPlayer p,GalaxyCatalog.Ref ref,double x,double z,net.minecraft.world.phys.Vec3 velocity){
+        var tag=new CompoundTag();tag.putString("ref",ref.key());tag.putDouble("x",x);tag.putDouble("y",com.dbzenith.galaxy.space.SpaceMath.ENTRY);tag.putDouble("z",z);tag.putFloat("yaw",p.getYRot());
+        tag.putBoolean("entry",true);tag.putDouble("vx",velocity.x);tag.putDouble("vy",velocity.y);tag.putDouble("vz",velocity.z);return queue(p,ref,tag,true);
+    }
     public static boolean home(ServerPlayer p){
         if(!hasPod(p)){p.displayClientMessage(Component.literal("Hold a Space Pod to plot a course."),true);return false;}
         if(p.level().dimension().equals(Level.OVERWORLD)){p.getPersistentData().remove(RETURN);return true;}
@@ -143,7 +151,7 @@ public final class PlanetRuntime {
         if(!reconnect&&data.isOnCooldown("space_travel",p.level().getGameTime())&&!p.isCreative()){p.displayClientMessage(Component.literal("Your Space Pod is recharging."),true);return false;}
         try {
             var legacy=legacy(ref);
-            if(reconnect&&legacy!=null){p.getPersistentData().remove(RETURN);return false;}
+            if(reconnect&&legacy!=null&&(checkpoint==null||!checkpoint.getBoolean("entry"))){p.getPersistentData().remove(RETURN);return false;}
             if(legacy!=null&&!reconnect){
                 Planet planet=Arrays.stream(Planet.values()).filter(t->t.dimension().equals(legacy)).findFirst().orElse(Planet.EARTH);
                 return p.getVehicle() instanceof SpacePodEntity pod?pod.launch(p,planet):Planet.travel(p,planet);
@@ -153,7 +161,7 @@ public final class PlanetRuntime {
             if(target.equals(p.level().dimension())&&!reconnect)throw new IllegalArgumentException("You are already on that planet.");
             if(checkpoint!=null){
                 double cx=checkpoint.getDouble("x"),cy=checkpoint.getDouble("y"),cz=checkpoint.getDouble("z");
-                if(!Double.isFinite(cx)||!Double.isFinite(cy)||!Double.isFinite(cz)||Math.abs(cx)>level.getWorldBorder().getSize()/2-8||Math.abs(cz)>level.getWorldBorder().getSize()/2-8||cy< -63||cy>315)checkpoint=null;
+                if(!Double.isFinite(cx)||!Double.isFinite(cy)||!Double.isFinite(cz)||Math.abs(cx)>level.getWorldBorder().getSize()/2-8||Math.abs(cz)>level.getWorldBorder().getSize()/2-8||cy< -63||cy>768)checkpoint=null;
             }
             double x=checkpoint==null?8:checkpoint.getDouble("x"),z=checkpoint==null?8:checkpoint.getDouble("z");
             ChunkPos chunk=new ChunkPos(BlockPos.containing(x,0,z));
@@ -218,8 +226,8 @@ public final class PlanetRuntime {
             if(!cancel){try{
                 if(q.ready.join()){
                     boolean bed=q.checkpoint!=null&&q.checkpoint.getBoolean("bed");
-                    BlockPos at=bed?BlockPos.containing(q.checkpoint.getDouble("x"),q.checkpoint.getDouble("y"),q.checkpoint.getDouble("z")):landing(l,q.chunk);double x=at.getX()+.5,y=at.getY(),z=at.getZ()+.5;
-                    if(q.checkpoint!=null){x=q.checkpoint.getDouble("x");y=q.checkpoint.getDouble("y");z=q.checkpoint.getDouble("z");if(!l.getWorldBorder().isWithinBounds(BlockPos.containing(x,y,z))||y<-63||y>315){x=at.getX()+.5;y=at.getY();z=at.getZ()+.5;}}
+                    BlockPos at=q.checkpoint!=null?BlockPos.containing(q.checkpoint.getDouble("x"),q.checkpoint.getDouble("y"),q.checkpoint.getDouble("z")):landing(l,q.chunk);double x=at.getX()+.5,y=at.getY(),z=at.getZ()+.5;
+                    if(q.checkpoint!=null){x=q.checkpoint.getDouble("x");y=q.checkpoint.getDouble("y");z=q.checkpoint.getDouble("z");if(!l.getWorldBorder().isWithinBounds(BlockPos.containing(x,y,z))||y<-63||y>768){at=landing(l,q.chunk);x=at.getX()+.5;y=at.getY();z=at.getZ()+.5;}}
                     if(bed){
                         var safe=net.minecraft.world.entity.player.Player.findRespawnPositionAndUseSpawnBlock(l,at,q.checkpoint.getFloat("yaw"),q.checkpoint.getBoolean("forced"),true);
                         if(safe.isEmpty()){
@@ -233,8 +241,13 @@ public final class PlanetRuntime {
                     p.stopRiding();
                     p.teleportTo(l,x,y,z,q.checkpoint==null?p.getYRot():q.checkpoint.getFloat("yaw"),0);
                     if(vessel!=null){vessel.discard();SpacePodEntity.arrive(p,new net.minecraft.world.phys.Vec3(x,y,z));}p.fallDistance=0;p.setDeltaMovement(0,0,0);
+                    if(q.checkpoint!=null&&q.checkpoint.getBoolean("entry")){
+                        var velocity=new net.minecraft.world.phys.Vec3(q.checkpoint.getDouble("vx"),q.checkpoint.getDouble("vy"),q.checkpoint.getDouble("vz"));p.setDeltaMovement(velocity);
+                        p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket(p));p.getPersistentData().putLong("dbzenithReentryUntil",now+140);
+                        com.dbzenith.galaxy.space.SpaceRuntime.scene(p,true,velocity);
+                    }
                     if(q.checkpoint==null)ModCapabilities.getOrThrow(p).setCooldown("space_travel",l.getGameTime()+com.dbzenith.config.DBZConfig.SERVER.spacePodRechargeTicks.get());
-                    var d=GalaxyData.get(server);var body=body(l);d.discover(q.ref,p.getUUID(),p.getGameProfile().getName(),server.overworld().getGameTime(),body.name());
+                    var d=GalaxyData.get(server);var body=body(l);if(body==null)body=GalaxyCatalog.body(server.overworld().getSeed(),d.salt(),q.ref);d.discover(q.ref,p.getUUID(),p.getGameProfile().getName(),server.overworld().getGameTime(),body.name());
                     s.used.put(l.dimension(),now);checkpoint(p);PlanetEnvironment.enter(p);
                     p.displayClientMessage(Component.literal("Landed on "+d.name(q.ref,body.name())),false);
                 }else p.displayClientMessage(Component.literal("Landing terrain was unavailable. You remain at your departure point."),false);

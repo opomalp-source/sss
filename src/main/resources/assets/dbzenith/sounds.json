@@ -199,4 +199,4 @@
     "subtitle": "subtitles.dbzenith.beam_clash",
     "sounds": ["dbzenith:beam_clash"]
   }
-}
+,"space_drone":{"subtitle":"subtitles.dbzenith.space_drone","sounds":[{"name":"dbzenith:space_drone","stream":true}]},"space_breath":{"subtitle":"subtitles.dbzenith.space_breath","sounds":[{"name":"dbzenith:space_breath","stream":true}]},"space_heartbeat":{"subtitle":"subtitles.dbzenith.space_heartbeat","sounds":[{"name":"dbzenith:space_heartbeat","stream":true}]},"space_entry":{"subtitle":"subtitles.dbzenith.space_entry","sounds":[{"name":"dbzenith:space_entry","stream":true}]},"space_music":{"subtitle":"subtitles.dbzenith.space_music","sounds":[{"name":"dbzenith:space_music","stream":true}]}}

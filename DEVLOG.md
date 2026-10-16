@@ -3953,3 +3953,40 @@ User approved the eight-phase immersive space design. This release is Phase 1 on
 - README/TODO/HANDOFF/GALAXY docs updated. Release script stages the offline dependency as well. User-requested
   direct local installation and source/tag push only: no updater/deploy. Phase3 is the next step; orbital skies,
   weather/landmarks/scouter, hyperspeed and planetary destruction remain later phases. Story last.
+
+### v0.141.0 — Galaxy Phase 3: orbital space and atmospheric crossings (2026-10-17)
+- On-demand runtime orbital instances per star system: shared local coordinates within a system, separate
+  dimensions/entity lists across systems, own dimension effects/type and independent borders. Hard active-orbit
+  cap4, async arrival tickets, bounded pending work, idle save/close/unregister, restart/reconnect checkpoints.
+  Browsing still generates no worlds. Existing named/surface dimensions and deterministic v1 outputs preserved.
+- Ki flight above altitude512 enters orbit; Space Pod menu adds continuous orbital launch. Gradual atmospheric
+  darkening/fog thinning, star emergence, cloud cutoff, curved distant horizon and wind fade. Destination chunks
+  preload, bounded fades cover crossings, and receiving-world UI closes only after client terrain is present.
+  Fade is tied to an accepted preload, so a full orbital cap cannot leave a high-altitude player blacked out.
+- Position mapping between a finite surface and its orbital sphere; close-return anchor for exact departure
+  coordinates. Re-entry above altitude340 with downward momentum, fire/plasma particles, warm edge glow, rumble,
+  atmospheric roar and existing post-shader heat shimmer. Accessibility/quality settings remain respected.
+- Pure shared inertial flight model: unpowered drift, ki thrust, strafe/rise, Sneak braking and bounded Sprint
+  boost; existing ki drain/seals retained. Living gravity is actually zero in orbit; ordinary items/projectiles
+  float. Ridden pods preserve transport and sealing. Real mineable rock/iron/ice clusters in a sparse inner belt.
+- Original cached star/nebula mesh, colored sun corona/glare; lit planet spheres with original spherical FBM
+  material maps, continents/oceans/polar regions, gas bands, volcanic/crystal/ice/desert palettes; independently
+  rotating cloud shells, atmosphere rims, rings and moons. Background material synthesis and bounded cache,
+  angular-size mesh/texture LOD. Original art is procedural code, no downloaded source textures.
+- Original synthesized Ogg drone, breathing, heartbeat, atmospheric roar and slow harmonies. World one-shots
+  attenuate/lower pitch toward vacuum; continuous flight wind fades. Existing lifecycle-managed ki loops remain.
+  tools/gen_space_audio.py needs numpy/soundfile; Ogg writes are chunked to avoid Windows encoder stack overflow.
+- Protocol44: bounded S2C survey metadata reused for the scene; terrain/world seeds never sent. Small motion
+  hints are finite/speed/proximity checked and rate-limited; the server owns destination, caps and transfers.
+  New operator orbit/approach previews; actual player interstellar travel remains Phase5. Gas giants allow only
+  upper-cloud approach, not fake solid landing; nearby stars burn and blind unprotected non-creative players.
+- Three new GameTests: orbital geometry/location round trips, inertia/braking/capped thrust; address and real
+  belt determinism, empty-space/codec round trip; actual runtime ascent/reentry, zero gravity, current map ID,
+  packet bounds and matching Earth coordinates with downward entry. All260 required tests passed. Streamed
+  sound entries are verified by the existing asset test. Existing charged-blast fixture moved to its own batch
+  after repeated concurrent interference, with its hit/stun/meter assertions unchanged.
+- Dev-client checks: Earth daylight material/cloud/rim, orbital HUD, moons/rings/starfield/asteroids, ascent and
+  entry recordings. Fixed the horizon's large ice-cap appearance and held movement inputs for complete devshot
+  clips. Profiling at1280x720, renderDistance7,60fps cap: space58-60fps after materials complete, planet60fps.
+  Limited local smoke check; full profiling/LOD/balance is Phase8. Docs/TODO/HANDOFF/version updated, direct local
+  install and main/tag push only. No updater/deploy. Planetary skies/weather/content/scouter are Phase4; story last.

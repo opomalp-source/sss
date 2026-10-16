@@ -29,6 +29,8 @@ public final class MotionDev {
         up = name.contains("driveup");
         down = name.contains("drivedown");
         ticks = forward || back || left || turn || up || down ? delay + (up || down ? 6 : 60) : 0;
+        var clip=java.util.regex.Pattern.compile("seq(\\d+)").matcher(name);
+        if(ticks>0&&clip.find())ticks=Math.max(ticks,delay+Math.min(400,Integer.parseInt(clip.group(1)))+6);
     }
 
     @SubscribeEvent

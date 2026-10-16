@@ -20,7 +20,7 @@ public final class ClientPlanet {
     @SubscribeEvent public static void logout(ClientPlayerNetworkEvent.LoggingOut e){environment=null;}
     @SubscribeEvent public static void fog(ViewportEvent.RenderFog e){
         var mc=Minecraft.getInstance();var d=environment;
-        if(d==null||d.name().isEmpty()||mc.player==null||!mc.player.level().dimension().location().toString().equals(d.dimension())||mc.player.isUnderWater())return;
+        if(d==null||d.radius()==0||d.name().isEmpty()||mc.player==null||!mc.player.level().dimension().location().toString().equals(d.dimension())||mc.player.isUnderWater())return;
         double edge=d.radius()-Math.max(Math.abs(mc.player.getX()),Math.abs(mc.player.getZ()));
         if(edge<192){float far=(float)Math.max(20,Math.min(e.getFarPlaneDistance(),edge+20));e.setFarPlaneDistance(far);e.setNearPlaneDistance(Math.min(e.getNearPlaneDistance(),far*.2f));e.setCanceled(true);}
     }

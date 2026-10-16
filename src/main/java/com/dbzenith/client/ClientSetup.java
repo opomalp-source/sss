@@ -58,6 +58,7 @@ public final class ClientSetup {
         event.registerAboveAll("dragon_radar", new RadarOverlay());
         event.registerAboveAll("scouter", new ScouterOverlay());
         event.registerAboveAll("planet_environment", new ClientPlanet.Overlay());
+        event.registerAboveAll("orbital_transit",new com.dbzenith.client.space.SpaceClient.Overlay());
         event.registerAboveAll("debug_stats", new DebugStatsOverlay());
     }
 
