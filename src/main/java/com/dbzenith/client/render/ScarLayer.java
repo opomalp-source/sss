@@ -113,7 +113,7 @@ public class ScarLayer<T extends LivingEntity, M extends HumanoidModel<T>> exten
     @Override
     public void render(PoseStack pose, MultiBufferSource buffers, int light, T e, float limbSwing, float limbSwingAmount,
                        float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (e.isInvisible()) return;
+        if (e.isInvisible() || ApeLook.is(e)) return;                              // under the Great Ape's fur
         Painted p = PAINTED.get(e.getId());
         if (p == null || p.scars.isEmpty()) return;
         long now = e.level().getGameTime();

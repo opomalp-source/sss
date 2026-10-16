@@ -5706,8 +5706,7 @@ public class ArtGen {
     // ================================================================== creatures with their own models
 
     static final class Creatures {
-        static void all() throws IOException {
-            greatApe();
+        static void all() throws IOException {                                              // the Great Ape: tools/GreatApeGen.java
             dragon();
             formHair();
             spacePod();
@@ -5813,47 +5812,6 @@ public class ArtGen {
             if (strand > 0.78) i = Math.min(r.length - 1, i + 1);
             else if (strand < 0.2) i = Math.max(0, i - 1);
             return r[i];
-        }
-
-        /** Texture for client.render.GreatApeModel (128x64, same box layout as the model). */
-        static void greatApe() throws IOException {
-            greatApe("great_ape", 0xFF6A4224, 0xFFFF2018);
-            greatApe("great_ape_golden", 0xFFE0A830, 0xFFFF2018);                              // the golden ape
-            greatApe("great_ape_legendary", 0xFFC8B83A, 0xFF7CFF4A);                           // the legendary ape, green-eyed
-        }
-
-        static void greatApe(String name, int furColor, int eyeColor) throws IOException {
-            int[] fur = ramp(furColor, 5), skin = ramp(0xFFC89A70, 4), dark = ramp(0xFF2A1A12, 3);
-            Canvas c = new Canvas(128, 64);
-            box(c, 0, 0, 9, 8, 8, (f, x, y, w, h) -> {                                          // skull
-                if (f == Face.FRONT) {
-                    if (y == 4 && (x == 2 || x == 6)) return eyeColor;                            // the eyes
-                    if (y == 4 && (x == 1 || x == 3 || x == 5 || x == 7)) return 0xFF801010;
-                    if (y >= 3 && x >= 1 && x <= 7) return skin[y == 3 ? 1 : 2];                   // face mask
-                }
-                return fur(fur, f, x, y, 201);
-            });
-            box(c, 36, 0, 6, 4, 3, (f, x, y, w, h) -> {                                         // muzzle
-                if (f == Face.FRONT) {
-                    if (y == 0 && (x == 1 || x == 4)) return dark[0];                            // nostrils
-                    if (y == 2) return dark[1];                                                 // mouth
-                    if (y == 3 && (x == 0 || x == 5)) return 0xFFF0E8D0;                         // fangs
-                }
-                return f == Face.TOP ? skin[2] : f == Face.BOTTOM ? skin[0] : skin[1];
-            });
-            box(c, 36, 8, 9, 1, 1, (f, x, y, w, h) -> f == Face.TOP ? fur[2] : fur[0]);         // brow ridge
-            box(c, 58, 0, 1, 3, 2, (f, x, y, w, h) -> f == Face.RIGHT || f == Face.LEFT ? skin[1] : fur[1]); // ears
-            box(c, 0, 16, 14, 13, 9, (f, x, y, w, h) -> {                                       // body
-                if (f == Face.FRONT && x >= 3 && x <= 10 && y >= 1 && y <= 11) return skin[(x + y) % 5 == 0 ? 1 : 2]; // chest
-                return fur(fur, f, x, y, 202);
-            });
-            box(c, 48, 16, 5, 18, 5, (f, x, y, w, h) -> {                                       // arms
-                if (y >= 15) return f == Face.BOTTOM ? dark[0] : dark[f == Face.FRONT ? 2 : 1];  // leathery hands
-                return fur(fur, f, x, y, 203);
-            });
-            box(c, 70, 16, 5, 10, 5, (f, x, y, w, h) -> y >= 8 ? dark[f == Face.FRONT ? 2 : 1] : fur(fur, f, x, y, 204)); // legs + feet
-            box(c, 92, 16, 2, 2, 8, (f, x, y, w, h) -> fur(fur, f, x, y, 205));                 // tail
-            c.save("entity/" + name + ".png");
         }
     }
 

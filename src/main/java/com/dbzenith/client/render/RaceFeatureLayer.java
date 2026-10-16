@@ -91,6 +91,7 @@ public class RaceFeatureLayer extends RenderLayer<AbstractClientPlayer, PlayerMo
 
     static int tailColor(PublicStatePacket state) {
         String form = state.form();
+        if (ApeLook.is(state)) return ApeLook.tailColor(form);
         if (form.contains("limit_breaker")) return 0xD8DCE6;
         if (form.contains("super_saiyan_4") || form.contains("ssj4") || form.contains("lssj4")) return 0xC0283A;
         if (form.contains("golden")) return 0xE8B840;

@@ -98,7 +98,7 @@ public class BattleDamageLayer<T extends LivingEntity, M extends HumanoidModel<T
     @Override
     public void render(PoseStack pose, MultiBufferSource buffers, int light, T e, float limbSwing, float limbSwingAmount,
                        float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (e.isInvisible() || !DBZConfig.CLIENT.battleDamage.get()) return;
+        if (e.isInvisible() || !DBZConfig.CLIENT.battleDamage.get() || ApeLook.is(e)) return;
         int hd = ArtStyle.hiRes() ? 1 : 0;
         ResourceLocation[] tex = TEX[hd][layout(e)];
         int overlay = LivingEntityRenderer.getOverlayCoords(e, 0);

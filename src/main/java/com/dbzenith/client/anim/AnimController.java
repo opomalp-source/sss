@@ -145,7 +145,7 @@ public final class AnimController {
         if (com.dbzenith.combat.Wounds.wounded(player) > 0.25f && player.onGround() && !state.has(PublicStatePacket.FLYING)
                 && !state.powering() && !state.has(PublicStatePacket.GUARDING)) return Anims.custom("wounded", Anims.WOUNDED);   // hunched, a hand on the wound (CX-52)
         if (state == null || player.isPassenger() || player.isSleeping() || player.isFallFlying() || player.isSwimming()
-                || player.getPose() == Pose.SWIMMING || isApe(state.form())) return null;
+                || player.getPose() == Pose.SWIMMING) return null;
         if (state.has(PublicStatePacket.DOWNED)) return Anims.custom("downed", Anims.DOWNED);
         com.dbzenith.combat.engine.Fighter.State fs = FighterStates.get(player.getId());   // the engine's states (CX-19e)
         if (fs == com.dbzenith.combat.engine.Fighter.State.LAUNCHED) return Anims.custom("launched", Anims.LAUNCHED);
@@ -185,9 +185,16 @@ public final class AnimController {
     private static void tickActions(AbstractClientPlayer player, Track t, PublicStatePacket state, long now) {
         // transformations: the form changed while we were watching
         String form = state == null ? null : state.form();
-        if (form != null && t.form != null && !form.equals(t.form) && !isApe(form)) {
+        if (form != null && t.form != null && !form.equals(t.form)) {
             if (PlayerData.BASE_FORM.equals(form)) play(player, t, Anims.POWER_DOWN, now, 0);
-            else {
+            else if (isApe(form)) {                                             // the Great Ape: the roar, then fists on the chest (v0.134)
+                play(player, t, Anims.APE_ROAR, now, (int) Anims.APE_ROAR.endTick);
+                com.dbzenith.client.fx.GiantSteps.roar(player);
+                if (player == Minecraft.getInstance().player) {
+                    com.dbzenith.client.ui.CutInOverlay.play(net.minecraft.network.chat.Component.translatable(
+                            com.dbzenith.transform.Forms.byId(form).translationKey()), 0xFF2020);
+                }
+            } else {
                 play(player, t, Anims.transformFor(state.raceEnum()), now, 30);
                 com.dbzenith.client.fx.TransformBurst.burst(player, form, state.auraColor());   // CX-24 phase 6
                 if (player == Minecraft.getInstance().player) {
@@ -448,7 +455,7 @@ public final class AnimController {
         };
     }
 
-    /** The Great Ape replaces the whole player model, so the humanoid animations do not apply. */
+    /** The Great Ape forms (the player's own figure grown giant: it roars on the change instead of the usual burst). */
     private static boolean isApe(String form) {
         return com.dbzenith.transform.GreatApe.isApeForm(form);
     }

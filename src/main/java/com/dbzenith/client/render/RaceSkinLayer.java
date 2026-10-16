@@ -69,7 +69,7 @@ public class RaceSkinLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         public static void pre(net.minecraftforge.client.event.RenderPlayerEvent.Pre event) {
             PublicStatePacket state = ClientPublicStates.get(event.getEntity().getId());
             boolean raceSkin = state != null && state.raceLook() && texture(state) != null;
-            if (!raceSkin && !BodySkinLayer.active(state)) return;
+            if (!raceSkin && !BodySkinLayer.active(state) && !ApeLook.is(state)) return;
             PlayerModel<AbstractClientPlayer> m = event.getRenderer().getModel();
             m.hat.visible = false;
             m.jacket.visible = false;
@@ -83,7 +83,7 @@ public class RaceSkinLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
     @Override
     public void render(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player, float limbSwing,
                        float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (player.isInvisible()) return;
+        if (player.isInvisible() || ApeLook.is(player)) return;                     // the Great Ape wears its own fur (ApeLayer)
         PublicStatePacket state = ClientPublicStates.get(player.getId());
         if (state == null || !state.raceLook()) return;
         ResourceLocation tex = texture(state);

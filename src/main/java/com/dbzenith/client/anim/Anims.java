@@ -576,6 +576,38 @@ public final class Anims {
                 .pose(44, fight(), Ease.INOUTQUAD);
     });
 
+    /**
+     * The Great Ape's change (v0.134): hunched, heaving, then up to its full height with the head thrown back and the
+     * arms flung wide and high in a roar that shakes it (the jaw drops with it, {@code ApeLayer.ROAR_FROM..ROAR_TO}),
+     * then fists pounding the chest, one and the other, before it settles into a heavy stance.
+     */
+    public static final KeyframeAnimation APE_ROAR = once(96, a -> {
+        Pose hunch = new Pose().at(0, 2.4f, 0).r("torso", 30, 0, 0).r("head", 18, 0, 0)
+                .limb("rightArm", -20, -15, 22, 70).limb("leftArm", -20, 15, -22, 70)
+                .limb("rightLeg", -6, 0, 14, 36).limb("leftLeg", -6, 0, -14, 36);
+        Pose roar = new Pose().at(0, 0.2f, 0).r("torso", -22, 0, 0).r("head", -42, 0, 0)
+                .limb("rightArm", -25, 0, 100, 25).limb("leftArm", -25, 0, -100, 25)
+                .limb("rightLeg", 0, 0, 18, 8).limb("leftLeg", 0, 0, -18, 8);
+        Pose beat = new Pose().at(0, 0.8f, 0).r("torso", -10, 0, 0).r("head", -18, 0, 0)
+                .limb("rightLeg", 0, 0, 14, 12).limb("leftLeg", 0, 0, -14, 12);
+        a.pose(0, new Pose().at(0, 1.0f, 0), Ease.LINEAR).pose(8, hunch, Ease.OUTQUAD);
+        a.pose(10, hunch.copy().move(0, 0.4f, 0), Ease.INOUTSINE);
+        a.pose(14, roar, Ease.OUTEXPO);
+        for (int t = 16; t <= 46; t += 2) {                                         // shaking with the roar
+            float s = (t % 4 == 0 ? 1 : -1) * 0.35f;
+            a.pose(t, roar.copy().move(s, 0, 0).r("head", -42, s * 8, s * 3), Ease.LINEAR);
+        }
+        a.pose(50, roar, Ease.INOUTSINE);
+        for (int i = 0; i < 8; i++) {                                               // fists on the chest, one and the other
+            boolean right = i % 2 == 0;
+            Pose p = beat.copy()
+                    .limb("rightArm", right ? -72 : -96, -38, right ? 18 : 40, right ? 128 : 96)
+                    .limb("leftArm", right ? -96 : -72, 38, right ? -40 : -18, right ? 96 : 128);
+            a.pose(56 + i * 4, p, i == 0 ? Ease.INOUTQUAD : Ease.OUTQUAD);
+        }
+        a.pose(96, new Pose().at(0, 1.0f, 0), Ease.INOUTQUAD);
+    });
+
     /** Light hit: the head snaps aside, the torso recoils half a step back, then the guard comes back up. */
     public static final KeyframeAnimation HIT_LIGHT = once(12, a -> {
         Pose hit = new Pose().at(0, 1.6f, 1.2f).r("torso", -14, 8, 0).r("head", -22, 14, 0)

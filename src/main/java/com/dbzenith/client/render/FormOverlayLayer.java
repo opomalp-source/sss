@@ -26,7 +26,7 @@ public class FormOverlayLayer extends RenderLayer<AbstractClientPlayer, PlayerMo
     @Override
     public void render(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player, float limbSwing,
                        float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (player.isInvisible()) return;
+        if (player.isInvisible() || ApeLook.is(player)) return;                     // the Great Ape wears its own fur (ApeLayer)
         PublicStatePacket state = ClientPublicStates.get(player.getId());
         if (state == null) return;
         String overlay = FormLooks.of(FormHairLayer.flicker(player, state, ageInTicks).id()).overlay();

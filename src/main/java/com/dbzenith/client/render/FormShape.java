@@ -11,6 +11,7 @@ public final class FormShape {
     /** Bulk: 2 hulking, 1 buffed, 0 as built, negative slimmer. */
     public static float bulk(String form) {
         if (form == null) return 0;
+        if (com.dbzenith.transform.GreatApe.isApeForm(form)) return 2;          // the Great Ape: hulking
         if (form.equals("buffed") || form.startsWith("lssj") || form.equals("berserker") || form.equals("wrathful")
                 || form.equals("primordial_majin") || form.equals("mutant_overlord")) return 2;
         if (form.equals("full_power") || form.equals("super_saiyan_rage") || form.equals("beast_awakening") || form.equals("super_majin")

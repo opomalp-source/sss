@@ -52,7 +52,7 @@ public final class Forms {
 
     public static final Form GREAT_APE = add(Form.builder("great_ape").parent("base", 1)
             .races(Race.SAIYAN, Race.HALF_SAIYAN).multipliers(4.0, 0.6, 2.0).drain(0, 0)
-            .colors(0xB0402A, -1, 0xFF2020).scale(3.0f).noTechniques().noFlight().trigger(Form.Trigger.MOON).build());
+            .colors(0xB0402A, -1, 0xFF2020).scale(10f).noTechniques().noFlight().trigger(Form.Trigger.MOON).build());
 
     // --- Half-Saiyan exclusive (also uses the Saiyan line above) ---
     public static final Form ULTIMATE = add(Form.builder("ultimate").parent("base", 4)
@@ -146,7 +146,7 @@ public final class Forms {
 
     // --- Primal Saiyan (and the Half-Saiyan Awakened Evolution path): the Golden Ape and the Super Saiyan 4 line ---
     public static final Form GOLDEN_APE = add(Form.builder("golden_ape").parent("super_saiyan_3", 4).races(Race.SAIYAN, Race.HALF_SAIYAN)
-            .only(Variant.PRIMAL, Variant.AWAKENED_EVOLUTION).dbv(18).drain(2.5, 0).colors(0xFFC23C, -1, 0xFF2020).scale(3.0f)
+            .only(Variant.PRIMAL, Variant.AWAKENED_EVOLUTION).dbv(18).drain(2.5, 0).colors(0xFFC23C, -1, 0xFF2020).scale(10f)
             .noTechniques().noFlight().unlock(1000, 40).build());
     public static final Form SUPER_SAIYAN_4 = add(Form.builder("super_saiyan_4").parent("golden_ape", 5).races(Race.SAIYAN, Race.HALF_SAIYAN)
             .only(Variant.PRIMAL, Variant.AWAKENED_EVOLUTION).dbv(20, 40).drain(2.2, 0).colors(SSJ4_AURA, SSJ4_HAIR, SSJ4_EYES)
@@ -169,7 +169,7 @@ public final class Forms {
             .dbv(18).rising(0.1).drain(4.5, 1.0).lightning().colors(LEGEND_AURA, LEGEND_HAIR, BLANK_EYES).hair(Form.HairStyle.LONG)
             .scale(1.15f).unlock(900, 50).build());
     public static final Form LEGENDARY_GREAT_APE = add(Form.builder("legendary_great_ape").parent("lssj3", 4).races(Race.SAIYAN)
-            .only(Variant.LEGENDARY_PRIMAL).dbv(20).drain(2.5, 0).colors(0x6AFF3A, -1, 0xFF2020).scale(3.2f).noTechniques().noFlight()
+            .only(Variant.LEGENDARY_PRIMAL).dbv(20).drain(2.5, 0).colors(0x6AFF3A, -1, 0xFF2020).scale(11f).noTechniques().noFlight()
             .unlock(1100, 40).build());
     public static final Form LSSJ4 = add(Form.builder("lssj4").parent("legendary_great_ape", 5).races(Race.SAIYAN).only(Variant.LEGENDARY_PRIMAL)
             .dbv(22, 44).rising(0.1).drain(2.4, 0).colors(SSJ4_AURA, SSJ4_HAIR, SSJ4_EYES).hair(Form.HairStyle.SPIKY_TALL).scale(1.12f)

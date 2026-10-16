@@ -244,7 +244,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue pvpTagForcesOn;
         public final ForgeConfigSpec.BooleanValue pvpHurtOutOfPvp;
         public final ForgeConfigSpec.BooleanValue pvpMeterGate;
-        public final ForgeConfigSpec.BooleanValue destructionEnabled, destructionKnockback, destructionKi;
+        public final ForgeConfigSpec.BooleanValue destructionEnabled, destructionKnockback, destructionKi, giantTrample;
         public final ForgeConfigSpec.DoubleValue destructionMaxRadius, destructionMaxHardness, destructionDrops, blowAwayForce, blowAwaySpeed;
         public final ForgeConfigSpec.IntValue destructionMaxBlocks, blowAwayComboHits;
         /** The ki attack rework, phase 6: ki craters made huge, carved over a few ticks, and optionally grown back. */
@@ -702,6 +702,7 @@ public final class DBZConfig {
             destructionEnabled = b.comment("Craters at all (off: the land is never torn up)").define("enabled", true);
             destructionKnockback = b.comment("Fighters blown into walls and the ground leave craters").define("knockbackCraters", true);
             destructionKi = b.comment("Ki attacks leave craters (each technique can be made calm in the Ki creator)").define("kiCraters", true);
+            giantTrample = b.comment("Giants (the Great Ape) trample trees and plants they walk into: leaves, plants and snow are crushed, logs drop as wood").define("giantTrample", true);
             destructionMaxRadius = b.comment("The largest crater's radius in blocks").defineInRange("maxRadius", 6.0, 1.0, 16.0);
             destructionMaxHardness = b.comment("The hardest block anything can break (stone 1.5, iron block 5, obsidian 50)").defineInRange("maxHardness", 50.0, 0.0, 1000.0);
             destructionMaxBlocks = b.comment("At most this many blocks removed by one crater").defineInRange("maxBlocks", 500, 0, 5000);

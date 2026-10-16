@@ -63,6 +63,11 @@ public final class Motion {
         java.util.Arrays.fill(maskO, 1f);
     }
 
+    /** The gait phase in cycles (unwrapped): two footfalls a cycle. */
+    public float gait() {
+        return gait;
+    }
+
     public State state() {
         return state;
     }

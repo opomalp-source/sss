@@ -87,6 +87,13 @@ public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         int ui = state.ultraInstinct();                                          // Ultra Instinct, over the form (CX-24 phase 5): silver eyes; Mastered, silver hair
         if (ui == 2 && !goldCharge) hairColor = UI_HAIR;
         if (ui > 0) eyeColor = ui == 2 ? UI_EYES : UI_SIGN_EYES;
+        boolean ape = ApeLook.is(state);                                          // the Great Ape: its own hairstyle grown wild in the fur's colour, its own red eyes
+        if (ape) {
+            hairColor = ApeLook.hairColor(state.form());
+            eyeColor = -1;
+            goldCharge = false;
+            ui = 0;
+        }
         if (hair.isEmpty() && eyeColor < 0) return;
 
         VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(ArtStyle.hiRes() ? TEXTURE_HD : TEXTURE));
@@ -95,9 +102,13 @@ public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
             VertexConsumer hairBuffer = buffers.getBuffer(RenderType.entityCutoutNoCull(HairRender.MATERIAL));
             pose.pushPose();
             getParentModel().head.translateAndRotate(pose);
+            if (ape) {                                                            // a wild mane, lifted off the brow so the eyes show
+                pose.translate(0, -1.6f / 16f, 1.4f / 16f);
+                pose.scale(1.12f, 1.12f, 1.12f);
+            }
             float aura = state.powering() ? 1f : formHair ? .3f : 0f;                // an aura lifts the hair
             float[] live = HairSim.step(player, getParentModel().head, hair, partialTick, aura);
-            int tips = !goldCharge && ui < 2 && (form.isBase() || form.hairColor() < 0) ? state.highlight() : -1;   // dyed tips, until a form recolours the hair
+            int tips = !ape && !goldCharge && ui < 2 && (form.isBase() || form.hairColor() < 0) ? state.highlight() : -1;   // dyed tips, until a form recolours the hair
             HairRender.render(pose, hairBuffer, hair, live, hairLight, OverlayTexture.NO_OVERLAY, hairColor, tips);
             pose.popPose();
         }

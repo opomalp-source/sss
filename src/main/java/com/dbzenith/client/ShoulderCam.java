@@ -83,7 +83,7 @@ public final class ShoulderCam {
         if (!cam.isDetached() || mc.level == null || !(cam.getEntity() instanceof net.minecraft.world.entity.player.Player p)) return;
         float s = com.dbzenith.transform.GreatApe.scaleOf(p);
         if (s <= 1.01f) return;
-        double back = (s - 1) * 4;
+        double back = (s - 1) * 2.4;                                          // a Great Ape (ten times a person) about 26 blocks back
         Vec3 from = cam.getPosition();
         Vector3f look = cam.getLookVector();
         Vec3 to = from.subtract(look.x() * back, look.y() * back, look.z() * back);

@@ -72,7 +72,7 @@ public final class ClientSetup {
         event.registerLayerDefinition(com.dbzenith.client.render.GearModel.LAYER, com.dbzenith.client.render.GearModel::createLayer);
         event.registerLayerDefinition(com.dbzenith.client.render.NpcExtrasModel.LAYER, com.dbzenith.client.render.NpcExtrasModel::createLayer);
         event.registerLayerDefinition(com.dbzenith.client.render.CricketRenderer.LAYER, com.dbzenith.client.render.CricketRenderer.Model::createLayer);
-        event.registerLayerDefinition(com.dbzenith.client.render.GreatApeModel.LAYER, com.dbzenith.client.render.GreatApeModel::createLayer);
+        event.registerLayerDefinition(com.dbzenith.client.render.ApeHeadModel.LAYER, com.dbzenith.client.render.ApeHeadModel::createLayer);
         event.registerLayerDefinition(com.dbzenith.client.render.DragonModel.LAYER, com.dbzenith.client.render.DragonModel::createLayer);
         event.registerLayerDefinition(com.dbzenith.client.render.SpacePodRenderer.LAYER, com.dbzenith.client.render.SpacePodRenderer::createLayer);
     }
@@ -88,6 +88,9 @@ public final class ClientSetup {
                 var raceSkin = new com.dbzenith.client.render.RaceSkinLayer(renderer);
                 var formOverlay = new com.dbzenith.client.render.FormOverlayLayer(renderer);
                 var bodyFx = new com.dbzenith.client.render.BodyFxLayer(renderer);
+                var ape = new com.dbzenith.client.render.ApeLayer(renderer, event.getEntityModels());   // the Great Ape: fur over the figure (v0.134)
+                renderer.addLayer(ape);
+                com.dbzenith.client.render.FirstPersonBody.register(renderer, ape);
                 renderer.addLayer(bodySkin);
                 renderer.addLayer(raceSkin);
                 renderer.addLayer(formOverlay);

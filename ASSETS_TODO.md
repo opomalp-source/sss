@@ -2,7 +2,7 @@
 
 All art is **original** and drawn in code. No Toei/Shueisha/Dragon Block C art is bundled.
 
-- `tools/ArtGen.java` draws the art: items, blocks, armor layers, NPC skins, race skins, the Great Ape and the Eternal Dragon. Run it with `java tools/ArtGen.java`.
+- `tools/ArtGen.java` draws the art: items, blocks, armor layers, NPC skins, race skins and the Eternal Dragon (the Great Ape: `tools/GreatApeGen.java`). Run it with `java tools/ArtGen.java`.
 - `tools/AssetGen.java` draws effect textures (ki glow and beam, hair strands, status icons, scars and tattoos) and the GameTest structure.
 - `tools/ContactSheet.java <folder> <out.png> [cell]` tiles a folder of PNGs into one review sheet.
 
@@ -24,7 +24,7 @@ Reference material (for drawing originals, or for adding art yourself for **priv
 | `textures/models/armor/*` | Turtle and Demon gi (V-neck, lapels, belt, wristbands, back emblem), Battle Armor, scouter, weights | **drawn** | |
 | `textures/entity/fighter/*` (8) | Master, Patrol Officer, Ki Soldier, Android Unit, Sproutling, Tyrant Lord, Rampage Brute, Namekian Warrior; full 64x64 skins with outer layers | **drawn** | NPCs now use the player model so outer layers (capes, helmets) show |
 | `textures/entity/race/{namekian,frost_demon,majin}` | Optional full race looks for players (Life screen) | **drawn** | |
-| `textures/entity/great_ape` + `client/render/GreatApeModel` | Real ape model: hunched body, long arms, muzzle, brow, tail; walk and swipe animation | **drawn** | |
+| `textures/entity/ape/*` + `client/render/ApeLayer`, `ApeHeadModel` | The player's figure grown giant under fur: mane, muzzle, fangs, ears, red eyes (`tools/GreatApeGen.java`) | **drawn** | |
 | `textures/entity/eternal_dragon` + `client/render/DragonModel` | Scaled serpent coil with dorsal spikes; head with snout, jaw, horns, whiskers, glowing eyes | **drawn** | |
 | `textures/entity/form_hair` + `client/render/FormHairModel` | Hair per style (spiky, tall, long, slim): tapered three-tier spikes, dark roots to bright tips, strand texture | **drawn** | |
 | `client/render/RaceFeatureModel` | Antennae, horns, tentacle, tail | good placeholder | |

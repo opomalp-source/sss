@@ -3720,3 +3720,58 @@ game's own numbers (`run-gametest/balance-report*.md`), and fixing what didn't h
 - Checked and left alone: crawling speed (an eighth of walking, about 0.4 blocks a second: a crawl); the moon's six
   seconds; Ultra Instinct's ki burn (about 80 seconds from full in the Sign).
 - **Tests:** the wound test checks that an open stump slows healing and a closed one doesn't. 242 GameTests.
+
+## 2026-10-16 — The Great Ape as your own figure grown giant; the ground shakes; clothes tear (v0.134.0)
+The user sent pictures of how the Great Ape should look and how big: the player's own blocky figure grown giant, with
+their chosen hairstyle as a wild mane (different for everyone), an ape's face with red eyes and a muzzle of fangs,
+the tail, and Vegeta's battle armour stretched over it. Also: every step and stomp should shake, and transforming
+should tear the clothes, except clothes made for it (Vegeta's armour). Player guide: `docs/GREAT_APE.md`.
+
+- **The look (`client/render/ApeLook`, `ApeLayer`, `ApeHeadModel`, `ApeShape`):**
+  - The separate ape model (`GreatApeModel`, its 23 parts and textures) is gone. The ape is drawn by the player
+    renderer itself, scaled by the form, so the hair, tail, gear, animations and everything else come along.
+  - `ApeLayer` (first of the body layers, and your arm in first person) covers the figure in fur: a heavy build
+    (bulky body shape, hulking bulk, 12% wider), a bare tan chest with pecs and abs, bare hands and feet, and the face
+    on the head's front: tan, framed in fur, angry red eyes under a heavy lid. The eyes glow in their own pass.
+  - `ApeHeadModel` grows the ape's face on the head: a heavy brow, a blunt muzzle with a dark nose, ivory fangs over
+    a dark mouth, a jaw that drops open (wide in the roar, a snarl now and then, with each blow), cheek tufts and
+    pointed ears cut out of their boxes.
+  - The skin, race skin, face, scars, cosmetics, form overlay and battle-damage layers step aside for the ape; the
+    outer skin layer is hidden. The hair layer draws the player's own hairstyle in the fur's colour, lifted off the
+    brow so the eyes show; the tail is in the fur's colour.
+  - Three furs: brown (the moon), gold (golden ape), green-gold (legendary). `tools/GreatApeGen.java` paints all of
+    it (the fur bodies in the player skin layout at 256, the face parts, the eyes). `ArtGen`'s stale ape painter is
+    gone.
+- **The size:** the Great Ape and the golden ape are ten times a person (18 blocks, as in the pictures; it was three),
+  the legendary ape eleven. The third-person camera stands back in proportion (2.4 blocks per scale step).
+- **A giant's body (`transform/GiantBody`, every tick):** step height grows with the size (it steps over trees and
+  ledges), reach grows with the arms, a longer stride (+12% speed per scale step; the view's widening was already
+  capped), no suffocation, falls felt in proportion. Trampling: leaves, plants and snow in its way are crushed, logs
+  break and drop as wood (48 blocks a tick at most, never in safe zones, protection mods asked; server config
+  `destruction.giantTrample`).
+- **Clothes tear (`GiantBody.tearClothes`, from `FormHandler.enter`):** becoming a Great Ape (not when already one)
+  tears whatever cloth is worn (the mod's outfits and head clothing, leather): the item breaks with its sound and
+  scraps, a cloth-tearing sound, a chat line. The Saiyans' battle armour and the Frieza Force armour stretch and stay
+  on. Metal armour (anything not cloth) bursts off into the inventory or onto the ground. Gi tooltips say which.
+- **The ground shakes (`client/fx/GiantSteps`):** every footfall of a giant form (scale 2 and up, so the Giant
+  Namekian too, lighter) follows the walk's gait, two a cycle: the view shakes for everyone near (the walker too),
+  a deep thud, a ring of dust and earth kicked up at the foot. Landing from a jump or a drop is a stomp with both
+  feet, harder the faster it came down. The change's roar rumbles.
+- **Animation:** the motion engine now animates the ape (heavy idle and walk; sprint uses the heavy walk); the change
+  plays `Anims.APE_ROAR` (hunched and heaving, up into a roar with the arms flung wide and high, shaking, then fists
+  pounding the chest) with the cut-in.
+- **Tests (`GiantTests`):** the change tears a turban and a gi top, battle armour and Frieza Force armour stay,
+  iron boots go to the inventory, nothing tears when already an ape; the ape is ten times as tall, steps and reaches
+  further, can't suffocate, and shrinks back with its step and reach; what trampling breaks and what stands.
+  245 GameTests.
+- **Checked in the dev client** (a full-moon night with night vision): the ape from the front in battle armour (mane,
+  red eyes, fangs, stretched armour, gloves and boots), mid-roar, bare (fur, chest, hands, feet), from behind walking
+  (mane down the back, tail), the golden ape; the first-person view from 18 blocks up; footfalls logged while
+  walking; walking through a forest felled the trees (logs in the inventory); the turban tore, the armour stayed.
+  The bare feet showed above the boots: the foot skin is now only at the very bottom.
+- **This PC:** a new machine (user `musta`): JDK 17 at `C:\Program Files\Microsoft\jdk-17.0.20.101-hotspot`, no
+  Python on PATH, Windows long paths off. The session's folder was too deep for the Minecraft toolchain
+  (CreateProcess fails past 260 characters), so the repo was built from a `subst Z:` drive. The dev server got its
+  own `run-server` (EULA accepted with the user's OK, offline mode, random RCON password in `rcon-password.txt`) and
+  the test client `pauseOnLostFocus:false` (it paused when unfocused, and in creative its open inventory moved the
+  armour off).

@@ -213,6 +213,7 @@ public final class FormHandler {
 
     /** Enters a form with effects. No requirement checks (callers check). */
     public static void enter(ServerPlayer player, PlayerData data, Form form) {
+        Form from = Forms.byId(data.getFormId());
         data.setFormId(form.id());
         TransformationExperience.completed(data, form);
         if (!form.isBase()) data.setFlag("has_transformed", true);
@@ -222,7 +223,7 @@ public final class FormHandler {
         if (form.isBase()) burst(player.serverLevel(), player, form.auraColor(), 10);   // powering down: a puff (a new form's burst is drawn by the clients, CX-24 phase 6)
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
                 form.isBase() ? com.dbzenith.registry.ModSounds.POWER_DOWN.get() : com.dbzenith.registry.ModSounds.TRANSFORM.get(), SoundSource.PLAYERS, form.isBase() ? 0.8f : 1.3f, 1f);
-        player.refreshDimensions();
+        GiantBody.onFormEntered(player, from, form);                           // a Great Ape's change tears the clothes (v0.134); the new size
         com.dbzenith.race.RacialSkillEffects.onFormEntered(player, data, form.isBase());
         if (!form.isBase()) {
             player.displayClientMessage(Component.translatable("message.dbzenith.transformed", Component.translatable(form.translationKey())), true);

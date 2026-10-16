@@ -43,7 +43,7 @@ public class BodySkinLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
     @Override
     public void render(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player, float limbSwing,
                        float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (player.isInvisible()) return;
+        if (player.isInvisible() || ApeLook.is(player)) return;                     // the Great Ape wears its own fur (ApeLayer)
         PublicStatePacket state = ClientPublicStates.get(player.getId());
         if (!active(state)) return;
         int tint = com.dbzenith.transform.FormLooks.of(state.form()).tint();

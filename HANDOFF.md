@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.133.0, 2026-10-16)
+# Handoff: where Dragon Block Zenith stands (v0.134.0, 2026-10-16)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.133.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.134.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -41,6 +41,12 @@
   - Guide: `docs/CLOTHES.md`.
 - **v0.133.0:** feel pass. Scars come from 15% blows and from being knocked out; an open stump slows healing to a
   third.
+- **v0.134.0:** the Great Ape after the user's pictures.
+  - The player's own figure grown giant (ten times, 18 blocks) under fur, their hairstyle as the mane, an ape's
+    face with red eyes and fangs (`ApeLayer`, `ApeHeadModel`, `ApeShape`, `tools/GreatApeGen.java`).
+  - Every footfall and landing shakes the view, with dust (`GiantSteps`); a giant's step, reach, stride, trampling
+    (`GiantBody`).
+  - The change tears cloth; battle armour stretches; metal armour bursts off.
 
 ## Known gaps and ideas
 
@@ -50,13 +56,19 @@
 - Scars are drawn on the body layer, so a shirt painted into a plain Minecraft skin doesn't cover them (a gi or a
   jacket layer does).
 - Regrowth isn't animated in your own first-person view.
-- The Great Ape has no mouth blast (it has no techniques at all).
+- The Great Ape has no mouth blast (it has no techniques at all). Its roar and chest beats are a guess at the
+  user's taste, checked only in stills; the footfall shake can only be judged in play.
 - A true duel simulation (player against NPC, every race) for pacing hasn't been built: the feel pass used the
   balance reports (`BalanceReport`, `BalanceReport2`, written to run-gametest/*.md).
 - Open TODO items: more content (bosses, planets, a space dimension), the original sound set, Animation v5 (combat
   actions as data, CX-18b), the CX-17 originals, and story mode last.
 
-## Tools on the user's Windows PC
+## Tools on the user's Windows PCs
 
-JDK 17 at `C:\Users\sunam\.jdks\jdk-17.0.20.1+1`; Python 3.12 and ffmpeg are installed (needed for the `.py`
-generators; old shells may not have them on PATH). The user's PC auto-installs released jars.
+- The first PC (user `sunam`): JDK 17 at `C:\Users\sunam\.jdks\jdk-17.0.20.1+1`; Python 3.12 and ffmpeg are
+  installed (needed for the `.py` generators; old shells may not have them on PATH).
+- The second PC (user `musta`, from v0.134.0): JDK 17 at `C:\Program Files\Microsoft\jdk-17.0.20.101-hotspot` (set
+  `JAVA_HOME`); no Python on PATH. Windows long paths are off, so keep the repo at a short path (or map one with
+  `subst`): deep folders break the Minecraft toolchain. Its dev server is set up (`run-server`, RCON password in
+  `run-server/rcon-password.txt`).
+- The user's PC auto-installs released jars.

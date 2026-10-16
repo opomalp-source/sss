@@ -286,6 +286,7 @@ Most of these already exist in a first version; each step upgrades what is there
 - [x] (v0.130.0) Great Ape: only at a full moon, after looking at it six seconds (heartbeat, red pulse); a new ape model (ApeShape, GreatApeGen) with breathing, stomping walk, swipes, roar and chest beats; the camera stands back for giants
 - [x] (v0.132.0) Clothing and armor: richer painted textures, thick parts standing off the body (plates, gloves, boots, sashes), layered Saiyan pads and sweeping Frieza Force pads; head clothing as items (Piccolo's turban, bandana, headband)
 - [x] (v0.133.0) Feel pass on the new systems: scars come from 15% blows and from going down (bosses hit about 12% a blow: a fifth was almost never reached); an open wound slows healing to a third (regen out-healed the seep, so closing it meant nothing)
+- [x] (v0.134.0) The Great Ape after the user's pictures: the player's own figure grown giant (ten times, 18 blocks) under fur, their hairstyle as the mane, an ape's brow, muzzle, fangs, ears and red eyes; every footfall and landing shakes the view with dust; the change tears cloth (battle armour stretches, metal bursts off); giant step, reach, stride, trampling
 
 # Ki attack rework (user spec, 2026-10-14): cinematic attacks and sound, data-driven
 Decided with the user: all built-in attacks as JSON; charging locks movement for big attacks (best judgement);

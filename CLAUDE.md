@@ -3,7 +3,8 @@
 Minecraft 1.20.1 Forge mod (Java 17), a Dragon Ball game. Start with `HANDOFF.md` (where things stand), then
 DEVLOG.md (newest entries at the bottom) and TODO.md.
 
-- **Building and testing:** JDK 17 (`JAVA_HOME`). Tests are GameTests:
+- **Building and testing:** JDK 17 (`JAVA_HOME`); on Windows keep the repo at a short path (long paths break the
+  toolchain; `subst` a drive if needed). Tests are GameTests:
   `rm -f run-gametest/world/serverconfig/dbzenith-server.toml; ./gradlew --offline build runGameTestServer`
   (all must pass; a few are timing-sensitive, rerun once before digging in). Then `./gradlew --offline build -x test`
   for the jar. In tests, schedule delayed steps with `Delays.after(helper, ticks, ...)`, never

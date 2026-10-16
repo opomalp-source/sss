@@ -128,11 +128,11 @@ public final class MotionEngine {
         m.fight = approach(m.fight, fighting(e) ? 1f : 0f, dt / Math.max(1f, Tuning.blendFight));   // into the fighting set and out, blended
         sense(m);
 
-        // ---- the engine against vanilla: off for swimming, riding, sleeping, crouching, dying, the Great Ape
+        // ---- the engine against vanilla: off for swimming, riding, sleeping, crouching, dying
         PublicStatePacket ps = e instanceof Player ? ClientPublicStates.get(e.getId()) : null;
         boolean vanilla = off || !enabled() || e.isPassenger() || e.isSleeping() || e.isFallFlying() || e.isSwimming()
                 || e.getPose() == net.minecraft.world.entity.Pose.SWIMMING || e.isCrouching() || e.deathTime > 0 || e.isAutoSpinAttack()
-                || (e.isInWater() && !m.flying) || (ps != null && ps.form() != null && (ps.form().contains("great_ape") || ps.form().equals("golden_ape")));
+                || (e.isInWater() && !m.flying);
         m.engine = approach(m.engine, vanilla ? 0f : 1f, dt / Math.max(1f, Tuning.blendEngine));
 
         // ---- choose the state

@@ -115,6 +115,8 @@ public class GiArmorItem extends ArmorItem {
         Metal plate = GiPlating.of(stack);
         if (plate != null) tooltip.add(Component.translatable("item.dbzenith.gi.plated", Component.translatable(plate.translationKey()),
                 String.format("%.1f", plate.platingReduction() * 100)).withStyle(net.minecraft.ChatFormatting.AQUA));
+        tooltip.add(Component.translatable(com.dbzenith.transform.GiantBody.stretches(stack) ? "item.dbzenith.gi.stretches" : "item.dbzenith.gi.tears")
+                .withStyle(net.minecraft.ChatFormatting.GRAY));
     }
 
     private static String pct(double m) {

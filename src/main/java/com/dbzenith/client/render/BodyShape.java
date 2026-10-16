@@ -101,6 +101,7 @@ public final class BodyShape {
     /** The build whose shape a player shows, or -1 for none (players drawn with their own Minecraft skin). */
     public static int build(PublicStatePacket state) {
         if (state == null) return -1;
+        if (ApeLook.is(state)) return BULKY;                                        // the Great Ape: the heaviest build under its fur, whatever the skin
         boolean modLook = BodySkinLayer.active(state) || (state.raceLook() && RaceSkinLayer.texture(state) != null);
         if (!modLook || ArtStyle.get() == ArtStyle.CLASSIC) return -1;
         return Math.max(0, Math.min(NAMES.length - 1, state.bodyType()));

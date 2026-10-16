@@ -45,12 +45,13 @@ public final class FirstPersonBody {
 
     /** Whether the character has a body of its own (a chosen skin tone or a race look) rather than the Minecraft skin. */
     public static boolean hasOwnBody(PublicStatePacket state) {
-        return state != null && (BodySkinLayer.active(state) || (state.raceLook() && RaceSkinLayer.texture(state) != null));
+        return state != null && (BodySkinLayer.active(state) || ApeLook.is(state) || (state.raceLook() && RaceSkinLayer.texture(state) != null));
     }
 
     /** The character's main body texture (for afterimages), or null for the Minecraft skin. */
     public static ResourceLocation bodyTexture(PublicStatePacket state) {
         if (state == null) return null;
+        if (ApeLook.is(state)) return ApeLook.body(state.form());
         if (BodySkinLayer.active(state)) return BodySkinLayer.bodyTexture(state);
         return state.raceLook() ? RaceSkinLayer.texture(state) : null;
     }
