@@ -12,7 +12,7 @@ The existing Space Pod destinations still work exactly as before.
   palette, hazards, landmark and population archetype. **Back** returns to the system.
 - Drag the chart to rotate it and scroll to zoom. Zooming into a selected star enters its next chart level;
   zooming out returns to the previous level. Scroll over the detail panel to read longer descriptions.
-- **Home** returns to your current legacy planet's sector. The cyan ring marks its system.
+- **Home** returns to your current planet's sector. The cyan ring marks its system.
 - Enter `x:y:z:system` in the coordinate box and press **Go**. Sector coordinates are -1024 through 1024 inclusive;
   the system index is 0 through 7. Each system has 3–9 planets, numbered from **0** in commands/addresses.
 - **Set waypoint** saves the selected planet for your player, across logouts/restarts. With no planet selected,
@@ -23,13 +23,12 @@ The existing Space Pod destinations still work exactly as before.
   may name it; names use 2–32 letters, numbers, spaces, apostrophes, dots or hyphens. Existing named Dragon Ball
   destinations keep their official names.
 
-**This phase is a chart and data foundation.** Procedural terrain, landing, space flight, environment hazards,
-planet destruction and restoration are not active yet. Survey descriptions are generation parameters, not a
-claim that the corresponding runtime worlds already exist. Merely browsing never creates chunks or dimensions,
+**The atlas remains a computed survey.** Phase 2 below adds landing, terrain, gravity and atmosphere; orbital
+flight, authored orbital skies, weather hazards, landmarks and destruction remain later phases. Merely browsing never creates chunks or dimensions,
 never grants a discovery and never gives the client the world/terrain seed.
 
 Visiting the existing Earth, Namek, King Kai's Planet or Beerus's Planet records discovery of that existing world.
-The first visitor's name is retained. Procedural landing/discovery will use the same record in later phases.
+The first visitor's name is retained. Procedural landing also records discoveries through this same index.
 
 ## Commands (operators)
 
@@ -63,7 +62,7 @@ The admin discovery command is a testing tool. Normal players cannot mark unvisi
 - `galaxy/GalaxyService`: server-only survey generation. At most 200 system summaries, 8 sector summaries,
   9 detailed planets (at most 5 moons each), or 32 search results per reply. Searching uses only the discovery
   index; descriptor generation is limited to returned results. Known-system membership is indexed per request.
-- `network/GalaxyPackets`: bounded request fields on the existing SimpleChannel, protocol **42**. Dedicated
+- `network/GalaxyPackets`: bounded request fields on the existing SimpleChannel, protocol **43**. Dedicated
   `InputGuard.Kind.GALAXY` bucket (burst 3, refill 2/s), server validation of coordinates and waypoint targets;
   only the sender's waypoint can be changed. UI replies have request IDs; closed/replaced screens ignore stale
   replies, and timed-out requests can be retried. The client never authorizes discovery or destruction.
@@ -90,3 +89,52 @@ The admin discovery command is a testing tool. Normal players cannot mark unvisi
 Each phase: appropriate new GameTests + complete existing suite, dev-client visual review, version/docs/devlog,
 commit/tag, push main and its release tags as requested for this project, direct install to
 `C:\Users\musta\AppData\Roaming\.minecraft\mods`, remove old DBZ jars. **Do not publish to the updater.**
+
+## Phase 2 — Living procedural planets (v0.140.0)
+
+Hold a **Space Pod** in either hand, open `/galaxy`, select a planet and press **Land**. Creative players can
+preview without a pod. Existing Space Pod travel cooldown, living-world restrictions and legacy destinations
+still apply. Stay within eight blocks of departure while landing terrain prepares. A ridden pod travels with
+you and remains sealed. `/galaxy home` returns to Earth with the same transport/cooldown rules.
+
+- Only a landing request creates a planet dimension. Terrain is generated from that planet's seed and archetype:
+  temperate, ocean, desert, ice, volcanic, jungle, barren, crystal, toxic swamp, training and floating asteroids.
+  Gas giants correctly refuse solid landing; upper-cloud travel belongs to the space phase.
+- One codec-backed chunk generator supplies independent terrain, caves, ore clusters, palettes, seas/lava,
+  compact trees and crystal growth. World borders have diameter **twice the catalogue radius**; border haze
+  increases near the edge. These are finite flat Minecraft worlds, not spherical terrain or wrap-around.
+- Living entities use Forge's synchronized gravity attribute. Items and ordinary arrows/thrown projectiles also
+  change their arcs; existing no-gravity ki projectiles keep their own movement. Fall damage scales with gravity.
+  Existing ki flight uses a bounded square-root gravity cost factor, and existing training/strain rules consume
+  the planet's gravity. Legacy Earth/Namek/King Kai/Beerus/Time Chamber behavior is preserved.
+- Vacuum, thin, toxic and scorching air consume a 300-point air reserve after a configurable landing grace.
+  Empty reserve causes periodic damage through existing combat/body rules. Breathless race traits, active ki
+  barriers, a ridden pod or a complete space suit protect you. The environment HUD displays name, gravity, air
+  type, reserve and protection. Heat/cold/weather-specific effects remain Phase 4.
+- Craft each **Space Suit** piece from its corresponding iron armor piece plus glass, redstone and leather
+  (shapeless). All four pieces are required to seal the suit. These use original generated textures/icons.
+- First successful landing records discovery; naming/search/waypoints use the Phase 1 store. Cinematic title
+  cards and scouter navigation remain Phase 4. Survey day length, orbital positions and hazard descriptions
+  are future rendering/content parameters; this phase does not claim custom orbital skies.
+
+Operators can use `/dbz galaxy land <players> "x:y:z:system/planet"`,
+`/dbz galaxy sample <kind> <players>` (e.g. `crystal`, `jungle`, `barren`, `volcanic`), and
+`/dbz galaxy unload "x:y:z:system/planet"`. Landing safety/cooldown rules still apply to targets.
+
+Server config **`dbzenith-planets.toml`** controls `maxLoaded` (default 4), `idleTicks` (1200),
+`landingGraceTicks` (300), `physicalGravity` and `atmosphereHazards`. Occupied worlds, forced chunks and pending
+landings prevent unload. New requests fail safely at the cap; occupied planets are never evicted. At most 16
+landings prepare concurrently. Chunk requests run asynchronously; no server-thread wait for generated terrain.
+Oceans, lava and void worlds receive a small safe landing pad when no suitable nearby dry surface exists.
+
+Unloading explicitly saves and closes region storage, removes the runtime dimension, and keeps region files for
+builds. Revisiting reopens those files; it never regenerates over player construction. A per-player location
+checkpoint supports reconnecting after their planet unloaded. Vanilla bed references survive unload and death
+cloning; returning from Other World or ordinary respawn can reload and validate the bed asynchronously. Missing
+or obstructed beds fall back safely. A full planet cap can delay a reconnect/bed return; free a slot and retry.
+No old dimensions are replaced. No migration of existing region files or galaxy-v1 descriptor outputs is made.
+
+The MIT-licensed **Infiniverse 1.20.1-1.0.0.5** is bundled in the mod jar, with its license. It has been exercised
+on this checkout's NeoForge 47.1.106 dedicated server and client. See [third-party provenance](THIRD_PARTY.md).
+Generation and discoveries stay server-authoritative. Protocol 43 adds a small dimension-bound environment
+packet to the existing channel; both sides need this version. Browsing unvisited systems still creates no world.

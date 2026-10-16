@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.139.0, 2026-10-16)
+# Handoff: where Dragon Block Zenith stands (v0.140.0, 2026-10-16)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.139.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.140.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -106,5 +106,24 @@ SavedData + server-fed atlas + commands; no runtime procedural dimensions/space 
 for architecture, commands, compatibility addresses and the remaining phase sequence. Preserve v1 generation
 output (fingerprint tested). Network protocol 42. Existing Earth/Namek/Northern/Beerus dimensions remain intact.
 The user explicitly asked for a commit and push after each space phase; direct installation only, no updater.
-Next: Phase 2 runtime dimensions/generation/environment, reuse flight/training/race systems. Validate Infiniverse
-1.20.1 (MIT) against this checkout before adopting it. Story mode remains last.
+Phase 2 is now complete below. Story mode remains last.
+## Galaxy / space request — Phase 2 (v0.140.0)
+Procedural worlds now instantiate on demand using bundled MIT Infiniverse 1.20.1-1.0.0.5. One serializable,
+stateless terrain generator covers the landable archetypes, caves/ores, flora and floating asteroid clusters.
+Landing is asynchronous, capped, server-authoritative and integrated into the atlas/pod flow. Original static
+worlds remain untouched. Independent finite borders with edge haze; full save/close/unregister on idle unload;
+region files/builds retained. Vanilla beds survive unload/death cloning; respawn/Other World return reloads and
+validates an unloaded bed world. Location checkpoints recover reconnects. See docs/GALAXY.md and THIRD_PARTY.md.
+
+Physical gravity uses Forge's synced living attribute plus item/arrow/thrown arcs and scaled fall damage;
+existing ki flight drain and training/strain consume planet gravity. Hostile atmospheres consume air after grace;
+existing breathless traits, barriers and pods protect, as does the new full four-piece craftable Space Suit.
+Protocol 43 adds a dimension-bound environment HUD packet. Config is dbzenith-planets.toml: maxLoaded4,
+idleTicks1200, landingGraceTicks300, physicalGravity, atmosphereHazards. Full slots reject requests safely.
+All 257 required GameTests passed, including real landing, independent border, saved build unload/reload and
+vanilla respawn into an unloaded world. Dev screenshots reviewed crystal/jungle/volcanic/barren/ocean terrain,
+HUD and the original suit; its opaque helmet outer layer was fixed to reveal the visor.
+
+Next is Phase 3: real Space dimension, spheres/starfield, ascent/re-entry, zero-g and sound. Current planet skies
+are archetype colors, not orbital skies. Gas giants have no landing surface until upper-cloud travel exists.
+Keep galaxy catalogue v1 and terrain v1 stable after release. Story last; direct install only, no updater.

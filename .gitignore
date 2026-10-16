@@ -39,3 +39,5 @@ logs/
 # per-machine settings (installMod mods folders)
 local.properties
 __pycache__/
+
+!libs/maven/maven/modrinth/infiniverse/1.0.0.5/infiniverse-1.0.0.5.jar

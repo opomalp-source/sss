@@ -88,11 +88,14 @@ obfuscation {
 }
 
 repositories {
+    maven { url = uri("libs/maven") }
     maven { url = "https://maven.kosmx.dev/" }                                   // playerAnimator (KosmX)
     maven { url = "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/" } // GeckoLib
 }
 
 dependencies {
+    modImplementation "maven.modrinth:infiniverse:1.0.0.5"
+    jarJar("maven.modrinth:infiniverse") { version { strictly "[1.0.0.5]" } }
     // Mod dependencies must use the mod* configurations so they are remapped (see ModDevGradle LEGACY.md).
     // All are MIT-licensed and bundled with Jar-in-Jar, so players install a single jar.
     modImplementation "dev.kosmx.player-anim:player-animation-lib-forge:${player_anim_version}"

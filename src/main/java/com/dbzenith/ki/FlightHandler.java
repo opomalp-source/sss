@@ -75,7 +75,8 @@ public final class FlightHandler {
 
         if (a.flying && !a.instabuild) {
             double drain = data.getDerived().maxKi() * DBZConfig.SERVER.flightKiPercentPerSecond.get() / 100.0 / 20.0
-                    * (player.isSprinting() ? DBZConfig.SERVER.flightBoostKiMultiplier.get() : 1);   // boosting burns more (CX-38)
+                    * (player.isSprinting() ? DBZConfig.SERVER.flightBoostKiMultiplier.get() : 1)
+                    * com.dbzenith.galaxy.planet.PlanetEnvironment.flightFactor(player.level());   // boosting burns more (CX-38)
             data.setKi(data.getKi() - drain);
             if (data.getKi() <= 0) {
                 stop(player, data);

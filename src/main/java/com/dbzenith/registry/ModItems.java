@@ -20,6 +20,10 @@ import net.minecraftforge.registries.RegistryObject;
 public final class ModItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, DBZenith.MOD_ID);
 
+    public static final RegistryObject<Item> SPACE_SUIT_HELMET=ITEMS.register("space_suit_helmet",()->new com.dbzenith.item.SpaceSuitItem(net.minecraft.world.item.ArmorItem.Type.HELMET));
+    public static final RegistryObject<Item> SPACE_SUIT_CHESTPLATE=ITEMS.register("space_suit_chestplate",()->new com.dbzenith.item.SpaceSuitItem(net.minecraft.world.item.ArmorItem.Type.CHESTPLATE));
+    public static final RegistryObject<Item> SPACE_SUIT_LEGGINGS=ITEMS.register("space_suit_leggings",()->new com.dbzenith.item.SpaceSuitItem(net.minecraft.world.item.ArmorItem.Type.LEGGINGS));
+    public static final RegistryObject<Item> SPACE_SUIT_BOOTS=ITEMS.register("space_suit_boots",()->new com.dbzenith.item.SpaceSuitItem(net.minecraft.world.item.ArmorItem.Type.BOOTS));
     public static final RegistryObject<Item> SENZU_BEAN = ITEMS.register("senzu_bean",
             () -> new SenzuBeanItem(new Item.Properties().stacksTo(16).rarity(Rarity.UNCOMMON)));
 

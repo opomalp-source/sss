@@ -124,6 +124,10 @@ public final class Otherworld {
         if (d.isDead() && secondsLeft(player, d) > 0 && !player.isCreative()) return false;
         d.setDead(false, 0, false);
         MinecraftServer server = player.server;
+        if(com.dbzenith.galaxy.planet.PlanetRuntime.restoreBed(player)) {
+            com.dbzenith.data.PlayerDataEvents.sync(player);
+            return true;
+        }
         BlockPos respawn = player.getRespawnPosition();
         ServerLevel home = respawn != null ? server.getLevel(player.getRespawnDimension()) : null;
         if (home == null || home.dimension() == OTHERWORLD || home.dimension() == LIMBO) {

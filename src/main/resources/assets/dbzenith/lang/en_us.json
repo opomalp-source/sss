@@ -2276,5 +2276,10 @@
   "settings.dbzenith.flight_body_lag": "Body follows the camera",
   "settings.dbzenith.flight_body_lag.desc": "In flight the body turns after the camera a moment later, the head first, instead of snapping round with it.",
   "settings.dbzenith.flight_cinematic_camera": "Cinematic flight camera",
-  "settings.dbzenith.flight_cinematic_camera.desc": "The camera eases back as you pick up speed and rolls a little into turns."
+  "settings.dbzenith.flight_cinematic_camera.desc": "The camera eases back as you pick up speed and rolls a little into turns.",
+  "item.dbzenith.space_suit_helmet": "Space Suit Helmet",
+  "item.dbzenith.space_suit_chestplate": "Space Suit Chestplate",
+  "item.dbzenith.space_suit_leggings": "Space Suit Leggings",
+  "item.dbzenith.space_suit_boots": "Space Suit Boots",
+  "item.dbzenith.space_suit.seal": "Wear all four pieces to seal against hostile atmospheres."
 }

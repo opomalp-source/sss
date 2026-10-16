@@ -22,7 +22,7 @@ public final class GalaxyScreen extends Screen {
     private CompoundTag data;
     private GalaxyCatalog.Id center=GalaxyCatalog.EARTH;
     private EditBox search,coordinates;
-    private Button back,home,go,searchButton,waypoint,previous,next;
+    private Button back,home,go,searchButton,waypoint,land,previous,next;
     private float yaw=.25f,tilt=.65f,zoom=1,targetZoom=1;
     private int mapX=14,mapY=65,mapW,mapH,sideX,sideW;
     private String selected="",status="",query="";
@@ -51,7 +51,8 @@ public final class GalaxyScreen extends Screen {
             try {center=GalaxyCatalog.Id.parse(coordinates.getValue());selected="";planet=-1;request(1);}
             catch(IllegalArgumentException ex){status="Use x:y:z:system; coordinates -1024 to 1024, system 0-7.";}
         });
-        waypoint=button("Set waypoint",sideX+8,height-30,sideW-16,b->{if(planet>=0)request(4);else{planet=0;request(4);}});
+        waypoint=button("Waypoint",sideX+8,height-30,(sideW-20)/2,b->{if(planet>=0)request(4);else{planet=0;request(4);}});
+        land=button("Land",sideX+sideW/2+2,height-30,(sideW-20)/2,b->{if(planet<0)planet=0;request(6);onClose();});
         previous=button("Previous",sideX+8,height-30,70,b->{cursor=Math.max(0,cursor-32);request(3);});
         next=button("Next",sideX+sideW-78,height-30,70,b->{cursor+=32;request(3);});
         if(data!=null) accept();
@@ -93,7 +94,9 @@ public final class GalaxyScreen extends Screen {
         g.disableScissor();
         sidebar(g);
         previous.visible=next.visible=view==3;previous.active=cursor>0&&!waiting;next.active=data.getBoolean("more")&&!waiting;
-        waypoint.visible=view==2;waypoint.active=!waiting;
+        waypoint.visible=land.visible=view==2;waypoint.active=!waiting;
+        var landBodies=data.getCompound("system").getList("bodies",Tag.TAG_COMPOUND);int landingIndex=Math.max(0,planet);
+        land.active=!waiting&&landingIndex<landBodies.size()&&landBodies.getCompound(landingIndex).getBoolean("landable");
         go.active=searchButton.active=!waiting;
         super.render(g,mx,my,pt);
         if(waiting)g.drawString(font,"Receiving chart...",mapX+8,mapY+mapH-13,CYAN,false);
@@ -157,7 +160,7 @@ public final class GalaxyScreen extends Screen {
             sphere(g,xx,yy,3,m.getInt("color"),false);
         }
         g.drawString(font,font.plainSubstrByWidth(b.getString("name"),mapW-16),mapX+8,mapY+25,GOLD,false);
-        g.drawString(font,"Survey model / terrain not generated",mapX+8,mapY+mapH-14,DIM,false);
+        g.drawString(font,b.getBoolean("landable")?"Land with a Space Pod":"Upper-cloud travel: next phase",mapX+8,mapY+mapH-14,DIM,false);
     }
     private void results(GuiGraphics g,int mx,int my){
         var entries=data.getList("entries",Tag.TAG_COMPOUND);
@@ -200,7 +203,7 @@ public final class GalaxyScreen extends Screen {
             }}
         }else{
             lines.add("Drag the chart to rotate it.");lines.add("Scroll to zoom; scroll here for details.");lines.add("Stars brighten when selected. Known systems carry labels.");
-            lines.add("Find searches discovered planets only. Enter coordinates below to chart a distant sector.");lines.add("Planets are survey descriptors in this phase. Landing arrives next.");
+            lines.add("Find searches discovered planets only. Enter coordinates below to chart a distant sector.");lines.add("Hold a Space Pod to land. Use /galaxy home to return to Earth.");
         }
         lines.add(" ");lines.add("Waypoint: "+(data.getString("waypoint").isEmpty()?"none":data.getString("waypoint")));
         g.drawString(font,font.plainSubstrByWidth(heading,sideW-16),sideX+8,mapY+8,GOLD,false);

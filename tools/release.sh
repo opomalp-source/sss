@@ -9,7 +9,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 V=$1; MSG=$2
 [ -f build/libs/dbzenith-$V.jar ] || { echo "no jar for $V"; exit 1; }
-git add -A src tools docs README.md DEVLOG.md TODO.md gradle.properties build.gradle CLAUDE.md HANDOFF.md
+git add -A src tools docs libs .gitignore README.md DEVLOG.md TODO.md gradle.properties build.gradle CLAUDE.md HANDOFF.md
 git commit -q -F - <<MSGEOF
 $MSG
 

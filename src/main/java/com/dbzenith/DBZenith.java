@@ -29,6 +29,7 @@ public class DBZenith {
     public DBZenith() {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 
+        com.dbzenith.galaxy.planet.PlanetGeneration.register(modBus);
         ModItems.register(modBus);
         ModEntities.register(modBus);
         ModBlocks.register(modBus);
@@ -47,6 +48,7 @@ public class DBZenith {
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, DBZConfig.SERVER_SPEC);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, DBZConfig.CLIENT_SPEC);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, com.dbzenith.galaxy.planet.PlanetConfig.SPEC, "dbzenith-planets.toml");
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {

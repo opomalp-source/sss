@@ -1,0 +1,20 @@
+{
+  "ingredients": [
+    {
+      "item": "minecraft:iron_chestplate"
+    },
+    {
+      "item": "minecraft:glass"
+    },
+    {
+      "item": "minecraft:redstone"
+    },
+    {
+      "item": "minecraft:leather"
+    }
+  ],
+  "result": {
+    "item": "dbzenith:space_suit_chestplate"
+  },
+  "type": "minecraft:crafting_shapeless"
+}

@@ -41,6 +41,7 @@ public final class TrainingTicker {
         Planet planet = Planet.of(player.level());
         if (planet != null && planet.gravity() > 1) data.applyGravity(planet.gravity(), now + 20);
         if (Otherworld.nearKaiPlanet(player)) data.applyGravity(Otherworld.KAI_GRAVITY, now + 20);   // the little planet at the end of Snake Way
+        if(com.dbzenith.galaxy.planet.PlanetRuntime.procedural(player.serverLevel())) data.applyGravity(com.dbzenith.galaxy.planet.PlanetEnvironment.gravity(player.level()),now+20);
         data.expireGravity(now);
         double g = data.getGravity(now);
         double excess = Math.max(0, g - tolerance(data));

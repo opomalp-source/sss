@@ -316,7 +316,7 @@ to both mods folders.
 # Immersive galaxy / space (user-approved plan, 2026-10-16)
 - [x] Phase 1 (v0.139.0) Deterministic versioned catalogue, bounded server-fed galaxy/sector/system/planet atlas,
   discovery SavedData, search, per-player waypoints, /galaxy and /dbz galaxy commands. Guide: docs/GALAXY.md.
-- [ ] Phase 2 Runtime planets, parameterized chunk generator, physical gravity, atmosphere, caps and idle unload
+- [x] Phase 2 (v0.140.0) Runtime planets, parameterized chunk generator, physical gravity, atmosphere, sealed suits, caps and idle unload; saved builds and respawn/reconnect support
 - [ ] Phase 3 Space dimension, spheres/starfield, ascent/re-entry, zero-g, quiet sound mix
 - [ ] Phase 4 Orbital skies, hazards/weather, landmarks/NPCs, landing discovery/naming, scouter HUD
 - [ ] Phase 5 Hyperspeed, cross-dimension Instant Transmission, iconic systems

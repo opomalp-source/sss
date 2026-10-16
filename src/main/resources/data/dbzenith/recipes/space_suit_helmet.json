@@ -1,0 +1,20 @@
+{
+  "ingredients": [
+    {
+      "item": "minecraft:iron_helmet"
+    },
+    {
+      "item": "minecraft:glass"
+    },
+    {
+      "item": "minecraft:redstone"
+    },
+    {
+      "item": "minecraft:leather"
+    }
+  ],
+  "result": {
+    "item": "dbzenith:space_suit_helmet"
+  },
+  "type": "minecraft:crafting_shapeless"
+}

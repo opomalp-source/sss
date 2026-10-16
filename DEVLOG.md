@@ -3922,3 +3922,34 @@ User approved the eight-phase immersive space design. This release is Phase 1 on
 - Final devshots checked galaxy overview, sector, system, Earth detail and discovery search. Search paging is now
   below the panel, and the planet preview shows Earth with one moon, no rings and its 20-minute day. Detail/list
   scrolling are independent; Enter submits coordinates/search. No external textures/assets.
+
+### v0.140.0 — Galaxy Phase 2: procedural worlds, gravity and air (2026-10-16)
+- On-demand runtime planets via bundled MIT Infiniverse 1.20.1-1.0.0.5, verified on NeoForge 47.1.106.
+  Original binary and license are pinned in a local Maven repo for reproducible offline builds; dependency is
+  included through Jar-in-Jar. Provenance/hash/license in docs/THIRD_PARTY.md and META-INF/licenses.
+- One codec-backed stateless terrain generator: archetype palettes, multi-scale relief, caves, ores, seas/lava,
+  compact trees, crystal flora and real floating asteroid clusters. Finite independent planet borders, with edge
+  haze. Gas giants refuse fake solid landing. Original named/static worlds keep their terrain/travel behavior.
+- Atlas Land action and operator land/sample/unload commands, /galaxy home, existing transport/cooldown rules.
+  Landing requests background chunk futures without server-thread blocking; pending tickets/cap/timeouts and
+  departure checks bound work. Ridden pods remain sealed and arrive with the player; unsafe surfaces get a pad.
+- Default active-world cap4, idle1200ticks. Occupants, forced chunks and pending landings pin worlds; empty
+  worlds explicitly save, close region IO and unregister. Saved builds survive reopening. Preserved vanilla bed
+  metadata during library removal and death cloning, async bed validation/reload for respawn and Other World
+  return, plus per-player location checkpoints for reconnecting to unloaded worlds.
+- Synced Forge gravity for living entities; item/arrow/thrown arcs; scaled fall damage; existing flight drain and
+  training/strain integration. Existing no-gravity ki projectile movement is preserved. Static old dimensions
+  keep their old gravity/training behavior. Hostile atmospheres drain an air reserve after landing grace, using
+  existing body damage, breathless races, barriers and pods. Four-piece craftable sealed Space Suit, original
+  generated textures/icons; helmet hides hair. Environment/protection HUD and dimension-bound packet (protocol43).
+- Five new GameTests (257 total) cover terrain determinism/palettes, protection/real gravity, item/arrow arcs and
+  embedded-arrow stability, actual asynchronous landing, border independence, codec persistence, air drain,
+  save/close/unregister/reopen build persistence, actual vanilla respawn into an unloaded world, cap/gas rejection.
+  Final full suite passed all257. One earlier suite hit the known timing-sensitive grip test; rerun passed.
+  A new arc test's expected arithmetic was corrected; no production assertion was weakened.
+- Dev-client review of crystal/jungle/volcanic/barren/ocean terrain and suit/HUD. Visor was hidden by the armor
+  model's opaque outer helmet UV layer; made it transparent and checked again. Restart/reconnect checked.
+  Gas-giant Land controls now disable and explicitly label upper-cloud travel as the next phase.
+- README/TODO/HANDOFF/GALAXY docs updated. Release script stages the offline dependency as well. User-requested
+  direct local installation and source/tag push only: no updater/deploy. Phase3 is the next step; orbital skies,
+  weather/landmarks/scouter, hyperspeed and planetary destruction remain later phases. Story last.

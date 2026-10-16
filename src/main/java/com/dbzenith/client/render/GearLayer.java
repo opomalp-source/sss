@@ -66,6 +66,7 @@ public class GearLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
 
     /** Whether something on the head covers the hair (a turban or a bandana). */
     public static boolean hairCovered(Player player) {
+        if(player.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof com.dbzenith.item.SpaceSuitItem)return true;
         if (ArtStyle.get() == ArtStyle.CLASSIC) return false;
         var k = com.dbzenith.item.HeadwearItem.worn(player);
         return k == com.dbzenith.item.HeadwearItem.Kind.TURBAN || k == com.dbzenith.item.HeadwearItem.Kind.BANDANA;

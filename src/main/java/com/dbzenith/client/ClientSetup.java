@@ -57,6 +57,7 @@ public final class ClientSetup {
         event.registerAboveAll("fusion_dance", new com.dbzenith.client.ClientFusion.Overlay());
         event.registerAboveAll("dragon_radar", new RadarOverlay());
         event.registerAboveAll("scouter", new ScouterOverlay());
+        event.registerAboveAll("planet_environment", new ClientPlanet.Overlay());
         event.registerAboveAll("debug_stats", new DebugStatsOverlay());
     }
 
