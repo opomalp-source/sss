@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.138.0, 2026-10-16)
+# Handoff: where Dragon Block Zenith stands (v0.139.0, 2026-10-16)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.138.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.139.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -99,3 +99,12 @@ The transformation cinematic also targets eye height. Giant distance and collisi
 The v0.137 camera change alone left the chin raised: idle/walk head offsets compounded the rig's head counter.
 Offsets now balance that counter for a forward gaze. Local front F5 renders neutral look pitch independently
 of camera pitch; gameplay aim, observers, rear/first-person views and authored action poses keep their behavior.
+
+## Galaxy / space request — Phase 1 (v0.139.0)
+User approved the eight-phase design after reviewing existing code. Phase 1 is deterministic catalogue + sparse
+SavedData + server-fed atlas + commands; no runtime procedural dimensions/space flight yet. See docs/GALAXY.md
+for architecture, commands, compatibility addresses and the remaining phase sequence. Preserve v1 generation
+output (fingerprint tested). Network protocol 42. Existing Earth/Namek/Northern/Beerus dimensions remain intact.
+The user explicitly asked for a commit and push after each space phase; direct installation only, no updater.
+Next: Phase 2 runtime dimensions/generation/environment, reuse flight/training/race systems. Validate Infiniverse
+1.20.1 (MIT) against this checkout before adopting it. Story mode remains last.

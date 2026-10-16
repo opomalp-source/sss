@@ -263,6 +263,14 @@ public final class ClientEvents {
             mc.setScreen(new com.dbzenith.client.screen.LifeScreen(null));
             delayTicks = Math.max(delayTicks, 5);
         }
+        if (name.startsWith("galaxy_")) {
+            if (mc.screen instanceof com.dbzenith.client.screen.GalaxyScreen galaxy) {
+                if (galaxy.devView(name)) delayTicks = Math.max(delayTicks, 20);
+            } else if (mc.player != null) {
+                mc.player.connection.sendCommand("galaxy");
+                delayTicks = Math.max(delayTicks, 20);
+            }
+        }
         if (name.startsWith("planets_") && !(mc.screen instanceof com.dbzenith.client.screen.PlanetScreen)) {
             mc.setScreen(new com.dbzenith.client.screen.PlanetScreen());
             delayTicks = Math.max(delayTicks, 5);

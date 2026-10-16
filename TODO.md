@@ -312,3 +312,14 @@ to both mods folders.
 
 - [x] (v0.137.0) F5 eye-height pivot in Great Ape and all scaled forms, including transformation cinematics; direct local installation by user request.
 - [x] (v0.138.0) Great Ape eyes visible in front F5: level resting head and separate local head look from camera pitch.
+
+# Immersive galaxy / space (user-approved plan, 2026-10-16)
+- [x] Phase 1 (v0.139.0) Deterministic versioned catalogue, bounded server-fed galaxy/sector/system/planet atlas,
+  discovery SavedData, search, per-player waypoints, /galaxy and /dbz galaxy commands. Guide: docs/GALAXY.md.
+- [ ] Phase 2 Runtime planets, parameterized chunk generator, physical gravity, atmosphere, caps and idle unload
+- [ ] Phase 3 Space dimension, spheres/starfield, ascent/re-entry, zero-g, quiet sound mix
+- [ ] Phase 4 Orbital skies, hazards/weather, landmarks/NPCs, landing discovery/naming, scouter HUD
+- [ ] Phase 5 Hyperspeed, cross-dimension Instant Transmission, iconic systems
+- [ ] Phase 6 Extend the existing protected/batched crater system
+- [ ] Phase 7 Planet destruction, orbital explosion, remnants, snapshots and Dragon Ball restoration
+- [ ] Phase 8 Visual/audio polish, performance/LOD, multiplayer, save compatibility, config and balance

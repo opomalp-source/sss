@@ -21,6 +21,8 @@ public class PlanetScreen extends Screen {
     protected void init() {
         Planet here = minecraft.level == null ? null : Planet.of(minecraft.level);
         Planet[] planets = Planet.values();
+        addRenderableWidget(ThemedButton.of(Component.literal("Galaxy map"), b -> minecraft.player.connection.sendCommand("galaxy"))
+                .bounds(width / 2 - 100, height / 2 + planets.length * 12 + 18, 200, 20).build());
         int top = height / 2 - planets.length * 12;
         for (int i = 0; i < planets.length; i++) {
             Planet p = planets[i];

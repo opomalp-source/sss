@@ -31,7 +31,7 @@ public final class InputGuard {
 
     /** Kinds of input, each with its burst and its refill per second. */
     public enum Kind {
-        MELEE(8, 14), KI_BLAST(12, 24), DASH(4, 6), TECHNIQUE(4, 8), BEAM_MASH(10, 25), LOCK_ON(4, 8), TOGGLE(4, 6), INPUT(16, 30);
+        GALAXY(3, 2), MELEE(8, 14), KI_BLAST(12, 24), DASH(4, 6), TECHNIQUE(4, 8), BEAM_MASH(10, 25), LOCK_ON(4, 8), TOGGLE(4, 6), INPUT(16, 30);
 
         final int burst;
         final double perSecond;

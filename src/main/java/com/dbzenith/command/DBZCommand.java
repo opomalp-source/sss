@@ -82,6 +82,7 @@ public final class DBZCommand {
     }
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        com.dbzenith.galaxy.GalaxyCommands.publicCommand(dispatcher);
         // /pvp, /pvp on, /pvp off: anyone, for themselves (CX-19)
         dispatcher.register(Commands.literal("pvp")
                 .executes(ctx -> com.dbzenith.combat.PvpRules.toggle(ctx.getSource().getPlayerOrException(), null) ? 1 : 0)
@@ -89,6 +90,7 @@ public final class DBZCommand {
                 .then(Commands.literal("off").executes(ctx -> com.dbzenith.combat.PvpRules.toggle(ctx.getSource().getPlayerOrException(), false) ? 1 : 0)));
         dispatcher.register(Commands.literal("dbz")
                 .requires(src -> src.hasPermission(2))
+                .then(com.dbzenith.galaxy.GalaxyCommands.branch())
                 .then(Commands.literal("apestomp").then(Commands.argument("targets", EntityArgument.players()).executes(ctx -> {
                     int count = 0;
                     for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) if (com.dbzenith.transform.ApeStomp.press(p)) count++;

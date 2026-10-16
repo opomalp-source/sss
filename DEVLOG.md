@@ -3883,3 +3883,42 @@ armour visible throughout growth, and white eyes when staring at the full moon. 
 - Devshots reviewed at neutral and +/-25-degree front camera pitch, rear view, growth and reversion. A cropped
   before/after comparison shows the red eyes visible at neutral and from above. From below the muzzle naturally
   occludes them, but the head no longer follows the inspection camera away as it rises. Direct local release only.
+
+## 2026-10-16 — Galaxy phase 1: deterministic catalogue and server-fed atlas (v0.139.0)
+User approved the eight-phase immersive space design. This release is Phase 1 only; guide: docs/GALAXY.md.
+
+- Versioned pure galaxy generation from the world seed, saved salt and stable signed sector/system address.
+  Eight systems per sector, primary/companion stars (including binaries/trinaries), 12 planet archetypes, derived
+  planet/moon seeds, bounded radii/gravity/air/temperature/day/tilt/rings, palettes/hazards/landmarks/populations.
+  The v1 descriptor fingerprint is fixed by a regression check; future changes must preserve already generated v1.
+- Sparse overworld SavedData: original discoverer UUID/name/time, generated/chosen planet names, individual
+  waypoints and reserved destroyed/restored/base/snapshot metadata. Browsing never marks a discovery. Existing
+  Earth/Namek/Northern/Beerus visits are recorded without modifying those dimensions or their terrain.
+  Unsupported schemas remain intact even if SavedData tries to save them: the loader preserves the original tag
+  and refuses galaxy use outside the loader rather than throwing where Minecraft might create a blank replacement.
+- The original code-drawn Galaxy Atlas: galaxy-sector-system-planet navigation, eased wheel zoom and rotation,
+  lit survey spheres, rings/moons, clipped detail panels, coordinate navigation, known-system labels/current-system
+  ring, discovered-name search with 32-result pages, and persistent waypoints. Open /galaxy or the Space Pod menu.
+  Public /galaxy name enforces first-discoverer ownership. Existing named destinations keep official names.
+- /dbz galaxy map <players>, system "x:y:z:system", discover "x:y:z:system" <planet>, and name ".../planet" <name>.
+  Admin discovery is a testing tool; ordinary survey packets cannot grant discoveries. Addresses are quoted in
+  commands because Brigadier does not accept unquoted colons/slashes; map coordinate input is unquoted.
+- Existing SimpleChannel, protocol 42. Small bounded requests, a dedicated 3-burst/2-per-second InputGuard bucket,
+  coordinate/target validation, request/reply IDs and stale-reply handling. Replies contain only map descriptors,
+  never the seed/salt. At most 200 visible-system summaries, 8 sector systems, 9 detailed planets/5 moons per planet,
+  or 32 discovery results. Known systems are indexed per request; search regenerates only returned descriptors.
+- Four new GameTests: v1 fingerprint and query-order/seed independence; address boundaries and all archetypes;
+  sparse save/load, first ownership/naming and future restoration metadata; server survey/packet bounds, no
+  discovery/dimension creation, invalid requests and authoritative waypoint storage. All 252 required tests passed
+  in the final server run. Packets in that run stayed below 64 KiB. No test assertions were weakened.
+- Visual review caught search paging buttons overlapping the panel, overly busy uncharted-star glows, and random
+  Earth rings/moons. Those were corrected; Earth has a fixed one-moon/no-rings/20-minute-day preview. Its descriptor
+  radius preserves the default Overworld border scale; no world border is changed by the atlas.
+- Existing pod travel, Instant Transmission, gravity training, race traits and crater jobs remain the integration
+  points for later phases. No runtime-dimension library or new external asset was added. Story remains last.
+- Remaining: runtime planets/environment in Phase 2; no procedural landing, space movement or destruction yet.
+  User requests source main/release-tag pushes after each space phase. Install directly into .minecraft/mods;
+  the release script has no updater/deploy call and no updater publication is performed.
+- Final devshots checked galaxy overview, sector, system, Earth detail and discovery search. Search paging is now
+  below the panel, and the planet preview shows Earth with one moon, no rings and its 20-minute day. Detail/list
+  scrolling are independent; Enter submits coordinates/search. No external textures/assets.

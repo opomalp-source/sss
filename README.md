@@ -3,14 +3,13 @@
 A Dragon Ball-inspired total-conversion mod for **Minecraft 1.20.1 / NeoForge 47.1.106**. Mod id `dbzenith`.
 Status, roadmap and decisions: [TODO.md](TODO.md), [FEATURE_MATRIX.md](FEATURE_MATRIX.md), [DEVLOG.md](DEVLOG.md), [BRIEF.md](BRIEF.md).
 
-## Latest release: 0.138.0
+## Latest release: 0.139.0
 
-Installed directly into the user's Minecraft mods folder. F5 pivots at eye height; the Great Ape has a forward resting gaze and an independent front-view camera pitch.
-The Great Ape fights with ground stomps, with a wind-up, shockwave and recovery. Its transformation has a new
-head-clutch, bracing and growth sequence, white eyes while staring at the moon, and battle armour that stays visible
-throughout the change. New hunched idle and walking clips suit its weight.
-Details: [Great Ape](docs/GREAT_APE.md), [handoff](HANDOFF.md), [development log](DEVLOG.md).
-
+Galaxy Phase 1: open `/galaxy` to chart sectors, systems, planets and moons, inspect their environment, search
+recorded discoveries and save waypoints. Unvisited worlds stay computed data; browsing creates no dimensions.
+Existing Space Pod travel still works. Procedural landing and space flight arrive in later phases.
+Details and commands: [Galaxy](docs/GALAXY.md). Great Ape front F5 eye visibility is also fixed.
+Installed directly into the Minecraft mods folder; no updater publication.
 Build the complete mod from this checkout with Gradle; `tools/release.sh` installs the tested jar directly; updater publication is disabled by user request.
 
 ## Build
