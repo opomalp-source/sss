@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.136.0, 2026-10-16)
+# Handoff: where Dragon Block Zenith stands (v0.137.0, 2026-10-16)
 
 ## The prompt to paste into a new session
 
@@ -9,11 +9,11 @@
 > Before doing anything, read `CLAUDE.md` (how to build, test, release and check visuals), then `HANDOFF.md` (where
 > things stand), the last few entries of `DEVLOG.md` and the open items in `TODO.md`. Follow their workflow: each
 > finished version gets a DEVLOG entry, TODO and docs updates, a `mod_version` bump, all GameTests passing, and a
-> release with `tools/release.sh` (which also publishes the jar for my auto-updater). Check how things look with the
+> release with `tools/release.sh` (direct install to `.minecraft/mods`, no updater). Check how things look with the
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.136.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.137.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -89,4 +89,8 @@
   `C:\Users\musta\Documents\Codex\2026-10-16\you-re-continuing-work-on-dragon\repo`, mapped to `Z:`. Its dev server is
   set up (`run-server`, RCON password in `server.properties`; do not print it). The scripted client needs
   `pauseOnLostFocus:false`. Leave `server-ip` empty for its `localhost` IPv6 connection.
-- The user's PC auto-installs released jars.
+- User override (2026-10-16): direct installation into `C:\Users\musta\AppData\Roaming\.minecraft\mods`; remove old DBZ jars. No updater publication. This overrides older release notes above.
+
+## v0.137.0 camera follow-up
+F5 front/rear cameras pivot at the eyes for every scaled form, with visible-growth smoothing for Great Ape.
+The transformation cinematic also targets eye height. Giant distance and collision checks remain.

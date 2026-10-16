@@ -10,10 +10,10 @@ DEVLOG.md (newest entries at the bottom) and TODO.md.
   for the jar. In tests, schedule delayed steps with `Delays.after(helper, ticks, ...)`, never
   `helper.runAfterDelay` (nested delays crash the test server).
 - **Releasing a version:** update DEVLOG.md (append), TODO.md and the docs, bump `mod_version` in gradle.properties,
-  build and test, then `tools/release.sh <version> "<summary>"`. It commits (with the Co-Authored-By trailer), tags,
-  installs the jar into the user's mods folders on Windows, and runs `tools/deploy.sh --no-build`, which publishes
-  the jar on the `builds` branch. The user's PC runs `tools/windows/dbz-update.ps1` every 10 minutes, swapping the new
-  jar in. Never skip deploying a finished version. Push `main` and the tags when the user asks to update the repo.
+  build and run all GameTests, check devshots, then `tools/release.sh <version> "<summary>"`.
+  The user changed the workflow on 2026-10-16: install directly into
+  `C:\Users\musta\AppData\Roaming\.minecraft\mods` and delete older `dbzenith-*.jar` there.
+  Do not publish to the updater or run deploy.sh. Push `main` and tags only when the user asks to update the repo.
 - **Checking visuals:** devshots, i.e. screenshots taken by the dev client on `/dbz devshot`.
   - On Windows: `tools/dev/winshots.sh "<setup;cmds>" <shot> "@cmd|cmd" <shot> ...`, then look at them with
     `tools/dev/Crop.java`.

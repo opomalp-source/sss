@@ -46,7 +46,7 @@ A Saiyan or half-Saiyan with a tail can turn into a Great Ape.
   into give way (leaves and plants are crushed, logs drop as wood); never in safe zones, and protection mods are
   asked first. Server config `destruction.giantTrample` turns it off.
 - Enormous strength; no flight, no ki techniques. The camera stands back so you can see the whole ape in third
-  person. It rises and retreats with the visible growth, frames your torso, eases further out for the roar and
+  person. It rises and retreats with the visible growth, pivots at your eyes, eases further out for the roar and
   returns afterwards. First person rises with the growth too; third person checks the camera's corners against walls.
 - **It ends** when the moon is gone (the night ends, the false moon fades, something covers you) or your tail is cut.
   You collapse back, exhausted.

@@ -142,7 +142,7 @@ public final class TransformFx {
         float o = Mth.lerp(partial, orbitO, orbit);
         o = o * o * (3 - 2 * o);
         float yaw = startYaw + ORBIT * o, pitch = -6 - 6 * o;                // round to the front, a little from below
-        Vec3 focus = mc.player.getPosition(partial).add(0, mc.player.getBbHeight() * 0.62, 0);
+        Vec3 focus = mc.player.getPosition(partial).add(0, mc.player.getEyeHeight(), 0);
         Vec3 look = Vec3.directionFromRotation(pitch, yaw);
         Vec3 want = focus.subtract(look.scale(DISTANCE));
         BlockHitResult hit = mc.level.clip(new ClipContext(focus, want, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, mc.player));

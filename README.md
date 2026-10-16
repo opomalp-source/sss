@@ -3,15 +3,15 @@
 A Dragon Ball-inspired total-conversion mod for **Minecraft 1.20.1 / NeoForge 47.1.106**. Mod id `dbzenith`.
 Status, roadmap and decisions: [TODO.md](TODO.md), [FEATURE_MATRIX.md](FEATURE_MATRIX.md), [DEVLOG.md](DEVLOG.md), [BRIEF.md](BRIEF.md).
 
-## Latest release: 0.136.0
+## Latest release: 0.137.0
 
-Download the tested mod from the [`builds` branch](https://github.com/opomalp-source/sss/tree/builds).
+Installed directly into the user's Minecraft mods folder. F5 now pivots at eye height in every form.
 The Great Ape fights with ground stomps, with a wind-up, shockwave and recovery. Its transformation has a new
 head-clutch, bracing and growth sequence, white eyes while staring at the moon, and battle armour that stays visible
 throughout the change. New hunched idle and walking clips suit its weight.
 Details: [Great Ape](docs/GREAT_APE.md), [handoff](HANDOFF.md), [development log](DEVLOG.md).
 
-Build the complete mod from this checkout with Gradle; `tools/release.sh` publishes the tested jar for the updater.
+Build the complete mod from this checkout with Gradle; `tools/release.sh` installs the tested jar directly; updater publication is disabled by user request.
 
 ## Build
 Requires JDK 17 (`JAVA_HOME`). On this machine: `C:\Users\sunam\.jdks\jdk-17.0.20.1+1`.

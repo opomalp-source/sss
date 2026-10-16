@@ -1,6 +1,6 @@
 #!/bin/bash
 # Releases a version (after bumping mod_version and building): commits, tags, installs the jar into the local mods
-# folders (only if Minecraft isn't running), and publishes it on the builds branch (tools/deploy.sh).
+# folder (only if Minecraft isn't running). No updater publication, per user request.
 # usage: tools/release.sh <version> "<commit subject>"
 # Build and test first:
 #   rm -f run-gametest/world/serverconfig/dbzenith-server.toml; ./gradlew --offline build runGameTestServer
@@ -16,8 +16,8 @@ $MSG
 Co-Authored-By: Codex <noreply@openai.com>
 MSGEOF
 git tag v$V
-if command -v powershell >/dev/null; then                                   # Windows: the user's two mods folders
-  powershell -NoProfile -Command "\$mc = Get-CimInstance Win32_Process -Filter \"name like 'java%'\" | Where-Object { \$_.CommandLine -match 'net\.minecraft|--gameDir|bootstraplauncher' }; if (\$mc) { 'MINECRAFT RUNNING: not installed' } else { foreach (\$d in \"\$env:APPDATA\.minecraft-dbz\mods\", \"\$env:APPDATA\.minecraft\mods\") { if (Test-Path \$d) { Get-ChildItem \$d -Filter 'dbzenith-*.jar' | Remove-Item -Force; Copy-Item build\libs\dbzenith-$V.jar \$d } }; 'installed $V' }"
+if command -v powershell >/dev/null; then                                   # Windows: the user's requested mods folder
+  powershell -NoProfile -Command "\$mc = Get-CimInstance Win32_Process -Filter \"name like 'java%'\" | Where-Object { \$_.CommandLine -match 'net\.minecraft|--gameDir|bootstraplauncher' }; if (\$mc) { 'MINECRAFT RUNNING: not installed' } else { foreach (\$d in \"\$env:APPDATA\.minecraft\mods\") { if (Test-Path \$d) { Copy-Item -LiteralPath build\libs\dbzenith-$V.jar -Destination \$d -Force; Get-ChildItem -LiteralPath \$d -File -Filter 'dbzenith-*.jar' | Where-Object { \$_.Name -ne 'dbzenith-$V.jar' } | ForEach-Object { Remove-Item -LiteralPath \$_.FullName -Force } } }; 'installed $V' }"
 fi
-bash tools/deploy.sh --no-build 2>&1 | tail -1
+
 git log --oneline -1 | cut -c1-90

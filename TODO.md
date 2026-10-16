@@ -309,3 +309,5 @@ to both mods folders.
 - [x] Phase 8 (v0.124.0) Beam clash v2: clash orb tinted to the winner, sideways lightning, shock rings, sparks, ground and rumble, clash roar; draws scale with time, winners pour through
 - [x] Phase 9 (v0.125.0) Post-processing: heat shimmer round ki light (bloom glow as mask), colour split after big hits, anime impact frames; settings for each
 - [x] Phase 10 (v0.126.0) Performance: per-frame budget and distance LOD for ki balls, low quality trims (no shimmer, fewer arcs and bolts), debug overlay stats, stress-tested; fixed the post pass blacking out the world with the HUD on (v0.125.0)
+
+- [x] (v0.137.0) F5 eye-height pivot in Great Ape and all scaled forms, including transformation cinematics; direct local installation by user request.

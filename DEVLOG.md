@@ -3855,3 +3855,17 @@ armour visible throughout growth, and white eyes when staring at the full moon. 
   bracing / arching / low roar / chest beats, and battle armour throughout the coat transition were recorded with
   devshots. A second clip checks alternating left/right knee lift, foot contact and ground effects; a durable cow
   took damage at contact (1000 to 986.9 health in that scene). Preview GIFs and an eye close-up were exported.
+
+## 2026-10-16 — Eye-height F5 camera (v0.137.0)
+- The user wanted front/rear third-person views at the eyes rather than the body in Great Ape and every other form.
+  Removed the giant camera's 0.67 eye-height multiplier and roar-time vertical bias. Both F5 views now orbit the
+  scaled eye position; Great Ape's camera still follows visible growth smoothly. Distance, roar pull-back and
+  eight-corner wall collision checks remain. The same path covers Giant Namekian and other enlarged forms.
+- Ordinary forms keep Minecraft's eye-height pivot. Transformation cinematics now focus on the eyes too instead
+  of 62% of body height. The user's shoulder offset setting remains available.
+- All 248 GameTests pass; build successful with Java 17.
+- User release override: install directly to C:\Users\musta\AppData\Roaming\.minecraft\mods, delete older DBZ jars,
+  and do not publish to the updater. Updated release.sh, CLAUDE, handoff and README to preserve this preference.
+- Devshots reviewed in front/rear views: base, Great Ape growth, completed Great Ape, Giant Namekian scale and
+  return to base. Cropped comparison checked with tools/dev/Crop.java. No new assets.
+- Fixed winshots.sh to quote the Java executable path for this machine's Program Files installation.

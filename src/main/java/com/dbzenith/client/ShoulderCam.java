@@ -91,9 +91,9 @@ public final class ShoulderCam {
         double y = Mth.lerp(event.getPartialTick(), p.yo, p.getY());
         double x = Mth.lerp(event.getPartialTick(), p.xo, p.getX());
         double z = Mth.lerp(event.getPartialTick(), p.zo, p.getZ());
-        // Follow the visible body, not the server's instantly enlarged eye height. Frame the chest in third person.
+        // Pivot both F5 views at the eyes, following visible growth instead of the server's instant size change.
         double eye = p.getEyeHeight() * s / target;
-        Vec3 from = new Vec3(x, y + (cam.isDetached() ? eye * 0.67 + s * 0.2 * roarRoom : eye), z);
+        Vec3 from = new Vec3(x, y + eye, z);
         if (!cam.isDetached()) {
             position(cam, from);
             return;

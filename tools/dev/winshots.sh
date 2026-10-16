@@ -15,11 +15,11 @@ for i in $(seq 1 120); do grep -q "Done (" "$OUT/dbz-server.log" && break; sleep
 ./gradlew --offline runClientTest -PdevScreenshots=0 -PdevQuitAfter=0 > "$OUT/dbz-client.log" 2>&1 &
 for i in $(seq 1 150); do grep -q "Dev joined the game" "$OUT/dbz-server.log" && break; sleep 2; done; sleep 8
 SETUP="$1"; shift
-if [ -n "$SETUP" ]; then IFS=';' read -ra CMDS <<< "$SETUP"; $J tools/Rcon.java 25575 "$P" "${CMDS[@]}" >/dev/null; sleep 3; fi
+if [ -n "$SETUP" ]; then IFS=';' read -ra CMDS <<< "$SETUP"; "$J" tools/Rcon.java 25575 "$P" "${CMDS[@]}" >/dev/null; sleep 3; fi
 for s in "$@"; do
-  if [ "${s:0:1}" = "@" ]; then IFS="|" read -ra CC <<< "${s:1}"; $J tools/Rcon.java 25575 "$P" "${CC[@]}" >/dev/null; sleep 4
-  else $J tools/Rcon.java 25575 "$P" "dbz devshot Dev $s 6" >/dev/null; sleep 4; fi
+  if [ "${s:0:1}" = "@" ]; then IFS="|" read -ra CC <<< "${s:1}"; "$J" tools/Rcon.java 25575 "$P" "${CC[@]}" >/dev/null; sleep 4
+  else "$J" tools/Rcon.java 25575 "$P" "dbz devshot Dev $s 6" >/dev/null; sleep 4; fi
 done
-$J tools/Rcon.java 25575 "$P" "stop" >/dev/null; sleep 8
+"$J" tools/Rcon.java 25575 "$P" "stop" >/dev/null; sleep 8
 powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"name like 'java%'\" | Where-Object { \$_.CommandLine -match 'devlaunch|clienttest|ClientTest' } | ForEach-Object { Stop-Process -Id \$_.ProcessId -Force }"
 echo shots-done
