@@ -89,7 +89,11 @@ public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         if (ui > 0) eyeColor = ui == 2 ? UI_EYES : UI_SIGN_EYES;
         boolean ape = ApeLook.is(state);                                          // the Great Ape: its own hairstyle grown wild in the fur's colour, its own red eyes
         if (ape) {
-            hairColor = ApeLook.hairColor(state.form());
+            float coat = com.dbzenith.transform.ApeChange.fur(ApeTransformation.age(player, partialTick));
+            int from = state.hairColor(), to = ApeLook.hairColor(state.form());
+            hairColor = (Math.round(net.minecraft.util.Mth.lerp(coat, (from >> 16) & 255, (to >> 16) & 255)) << 16)
+                    | (Math.round(net.minecraft.util.Mth.lerp(coat, (from >> 8) & 255, (to >> 8) & 255)) << 8)
+                    | Math.round(net.minecraft.util.Mth.lerp(coat, from & 255, to & 255));
             eyeColor = -1;
             goldCharge = false;
             ui = 0;
@@ -103,8 +107,10 @@ public class FormHairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
             pose.pushPose();
             getParentModel().head.translateAndRotate(pose);
             if (ape) {                                                            // a wild mane, lifted off the brow so the eyes show
-                pose.translate(0, -1.6f / 16f, 1.4f / 16f);
-                pose.scale(1.12f, 1.12f, 1.12f);
+                float mane = com.dbzenith.transform.ApeChange.face(ApeTransformation.age(player, partialTick));
+                pose.translate(0, -1.6f / 16f * mane, 1.4f / 16f * mane);
+                float size = 1 + 0.12f * mane;
+                pose.scale(size, size, size);
             }
             float aura = state.powering() ? 1f : formHair ? .3f : 0f;                // an aura lifts the hair
             float[] live = HairSim.step(player, getParentModel().head, hair, partialTick, aura);

@@ -3775,3 +3775,34 @@ should tear the clothes, except clothes made for it (Vegeta's armour). Player gu
   own `run-server` (EULA accepted with the user's OK, offline mode, random RCON password in `rcon-password.txt`) and
   the test client `pauseOnLostFocus:false` (it paused when unfocused, and in creative its open inventory moved the
   armour off).
+
+## 2026-10-16 — Becoming the Great Ape: growth, fur, face and camera (v0.135.0)
+The user asked for Great Ape camera and animation work, starting with a transformation where the player actually
+gets bigger and hairier. Player guide: `docs/GREAT_APE.md`.
+
+- **One witnessed change, one timeline (`ApeChange`, `ApeTransformation`).** It starts on a non-ape-to-ape state
+  change in `AnimController`, using the player's ticks and render interpolation. First seeing an existing ape,
+  rendering portraits, or changing between ape variants doesn't restart it. Reversion interrupts the action and
+  cancels the pending roar. Player keys are weak references, rather than a render-populated map of entity ids.
+- **The body grows.** A hunched, straining pose and uneven breaths while the visible scale eases from normal to
+  the full form size (ticks 8-68). The coat arrives on the arms, trunk, legs and head at staggered times. The old
+  skin stays underneath; the generated face strains and fades as the ape's face develops. The muzzle, ears and
+  fangs grow out of the head; the player's hair blends to the fur colour and grows into its mane placement.
+- **Then the roar.** At tick 72 the ape rises with its head back and arms wide. The jaw, layered roar sounds,
+  dust ring, camera shake and optional title cut-in agree on that moment. The title no longer covers the growth.
+  Chest beats follow, then recovery (160 ticks total). All three ape variants share the sequence.
+- **Camera (`ShoulderCam`).** Its height and distance follow the visible growth rather than instantly jumping
+  to the server's full eye height. Third person frames the torso and checks eight camera corners against terrain;
+  the roar eases farther back and slightly higher, returning by tick 180. First person rises with the growth.
+  The first rear recording clipped the raised mane; the extra roar framing was added and rechecked.
+- **Verification.** 246 GameTests, including a new test for normal-sized/no-fur onset, monotonic bounded growth,
+  fur preceding the muzzle, and a fully grown body/coat/face before the roar. Devshot sequences checked front and
+  rear growth, the strained human face, fur stages, muzzle, mane, battle armour, the full roar within the frame,
+  camera against a stone wall, golden ape, first-person rise against an 18-block marker, joining already transformed,
+  and reverting mid-growth (back to the human idle instead of continuing the roar). A looping review GIF
+  was exported from the dev-client frames. No new third-party assets.
+- **Limits.** This is the visual transformation: server form size, reach, clothing tearing and other gameplay
+  rules still take effect immediately on form entry. Further locomotion/combat animation polish follows user
+  feedback; no mouth blast yet. Story remains last.
+- **Docs/release.** Updated guide, TODO, handoff and stale README release/build notes. Release scripts now stage
+  the README, use the actual Codex co-author, and fail when publishing fails instead of reporting false success.

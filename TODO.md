@@ -288,6 +288,10 @@ Most of these already exist in a first version; each step upgrades what is there
 - [x] (v0.133.0) Feel pass on the new systems: scars come from 15% blows and from going down (bosses hit about 12% a blow: a fifth was almost never reached); an open wound slows healing to a third (regen out-healed the seep, so closing it meant nothing)
 - [x] (v0.134.0) The Great Ape after the user's pictures: the player's own figure grown giant (ten times, 18 blocks) under fur, their hairstyle as the mane, an ape's brow, muzzle, fangs, ears and red eyes; every footfall and landing shakes the view with dust; the change tears cloth (battle armour stretches, metal bursts off); giant step, reach, stride, trampling
 
+# Great Ape growth and camera (user request, 2026-10-16)
+- [x] (v0.135.0) First transformation: straining breaths, progressive growth, fur spreading over the body, muzzle and ears growing, hair becoming the mane, original strained face fading into the ape; full-sized roar with sound/dust/shake and chest beats; camera follows visible growth, frames the torso, makes room for the roar, rises smoothly in first person and checks its corners against walls
+- [ ] User feedback on the growth/camera sequence, then further Great Ape locomotion and combat animation polish
+
 # Ki attack rework (user spec, 2026-10-14): cinematic attacks and sound, data-driven
 Decided with the user: all built-in attacks as JSON; charging locks movement for big attacks (best judgement);
 very big craters; light faked (ground glow + bloom); procedural 3D glowing meshes; run phases 1-4 then stop; install

@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.134.0, 2026-10-16)
+# Handoff: where Dragon Block Zenith stands (v0.135.0, 2026-10-16)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.134.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.135.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -47,6 +47,16 @@
   - Every footfall and landing shakes the view, with dust (`GiantSteps`); a giant's step, reach, stride, trampling
     (`GiantBody`).
   - The change tears cloth; battle armour stretches; metal armour bursts off.
+- **v0.135.0:** Great Ape growth and camera, the first priority in the user's next Great Ape pass.
+  - Hunching, straining breaths, growth from normal size over about three seconds; fur arrives part by part;
+    the muzzle and ears grow out, the mane grows and changes colour, the original face strains then fades.
+  - Full-sized roar, sound, dust, shake and title cut-in together; chest beats and recovery. About eight seconds.
+  - The camera rises and retreats with the visible body, frames the torso, eases farther out for the roar and
+    returns; camera-corner collision checks. First person rises with the growth too.
+  - A witnessed transition starts the sequence; seeing an existing ape or switching ape variants does not replay it.
+    Reverting interrupts it and cancels the pending roar. The server still applies its form size and rules immediately.
+  - 246 GameTests; front/rear growth recordings, restored face, mane framing, battle armour, first-person rise and
+    wall collision checked in devshots. Guide: `docs/GREAT_APE.md`.
 
 ## Known gaps and ideas
 
@@ -56,8 +66,8 @@
 - Scars are drawn on the body layer, so a shirt painted into a plain Minecraft skin doesn't cover them (a gi or a
   jacket layer does).
 - Regrowth isn't animated in your own first-person view.
-- The Great Ape has no mouth blast (it has no techniques at all). Its roar and chest beats are a guess at the
-  user's taste, checked only in stills; the footfall shake can only be judged in play.
+- The Great Ape has no mouth blast (it has no techniques at all). The new growth/roar/camera sequence has devshot
+  recordings; the user's feedback on its feel, locomotion and footfall shake is still useful.
 - A true duel simulation (player against NPC, every race) for pacing hasn't been built: the feel pass used the
   balance reports (`BalanceReport`, `BalanceReport2`, written to run-gametest/*.md).
 - Open TODO items: more content (bosses, planets, a space dimension), the original sound set, Animation v5 (combat
@@ -69,6 +79,8 @@
   installed (needed for the `.py` generators; old shells may not have them on PATH).
 - The second PC (user `musta`, from v0.134.0): JDK 17 at `C:\Program Files\Microsoft\jdk-17.0.20.101-hotspot` (set
   `JAVA_HOME`); no Python on PATH. Windows long paths are off, so keep the repo at a short path (or map one with
-  `subst`): deep folders break the Minecraft toolchain. Its dev server is set up (`run-server`, RCON password in
-  `run-server/rcon-password.txt`).
+  `subst`): deep folders break the Minecraft toolchain. The current checkout is
+  `C:\Users\musta\Documents\Codex\2026-10-16\you-re-continuing-work-on-dragon\repo`, mapped to `Z:`. Its dev server is
+  set up (`run-server`, RCON password in `server.properties`; do not print it). The scripted client needs
+  `pauseOnLostFocus:false`. Leave `server-ip` empty for its `localhost` IPv6 connection.
 - The user's PC auto-installs released jars.

@@ -5,15 +5,15 @@
 # Build and test first:
 #   rm -f run-gametest/world/serverconfig/dbzenith-server.toml; ./gradlew --offline build runGameTestServer
 #   ./gradlew --offline build -x test
-set -e
+set -euo pipefail
 cd "$(dirname "$0")/.."
 V=$1; MSG=$2
 [ -f build/libs/dbzenith-$V.jar ] || { echo "no jar for $V"; exit 1; }
-git add -A src tools docs DEVLOG.md TODO.md gradle.properties build.gradle CLAUDE.md HANDOFF.md 2>/dev/null || true
+git add -A src tools docs README.md DEVLOG.md TODO.md gradle.properties build.gradle CLAUDE.md HANDOFF.md
 git commit -q -F - <<MSGEOF
 $MSG
 
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Co-Authored-By: Codex <noreply@openai.com>
 MSGEOF
 git tag v$V
 if command -v powershell >/dev/null; then                                   # Windows: the user's two mods folders

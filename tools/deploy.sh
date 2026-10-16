@@ -29,8 +29,10 @@ git checkout -q -b builds
 git add -A
 git -c user.name="$(git -C "$ROOT" config user.name || echo dbz)" -c user.email="$(git -C "$ROOT" config user.email || echo dbz@localhost)" \
     commit -q -m "Build $VERSION"
+PUBLISHED=0
 for i in 1 2 3 4; do
-    git push -q -f "$REMOTE" builds && break
+    if git push -q -f "$REMOTE" builds; then PUBLISHED=1; break; fi
     sleep $((2 ** i))
 done
+[ "$PUBLISHED" = 1 ] || { echo "failed to publish $VERSION" >&2; exit 1; }
 echo "published $VERSION"

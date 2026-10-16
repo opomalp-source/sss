@@ -29,6 +29,7 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
     /** Classic (64x64) and HD (128x128, with a pupil-and-shine layer) part textures. */
     private static final ResourceLocation[][] TEXTURES = textures("face"), TEXTURES_HD = textures("face_hd");
     private static ResourceLocation[][] textures;
+    private float opacity = 1f;
 
     private static ResourceLocation[][] textures(String folder) {
         ResourceLocation[][] t = new ResourceLocation[Part.values().length + 2][];
@@ -61,8 +62,16 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
     @Override
     public void render(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player, float limbSwing,
                        float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (player.isInvisible() || ApeLook.is(player)) return;                     // the Great Ape wears its own fur (ApeLayer)
+        if (player.isInvisible()) return;
         PublicStatePacket state = ClientPublicStates.get(player.getId());
+        boolean changingApe = ApeLook.is(state);
+        opacity = 1f;
+        if (changingApe) {
+            float t = ApeTransformation.age(player, partialTick);
+            opacity = 1 - com.dbzenith.transform.ApeChange.phase(t, 32, 64);
+            if (opacity <= 0) return;
+            state = ApeTransformation.before(player);
+        }
         if (!active(state)) return;
         Form form = FormHairLayer.flicker(player, state, ageInTicks);
         boolean hd = ArtStyle.hiRes();
@@ -71,7 +80,7 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         int eyes = FaceParts.get(face, Part.EYES);
         int brows = FaceParts.get(face, Part.BROWS), mouth = FaceParts.get(face, Part.MOUTH);
         // expressions (CX-14b, CX-42): what the fighter is going through shows on the face, strongest first
-        boolean shout = state.has(PublicStatePacket.CHARGING) || state.has(PublicStatePacket.TRANSFORMING);
+        boolean shout = changingApe || state.has(PublicStatePacket.CHARGING) || state.has(PublicStatePacket.TRANSFORMING);
         boolean hurt = player.hurtTime > 0;
         boolean grit = !shout && (hurt || state.has(PublicStatePacket.GUARDING) || state.has(PublicStatePacket.HEAVY));
         if (hurt || player.swinging || shout || grit) COMBAT.put(player.getId(), ageInTicks);
@@ -127,7 +136,7 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         if (glowing) {                                                         // eyes that burn: an emissive pass over the iris
             ResourceLocation glow = textures[IRIS][Math.max(0, Math.min(textures[IRIS].length - 1, eyes))];
             getParentModel().renderToBuffer(pose, buffers.getBuffer(RenderType.eyes(glow)), LightTexture.FULL_BRIGHT, overlay,
-                    ((iris >> 16) & 255) / 255f * 0.8f, ((iris >> 8) & 255) / 255f * 0.8f, (iris & 255) / 255f * 0.8f, 1f);
+                    ((iris >> 16) & 255) / 255f * 0.8f, ((iris >> 8) & 255) / 255f * 0.8f, (iris & 255) / 255f * 0.8f, opacity);
         }
         pose.popPose();
         int hair = form.hairColor() >= 0 ? form.hairColor() : race != null ? race.brow() : state.hairColor() >= 0 ? state.hairColor() : 0x3A2414;
@@ -148,7 +157,7 @@ public class FaceLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
     private void draw(PoseStack pose, MultiBufferSource buffers, int part, int option, int light, int overlay, int tint) {
         ResourceLocation tex = textures[part][Math.max(0, Math.min(textures[part].length - 1, option))];
         getParentModel().renderToBuffer(pose, buffers.getBuffer(RenderType.entityTranslucent(tex)), light, overlay,
-                ((tint >> 16) & 255) / 255f, ((tint >> 8) & 255) / 255f, (tint & 255) / 255f, 1f);
+                ((tint >> 16) & 255) / 255f, ((tint >> 8) & 255) / 255f, (tint & 255) / 255f, opacity);
     }
 
 

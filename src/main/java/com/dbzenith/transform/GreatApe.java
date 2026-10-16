@@ -64,10 +64,6 @@ public final class GreatApe {
         if (gaze >= GAZE_SECONDS) {
             data.setMoonGaze(0);
             FormHandler.enter(player, data, Forms.GREAT_APE);
-            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), net.minecraft.sounds.SoundEvents.RAVAGER_ROAR,   // the roar
-                    net.minecraft.sounds.SoundSource.PLAYERS, 3f, 0.45f);
-            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), net.minecraft.sounds.SoundEvents.ENDER_DRAGON_GROWL,
-                    net.minecraft.sounds.SoundSource.PLAYERS, 1.5f, 0.6f);
             player.displayClientMessage(Component.translatable("message.dbzenith.great_ape"), true);
         }
     }

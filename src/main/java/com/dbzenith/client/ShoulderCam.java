@@ -31,6 +31,7 @@ import java.lang.reflect.Method;
 @Mod.EventBusSubscriber(modid = DBZenith.MOD_ID, value = Dist.CLIENT)
 public final class ShoulderCam {
     private static final Method MOVE = ObfuscationReflectionHelper.findMethod(Camera.class, "m_90568_", double.class, double.class, double.class);
+    private static final Method POSITION = ObfuscationReflectionHelper.findMethod(Camera.class, "m_90584_", double.class, double.class, double.class);
     private static boolean was, joined;
     private static CameraType before;
     private static float amount, amountO;
@@ -80,17 +81,39 @@ public final class ShoulderCam {
     public static void onGiantCamera(ViewportEvent.ComputeCameraAngles event) {
         Camera cam = event.getCamera();
         Minecraft mc = Minecraft.getInstance();
-        if (!cam.isDetached() || mc.level == null || !(cam.getEntity() instanceof net.minecraft.world.entity.player.Player p)) return;
-        float s = com.dbzenith.transform.GreatApe.scaleOf(p);
-        if (s <= 1.01f) return;
-        double back = (s - 1) * 2.4;                                          // a Great Ape (ten times a person) about 26 blocks back
-        Vec3 from = cam.getPosition();
+        if (mc.level == null || !(cam.getEntity() instanceof net.minecraft.world.entity.player.Player p)) return;
+        float target = com.dbzenith.transform.GreatApe.scaleOf(p);
+        if (target <= 1.01f) return;
+        float s = com.dbzenith.client.render.ApeTransformation.scale(p, (float) event.getPartialTick());
+        float age = com.dbzenith.client.render.ApeTransformation.age(p, (float) event.getPartialTick());
+        float roarRoom = com.dbzenith.client.render.ApeLook.is(p)
+                ? com.dbzenith.transform.ApeChange.phase(age, 48, 72) * (1 - com.dbzenith.transform.ApeChange.phase(age, 148, com.dbzenith.transform.ApeChange.CAMERA_END)) : 0;
+        double y = Mth.lerp(event.getPartialTick(), p.yo, p.getY());
+        double x = Mth.lerp(event.getPartialTick(), p.xo, p.getX());
+        double z = Mth.lerp(event.getPartialTick(), p.zo, p.getZ());
+        // Follow the visible body, not the server's instantly enlarged eye height. Frame the chest in third person.
+        double eye = p.getEyeHeight() * s / target;
+        Vec3 from = new Vec3(x, y + (cam.isDetached() ? eye * 0.67 + s * 0.2 * roarRoom : eye), z);
+        if (!cam.isDetached()) {
+            position(cam, from);
+            return;
+        }
+        double back = 4 + (s - 1) * (2.8 + 1.1 * roarRoom);
         Vector3f look = cam.getLookVector();
         Vec3 to = from.subtract(look.x() * back, look.y() * back, look.z() * back);
-        BlockHitResult hit = mc.level.clip(new ClipContext(from, to, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, p));
-        double room = hit.getType() == HitResult.Type.MISS ? back : Math.max(0, hit.getLocation().distanceTo(from) - 0.3);
+        double room = back;
+        // Check the camera's corners as well as its centre, so walls cannot clip through the near plane.
+        for (int i = 0; i < 8; i++) {
+            Vec3 corner = new Vec3((i & 1) == 0 ? -0.2 : 0.2, (i & 2) == 0 ? -0.2 : 0.2, (i & 4) == 0 ? -0.2 : 0.2);
+            BlockHitResult hit = mc.level.clip(new ClipContext(from.add(corner), to.add(corner), ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, p));
+            if (hit.getType() != HitResult.Type.MISS) room = Math.min(room, Math.max(0, hit.getLocation().distanceTo(from.add(corner)) - 0.3));
+        }
+        position(cam, from.subtract(look.x() * room, look.y() * room, look.z() * room));
+    }
+
+    private static void position(Camera cam, Vec3 at) {
         try {
-            MOVE.invoke(cam, -room, 0.0, 0.0);                                    // move(forward, up, left)
+            POSITION.invoke(cam, at.x, at.y, at.z);
         } catch (ReflectiveOperationException ignored) {
         }
     }

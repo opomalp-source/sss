@@ -80,6 +80,7 @@ public final class AnimController {
         boolean wasDowned;
         int lastHurtTime;
         String form;
+        PublicStatePacket previousState;
         int combo;
         long lastPunch;
         long actionLockUntil;          // a transformation is not interrupted by small actions
@@ -186,13 +187,13 @@ public final class AnimController {
         // transformations: the form changed while we were watching
         String form = state == null ? null : state.form();
         if (form != null && t.form != null && !form.equals(t.form)) {
+            t.actionLockUntil = 0;                                             // a reversion must interrupt the growth/roar too
             if (PlayerData.BASE_FORM.equals(form)) play(player, t, Anims.POWER_DOWN, now, 0);
-            else if (isApe(form)) {                                             // the Great Ape: the roar, then fists on the chest (v0.134)
-                play(player, t, Anims.APE_ROAR, now, (int) Anims.APE_ROAR.endTick);
-                com.dbzenith.client.fx.GiantSteps.roar(player);
-                if (player == Minecraft.getInstance().player) {
-                    com.dbzenith.client.ui.CutInOverlay.play(net.minecraft.network.chat.Component.translatable(
-                            com.dbzenith.transform.Forms.byId(form).translationKey()), 0xFF2020);
+            else if (isApe(form)) {
+                if (!isApe(t.form)) {
+                    com.dbzenith.client.render.ApeTransformation.begin(player, t.previousState);
+                    play(player, t, Anims.APE_ROAR, now, (int) Anims.APE_ROAR.endTick);
+                    com.dbzenith.client.fx.GiantSteps.roar(player);
                 }
             } else {
                 play(player, t, Anims.transformFor(state.raceEnum()), now, 30);
@@ -204,6 +205,7 @@ public final class AnimController {
             }
         }
         t.form = form;
+        t.previousState = state;
 
         // a heavy strike lands when the wind-up is released
         boolean heavy = state != null && state.has(PublicStatePacket.HEAVY);

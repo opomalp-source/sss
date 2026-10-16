@@ -45,6 +45,26 @@ public final class GiantTests {
     }
 
     @GameTest(template = EMPTY)
+    public static void apeGrowthFinishesBeforeTheRoar(GameTestHelper helper) {
+        helper.assertTrue(com.dbzenith.transform.ApeChange.growth(0) == 0
+                && com.dbzenith.transform.ApeChange.fur(0) == 0 && com.dbzenith.transform.ApeChange.face(0) == 0,
+                "the change starts as a person, without fur or muzzle");
+        float previous = 0;
+        for (int t = 0; t <= com.dbzenith.transform.ApeChange.END; t++) {
+            float growth = com.dbzenith.transform.ApeChange.growth(t);
+            helper.assertTrue(growth >= previous && growth <= 1, "growth never shrinks or overshoots");
+            previous = growth;
+        }
+        helper.assertTrue(com.dbzenith.transform.ApeChange.fur(28) > 0 && com.dbzenith.transform.ApeChange.face(28) == 0,
+                "fur starts before the muzzle grows");
+        int roar = com.dbzenith.transform.ApeChange.ROAR;
+        helper.assertTrue(com.dbzenith.transform.ApeChange.growth(roar) == 1
+                && com.dbzenith.transform.ApeChange.fur(roar) == 1 && com.dbzenith.transform.ApeChange.face(roar) == 1,
+                "the body, coat and muzzle are complete for the roar");
+        helper.succeed();
+    }
+
+    @GameTest(template = EMPTY)
     public static void greatApeTearsClothButBattleArmourStretches(GameTestHelper helper) {
         ServerPlayer p = saiyan(helper);
         PlayerData d = ModCapabilities.getOrThrow(p);

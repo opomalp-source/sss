@@ -1,7 +1,6 @@
 package com.dbzenith.client.render;
 
 import com.dbzenith.DBZenith;
-import com.dbzenith.transform.GreatApe;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -22,7 +21,7 @@ public final class FormScaleRenderer {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void pre(RenderPlayerEvent.Pre event) {
-        float s = GreatApe.scaleOf(event.getEntity());
+        float s = ApeTransformation.scale(event.getEntity(), event.getPartialTick());
         float width = bodyWidth(event.getEntity().getId());
         float height = com.dbzenith.appearance.Stature.heightScale(event.getEntity());
         event.getPoseStack().pushPose();
@@ -33,7 +32,15 @@ public final class FormScaleRenderer {
     private static float bodyWidth(int entityId) {
         com.dbzenith.network.PublicStatePacket state = com.dbzenith.client.ClientPublicStates.get(entityId);
         if (state == null) return 1f;
-        if (ApeLook.is(state)) return APE_WIDTH;
+        if (ApeLook.is(state)) {
+            var mc = net.minecraft.client.Minecraft.getInstance();
+            if (mc.level != null && mc.level.getEntity(entityId) instanceof net.minecraft.world.entity.player.Player p) {
+                var before = ApeTransformation.before(p);
+                float original = before == null ? 1 : before.bodyType() == 0 ? 0.92f : before.bodyType() == 2 ? 1.12f : 1f;
+                return net.minecraft.util.Mth.lerp(com.dbzenith.transform.ApeChange.growth(ApeTransformation.age(p, mc.getFrameTime())), original, APE_WIDTH);
+            }
+            return APE_WIDTH;
+        }
         return switch (state.bodyType()) {
             case 0 -> 0.92f;
             case 2 -> 1.12f;

@@ -48,7 +48,7 @@ public final class GiantSteps {
 
     /** The Great Ape's roar on the change: the rumble comes with the roar itself ({@code Anims.APE_ROAR}). */
     public static void roar(Player player) {
-        WALKERS.computeIfAbsent(player.getId(), k -> new Walker()).roarAt = player.tickCount + 13;
+        WALKERS.computeIfAbsent(player.getId(), k -> new Walker()).roarAt = player.tickCount + com.dbzenith.transform.ApeChange.ROAR;
     }
 
     @SubscribeEvent
@@ -62,13 +62,17 @@ public final class GiantSteps {
         if (mc.isPaused()) return;
         WALKERS.int2ObjectEntrySet().removeIf(e -> mc.level.getEntity(e.getIntKey()) == null);
         for (Player p : mc.level.players()) {
-            float s = GreatApe.scaleOf(p);
+            if (GreatApe.scaleOf(p) < GIANT) {
+                WALKERS.remove(p.getId());                                     // cancel a pending roar on early reversion
+                continue;
+            }
+            float s = com.dbzenith.client.render.ApeTransformation.scale(p, 0);
             Walker w = WALKERS.get(p.getId());
             if (s < GIANT) {
-                if (w != null && w.roarAt < 0) WALKERS.remove(p.getId());
                 continue;
             }
             if (w == null) WALKERS.put(p.getId(), w = new Walker());
+            if (!com.dbzenith.client.render.ApeLook.is(p)) w.roarAt = -1;
             tick(mc.level, p, s, w);
         }
     }
@@ -76,6 +80,13 @@ public final class GiantSteps {
     private static void tick(ClientLevel level, Player p, float s, Walker w) {
         if (w.roarAt >= 0 && p.tickCount >= w.roarAt) {                          // the roar: the ground trembles under it
             w.roarAt = -1;
+            level.playLocalSound(p.getX(), p.getY() + s, p.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 3f, 0.45f, false);
+            level.playLocalSound(p.getX(), p.getY() + s, p.getZ(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.PLAYERS, 1.5f, 0.6f, false);
+            if (p == Minecraft.getInstance().player) {
+                var state = com.dbzenith.client.ClientPublicStates.get(p.getId());
+                if (state != null) com.dbzenith.client.ui.CutInOverlay.play(net.minecraft.network.chat.Component.translatable(
+                        com.dbzenith.transform.Forms.byId(state.form()).translationKey()), 0xFF2020);
+            }
             CameraFx.shakeAt(p.position(), 0.8f, 14 * s);
             ImpactFx.dustRing(p.position(), 1.6f * s, 20);
         }
