@@ -16,6 +16,7 @@ import java.util.*;
 public final class GalaxyScreen extends Screen {
     private static final int TEXT=0xFFE3EDF5,DIM=0xFF8AABC0,GOLD=0xFFFFCB79,CYAN=0xFF75D8E8;
     private static int nextSequence;
+    private final Deque<Integer> searchBack=new ArrayDeque<>();
     private int sequence,view=1,planet=-1,cursor,scroll,detailScroll,detailMax;
     private boolean waiting;
     private long requestedAt;
@@ -41,7 +42,7 @@ public final class GalaxyScreen extends Screen {
         sideW=Math.min(210,Math.max(142,width/3));sideX=width-sideW-14;mapW=sideX-mapX-10;mapH=height-mapY-68;
         button("Places",14,11,52,b->minecraft.setScreen(new IconicScreen(this)));
         search=new EditBox(font,width-206,11,135,18,Component.literal("Search discovered planets"));search.setMaxLength(32);search.setHint(Component.literal("Discovered planet name"));search.setValue(query);addRenderableWidget(search);
-        searchButton=button("Find",width-66,11,52,b->{query=search.getValue();cursor=0;request(3);});
+        searchButton=button("Find",width-66,11,52,b->{query=search.getValue();cursor=0;searchBack.clear();request(3);});
         back=button("Back",14,37,49,b->back());
         home=button("Home",68,37,49,b->{center=GalaxyCatalog.Id.parse(data.getString("current"));planet=-1;selected="";request(1);});
         button("Galaxy",122,37,58,b->{planet=-1;request(0);});
@@ -56,8 +57,8 @@ public final class GalaxyScreen extends Screen {
         land=button("Land",sideX+sideW/2+2,height-30,(sideW-20)/2,b->{if(planet<0)planet=0;request(6);onClose();});
         jump=button("Jump",sideX+8,height-52,(sideW-20)/2,b->{if(planet<0)planet=0;request(8);onClose();});
         transmit=button("Transmit",sideX+sideW/2+2,height-52,(sideW-20)/2,b->{if(planet<0)planet=0;request(9);onClose();});
-        previous=button("Previous",sideX+8,height-30,70,b->{cursor=Math.max(0,cursor-32);request(3);});
-        next=button("Next",sideX+sideW-78,height-30,70,b->{cursor+=32;request(3);});
+        previous=button("Previous",sideX+8,height-30,70,b->{if(!waiting&&!searchBack.isEmpty()){int old=cursor;cursor=searchBack.peek();if(request(3))searchBack.pop();else cursor=old;}});
+        next=button("Next",sideX+sideW-78,height-30,70,b->{if(!waiting){int old=cursor;cursor=data.getInt("nextCursor");if(request(3))searchBack.push(old);else cursor=old;}});
         if(data!=null) accept();
     }
     private Button button(String name,int x,int y,int w,java.util.function.Consumer<Button> onClick) {
@@ -69,11 +70,11 @@ public final class GalaxyScreen extends Screen {
         coordinates.setValue(center.toString());scroll=detailScroll=0;status="";zoom=beforeView==view?1:.7f;targetZoom=1;
         if(view!=2)selected="";
     }
-    private void request(int action) {
-        if(waiting) return;
-        if(System.currentTimeMillis()-requestedAt<550) {status="Chart updating; try again in a moment.";return;}
+    private boolean request(int action) {
+        if(waiting) return false;
+        if(System.currentTimeMillis()-requestedAt<550) {status="Chart updating; try again in a moment.";return false;}
         requestedAt=System.currentTimeMillis();waiting=true;sequence=++nextSequence;status="";
-        ModNetwork.sendToServer(new GalaxyPackets.Request(sequence,action,center.toString(),planet,query,cursor));
+        ModNetwork.sendToServer(new GalaxyPackets.Request(sequence,action,center.toString(),planet,query,cursor));return true;
     }
     @Override public void tick() {
         search.tick();coordinates.tick();
@@ -88,7 +89,7 @@ public final class GalaxyScreen extends Screen {
         if(data==null)return;
         zoom+=(targetZoom-zoom)*.2f;
         g.fillGradient(0,0,width,height,0xFF060D19,0xFF0B1927);
-        g.drawString(font,font.plainSubstrByWidth("GALAXY ATLAS",Math.max(30,width-290)),75,13,GOLD,false);
+        g.drawString(font,font.plainSubstrByWidth(width<355?"Atlas":"GALAXY ATLAS",Math.max(30,width-290)),75,13,GOLD,false);
         jump.visible=transmit.visible=view==2;jump.active=!waiting&&com.dbzenith.galaxy.space.SpaceRuntime.isSpace(minecraft.level);
         var selectedBody=data.getCompound("system").getList("bodies",Tag.TAG_COMPOUND);transmit.active=!waiting&&data.getBoolean("canTransmit")&&planet>=0&&planet<selectedBody.size()&&selectedBody.getCompound(planet).getBoolean("visited");
         frame(g,mapX,mapY,mapW,mapH);frame(g,sideX,mapY,sideW,mapH);
@@ -97,7 +98,7 @@ public final class GalaxyScreen extends Screen {
         if(view==3)results(g,mx,my);else if(view==2)system(g,mx,my);else chart(g,mx,my);
         g.disableScissor();
         sidebar(g);
-        previous.visible=next.visible=view==3;previous.active=cursor>0&&!waiting;next.active=data.getBoolean("more")&&!waiting;
+        previous.visible=next.visible=view==3;previous.active=!searchBack.isEmpty()&&!waiting;next.active=data.getBoolean("more")&&!waiting;
         waypoint.visible=land.visible=view==2;waypoint.active=!waiting;
         var landBodies=data.getCompound("system").getList("bodies",Tag.TAG_COMPOUND);int landingIndex=Math.max(0,planet);
         land.active=!waiting&&landingIndex<landBodies.size()&&landBodies.getCompound(landingIndex).getBoolean("landable");
@@ -135,8 +136,8 @@ public final class GalaxyScreen extends Screen {
             if(chosen || n.id.equals(data.getString("current")))ring(g,n.x,n.y,10,0xFF75D8E8);
             nodes.add(n);
         }
-        g.drawString(font,"Drag to rotate  /  Scroll to zoom",mapX+8,mapY+mapH-25,DIM,false);
-        g.drawString(font,"Click a star to select; click again to enter",mapX+8,mapY+mapH-14,DIM,false);
+        if(mapW>=230)g.drawString(font,"Drag to rotate  /  Scroll to zoom",mapX+8,mapY+mapH-25,DIM,false);
+        g.drawString(font,mapW<270?"Click twice to enter":"Click a star to select; click again to enter",mapX+8,mapY+mapH-14,DIM,false);
     }
     private void system(GuiGraphics g,int mx,int my){
         CompoundTag s=data.getCompound("system");ListTag bodies=s.getList("bodies",Tag.TAG_COMPOUND);
@@ -152,7 +153,7 @@ public final class GalaxyScreen extends Screen {
         }
         var stars=s.getList("starsDetail",Tag.TAG_COMPOUND);
         for(int i=0;i<stars.size();i++){var star=stars.getCompound(i);double[] at=project((i-(stars.size()-1)*.5)*14,0,0);dot(g,(int)at[0],(int)at[1],7,star.getInt("color"),true);}
-        g.drawString(font,"Select a planet to inspect its survey",mapX+8,mapY+mapH-14,DIM,false);
+        g.drawString(font,mapW<240?"Select a planet":"Select a planet to inspect its survey",mapX+8,mapY+mapH-14,DIM,false);
     }
     private void planet(GuiGraphics g,CompoundTag b){
         int x=mapX+mapW/2,y=mapY+mapH/2;int r=Math.max(3,(int)(Math.min(mapW,mapH)/4*zoom));
@@ -166,11 +167,11 @@ public final class GalaxyScreen extends Screen {
             sphere(g,xx,yy,3,m.getInt("color"),false);
         }
         g.drawString(font,font.plainSubstrByWidth(b.getString("name"),mapW-16),mapX+8,mapY+25,GOLD,false);
-        g.drawString(font,b.getBoolean("destroyed")?"Debris remnant / surface sealed":b.getBoolean("landable")?"Land with a Space Pod":"Upper clouds only",mapX+8,mapY+mapH-14,DIM,false);
+        g.drawString(font,b.getBoolean("destroyed")?(mapW<220?"Surface sealed":"Debris remnant / surface sealed"):b.getBoolean("landable")?(mapW<180?"Land: Space Pod":"Land with a Space Pod"):"Upper clouds only",mapX+8,mapY+mapH-14,DIM,false);
     }
     private void results(GuiGraphics g,int mx,int my){
         var entries=data.getList("entries",Tag.TAG_COMPOUND);
-        if(entries.isEmpty()){g.drawString(font,"No discoveries match this name.",mapX+10,mapY+36,TEXT,false);return;}
+        if(entries.isEmpty()){g.drawWordWrap(font,Component.literal(data.getBoolean("more")?"No matches on this page. Next continues the search.":"No discoveries match this name."),mapX+10,mapY+36,mapW-20,TEXT);return;}
         int visible=Math.max(1,(mapH-35)/24),start=Math.min(scroll,Math.max(0,entries.size()-visible));
         for(int i=start;i<Math.min(entries.size(),start+visible);i++){
             var t=entries.getCompound(i);int y=mapY+29+(i-start)*24;

@@ -10,23 +10,33 @@ import java.util.*;
 
 /** Original spherical material maps, generated once on demand from public identity (never terrain/world seeds). */
 final class OrbitalTextures {
-    private static final Map<String,ResourceLocation> CACHE=new LinkedHashMap<>();
+    private static final Map<String,ResourceLocation> CACHE=new LinkedHashMap<>(64,.75f,true);
     private static final Map<String,java.util.concurrent.CompletableFuture<NativeImage>> PENDING=new HashMap<>();
     private static final java.util.concurrent.Executor MATERIALS=java.util.concurrent.Executors.newSingleThreadExecutor(r->{var t=new Thread(r,"DBZ-orbit-materials");t.setDaemon(true);return t;});
+    private static final Set<String> READY=new HashSet<>();
+    private static final java.util.concurrent.atomic.AtomicInteger IN_FLIGHT=new java.util.concurrent.atomic.AtomicInteger();
+    private static long nextUpload;private static int uploads,peakGenerating;
+    static void beginFrame(){uploads=0;}
     static ResourceLocation get(CompoundTag b,int resolution){
         String identity=b.getString("type")+":"+b.getInt("color")+":"+b.getDouble("phase")+":"+b.getDouble("orbit")+":"+b.getBoolean("cloudLayer");String key=identity+":"+resolution;
         var manager=Minecraft.getInstance().getTextureManager();var found=CACHE.get(key);var future=PENDING.get(key);
         if(found!=null){
-            if(future!=null&&future.isDone()){
-                try{var image=future.join();manager.release(found);found=register(key,image);CACHE.put(key,found);}
+            if(future!=null&&future.isDone()&&uploads<1&&net.minecraft.Util.getMillis()>=nextUpload){
+                try{var image=future.join();manager.release(found);found=register(key,image);CACHE.put(key,found);READY.add(key);uploads++;nextUpload=net.minecraft.Util.getMillis()+16;}
                 catch(java.util.concurrent.CompletionException ex){com.dbzenith.DBZenith.LOGGER.error("Orbital material failed",ex);}PENDING.remove(key);
-            }return found;
+            }
+            if(!READY.contains(key)&&!PENDING.containsKey(key))request(key,b,resolution,identity);
+            return found;
         }
         var placeholder=new NativeImage(1,1,false);int rgb=b.getInt("color");placeholder.setPixelRGBA(0,0,b.getBoolean("cloudLayer")?0:0xFF000000|((rgb&255)<<16)|(rgb&0xFF00)|((rgb>>>16)&255));
         found=register(key,placeholder);CACHE.put(key,found);
-        CompoundTag descriptor=b.copy();PENDING.put(key,java.util.concurrent.CompletableFuture.supplyAsync(()->generate(descriptor,resolution,resolution/2,identity),MATERIALS));
-        if(CACHE.size()>48){var it=CACHE.entrySet().iterator();var first=it.next();manager.release(first.getValue());var pending=PENDING.remove(first.getKey());if(pending!=null)pending.thenAccept(NativeImage::close);it.remove();}
+        request(key,b,resolution,identity);
+        if(CACHE.size()>48){var it=CACHE.entrySet().iterator();var first=it.next();manager.release(first.getValue());READY.remove(first.getKey());var pending=PENDING.remove(first.getKey());if(pending!=null)pending.thenAccept(NativeImage::close);it.remove();}
         return found;
+    }
+    private static void request(String key,CompoundTag body,int resolution,String identity){
+        if(IN_FLIGHT.get()>=4)return;peakGenerating=Math.max(peakGenerating,IN_FLIGHT.incrementAndGet());var descriptor=body.copy();
+        PENDING.put(key,java.util.concurrent.CompletableFuture.supplyAsync(()->{try{return generate(descriptor,resolution,resolution/2,identity);}finally{IN_FLIGHT.decrementAndGet();}},MATERIALS));
     }
     private static NativeImage generate(CompoundTag b,int width,int height,String key){
         var image=new NativeImage(width,height,false);long seed=GalaxyCatalog.mix(key.hashCode());boolean cloud=b.getBoolean("cloudLayer");
@@ -53,9 +63,9 @@ final class OrbitalTextures {
         }
         return image;
     }
-    static void clear(){for(var id:CACHE.values())Minecraft.getInstance().getTextureManager().release(id);CACHE.clear();for(var future:PENDING.values())future.thenAccept(NativeImage::close);PENDING.clear();}
-    private static ResourceLocation register(String key,NativeImage image){var texture=new DynamicTexture(image);texture.setFilter(true,false);return Minecraft.getInstance().getTextureManager().register("dbzenith_orbit_"+Integer.toUnsignedString(key.hashCode(),16),texture);}
-    static String metrics(){return CACHE.size()+" materials / "+PENDING.size()+" pending";}
+    static void clear(){for(var id:CACHE.values())Minecraft.getInstance().getTextureManager().release(id);CACHE.clear();READY.clear();for(var future:PENDING.values())future.thenAccept(NativeImage::close);PENDING.clear();}
+    private static ResourceLocation register(String key,NativeImage image){var texture=new DynamicTexture(image);texture.setFilter(true,false);var id=new ResourceLocation("dbzenith","orbital/"+UUID.nameUUIDFromBytes(key.getBytes(java.nio.charset.StandardCharsets.UTF_8)));Minecraft.getInstance().getTextureManager().register(id,texture);return id;}
+    static String metrics(){return CACHE.size()+" materials / "+PENDING.size()+" pending / "+IN_FLIGHT.get()+" generating (peak "+peakGenerating+")";}
     private static double hash(int x,int y,int z,long seed){return (GalaxyCatalog.mix(seed^x*0x9e3779b97f4a7c15L^y*0x632be59bd9b4e019L^z*0x94d049bb133111ebL)>>>11)*0x1.0p-53*2-1;}
     private static double smooth(double v){return v*v*v*(v*(v*6-15)+10);}
     private static double noise(double x,double y,double z,long seed){int ix=(int)Math.floor(x),iy=(int)Math.floor(y),iz=(int)Math.floor(z);double fx=smooth(x-ix),fy=smooth(y-iy),fz=smooth(z-iz),v=0;

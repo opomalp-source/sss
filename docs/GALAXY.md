@@ -301,3 +301,16 @@ Powerful ki impacts can destabilize an unprotected planet. A persistent countdow
 orbital explosion, followed by real mineable debris. The atlas seals the landing surface until a dragon
 restores it. Existing region files and builds are retained. See [Planet destruction](PLANET_DESTRUCTION.md)
 for safeguards, config, commands, snapshots and restoration limits. Phase8 is the final polish pass.
+
+
+## Phase 8 — polish and bounded work (v0.146.0)
+
+Orbital rendering uses shared meshes, distant impostors, conservative culling, a smooth atmospheric rim and
+a bounded48-entry LRU material cache with4 generation jobs and paced uploads. Space detail and sound mixing
+are independent settings. Settings tabs page inside the window. Atlas searches scan at most512 discoveries
+per page, return32 matches and continue using Next; known-system checks use a derived index. Search cursor
+semantics use protocol49. Existing saves, v1 catalogue identities and terrain output stay unchanged.
+
+See [Space polish](SPACE_POLISH.md) for measured local frame/sky timings, exact limits, controls, regression
+coverage and remaining hardware/human-soak validation. Motion hints are isolated by player and dimension;
+menus/focus loss clear thrust while retaining coast. All eight planned galaxy phases are implemented.

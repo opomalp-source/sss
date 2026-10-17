@@ -19,7 +19,8 @@ import java.util.List;
  * explaining it. Changes apply at once and are saved to the client config file.
  */
 public class SettingsScreen extends Screen {
-    private static final int W = 360, H = 222, ROW = 22;
+    private static final int ROW=22;
+    private int panelW=360,panelH=222,page;
 
     private enum Tab { HUD, STYLE, EFFECTS, CAMERA, COMBAT, CONTROLS }
 
@@ -41,7 +42,7 @@ public class SettingsScreen extends Screen {
 
     /** Dev: open on a tab by name (hud, style, effects, camera, combat, controls). */
     public SettingsScreen onTab(String name) {
-        for (Tab t : Tab.values()) if (t.name().equalsIgnoreCase(name)) tab = t;
+        String base=name.replaceAll("[0-9]+$", "");for(Tab t:Tab.values())if(t.name().equalsIgnoreCase(base))tab=t;String digits=name.substring(base.length());page=digits.isEmpty()?0:Math.min(20,Integer.parseInt(digits));
         return this;
     }
 
@@ -67,6 +68,9 @@ public class SettingsScreen extends Screen {
                 o.add(new Option("aura_ground", c.auraGround, 0, 0, null));
                 o.add(new Option("aura_light", c.auraLight, 0, 0, null));
                 o.add(new Option("ki_bloom", c.kiBloom, 0, 2, null));
+                o.add(new Option("space_quality", c.spaceQuality, 0, 2, new String[]{"low", "normal", "high"}));
+                o.add(new Option("space_ambience", c.spaceAmbienceVolume, 0, 1, null));
+                o.add(new Option("space_music", c.spaceMusicVolume, 0, 1, null));
                 o.add(new Option("ki_quality", c.kiQuality, 0, 3, new String[]{"low", "medium", "high", "ultra"}));
                 o.add(new Option("heat_haze", c.heatHaze, 0, 1, null));                             // the ki attack rework, phase 9
                 o.add(new Option("chromatic_aberration", c.chromaticAberration, 0, 0, null));
@@ -124,21 +128,22 @@ public class SettingsScreen extends Screen {
 
     @Override
     protected void init() {
-        left = (width - W) / 2;
-        top = (height - H) / 2;
+        panelW=Math.min(360,width-8);panelH=Math.min(222,height-8);
+        left = (width - panelW) / 2;
+        top = (height - panelH) / 2;
         Tab[] tabs = Tab.values();
-        int tw = (W - 16 - (tabs.length - 1) * 4) / tabs.length;
+        int tw = (panelW - 16 - (tabs.length - 1) * 4) / tabs.length;
         for (int i = 0; i < tabs.length; i++) {
             Tab t = tabs[i];
             addRenderableWidget(ThemedButton.of(Component.translatable("settings.dbzenith.tab." + t.name().toLowerCase()), b -> {
-                tab = t;
+                tab = t;page=0;
                 rebuild();
             }).bounds(left + 8 + i * (tw + 4), top + 16, tw, 16).build().selected(t == tab));
         }
 
         int y = top + 44;
-        int wx = left + W - 158;
-        for (Option opt : options(tab)) {
+        int wx = left + panelW - 158;
+        for (Option opt : visibleOptions()) {
             Tooltip tip = Tooltip.create(Component.translatable("settings.dbzenith." + opt.key + ".desc"));
             if (opt.value instanceof ForgeConfigSpec.BooleanValue bool) {
                 ThemedButton b = ThemedButton.of(onOff(bool.get()), x -> {
@@ -180,28 +185,30 @@ public class SettingsScreen extends Screen {
                 }).bounds(wx, y, 150, 16).tooltip(tip).build();
                 addRenderableWidget(b);
             }
-            y += row(tab);
+            y += ROW;
+        }
+        int pages=(options(tab).size()+visibleRows()-1)/visibleRows();
+        if(pages>1){
+            addRenderableWidget(ThemedButton.of(Component.literal("<"),b->{page--;rebuild();}).bounds(left+panelW/2-55,top+panelH-24,22,18).build()).active=page>0;
+            addRenderableWidget(ThemedButton.of(Component.literal(">"),b->{page++;rebuild();}).bounds(left+panelW/2+32,top+panelH-24,22,18).build()).active=page+1<pages;
         }
         if (tab == Tab.CONTROLS) {
             addRenderableWidget(ThemedButton.of(Component.translatable("settings.dbzenith.keybinds"),
-                    b -> minecraft.setScreen(new KeyBindsScreen(this, minecraft.options))).bounds(left + W / 2 - 90, top + 50, 180, 18).build());
+                    b -> minecraft.setScreen(new KeyBindsScreen(this, minecraft.options))).bounds(left + panelW / 2 - 90, top + 50, 180, 18).build());
             addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.move_list"),                // CX-19 phase 8
-                    b -> minecraft.setScreen(new MoveListScreen(this))).bounds(left + W / 2 - 90, top + 74, 180, 18).build());
+                    b -> minecraft.setScreen(new MoveListScreen(this))).bounds(left + panelW / 2 - 90, top + 74, 180, 18).build());
         }
 
         addRenderableWidget(ThemedButton.of(Component.translatable("settings.dbzenith.reset"), b -> {
             for (Option o : options(tab)) reset(o.value);
             save();
             rebuild();
-        }).bounds(left + 8, top + H - 24, 110, 18).build());
-        addRenderableWidget(ThemedButton.of(Component.translatable("gui.done"), b -> onClose()).bounds(left + W - 78, top + H - 24, 70, 18).build());
+        }).bounds(left + 8, top + panelH - 24, Math.min(110,panelW/2-66), 18).build());
+        addRenderableWidget(ThemedButton.of(Component.translatable("gui.done"), b -> onClose()).bounds(left + panelW - 78, top + panelH - 24, 70, 18).build());
     }
 
-    /** Row spacing: tighter for a tab with many options, so they fit above the buttons. */
-    private static int row(Tab tab) {
-        return options(tab).size() > 6 ? 19 : ROW;
-    }
-
+    private int visibleRows(){return Math.max(1,(panelH-84)/ROW);}
+    private List<Option> visibleOptions(){var list=options(tab);int rows=visibleRows();page=Math.max(0,Math.min(page,Math.max(0,(list.size()-1)/rows)));int start=Math.min(list.size(),page*rows);return list.subList(start,Math.min(list.size(),start+rows));}
     private static <T> void reset(ForgeConfigSpec.ConfigValue<T> v) {
         v.set(v.getDefault());
     }
@@ -227,16 +234,17 @@ public class SettingsScreen extends Screen {
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partial) {
         DbzTheme.screenBackground(g, width, height);
-        DbzTheme.window(g, font, title, left, top, W, H);
+        DbzTheme.window(g, font, title, left, top, panelW, panelH);
         int y = top + 48;
-        for (Option opt : options(tab)) {
-            g.drawString(font, Component.translatable("settings.dbzenith." + opt.key), left + 12, y, DbzTheme.TEXT, true);
-            y += row(tab);
+        for (Option opt : visibleOptions()) {
+            g.drawString(font, font.plainSubstrByWidth(Component.translatable("settings.dbzenith."+opt.key).getString(),panelW-174), left + 12, y, DbzTheme.TEXT, true);
+            y += ROW;
         }
+        int pages=(options(tab).size()+visibleRows()-1)/visibleRows();if(pages>1)g.drawCenteredString(font,(page+1)+" / "+pages,left+panelW/2,top+panelH-19,DbzTheme.DIM);
         if (tab == Tab.CONTROLS) {
             DbzTheme.text(g, font, Component.translatable("settings.dbzenith.move_list_hint"), left + 12, top + 100, DbzTheme.DIM, 0.75f);
         }
-        DbzTheme.divider(g, left + 8, top + 38, W - 16);
+        DbzTheme.divider(g, left + 8, top + 38, panelW - 16);
         super.render(g, mouseX, mouseY, partial);
     }
 

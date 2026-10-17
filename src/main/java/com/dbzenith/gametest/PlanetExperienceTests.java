@@ -31,7 +31,7 @@ public final class PlanetExperienceTests {
     }
     private static void checkLandmark(GameTestHelper h){
         var server=h.getLevel().getServer();GalaxyCatalog.Ref ref=null;
-        for(int x=310;x<350&&ref==null;x++){
+        for(int x=310;x<=1024&&ref==null;x++){
             var id=new GalaxyCatalog.Id(x,12,-8,2);var system=GalaxyCatalog.system(server.overworld().getSeed(),GalaxyData.get(server).salt(),id);
             for(var b:system.planets())if(b.kind()==GalaxyCatalog.Kind.DESERT&&GalaxyData.get(server).discovery(new GalaxyCatalog.Ref(id,b.index()))==null){ref=new GalaxyCatalog.Ref(id,b.index());break;}
         }

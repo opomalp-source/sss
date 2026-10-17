@@ -66,28 +66,29 @@ public final class KiCreator2Tests {
         helper.succeed();
     }
 
-    @GameTest(template = EMPTY, timeoutTicks = 100)
+    @GameTest(template = EMPTY, timeoutTicks = 100, batch = "creator_mine")
     public static void placedMinesWaitThenGoOff(GameTestHelper helper) {
         ServerPlayer p = TestPlayers.create(helper);
-        Vec3 at = Vec3.atBottomCenterOf(helper.absolutePos(new BlockPos(1, 2, 1)));
-        p.teleportTo(at.x, at.y, at.z);
+        Vec3 at = Vec3.atBottomCenterOf(helper.absolutePos(new BlockPos(1, 102, 1)));
+        p.teleportTo(at.x, at.y, at.z);p.setNoGravity(true);
         p.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, at.add(4, 0, 0));
         Technique mine = CustomTechniques.build(0, new Spec("Mine", Kind.BLAST, 3, 0, 0xFFFFFF, CustomTechniques.Method.PLACED,
                 CustomTechniques.Origin.HAND, Technique.KiType.PURE));
         helper.assertTrue(mine.has(Technique.PLACED), "the method makes a mine");
         TechniqueHandler.spawn(helper.getLevel(), p, mine, 60);
-        Zombie z = dummy(helper, new BlockPos(5, 2, 4));
+        // Keep unrelated batch entities and terrain outside the proximity trigger.
+        Zombie z = dummy(helper, new BlockPos(5, 102, 4));z.setNoGravity(true);
         float hp = z.getHealth();
         Delays.after(helper, 10, () -> {
             helper.assertTrue(z.getHealth() == hp, "the mine waits while no one is near");
             var mines = helper.getLevel().getEntitiesOfClass(com.dbzenith.skill.KiBlastEntity.class, p.getBoundingBox().inflate(16), b -> b.getOwner() == p);   // its own (other tests nearby fire too)
-            helper.assertTrue(mines.size() == 1, "one mine is out");
+            helper.assertTrue(mines.size() == 1, "one mine remains armed in the isolated air arena: " + mines.size());
             Vec3 m = mines.get(0).position();
             z.teleportTo(m.x, m.y - 0.5, m.z);
         });
         helper.succeedWhen(() -> {
             helper.assertTrue(z.getHealth() < hp, "and goes off when someone comes close");
-            TestPlayers.remove(helper, p);
+            TestPlayers.remove(helper, p);z.discard();
         });
     }
 }

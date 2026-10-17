@@ -263,3 +263,39 @@ compact warning, stable ground/ruins, sky warming and intact/cancelled sphere. A
 fissure entries and retired the event (saved NBT events empty). Local capped smoke checks59-60fps; broad
 profiling remains Phase8. Snapshots are retained world storage, not copied backups; already-placed orbital
 remnants remain after restoration. Direct install/no updater. Next: finish Phase8, story last.
+
+
+## Galaxy Phase 8 (v0.146.0, 2026-10-17)
+OrbitalLod owns bounded immutable unit meshes (8/12/16/24/32/40/56), cached normals/UVs and conservative
+behind-camera culling. Tiny bodies/moons use lit disc impostors. Textured spheres skip unused procedural
+vertex colors/allocations. A small gradient halo replaces the expensive atmosphere sphere. Remnant layouts
+cache at most12 descriptors; orbital height queries scan only intersecting height ranges, preserving blocks.
+
+OrbitalTextures is a48-entry access-order LRU, max4 queued/running generation jobs, at most1 upload/frame
+and1/16ms. Visible deferred placeholders retry; evicted/logout job results are closed. Stable directly registered
+texture IDs avoid Minecraft's per-name dynamic counter growth. Client [space] quality0/1/2 defaultsBalanced1,
+ambienceVolume .8 and musicVolume .7. Vanilla music suppressed in vacuum; original warnings/breath remain.
+Settings tabs now page/rescale within the window. Reset applies the whole tab. Flight tips fade after10s;
+menus/focus loss clear thrust while preserving drift, and calm re-entry rumble is reduced.
+
+GalaxyData derives known-system and discovery-order indices from existing records. SYSTEM/overview no longer
+scan all discoveries. Search pages inspect <=512 records and return <=32 matches; nextCursor continues through
+sparse/empty pages, client Previous uses actual history and local throttling cannot advance it accidentally.
+Sorted NBT save order is retained without a redundant sort. No schema/catalogue/terrain migration. Protocol49
+reflects new cursor semantics, so update client/server together. No unvisited-system records are introduced.
+
+SpaceRuntime momentum hints are finite/speed-bounded and tagged by player/dimension, then cleared on transfer.
+Five new tests cover mesh reuse/bounds/culling,1800-record sparse search/reload/large cursor, exact positive and
+negative remnant height parity, two-player hint isolation and real concurrent preloads with one cancellation.
+All279 tests passed in the first complete run; final validation below. Existing v1 fingerprint unchanged.
+
+SpaceProfile is devAutomation-only:600-frame windows after120 warmup, frame intervals + CPU/driver sky duration,
+mesh counters, plus screenshot flags for quality, cap/VSync and custom-sky bypass. docs/SPACE_POLISH.md records
+hardware/method/results. Final Earth Balanced4040 mesh vertices/5 instrumented draws vs early Phase8 6632/16;
+median uncapped sky .465ms, Low .316ms, High .693ms, Namek .733ms. At60cap Earth held60fps/16.678ms mean.
+Peak material jobs4, then0 pending/running. Baseline is the same orbital scene with sky disabled, not a separate
+vanilla world; these are local scene results, not universal hardware/shader or human-soak claims.
+All8 planned galaxy phases implemented. Story remains last; wider real-play/hardware validation is still useful.
+Direct install with release.sh, remove old DBZ jar, main/tag push only; no updater/deploy.
+
+Final release validation: all279 required tests passed (phase146-testsfinal5.log,1m1s), offline build -x test succeeds. Final devshots reviewed with Crop.java, including minimum320-wide GUI settings and atlas. Existing mine fixture now isolates proximity triggers; repeat-save desert search expanded. Grip test passed on rerun unchanged. No production combat changes.

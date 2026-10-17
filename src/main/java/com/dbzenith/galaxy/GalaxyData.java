@@ -15,6 +15,11 @@ import java.util.*;
 public final class GalaxyData extends SavedData {
     public record Discovery(UUID owner, String discoverer, long tick, String name, boolean destroyed, boolean restored, boolean base, String snapshot, String catalogName) {}
     private final Map<GalaxyCatalog.Ref,Discovery> discoveries=new TreeMap<>(Comparator.comparing(GalaxyCatalog.Ref::key));
+    private final Set<GalaxyCatalog.Id> knownSystems=new HashSet<>();
+    private final List<GalaxyCatalog.Ref> discoveryOrder=new ArrayList<>();
+    public boolean knownSystem(GalaxyCatalog.Id id){return knownSystems.contains(id);}
+    public int discoveryCount(){return discoveryOrder.size();}
+    public GalaxyCatalog.Ref discoveryAt(int index){return discoveryOrder.get(index);}
     private final Map<UUID,GalaxyCatalog.Ref> waypoints=new LinkedHashMap<>();
     public record Arrival(double x,double y,double z,float yaw){}
     private final Map<UUID,Map<GalaxyCatalog.Ref,Arrival>> arrivals=new HashMap<>();
@@ -48,7 +53,7 @@ public final class GalaxyData extends SavedData {
     }
     public boolean discover(GalaxyCatalog.Ref ref,UUID player,String name,long tick,String catalogName) {
         if(discoveries.containsKey(ref)) return false;
-        discoveries.put(ref,new Discovery(player,name,tick,"",false,false,false,"",catalogName)); setDirty(); return true;
+        discoveries.put(ref,new Discovery(player,name,tick,"",false,false,false,"",catalogName));knownSystems.add(ref.system());discoveryOrder.add(ref); setDirty(); return true;
     }
     public boolean rename(GalaxyCatalog.Ref ref,UUID player,String name) {
         Discovery d=discovery(ref);
@@ -83,8 +88,7 @@ public final class GalaxyData extends SavedData {
         if(unsupported!=null)return unsupported.copy();
         tag.putInt("version",GalaxyCatalog.VERSION); tag.putLong("salt",salt);
         ListTag list=new ListTag();
-        discoveries.entrySet().stream().sorted(Comparator.comparing(e->e.getKey().key())).forEach(e->{
-            var d=e.getValue(); CompoundTag t=new CompoundTag(); t.putString("ref",e.getKey().key()); t.putUUID("owner",d.owner);
+        discoveries.forEach((ref,d)->{ CompoundTag t=new CompoundTag(); t.putString("ref",ref.key()); t.putUUID("owner",d.owner);
             t.putString("discoverer",d.discoverer); t.putLong("tick",d.tick); t.putString("name",d.name); t.putBoolean("destroyed",d.destroyed);
             t.putBoolean("restored",d.restored); t.putBoolean("base",d.base); t.putString("snapshot",d.snapshot); t.putString("catalogName",d.catalogName); list.add(t);
         });
@@ -104,6 +108,7 @@ public final class GalaxyData extends SavedData {
                     t.getString("name"),t.getBoolean("destroyed"),t.getBoolean("restored"),t.getBoolean("base"),t.getString("snapshot"),t.getString("catalogName"))); }
             catch(IllegalArgumentException ex) { DBZenith.LOGGER.warn("Skipping malformed galaxy discovery: {}",t.getString("ref")); }
         }
+        for(var ref:data.discoveries.keySet()){data.knownSystems.add(ref.system());data.discoveryOrder.add(ref);}
         for(Tag raw:tag.getList("waypoints",Tag.TAG_COMPOUND)) {
             CompoundTag t=(CompoundTag)raw;
             try { data.waypoints.put(t.getUUID("player"),GalaxyCatalog.Ref.parse(t.getString("ref"))); } catch(IllegalArgumentException ignored) {}

@@ -10,57 +10,53 @@ public final class GalaxyService {
     public static final int OVERVIEW=0, SECTOR=1, SYSTEM=2, SEARCH=3, WAYPOINT=4, CLEAR_WAYPOINT=5;
     private GalaxyService() {}
     public static CompoundTag survey(ServerPlayer p,int view,GalaxyCatalog.Id center,int planet,String query,int cursor) {
-        if(view<0 || view>SEARCH || query.length()>32 || cursor<0 || cursor>100000) throw new IllegalArgumentException("Invalid survey request");
+        if(view<0 || view>SEARCH || query.length()>32 || cursor<0) throw new IllegalArgumentException("Invalid survey request");
         GalaxyData data=GalaxyData.get(p.server); long seed=p.server.overworld().getSeed();
         CompoundTag out=new CompoundTag(); out.putInt("view",view); out.putString("center",center.toString()); out.putInt("planet",planet);
         out.putString("current",GalaxyData.current(p).toString()); out.putInt("version",GalaxyCatalog.VERSION);
         out.putBoolean("canTransmit",com.dbzenith.race.RacialSkills.has(com.dbzenith.data.ModCapabilities.getOrThrow(p),"instant_transmission"));
         var wp=data.waypoint(p.getUUID()); out.putString("waypoint",wp==null?"":wp.key());
         ListTag entries=new ListTag();
-        Set<GalaxyCatalog.Id> known=knownSystems(data);
+
         if(view==OVERVIEW) {
             for(int dx=-2;dx<=2;dx++) for(int dy=-2;dy<=2;dy++) {
                 int x=center.x()+dx,y=center.y()+dy;
                 if(Math.abs(x)>GalaxyCatalog.LIMIT || Math.abs(y)>GalaxyCatalog.LIMIT) continue;
-                for(int i=0;i<GalaxyCatalog.SYSTEMS;i++) entries.add(summary(GalaxyCatalog.system(seed,data.salt(),new GalaxyCatalog.Id(x,y,center.z(),i)),known));
+                for(int i=0;i<GalaxyCatalog.SYSTEMS;i++) entries.add(summary(GalaxyCatalog.system(seed,data.salt(),new GalaxyCatalog.Id(x,y,center.z(),i)),data));
             }
         } else if(view==SECTOR) {
-            for(int i=0;i<GalaxyCatalog.SYSTEMS;i++) entries.add(summary(GalaxyCatalog.system(seed,data.salt(),new GalaxyCatalog.Id(center.x(),center.y(),center.z(),i)),known));
+            for(int i=0;i<GalaxyCatalog.SYSTEMS;i++) entries.add(summary(GalaxyCatalog.system(seed,data.salt(),new GalaxyCatalog.Id(center.x(),center.y(),center.z(),i)),data));
         } else if(view==SYSTEM) {
             var s=GalaxyCatalog.system(seed,data.salt(),center);var system=detail(s,data);for(Tag raw:system.getList("bodies",Tag.TAG_COMPOUND)){var b=(CompoundTag)raw;b.putBoolean("visited",com.dbzenith.data.ModCapabilities.getOrThrow(p).hasFlag("planet_landing:"+new GalaxyCatalog.Ref(center,b.getInt("index")).key()));}out.put("system",system);
         } else {
-            String needle=query.strip().toLowerCase(Locale.ROOT);
-            int skipped=0;
-            var sorted=data.discoveries().entrySet();
-            boolean more=false;
-            for(var e:sorted) {
-                var ref=e.getKey();
-                String name=data.name(ref,e.getValue().catalogName());
-                if(!name.toLowerCase(Locale.ROOT).contains(needle) && !ref.key().contains(needle)) continue;
-                if(skipped++<cursor) continue;
-                if(entries.size()>=32) { more=true; break; }
-                var b=GalaxyCatalog.body(seed,data.salt(),ref);
-                CompoundTag t=new CompoundTag(); t.putString("id",ref.system().toString()); t.putInt("planet",ref.planet()); t.putString("name",name);
-                t.putString("type",GalaxyCatalog.label(b.kind())); t.putString("discoverer",e.getValue().discoverer()); t.putBoolean("destroyed",data.destroyed(ref)); entries.add(t);
-            }
-            out.putBoolean("more",more); out.putInt("cursor",cursor); out.putString("query",query);
+            var page=searchPage(data,seed,query,cursor);out.merge(page);entries=page.getList("entries",Tag.TAG_COMPOUND);
         }
         out.put("entries",entries); return out;
     }
-    private static Set<GalaxyCatalog.Id> knownSystems(GalaxyData data) {
-        Set<GalaxyCatalog.Id> result=new HashSet<>();
-        for(var ref:data.discoveries().keySet())result.add(ref.system());
-        return result;
+    public static CompoundTag searchPage(GalaxyData data,long seed,String query,int cursor){
+        if(query.length()>32||cursor<0)throw new IllegalArgumentException("Invalid discovery search");
+        var out=new CompoundTag();var entries=new ListTag();
+        String needle=query.strip().toLowerCase(Locale.ROOT);
+        int examined=0,next=Math.min(cursor,data.discoveryCount());
+        while(next<data.discoveryCount()&&examined<512&&entries.size()<32){
+            var ref=data.discoveryAt(next++);examined++;var discovery=data.discovery(ref);
+            String name=data.name(ref,discovery.catalogName());
+            if(!name.toLowerCase(Locale.ROOT).contains(needle)&&!ref.key().contains(needle))continue;
+            var body=GalaxyCatalog.body(seed,data.salt(),ref);CompoundTag t=new CompoundTag();t.putString("id",ref.system().toString());t.putInt("planet",ref.planet());t.putString("name",name);
+            t.putString("type",GalaxyCatalog.label(body.kind()));t.putString("discoverer",discovery.discoverer());t.putBoolean("destroyed",data.destroyed(ref));entries.add(t);
+        }
+        out.putBoolean("more",next<data.discoveryCount());out.putInt("nextCursor",next);out.putInt("examined",examined);out.putInt("cursor",cursor);out.putString("query",query);
+        out.put("entries",entries);return out;
     }
-    private static CompoundTag summary(GalaxyCatalog.SystemSpec s,Set<GalaxyCatalog.Id> known) {
+    private static CompoundTag summary(GalaxyCatalog.SystemSpec s,GalaxyData data) {
         CompoundTag t=new CompoundTag(); t.putString("id",s.id().toString()); t.putString("name",s.name());
         t.putDouble("x",s.x());t.putDouble("y",s.y());t.putDouble("z",s.z());
         t.putInt("color",s.stars().get(0).type().color); t.putInt("stars",s.stars().size()); t.putInt("planets",s.planets().size());
         t.putString("type",GalaxyCatalog.label(s.stars().get(0).type()));
-        t.putBoolean("known",known.contains(s.id())); return t;
+        t.putBoolean("known",data.knownSystem(s.id())); return t;
     }
     private static CompoundTag detail(GalaxyCatalog.SystemSpec s,GalaxyData data) {
-        CompoundTag t=summary(s,knownSystems(data)); ListTag stars=new ListTag();
+        CompoundTag t=summary(s,data); ListTag stars=new ListTag();
         for(var star:s.stars()) {
             CompoundTag st=new CompoundTag(); st.putString("type",GalaxyCatalog.label(star.type())); st.putInt("color",star.type().color);
             st.putDouble("radius",star.radius()); st.putDouble("light",star.luminosity()); st.putDouble("phase",star.phase()); stars.add(st);

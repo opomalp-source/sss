@@ -102,6 +102,14 @@ public final class ClientEvents {
     public static void devScreenshot(String name, int delayTicks) {
         if (!DEV_AUTOMATION) return;
         Minecraft mc = Minecraft.getInstance();
+        if(name.contains("spacequality0"))com.dbzenith.config.DBZConfig.CLIENT.spaceQuality.set(0);
+        if(name.contains("spacequality1"))com.dbzenith.config.DBZConfig.CLIENT.spaceQuality.set(1);
+        if(name.contains("spacequality2"))com.dbzenith.config.DBZConfig.CLIENT.spaceQuality.set(2);
+        if(name.contains("spacebaseline"))com.dbzenith.client.space.SpaceProfile.bypass=true;
+        if(name.contains("spacerender"))com.dbzenith.client.space.SpaceProfile.bypass=false;
+        if(name.contains("spaceuncapped")){mc.options.framerateLimit().set(260);mc.options.enableVsync().set(false);mc.getWindow().updateVsync(false);}
+        if(name.contains("spacecapped")){mc.options.framerateLimit().set(60);mc.options.enableVsync().set(true);mc.getWindow().updateVsync(true);}
+        if(name.contains("spaceprofile")||name.contains("spacecapped"))com.dbzenith.client.space.SpaceProfile.reset(name);
         net.minecraft.client.CameraType wanted = name.startsWith("third_") ? net.minecraft.client.CameraType.THIRD_PERSON_BACK
                 : name.startsWith("front_") ? net.minecraft.client.CameraType.THIRD_PERSON_FRONT
                 : name.startsWith("first_") ? net.minecraft.client.CameraType.FIRST_PERSON : null;
@@ -121,7 +129,7 @@ public final class ClientEvents {
             mc.setScreen(new com.dbzenith.client.screen.KiCreatorScreen(null));
             delayTicks = Math.max(delayTicks, 6);
         }
-        if (name.startsWith("settings_") && !(mc.screen instanceof com.dbzenith.client.screen.SettingsScreen)) {
+        if (name.startsWith("settings_") && (delayTicks>0||!(mc.screen instanceof com.dbzenith.client.screen.SettingsScreen))) {
             String[] parts = name.split("_");
             mc.setScreen(new com.dbzenith.client.screen.SettingsScreen(null).onTab(parts.length > 2 ? parts[1] : "hud"));
             delayTicks = Math.max(delayTicks, 6);

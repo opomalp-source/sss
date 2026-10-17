@@ -1,4 +1,15 @@
 {
+  "settings.dbzenith.space_quality.low": "Low",
+  "settings.dbzenith.space_quality.normal": "Balanced",
+  "settings.dbzenith.space_quality.high": "High",
+
+  "settings.dbzenith.space_quality": "Space detail",
+  "settings.dbzenith.space_quality.desc": "Planet mesh and texture detail. Distant worlds use light impostors.",
+  "settings.dbzenith.space_ambience": "Space ambience",
+  "settings.dbzenith.space_ambience.desc": "Adjust the orbital drone, drive and weather mix. Breathing and warnings remain audible.",
+  "settings.dbzenith.space_music": "Space music",
+  "settings.dbzenith.space_music.desc": "Adjust the original orbital music independently of the ambience.",
+
   "wish.dbzenith.restore_planet": "Restore a planet",
   "wish.dbzenith.restore_planet.desc": "Restore the destroyed planet at your waypoint, or the first known destroyed planet. Its retained surface and builds return.",
   "itemGroup.dbzenith.main": "Dragon Block Zenith",

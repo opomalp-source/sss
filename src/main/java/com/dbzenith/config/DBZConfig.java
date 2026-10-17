@@ -805,7 +805,8 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue animationLabels;
         public final ForgeConfigSpec.IntValue artStyle;
         public final ForgeConfigSpec.IntValue uiStyle;
-        public final ForgeConfigSpec.IntValue hudStyle, kiQuality;
+        public final ForgeConfigSpec.IntValue hudStyle, kiQuality, spaceQuality;
+        public final ForgeConfigSpec.DoubleValue spaceAmbienceVolume,spaceMusicVolume;
 
         Client(ForgeConfigSpec.Builder b) {
             b.push("hud");
@@ -873,7 +874,11 @@ public final class DBZConfig {
             hudStyle = b.comment("HUD: 0 Saga (a round portrait, a Release tab, a smoky BP and Ki bar, slanted health and stamina bars), 1 Classic, 2 Minimal (thin bars, no portrait), 3 Ornate (a portrait frame per form), 4 Clean (a portrait card and slim gradient bars)")
                     .defineInRange("hudStyle", 0, 0, 4);
             b.pop();
-            b.push("effects");
+            b.push("space");
+            spaceQuality=b.comment("Orbital rendering: 0 low, 1 balanced, 2 high; distant bodies use impostors").defineInRange("quality",1,0,2);
+            spaceAmbienceVolume=b.comment("Space ambience mix multiplier; breathing and alerts remain audible").defineInRange("ambienceVolume",.8,0,1);
+            spaceMusicVolume=b.comment("Original space music mix multiplier").defineInRange("musicVolume",.7,0,1);
+            b.pop();b.push("effects");
             screenShake = b.comment("Camera shake strength from hits, explosions and landings (0 = off)")
                     .defineInRange("screenShake", 1.0, 0.0, 2.0);
             screenFlash = b.comment("Full-screen flashes from explosions, beams firing, the Solar Flare and transformations: their strength (0 = none)")

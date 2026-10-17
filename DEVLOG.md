@@ -4121,3 +4121,36 @@ User approved the eight-phase immersive space design. This release is Phase 1 on
   Existing GameTest proves actual wish restoration retains original blocks and chest contents. Preview camera
   was corrected to the loaded landmark after earlier elevated/void camera attempts; no gameplay flight changes.
 - Direct local installation with the release script, old DBZ jar removal and main/tag push; no updater/deploy.
+
+
+### v0.146.0 — Galaxy Phase 8: clearer space, bounded work (2026-10-17)
+- Added shared immutable orbital meshes/normals/UVs, distant disc impostors, conservative body culling and a
+  soft atmospheric halo. Removed unused textured-sphere procedural color calculations and per-vertex vector
+  arrays. Remnant layout cache bounded12; height queries inspect only intersecting ranges without changing
+  generated blocks. No generation-version, terrain, dimension-key or save-schema change.
+- 48-entry material LRU; max4 queued/running jobs, max1 completed upload/frame and1/16ms, deferred visible
+  requests retry. Eviction/logout closes orphan images; stable directly registered IDs avoid dynamic-name
+  counter growth. No downloaded assets, new dependencies or per-body render targets.
+- Independent space detail and ambience/music mix settings. Original breathing/alerts retain existing levels;
+  vanilla music suppressed in vacuum. Long settings tabs page within a responsive panel; full-tab reset retained.
+  Flight instructions fade after10s; menus/focus loss clear thrust, and calm-mode re-entry rumble is reduced.
+- Derived visited-system/discovery indices remove all-record scans from ordinary scene/atlas summaries. Search
+  scans <=512 records/page, replies <=32 matches with resumable cursor; empty pages can continue. Previous keeps
+  actual cursor history; throttled clicks cannot silently skip pages. Sorted save order retained. Protocol49.
+- Finite, speed-bounded player momentum hints now carry their dimension and are cleared on transfer. Added
+  five GameTests for shared meshes/culling, sparse1800-record search/index reload, exact remnant column heights,
+  independent two-player hints and real concurrent transit where one departure changes. First full run279 pass.
+- Instrumented dev-only A/B frame/sky timings; same Earth view, uncapped/VSync off vs custom sky disabled.
+  Final median sky times Low .316ms, Balanced .465ms, High .693ms; Namek Balanced .733ms. Balanced uses4040
+  instrumented mesh vertices/5 draws vs early Phase8 6632/16.60cap holds60fps,16.678ms mean interval. Peak4
+  material jobs, settling to0. Hardware/method/windows/limits documented in docs/SPACE_POLISH.md; local results
+  do not claim zero overhead or cover every shader, hardware configuration or human multiplayer server.
+- Version, README/TODO/galaxy guide/handoff updated. Final tests and devshot review below. Direct local
+  install and main/tag push only, no updater/deploy. All8 galaxy phases implemented; story remains last.
+- Final validation: all279 required GameTests pass on final sources (build/phase146-testsfinal5.log,
+  1m1s Gradle run); offline build -x test succeeds. A prior run was interrupted when its process ended;
+  the complete rerun is the release gate. Isolated the existing proximity-mine fixture from foreign entities
+  and expanded the repeat-save desert fixture search; assertions remain intact, production combat unchanged.
+  The existing timing-sensitive grip test passed on rerun without changes.
+- Reviewed final Earth/Namek/stellar devshots and settings/atlas at normal and minimum320-wide GUI sizes
+  using Crop.java. Corrected narrow atlas title/hints and settings footer overlap. No shader/human-soak claim.

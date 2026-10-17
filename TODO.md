@@ -322,4 +322,4 @@ to both mods folders.
 - [x] Phase 5 (v0.143.0) Bounded pod/ki hyperspeed, original tunnel/drive mix, cross-world learned Instant Transmission to personal visits/known ki, paged picker, iconic Places charts, Planet Vegeta and Frieza Planet79
 - [x] Phase 6 (v0.144.0) Streaming crater scan/dig/scorch/lip/reconciliation budgets, per-block protection, melted glass/hot rock, original lingering dust/rubble, bounded safe restoration and legacy explosion bypass closed
 - [x] Phase 7 (v0.145.0) Persistent staged planet destruction, protected worlds/bases/spawns, evacuation, orbital cracks/explosion/shockwave, mineable remnants, retained surface snapshots and Dragon Ball restoration
-- [ ] Phase 8 Visual/audio polish, performance/LOD, multiplayer, save compatibility, config and balance
+- [x] Phase 8 (v0.146.0) Shared meshes/impostors/soft atmosphere, bounded LRU material work, indexed bounded atlas searches, paged responsive settings and space sound/detail controls, per-player/dimension momentum and concurrent-travel tests, local uncapped renderer profiling; docs/SPACE_POLISH.md records scope and wider validation limits

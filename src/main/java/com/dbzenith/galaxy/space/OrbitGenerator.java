@@ -58,7 +58,9 @@ public final class OrbitGenerator extends ChunkGenerator {
             // First chunk load records materialization in the sparse destruction journal.
         }return CompletableFuture.completedFuture(chunk);
     }
-    @Override public int getBaseHeight(int x,int z,Heightmap.Types t,LevelHeightAccessor l,RandomState r){for(int y=remnants.isEmpty()?230:1023;y>=(remnants.isEmpty()?40:-1024);y--)if(t.isOpaque().test(block(x,y,z)))return y+1;return -1024;}
+    @Override public int getBaseHeight(int x,int z,Heightmap.Types t,LevelHeightAccessor l,RandomState r){double distance=Math.hypot(x,z);int top=distance>=10000&&distance<=11600?230:-1025,bottom=distance>=10000&&distance<=11600?40:1024;
+        for(var f:remnants)if(Math.abs(x-f.center().x)<=f.radius()&&Math.abs(z-f.center().z)<=f.radius()){top=Math.max(top,(int)Math.ceil(f.center().y)+f.radius());bottom=Math.min(bottom,(int)Math.floor(f.center().y)-f.radius());}
+        for(int y=Math.min(1023,top);y>=Math.max(-1024,bottom);y--)if(t.isOpaque().test(block(x,y,z)))return y+1;return -1024;}
     @Override public NoiseColumn getBaseColumn(int x,int z,LevelHeightAccessor l,RandomState r){var a=new BlockState[l.getHeight()];for(int i=0;i<a.length;i++)a[i]=block(x,l.getMinBuildHeight()+i,z);return new NoiseColumn(l.getMinBuildHeight(),a);}
     @Override public void buildSurface(WorldGenRegion l,StructureManager s,RandomState r,ChunkAccess c){}
     @Override public void applyCarvers(WorldGenRegion l,long seed,RandomState r,BiomeManager b,StructureManager s,ChunkAccess c,GenerationStep.Carving step){}

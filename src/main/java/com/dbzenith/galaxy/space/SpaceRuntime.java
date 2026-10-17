@@ -41,12 +41,12 @@ public final class SpaceRuntime {
         final Map<ResourceKey<Level>,GalaxyCatalog.SystemSpec> systems=new HashMap<>();final Set<ResourceKey<Level>> retiring=new HashSet<>();
     }
     private record Transit(ResourceKey<Level> origin,ResourceKey<Level> target,GalaxyCatalog.Ref ref,Vec3 position,Vec3 velocity,ChunkPos chunk,long tick,CompletableFuture<Boolean> ready){}
-    private record Motion(Vec3 velocity,int tick){}
-    public static void velocityHint(ServerPlayer p,Vec3 v){
-        if(!Double.isFinite(v.lengthSqr())||v.lengthSqr()>31||!isSpace(p.level())&&(p.getY()<450||surfaceRef(p.serverLevel())==null))return;
-        state(p.server).motion.put(p.getUUID(),new Motion(v,p.server.getTickCount()));
+    private record Motion(Vec3 velocity,int tick,ResourceKey<Level> dimension){}
+    public static boolean velocityHint(ServerPlayer p,Vec3 v){
+        if(!p.isAlive()||!Double.isFinite(v.lengthSqr())||v.lengthSqr()>30.25001||!isSpace(p.level())&&(p.getY()<450||surfaceRef(p.serverLevel())==null))return false;
+        state(p.server).motion.put(p.getUUID(),new Motion(v,p.server.getTickCount(),p.level().dimension()));return true;
     }
-    private static Vec3 velocity(ServerPlayer p){var m=state(p.server).motion.get(p.getUUID());return m!=null&&p.server.getTickCount()-m.tick<30?m.velocity:p.getDeltaMovement();}
+    public static Vec3 momentum(ServerPlayer p){var m=state(p.server).motion.get(p.getUUID());return m!=null&&m.dimension.equals(p.level().dimension())&&p.server.getTickCount()-m.tick<30?m.velocity:p.getDeltaMovement();}
     private static State state(MinecraftServer s){return STATES.computeIfAbsent(s,k->new State());}
     public static boolean isSpace(Level l){return id(l.dimension())!=null;}
     public static GalaxyCatalog.Id id(ResourceKey<Level> key){
@@ -78,7 +78,7 @@ public final class SpaceRuntime {
         try{
             var body=GalaxyCatalog.body(p.server.overworld().getSeed(),GalaxyData.get(p.server).salt(),ref);Vec3 normal=SpaceMath.normal(p.getX(),p.getZ(),body.radius());
             Vec3 at=SpaceMath.center(body).add(normal.scale(SpaceMath.radius(body.radius())+100));
-            Vec3 oldVelocity=velocity(p);double longitude=Math.atan2(normal.x,normal.y);Vec3 east=new Vec3(Math.cos(longitude),-Math.sin(longitude),0),north=east.cross(normal).normalize();
+            Vec3 oldVelocity=momentum(p);double longitude=Math.atan2(normal.x,normal.y);Vec3 east=new Vec3(Math.cos(longitude),-Math.sin(longitude),0),north=east.cross(normal).normalize();
             Vec3 v=normal.scale(Math.max(.18,Math.min(3,oldVelocity.y))).add(east.scale(oldVelocity.x)).add(north.scale(oldVelocity.z));if(v.lengthSqr()>30.25)v=v.normalize().scale(5.5);
             var anchor=new CompoundTag();anchor.putString("ref",ref.key());anchor.putDouble("x",p.getX());anchor.putDouble("z",p.getZ());p.getPersistentData().put("dbzenithLaunchAnchor",anchor);
             return queue(p,open(p.server,ref.system()),ref,at,v);
@@ -124,6 +124,7 @@ public final class SpaceRuntime {
     }}
     @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent e){if(e.getEntity() instanceof ServerPlayer p){checkpoint(p);state(p.server).motion.remove(p.getUUID());}}
     @SubscribeEvent public static void changed(PlayerEvent.PlayerChangedDimensionEvent e){if(e.getEntity() instanceof ServerPlayer p){
+        state(p.server).motion.remove(p.getUUID());
         if(isSpace(p.level()))checkpoint(p);else p.getPersistentData().remove(CHECKPOINT);
         if(!isSpace(p.level())&&p.getPersistentData().contains("dbzenithOrbitMayfly")){
             p.getAbilities().mayfly=p.isCreative()||p.isSpectator()||ModCapabilities.getOrThrow(p).isFlying()||p.getPersistentData().getBoolean("dbzenithOrbitMayfly");
@@ -158,8 +159,8 @@ public final class SpaceRuntime {
                 if(discovery!=null&&discovery.destroyed()&&!discovery.restored())continue;
                 double[] surface=SpaceMath.surface(n,body.radius());var anchor=p.getPersistentData().getCompound("dbzenithLaunchAnchor");
                 if(anchor.getString("ref").equals(ref.key())&&SpaceMath.normal(anchor.getDouble("x"),anchor.getDouble("z"),body.radius()).dot(n)>.997){surface[0]=anchor.getDouble("x");surface[1]=anchor.getDouble("z");}
-                if(distance<radius+65&&velocity(p).dot(n)<.03){
-                    Vec3 motion=velocity(p);Vec3 entryVelocity=new Vec3(motion.x*.15,-Math.max(.8,Math.min(3,Math.abs(motion.dot(n)))),motion.z*.15);
+                if(distance<radius+65&&momentum(p).dot(n)<.03){
+                    Vec3 motion=momentum(p);Vec3 entryVelocity=new Vec3(motion.x*.15,-Math.max(.8,Math.min(3,Math.abs(motion.dot(n)))),motion.z*.15);
                     if(PlanetRuntime.reenter(p,ref,surface[0],surface[1],entryVelocity))prepare(p);
                 }
             }
