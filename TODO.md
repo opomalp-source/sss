@@ -325,3 +325,5 @@ to both mods folders.
 - [x] Phase 8 (v0.146.0) Shared meshes/impostors/soft atmosphere, bounded LRU material work, indexed bounded atlas searches, paged responsive settings and space sound/detail controls, per-player/dimension momentum and concurrent-travel tests, local uncapped renderer profiling; docs/SPACE_POLISH.md records scope and wider validation limits
 
 - [x] v0.147.0: widen Great Ape shoulder/hip joints with growth; check idle, movement, stomp and reversion visually.
+
+- [x] v0.148.0: rework all outfit materials and depth; distinct early/Cell Saga armor, Piccolo cape/mantle/turban, boot/glove coverage, icons and fallbacks.

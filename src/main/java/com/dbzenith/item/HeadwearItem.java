@@ -21,7 +21,7 @@ import java.util.Locale;
  * Head clothing, worn on the head (the clothing rework; the user: "head clothing, for example the turbans from
  * Piccolo, as its own item"): drawn in 3D over the head by {@code GearLayer}, never as vanilla's flat helmet.
  * <ul>
- *   <li><b>Piccolo's Turban:</b> white, domed, with its purple band; it covers the hair.</li>
+ *   <li><b>Piccolo's Turban:</b> ivory wraps around a low purple crown; it covers the hair.</li>
  *   <li><b>Bandana:</b> Pan's orange bandana, knotted at the back.</li>
  *   <li><b>Headband:</b> a red fighter's headband, its tails hanging at the back.</li>
  * </ul>
@@ -69,6 +69,11 @@ public class HeadwearItem extends ArmorItem {
 
     public Kind kind() {
         return kind;
+    }
+
+    @Override
+    public String getArmorTexture(ItemStack stack, net.minecraft.world.entity.Entity entity, EquipmentSlot slot, String type) {
+        return DBZenith.MOD_ID + ":textures/models/armor/" + kind.id() + "_layer_1.png";
     }
 
     /** What a player wears on the head, or null. */

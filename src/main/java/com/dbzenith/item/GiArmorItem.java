@@ -32,7 +32,9 @@ public class GiArmorItem extends ArmorItem {
         HOODIE(1.02, 1.08, 1.02, 0.03, 1, Items.LEATHER),
         FROST_ARMOR(1.04, 1.02, 1.12, 0.14, 5, Items.IRON_INGOT),
         /** The fusion outfit (12c): what a fused warrior from the dance wears; it can be made and worn by anyone, too. */
-        FUSION(1.06, 1.06, 1.06, 0.05, 2, Items.LEATHER);
+        FUSION(1.06, 1.06, 1.06, 0.05, 2, Items.LEATHER),
+        /** Capsule Corporation's streamlined Cell-era armor; append to preserve the existing set order. */
+        CELL_ARMOR(1.08, 1.00, 1.08, 0.15, 5, Items.IRON_INGOT);
 
         private final double strMult;
         private final double dexMult;
@@ -68,6 +70,8 @@ public class GiArmorItem extends ArmorItem {
         public String id() {
             return name().toLowerCase(Locale.ROOT);
         }
+
+        public boolean battleArmor() { return this == BATTLE_ARMOR || this == CELL_ARMOR || this == FROST_ARMOR; }
     }
 
     private static final EquipmentSlot[] SET_SLOTS = {EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};

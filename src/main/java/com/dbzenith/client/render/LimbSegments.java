@@ -50,6 +50,8 @@ public final class LimbSegments {
     static boolean proportions;
     static boolean grounded = true;
     static float spread;
+    /** Temporary local surface expansion for clothing; unlike joint scaling, this also covers the foot's top. */
+    static float clothingShell;
 
     // ------------------------------------------------------------------------------------------------ attach and show
 
@@ -248,6 +250,21 @@ public final class LimbSegments {
         return out;
     }
 
+    /** Half-torso sides use their own skin rows; both end caps keep the original full-body UV islands. */
+    static ModelPart torso(float[] deformation, int y) {
+        float xa = -4 - deformation[0], xb = 4 + deformation[0];
+        float ya = y - deformation[1], yb = y + 6 + deformation[1];
+        float za = -2 - deformation[2], zb = 2 + deformation[2];
+        List<float[]> q = new ArrayList<>();
+        face(q, Direction.NORTH, xa, xb, ya, yb, za, zb, 20, 20+y, 28, 26+y, false);
+        face(q, Direction.SOUTH, xa, xb, ya, yb, za, zb, 40, 20+y, 32, 26+y, false);
+        face(q, Direction.WEST, xa, xb, ya, yb, za, zb, 20, 20+y, 16, 26+y, false);
+        face(q, Direction.EAST, xa, xb, ya, yb, za, zb, 28, 20+y, 32, 26+y, false);
+        face(q, Direction.UP, xa, xb, ya, ya, za, zb, 20, 16, 28, 20, true);
+        face(q, Direction.DOWN, xa, xb, yb, yb, za, zb, 28, 16, 36, 20, true);
+        return new ModelPart(List.of(new BlockCube(flat(q), null, STATIC)), Map.of());
+    }
+
     // ------------------------------------------------------------------------------------------------ drawing
 
     /** A limb's blocks, drawn through the limb's pose, its bend past the joint, and for feet a level turn at the ankle. */
@@ -255,6 +272,7 @@ public final class LimbSegments {
         private final float[] quads;
         private final ModelPart parent;
         private final int joint;
+        private final float centerX, centerY, centerZ;
         private final Matrix4f m = new Matrix4f();
         private final Matrix3f n = new Matrix3f();
         private final Matrix3f level = new Matrix3f();
@@ -267,6 +285,15 @@ public final class LimbSegments {
             this.quads = quads;
             this.parent = parent;
             this.joint = joint;
+            float minX = Float.POSITIVE_INFINITY, minY = minX, minZ = minX;
+            float maxX = Float.NEGATIVE_INFINITY, maxY = maxX, maxZ = maxX;
+            for (int i = 0; i < quads.length; i += 23) for (int k = 0; k < 4; k++) {
+                int v = i + k * 5;
+                minX = Math.min(minX, quads[v]); maxX = Math.max(maxX, quads[v]);
+                minY = Math.min(minY, quads[v+1]); maxY = Math.max(maxY, quads[v+1]);
+                minZ = Math.min(minZ, quads[v+2]); maxZ = Math.max(maxZ, quads[v+2]);
+            }
+            centerX = (minX + maxX) * .5f; centerY = (minY + maxY) * .5f; centerZ = (minZ + maxZ) * .5f;
         }
 
         @Override
@@ -294,7 +321,9 @@ public final class LimbSegments {
                 n.transform(nor.set(quads[i + 20], quads[i + 21], quads[i + 22]));
                 for (int k = 0; k < 4; k++) {
                     int o = i + k * 5;
-                    m.transform(pos.set(quads[o], quads[o + 1], quads[o + 2], 1f));
+                    m.transform(pos.set(quads[o] + Math.copySign(clothingShell, quads[o] - centerX),
+                            quads[o+1] + Math.copySign(clothingShell, quads[o+1] - centerY),
+                            quads[o+2] + Math.copySign(clothingShell, quads[o+2] - centerZ), 1f));
                     vc.vertex(pos.x(), pos.y(), pos.z(), r, g, b, a, quads[o + 3], quads[o + 4], overlay, light, nor.x(), nor.y(), nor.z());
                 }
             }

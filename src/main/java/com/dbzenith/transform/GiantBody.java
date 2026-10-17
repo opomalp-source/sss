@@ -154,7 +154,7 @@ public final class GiantBody {
 
     /** Clothes made to stretch with a Saiyan who turns into a Great Ape: the Saiyans' and the Frieza Force's battle armour. */
     public static boolean stretches(ItemStack stack) {
-        return stack.getItem() instanceof GiArmorItem gi && (gi.set() == GiArmorItem.Set.BATTLE_ARMOR || gi.set() == GiArmorItem.Set.FROST_ARMOR);
+        return stack.getItem() instanceof GiArmorItem gi && gi.set().battleArmor();
     }
 
     /** Cloth: the mod's outfits and head clothing, and leather. It tears. */

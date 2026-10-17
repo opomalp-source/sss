@@ -195,8 +195,9 @@ public final class ClientEvents {
             mc.setScreen(new com.dbzenith.client.screen.PathChoiceScreen(null));
             delayTicks = Math.max(delayTicks, 6);
         }
-        com.dbzenith.client.fx.CameraFx.devZoom = name.contains("zoomface") ? 14f : name.contains("zoom") ? 42f : 0f;
+        com.dbzenith.client.fx.CameraFx.devZoom = name.contains("zoomface") ? 14f : name.contains("zoomgear") ? 54f : name.contains("zoom") ? 42f : 0f;
         com.dbzenith.client.fx.CameraFx.devTurn = name.contains("side") ? 90f : name.contains("turn") ? 45f : 0f;
+        if (mc.player != null) mc.player.yBodyRot = mc.player.yBodyRotO = mc.player.getYRot() + com.dbzenith.client.fx.CameraFx.devTurn;
         com.dbzenith.client.anim.AnimController.devFreeze = false;
         com.dbzenith.client.fx.VfxV3.devSpeedLines = name.contains("speedlines");
         com.dbzenith.client.motion.MotionDev.fromShot(name, delayTicks);

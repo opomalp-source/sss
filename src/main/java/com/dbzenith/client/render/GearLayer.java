@@ -92,7 +92,30 @@ public class GearLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         if (top == null && pants == null && boots == null && hat == null) return;
         int o = OverlayTexture.NO_OVERLAY;
         model.follow(getParentModel());
-        if (pants != null) thick(getParentModel(), texture(pants, "pants"), pose, buffers, light, player, 1.008f, getParentModel().body, getParentModel().rightLeg, getParentModel().leftLeg);
+        float legWidthR = getParentModel().rightLeg.xScale, legWidthL = getParentModel().leftLeg.xScale;
+        float legDepthR = getParentModel().rightLeg.zScale, legDepthL = getParentModel().leftLeg.zScale;
+        var torsoChildren = BodyShape.childrenOf(getParentModel().body);
+        boolean[] chestVisible = new boolean[BodyShape.NAMES.length];
+        // Trousers cover the waist underside, but must not paint the upper chest's underside too.
+        if (torsoChildren != null) for (int i = 0; i < chestVisible.length; i++) {
+            var chest = torsoChildren.get(BodyShape.NAMES[i]);
+            if (chest != null) { chestVisible[i] = chest.visible; chest.visible = false; }
+        }
+        try {
+            if (pants != null && !pants.battleArmor()) {
+                float volume = pants == GiArmorItem.Set.MAJIN || pants == GiArmorItem.Set.FUSION ? 1.15f : 1.07f;
+                getParentModel().rightLeg.xScale *= volume; getParentModel().leftLeg.xScale *= volume;
+                getParentModel().rightLeg.zScale *= volume; getParentModel().leftLeg.zScale *= volume;
+            }
+            if (pants != null) thick(getParentModel(), texture(pants, "pants"), pose, buffers, light, player, 1.008f, getParentModel().body, getParentModel().rightLeg, getParentModel().leftLeg);
+        } finally {
+            if (torsoChildren != null) for (int i = 0; i < chestVisible.length; i++) {
+                var chest = torsoChildren.get(BodyShape.NAMES[i]);
+                if (chest != null) chest.visible = chestVisible[i];
+            }
+            getParentModel().rightLeg.xScale = legWidthR; getParentModel().leftLeg.xScale = legWidthL;
+            getParentModel().rightLeg.zScale = legDepthR; getParentModel().leftLeg.zScale = legDepthL;
+        }
         PlayerModel<AbstractClientPlayer> m = getParentModel();
         if (top != null) {
             thick(m, texture(top, "top"), pose, buffers, light, player, 1.008f, m.body, m.rightArm, m.leftArm);
@@ -101,7 +124,16 @@ public class GearLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         if (boots != null) thick(m, texture(boots, "boots"), pose, buffers, light, player, 1.13f, m.rightLeg, m.leftLeg);   // boots, thick
 
         VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(PARTS));
-        if (pants == GiArmorItem.Set.MAJIN || pants == GiArmorItem.Set.FUSION) piece(pose, vc, light, o, GearModel.Piece.BAGGY, 0, 0xF2F0F4);
+        // Use the existing segmented/bending limb geometry for cloth volume: no rigid extra thigh boxes.
+        if (top != null && top.battleArmor()) {
+            piece(pose, vc, light, o, GearModel.Piece.CHEST_PLATE, 0, 0xF2F1E8);
+            piece(pose, vc, light, o, GearModel.Piece.ABDOMEN, 0, top == GiArmorItem.Set.FROST_ARMOR ? 0x8251A0 : 0xC7A665);
+            piece(pose, vc, light, o, GearModel.Piece.STRAPS, 0, 0xF2F1E8);
+        }
+        if (pants == GiArmorItem.Set.MAJIN) {
+            piece(pose, vc, light, o, GearModel.Piece.MAJIN_BUCKLE, 0, 0xD9B44B);
+            piece(pose, vc, light, o, GearModel.Piece.MAJIN_MARK, 0, 0x24212B);
+        }
         if (hat != null) {                                                         // head clothing (the clothing rework)
             switch (hat) {
                 case TURBAN -> {
@@ -121,28 +153,42 @@ public class GearLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         if (top == null) return;
         Cloth.Chain sash = Cloth.chain(player, "sash", Cloth.SASH, ageInTicks);   // CX-44: the sash ends and the cape swing on springs
         switch (top) {
-            case TURTLE -> piece(pose, vc, light, o, GearModel.Piece.SASH_TAILS, sash, 0x2852C8);
-            case DEMON -> piece(pose, vc, light, o, GearModel.Piece.SASH_TAILS, sash, 0xC02838);
-            case BATTLE_ARMOR -> {                                                 // Saiyan armour: layered pads flaring down and out
-                piece(pose, vc, light, o, GearModel.Piece.PADS, 0, 0xECEEF2);
-                piece(pose, vc, light, o, GearModel.Piece.PAD_LIP, 0, 0xE2E4EA);
-                piece(pose, vc, light, o, GearModel.Piece.PAD_TRIM, 0, 0xD8B040);
+            case TURTLE -> {
+                piece(pose, vc, light, o, GearModel.Piece.GI_LAPELS, 0, 0xED7424);
+                piece(pose, vc, light, o, GearModel.Piece.SASH_KNOT, 0, 0x243D7E);
+                piece(pose, vc, light, o, GearModel.Piece.SASH_TAILS, sash, 0x243D7E);
             }
+            case DEMON -> {
+                piece(pose, vc, light, o, GearModel.Piece.GI_LAPELS, 0, 0x65419A);
+                piece(pose, vc, light, o, GearModel.Piece.SASH_KNOT, 0, 0xAD2941);
+                piece(pose, vc, light, o, GearModel.Piece.SASH_TAILS, sash, 0xAD2941);
+            }
+            case BATTLE_ARMOR -> {                                                 // Saiyan armour: layered pads flaring down and out
+                piece(pose, vc, light, o, GearModel.Piece.PADS, 0, 0xC7A665);
+                piece(pose, vc, light, o, GearModel.Piece.PAD_LIP, 0, 0xE2E4EA);
+                piece(pose, vc, light, o, GearModel.Piece.HIP_GUARDS, 0, 0xC7A665);
+                piece(pose, vc, light, o, GearModel.Piece.PAD_TRIM, 0, 0xF0EFE8);
+            }
+            case CELL_ARMOR -> { } // No shoulder or hip guards: this is a distinct, streamlined shell.
             case NAMEKIAN -> {
                 piece(pose, vc, light, o, GearModel.Piece.CAPE, Cloth.chain(player, "cape", Cloth.CAPE, ageInTicks), 0xF4F2EC);
                 piece(pose, vc, light, o, GearModel.Piece.NAMEK_PADS, 0, 0xF4F2EC);
-                piece(pose, vc, light, o, GearModel.Piece.SASH_TAILS, sash, 0x40B0E0);
+                piece(pose, vc, light, o, GearModel.Piece.SASH_KNOT, 0, 0x4CA4CC);
+                piece(pose, vc, light, o, GearModel.Piece.SASH_TAILS, sash, 0x4CA4CC);
             }
-            case MAJIN -> { }
-            case HOODIE -> piece(pose, vc, light, o, GearModel.Piece.HOOD, 0, 0xC8283A);
+            case MAJIN -> { } // The belt belongs to the trousers, including when pieces are mixed.
+            case HOODIE -> {
+                piece(pose, vc, light, o, GearModel.Piece.HOOD, 0, 0xB52C41);
+                piece(pose, vc, light, o, GearModel.Piece.HOOD_TRIM, 0, 0xAE293B);
+            }
             case FROST_ARMOR -> {                                                  // the Frieza Force: pads sweeping up like wings
                 piece(pose, vc, light, o, GearModel.Piece.FROST_PADS, 0, 0x8A4AC8);
                 piece(pose, vc, light, o, GearModel.Piece.FROST_PAD_TRIM, 0, 0xF2F0F6);
             }
             case FUSION -> {
-                piece(pose, vc, light, o, GearModel.Piece.PADS, 0, 0xEAB830);
-                piece(pose, vc, light, o, GearModel.Piece.PAD_LIP, 0, 0xE0AE28);
-                piece(pose, vc, light, o, GearModel.Piece.PAD_TRIM, 0, 0x1F6F80);
+                piece(pose, vc, light, o, GearModel.Piece.FUSION_COLLAR, 0, 0xE5B64B);
+                piece(pose, vc, light, o, GearModel.Piece.SASH_KNOT, 0, 0x50A6C9);
+                piece(pose, vc, light, o, GearModel.Piece.SASH_TAILS, sash, 0x50A6C9);
             }
         }
     }
@@ -159,11 +205,17 @@ public class GearLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
             p.yScale *= 1.008f;                                                  // above the growing fur on every face, including shoulders and knees
             p.zScale *= s;
         }
-        renderColoredCutoutModel(m, tex, pose, buffers, light, player, 1f, 1f, 1f);
-        for (var p : parts) {
-            p.xScale /= s;
-            p.yScale /= 1.008f;
-            p.zScale /= s;
+        float previousShell = LimbSegments.clothingShell;
+        try {
+            LimbSegments.clothingShell = s > 1.05f ? .16f : .08f;
+            renderColoredCutoutModel(m, tex, pose, buffers, light, player, 1f, 1f, 1f);
+        } finally {
+            LimbSegments.clothingShell = previousShell;
+            for (var p : parts) {
+                p.xScale /= s;
+                p.yScale /= 1.008f;
+                p.zScale /= s;
+            }
         }
     }
 

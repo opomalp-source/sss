@@ -67,10 +67,9 @@ public final class BodyShape {
 
     /** A half-torso block: 8 x 6 x 4 from {@code y}, mapping the body texture from ({@code u}, {@code v}). */
     static ModelPart bake(float[] d, int u, int v, int y) {
-        MeshDefinition mesh = new MeshDefinition();
-        mesh.getRoot().addOrReplaceChild("part", CubeListBuilder.create().texOffs(u, v)
-                .addBox(-4, y, -2, 8, 6, 4, new CubeDeformation(d[0], d[1], d[2])), PartPose.ZERO);
-        return LayerDefinition.create(mesh, 64, 64).bakeRoot().getChild("part");
+        // Half-height boxes need the full torso's cap UVs. Shifting a vanilla box's whole UV origin
+        // made the waist underside sample the white armor chest, leaving a false belt at the hips.
+        return LimbSegments.torso(d, y);
     }
 
     private static Field childrenField;

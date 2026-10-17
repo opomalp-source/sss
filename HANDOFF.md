@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.147.0, 2026-10-17)
+# Handoff: where Dragon Block Zenith stands (v0.148.0, 2026-10-17)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.147.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.148.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -304,3 +304,10 @@ Final release validation: all279 required tests passed (phase146-testsfinal5.log
 PhysiqueModel spreads ape shoulder pivots3px/side, hips1.6px/side after the animation pose, blended by ApeChange.growth. Clothing parts copy final joints; BodyShape.Post and the next setupAnim undo offsets so a shared renderer cannot retain ape spacing. All ape variants use the same path. See docs/GREAT_APE.md. Validation below.
 
 Validation: all279 required GameTests pass (phase147-tests.log), release build succeeds. Crop.java visual review covers growth, idle, walk, raised-knee stomp, battle armor, golden/legendary variants and clean base reversion. Final daylight moon-ape scene uses a false moon. Direct local install only; no updater.
+
+## Clothing rework (v0.148.0)
+Existing battle_armor IDs are the Saiyan Saga cut; appended CELL_ARMOR registers cell_armor_top/pants/boots with blue-wool recipes. Same bonuses, distinct set matching; both stretch in Great Ape. GearModel has separate shells, ribs, hip guards, collars, lapels and knots; Piccolo's mantle is torso-attached and cape uses four overlapping, smoothly tapered pleated panels on the existing Cloth chain. Gear art is512px, icons64px, all Classic/NPC fallbacks regenerated. LimbSegments.clothingShell expands each segment around its own center to cover shoe/glove top surfaces; GearLayer restores state/scales in finally. See docs/CLOTHES.md for reference links, recipes and regeneration. Validation below.
+
+Final refinements: CapePanel bakes continuous closed trapezoid pleats; capeRoot uses the original four-link spring chain. Half-torso end-cap UVs corrected in LimbSegments.torso; pants pass hides upper-chest children and restores visibility. ArtGen.topFinish/bootsFinish/pantsFinish handle cap coordinates separately, preventing glove pixels on shoulders and boot pixels on hips. Regression resource checks enforce boot/trouser cap separation. Generator replay is byte-identical.
+
+Release validation: all281 required tests pass (phase148-testsfinal.log, Gradle1m37s), build -x test succeeds. Crop.java review covers nine outfits, rear/angled tapered cape, motion, mixed-piece belt, shoe/hip/shoulder caps and true fixed-full-moon ape growth wearing Cell Saga armor. Per-item headwear fallbacks eliminate the missing shared texture. Direct local install/no updater. Story remains last.
