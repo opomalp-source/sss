@@ -29,7 +29,7 @@ public final class PlanetEnvironment {
         if(com.dbzenith.galaxy.space.SpaceRuntime.isSpace(l))return 0;
         if(!PlanetConfig.GRAVITY.get())return 1;
         if(l.isClientSide)return com.dbzenith.client.ClientPlanet.gravity(l);
-        var b=PlanetRuntime.body((ServerLevel)l);return b==null?1:b.gravity();
+        var b=PlanetRuntime.body((ServerLevel)l);return (b==null?1:b.gravity())*PlanetDestruction.gravity((ServerLevel)l);
     }
     public static double flightFactor(Level l){return Math.max(.35,Math.min(5,Math.sqrt(gravity(l))));}
     public static void applyGravity(LivingEntity entity,double g){

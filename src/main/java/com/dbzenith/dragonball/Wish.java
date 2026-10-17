@@ -49,7 +49,8 @@ public enum Wish {
     /** Divine awakening: godly ki, grown far beyond its first spark. */
     DIVINE_AWAKENING(BallSet.SUPER),
     /** Every soul revived and every living fighter restored, everywhere. */
-    UNIVERSAL_RESTORATION(BallSet.SUPER);
+    UNIVERSAL_RESTORATION(BallSet.SUPER),
+    RESTORE_PLANET(BallSet.EARTH);
 
     /** Immortality that never runs out. */
     public static final long FOREVER = Long.MAX_VALUE;
@@ -82,11 +83,13 @@ public enum Wish {
         return "wish.dbzenith." + id();
     }
 
+    public boolean canGrant(ServerPlayer p){return this!=RESTORE_PLANET||com.dbzenith.galaxy.planet.PlanetDestruction.wishTarget(p)!=null;}
     public void grant(ServerPlayer player) {
         PlayerData d = ModCapabilities.get(player).orElse(null);
         if (d == null) return;
         DBZConfig.Server c = DBZConfig.SERVER;
         switch (this) {
+            case RESTORE_PLANET -> {var ref=com.dbzenith.galaxy.planet.PlanetDestruction.wishTarget(player);if(ref!=null)com.dbzenith.galaxy.planet.PlanetDestruction.restore(player.server,ref);}
             case POWER -> d.addTrainingPoints(c.wishPowerTp.get());
             case RESTORATION -> restore(player, d);
             case SENZU -> give(player, new ItemStack(ModItems.SENZU_BEAN.get(), c.wishSenzuCount.get()));

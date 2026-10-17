@@ -38,7 +38,7 @@ public final class ScouterOverlay implements IGuiOverlay {
     @Override
     public void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null || mc.options.hideGui || com.dbzenith.client.space.JourneyClient.active() || !ScouterItem.wears(mc.player)) {
+        if (mc.player == null || mc.level == null || mc.options.hideGui || com.dbzenith.client.space.JourneyClient.active() || com.dbzenith.client.space.DoomClient.warning() || !ScouterItem.wears(mc.player)) {
             lockedId = -1;
             return;
         }

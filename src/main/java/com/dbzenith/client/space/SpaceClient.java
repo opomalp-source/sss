@@ -92,7 +92,7 @@ public final class SpaceClient {
             var bodies=system().getList("bodies",Tag.TAG_COMPOUND);CompoundTag nearest=null;double best=Double.MAX_VALUE;
             for(Tag raw:bodies){var b=(CompoundTag)raw;double d=p.position().distanceTo(SpaceMath.center(b.getDouble("orbit"),b.getDouble("phase")))-SpaceMath.radius(b.getInt("radius"));if(d<best){best=d;nearest=b;}}
             if(nearest!=null){String text=mc.font.plainSubstrByWidth(nearest.getString("name")+"  /  "+String.format(java.util.Locale.ROOT,"%,.0f m",Math.max(0,best)),w/2-16);g.drawString(mc.font,text,w-mc.font.width(text)-10,14,0xFFC6E4EF,false);}
-            g.drawCenteredString(mc.font,"W/S thrust  /  Space rise  /  Sneak brake  /  V ki flight",w/2,h-103,0xFF819DAF);
+            if(!DoomClient.warning())g.drawCenteredString(mc.font,"W/S thrust  /  Space rise  /  Sneak brake  /  V ki flight",w/2,h-103,0xFF819DAF);
         }
     }
 }

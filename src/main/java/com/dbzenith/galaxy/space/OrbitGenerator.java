@@ -25,6 +25,7 @@ public final class OrbitGenerator extends ChunkGenerator {
         Codec.LONG.fieldOf("belt_seed").forGetter(g->g.seed)
     ).apply(i,OrbitGenerator::new));
     public final GalaxyCatalog.Id system;private final long seed;
+    public volatile List<Remnants.Fragment> remnants=List.of();
     public OrbitGenerator(BiomeSource biome,long seed,GalaxyCatalog.Id system){this(biome,system.toString(),seed);}
     private OrbitGenerator(BiomeSource biome,String system,long seed){super(biome);this.system=GalaxyCatalog.Id.parse(system);this.seed=seed;}
     @Override protected Codec<? extends ChunkGenerator> codec(){return CODEC;}
@@ -33,6 +34,7 @@ public final class OrbitGenerator extends ChunkGenerator {
     @Override public int getSeaLevel(){return -1024;}
     @Override public ChunkGeneratorStructureState createState(HolderLookup<StructureSet> lookup,RandomState random,long seed){return ChunkGeneratorStructureState.createForFlat(random,seed,biomeSource,Stream.empty());}
     public BlockState block(int x,int y,int z){
+        for(var f:remnants){var b=Remnants.material(f,x,y,z);if(!b.isAir())return b;}
         double d=Math.hypot(x,z);if(d<10000||d>11600||y<40||y>230)return Blocks.AIR.defaultBlockState();
         int cx=Math.floorDiv(x,64),cz=Math.floorDiv(z,64);long h=GalaxyCatalog.mix(seed^cx*0x9e3779b97f4a7c15L^cz*0x632be59bd9b4e019L);
         if((h&15)>3)return Blocks.AIR.defaultBlockState();
@@ -45,9 +47,18 @@ public final class OrbitGenerator extends ChunkGenerator {
         double d=Math.hypot(chunk.getPos().getMiddleBlockX(),chunk.getPos().getMiddleBlockZ());
         if(d>9980&&d<11620){var p=new BlockPos.MutableBlockPos();for(int x=0;x<16;x++)for(int z=0;z<16;z++)for(int y=40;y<=230;y++){
             int wx=chunk.getPos().getMinBlockX()+x,wz=chunk.getPos().getMinBlockZ()+z;var s=block(wx,y,wz);if(!s.isAir())chunk.setBlockState(p.set(wx,y,wz),s,false);
-        }}return CompletableFuture.completedFuture(chunk);
+        }}
+        var pos=new BlockPos.MutableBlockPos();
+        for(var f:remnants)if(Remnants.intersects(f,chunk.getPos())){
+            for(int x=Math.max(chunk.getPos().getMinBlockX(),(int)Math.floor(f.center().x)-f.radius());x<=Math.min(chunk.getPos().getMaxBlockX(),(int)Math.ceil(f.center().x)+f.radius());x++)
+                for(int z=Math.max(chunk.getPos().getMinBlockZ(),(int)Math.floor(f.center().z)-f.radius());z<=Math.min(chunk.getPos().getMaxBlockZ(),(int)Math.ceil(f.center().z)+f.radius());z++)
+                    for(int y=Math.max(-1024,(int)Math.floor(f.center().y)-f.radius());y<=Math.min(1023,(int)Math.ceil(f.center().y)+f.radius());y++){
+                        var state=Remnants.material(f,x,y,z);if(!state.isAir())chunk.setBlockState(pos.set(x,y,z),state,false);
+                    }
+            // First chunk load records materialization in the sparse destruction journal.
+        }return CompletableFuture.completedFuture(chunk);
     }
-    @Override public int getBaseHeight(int x,int z,Heightmap.Types t,LevelHeightAccessor l,RandomState r){for(int y=230;y>=40;y--)if(t.isOpaque().test(block(x,y,z)))return y+1;return -1024;}
+    @Override public int getBaseHeight(int x,int z,Heightmap.Types t,LevelHeightAccessor l,RandomState r){for(int y=remnants.isEmpty()?230:1023;y>=(remnants.isEmpty()?40:-1024);y--)if(t.isOpaque().test(block(x,y,z)))return y+1;return -1024;}
     @Override public NoiseColumn getBaseColumn(int x,int z,LevelHeightAccessor l,RandomState r){var a=new BlockState[l.getHeight()];for(int i=0;i<a.length;i++)a[i]=block(x,l.getMinBuildHeight()+i,z);return new NoiseColumn(l.getMinBuildHeight(),a);}
     @Override public void buildSurface(WorldGenRegion l,StructureManager s,RandomState r,ChunkAccess c){}
     @Override public void applyCarvers(WorldGenRegion l,long seed,RandomState r,BiomeManager b,StructureManager s,ChunkAccess c,GenerationStep.Carving step){}

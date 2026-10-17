@@ -225,3 +225,41 @@ All270 required tests pass. Final before/impact/settled devshots checked with Cr
 and jobs0/tracked0 completion verified. Seeded scorch breaks up stripes; compacted ki rim material prevents
 introduced sand from falling away before restoration. Local capped smoke check59-60fps, not broad profiling.
 Story remains last. Install directly to the authorized mods folder, remove old DBZ jar; no updater.
+
+
+## Galaxy Phase 7 (v0.145.0, 2026-10-17)
+PlanetDestruction + DoomData own durable 30-90s core events and a sparse, bounded original-state fissure
+journal. Large ball/beam impacts use current battle power/permission; operators share protection/caps.
+Earth is always protected; configured worlds, recorded bases/spawns and forced chunks veto/cancel events.
+Player placement/spawn markers persist; crater synthetic place events are excluded. Old unmarked builds
+must be explicitly protected; there is no whole-save block scan. See docs/PLANET_DESTRUCTION.md.
+
+Detonation seals surfaces in GalaxyData, evacuates through existing async SpaceRuntime (Earth cap fallback),
+unregisters empty procedural worlds, blocks pending/legacy/bed/transmission entry and reconnects safely.
+Region directories are NEVER deleted: retained storage is the snapshot. Static legacy Namek stays registered.
+Restore a planet is appended to Wish (old ordinals intact); actual dragon refuses without consuming a wish
+when no target/slot is available. Waypoint selects the destroyed target, then lexical fallback. Restoration
+pins its surface, preloads one journal chunk per event, repairs64 entries/tick, preserving later edits/builds.
+
+Remnants uses24 deterministic real block clusters/body. Immutable generator descriptors, only visited chunks;
+old empty chunks fill with global2048 scans/128 writes, occupied orbital chunks preserved, player placement
+cancels pending fills. Sparse materialization records prevent regeneration of mined fragments. Restoration
+stops new generation but retains existing orbital debris/builds. Historical destroyed records leave tick work.
+
+DoomPacket protocol48 sends only current-system summaries, max12 bodies, once20ticks. DoomClient adds warm
+sky/fog, accessibility-aware quakes/lifting block particles, compact scouter-style warning, original drone mix,
+orbital glowing seams, warm expanding flash/shockwave and distant crust silhouettes blending to real clusters.
+Atlas shows remains and disables landing; restored status uses destroyed&&!restored. Hyperspeed still reaches
+remnants. Warning suppresses scouter lens/readout and orbital tutorial text, retaining health/air HUD.
+
+Four new GameTests exercise saved clocks/journals/materialization/schema preservation, identity/base/restored
+flags, fragment bounds/materials, actual evacuation/sealing/mineable generation/no-regrowth/wish restoration
+with retained chest contents, and a refused wish followed by a valid wish on the same dragon. Cap fixture counts
+already-loaded dimensions; lifecycle uses an unvisited body so mined regions from a prior test remain mined.
+Final validation/devshots below. Next: Phase8 polish, profiling, multiplayer/config/balance. Story last.
+All274 required GameTests pass on final sources (phase145-testsfinal.log,50s), offline release build succeeds.
+Devshots/two detonation clips checked with Crop.java; connected cracks, warm shockwave, real hot block clusters,
+compact warning, stable ground/ruins, sky warming and intact/cancelled sphere. Actual cancellation repaired36
+fissure entries and retired the event (saved NBT events empty). Local capped smoke checks59-60fps; broad
+profiling remains Phase8. Snapshots are retained world storage, not copied backups; already-placed orbital
+remnants remain after restoration. Direct install/no updater. Next: finish Phase8, story last.

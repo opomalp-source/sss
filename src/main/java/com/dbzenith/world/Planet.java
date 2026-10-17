@@ -58,6 +58,8 @@ public enum Planet {
 
     /** Whether a flight to {@code target} may start now (tells the player why not). */
     public static boolean canTravel(ServerPlayer player, Planet target) {
+        var ref=new com.dbzenith.galaxy.GalaxyCatalog.Ref(switch(target){case EARTH->com.dbzenith.galaxy.GalaxyCatalog.EARTH;case NAMEK->com.dbzenith.galaxy.GalaxyCatalog.NAMEK;case NORTHERN_PLANET->com.dbzenith.galaxy.GalaxyCatalog.NORTH;case BEERUS_PLANET->com.dbzenith.galaxy.GalaxyCatalog.BEERUS;},0);
+        if(com.dbzenith.galaxy.GalaxyData.get(player.server).destroyed(ref)||com.dbzenith.galaxy.planet.PlanetDestruction.restoring(player.server,ref)){player.displayClientMessage(Component.literal("This planet is sealed until restoration completes."),true);return false;}
         PlayerData d = ModCapabilities.get(player).orElse(null);
         long now = player.level().getGameTime();
         if (d == null || TimeChamber.isIn(player) || Planet.of(player.level()) == target) return false;

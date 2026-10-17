@@ -1,4 +1,6 @@
 {
+  "wish.dbzenith.restore_planet": "Restore a planet",
+  "wish.dbzenith.restore_planet.desc": "Restore the destroyed planet at your waypoint, or the first known destroyed planet. Its retained surface and builds return.",
   "itemGroup.dbzenith.main": "Dragon Block Zenith",
   "item.dbzenith.senzu_bean": "Senzu Bean",
   "stat.dbzenith.strength": "Strength",

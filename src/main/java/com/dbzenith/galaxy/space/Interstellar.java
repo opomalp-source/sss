@@ -33,7 +33,7 @@ public final class Interstellar {
     private static Map<UUID,Trip> trips(MinecraftServer s){return TRIPS.computeIfAbsent(s,k->new HashMap<>());}
     public static boolean active(ServerPlayer p){return trips(p.server).containsKey(p.getUUID());}
     public static int duration(GalaxyCatalog.Id a,GalaxyCatalog.Id b){double d=Math.sqrt((double)(a.x()-b.x())*(a.x()-b.x())+(double)(a.y()-b.y())*(a.y()-b.y())+(double)(a.z()-b.z())*(a.z()-b.z()));return Math.max(200,Math.min(400,200+(int)(Math.sqrt(d)*32)));}
-    private static boolean living(ServerPlayer p){return p.isAlive()&&!p.isSpectator()&&!p.isSleeping()&&!com.dbzenith.combat.KnockOut.isDown(p)&&!ModCapabilities.getOrThrow(p).isDead()&&!TimeChamber.isIn(p)&&(SpaceRuntime.isSpace(p.level())||SpaceRuntime.surfaceRef(p.serverLevel())!=null);}
+    private static boolean living(ServerPlayer p){var ref=SpaceRuntime.surfaceRef(p.serverLevel());if(ref!=null&&(GalaxyData.get(p.server).destroyed(ref)||com.dbzenith.galaxy.planet.PlanetDestruction.restoring(p.server,ref)))return false;return p.isAlive()&&!p.isSpectator()&&!p.isSleeping()&&!com.dbzenith.combat.KnockOut.isDown(p)&&!ModCapabilities.getOrThrow(p).isDead()&&!TimeChamber.isIn(p)&&(SpaceRuntime.isSpace(p.level())||SpaceRuntime.surfaceRef(p.serverLevel())!=null);}
     public static boolean accessible(ServerPlayer p,GalaxyCatalog.Ref ref){return !ref.system().equals(GalaxyCatalog.BEERUS)||p.isCreative()||ModCapabilities.getOrThrow(p).hasFlag("god_ki");}
     public static boolean begin(ServerPlayer p,GalaxyCatalog.Ref ref){
         if(!PlanetConfig.HYPERSPEED.get()||!living(p)||!SpaceRuntime.isSpace(p.level())||active(p)||SpaceRuntime.pending(p))return refuse(p,"Launch into orbit before plotting a hyperspeed course.");
@@ -42,7 +42,7 @@ public final class Interstellar {
         if(!p.isCreative()&&(d.isOnCooldown("space_travel",p.level().getGameTime())||!pod&&(ModEffects.isKiSealed(p)||!d.isFlying()||d.getKi()<d.getDerived().maxKi()*.98)))return refuse(p,"Hyperspeed needs a piloted Space Pod or ki flight at full ki, with navigation recharged.");
         var data=GalaxyData.get(p.server);GalaxyCatalog.Body body;
         try{body=GalaxyCatalog.body(p.server.overworld().getSeed(),data.salt(),ref);}catch(IllegalArgumentException ex){return false;}
-        var known=data.discovery(ref);if(known!=null&&known.destroyed()&&!known.restored())return refuse(p,"That planet has been destroyed.");
+        // Destroyed systems remain reachable: their orbital remnants can be explored.
         if(trips(p.server).size()>=16)return refuse(p,"Navigation is busy. Try again shortly.");
         var trip=new Trip(p,ref,duration(GalaxyData.current(p),ref.system()),data.name(ref,body.name()));trips(p.server).put(p.getUUID(),trip);p.setDeltaMovement(Vec3.ZERO);if(p.getVehicle()!=null)p.getVehicle().setDeltaMovement(Vec3.ZERO);
         ModNetwork.sendTo(p,new JourneyPacket(true,0,trip.duration,trip.name));return true;

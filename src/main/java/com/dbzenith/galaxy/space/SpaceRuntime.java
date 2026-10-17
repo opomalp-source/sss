@@ -71,7 +71,7 @@ public final class SpaceRuntime {
         var registry=server.registryAccess();var type=registry.registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(ResourceKey.create(Registries.DIMENSION_TYPE,new ResourceLocation(DBZenith.MOD_ID,"space")));
         var biome=registry.registryOrThrow(Registries.BIOME).getHolderOrThrow(ResourceKey.create(Registries.BIOME,new ResourceLocation(DBZenith.MOD_ID,"orbital_void")));
         var level=InfiniverseAPI.get().getOrCreateLevel(server,key,()->new LevelStem(type,new OrbitGenerator(new FixedBiomeSource(biome),GalaxyCatalog.seed(server.overworld().getSeed(),GalaxyData.get(server).salt(),id),id)));
-        PlanetRuntime.isolateBorder(level);level.getWorldBorder().setCenter(0,0);level.getWorldBorder().setSize(240000);s.used.put(key,(long)server.getTickCount());return level;
+        PlanetRuntime.isolateBorder(level);level.getWorldBorder().setCenter(0,0);level.getWorldBorder().setSize(240000);s.used.put(key,(long)server.getTickCount());Remnants.configure(level);return level;
     }
     public static boolean ascend(ServerPlayer p){
         var ref=surfaceRef(p.serverLevel());if(ref==null||ModCapabilities.getOrThrow(p).isDead()||!p.isAlive())return false;
@@ -132,7 +132,7 @@ public final class SpaceRuntime {
     }}
     @SubscribeEvent public static void stopped(ServerStoppedEvent e){STATES.remove(e.getServer());}
     @SubscribeEvent public static void started(net.minecraftforge.event.server.ServerStartedEvent e){for(var l:e.getServer().getAllLevels())if(isSpace(l)){
-        PlanetRuntime.isolateBorder(l);l.getWorldBorder().setCenter(0,0);l.getWorldBorder().setSize(240000);state(e.getServer()).used.put(l.dimension(),(long)e.getServer().getTickCount());
+        PlanetRuntime.isolateBorder(l);l.getWorldBorder().setCenter(0,0);l.getWorldBorder().setSize(240000);state(e.getServer()).used.put(l.dimension(),(long)e.getServer().getTickCount());Remnants.configure(l);
     }}
     @SubscribeEvent(priority=EventPriority.HIGH) public static void save(UnregisterDimensionEvent e){if(isSpace(e.getLevel())){state(e.getLevel().getServer()).retiring.add(e.getLevel().dimension());e.getLevel().save(null,true,false);}}
     @SubscribeEvent public static void close(LevelEvent.Unload e){if(e.getLevel() instanceof ServerLevel l&&isSpace(l)&&l.getServer().getLevel(l.dimension())==null){

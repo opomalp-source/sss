@@ -293,3 +293,11 @@ Real ki crater terrain now streams across bounded scan/edit/reconciliation stage
 substrate-aware glass and hot rock, original lingering dust/rubble, safe optional restoration and no vanilla
 explosion terrain bypass. Existing ball, beam and clash systems use it automatically. See [Craters](CRATERS.md)
 for config limits, lifecycle tradeoffs and operator checks. Planet-level destruction is Phase7, polish Phase8.
+
+
+## Phase 7 — planet destruction (v0.145.0)
+
+Powerful ki impacts can destabilize an unprotected planet. A persistent countdown leads to evacuation and an
+orbital explosion, followed by real mineable debris. The atlas seals the landing surface until a dragon
+restores it. Existing region files and builds are retained. See [Planet destruction](PLANET_DESTRUCTION.md)
+for safeguards, config, commands, snapshots and restoration limits. Phase8 is the final polish pass.

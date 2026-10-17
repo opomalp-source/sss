@@ -4086,3 +4086,38 @@ User approved the eight-phase immersive space design. This release is Phase 1 on
   a finished crater through the same path. Live status returned jobs0/tracked0 after completion. Local capped
   client smoke checks stayed59-60fps; broader performance profiling remains Phase8. README/guide explain
   supported queued lighting and state-based session-local restoration. Direct local install, no updater.
+
+
+### v0.145.0 — Galaxy Phase 7: a planet's final minute (2026-10-17)
+- Added durable server-authoritative core-instability events, default60s (30-90 configurable), current battle-
+  power/permission gates on large ki impacts, operator controls, configured world/base/spawn protection and
+  cancellation if protection engages. Natural-block magma fissures have a bounded persistent original-state
+  journal; Forge protection checks, no fluids/inventories or whole-world scans. Gravity pulses during collapse.
+- Surface reddening, original rumble/drone mix, rising block particles, evacuation clock and orbital seams.
+  Warm swelling blast, expanding shockwave and crust silhouettes; calm/flash controls respected. Original assets.
+  Visual QA moved the warning away from the planet into a compact top-right card, preserving health and air.
+- Destruction seals travel/respawn checkpoints/transmission and pending landings; normal async orbital transit
+  evacuates survivors and preserves pods, with Earth as the cap/unavailable fallback. Empty procedural surfaces
+  save/unregister. Earth always protected. Region files retained as the snapshot; no directory deletion.
+- Real deterministic mineable remnants materialize only in visited chunks. Existing occupied orbit chunks and
+  later placements are protected, global2048-candidate/128-write fill budget, sparse per-event chunk markers
+  prevent mined debris regrowth. Historical events do not remain in countdown iteration. Texture variants bounded.
+- Appended Restore a planet to Earth/Super wishes, preserving enum ordinals. Uses destroyed waypoint or lexical
+  fallback; a refusal/cap failure does not consume a dragon wish. One async journal chunk/event, max64 repairs
+  per event/tick; original surface, inventories, names and personal visit history retained. Existing orbital
+  debris remains to protect player work. Atlas/scouter show remains, normal status returns after restoration.
+- Protocol48: small bounded current-system summaries, no snapshot/terrain seeds sent. Added operator planet
+  destroy/restore/status/protect/unprotect/remnant commands and PLANET_DESTRUCTION.md; docs/TODO/version updated.
+- Four new GameTests cover persistence/unknown schemas, identity/protection/restored flags, deterministic real
+  fragment material, actual event/evacuation/sealed landing/wish restore/chest contents and refused-wish safety.
+  Repeat-save fixtures now account for preloaded worlds and previously mined fragments. Final validation below.
+- Final validation: offline build + all274 required GameTests pass (phase145-testsfinal.log,50s), then
+  build -x test succeeds; jar metadata confirms0.145.0. Three dev-client sessions and two full detonation
+  clips checked with Crop.java: warm flash/shockwave, connected orbital cracks, real mineable hot fragments,
+  intact/cancelled sphere, stable surface ruins and gradual sky warming. Compact warning avoids obscuring
+  the sphere at small GUI sizes. Local capped smoke checks stayed59-60fps, not a broad performance benchmark.
+- Live ground event recorded36 protected fissure changes; enabling base protection cancelled the countdown.
+  After save/shutdown the destruction SavedData had no remaining events/journal, confirming repair completed.
+  Existing GameTest proves actual wish restoration retains original blocks and chest contents. Preview camera
+  was corrected to the loaded landmark after earlier elevated/void camera attempts; no gameplay flight changes.
+- Direct local installation with the release script, old DBZ jar removal and main/tag push; no updater/deploy.

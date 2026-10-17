@@ -61,6 +61,7 @@ public final class SpaceSky {
         RenderSystem.disableDepthTest();RenderSystem.depthMask(false);RenderSystem.disableCull();RenderSystem.enableBlend();RenderSystem.defaultBlendFunc();FogRenderer.setupNoFog();RenderSystem.setShader(GameRenderer::getPositionColorShader);
         Matrix4f m=ps.last().pose();var buffer=Tesselator.getInstance().getBuilder();
         int skyColor=level.getBiome(camera.getBlockPosition()).value().getSkyColor();Vec3 sky=new Vec3((skyColor>>16&255)/255d,(skyColor>>8&255)/255d,(skyColor&255)/255d).scale(daylight*(1-vacuum));int rgb=((int)(sky.x*255)<<16)|((int)(sky.y*255)<<8)|(int)(sky.z*255);
+        rgb=mix(rgb,0x8B281A,DoomClient.intensity()*.75);
         buffer.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_COLOR);
         for(int face=0;face<6;face++){Vec3 n=switch(face){case 0->new Vec3(1,0,0);case 1->new Vec3(-1,0,0);case 2->new Vec3(0,1,0);case 3->new Vec3(0,-1,0);case 4->new Vec3(0,0,1);default->new Vec3(0,0,-1);};Vec3 side=Math.abs(n.y)>.5?new Vec3(1,0,0):n.cross(new Vec3(0,1,0));quad(buffer,m,n.scale(190),side.scale(190),n.cross(side).scale(190),rgb,1);}
         BufferUploader.drawWithShader(buffer.end());buildStars();RenderSystem.setShaderColor(1,1,1,(float)Math.max(vacuum,(1-daylight)*.8));stars.bind();stars.drawWithShader(m,projection,GameRenderer.getPositionColorShader());VertexBuffer.unbind();RenderSystem.setShaderColor(1,1,1,1);
@@ -132,11 +133,15 @@ public final class SpaceSky {
     }
     private static void body(Matrix4f m,CompoundTag b,Vec3 camera,double time){
         Vec3 center=SpaceMath.center(b.getDouble("orbit"),b.getDouble("phase")),relative=center.subtract(camera);double d=Math.max(1,relative.length()),r=SpaceMath.radius(b.getInt("radius"));
-        if(d<r*.98)return;double scale=100/d;Vec3 projected=relative.scale(scale);double radius=r*scale;
+        double scale=100/d;Vec3 projected=relative.scale(scale);double radius=r*scale;
         int segments=radius>12?56:radius>3?32:radius>.5?16:8;
+        var doom=DoomClient.body(b.getInt("index"));
+        if(b.getBoolean("destroyed")||doom!=null&&doom.phase()==com.dbzenith.galaxy.planet.DoomData.DESTROYED){remnant(m,b,camera,time,doom);return;}
+        if(d<r*.98)return;
         Vec3 light=SpaceMath.star(0,SpaceClient.system().getList("starsDetail",Tag.TAG_COMPOUND).size()).subtract(center).normalize();
         if(b.getBoolean("rings"))rings(m,projected,radius,relative.normalize(),false,b.getDouble("tilt"));
         sphere(m,projected,radius,b,light,segments,time,false,1);
+        if(doom!=null&&doom.phase()==com.dbzenith.galaxy.planet.DoomData.ACTIVE)seams(m,projected,radius,DoomClient.progress(doom),b.getInt("index"));
         if(b.getString("type").equals("Temperate")||b.getString("type").equals("Ocean")||b.getString("type").equals("Jungle")){
             var clouds=b.copy();clouds.putBoolean("cloudLayer",true);sphere(m,projected,radius*1.009,clouds,light,segments,time,false,1);
         }
@@ -148,6 +153,35 @@ public final class SpaceSky {
             if(md>d&&moonAt.normalize().dot(relative.normalize())>Math.sqrt(Math.max(0,1-r*r/(d*d))))continue;
             CompoundTag mb=new CompoundTag();mb.putInt("color",moon.getInt("color"));mb.putString("type","Barren");mb.putBoolean("landable",true);
             sphere(m,moonAt.scale(100/Math.max(1,md)),Math.min(r*.18,SpaceMath.radius(moon.getInt("radius"))*.5)*100/Math.max(1,md),mb,light,12,time,false,1);
+        }
+    }
+    private static void seams(Matrix4f m,Vec3 c,double r,float progress,int identity){
+        if(progress<.15)return;var b=Tesselator.getInstance().getBuilder();b.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_COLOR);
+        for(int path=0;path<7;path++)for(int i=0;i<18;i++){
+            double lat=-1.3+i*.14,lon=path*.9+Math.sin(i*1.9+identity+path)*.055,width=.002+progress*.012,nextLon=path*.9+Math.sin((i+1)*1.9+identity+path)*.055;
+            if(normal(lon,lat).dot(c.scale(-1).normalize())<0)continue;
+            vertex(b,m,c.add(normal(lon-width,lat).scale(r*1.012)),0xFF471A,1,progress);
+            vertex(b,m,c.add(normal(lon+width,lat).scale(r*1.012)),0xFFE48C,1,progress);
+            vertex(b,m,c.add(normal(nextLon+width,lat+.14).scale(r*1.012)),0xFF6E27,1,progress);
+            vertex(b,m,c.add(normal(nextLon-width,lat+.14).scale(r*1.012)),0xFF471A,1,progress);
+        }BufferUploader.drawWithShader(b.end());
+    }
+    private static void remnant(Matrix4f m,CompoundTag body,Vec3 camera,double time,com.dbzenith.network.DoomPacket.Body event){
+        Vec3 center=SpaceMath.center(body.getDouble("orbit"),body.getDouble("phase"));double r=SpaceMath.radius(body.getInt("radius"));
+        float age=event==null?1201:DoomClient.aftermath(event);
+        if(age<180){
+            Vec3 rel=center.subtract(camera);double d=Math.max(1,rel.length()),scale=100/d;Vec3 c=rel.scale(scale),view=rel.normalize(),side=view.cross(new Vec3(0,1,0)).normalize();if(side.lengthSqr()<.1)side=new Vec3(1,0,0);Vec3 up=view.cross(side).normalize();
+            var b=Tesselator.getInstance().getBuilder();b.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_COLOR);double rr=r*scale*(1+age*.045);
+            for(int i=0;i<96;i++){double a=i*Math.PI/48,aa=(i+1)*Math.PI/48;Vec3 n=side.scale(Math.cos(a)).add(up.scale(Math.sin(a))),nn=side.scale(Math.cos(aa)).add(up.scale(Math.sin(aa)));
+                vertex(b,m,c.add(n.scale(rr)),0xFFE3A8,1,1-age/180);vertex(b,m,c.add(n.scale(rr*1.08)),0xFF7A3C,1,0);vertex(b,m,c.add(nn.scale(rr*1.08)),0xFF7A3C,1,0);vertex(b,m,c.add(nn.scale(rr)),0xFFE3A8,1,1-age/180);
+            }BufferUploader.drawWithShader(b.end());
+            if(age<55){var flash=body.copy();flash.putBoolean("horizon",true);flash.putBoolean("detonation",true);flash.putInt("color",0xFFE3AF);sphere(m,c,r*scale*(1+age*.025),flash,new Vec3(0,1,0),24,time,false,(1-age/55)*com.dbzenith.config.DBZConfig.CLIENT.screenFlash.get().floatValue()*(com.dbzenith.client.fx.CameraFx.calm()?.18f:1));}
+        }
+        var identity=SpaceClient.system().getString("id")+"/"+body.getInt("index");
+        for(var f:Remnants.fragments(identity,body.getInt("index"),center,r)){
+            double expansion=Math.min(1,.12+age/90);Vec3 at=center.add(f.center().subtract(center).scale(expansion)).subtract(camera);double distance=Math.max(1,at.length());
+            var rock=new CompoundTag();rock.putString("type","Barren");rock.putInt("color",0x76615B);rock.putDouble("phase",Math.floorMod(f.seed(),3)/3d);
+            sphere(m,at.scale(100/distance),(f.radius()+Math.max(0,r*.065-f.radius())*Math.min(1,Math.max(0,(distance-200)/1800)))*100/distance,rock,new Vec3(.5,.7,.2),8,time,false,Math.min(1,age/25f));
         }
     }
     private static void sphere(Matrix4f m,Vec3 c,double r,CompoundTag b,Vec3 light,int segments,double time,boolean atmosphere,float alpha){
@@ -168,7 +202,7 @@ public final class SpaceSky {
                     else if(type.equals("Volcanic")&&Math.abs(feature)<.06)color=0xFF8A32;
                     else color=mix(base,feature>0?0xEEEEEE:0x1E2639,Math.abs(feature)*.22);
                 }
-                if(horizon){color=mix(0x5B98BC,base,Math.max(0,v.y));lit=1;a*=.65f;}
+                if(horizon){color=b.getBoolean("detonation")?0xFFF0C8:mix(0x5B98BC,base,Math.max(0,v.y));lit=1;a*=b.getBoolean("detonation")?.95f:.65f;}
                 if(vertexColor)vertex(buffer,m,c.add(v.scale(r)),color,lit,a);
                 else {Vec3 at=c.add(v.scale(r));double u=(lon+(corner>=2?dl:0))/(Math.PI*2)+time/(clouds?160000:1200000d),vv=(lat+(corner==1||corner==2?dp:0))/Math.PI+.5;
                     buffer.vertex(m,(float)at.x,(float)at.y,(float)at.z).uv((float)u,(float)vv).color(lit,lit,lit,a).endVertex();}corner++;

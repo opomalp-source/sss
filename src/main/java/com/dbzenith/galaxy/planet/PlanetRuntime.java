@@ -71,7 +71,7 @@ public final class PlanetRuntime {
     }
     public static int loaded(MinecraftServer s){int n=0;for(var l:s.getAllLevels())if(procedural(l))n++;return n;}
     private static boolean pinned(ServerLevel l){
-        if(!l.players().isEmpty()||!l.getForcedChunks().isEmpty())return true;
+        if(!l.players().isEmpty()||!l.getForcedChunks().isEmpty()||restoration(l))return true;
         return state(l.getServer()).pending.values().stream().anyMatch(p->p.target.equals(l.dimension()));
     }
     private static GalaxyCatalog.Ref fromKey(ResourceKey<Level> dimension){
@@ -102,10 +102,15 @@ public final class PlanetRuntime {
         InfiniverseAPI.get().markDimensionForUnregistration(l.getServer(),l.dimension());return true;
     }
     /** Creation does not request any chunk; landing generation is asynchronous and separately ticketed. */
-    public static ServerLevel open(MinecraftServer server,GalaxyCatalog.Ref ref){
+    private static boolean restoration(ServerLevel l){var ref=fromKey(l.dimension());return ref!=null&&PlanetDestruction.restoring(l.getServer(),ref);}
+    public static ServerLevel openForRestoration(MinecraftServer server,GalaxyCatalog.Ref ref){
+        if(!PlanetDestruction.restoring(server,ref))throw new IllegalArgumentException("No restoration is active.");return open(server,ref,true);
+    }
+    public static ServerLevel open(MinecraftServer server,GalaxyCatalog.Ref ref){return open(server,ref,false);}
+    private static ServerLevel open(MinecraftServer server,GalaxyCatalog.Ref ref,boolean recovery){
         var data=GalaxyData.get(server);var descriptor=GalaxyCatalog.body(server.overworld().getSeed(),data.salt(),ref);
         if(!descriptor.kind().landable())throw new IllegalArgumentException("Gas giants have no solid landing surface. Upper-cloud travel arrives with space flight.");
-        var d=data.discovery(ref);if(d!=null&&d.destroyed()&&!d.restored())throw new IllegalArgumentException("That planet has been destroyed.");
+        var d=data.discovery(ref);if(!recovery&&(data.destroyed(ref)||PlanetDestruction.restoring(server,ref)))throw new IllegalArgumentException("That planet has been destroyed.");
         var old=legacy(ref);if(old!=null)return server.getLevel(old);
         var key=key(ref);var level=server.getLevel(key);if(level!=null)return level;
         if(loaded(server)>=PlanetConfig.MAX_LOADED.get())throw new IllegalArgumentException("All planet slots are occupied. Leave a planet and allow it to unload first.");
@@ -158,6 +163,7 @@ public final class PlanetRuntime {
         if(!reconnect&&data.isOnCooldown("space_travel",p.level().getGameTime())&&!p.isCreative()){p.displayClientMessage(Component.literal("Your Space Pod is recharging."),true);return false;}
         if(!reconnect&&!p.isCreative()&&legacy(ref)==null&&!GalaxyData.current(p).equals(ref.system())){p.displayClientMessage(Component.literal("Reach this star system by hyperspeed before landing."),true);return false;}
         try {
+            if(GalaxyData.get(p.server).destroyed(ref)||PlanetDestruction.restoring(p.server,ref))throw new IllegalArgumentException("This planet is sealed until restoration completes.");
             var legacy=legacy(ref);
             if(reconnect&&legacy!=null&&(checkpoint==null||!checkpoint.getBoolean("entry")&&!checkpoint.getBoolean("transmission"))){p.getPersistentData().remove(RETURN);return false;}
             if(legacy!=null&&!reconnect){
@@ -240,7 +246,7 @@ public final class PlanetRuntime {
         if(e.phase!=TickEvent.Phase.END)return;var server=net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();if(server==null)return;
         State s=state(server);long now=server.getTickCount();
         for(var it=s.pending.entrySet().iterator();it.hasNext();){var entry=it.next();Pending q=entry.getValue();ServerPlayer p=server.getPlayerList().getPlayer(entry.getKey());ServerLevel l=server.getLevel(q.target);
-            boolean cancel=p==null||l==null||now-q.start>600||!p.isAlive()||!p.level().dimension().equals(q.origin)||(q.checkpoint==null&&p.distanceToSqr(q.ox,q.oy,q.oz)>64);
+            boolean cancel=GalaxyData.get(server).destroyed(q.ref)||PlanetDestruction.restoring(server,q.ref)||p==null||l==null||now-q.start>600||!p.isAlive()||!p.level().dimension().equals(q.origin)||(q.checkpoint==null&&p.distanceToSqr(q.ox,q.oy,q.oz)>64);
             if(!cancel&&!q.ready.isDone())continue;
             boolean transmission=q.checkpoint!=null&&q.checkpoint.getBoolean("transmission");
             if(transmission&&(p==null||!com.dbzenith.galaxy.space.Interstellar.canTransmit(p)||p.distanceToSqr(q.ox,q.oy,q.oz)>4))cancel=true;

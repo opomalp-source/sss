@@ -67,7 +67,7 @@ public class DragonSpiritEntity extends Entity {
 
     /** Grants one wish to the summoner. Returns false if this dragon already granted it or the player is someone else. */
     public boolean grant(ServerPlayer player, Wish wish) {
-        if (granted || !isSummoner(player) || !wishes().contains(wish)) return false;
+        if (granted || !isSummoner(player) || !wishes().contains(wish) || !wish.canGrant(player)) return false;
         granted = true;
         wish.grant(player);
         if (set() == BallSet.BLACK_STAR && wish != Wish.LIFT_CURSE) DragonBalls.curse(player.server, player.level().getGameTime());

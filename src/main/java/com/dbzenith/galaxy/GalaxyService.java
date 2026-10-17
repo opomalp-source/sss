@@ -41,7 +41,7 @@ public final class GalaxyService {
                 if(entries.size()>=32) { more=true; break; }
                 var b=GalaxyCatalog.body(seed,data.salt(),ref);
                 CompoundTag t=new CompoundTag(); t.putString("id",ref.system().toString()); t.putInt("planet",ref.planet()); t.putString("name",name);
-                t.putString("type",GalaxyCatalog.label(b.kind())); t.putString("discoverer",e.getValue().discoverer()); t.putBoolean("destroyed",e.getValue().destroyed()); entries.add(t);
+                t.putString("type",GalaxyCatalog.label(b.kind())); t.putString("discoverer",e.getValue().discoverer()); t.putBoolean("destroyed",data.destroyed(ref)); entries.add(t);
             }
             out.putBoolean("more",more); out.putInt("cursor",cursor); out.putString("query",query);
         }
@@ -73,9 +73,9 @@ public final class GalaxyService {
             body.putDouble("gravity",b.gravity());body.putString("atmosphere",GalaxyCatalog.label(b.atmosphere()));body.putInt("temperature",b.temperature());
             if(s.id().equals(IconicSystems.VEGETA)&&b.index()==0)body.putInt("color",0xB54B3B);
             body.putInt("day",b.dayTicks());body.putDouble("tilt",b.tilt());body.putBoolean("rings",b.rings());body.putDouble("orbit",b.orbit());body.putDouble("phase",b.phase());
-            body.putBoolean("landable",b.kind().landable());body.putString("palette",b.kind().palette);body.putString("hazard",b.hazard());
+            body.putBoolean("landable",b.kind().landable()&&!data.destroyed(ref));body.putString("palette",b.kind().palette);body.putString("hazard",b.hazard());
             body.putString("landmark",b.landmark());body.putString("population",b.population());body.putBoolean("known",d!=null);
-            body.putString("discoverer",d==null?"":d.discoverer()); body.putBoolean("destroyed",d!=null && d.destroyed());
+            body.putString("discoverer",d==null?"":d.discoverer()); body.putBoolean("destroyed",data.destroyed(ref));
             ListTag moons=new ListTag();
             for(var moon:b.moons()) {
                 CompoundTag m=new CompoundTag();m.putString("name",moon.name());m.putInt("color",moon.kind().color);m.putInt("radius",moon.radius());

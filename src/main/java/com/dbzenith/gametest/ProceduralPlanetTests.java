@@ -125,7 +125,7 @@ public final class ProceduralPlanetTests {
     @GameTest(template="empty",batch="procedural_caps",timeoutTicks=80) public static void runtimePlanetCapAndGasGiantAreEnforced(GameTestHelper h){
         var s=h.getLevel().getServer();int limit=PlanetConfig.MAX_LOADED.get();List<ServerLevel> created=new ArrayList<>();
         try{
-            int attempt=0;while(created.size()<limit){var ref=new GalaxyCatalog.Ref(new GalaxyCatalog.Id(400+attempt++,3,9,2),0);var b=GalaxyCatalog.body(s.overworld().getSeed(),GalaxyData.get(s).salt(),ref);if(!b.kind().landable())continue;created.add(PlanetRuntime.open(s,ref));}
+            int attempt=0;while(PlanetRuntime.loaded(s)<limit){var ref=new GalaxyCatalog.Ref(new GalaxyCatalog.Id(400+attempt++,3,9,2),0);var b=GalaxyCatalog.body(s.overworld().getSeed(),GalaxyData.get(s).salt(),ref);if(!b.kind().landable())continue;created.add(PlanetRuntime.open(s,ref));}
             boolean cap=false;try{PlanetRuntime.open(s,find(s,GalaxyCatalog.Kind.ICE));}catch(IllegalArgumentException ex){cap=true;}
             h.assertTrue(cap&&PlanetRuntime.loaded(s)<=limit,"hard active-world cap");
             boolean gas=false;try{PlanetRuntime.open(s,find(s,GalaxyCatalog.Kind.GAS_GIANT));}catch(IllegalArgumentException ex){gas=true;}

@@ -53,6 +53,9 @@ public final class Destruction {
             Map.entry(Blocks.ICE, Blocks.AIR), Map.entry(Blocks.GRAVEL, Blocks.GRAVEL));
 
     private Destruction() {}
+    private static boolean internalPlace;
+    public static boolean internalPlacement(){return internalPlace;}
+    private static boolean sealed(ServerLevel l){var ref=com.dbzenith.galaxy.space.SpaceRuntime.surfaceRef(l);return ref!=null&&(com.dbzenith.galaxy.GalaxyData.get(l.getServer()).destroyed(ref)||com.dbzenith.galaxy.planet.PlanetDestruction.restoring(l.getServer(),ref));}
 
     /** The bowl's radius (blocks) for a force: about 1 at the digging threshold, 6 at full force. */
     public static double radius(double force) {
@@ -74,12 +77,14 @@ public final class Destruction {
     /** A ki attack striking something: the same routine, but far bigger, with a scorched floor, a raised rim and debris. */
     public static int ki(ServerLevel level, Vec3 at, Vec3 normal, double force, Entity by) {
         if (!DBZConfig.SERVER.destructionKi.get()) return 0;
+        if(Double.isFinite(force)&&Double.isFinite(at.x+at.y+at.z+normal.x+normal.y+normal.z)&&level.hasChunkAt(BlockPos.containing(at))&&!isProtected(level,at))com.dbzenith.galaxy.planet.PlanetDestruction.attack(level,at,force,by);
         return crater(level, at, normal, force, by, true, true);
     }
 
     /** A beam held on something, carving into it as it goes: as big, but no lip or flung debris (it would pile up). */
     public static int kiCarve(ServerLevel level, Vec3 at, Vec3 normal, double force, Entity by) {
         if (!DBZConfig.SERVER.destructionKi.get()) return 0;
+        if(Double.isFinite(force)&&Double.isFinite(at.x+at.y+at.z+normal.x+normal.y+normal.z)&&level.hasChunkAt(BlockPos.containing(at))&&!isProtected(level,at))com.dbzenith.galaxy.planet.PlanetDestruction.attack(level,at,force,by);
         return crater(level, at, normal, force, by, true, false);
     }
 
@@ -97,7 +102,7 @@ public final class Destruction {
     private static int crater(ServerLevel level, Vec3 at, Vec3 normal, double force, Entity by, boolean ki, boolean extras) {
         var c=DBZConfig.SERVER;
         if(!Double.isFinite(force)||!Double.isFinite(at.x+at.y+at.z+normal.x+normal.y+normal.z)
-            ||!c.destructionEnabled.get()||force<CRACK_FORCE||isProtected(level,at)
+            ||sealed(level)||!c.destructionEnabled.get()||force<CRACK_FORCE||isProtected(level,at)
             ||!level.hasChunkAt(BlockPos.containing(at))||!(by instanceof Player)&&!level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING))return 0;
         int cap=ki?c.kiCraterMaxBlocks.get():c.destructionMaxBlocks.get();if(cap==0)return 0;
         double r=ki?kiRadius(force):radius(force);
@@ -162,7 +167,7 @@ public final class Destruction {
         boolean done(){return stage==4;}
         boolean valid(){
             var c=DBZConfig.SERVER;
-            return level.getServer().getLevel(level.dimension())==level&&c.destructionEnabled.get()&&(!ki||c.destructionKi.get())
+            return !sealed(level)&&level.getServer().getLevel(level.dimension())==level&&c.destructionEnabled.get()&&(!ki||c.destructionKi.get())
                 &&(blame==null?level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING):level.getServer().getPlayerList().getPlayer(blame.getUUID())==blame);
         }
         boolean available(BlockPos p){return level.isInWorldBounds(p)&&level.getWorldBorder().isWithinBounds(p)&&level.hasChunkAt(p)&&!isProtected(level,Vec3.atCenterOf(p));}
@@ -175,7 +180,8 @@ public final class Destruction {
             if(b.writes<=0||edits>=cap*2||retained+pendingEdits+needed>DBZConfig.SERVER.craterMaxRegrowth.get()||!available(p))return false;
             if(blame!=null){
                 if(place){
-                    if(MinecraftForge.EVENT_BUS.post(new BlockEvent.EntityPlaceEvent(net.minecraftforge.common.util.BlockSnapshot.create(level.dimension(),level,p),level.getBlockState(p.below()),blame)))return false;
+                    internalPlace=true;
+                    try{if(MinecraftForge.EVENT_BUS.post(new BlockEvent.EntityPlaceEvent(net.minecraftforge.common.util.BlockSnapshot.create(level.dimension(),level,p),level.getBlockState(p.below()),blame)))return false;}finally{internalPlace=false;}
                 }else if(MinecraftForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level,p,from,blame)))return false;
             }
             // A protection listener may have replaced the block or introduced a block entity.
@@ -292,7 +298,7 @@ public final class Destruction {
             var batch=REGROW.peek();var g=batch.blocks.pollFirstEntry().getValue();
             if(batch.blocks.isEmpty())REGROW.remove();
             retained--;b.scans--;var l=g.level;
-            if(l.getServer().getLevel(l.dimension())!=l||!l.hasChunkAt(g.pos)||isProtected(l,Vec3.atCenterOf(g.pos))||!l.getWorldBorder().isWithinBounds(g.pos))continue;
+            if(sealed(l)||l.getServer().getLevel(l.dimension())!=l||!l.hasChunkAt(g.pos)||isProtected(l,Vec3.atCenterOf(g.pos))||!l.getWorldBorder().isWithinBounds(g.pos))continue;
             if(l.getBlockState(g.pos)==g.placed&&l.getBlockEntity(g.pos)==null&&l.setBlock(g.pos,g.was,Block.UPDATE_CLIENTS)){b.writes--;}
         }
         last=new WorkStats(scans-b.scans,writes-b.writes,128-b.notify,JOBS.size(),retained,retained+pendingEdits);

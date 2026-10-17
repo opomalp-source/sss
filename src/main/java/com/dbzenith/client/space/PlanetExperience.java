@@ -60,7 +60,8 @@ public final class PlanetExperience {
         for(Tag raw:bodies){var b=(CompoundTag)raw;double d=p.position().distanceTo(SpaceMath.center(b.getDouble("orbit"),b.getDouble("phase")))-SpaceMath.radius(b.getInt("radius"));if(d<best){best=d;nearest=b;}}
         if(nearest==null)return;int x=Math.max(w/2+18,w-190),y=30,color=0xFF80F3AC;
         String scan=valid()&&state.getInt("scanBody")==nearest.getInt("index")?(state.getBoolean("scanLoaded")?state.getInt("scanCount")+" signals / max "+state.getLong("scanPower"):"Surface unscanned"):"Scanning...";
-        String[] lines={nearest.getString("name"),String.format(java.util.Locale.ROOT,"%,.0f m  /  %s",Math.max(0,best),nearest.getString("type")),String.format(java.util.Locale.ROOT,"%.2fg / %s",nearest.getDouble("gravity"),nearest.getString("atmosphere")),scan};
+        boolean destroyed=nearest.getBoolean("destroyed");
+        String[] lines=destroyed?new String[]{nearest.getString("name"),"DESTROYED / debris remnant","0g / vacuum","Surface sealed until restored"}:new String[]{nearest.getString("name"),String.format(java.util.Locale.ROOT,"%,.0f m  /  %s",Math.max(0,best),nearest.getString("type")),String.format(java.util.Locale.ROOT,"%.2fg / %s",nearest.getDouble("gravity"),nearest.getString("atmosphere")),scan};
         g.fill(x-6,y-5,w-6,y+46,0xA008201C);for(int i=0;i<lines.length;i++)g.drawString(mc.font,mc.font.plainSubstrByWidth(lines[i],w-x-12),x,y+i*11,color,false);
         if(valid()&&state.getBoolean("localWaypoint")){
             String ref=state.getString("waypoint");try{int index=Integer.parseInt(ref.substring(ref.lastIndexOf('/')+1));if(index<bodies.size()){

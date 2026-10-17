@@ -35,6 +35,12 @@ public final class GalaxyData extends SavedData {
     public long salt() { requireSupported(); return salt; }
     public Map<GalaxyCatalog.Ref,Discovery> discoveries() { return Collections.unmodifiableMap(discoveries); }
     public Discovery discovery(GalaxyCatalog.Ref ref) { return discoveries.get(ref); }
+    public boolean destroyed(GalaxyCatalog.Ref ref){var d=discovery(ref);return d!=null&&d.destroyed&&!d.restored;}
+    public void base(GalaxyCatalog.Ref ref,boolean value){var d=discovery(ref);if(d==null)return;discoveries.put(ref,new Discovery(d.owner,d.discoverer,d.tick,d.name,d.destroyed,d.restored,value,d.snapshot,d.catalogName));setDirty();}
+    public void destruction(GalaxyCatalog.Ref ref,boolean destroyed,boolean restored,String snapshot){
+        var d=discovery(ref);if(d==null)return;
+        discoveries.put(ref,new Discovery(d.owner,d.discoverer,d.tick,d.name,destroyed,restored,d.base,snapshot,d.catalogName));setDirty();
+    }
     public GalaxyCatalog.Ref waypoint(UUID player) { return waypoints.get(player); }
     public void waypoint(UUID player,GalaxyCatalog.Ref ref) {
         if(ref==null) waypoints.remove(player); else waypoints.put(player,ref);

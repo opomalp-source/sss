@@ -146,7 +146,7 @@ public final class GalaxyScreen extends Screen {
             var b=bodies.getCompound(i);double r=(i+1.7)*unit;
             ellipse(g,r,0xFF1B3547);
             double phase=b.getDouble("phase");double[] at=project(Math.cos(phase)*r,0,Math.sin(phase)*r);
-            int color=b.getInt("color");sphere(g,(int)at[0],(int)at[1],b.getString("type").equals("Gas giant")?6:4,color,b.getBoolean("rings"));
+            int color=b.getBoolean("destroyed")?0xA77C67:b.getInt("color");sphere(g,(int)at[0],(int)at[1],b.getString("type").equals("Gas giant")?6:4,color,b.getBoolean("rings"));
             nodes.add(new Node((int)at[0],(int)at[1],8,center.toString(),i,b.getString("name"),color,b.getBoolean("known")));
             if(b.getBoolean("known")||distance(mx,my,at[0],at[1])<100)g.drawString(font,b.getString("name"),(int)at[0]+7,(int)at[1]-5,TEXT,false);
         }
@@ -156,7 +156,9 @@ public final class GalaxyScreen extends Screen {
     }
     private void planet(GuiGraphics g,CompoundTag b){
         int x=mapX+mapW/2,y=mapY+mapH/2;int r=Math.max(3,(int)(Math.min(mapW,mapH)/4*zoom));
-        ring(g,x,y,r+4,0x244FAFD2);sphere(g,x,y,r,b.getInt("color"),b.getBoolean("rings"));
+        if(b.getBoolean("destroyed")){
+            for(int i=0;i<24;i++){double a=i*2.399963,d=r*(.25+(i%7)/8d);sphere(g,x+(int)(Math.cos(a)*d),y+(int)(Math.sin(a)*d*.6),Math.max(2,r/13),0xA77C67,false);}
+        }else{ring(g,x,y,r+4,0x244FAFD2);sphere(g,x,y,r,b.getInt("color"),b.getBoolean("rings"));}
         var moons=b.getList("moons",Tag.TAG_COMPOUND);
         for(int i=0;i<moons.size();i++){
             var m=moons.getCompound(i);double a=m.getDouble("phase"),rr=r+20+(i%2)*8;
@@ -164,7 +166,7 @@ public final class GalaxyScreen extends Screen {
             sphere(g,xx,yy,3,m.getInt("color"),false);
         }
         g.drawString(font,font.plainSubstrByWidth(b.getString("name"),mapW-16),mapX+8,mapY+25,GOLD,false);
-        g.drawString(font,b.getBoolean("landable")?"Land with a Space Pod":"Upper-cloud travel: next phase",mapX+8,mapY+mapH-14,DIM,false);
+        g.drawString(font,b.getBoolean("destroyed")?"Debris remnant / surface sealed":b.getBoolean("landable")?"Land with a Space Pod":"Upper clouds only",mapX+8,mapY+mapH-14,DIM,false);
     }
     private void results(GuiGraphics g,int mx,int my){
         var entries=data.getList("entries",Tag.TAG_COMPOUND);
@@ -184,7 +186,7 @@ public final class GalaxyScreen extends Screen {
             CompoundTag sys=data.getCompound("system");var bodies=sys.getList("bodies",Tag.TAG_COMPOUND);
             if(planet>=0 && planet<bodies.size()){
                 var b=bodies.getCompound(planet);heading=b.getString("name");
-                lines.add(b.getString("type")+(b.getBoolean("landable")?"":" / upper clouds only"));
+                lines.add(b.getBoolean("destroyed")?"DESTROYED / debris remnant":b.getString("type")+(b.getBoolean("landable")?"":" / upper clouds only"));
                 lines.add(String.format(Locale.ROOT,"Gravity %.2fg",b.getDouble("gravity")));lines.add("Air: "+b.getString("atmosphere"));
                 lines.add("Surface radius: "+b.getInt("radius")+" blocks");lines.add("Temperature: "+b.getInt("temperature")+" C");
                 lines.add(String.format(Locale.ROOT,"Day: %.0f min / tilt %.1f deg",b.getInt("day")/1200d,b.getDouble("tilt")));
