@@ -157,7 +157,7 @@ public final class SpaceRuntime {
                     if(PlanetRuntime.reenter(p,ref,surface[0],surface[1],entryVelocity))prepare(p);
                 }
             }
-            if(p.position().distanceTo(new Vec3(0,128,0))<950&&now%20==0&&!p.isCreative()){p.hurt(p.damageSources().onFire(),6);p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.BLINDNESS,50,0,false,false));}
+            for(int i=0;i<system.stars().size();i++)if(p.position().distanceTo(SpaceMath.star(i,system.stars().size()))<950&&now%20==0&&!p.isCreative()){p.hurt(p.damageSources().onFire(),6);p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.BLINDNESS,50,0,false,false));break;}
             if(now%100==0)checkpoint(p);
         }else if(p.getY()>=SpaceMath.ASCENT&&surfaceRef(p.serverLevel())!=null&&!pending(p)&&now>p.getPersistentData().getLong("dbzenithAscentRetry")){
             if(p.getAbilities().flying||p.getVehicle() instanceof SpacePodEntity pod&&pod.state()==SpacePodEntity.ORBIT_LAUNCH){if(!ascend(p)){p.getPersistentData().putLong("dbzenithAscentRetry",now+100);if(p.getVehicle() instanceof SpacePodEntity pod)pod.orbitRefused();}}

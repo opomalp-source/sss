@@ -41,6 +41,7 @@ public final class NeedsTests {
         for (int i = 0; i < 120; i++) Needs.tick(p, d);
         helper.assertTrue(d.getThirst() < 100, "thirst drains over time: " + d.getThirst());
         d.setThirst(10);
+        d.setTemperature(0); // isolate thirst from the test world's biome; temperature has its own assertions below
         helper.assertTrue(Needs.staminaRegenMultiplier(d) == 0.5, "thirsty fighters recover stamina slowly");
         ForgeEventFactory.onItemUseFinish(p, new ItemStack(Items.POTION), 0, new ItemStack(Items.GLASS_BOTTLE));
         helper.assertTrue(d.getThirst() == 50, "a water bottle quenches 40: " + d.getThirst());

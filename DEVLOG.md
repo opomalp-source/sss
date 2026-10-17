@@ -3990,3 +3990,35 @@ User approved the eight-phase immersive space design. This release is Phase 1 on
   clips. Profiling at1280x720, renderDistance7,60fps cap: space58-60fps after materials complete, planet60fps.
   Limited local smoke check; full profiling/LOD/balance is Phase8. Docs/TODO/HANDOFF/version updated, direct local
   install and main/tag push only. No updater/deploy. Planetary skies/weather/content/scouter are Phase4; story last.
+
+### v0.142.0 — Galaxy Phase 4: living planetary environments (2026-10-17)
+- Non-Earth rotating surface skies use the orbital system descriptors, day length and tilt, colored suns,
+  planetary disks, illuminated moon phases, solar occultation and equatorial ring arcs. Shared trinary-star
+  positions, ambient daylight floor and sky lightmap adjustment. Earth and its Great Ape moon contract retained.
+  Render-only orbital scale and diffuse lighting are approximations; vanilla server light/crop clocks unchanged.
+- Deterministic weather calendars: dust/acid/meteors/ion/cold/heat/quakes, gradual intensity, local bounded FX,
+  fog and an original storm sound mix. Server damage/ki drain/slowing respect roofs, existing protection, grace,
+  config and creative. Meteor warnings precede bounded loaded-area impacts without terrain damage.
+- Five original chunk-clipped landmark templates: broken ruins, crashed hulls, luminous crystal clusters,
+  remote master's shelters and abandoned outposts. Graded foundations, interior clearing and detail pieces;
+  only new chunks decorated. Existing terrain-v1 noise/catalogue output and player builds unchanged.
+  Existing inhabitants populate marked loaded sites once; sparse separate SavedData prevents restart duplicates.
+- Ground-contact discovery with persistent per-player first-landing title cards, ownership-safe naming via
+  /galaxy namehere and clickable suggestion. Old discovery owners and iconic names preserved.
+- Existing scouter gains orbital nearest-body environment, bounded loaded-surface signals with god ki omitted,
+  explicit unscanned state and current-system waypoint projection/direction arrow. Never loads a scanned world.
+  Protocol45, dimension-bound S2C activity updates every100 ticks. Separate weather/damage/inhabitant switches.
+- Added three GameTests for pure calendar/sky/eclipse contracts, persistent population claims, real generated
+  landmarks, ground-contact ownership and real roof shelter against ion-storm ki drain. Fixture cleans up
+  players/worlds and waits for deferred dimension retirement. Failed disposable test save backed up before a
+  fresh suite, retaining all user saves. Visual pass moved climate status out of the main HUD and improved
+  outpost/hull/crystal detail and landmark preview camera. All263 required GameTests passed. The older landing
+  fixture now explicitly simulates contact for embedded players; false-moon checks run in their own active arena
+  after distant entity ticks proved unreliable. A thirst-only assertion resets temperature so a cold fresh test
+  biome cannot add a second stamina penalty. Gameplay assertions retained. Planetary heat/cold also feed the
+  existing Needs temperature/stamina system; no parallel temperature meter. Landing discovery checks real
+  supporting collision as well as the movement ground flag; a forged airborne ground flag cannot claim a world.
+  Dev checks include Namek sky, rings/moons, dust/acid/ion visuals, first-landing card, existing inhabitants and
+  scouter unloaded/loaded readings (Earth2 signals/max1000), plus a persistent planet rename. Local capped
+  client smoke check remained59-60fps after materials finished; broad profiling remains Phase8.
+- README/TODO/HANDOFF/galaxy guide updated. Direct local install, no updater/deploy. Phase5 travel next; story last.

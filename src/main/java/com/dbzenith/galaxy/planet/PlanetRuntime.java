@@ -247,7 +247,8 @@ public final class PlanetRuntime {
                         com.dbzenith.galaxy.space.SpaceRuntime.scene(p,true,velocity);
                     }
                     if(q.checkpoint==null)ModCapabilities.getOrThrow(p).setCooldown("space_travel",l.getGameTime()+com.dbzenith.config.DBZConfig.SERVER.spacePodRechargeTicks.get());
-                    var d=GalaxyData.get(server);var body=body(l);if(body==null)body=GalaxyCatalog.body(server.overworld().getSeed(),d.salt(),q.ref);d.discover(q.ref,p.getUUID(),p.getGameProfile().getName(),server.overworld().getGameTime(),body.name());
+                    var d=GalaxyData.get(server);var body=body(l);if(body==null)body=GalaxyCatalog.body(server.overworld().getSeed(),d.salt(),q.ref);
+                    com.dbzenith.galaxy.space.SpaceRuntime.scene(p,false,p.getDeltaMovement());
                     s.used.put(l.dimension(),now);checkpoint(p);PlanetEnvironment.enter(p);
                     p.displayClientMessage(Component.literal("Landed on "+d.name(q.ref,body.name())),false);
                 }else p.displayClientMessage(Component.literal("Landing terrain was unavailable. You remain at your departure point."),false);

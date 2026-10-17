@@ -44,6 +44,7 @@ public final class ScouterOverlay implements IGuiOverlay {
         }
         float now = mc.level.getGameTime() + partialTick;
         lens(g, width, height, now);
+        com.dbzenith.client.space.PlanetExperience.scouter(g,width,height,partialTick);
 
         Font font = mc.font;
         long mine = powerOf(mc.player);

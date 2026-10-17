@@ -66,6 +66,13 @@ public final class Needs {
     /** -1 cold, 0 comfortable, 1 hot. */
     public static int temperatureAt(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
+        var planet=com.dbzenith.galaxy.planet.PlanetRuntime.body(level);
+        if(planet!=null){
+            if(com.dbzenith.galaxy.planet.PlanetActivity.protectedFromWeather(player))return 0;
+            var weather=com.dbzenith.galaxy.planet.PlanetActivity.weather(level,planet);
+            if(weather.hazard()==com.dbzenith.galaxy.planet.PlanetConditions.Hazard.COLD||planet.temperature()<=-50)return -1;
+            if(weather.hazard()==com.dbzenith.galaxy.planet.PlanetConditions.Hazard.HEAT||planet.temperature()>=50)return 1;
+        }
         if (level.dimensionType().ultraWarm()) return 1;
         BlockPos pos = player.blockPosition();
         float base = level.getBiome(pos).value().getBaseTemperature();

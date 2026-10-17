@@ -14,10 +14,22 @@ public final class GalaxyCommands {
     private GalaxyCommands() {}
     /** Public /galaxy. /dbz galaxy retains the existing admin command's permission. */
     public static void publicCommand(com.mojang.brigadier.CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("galaxy").executes(c->{GalaxyService.open(c.getSource().getPlayerOrException());return 1;}).then(nameCommand()).then(Commands.literal("home").executes(c->com.dbzenith.galaxy.planet.PlanetRuntime.home(c.getSource().getPlayerOrException())?1:0)));
+        dispatcher.register(Commands.literal("galaxy").executes(c->{GalaxyService.open(c.getSource().getPlayerOrException());return 1;}).then(nameCommand()).then(Commands.literal("namehere").then(Commands.argument("name",StringArgumentType.greedyString()).executes(c->{
+            var p=c.getSource().getPlayerOrException();var ref=com.dbzenith.galaxy.space.SpaceRuntime.surfaceRef(p.serverLevel());boolean ok=ref!=null&&GalaxyData.get(p.server).rename(ref,p.getUUID(),StringArgumentType.getString(c,"name"));
+            if(ok){com.dbzenith.galaxy.space.SpaceRuntime.scene(p,false,p.getDeltaMovement());c.getSource().sendSuccess(()->Component.literal("Planet named."),false);}else c.getSource().sendFailure(Component.literal("Only the first discoverer can name this planet. Use 2-32 letters, numbers, spaces, apostrophes, dots or hyphens."));return ok?1:0;
+        }))).then(Commands.literal("home").executes(c->com.dbzenith.galaxy.planet.PlanetRuntime.home(c.getSource().getPlayerOrException())?1:0)));
     }
     public static LiteralArgumentBuilder<CommandSourceStack> branch() {
         return Commands.literal("galaxy").executes(c->{GalaxyService.open(c.getSource().getPlayerOrException());return 1;})
+            .then(Commands.literal("weather").then(Commands.argument("hazard",StringArgumentType.word()).then(Commands.argument("players",EntityArgument.players()).executes(c->{
+                try{var hazard=com.dbzenith.galaxy.planet.PlanetConditions.Hazard.valueOf(StringArgumentType.getString(c,"hazard").toUpperCase(java.util.Locale.ROOT));for(var p:EntityArgument.getPlayers(c,"players")){com.dbzenith.galaxy.planet.PlanetActivity.preview(p.serverLevel(),hazard);com.dbzenith.network.ModNetwork.sendTo(p,new com.dbzenith.network.PlanetActivityPacket(com.dbzenith.galaxy.planet.PlanetActivity.status(p)));}return 1;}catch(IllegalArgumentException ex){return 0;}
+            }))))
+            .then(Commands.literal("landmark").then(Commands.argument("players",EntityArgument.players()).executes(c->{int found=0;for(var p:EntityArgument.getPlayers(c,"players")){
+                if(!(p.serverLevel().getChunkSource().getGenerator() instanceof com.dbzenith.galaxy.planet.PlanetGenerator g))continue;
+                com.dbzenith.galaxy.planet.PlanetLandmarks.Site best=null;double distance=Double.MAX_VALUE;
+                int cx=Math.floorDiv(p.getBlockX(),512),cz=Math.floorDiv(p.getBlockZ(),512);for(int x=cx-5;x<=cx+5;x++)for(int z=cz-5;z<=cz+5;z++){var s=com.dbzenith.galaxy.planet.PlanetLandmarks.site(g,x,z);if(s!=null){double d=p.distanceToSqr(s.x(),s.y(),s.z());if(d<distance){distance=d;best=s;}}}
+                if(best!=null){p.teleportTo(p.serverLevel(),best.x()+.5,best.y()+16,best.z()+18.5,180,35);found++;}
+            }return found;})))
             .then(Commands.literal("orbit").then(Commands.argument("players",EntityArgument.players()).executes(c->{int n=0;for(var p:EntityArgument.getPlayers(c,"players"))if(com.dbzenith.galaxy.space.SpaceRuntime.ascend(p))n++;return n;})))
             .then(Commands.literal("approach").then(Commands.argument("players",EntityArgument.players()).then(Commands.argument("planet",IntegerArgumentType.integer(0,8)).executes(c->{int n=0;for(var p:EntityArgument.getPlayers(c,"players"))if(com.dbzenith.galaxy.space.SpaceRuntime.approach(p,IntegerArgumentType.getInteger(c,"planet")))n++;return n;}))))
             .then(Commands.literal("map").then(Commands.argument("players",EntityArgument.players()).executes(c->{

@@ -318,7 +318,7 @@ to both mods folders.
   discovery SavedData, search, per-player waypoints, /galaxy and /dbz galaxy commands. Guide: docs/GALAXY.md.
 - [x] Phase 2 (v0.140.0) Runtime planets, parameterized chunk generator, physical gravity, atmosphere, sealed suits, caps and idle unload; saved builds and respawn/reconnect support
 - [x] Phase 3 (v0.141.0) Per-system orbital space instances, original lit/textured planet and cloud meshes, moons/rings/starfield, continuous ascent/re-entry with preloads/fades, zero-g inertia/ki thrust/braking, pod launch and quiet sound mix
-- [ ] Phase 4 Orbital skies, hazards/weather, landmarks/NPCs, landing discovery/naming, scouter HUD
+- [x] Phase 4 (v0.142.0) Orbital surface skies, hazards/weather/shelter, five clipped landmark templates and persistent NPC tables, ground-contact discovery/naming, orbital scouter scans and waypoint markers
 - [ ] Phase 5 Hyperspeed, cross-dimension Instant Transmission, iconic systems
 - [ ] Phase 6 Extend the existing protected/batched crater system
 - [ ] Phase 7 Planet destruction, orbital explosion, remnants, snapshots and Dragon Ball restoration

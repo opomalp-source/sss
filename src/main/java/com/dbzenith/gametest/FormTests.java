@@ -208,7 +208,7 @@ public final class FormTests {
         helper.succeed();
     }
 
-    @GameTest(template = EMPTY, timeoutTicks = 120)
+    @GameTest(template = EMPTY, batch = "false_moon", timeoutTicks = 120)
     public static void falseMoonTriggersGreatApe(GameTestHelper helper) {
         ServerPlayer saiyan = saiyan(helper, 0);
         PlayerData d = ModCapabilities.getOrThrow(saiyan);
@@ -216,7 +216,8 @@ public final class FormTests {
         PlayerData h = ModCapabilities.getOrThrow(human);
         float normalHeight = saiyan.getBbHeight();
         // Template-relative Y can be underground outside the test pad; use the actual surface height.
-        var anchor = net.minecraft.world.phys.Vec3.atBottomCenterOf(helper.absolutePos(new net.minecraft.core.BlockPos(200, 0, -200)));
+        // This isolated batch can use the actively ticking arena; embedded players do not activate distant entities.
+        var anchor = net.minecraft.world.phys.Vec3.atBottomCenterOf(helper.absolutePos(new net.minecraft.core.BlockPos(1, 0, 1)));
         int chunkX = net.minecraft.util.Mth.floor(anchor.x) >> 4, chunkZ = net.minecraft.util.Mth.floor(anchor.z) >> 4;
         helper.getLevel().setChunkForced(chunkX, chunkZ, true);
         helper.getLevel().getChunk(chunkX, chunkZ);                              // height queries on unloaded chunks report the world's minimum Y

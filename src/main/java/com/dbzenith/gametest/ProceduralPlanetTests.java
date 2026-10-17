@@ -93,7 +93,8 @@ public final class ProceduralPlanetTests {
     private static void pollLanding(GameTestHelper h,ServerPlayer p,ServerLevel level,GalaxyCatalog.Ref ref,int tries){Delays.after(h,5,()->{
         if(p.level()!=level){h.assertTrue(tries<120,"asynchronous landing completed");pollLanding(h,p,level,ref,tries+1);return;}
         h.assertTrue(!PlanetRuntime.unload(level),"occupied planets cannot unload");
-        h.assertTrue(GalaxyData.get(p.server).discovery(ref)!=null,"landing records discovery");
+        p.setOnGround(true);PlanetActivity.landing(p); // embedded players do not simulate ordinary ground contact
+        h.assertTrue(GalaxyData.get(p.server).discovery(ref)!=null,"grounded landing records discovery");
         BlockPos marker=new BlockPos(4,200,4);level.setBlock(marker,Blocks.OBSIDIAN.defaultBlockState(),3);
         for(int x=2;x<=6;x++)for(int z=1;z<=6;z++)if(x!=4||z!=4)level.setBlock(new BlockPos(x,200,z),Blocks.STONE.defaultBlockState(),3);
         var bed=Blocks.RED_BED.defaultBlockState().setValue(net.minecraft.world.level.block.BedBlock.FACING,Direction.SOUTH);

@@ -93,7 +93,7 @@ public final class KiSenseHud {
     }
 
     /** The screen angle (0 = straight ahead, clockwise) from the camera to a point. */
-    static float angleTo(Player me, Vec3 target, float partial) {
+    public static float angleTo(Player me, Vec3 target, float partial) {
         Vec3 rel = target.subtract(me.getPosition(partial));
         float yaw = me.getViewYRot(partial) * Mth.DEG_TO_RAD;
         double fwd = -rel.x * Mth.sin(yaw) + rel.z * Mth.cos(yaw), right = -rel.x * Mth.cos(yaw) - rel.z * Mth.sin(yaw);
@@ -101,7 +101,7 @@ public final class KiSenseHud {
     }
 
     /** A filled triangle pointing at {@code angle}. */
-    static void arrow(GuiGraphics g, float x, float y, float angle, float size, int color) {
+    public static void arrow(GuiGraphics g, float x, float y, float angle, float size, int color) {
         float s = Mth.sin(angle), c = Mth.cos(angle);
         float tx = x + s * size, ty = y - c * size;
         float lx = x - c * size * 0.6f - s * size * 0.5f, ly = y - s * size * 0.6f + c * size * 0.5f;
@@ -110,7 +110,7 @@ public final class KiSenseHud {
     }
 
     /** World to screen, or null when behind the camera. */
-    static Vec3 project(Minecraft mc, Vec3 world, int width, int height) {
+    public static Vec3 project(Minecraft mc, Vec3 world, int width, int height) {
         var camera = mc.gameRenderer.getMainCamera();
         Vec3 rel = world.subtract(camera.getPosition());
         org.joml.Vector3f v = new org.joml.Vector3f((float) rel.x, (float) rel.y, (float) rel.z);

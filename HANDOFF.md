@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.141.0, 2026-10-16)
+# Handoff: where Dragon Block Zenith stands (v0.142.0, 2026-10-17)
 
 ## The prompt to paste into a new session
 
@@ -155,3 +155,20 @@ Config dbzenith-planets.toml adds maxLoadedOrbits4 and orbitalTravel. Operator p
 <players> and /dbz galaxy approach <players> <planet index>. Guide: docs/GALAXY.md. Orbital vertical volume is
 bounded; interstellar travel is Phase5. Next: Phase4 authored orbital skies/weather/hazards, landmarks/NPC tables,
 cinematic landing discovery and scouter navigation. Story last. Direct install only; no updater/deploy.
+
+## Galaxy Phase 4 (v0.142.0, 2026-10-17)
+PlanetExperience/PlanetActivity add dimension-bound climate, landing cards and scouter data (protocol45).
+PlanetConditions is a pure seeded weather calendar; shelters, existing protection and grace prevent damage.
+Hazards never load remote chunks or edit blocks. Meteors have a40-tick warning and8-pending/world cap.
+PlanetLandmarks decorates only new chunks, five clipped block templates; terrain/catalogue-v1 output is stable.
+Loaded marked sites get existing NPCs once, recorded sparsely in separate SavedData; peaceful suppresses hostiles.
+Discovery waits for ground contact; prior ownership remains; /galaxy namehere and clickable first-owner prompt.
+Scouter uses loaded surface entities only, existing god-ki rules, nearest-body data and atlas waypoint projection.
+Non-Earth surface sky shares system geometry, day length/tilt, phases/eclipses, colored stars and ring arc.
+Trinary stars spread in a shared30k orbital triangle and diffuse light prevents full darkness. Sky lightmap
+adapts visually; vanilla server light/crop clocks remain intact. Earth/Great Ape moon remain vanilla.
+Three new GameTests cover calendar/projection/eclipse bounds, persistent site claims, real generated structure,
+ground-contact discovery and real roof protection against server ki drain. All263 required tests pass. The
+existing Needs system consumes planetary temperatures/protection; thirst fixture isolated from biome cold.
+False-moon fixture isolated into the active test arena; older landing fixture explicitly simulates ground contact.
+Next: Phase5 hyperspeed, cross-dimensional Instant Transmission and remaining iconic systems. Story last.

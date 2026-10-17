@@ -22,8 +22,8 @@ public final class SpaceAudio {
         if(e.phase!=TickEvent.Phase.END)return;var mc=Minecraft.getInstance();boolean space=mc.level!=null&&SpaceRuntime.isSpace(mc.level);
         if(mc.player==null){loops.clear();wasSpace=false;return;}
         if(space&&!wasSpace)mc.getSoundManager().stop(null,SoundSource.MUSIC);wasSpace=space;
-        if((space||SpaceClient.entryIntensity()>0)&&loops.stream().noneMatch(l->!l.isStopped())){
-            loops.clear();var sounds=List.of(ModSounds.SPACE_DRONE.get(),ModSounds.SPACE_BREATH.get(),ModSounds.SPACE_HEARTBEAT.get(),ModSounds.SPACE_ENTRY.get(),ModSounds.SPACE_MUSIC.get());
+        if((space||SpaceClient.entryIntensity()>0||PlanetExperience.weatherVolume()>0)&&loops.stream().noneMatch(l->!l.isStopped())){
+            loops.clear();var sounds=List.of(ModSounds.SPACE_DRONE.get(),ModSounds.SPACE_BREATH.get(),ModSounds.SPACE_HEARTBEAT.get(),ModSounds.SPACE_ENTRY.get(),ModSounds.SPACE_MUSIC.get(),ModSounds.SPACE_ENTRY.get());
             for(int i=0;i<sounds.size();i++){var loop=new Loop(sounds.get(i),i);loops.add(loop);mc.getSoundManager().play(loop);}
         }
     }
@@ -42,13 +42,13 @@ public final class SpaceAudio {
         @Override public boolean canStartSilent(){return true;}
         @Override public void tick(){
             var mc=Minecraft.getInstance();if(mc.level!=level||mc.player==null){stop();return;}
-            boolean space=SpaceRuntime.isSpace(level);float entry=SpaceClient.entryIntensity();if(!space&&entry<=0){stop();return;}
+            boolean space=SpaceRuntime.isSpace(level);float entry=SpaceClient.entryIntensity();if(!space&&entry<=0&&PlanetExperience.weatherVolume()<=0){stop();return;}
             double nearest=20000;for(var raw:SpaceClient.system().getList("bodies",net.minecraft.nbt.Tag.TAG_COMPOUND)){
                 var b=(net.minecraft.nbt.CompoundTag)raw;nearest=Math.min(nearest,mc.player.position().distanceTo(SpaceMath.center(b.getDouble("orbit"),b.getDouble("phase")))-SpaceMath.radius(b.getInt("radius")));
             }
             float swell=(float)Math.max(0,1-nearest/6000);boolean sealed=com.dbzenith.item.SpaceSuitItem.sealed(mc.player)||mc.player.isPassenger();
-            float target=switch(kind){case 0->space?.14f+swell*.10f:0;case 1->space&&sealed?.48f:0;case 2->space&&!mc.player.isCreative()?.14f:0;case 3->entry*.75f;default->space?.12f+swell*.2f:0;};
-            volume+=(target-volume)*.045f;pitch=kind==3?.8f+entry*.25f:1;
+            float target=switch(kind){case 0->space?.14f+swell*.10f:0;case 1->space&&sealed?.48f:0;case 2->space&&!mc.player.isCreative()?.14f:0;case 3->entry*.75f;case 5->PlanetExperience.weatherVolume();default->space?.12f+swell*.2f:0;};
+            volume+=(target-volume)*.045f;pitch=kind==5?.55f:kind==3?.8f+entry*.25f:1;
         }
     }
     private record Muffled(SoundInstance original,float gain,float tone) implements SoundInstance {

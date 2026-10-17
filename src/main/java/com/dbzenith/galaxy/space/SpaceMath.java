@@ -9,6 +9,10 @@ public final class SpaceMath {
     public static double radius(int surfaceRadius){return Math.max(80,Math.min(600,surfaceRadius/12d));}
     public static Vec3 center(double orbit,double phase){return new Vec3(Math.cos(phase)*orbit*6000,128,Math.sin(phase)*orbit*6000);}
     public static Vec3 center(GalaxyCatalog.Body b){return center(b.orbit(),b.phase());}
+    public static Vec3 star(int index,int count){
+        if(count==3){double a=index*Math.PI*2/3;return new Vec3(Math.cos(a)*30000,128,Math.sin(a)*30000);}
+        return new Vec3((index-(count-1)*.5)*650,128,0);
+    }
     public static Vec3 normal(double x,double z,int radius){
         double longitude=Math.max(-.999,Math.min(.999,x/radius))*Math.PI,latitude=Math.max(-.999,Math.min(.999,z/radius))*Math.PI/2;
         return new Vec3(Math.sin(longitude)*Math.cos(latitude),Math.cos(longitude)*Math.cos(latitude),Math.sin(latitude));

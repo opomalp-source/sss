@@ -64,7 +64,7 @@ public final class PlanetGenerator extends ChunkGenerator {
         for(int i=0;i<column.length;i++)column[i]=terrain.columnBlock(x,level.getMinBuildHeight()+i,z,h);
         return new NoiseColumn(level.getMinBuildHeight(),column);
     }
-    @Override public void buildSurface(WorldGenRegion level,StructureManager structures,RandomState random,ChunkAccess chunk){}
+    @Override public void buildSurface(WorldGenRegion level,StructureManager structures,RandomState random,ChunkAccess chunk){PlanetLandmarks.decorate(this,chunk);}
     @Override public void applyCarvers(WorldGenRegion level,long seed,RandomState random,BiomeManager biomes,StructureManager structures,ChunkAccess chunk,GenerationStep.Carving step){}
     @Override public void spawnOriginalMobs(WorldGenRegion level){}
     @Override public void addDebugScreenInfo(List<String> lines,RandomState random,BlockPos pos){lines.add("Zenith planet "+ref.key()+" / terrain v1");}

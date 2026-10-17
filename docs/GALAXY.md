@@ -193,3 +193,47 @@ and is drawn as a VBO; rendering allocates no planet dimensions or chunks. Final
 Operator previews: `/dbz galaxy orbit <players>` leaves the current supported planet, and
 `/dbz galaxy approach <players> <planet index>` frames a body's daylight side without creating its surface.
 These are operator tools, not player interstellar travel. `/galaxy home` remains the transport-based Earth return.
+
+## Phase 4 — living planets (v0.142.0)
+
+Non-Earth surface skies project the orbital system through a rotating frame using the catalogue day length,
+axial tilt and position. Stars retain their catalogue color/size; other planets and orbiting moons use the same
+compressed orbital geometry as space. Moon illumination produces phases; aligned moons occlude solar disks.
+Ringed worlds have a translucent equatorial sky arc. Three-star systems use widely separated barycentric
+positions shared by both renderers and a diffuse daylight floor. These are stylized render distances, not an
+astronomical simulation. Sky-lightmap adaptation affects presentation; vanilla server lighting, crop rules and
+save clocks retain their behavior. Earth retains its vanilla Sun/Moon and Great Ape gaze contract.
+
+Procedural planets have a deterministic 9600-tick weather calendar, including 1800-tick events with gentle
+onset/decay. Archetypes select dust, acid, meteors, ion storms, cold or quakes; hot/cold worlds retain a thermal
+hazard between events. Heat/cold feed the existing Needs temperature and stamina-recovery system. Dust slows
+exposed players, acid/temperature hurt, and ion storms drain ki. Roofs, the
+existing sealed suit/pod/barrier/vacuum adaptations and landing grace protect. Weather has bounded local
+particles, fog and a quiet original storm mix; quakes respect the cinematic-camera setting. Meteors warn for
+40 ticks, then affect a small loaded area without terrain griefing; at most eight impacts are pending per world.
+No climate work requests a new chunk. Config: `planetWeather`, `weatherDamage`, `landmarkInhabitants`.
+
+Newly generated procedural chunks can contain rare ruins, crashed ships, crystal clusters, master's shelters
+and abandoned outposts, on seeded 512-block cells. Each piece is clipped to its own chunk and graded onto the
+terrain. Terrain-v1 noise and existing generated chunks/builds are unchanged; new decorative content appears
+only as new chunks reach the surface-generation stage. Asteroid/gas archetypes skip surface landmarks.
+Nearby loaded marked sites populate once, with existing wildlife, soldiers, Namekian settlers or a martial arts
+master. Sparse `dbzenith_planet_sites` SavedData prevents duplicate inhabitants after unload/restart; defeated
+inhabitants do not continually respawn. Peaceful difficulty suppresses hostile inhabitants.
+
+Discovery now waits for ground contact. A player's first landing shows the planet name, type, gravity and first
+discoverer. The first discoverer gets a clickable naming suggestion: `/galaxy namehere New Name`. Existing
+`/galaxy name "x:y:z:slot/planet" New Name` still works. Named iconic worlds remain protected; old discovery
+ownership is preserved. Individual landing-card flags survive reconnect/death through existing player data.
+
+Wear the existing Scouter in orbit for nearest-body type, distance, gravity, atmosphere and a surface signal
+summary. It scans only a currently loaded surface (bounded to 2048 entities), omits god ki via the existing
+scouter rules, and explicitly reports an unloaded surface as unscanned. This is a loaded-region reading, not
+a promise to detect entities in unloaded chunks. An atlas waypoint in the current system gets a projected
+marker or direction arrow. No distant world is loaded by scanning or setting a waypoint. Updates are server
+bound to the current dimension and sent every 100 ticks; protocol45 adds the small S2C activity packet.
+
+Operator checks: `/dbz galaxy weather dust <players>` (also clear/acid/meteors/ion/cold/heat/quake) previews a
+weather event for 1200 ticks; it is transient and does not change the calendar/save. `/dbz galaxy landmark
+<players>` previews the nearest candidate within five cells. Previously generated chunks can lack a candidate's
+new structure. Interstellar travel/Instant Transmission and the remaining iconic worlds are Phase5; story last.

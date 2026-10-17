@@ -61,7 +61,7 @@ public final class GalaxyData extends SavedData {
     private static void landed(ServerPlayer p) {
         String dim=p.level().dimension().location().toString();
         if(!Set.of("minecraft:overworld","dbzenith:namek","dbzenith:northern_planet","dbzenith:beerus_planet").contains(dim)) return;
-        get(p.server).discover(new GalaxyCatalog.Ref(current(p),0),p.getUUID(),p.getGameProfile().getName(),p.server.overworld().getGameTime(),GalaxyCatalog.body(p.server.overworld().getSeed(),get(p.server).salt(),new GalaxyCatalog.Ref(current(p),0)).name());
+        com.dbzenith.galaxy.planet.PlanetActivity.landing(p);
     }
     @SubscribeEvent public static void login(PlayerEvent.PlayerLoggedInEvent e) { if(e.getEntity() instanceof ServerPlayer p) landed(p); }
     @SubscribeEvent public static void travel(PlayerEvent.PlayerChangedDimensionEvent e) { if(e.getEntity() instanceof ServerPlayer p) landed(p); }

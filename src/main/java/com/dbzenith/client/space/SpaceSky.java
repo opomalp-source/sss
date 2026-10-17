@@ -36,11 +36,48 @@ public final class SpaceSky {
         @Override public boolean tickRain(ClientLevel l,int t,Camera c){return true;}
     }
     private static final class Ascent extends DimensionSpecialEffects.OverworldEffects {
+        @Override public void adjustLightmapColors(ClientLevel l,float pt,float dark,float flicker,float skyLight,int block,int sky,org.joml.Vector3f color){
+            if(l.dimension().equals(net.minecraft.world.level.Level.OVERWORLD)||SpaceClient.surfaceBody().isEmpty()||sky==0)return;
+            var b=SpaceClient.surfaceBody();var p=Minecraft.getInstance().player;if(p==null)return;
+            int count=SpaceClient.system().getList("starsDetail",Tag.TAG_COMPOUND).size();Vec3 sun=SpaceMath.star(0,count).subtract(SpaceMath.center(b.getDouble("orbit"),b.getDouble("phase")));
+            double daylight=PlanetSkyMath.daylight(PlanetSkyMath.local(sun,SpaceMath.normal(p.getX(),p.getZ(),b.getInt("radius")),(l.getGameTime()+pt)/Math.max(1,b.getInt("day"))).normalize().y,count);
+            float weight=sky/15f*(1-block/15f);color.mul(1-weight*(float)(1-daylight)*.75f);if(daylight>.4)color.lerp(new org.joml.Vector3f((float)daylight),weight*.55f);
+        }
         @Override public boolean renderSky(ClientLevel l,int t,float pt,PoseStack ps,Camera camera,Matrix4f projection,boolean foggy,Runnable setupFog){
+            if(SpaceClient.surface(l)&&!l.dimension().equals(net.minecraft.world.level.Level.OVERWORLD)&&!SpaceClient.surfaceBody().isEmpty()){surface(l,pt,ps,camera,projection);setupFog.run();return true;}
             if(!SpaceClient.surface(l)||camera.getPosition().y<=180)return false;
             render(l,pt,ps,camera,projection,(float)SpaceMath.atmosphere(camera.getPosition().y),false);setupFog.run();return true;
         }
-        @Override public boolean renderClouds(ClientLevel l,int t,float pt,PoseStack p,double x,double y,double z,Matrix4f m){return SpaceClient.surface(l)&&y>260;}
+        @Override public boolean renderClouds(ClientLevel l,int t,float pt,PoseStack p,double x,double y,double z,Matrix4f m){return SpaceClient.surface(l)&&(y>260||SpaceClient.surfaceBody().getString("atmosphere").equals("None"));}
+        @Override public boolean renderSnowAndRain(ClientLevel l,int t,float pt,LightTexture light,double x,double y,double z){return !l.dimension().equals(net.minecraft.world.level.Level.OVERWORLD)&&SpaceClient.surface(l);}
+        @Override public boolean tickRain(ClientLevel l,int t,Camera camera){return !l.dimension().equals(net.minecraft.world.level.Level.OVERWORLD)&&SpaceClient.surface(l);}
+    }
+    private static void surface(ClientLevel level,float pt,PoseStack ps,Camera camera,Matrix4f projection){
+        var b=SpaceClient.surfaceBody();var sys=SpaceClient.system();var suns=sys.getList("starsDetail",Tag.TAG_COMPOUND);if(suns.isEmpty())return;
+        Vec3 center=SpaceMath.center(b.getDouble("orbit"),b.getDouble("phase")),normal=SpaceMath.normal(camera.getPosition().x,camera.getPosition().z,b.getInt("radius"));
+        double tilt=Math.toRadians(b.getDouble("tilt"));normal=new Vec3(normal.x,normal.y*Math.cos(tilt)-normal.z*Math.sin(tilt),normal.y*Math.sin(tilt)+normal.z*Math.cos(tilt));
+        double turns=(level.getGameTime()+pt)/Math.max(1,b.getInt("day")),vacuum=b.getString("atmosphere").equals("None")?1:SpaceMath.atmosphere(camera.getPosition().y);
+        Vec3 primary=PlanetSkyMath.local(SpaceMath.star(0,suns.size()).subtract(center),normal,turns);double daylight=PlanetSkyMath.daylight(primary.normalize().y,suns.size());
+        RenderSystem.disableDepthTest();RenderSystem.depthMask(false);RenderSystem.disableCull();RenderSystem.enableBlend();RenderSystem.defaultBlendFunc();FogRenderer.setupNoFog();RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        Matrix4f m=ps.last().pose();var buffer=Tesselator.getInstance().getBuilder();
+        int skyColor=level.getBiome(camera.getBlockPosition()).value().getSkyColor();Vec3 sky=new Vec3((skyColor>>16&255)/255d,(skyColor>>8&255)/255d,(skyColor&255)/255d).scale(daylight*(1-vacuum));int rgb=((int)(sky.x*255)<<16)|((int)(sky.y*255)<<8)|(int)(sky.z*255);
+        buffer.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_COLOR);
+        for(int face=0;face<6;face++){Vec3 n=switch(face){case 0->new Vec3(1,0,0);case 1->new Vec3(-1,0,0);case 2->new Vec3(0,1,0);case 3->new Vec3(0,-1,0);case 4->new Vec3(0,0,1);default->new Vec3(0,0,-1);};Vec3 side=Math.abs(n.y)>.5?new Vec3(1,0,0):n.cross(new Vec3(0,1,0));quad(buffer,m,n.scale(190),side.scale(190),n.cross(side).scale(190),rgb,1);}
+        BufferUploader.drawWithShader(buffer.end());buildStars();RenderSystem.setShaderColor(1,1,1,(float)Math.max(vacuum,(1-daylight)*.8));stars.bind();stars.drawWithShader(m,projection,GameRenderer.getPositionColorShader());VertexBuffer.unbind();RenderSystem.setShaderColor(1,1,1,1);
+        var moons=b.getList("moons",Tag.TAG_COMPOUND);double radius=SpaceMath.radius(b.getInt("radius"));
+        for(int i=0;i<suns.size();i++){var star=suns.getCompound(i);Vec3 direction=SpaceMath.star(i,suns.size()).subtract(center);double size=Math.min(450,200*star.getDouble("radius")),cover=0;
+            for(int j=0;j<moons.size();j++){var moon=moons.getCompound(j);double phase=moon.getDouble("phase")+(level.getGameTime()+pt)*.000002/(j+1);Vec3 md=new Vec3(Math.cos(phase),Math.sin(phase)*.35,Math.sin(phase)).scale(radius*(2+j*.65));cover=Math.max(cover,PlanetSkyMath.eclipse(direction,size,md,Math.min(radius*.18,SpaceMath.radius(moon.getInt("radius"))*.5)));}
+            sun(m,PlanetSkyMath.local(direction,normal,turns),mix(star.getInt("color"),0x15141D,cover),size,pt);
+        }
+        for(Tag raw:sys.getList("bodies",Tag.TAG_COMPOUND)){var other=(CompoundTag)raw;if(other.getInt("index")==b.getInt("index"))continue;Vec3 rel=SpaceMath.center(other.getDouble("orbit"),other.getDouble("phase")).subtract(center);double d=rel.length();
+            sphere(m,PlanetSkyMath.local(rel,normal,turns).scale(100/d),SpaceMath.radius(other.getInt("radius"))*100/d,other,PlanetSkyMath.local(SpaceMath.star(0,suns.size()).subtract(SpaceMath.center(other.getDouble("orbit"),other.getDouble("phase"))),normal,turns).normalize(),16,level.getGameTime()+pt,false,1);}
+        for(int j=0;j<moons.size();j++){var moon=moons.getCompound(j);double phase=moon.getDouble("phase")+(level.getGameTime()+pt)*.000002/(j+1);Vec3 md=new Vec3(Math.cos(phase),Math.sin(phase)*.35,Math.sin(phase)).scale(radius*(2+j*.65));double d=md.length();
+            sphere(m,PlanetSkyMath.local(md,normal,turns).scale(100/d),Math.min(radius*.18,SpaceMath.radius(moon.getInt("radius"))*.5)*100/d,moon,primary.normalize(),24,level.getGameTime()+pt,false,1);}
+        if(b.getBoolean("rings")){ // translucent near-side arc of the planet's own equatorial ring
+            var ring=Tesselator.getInstance().getBuilder();ring.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_COLOR);
+            for(int i=0;i<96;i++){double a=i*Math.PI/48,aa=(i+1)*Math.PI/48;Vec3 n=new Vec3(Math.cos(a),.22,Math.sin(a)),nn=new Vec3(Math.cos(aa),.22,Math.sin(aa));vertex(ring,m,n.scale(140),0xB6ADA5,1,.26f);vertex(ring,m,n.add(0,.16,0).scale(140),0xD8CABC,1,.08f);vertex(ring,m,nn.add(0,.16,0).scale(140),0xD8CABC,1,.08f);vertex(ring,m,nn.scale(140),0xB6ADA5,1,.26f);}BufferUploader.drawWithShader(ring.end());
+        }
+        RenderSystem.disableBlend();RenderSystem.depthMask(true);RenderSystem.enableDepthTest();RenderSystem.enableCull();RenderSystem.setShaderColor(1,1,1,1);
     }
     private static void vertex(BufferBuilder b,Matrix4f m,Vec3 p,int rgb,float light,float alpha){b.vertex(m,(float)p.x,(float)p.y,(float)p.z).color(Math.min(1,((rgb>>16)&255)/255f*light),Math.min(1,((rgb>>8)&255)/255f*light),Math.min(1,(rgb&255)/255f*light),alpha).endVertex();}
     private static void quad(BufferBuilder b,Matrix4f m,Vec3 c,Vec3 a,Vec3 d,int color,float alpha){vertex(b,m,c.subtract(a).subtract(d),color,1,alpha);vertex(b,m,c.subtract(a).add(d),color,1,alpha);vertex(b,m,c.add(a).add(d),color,1,alpha);vertex(b,m,c.add(a).subtract(d),color,1,alpha);}
@@ -84,7 +121,7 @@ public final class SpaceSky {
             Vec3 cameraPos=camera.getPosition();var sys=SpaceClient.system();var bodies=sys.getList("bodies",Tag.TAG_COMPOUND);List<CompoundTag> sorted=new ArrayList<>();for(Tag t:bodies)sorted.add((CompoundTag)t);
             sorted.sort(Comparator.comparingDouble((CompoundTag b)->SpaceMath.center(b.getDouble("orbit"),b.getDouble("phase")).distanceToSqr(cameraPos)).reversed());
             for(var body:sorted)body(m,body,cameraPos,level.getGameTime()+pt);
-            var suns=sys.getList("starsDetail",Tag.TAG_COMPOUND);for(int i=0;i<suns.size();i++){var s=suns.getCompound(i);Vec3 offset=new Vec3((i-(suns.size()-1)*.5)*650,0,0);sun(m,STAR.add(offset).subtract(cameraPos),s.getInt("color"),Math.min(450,200*s.getDouble("radius")),pt);}
+            var suns=sys.getList("starsDetail",Tag.TAG_COMPOUND);for(int i=0;i<suns.size();i++){var s=suns.getCompound(i);sun(m,SpaceMath.star(i,suns.size()).subtract(cameraPos),s.getInt("color"),Math.min(450,200*s.getDouble("radius")),pt);}
         }else if(vacuum>.1){
             // A distant curved limb meets the real chunks below; close terrain always draws over this sky pass.
             var body=SpaceClient.surfaceBody().copy();if(body.isEmpty()){body.putInt("color",0x477EAA);body.putString("type","Temperate");body.putString("atmosphere","Breathable");}
@@ -97,7 +134,7 @@ public final class SpaceSky {
         Vec3 center=SpaceMath.center(b.getDouble("orbit"),b.getDouble("phase")),relative=center.subtract(camera);double d=Math.max(1,relative.length()),r=SpaceMath.radius(b.getInt("radius"));
         if(d<r*.98)return;double scale=100/d;Vec3 projected=relative.scale(scale);double radius=r*scale;
         int segments=radius>12?56:radius>3?32:radius>.5?16:8;
-        Vec3 light=STAR.subtract(center).normalize();
+        Vec3 light=SpaceMath.star(0,SpaceClient.system().getList("starsDetail",Tag.TAG_COMPOUND).size()).subtract(center).normalize();
         if(b.getBoolean("rings"))rings(m,projected,radius,relative.normalize(),false,b.getDouble("tilt"));
         sphere(m,projected,radius,b,light,segments,time,false,1);
         if(b.getString("type").equals("Temperate")||b.getString("type").equals("Ocean")||b.getString("type").equals("Jungle")){
