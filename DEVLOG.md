@@ -4055,3 +4055,34 @@ User approved the eight-phase immersive space design. This release is Phase 1 on
   a real Frieza Planet 79 -> Earth cast (250 ->210 ki, existing cooldown). The outpost's lodestone at y66
   and dry roof at y73 were checked in the dev world. Local capped scene smoke check stayed58-60fps;
   this is not a broad performance benchmark. Removed atlas subtitle overlap with Places at small GUI size.
+
+
+### v0.144.0 — Galaxy Phase 6: bounded living craters (2026-10-17)
+- Reused Destruction/ImpactFx and all existing ball, beam and clash callers. Replaced eager cubic planning,
+  sorting and unbounded finish passes with streaming outward shells and staged scorch/lip/reconciliation.
+  Every queued direct edit, including restoration, shares blocksPerTick; scansPerTick bounds candidates,
+  including air/protection skips. Round-robin jobs, queue/tracked-record caps, nearby impact coalescing.
+- Per-block safe zones, world border, loaded chunks, current hardness, fluids, inventories, Forge vetoes
+  and listener state rechecks. No chunk loads or idle-dimension pins. Owner/config/mob-griefing cancellation,
+  bounded cleanup and unload/stop disposal. Small melee craters keep their bounded immediate response.
+- Deferred neighbour/shape work (128/tick) and vanilla queued lighting, without force-flushing light internals.
+  Vanilla explosive terrain bypass removed; legacy explosion setting uses protected craters. Damage and
+  knockback retained, native damage blast power bounded16 and malformed values refused.
+- Sand/red sand melt to glass; exposed rock scorches to blackstone/basalt with sparse magma at high force.
+  Original client rubble cannot place blocks across claims; longer world-lit dust, quality-aware budgets.
+  Optional restoration coalesces original/expected states and preserves later player builds.
+- Added four GameTests covering real job/edit/inspection caps, partial safe-zone intersection, late bedrock,
+  inventory/Forge protection, actual glass floor, temporary restoration/player edits, malformed inputs and
+  legacy explosion bypass. Operator crater hit/status commands use the real pipeline. Protocol47.
+- Version/docs/README/TODO/HANDOFF updated. Final tests/devshot verification recorded below.
+- Final material variation uses seeded mixing instead of linear coordinate patterns. Sandy rims include melted
+  patches and stable terrain-matched rubble. The exact restoration regression caught loose sand migrating
+  during reconciliation; ki crack/rim replacements now stay stable, and the test also checks falling entities.
+  Restoration queues an ordered batch without copying all snapshots in a single finishing tick.
+- Final offline build and all270 required GameTests pass (phase144-tests4.log,50s), including every existing
+  galaxy/travel/combat test. build -x test succeeds. Native explosion bypass has its own regression test.
+- Final dev-client comparison checked with Crop.java: before/impact/settled bowl on Planet Vegeta, irregular
+  scorch, stable raised rubble, melted sandy rim and fading world-lit dust. Real Supernova cast also left
+  a finished crater through the same path. Live status returned jobs0/tracked0 after completion. Local capped
+  client smoke checks stayed59-60fps; broader performance profiling remains Phase8. README/guide explain
+  supported queued lighting and state-based session-local restoration. Direct local install, no updater.

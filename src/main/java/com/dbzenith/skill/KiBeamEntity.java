@@ -214,12 +214,12 @@ public class KiBeamEntity extends Entity {
         if (explosionPower > 0 && hitBlock && getOwner() != null) {
             Vec3 end = position().add(direction().scale(getLength()));
             if (level() instanceof net.minecraft.server.level.ServerLevel sl0) KiExplosion.blast(sl0, this, end.x, end.y, end.z, explosionPower);   // phase 6
-            if (destructive && level() instanceof net.minecraft.server.level.ServerLevel sl2) {     // the crater (CX-20)
+            if ((destructive || DBZConfig.SERVER.kiBlastsBreakBlocks.get()) && level() instanceof net.minecraft.server.level.ServerLevel sl2) {
                 com.dbzenith.combat.Destruction.ki(sl2, end, direction().scale(-1), 0.6 + explosionPower * 0.55, getOwner());
             }
             if (level() instanceof net.minecraft.server.level.ServerLevel sl) {
                 com.dbzenith.network.ImpactPacket.at(end, direction(), com.dbzenith.network.ImpactPacket.EXPLOSION, explosionPower, getColor(), getOwner().getId())
-                        .withFeel(destructive && DBZConfig.SERVER.destructionKi.get() ? com.dbzenith.network.ImpactPacket.DIGS : 0, -1).send(sl);
+                        .withFeel((destructive || DBZConfig.SERVER.kiBlastsBreakBlocks.get()) && DBZConfig.SERVER.destructionKi.get() ? com.dbzenith.network.ImpactPacket.DIGS : 0, -1).send(sl);
             }
         }
         discard();

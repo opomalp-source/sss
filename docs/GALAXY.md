@@ -285,3 +285,11 @@ Commands: `/galaxy jump "ref"`; operator `/dbz galaxy jump <players> "ref"` uses
 `hyperspeedTravel` can disable jumps. Requests use existing rate limits; protocol46 adds a small S2C journey
 clock/name packet. Personal destination data is bounded and requested explicitly, with no terrain seeds sent.
 Crater/destruction work is Phase6/7; full performance/balance polish is Phase8. Story last.
+
+
+## Phase 6 — craters (v0.144.0)
+
+Real ki crater terrain now streams across bounded scan/edit/reconciliation stages, with per-block protection,
+substrate-aware glass and hot rock, original lingering dust/rubble, safe optional restoration and no vanilla
+explosion terrain bypass. Existing ball, beam and clash systems use it automatically. See [Craters](CRATERS.md)
+for config limits, lifecycle tradeoffs and operator checks. Planet-level destruction is Phase7, polish Phase8.

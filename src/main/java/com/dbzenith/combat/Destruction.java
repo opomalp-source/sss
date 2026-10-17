@@ -5,9 +5,7 @@ import com.dbzenith.network.ImpactPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
@@ -91,245 +89,221 @@ public final class Destruction {
         return Math.min(DBZConfig.SERVER.kiCraterMaxRadius.get(), (0.9 + (force - DIG_FORCE) * 2.3) * DBZConfig.SERVER.kiCraterScale.get());
     }
 
-    /**
-     * Digs a crater at {@code at} into the surface facing {@code normal} (unit, pointing out of it). Returns the blocks
-     * removed. {@code by} is whoever caused it (a player is checked against protection; an NPC against mobGriefing).
-     */
+
+    /** Queued ki impacts return an accepted work estimate; small melee impacts return actual removals. */
     public static int crater(ServerLevel level, Vec3 at, Vec3 normal, double force, Entity by) {
         return crater(level, at, normal, force, by, false, false);
     }
-
     private static int crater(ServerLevel level, Vec3 at, Vec3 normal, double force, Entity by, boolean ki, boolean extras) {
-        DBZConfig.Server c = DBZConfig.SERVER;
-        if (!c.destructionEnabled.get() || force < CRACK_FORCE || isProtected(level, at)) return 0;
-        if (!(by instanceof Player) && !level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) return 0;
-        ServerPlayer blame = by instanceof ServerPlayer sp ? sp : null;
-        Vec3 n = normal.lengthSqr() < 1e-6 ? new Vec3(0, 1, 0) : normal.normalize();
-        double r = ki ? kiRadius(force) : radius(force), depth = r * 0.7, rim = r > 0 ? r * 1.45 + 0.6 : 1.3 + force;
-        double hard = hardnessLimit(force);
-        Vec3 centre = at.subtract(n.scale(r * 0.3));
-        int maxBlocks = ki ? c.kiCraterMaxBlocks.get() : c.destructionMaxBlocks.get();
-        int reach = (int) Math.ceil(rim) + 1;
-        BlockPos base = BlockPos.containing(centre);
-        long seed = base.asLong() * 31 + level.getGameTime();
-        List<long[]> dig = new ArrayList<>();                                  // {pos, distance squared}: dug from the middle outward
-        List<BlockPos> crack = new ArrayList<>();
-        for (int dx = -reach; dx <= reach; dx++) for (int dy = -reach; dy <= reach; dy++) for (int dz = -reach; dz <= reach; dz++) {
-            BlockPos pos = base.offset(dx, dy, dz);
-            BlockState state = level.getBlockState(pos);
-            if (state.isAir() || !state.getFluidState().isEmpty() || level.getBlockEntity(pos) != null) continue;
-            float hardness = state.getDestroySpeed(level, pos);
-            if (hardness < 0 || hardness > hard) continue;
-            Vec3 v = Vec3.atCenterOf(pos).subtract(centre);
-            double along = v.dot(n);
-            double lateral = v.subtract(n.scale(along)).length();
-            double jitter = 1 + 0.18 * (Mth.sin((float) (seed + pos.asLong() * 7919 % 1000)) );   // a ragged edge
-            boolean digs = r > 0 && Math.pow(lateral / r, 2) + Math.pow(along / depth, 2) <= jitter;
-            boolean cracks = !digs && Math.pow(lateral / rim, 2) + Math.pow(along / Math.max(1, depth * 1.4), 2) <= jitter
-                    && (Math.floorMod(pos.asLong() * 2654435761L + seed, 100) < 55);
-            if (digs || (cracks && state.canBeReplaced())) dig.add(new long[]{pos.asLong(), (long) (v.lengthSqr() * 16)});
-            else if (cracks) crack.add(pos);
+        var c=DBZConfig.SERVER;
+        if(!Double.isFinite(force)||!Double.isFinite(at.x+at.y+at.z+normal.x+normal.y+normal.z)
+            ||!c.destructionEnabled.get()||force<CRACK_FORCE||isProtected(level,at)
+            ||!level.hasChunkAt(BlockPos.containing(at))||!(by instanceof Player)&&!level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING))return 0;
+        int cap=ki?c.kiCraterMaxBlocks.get():c.destructionMaxBlocks.get();if(cap==0)return 0;
+        double r=ki?kiRadius(force):radius(force);
+        if(JOBS.size()>=c.craterMaxJobs.get())return 0;
+        var job=new Job(level,at,normal,force,by,ki,extras&&r>=3,cap);
+        if(ki){
+            if(JOBS.size()>=c.craterMaxJobs.get()||JOBS.stream().anyMatch(j->j.level==level&&j.owner==by&&j.centre.distanceToSqr(job.centre)<4))return 0;
+            JOBS.addLast(job);
+        }else{
+            var budget=new Budget(100000,Math.max(1,cap*2),128);
+            while(!job.done()&&budget.scans>0&&budget.writes>0){if(!job.step(budget))break;}
+            // Remaining neighbour reconciliation/restoration uses the same bounded queue as ki work.
+            if(!job.done())JOBS.addLast(job);else job.complete();
         }
-        dig.sort((a, b) -> Long.compare(a[1], b[1]));
-        if (dig.size() > maxBlocks) dig = new ArrayList<>(dig.subList(0, maxBlocks));
-        Job job = new Job(level, by, blame, dig, crack, seed, extras && r >= 3 ? n : null, centre, r);
-        int removed;
-        if (ki && r > 5) {                                                     // a big one is carved over a few ticks, outward
-            JOBS.add(job);
-            removed = dig.size();
-        } else {
-            removed = job.run(Integer.MAX_VALUE);
-            job.finish();
-        }
-        float size = (float) Math.max(0.6, r);                                 // its dust, debris and rumble on the clients (phase 6: no vanilla bang)
-        ImpactPacket.at(at, n, ImpactPacket.CRATER, size, 0xA08A6A, by == null ? -1 : by.getId()).send(level);
-        return removed;
+        ImpactPacket.at(at,job.normal,ImpactPacket.CRATER,(float)Math.max(.6,r),0xA08A6A,by==null?-1:by.getId())
+            .withFeel(c.craterDebris.get()?ImpactPacket.RUBBLE:0,0).send(level);
+        return ki?Math.min(cap,Math.max(1,(int)(r*r*r*2))):job.removed;
     }
 
-    // ------------------------------------------------------------------ carving (the ki attack rework, phase 6)
-
-    private static final List<Job> JOBS = new ArrayList<>();
-    /** What craters took, to grow back (when {@code regrowSeconds} is on). */
-    private static final List<Regrow> REGROW = new ArrayList<>();
-
-    private record Regrow(ServerLevel level, long pos, BlockState was, BlockState placed, long due) {}
-
-    /** One crater being carved: blocks dug from the middle outward, then its rim cracked, its floor scorched, its lip raised. */
+    private static final java.util.ArrayDeque<Job> JOBS=new java.util.ArrayDeque<>();
+    private record Regrow(ServerLevel level,BlockPos pos,BlockState was,BlockState placed,long due){}
+    private record Regrowth(ServerLevel level,java.util.NavigableMap<BlockPos,Regrow> blocks,long due){}
+    private static final java.util.PriorityQueue<Regrowth> REGROW=new java.util.PriorityQueue<>(java.util.Comparator.comparingLong(Regrowth::due));
+    private static int retained,pendingEdits;
+    public record WorkStats(int inspected,int changed,int notifications,int jobs,int regrowth,int tracked){}
+    private static WorkStats last=new WorkStats(0,0,0,0,0,0);
+    public static WorkStats work(){return last;}
+    private static final class Budget {
+        int scans,writes,notify;
+        Budget(int scans,int writes,int notify){this.scans=scans;this.writes=writes;this.notify=notify;}
+    }
+    /** Successive cube shells, each position once; no allocation or terrain scan when accepting an attack. */
+    private static final class Shell {
+        final BlockPos base;final int reach;int shell,face,i,j;
+        Shell(BlockPos base,int reach){this.base=base;this.reach=reach;}
+        BlockPos next(){
+            if(shell>reach)return null;
+            if(shell==0){shell=1;return base;}
+            int a=face<2?2*shell+1:2*shell-1,b=face<4?2*shell+1:2*shell-1;
+            int u=i-shell+(face<2?0:1),v=j-shell+(face<4?0:1);
+            BlockPos out=switch(face){
+                case 0->base.offset(-shell,u,v);case 1->base.offset(shell,u,v);
+                case 2->base.offset(u,-shell,v);case 3->base.offset(u,shell,v);
+                case 4->base.offset(u,v,-shell);default->base.offset(u,v,shell);};
+            if(++j==b){j=0;if(++i==a){i=0;if(++face==6){face=0;shell++;}}}return out;
+        }
+    }
     private static final class Job {
-        final ServerLevel level;
-        final Entity by;
-        final ServerPlayer blame;
-        final List<long[]> dig;
-        final List<BlockPos> crack;
-        final long seed;
-        final Vec3 extras, centre;                                              // extras: the normal, when it gets a floor, lip and debris
-        final double r;
-        final boolean regrow = DBZConfig.SERVER.craterRegrowSeconds.get() > 0;
-        final List<Regrow> taken = new ArrayList<>();
-        int next, removed, effects, debris;
-
-        Job(ServerLevel level, Entity by, ServerPlayer blame, List<long[]> dig, List<BlockPos> crack, long seed, Vec3 extras, Vec3 centre, double r) {
-            this.level = level;
-            this.by = by;
-            this.blame = blame;
-            this.dig = dig;
-            this.crack = crack;
-            this.seed = seed;
-            this.extras = extras;
-            this.centre = centre;
-            this.r = r;
+        final ServerLevel level;final Entity owner;final ServerPlayer blame;final boolean ki,extras,regrow;
+        final Vec3 centre,normal;final double r,depth,rim,force;final long seed;final int cap,reach;
+        final Shell shell;final List<BlockPos> dug=new ArrayList<>(),changed=new ArrayList<>();
+        final java.util.NavigableMap<BlockPos,Regrow> undo=new java.util.TreeMap<>(java.util.Comparator.comparingInt((BlockPos p)->p.getY()).thenComparingLong(p->p.asLong()));
+        final int regrowTicks=DBZConfig.SERVER.craterRegrowSeconds.get()*20;
+        int stage,index,removed,edits,effects,lx,lz,ly,pileLeft;boolean cancelled;BlockPos pileTop;BlockState pile;
+        Job(ServerLevel l,Vec3 at,Vec3 n,double force,Entity by,boolean ki,boolean extras,int cap){
+            level=l;owner=by;blame=by instanceof ServerPlayer p?p:null;this.force=force;this.ki=ki;this.extras=extras;this.cap=cap;
+            normal=n.lengthSqr()<1e-6?new Vec3(0,1,0):n.normalize();r=ki?kiRadius(force):radius(force);depth=r*.7;
+            rim=r>0?r*1.45+.6:1.3+force;centre=at.subtract(normal.scale(r*.3));reach=(int)Math.ceil(rim)+1;
+            shell=new Shell(BlockPos.containing(centre),reach);seed=BlockPos.containing(centre).asLong()*31+l.getGameTime();
+            regrow=DBZConfig.SERVER.craterRegrowSeconds.get()>0;lx=lz=-reach;ly=(int)centre.y+(int)Math.ceil(r);
         }
-
-        boolean done() {
-            return next >= dig.size();
+        boolean done(){return stage==4;}
+        boolean valid(){
+            var c=DBZConfig.SERVER;
+            return level.getServer().getLevel(level.dimension())==level&&c.destructionEnabled.get()&&(!ki||c.destructionKi.get())
+                &&(blame==null?level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING):level.getServer().getPlayerList().getPlayer(blame.getUUID())==blame);
         }
-
-        /** Digs up to {@code budget} blocks; returns how many went. */
-        int run(int budget) {
-            double drops = DBZConfig.SERVER.destructionDrops.get();
-            boolean fling = extras != null && !regrow && DBZConfig.SERVER.craterDebris.get();
-            int maxDebris = (int) Math.min(48, r * 2.5);
-            int went = 0;
-            while (next < dig.size() && went < budget) {
-                BlockPos pos = BlockPos.of(dig.get(next++)[0]);
-                BlockState state = level.getBlockState(pos);
-                if (state.isAir() || !state.getFluidState().isEmpty() || level.getBlockEntity(pos) != null) continue;
-                if (blame != null && MinecraftForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level, pos, state, blame))) continue;
-                if (drops > 0 && Math.floorMod(pos.asLong() * 40503L + seed, 1000) < drops * 1000) Block.dropResources(state, level, pos, null, by, ItemStack.EMPTY);
-                if (fling && debris < maxDebris && level.getBlockState(pos.above()).isAir() && Math.floorMod(pos.asLong() * 69069L + seed, 100) < 18) {
-                    Vec3 out = Vec3.atCenterOf(pos).subtract(centre).multiply(1, 0, 1);   // thrown up and out over the rim
-                    if (out.lengthSqr() < 1e-4) out = new Vec3(1, 0, 0);
-                    out = out.normalize();
-                    double sp = 0.35 + Math.floorMod(pos.asLong() * 31L + seed, 100) / 100.0 * 0.5;
-                    FallingBlockEntity fb = FallingBlockEntity.fall(level, pos, state);
-                    fb.setDeltaMovement(out.x * sp, 0.55 + sp * 0.6, out.z * sp);
-                    fb.dropItem = false;
-                    debris++;
-                } else {
-                    level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-                }
-                if (regrow) taken.add(new Regrow(level, pos.asLong(), state, null, 0));
-                removed++;
-                went++;
-                if (effects < 48 && (removed % 3 == 0 || r < 2)) {
-                    level.levelEvent(2001, pos, Block.getId(state));                                       // break particles and sound
-                    effects++;
-                }
-            }
-            return went;
+        boolean available(BlockPos p){return level.isInWorldBounds(p)&&level.getWorldBorder().isWithinBounds(p)&&level.hasChunkAt(p)&&!isProtected(level,Vec3.atCenterOf(p));}
+        boolean breakable(BlockPos p,BlockState s){
+            float h=s.getDestroySpeed(level,p);
+            return !s.isAir()&&s.getFluidState().isEmpty()&&!s.hasBlockEntity()&&h>=0&&h<=hardnessLimit(force);
         }
-
-        /** Done digging: the rim cracks; a ki crater's floor is scorched and its lip raised with what was thrown out. */
-        void finish() {
-            for (BlockPos pos : crack) {
-                BlockState state = level.getBlockState(pos);
-                Block to = CRACKED.get(state.getBlock());
-                if (to == null || to == state.getBlock()) continue;
-                if (blame != null && MinecraftForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level, pos, state, blame))) continue;
-                level.setBlock(pos, to.defaultBlockState(), 3);
-                if (regrow) taken.add(new Regrow(level, pos.asLong(), state, to.defaultBlockState(), 0));
+        boolean change(BlockPos p,BlockState from,BlockState to,Budget b,boolean place){
+            int needed=1+(regrow&&!undo.containsKey(p)?1:0);
+            if(b.writes<=0||edits>=cap*2||retained+pendingEdits+needed>DBZConfig.SERVER.craterMaxRegrowth.get()||!available(p))return false;
+            if(blame!=null){
+                if(place){
+                    if(MinecraftForge.EVENT_BUS.post(new BlockEvent.EntityPlaceEvent(net.minecraftforge.common.util.BlockSnapshot.create(level.dimension(),level,p),level.getBlockState(p.below()),blame)))return false;
+                }else if(MinecraftForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level,p,from,blame)))return false;
             }
-            if (extras != null) {
-                scorch();
-                if (extras.y > 0.6) lip();
-            }
-            if (regrow && !taken.isEmpty()) {
-                long due = level.getGameTime() + DBZConfig.SERVER.craterRegrowSeconds.get() * 20L;
-                taken.sort((a, b) -> Integer.compare(BlockPos.getY(a.pos), BlockPos.getY(b.pos)));   // it grows back from the bottom up
-                for (Regrow g : taken) REGROW.add(new Regrow(level, g.pos, g.was, g.placed, due));
-            }
+            // A protection listener may have replaced the block or introduced a block entity.
+            if(level.getBlockState(p)!=from||level.getBlockEntity(p)!=null)return false;
+            // Send chunk-batched client changes, queue vanilla light checks, defer neighbour/shape work.
+            if(!level.setBlock(p,to,Block.UPDATE_CLIENTS|Block.UPDATE_KNOWN_SHAPE))return false;
+            b.writes--;edits++;changed.add(p);pendingEdits++;
+            if(regrow){var old=undo.put(p,new Regrow(level,p,undo.containsKey(p)?undo.get(p).was:from,to,0));if(old==null)retained++;}
+            return true;
         }
-
-        /** The floor left burnt: blackstone, coarse earth and tuff where the energy struck, most at the middle. */
-        private void scorch() {
-            for (int i = 0; i < next; i++) {
-                BlockPos below = BlockPos.of(dig.get(i)[0]).below();
-                BlockState state = level.getBlockState(below);
-                if (state.isAir() || !CRACKED.containsKey(state.getBlock()) || !level.getBlockState(below.above()).isAir()) continue;
-                int roll = Math.floorMod(below.asLong() * 2246822519L + seed, 100);
-                double d = Vec3.atCenterOf(below).distanceTo(centre) / Math.max(1, r);
-                Block to = roll < 45 * (1.2 - d) ? Blocks.BLACKSTONE : roll < 70 ? Blocks.COARSE_DIRT : roll < 82 ? Blocks.TUFF : null;
-                if (to == null || to == state.getBlock()) continue;
-                if (blame != null && MinecraftForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level, below, state, blame))) continue;
-                level.setBlock(below, to.defaultBlockState(), 3);
-                if (regrow) taken.add(new Regrow(level, below.asLong(), state, to.defaultBlockState(), 0));
+        boolean step(Budget b){
+            if(stage==3){
+                if(index>=changed.size()){stage=4;return true;}
+                if(b.notify<=0)return false;b.scans--;b.notify--;
+                var p=changed.set(index++,null);pendingEdits--;
+                boolean loaded=true;for(int dx=-16;dx<=16;dx+=16)for(int dz=-16;dz<=16;dz+=16)loaded&=level.hasChunkAt(p.offset(dx,0,dz));
+                if(loaded&&available(p)){level.updateNeighborsAt(p,level.getBlockState(p).getBlock());level.getBlockState(p).updateNeighbourShapes(level,p,Block.UPDATE_CLIENTS);}
+                return true;
             }
+            b.scans--;
+            if(stage==0){
+                BlockPos p=shell.next();if(p==null){stage=extras?1:3;index=0;return true;}
+                Vec3 v=Vec3.atCenterOf(p).subtract(centre);double along=v.dot(normal),lat2=Math.max(0,v.lengthSqr()-along*along);
+                long sample=com.dbzenith.galaxy.GalaxyCatalog.mix(seed^p.asLong());
+                double jitter=.82+.36*(sample>>>11)*0x1.0p-53;
+                boolean dig=r>0&&lat2/(r*r)+along*along/(depth*depth)<=jitter;
+                boolean crack=!dig&&lat2/(rim*rim)+along*along/Math.pow(Math.max(1,depth*1.4),2)<=jitter&&Math.floorMod(sample,100)<55;
+                if(!dig&&!crack||!available(p))return true;
+                var s=level.getBlockState(p);if(!breakable(p,s))return true;
+                if(dig&&removed<cap||crack&&s.canBeReplaced()&&removed<cap){
+                    if(change(p,s,Blocks.AIR.defaultBlockState(),b,false)){
+                        removed++;if(extras)dug.add(p);
+                        double drops=DBZConfig.SERVER.destructionDrops.get();
+                        if(drops>0&&Math.floorMod(p.asLong()*40503L+seed,1000)<drops*1000)Block.dropResources(s,level,p,null,owner,ItemStack.EMPTY);
+                        if(effects<24&&removed%16==0){level.levelEvent(2001,p,Block.getId(s));effects++;}
+                    }
+                }else if(crack){
+                    var to=CRACKED.get(s.getBlock());
+                    if(extras&&force>=1.5&&Math.floorMod(sample>>>24,100)<40&&(s.is(Blocks.SAND)||s.is(Blocks.RED_SAND)||s.is(Blocks.SANDSTONE)||s.is(Blocks.RED_SANDSTONE)))to=thermal(s,force,0);
+                    if(ki&&to==Blocks.SAND)to=Blocks.SANDSTONE;
+                    if(ki&&to==Blocks.RED_SAND)to=Blocks.RED_SANDSTONE;
+                    if(ki&&to==Blocks.SNOW)to=Blocks.PACKED_ICE;
+                    if(to!=null&&to!=s.getBlock())change(p,s,to.defaultBlockState(),b,false);
+                }return true;
+            }
+            if(stage==1){
+                if(index>=dug.size()){dug.clear();stage=normal.y>.6?2:3;index=0;return true;}
+                var p=dug.get(index++).relative(net.minecraft.core.Direction.getNearest(normal.x,normal.y,normal.z).getOpposite());
+                if(!available(p))return true;var s=level.getBlockState(p);
+                var exposed=p.relative(net.minecraft.core.Direction.getNearest(normal.x,normal.y,normal.z));
+                if(!breakable(p,s)||!level.hasChunkAt(exposed)||!level.getBlockState(exposed).isAir())return true;
+                var to=thermal(s,force,(int)Math.floorMod(com.dbzenith.galaxy.GalaxyCatalog.mix(seed^p.asLong()),100));
+                if(to!=null&&to!=s.getBlock())change(p,s,to.defaultBlockState(),b,false);return true;
+            }
+            // Raised lip: a single column read or placement per step, no unbounded finish pass.
+            if(lx>reach){stage=3;index=0;return true;}
+            if(pileLeft>0){
+                var p=pileTop.above(pileLeft--);
+                if(available(p)&&level.getBlockState(p).isAir())change(p,Blocks.AIR.defaultBlockState(),pile,b,true);
+                if(pileLeft==0)nextColumn();return true;
+            }
+            double d=Math.sqrt(lx*lx+lz*lz)/Math.max(1,r);
+            if(d<.95||d>1.45||ly<(int)centre.y-(int)Math.ceil(r)){nextColumn();return true;}
+            var p=new BlockPos((int)Math.floor(centre.x)+lx,ly--,(int)Math.floor(centre.z)+lz);
+            if(!available(p)){nextColumn();return true;}var s=level.getBlockState(p);
+            if(!s.getFluidState().isEmpty()){nextColumn();return true;}
+            if(s.isSolid()&&level.getBlockState(p.above()).isAir()){
+                Block material=rubble(s);
+                if(!breakable(p,s)||material==null){nextColumn();return true;}
+                int count=(int)Math.round(Math.max(1,r*.13)*(1-Math.abs(d-1.12)/.33)*(.75+.5*Math.floorMod(com.dbzenith.galaxy.GalaxyCatalog.mix(seed^p.asLong()),100)/100d));
+                if(count<=0){nextColumn();return true;}
+                pileTop=p;pile=material.defaultBlockState();
+                pileLeft=count;
+            }return true;
         }
-
-        /** The lip: earth thrown out piled in a ring round the edge, highest just outside it, made of what the ground is. */
-        private void lip() {
-            int ring = (int) Math.ceil(r * 1.45);
-            BlockPos mid = BlockPos.containing(centre);
-            double peak = Math.max(1, r * 0.13);
-            for (int dx = -ring; dx <= ring; dx++) for (int dz = -ring; dz <= ring; dz++) {
-                double d = Math.sqrt(dx * dx + dz * dz) / r;
-                if (d < 0.95 || d > 1.45) continue;
-                double h = peak * (1 - Math.abs(d - 1.12) / 0.33) * (0.75 + 0.5 * Math.floorMod(mid.asLong() + dx * 341873128712L + dz * 132897987541L + seed, 100) / 100.0);
-                int blocks = (int) Math.round(h);
-                if (blocks <= 0) continue;
-                BlockPos top = surface(mid.getX() + dx, mid.getZ() + dz, mid.getY() + (int) Math.ceil(r), mid.getY() - (int) Math.ceil(r));
-                if (top == null) continue;
-                BlockState ground = level.getBlockState(top);
-                Block pile = ground.is(Blocks.GRASS_BLOCK) || ground.is(Blocks.DIRT) || ground.is(Blocks.PODZOL) || ground.is(Blocks.MYCELIUM) ? Blocks.DIRT
-                        : CRACKED.getOrDefault(ground.getBlock(), ground.getBlock());
-                if (pile == Blocks.AIR || pile == Blocks.ICE) pile = Blocks.COARSE_DIRT;
-                for (int k = 1; k <= blocks; k++) {
-                    BlockPos p = top.above(k);
-                    if (!level.getBlockState(p).isAir()) break;
-                    if (blame != null && MinecraftForge.EVENT_BUS.post(new BlockEvent.EntityPlaceEvent(net.minecraftforge.common.util.BlockSnapshot.create(level.dimension(), level, p),
-                            level.getBlockState(top), blame))) break;
-                    BlockState put = (k == blocks && pile == Blocks.DIRT ? Blocks.COARSE_DIRT : pile).defaultBlockState();
-                    level.setBlock(p, put, 3);
-                    if (regrow) taken.add(new Regrow(level, p.asLong(), Blocks.AIR.defaultBlockState(), put, 0));
-                }
-            }
-        }
-
-        /** The highest solid block of a column between two heights, or null. */
-        private BlockPos surface(int x, int z, int fromY, int toY) {
-            for (int y = fromY; y >= toY; y--) {
-                BlockPos p = new BlockPos(x, y, z);
-                BlockState s = level.getBlockState(p);
-                if (!s.getFluidState().isEmpty()) return null;
-                if (s.isSolid() && level.getBlockState(p.above()).isAir()) return p;
-            }
-            return null;
+        void nextColumn(){if(++lz>reach){lz=-reach;lx++;}ly=(int)centre.y+(int)Math.ceil(r);pileLeft=0;}
+        void complete(){
+            long due=level.getServer().getTickCount()+regrowTicks;
+            if(!undo.isEmpty())REGROW.add(new Regrowth(level,undo,due));
         }
     }
-
-    /** Each server tick: carve the big craters a little further, and grow back what is due. */
-    @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
-        int budget = DBZConfig.SERVER.craterBlocksPerTick.get();
-        while (!JOBS.isEmpty() && budget > 0) {
-            Job job = JOBS.get(0);
-            budget -= Math.max(1, job.run(budget));
-            if (job.done()) {
-                job.finish();
-                JOBS.remove(0);
-            }
+    private static Block rubble(BlockState s){
+        if(s.is(Blocks.SAND)||s.is(Blocks.SANDSTONE))return Blocks.SANDSTONE;
+        if(s.is(Blocks.RED_SAND)||s.is(Blocks.RED_SANDSTONE))return Blocks.RED_SANDSTONE;
+        if(s.is(Blocks.GRASS_BLOCK)||s.is(Blocks.DIRT)||s.is(Blocks.COARSE_DIRT)||s.is(Blocks.PODZOL)||s.is(Blocks.MYCELIUM)||s.is(Blocks.MUD))return Blocks.COARSE_DIRT;
+        if(s.is(Blocks.STONE)||s.is(Blocks.COBBLESTONE)||s.is(Blocks.ANDESITE))return Blocks.COBBLESTONE;
+        if(s.is(Blocks.BLACKSTONE)||s.is(Blocks.BASALT)||s.is(Blocks.TUFF))return s.getBlock();
+        if(s.is(Blocks.SNOW)||s.is(Blocks.SNOW_BLOCK)||s.is(Blocks.ICE))return Blocks.PACKED_ICE;
+        var block=CRACKED.get(s.getBlock());return block==Blocks.SAND||block==Blocks.RED_SAND||block==Blocks.AIR?null:block;
+    }
+    /** Materials are selected from the struck substrate, not randomly substituted into player builds. */
+    public static Block thermal(BlockState s,double force,int roll){
+        if(s.is(Blocks.SAND)||s.is(Blocks.SANDSTONE))return force>=1.5?Blocks.GLASS:Blocks.SANDSTONE;
+        if(s.is(Blocks.RED_SAND)||s.is(Blocks.RED_SANDSTONE))return force>=1.5?Blocks.ORANGE_STAINED_GLASS:Blocks.RED_SANDSTONE;
+        if(s.is(Blocks.STONE)||s.is(Blocks.COBBLESTONE)||s.is(Blocks.DEEPSLATE)||s.is(Blocks.COBBLED_DEEPSLATE)||s.is(Blocks.TUFF)||s.is(Blocks.BASALT)||s.is(Blocks.BLACKSTONE))
+            return force>=2.5&&roll<14?Blocks.MAGMA_BLOCK:roll<60?Blocks.BLACKSTONE:Blocks.BASALT;
+        if(s.is(Blocks.GRASS_BLOCK)||s.is(Blocks.DIRT)||s.is(Blocks.PODZOL)||s.is(Blocks.MYCELIUM))return roll<65?Blocks.COARSE_DIRT:Blocks.TUFF;
+        return null;
+    }
+    @SubscribeEvent public static void onServerTick(TickEvent.ServerTickEvent e){
+        if(e.phase!=TickEvent.Phase.END)return;
+        int scans=DBZConfig.SERVER.craterScansPerTick.get(),writes=DBZConfig.SERVER.craterBlocksPerTick.get();
+        var b=new Budget(scans,writes,128);int rounds=JOBS.size(),quantum=Math.max(64,scans/Math.max(1,rounds));
+        while(rounds-->0&&!JOBS.isEmpty()&&b.scans>0&&b.writes>0){
+            var j=JOBS.removeFirst();
+            if(j.level.getServer().getLevel(j.level.dimension())!=j.level){retained-=j.undo.size();pendingEdits-=j.stage==3?j.changed.size()-j.index:j.changed.size();continue;}
+            if(!j.cancelled&&!j.valid()){j.cancelled=true;j.dug.clear();if(j.stage!=3){j.stage=3;j.index=0;}}
+            int limit=Math.max(0,b.scans-quantum);
+            while(!j.done()&&b.scans>limit&&b.writes>0)if(!j.step(b))break;
+            if(j.done())j.complete();else JOBS.addLast(j);
         }
-        if (REGROW.isEmpty()) return;
-        int grow = 300;
-        java.util.Iterator<Regrow> it = REGROW.iterator();
-        while (it.hasNext() && grow > 0) {
-            Regrow g = it.next();
-            if (g.level.getGameTime() < g.due) continue;
-            it.remove();
-            grow--;
-            BlockPos p = BlockPos.of(g.pos);
-            BlockState now = g.level.getBlockState(p);
-            boolean ours = g.placed == null ? now.isAir() : now == g.placed;   // never over something built or placed since
-            if (ours) g.level.setBlock(p, g.was, 3);
+        int restore=300;long now=net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer().getTickCount();
+        while(!REGROW.isEmpty()&&REGROW.peek().due<=now&&b.scans>0&&b.writes>0&&restore-->0){
+            var batch=REGROW.peek();var g=batch.blocks.pollFirstEntry().getValue();
+            if(batch.blocks.isEmpty())REGROW.remove();
+            retained--;b.scans--;var l=g.level;
+            if(l.getServer().getLevel(l.dimension())!=l||!l.hasChunkAt(g.pos)||isProtected(l,Vec3.atCenterOf(g.pos))||!l.getWorldBorder().isWithinBounds(g.pos))continue;
+            if(l.getBlockState(g.pos)==g.placed&&l.getBlockEntity(g.pos)==null&&l.setBlock(g.pos,g.was,Block.UPDATE_CLIENTS)){b.writes--;}
+        }
+        last=new WorkStats(scans-b.scans,writes-b.writes,128-b.notify,JOBS.size(),retained,retained+pendingEdits);
+    }
+    @SubscribeEvent public static void unload(net.minecraftforge.event.level.LevelEvent.Unload e){
+        if(e.getLevel() instanceof ServerLevel l){
+            JOBS.removeIf(j->{if(j.level!=l)return false;retained-=j.undo.size();pendingEdits-=j.stage==3?j.changed.size()-j.index:j.changed.size();return true;});
+            REGROW.removeIf(g->{if(g.level!=l)return false;retained-=g.blocks.size();return true;});
         }
     }
-
-    @SubscribeEvent
-    public static void onServerStopping(ServerStoppingEvent event) {
-        JOBS.clear();
-        REGROW.clear();
-    }
+    @SubscribeEvent public static void onServerStopping(ServerStoppingEvent e){JOBS.clear();REGROW.clear();retained=pendingEdits=0;}
 
     /** Places nothing is torn up: PvP safe zones, the world spawn's safe radius, the tournament grounds, the other world. */
     public static boolean isProtected(ServerLevel level, Vec3 at) {

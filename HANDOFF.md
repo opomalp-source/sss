@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.143.0, 2026-10-17)
+# Handoff: where Dragon Block Zenith stands (v0.144.0, 2026-10-17)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.141.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.144.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -197,3 +197,31 @@ actual hyperspeed/cancellation and asynchronous personal Earth return. See DEVLO
 All266 required tests pass. Dev-client Survival landings/personal picker/actual Earth return verified;
 hyperspeed clips, supported Vegeta ruins and Namek tint checked. Frieza outpost is above sea level.
 Next: Phase6 extends protected batched craters, then staged planetary destruction and polish. Story last.
+
+
+## Galaxy Phase 6 (v0.144.0, 2026-10-17)
+Destruction now streams successive candidate shells instead of building/sorting a huge block list on impact.
+All ki work is queued, including small ki hits. Dig, cracks, scorch, raised lips and optional restoration share
+global candidate/edit budgets; neighbour/shape reconciliation is deferred (128 positions/tick). Vanilla's
+queued light checks remain supported; no synchronous light flush or unsafe lighting internals. Small melee
+impacts retain a bounded immediate response. Jobs are capped, nearby same-owner impacts coalesce and unloaded
+chunks are skipped. No dimension pinning; unload/stop clears remaining session work.
+
+Per-block protection/hardness/fluids/block entities/border checks are repeated when editing. Forge break/place
+listeners can refuse or replace a block before writing. No physical falling-block debris can cross a claim:
+existing original block particles replace it. Substrate-aware scorch melts sand/red sand to glass and leaves
+blackstone/basalt with sparse magma after powerful rock hits. Original dust now lingers 8-16s, quality-aware.
+
+Restoration snapshots coalesce per position and preserve later player edits. Pending updates + snapshots have
+a shared maxTrackedChanges cap; due restoration is budgeted and session-local. Legacy kiBlastsBreakBlocks
+now requests the same protected crater path; vanilla explosions cannot remove terrain behind the queue.
+Native damage blast power is bounded16; malformed values refused. Protocol47.
+
+Operator /dbz crater hit <players> <force> runs the real terrain path at a looked-at block, and status reports
+last tick's bounded work. Guide: docs/CRATERS.md. Four new tests cover malformed values, material mapping,
+legacy blast bypass and actual queue caps/budgets/edge protection/late hardness/Forge veto/glass/restoration.
+See DEVLOG for final validation. Next: Phase7 staged planet destruction/remnants/Dragon Ball restoration.
+All270 required tests pass. Final before/impact/settled devshots checked with Crop.java; real Supernova impact
+and jobs0/tracked0 completion verified. Seeded scorch breaks up stripes; compacted ki rim material prevents
+introduced sand from falling away before restoration. Local capped smoke check59-60fps, not broad profiling.
+Story remains last. Install directly to the authorized mods folder, remove old DBZ jar; no updater.

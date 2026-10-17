@@ -3,7 +3,11 @@
 A Dragon Ball-inspired total-conversion mod for **Minecraft 1.20.1 / NeoForge 47.1.106**. Mod id `dbzenith`.
 Status, roadmap and decisions: [TODO.md](TODO.md), [FEATURE_MATRIX.md](FEATURE_MATRIX.md), [DEVLOG.md](DEVLOG.md), [BRIEF.md](BRIEF.md).
 
-## Latest release: 0.143.0
+## Latest release: 0.144.0
+
+Galaxy Phase 6: ki craters now budget their scan, excavation, scorch, raised rim and restoration work.
+Every target block respects safe zones and protection events. Sand melts into glass, powerful impacts leave
+hot rock, and original rubble/dust effects linger above the bowl. Details: [Craters](docs/CRATERS.md).
 
 Galaxy Phase 5: plot hyperspeed courses from orbit with a piloted Space Pod or full ki. Original star-streak
 effects and a rising drive sound accompany the bounded trip. Instant Transmission now reaches personally
@@ -16,12 +20,12 @@ matching surface location. Space Pods can launch continuously into orbit. Sealed
 protect against vacuum; the sound mix fades from wind to breathing, heartbeat and quiet orbital ambience.
 Phase 4 adds rotating planetary skies, multiple suns, phases and eclipses, weather hazards with shelter,
 rare original landmarks and inhabitants, cinematic first landings, naming and orbital scouter navigation.
-Details and commands: [Galaxy](docs/GALAXY.md). Crater and planetary destruction phases are next.
+Details and commands: [Galaxy](docs/GALAXY.md). Planetary destruction is next.
 Installed directly into the Minecraft mods folder; no updater publication.
 Build the complete mod from this checkout with Gradle; `tools/release.sh` installs the tested jar directly; updater publication is disabled by user request.
 
 ## Build
-Requires JDK 17 (`JAVA_HOME`). On this machine: `C:\Users\sunam\.jdks\jdk-17.0.20.1+1`.
+Requires JDK 17 (`JAVA_HOME`). On this machine: `C:\Program Files\Microsoft\jdk-17.0.20.101-hotspot`.
 
 ```bash
 ./gradlew build                # jar -> build/libs/dbzenith-<version>.jar

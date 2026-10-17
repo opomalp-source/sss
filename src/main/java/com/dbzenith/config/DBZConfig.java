@@ -249,7 +249,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.IntValue destructionMaxBlocks, blowAwayComboHits;
         /** The ki attack rework, phase 6: ki craters made huge, carved over a few ticks, and optionally grown back. */
         public final ForgeConfigSpec.DoubleValue kiCraterScale, kiCraterMaxRadius;
-        public final ForgeConfigSpec.IntValue kiCraterMaxBlocks, craterBlocksPerTick, craterRegrowSeconds;
+        public final ForgeConfigSpec.IntValue kiCraterMaxBlocks, craterBlocksPerTick, craterRegrowSeconds, craterScansPerTick, craterMaxJobs, craterMaxRegrowth;
         public final ForgeConfigSpec.BooleanValue craterDebris;
         public final ForgeConfigSpec.IntValue pvpSpawnSafeRadius;
         public final ForgeConfigSpec.BooleanValue pvpSafeOtherworld;
@@ -418,7 +418,7 @@ public final class DBZConfig {
                     .defineInRange("kiCostReleaseScaling", 1.5, 0.0, 100.0);
             kiBlastBaseDamage = b.comment("Flat DBZ damage added to every ki technique before multipliers")
                     .defineInRange("kiBlastBaseDamage", 40.0, 0.0, 1e9);
-            kiBlastsBreakBlocks = b.comment("Whether explosive techniques break blocks")
+            kiBlastsBreakBlocks = b.comment("Legacy override: explosive techniques also request protected queued craters; never bypasses destruction limits or safe zones")
                     .define("kiBlastsBreakBlocks", false);
             techCharge = b.comment("Holding the technique key charges a technique (CX-23): bigger and stronger the longer, costing ki as it grows. Off: it goes off at once")
                     .define("techniqueCharging", true);
@@ -710,8 +710,11 @@ public final class DBZConfig {
             kiCraterScale = b.comment("Ki attack craters are this many times wider than a fighter's impact of the same force (the ki attack rework: very big craters)").defineInRange("kiCraterScale", 2.5, 0.5, 10.0);
             kiCraterMaxRadius = b.comment("The largest ki crater's radius in blocks").defineInRange("kiCraterMaxRadius", 20.0, 1.0, 48.0);
             kiCraterMaxBlocks = b.comment("At most this many blocks removed by one ki crater").defineInRange("kiCraterMaxBlocks", 30000, 0, 200000);
-            craterBlocksPerTick = b.comment("Big craters are carved outward over a few ticks, at most this many blocks a tick in all (keeps the server smooth)").defineInRange("blocksPerTick", 1500, 50, 50000);
-            craterDebris = b.comment("Big ki craters throw real blocks out as debris, which land where they fall (off while craters grow back)").define("debris", true);
+            craterBlocksPerTick = b.comment("Total direct queued crater edits per tick, including digging, cracking, scorching, lips and restoration").defineInRange("blocksPerTick", 1500, 50, 50000);
+            craterScansPerTick = b.comment("Total crater candidate inspections per server tick, including scorch, lip and restoration work").defineInRange("scansPerTick", 12000, 256, 100000);
+            craterMaxJobs = b.comment("Maximum pending crater jobs; excess impacts still deal normal combat damage").defineInRange("maxJobs", 16, 1, 64);
+            craterMaxRegrowth = b.comment("Maximum tracked pending neighbour updates plus temporary restoration records; further crater edits are skipped until room is available").defineInRange("maxTrackedChanges", 200000, 1000, 1000000);
+            craterDebris = b.comment("Client rubble particles. Debris never places blocks across protected boundaries").define("debris", true);
             craterRegrowSeconds = b.comment("Ki craters grow back this many seconds after they are made, bottom up (0: never; the land stays torn up). Not kept over a server restart").defineInRange("regrowSeconds", 0, 0, 86400);
             blowAwayComboHits = b.comment("Every this many hits of a combo, the blow sends the victim flying (0: only knock-away moves and hard blows)").defineInRange("blowAwayComboHits", 5, 0, 50);
             blowAwayForce = b.comment("A blow at least this hard (force, about 0..3; a heavy that takes a quarter of the victim's health is about 2) sends the victim flying even outside a long combo").defineInRange("blowAwayForce", 1.6, 0.0, 10.0);

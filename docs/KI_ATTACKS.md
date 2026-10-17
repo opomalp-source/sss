@@ -126,19 +126,16 @@ A destructive attack (`"destructive": true`) tears the land up where it lands, a
 
 - **Size:** ki craters are huge. They are `kiCraterScale` times a fighter's impact crater, up to `kiCraterMaxRadius`
   blocks. A ball's `look.crater` multiplies its own crater.
-- **Carving:** big craters are carved outward over a few ticks.
-- **Finishing:** the floor is scorched (blackstone, coarse dirt, tuff), a lip of thrown-out earth rings the edge, and
-  real blocks are flung out to land where they fall.
-- **Settings:** server config `[destruction]`:
-  - `kiCraters`: on or off;
-  - `kiCraterScale`, `kiCraterMaxRadius`, `kiCraterMaxBlocks`: size;
-  - `blocksPerTick`: carving speed;
-  - `debris`: flung blocks;
-  - `regrowSeconds`: grow the land back after that long; 0 keeps it torn up.
-- **Where not:** never in safe zones (PvP zones, the spawn's safe radius, the tournament grounds, the Otherworld).
-  NPCs dig only with `mobGriefing` on, and a player's crater respects protection mods.
-- **The explosion itself:** it deals vanilla explosion damage and knockback, but its look and sound are the mod's own.
-  Blocks are only broken by the explosion with `kiBlastsBreakBlocks` on.
+- **Carving:** all ki craters stream through bounded inspection/edit jobs, outward from impact.
+- **Finishing:** exposed sand melts into glass, powerful rock impacts leave blackstone/basalt and sparse magma,
+  a ragged lip surrounds the bowl, and original client rubble/dust lingers. Rubble never places terrain blocks.
+- **Settings:** server config destruction retains size/debris/regrowth controls and adds scansPerTick,
+  maxJobs and maxTrackedChanges. blocksPerTick now covers all queued direct edits, including finishing and
+  restoration. See [Craters](CRATERS.md) for defaults and lifecycle details.
+- **Protection:** every direct target block respects safe zones, loaded chunks, border, current hardness,
+  fluids, block entities and Forge protection events. Craters cannot reach through the edge of a safe zone.
+- **Explosion:** vanilla damage/knockback remain (native power bounded16). Terrain always uses the protected
+  queue; the legacy kiBlastsBreakBlocks override requests this path instead of immediate vanilla removal.
 
 To try it: fire a destructive attack at open ground away from spawn. For example, a datapack attack with
 `"explosion": 5.0, "destructive": true`, fired with `/dbz cast @s <id> 1` while looking down.

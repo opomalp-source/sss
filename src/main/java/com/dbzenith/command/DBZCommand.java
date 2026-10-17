@@ -91,6 +91,7 @@ public final class DBZCommand {
         dispatcher.register(Commands.literal("dbz")
                 .requires(src -> src.hasPermission(2))
                 .then(com.dbzenith.galaxy.GalaxyCommands.branch())
+                .then(com.dbzenith.combat.CraterCommands.branch())
                 .then(Commands.literal("apestomp").then(Commands.argument("targets", EntityArgument.players()).executes(ctx -> {
                     int count = 0;
                     for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) if (com.dbzenith.transform.ApeStomp.press(p)) count++;

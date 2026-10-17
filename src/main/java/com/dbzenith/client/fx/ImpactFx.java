@@ -193,7 +193,7 @@ public final class ImpactFx {
                 if (s >= 5 && seen < 10 + 3 * s) CameraFx.impactFrame();
             }
             case ImpactPacket.WAVE, ImpactPacket.STUN_WAVE, ImpactPacket.FLARE -> KiWaveFx.start(m);   // the ki attack rework, phase 5
-            case ImpactPacket.CRATER -> torn(level, pos, s, rnd);                // phase 6: the ground torn open
+            case ImpactPacket.CRATER -> torn(level, pos, s, rnd, (m.flags() & ImpactPacket.RUBBLE) != 0);
             default -> { }
         }
         feel(m, level, pos, dir, s, mine);
@@ -325,7 +325,7 @@ public final class ImpactFx {
      * over the rim, earth flung up and out, and for a big one a column of dust rising from the middle. The crater itself
      * was dug for real; this is what hangs over it.
      */
-    private static void torn(ClientLevel level, Vec3 pos, float r, RandomSource rnd) {
+    private static void torn(ClientLevel level, Vec3 pos, float r, RandomSource rnd, boolean rubble) {
         CameraFx.shakeAt(pos, 0.15f + 0.05f * r, 16 + 3 * r);
         double seen = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().distanceTo(pos);
         if (r >= 6 && seen < 3 * r) CameraFx.aberrate(0.5f * (float) (1 - seen / (3 * r)));
@@ -338,23 +338,23 @@ public final class ImpactFx {
         BlockState below = level.getBlockState(BlockPos.containing(pos.x, pos.y - 0.5, pos.z));
         if (below.isAir()) below = net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState();
         ParticleOptions chunk = new BlockParticleOption(ParticleTypes.BLOCK, below);
-        int ring = Math.min(40, 8 + (int) (3 * r));
+        int ring = Math.min(KiParticles.quality()==0?16:40, 8 + (int) (3 * r));
         for (int i = 0; i < ring; i++) {                                        // dust rolling out over the rim
             double a = rnd.nextDouble() * Math.PI * 2, d = r * (0.7 + rnd.nextDouble() * 0.6), out = 0.03 + rnd.nextDouble() * 0.06;
             add(Kind.SMOKE, pos.add(Math.cos(a) * d, 0.3 + rnd.nextDouble() * 0.6, Math.sin(a) * d), new Vec3(Math.cos(a) * out, 0.01 + rnd.nextDouble() * 0.02, Math.sin(a) * out),
-                    DUST + 0x0A0A0A * rnd.nextInt(3), 0.4f + 0.12f * r, (0.9f + rnd.nextFloat() * 0.6f) * (0.6f + 0.16f * r), 70 + rnd.nextInt(60), 190);
+                    DUST + 0x0A0A0A * rnd.nextInt(3), 0.4f + 0.12f * r, (0.9f + rnd.nextFloat() * 0.6f) * (0.6f + 0.16f * r), 160 + rnd.nextInt(100), 170);
         }
-        int flung = Math.min(70, 10 + (int) (4 * r));
+        int flung = rubble?Math.min(KiParticles.quality()==0?18:70, 10 + (int) (4 * r)):0;
         for (int i = 0; i < flung; i++) {                                       // earth flung up and out
             double a = rnd.nextDouble() * Math.PI * 2, d = rnd.nextDouble() * r * 0.8, v = 0.2 + rnd.nextDouble() * (0.25 + 0.03 * r);
             level.addParticle(chunk, pos.x + Math.cos(a) * d, pos.y + 0.2, pos.z + Math.sin(a) * d, Math.cos(a) * v, 0.35 + rnd.nextDouble() * (0.4 + 0.04 * r), Math.sin(a) * v);
         }
         if (r >= 4) {                                                           // a column of dust rising from the middle
-            int column = Math.min(24, (int) (2 * r));
+            int column = Math.min(KiParticles.quality()==0?8:24, (int) (2 * r));
             for (int i = 0; i < column; i++) {
                 Vec3 at = pos.add(rnd.nextGaussian() * r * 0.2, rnd.nextDouble() * r * 0.8, rnd.nextGaussian() * r * 0.2);
                 add(Kind.SMOKE, at, new Vec3(rnd.nextGaussian() * 0.01, 0.03 + rnd.nextDouble() * 0.04, rnd.nextGaussian() * 0.01),
-                        DUST - 0x101010 + 0x0A0A0A * rnd.nextInt(3), 0.5f + 0.1f * r, (1f + rnd.nextFloat() * 0.6f) * (0.5f + 0.14f * r), 90 + rnd.nextInt(60), 200);
+                        DUST - 0x101010 + 0x0A0A0A * rnd.nextInt(3), 0.5f + 0.1f * r, (1f + rnd.nextFloat() * 0.6f) * (0.5f + 0.14f * r), 220 + rnd.nextInt(100), 150);
             }
         }
     }

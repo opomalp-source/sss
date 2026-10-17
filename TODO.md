@@ -320,6 +320,6 @@ to both mods folders.
 - [x] Phase 3 (v0.141.0) Per-system orbital space instances, original lit/textured planet and cloud meshes, moons/rings/starfield, continuous ascent/re-entry with preloads/fades, zero-g inertia/ki thrust/braking, pod launch and quiet sound mix
 - [x] Phase 4 (v0.142.0) Orbital surface skies, hazards/weather/shelter, five clipped landmark templates and persistent NPC tables, ground-contact discovery/naming, orbital scouter scans and waypoint markers
 - [x] Phase 5 (v0.143.0) Bounded pod/ki hyperspeed, original tunnel/drive mix, cross-world learned Instant Transmission to personal visits/known ki, paged picker, iconic Places charts, Planet Vegeta and Frieza Planet79
-- [ ] Phase 6 Extend the existing protected/batched crater system
+- [x] Phase 6 (v0.144.0) Streaming crater scan/dig/scorch/lip/reconciliation budgets, per-block protection, melted glass/hot rock, original lingering dust/rubble, bounded safe restoration and legacy explosion bypass closed
 - [ ] Phase 7 Planet destruction, orbital explosion, remnants, snapshots and Dragon Ball restoration
 - [ ] Phase 8 Visual/audio polish, performance/LOD, multiplayer, save compatibility, config and balance

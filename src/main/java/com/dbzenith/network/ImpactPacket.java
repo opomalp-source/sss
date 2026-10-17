@@ -42,6 +42,7 @@ public record ImpactPacket(float x, float y, float z, float dx, float dy, float 
     public static final int CRIT = 1, COUNTER = 2, ZHIT = 4;
     /** An explosion that digs a real crater (the ki attack rework, phase 6): no flat crater decal, the dug crater sends its own dust. */
     public static final int DIGS = 8;
+    public static final int RUBBLE = 16;
 
     /** Hitstop ticks for a kind of impact (before the config's scale): light 2, heavy 4, more for criticals and counters. */
     public static int hitstopFor(int kind, int flags) {
@@ -105,7 +106,7 @@ public record ImpactPacket(float x, float y, float z, float dx, float dy, float 
 
     public static ImpactPacket decode(FriendlyByteBuf buf) {
         return new ImpactPacket(buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat(),
-                buf.readByte(), Math.min(buf.readFloat(), 16f), buf.readInt(), buf.readVarInt() - 1, buf.readVarInt() - 1, buf.readByte(), Math.min(buf.readByte(), 20) - 1);
+                buf.readByte(), Math.min(buf.readFloat(), 48f), buf.readInt(), buf.readVarInt() - 1, buf.readVarInt() - 1, buf.readByte(), Math.min(buf.readByte(), 20) - 1);
     }
 
     public static void handle(ImpactPacket msg, Supplier<NetworkEvent.Context> ctx) {
