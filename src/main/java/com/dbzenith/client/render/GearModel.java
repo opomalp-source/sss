@@ -48,6 +48,9 @@ public class GearModel {
 
     private final ModelPart head, body, rightArm, leftArm, rightLeg, leftLeg;
     private final ModelPart capeRoot = capeChain(0);
+    private float capeForwardTilt;
+
+    public void capeForwardTilt(float radians) { capeForwardTilt = Math.max(0, radians); }
 
     private static ModelPart capeChain(int index) {
         var children = index + 1 < CAPE_PANELS ? java.util.Map.of("cape_" + (index + 1), capeChain(index + 1))
@@ -253,6 +256,7 @@ public class GearModel {
     }
 
     public void follow(PlayerModel<?> m) {
+        capeForwardTilt = 0;
         head.copyFrom(m.head);
         body.copyFrom(m.body);
         rightArm.copyFrom(m.rightArm);
@@ -278,7 +282,7 @@ public class GearModel {
                     ModelPart panel = p;
                     for (int i = 0; i < CAPE_PANELS; i++) {
                         int s = Math.min(i, cloth.segments() - 1);
-                        panel.xRot = Math.max(i == 0 ? 0.04f : -0.5f, cloth.relPitch(s));   // never into the back
+                        panel.xRot = Math.max(i == 0 ? 0.04f : -0.5f, cloth.relPitch(s) - (i == 0 ? capeForwardTilt : 0));
                         panel.zRot = cloth.relRoll(s) * 0.45f;
                         if (i + 1 < CAPE_PANELS) panel = panel.getChild("cape_" + (i + 1));
                     }

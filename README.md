@@ -3,7 +3,7 @@
 A Dragon Ball-inspired total-conversion mod for **Minecraft 1.20.1 / NeoForge 47.1.106**. Mod id `dbzenith`.
 Status, roadmap and decisions: [TODO.md](TODO.md), [FEATURE_MATRIX.md](FEATURE_MATRIX.md), [DEVLOG.md](DEVLOG.md), [BRIEF.md](BRIEF.md).
 
-## Latest release: 0.148.0
+## Latest release: 0.148.1
 
 Clothing rework: separate Saiyan Saga and Cell Saga armor, modeled shells/lapels/collars, detailed original materials and a long pleated Piccolo cape. [Clothing guide and recipes](docs/CLOTHES.md).
 

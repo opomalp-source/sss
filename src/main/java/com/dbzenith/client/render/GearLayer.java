@@ -171,6 +171,14 @@ public class GearLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
             }
             case CELL_ARMOR -> { } // No shoulder or hip guards: this is a distinct, streamlined shell.
             case NAMEKIAN -> {
+                // Wind is already swinging the cloth back; do not add the rig's forward flight lean a second time.
+                var motion = com.dbzenith.client.motion.MotionEngine.peek(player);
+                if (motion != null && com.dbzenith.client.motion.MotionEngine.enabled()
+                        && fused != null && fused.has(PublicStatePacket.FLYING)) {
+                    var rig = com.dbzenith.client.motion.MotionEngine.sample(motion, partialTick);
+                    model.capeForwardTilt(-rig.get(com.dbzenith.client.motion.Bone.BODY, com.dbzenith.client.motion.Bone.PITCH)
+                            * net.minecraft.util.Mth.DEG_TO_RAD * motion.engineWeight(partialTick));
+                }
                 piece(pose, vc, light, o, GearModel.Piece.CAPE, Cloth.chain(player, "cape", Cloth.CAPE, ageInTicks), 0xF4F2EC);
                 piece(pose, vc, light, o, GearModel.Piece.NAMEK_PADS, 0, 0xF4F2EC);
                 piece(pose, vc, light, o, GearModel.Piece.SASH_KNOT, 0, 0x4CA4CC);

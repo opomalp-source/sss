@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.148.0, 2026-10-17)
+# Handoff: where Dragon Block Zenith stands (v0.148.1, 2026-10-17)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.148.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.148.1. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -311,3 +311,8 @@ Existing battle_armor IDs are the Saiyan Saga cut; appended CELL_ARMOR registers
 Final refinements: CapePanel bakes continuous closed trapezoid pleats; capeRoot uses the original four-link spring chain. Half-torso end-cap UVs corrected in LimbSegments.torso; pants pass hides upper-chest children and restores visibility. ArtGen.topFinish/bootsFinish/pantsFinish handle cap coordinates separately, preventing glove pixels on shoulders and boot pixels on hips. Regression resource checks enforce boot/trouser cap separation. Generator replay is byte-identical.
 
 Release validation: all281 required tests pass (phase148-testsfinal.log, Gradle1m37s), build -x test succeeds. Crop.java review covers nine outfits, rear/angled tapered cape, motion, mixed-piece belt, shoe/hip/shoulder caps and true fixed-full-moon ape growth wearing Cell Saga armor. Per-item headwear fallbacks eliminate the missing shared texture. Direct local install/no updater. Story remains last.
+
+## Cape flight follow-up (v0.148.1)
+GearLayer reuses MotionEngine.sample BODY.PITCH and engineWeight to compensate the cape root during ki flight; GearModel.follow resets the compensation per wearer. This prevents the wind angle from piling onto the rig lean and throwing the cape above the head. No server/physics change. Validation below.
+
+Final148.1 validation: all281 GameTests pass, build succeeds. Airborne sprint fromY160, hover/settling and return to ground checked with Crop.java. Compensated cape follows the flyer; all0.148.0 materials remain unchanged. Direct install/no updater.

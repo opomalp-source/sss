@@ -69,3 +69,6 @@ Worn in the head slot (instead of a scouter):
 Clothing cap UVs are handled separately: a cap's vertical coordinate measures depth rather than distance down a limb. Boot maps leave thigh caps transparent; trouser maps cover those caps, and glove regions stay off the shoulders. Half-torso caps keep the original body cap UV islands instead of sampling chest paint. The cape is a cached continuous trapezoid mesh with closed pleats, rather than a stack of rectangular boxes.
 
 Headwear also has distinct generated Classic/NPC fallback sheets; its item texture paths no longer reference a missing shared material. For Great Ape visual QA, freeze a full moon at18000 or allow a false moon at least40 ticks to rise before forcing the form.
+
+### v0.148.1 flight adjustment
+The cape root compensates for the motion rig's sampled forward pitch during ki flight, preventing wind lift from being added twice. The existing interpolated rig and spring chain drive it; hover/walking and the trailing panels keep their motion.
