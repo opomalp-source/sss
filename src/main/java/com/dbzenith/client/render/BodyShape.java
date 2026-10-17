@@ -138,6 +138,7 @@ public final class BodyShape {
 
     @SubscribeEvent
     public static void post(RenderPlayerEvent.Post event) {
+        if (event.getRenderer().getModel() instanceof PhysiqueModel<?> physique) physique.resetApeSpacing();
         shape(event.getRenderer().getModel(), 1f, 1f, 1f, 1f);                       // the model is shared: back to vanilla
         LimbSegments.show(event.getRenderer().getModel(), -1, true, true, true);
         LimbSegments.reset(event.getRenderer().getModel());

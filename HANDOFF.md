@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.144.0, 2026-10-17)
+# Handoff: where Dragon Block Zenith stands (v0.147.0, 2026-10-17)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.144.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.147.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -299,3 +299,8 @@ All8 planned galaxy phases implemented. Story remains last; wider real-play/hard
 Direct install with release.sh, remove old DBZ jar, main/tag push only; no updater/deploy.
 
 Final release validation: all279 required tests passed (phase146-testsfinal5.log,1m1s), offline build -x test succeeds. Final devshots reviewed with Crop.java, including minimum320-wide GUI settings and atlas. Existing mine fixture now isolates proximity triggers; repeat-save desert search expanded. Grip test passed on rerun unchanged. No production combat changes.
+
+## Great Ape limb spacing (v0.147.0)
+PhysiqueModel spreads ape shoulder pivots3px/side, hips1.6px/side after the animation pose, blended by ApeChange.growth. Clothing parts copy final joints; BodyShape.Post and the next setupAnim undo offsets so a shared renderer cannot retain ape spacing. All ape variants use the same path. See docs/GREAT_APE.md. Validation below.
+
+Validation: all279 required GameTests pass (phase147-tests.log), release build succeeds. Crop.java visual review covers growth, idle, walk, raised-knee stomp, battle armor, golden/legendary variants and clean base reversion. Final daylight moon-ape scene uses a false moon. Direct local install only; no updater.

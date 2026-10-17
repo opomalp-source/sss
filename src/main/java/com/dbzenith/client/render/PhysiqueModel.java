@@ -9,6 +9,21 @@ import net.minecraft.world.entity.LivingEntity;
  * and arms hanging a little out ({@link LimbSegments#pose}). Swapped in for the player renderers' own model.
  */
 public class PhysiqueModel<T extends LivingEntity> extends PlayerModel<T> {
+    private float apeShoulders, apeHips;
+
+    /** Undo only our joint offsets: the renderer shares this model across players and first-person arms. */
+    public void resetApeSpacing() {
+        rightArm.x += apeShoulders;
+        leftArm.x -= apeShoulders;
+        rightLeg.x += apeHips;
+        leftLeg.x -= apeHips;
+        apeShoulders = apeHips = 0;
+        rightSleeve.copyFrom(rightArm);
+        leftSleeve.copyFrom(leftArm);
+        rightPants.copyFrom(rightLeg);
+        leftPants.copyFrom(leftLeg);
+    }
+
     public PhysiqueModel(ModelPart root, boolean slim) {
         super(root, slim);
     }
@@ -33,11 +48,27 @@ public class PhysiqueModel<T extends LivingEntity> extends PlayerModel<T> {
 
     @Override
     public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float age, float headYaw, float headPitch) {
+        resetApeSpacing();
         // Front F5 is an inspection view: orbiting it must not tip the ape's face away from the viewer.
         var mc = net.minecraft.client.Minecraft.getInstance();
         if (entity == mc.player && mc.player != null && mc.options.getCameraType().isMirrored()
                 && ApeLook.is(mc.player)) headPitch = 0;
         super.setupAnim(entity, limbSwing, limbSwingAmount, age, headYaw, headPitch);
         LimbSegments.pose(this);
+        if (entity instanceof net.minecraft.client.player.AbstractClientPlayer player && ApeLook.is(player)) {
+            // Thickened ape limbs need wider joints, not merely a wider swing around human-sized hips.
+            float growth = com.dbzenith.transform.ApeChange.growth(ApeTransformation.age(player,
+                    net.minecraft.util.Mth.clamp(age - entity.tickCount, 0, 1)));
+            apeShoulders = 3f * growth;
+            apeHips = 1.6f * growth;
+            rightArm.x -= apeShoulders;
+            leftArm.x += apeShoulders;
+            rightLeg.x -= apeHips;
+            leftLeg.x += apeHips;
+            rightSleeve.copyFrom(rightArm);
+            leftSleeve.copyFrom(leftArm);
+            rightPants.copyFrom(rightLeg);
+            leftPants.copyFrom(leftLeg);
+        }
     }
 }

@@ -4154,3 +4154,9 @@ User approved the eight-phase immersive space design. This release is Phase 1 on
   The existing timing-sensitive grip test passed on rerun without changes.
 - Reviewed final Earth/Namek/stellar devshots and settings/atlas at normal and minimum320-wide GUI sizes
   using Crop.java. Corrected narrow atlas title/hints and settings footer overlap. No shader/human-soak claim.
+
+## 2026-10-17 — Wider Great Ape limb joints (v0.147.0)
+- Thick ape limbs previously kept human-width pivots, sinking upper arms/thighs into the trunk and each other. Spread shoulders3 model pixels/side and hips1.6/side, blended through visible growth and applied after posing. All three ape variants share the change.
+- Sleeves/pants copy final pivots; offsets are explicitly removed after rendering and before reposing shared models. Ordinary forms retain their existing proportions. No new assets or combat changes. Validation below.
+
+- Validation: all279 required GameTests pass (build/phase147-tests.log); offline build -x test succeeds. Reviewed Crop.java devshot comparisons of growth/recovery, empty-hand idle, three-quarter view, walking, an actual planted raised-knee stomp, battle armor, golden/legendary variants and base reversion. Initial daylight moon-ape setup reverted; final daylight checks used a local false moon. No assertions or server behavior changed. Direct local installation, no updater.

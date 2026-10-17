@@ -3,7 +3,9 @@
 A Dragon Ball-inspired total-conversion mod for **Minecraft 1.20.1 / NeoForge 47.1.106**. Mod id `dbzenith`.
 Status, roadmap and decisions: [TODO.md](TODO.md), [FEATURE_MATRIX.md](FEATURE_MATRIX.md), [DEVLOG.md](DEVLOG.md), [BRIEF.md](BRIEF.md).
 
-## Latest release: 0.146.0
+## Latest release: 0.147.0
+
+Great Ape shoulders and hips spread as the body grows, giving thick limbs more room through idle, walking and stomps. [Great Ape guide](docs/GREAT_APE.md).
 
 Galaxy Phase 8: smoother orbital atmospheres, shared meshes/distant impostors, bounded texture work and
 indexed, bounded atlas searches. Independent space detail/music/ambience controls fit in paged settings.

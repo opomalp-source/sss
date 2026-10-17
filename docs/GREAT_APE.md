@@ -82,3 +82,6 @@ A Saiyan or half-Saiyan with a tail can turn into a Great Ape.
 The resting head faces forward instead of tipping the chin upward. In your front F5 view, camera pitch does not
 change the local head's look pitch, so you can raise the view to inspect the eyes. Gameplay aim and the head
 movement seen by other players still follow your actual look. Roar and stomp animations keep their head poses.
+
+### Limb spacing (v0.147.0)
+Great Ape, Golden Great Ape and Legendary Great Ape widen their shoulders by3 model pixels per side and hips by1.6 per side as growth progresses. The joint offsets are applied after the authored pose, so thick upper arms and thighs retain their separation while walking and stomping. Sleeves and pants follow the same joints. Offsets are undone after each player render and before the next pose to keep the shared model clean.
