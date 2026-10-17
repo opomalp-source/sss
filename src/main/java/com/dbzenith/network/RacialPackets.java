@@ -115,6 +115,7 @@ public final class RacialPackets {
             if (player == null) return;
             ModCapabilities.get(player).ifPresent(d -> {
                 if (!RacialSkills.has(d, "instant_transmission")) return;
+                if(!InputGuard.allow(player,InputGuard.Kind.TECHNIQUE))return;
                 ModNetwork.sendTo(player, new TransmitTargets(destinations(player, d)));
             });
         }
@@ -124,15 +125,22 @@ public final class RacialPackets {
     static List<Destination> destinations(ServerPlayer player, PlayerData d) {
         List<Destination> out = new ArrayList<>();
         boolean divine = d.hasFlag("god_ki");
-        for (ServerPlayer p : player.serverLevel().players()) {
+        for (ServerPlayer p : player.server.getPlayerList().getPlayers()) {
             if (p == player || p.isSpectator()) continue;
             PlayerData o = ModCapabilities.get(p).orElse(null);
             if (o == null || o.hasFlag("god_ki") && !divine) continue;
-            out.add(new Destination(p.getStringUUID(), p.getGameProfile().getName(), (int) p.distanceTo(player),
+            boolean local=p.level()==player.level();if(!local&&(!d.hasFlag("transmission_contact:"+p.getStringUUID())||!p.isAlive()||o.isDead()||com.dbzenith.galaxy.space.SpaceRuntime.surfaceRef(p.serverLevel())==null&&!com.dbzenith.galaxy.space.SpaceRuntime.isSpace(p.level())))continue;
+            if(out.size()>=32)break;
+            out.add(new Destination(p.getStringUUID(), p.getGameProfile().getName(), local?(int) p.distanceTo(player):-1,
                     o.hasFlag("god_ki") ? -1 : StatCalculator.battlePower(o)));
         }
         out.sort(Comparator.comparingInt(Destination::distance));
         out.add(new Destination("home", "", (int) Math.sqrt(home(player).distanceToSqr(player.position())), 0));
+        var galaxy=com.dbzenith.galaxy.GalaxyData.get(player.server);int n=0;for(var ref:galaxy.arrivals(player.getUUID()).keySet()){
+            if(!d.hasFlag("planet_landing:"+ref.key()))continue;
+            var found=galaxy.discovery(ref);if(found==null||found.destroyed()&&!found.restored())continue;if(n++>=32)break;
+            out.add(new Destination("planet:"+ref.key(),galaxy.name(ref,found.catalogName()),-1,0));
+        }
         return out;
     }
 
@@ -157,7 +165,7 @@ public final class RacialPackets {
         }
 
         public static TransmitTargets decode(FriendlyByteBuf buf) {
-            int n = Math.min(256, buf.readVarInt());
+            int n = buf.readVarInt();if(n<0||n>128)throw new IllegalArgumentException("Invalid transmission list");
             List<Destination> list = new ArrayList<>(n);
             for (int i = 0; i < n; i++) list.add(new Destination(buf.readUtf(64), buf.readUtf(64), buf.readVarInt(), buf.readLong()));
             return new TransmitTargets(list);
@@ -181,6 +189,8 @@ public final class RacialPackets {
         public static void handle(Transmit m, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayer player = ctx.get().getSender();
             if (player == null) return;
+            if(!InputGuard.allow(player,InputGuard.Kind.TECHNIQUE))return;
+            if(m.key.startsWith("planet:")){try{com.dbzenith.galaxy.space.Interstellar.transmit(player,com.dbzenith.galaxy.GalaxyCatalog.Ref.parse(m.key.substring(7)));}catch(IllegalArgumentException ignored){}return;}
             if (m.key.startsWith("entity:")) {                                  // locked on (CX-50): straight behind them
                 ModCapabilities.get(player).ifPresent(d -> {
                     if (!RacialSkills.has(d, "instant_transmission")) return;
@@ -202,6 +212,7 @@ public final class RacialPackets {
                     } else {
                         ServerPlayer target = player.getServer().getPlayerList().getPlayer(UUID.fromString(t.key()));
                         if (target == null) return;
+                        if(target.level()!=player.level()){com.dbzenith.galaxy.space.Interstellar.transmitToPlayer(player,target);return;}
                         dest = target.position().subtract(target.getLookAngle().multiply(1, 0, 1).normalize().scale(1.5));   // right behind them
                     }
                     RacialSkillEffects.transmit(player, dest);

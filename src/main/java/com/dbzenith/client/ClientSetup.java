@@ -60,6 +60,7 @@ public final class ClientSetup {
         event.registerAboveAll("planet_environment", new ClientPlanet.Overlay());
         event.registerAboveAll("orbital_transit",new com.dbzenith.client.space.SpaceClient.Overlay());
         event.registerAboveAll("planet_activity",new com.dbzenith.client.space.PlanetExperience.Overlay());
+        event.registerAboveAll("hyperspeed",new com.dbzenith.client.space.JourneyClient.Overlay());
         event.registerAboveAll("debug_stats", new DebugStatsOverlay());
     }
 

@@ -46,7 +46,7 @@ final class OrbitalTextures {
                 color=mix(0x202329,0x70665B,terrain+.4);if(Math.abs(terrain+.06+fine*.12)<.018)color=mix(0xC33D16,0xFFBC59,(fine+.5));
             }else if(type.equals("Ice"))color=mix(0x557E9A,0xE7EEF2,terrain+.65);
             else if(type.equals("Crystal"))color=mix(0x574B83,0xDEDAE9,terrain+.6);
-            else if(type.equals("Desert"))color=mix(0x8C4E37,0xE4BE7F,terrain+.6);
+            else if(type.equals("Desert"))color=color==0xB54B3B?mix(0x632A30,0xD87A60,terrain+.6):mix(0x8C4E37,0xE4BE7F,terrain+.6);
             else color=mix(color,terrain<0?0x34363E:0xD0C8BC,Math.abs(terrain)*.8);
             if(!cloud)color=mix(color,fine>0?0xD6D3CB:0x161C26,Math.abs(fine)*.18);
             int abgr=(alpha<<24)|((color&255)<<16)|(color&0xFF00)|((color>>>16)&255);image.setPixelRGBA(x,y,abgr);

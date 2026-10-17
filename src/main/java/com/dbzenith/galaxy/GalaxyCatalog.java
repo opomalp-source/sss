@@ -10,7 +10,7 @@ public final class GalaxyCatalog {
 
     public record Id(int x, int y, int z, int slot) {
         public Id {
-            if (Math.abs((long)x) > LIMIT || Math.abs((long)y) > LIMIT || Math.abs((long)z) > LIMIT || slot < 0 || slot >= SYSTEMS)
+            if (Math.abs((long)x) > LIMIT || Math.abs((long)y) > LIMIT || Math.abs((long)z) > LIMIT || slot < 0 || slot >= SYSTEMS&&!IconicSystems.reserved(x,y,z,slot))
                 throw new IllegalArgumentException("Galaxy coordinates out of range");
         }
         public static Id parse(String text) {
@@ -67,6 +67,7 @@ public final class GalaxyCatalog {
     }
     private static String name(Random r) { return START[r.nextInt(START.length)] + END[r.nextInt(END.length)]; }
     public static SystemSpec system(long worldSeed, long salt, Id id) {
+        if(IconicSystems.isNew(id))return IconicSystems.system(worldSeed,salt,id);
         Random r = new Random(seed(worldSeed, salt, id));
         String name = name(r) + " " + (100 + r.nextInt(900));
         double x=id.x * 1000d + r.nextDouble()*800+100, y=id.y*1000d+r.nextDouble()*800+100, z=id.z*1000d+r.nextDouble()*800+100;

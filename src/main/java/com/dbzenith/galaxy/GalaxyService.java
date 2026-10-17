@@ -14,6 +14,7 @@ public final class GalaxyService {
         GalaxyData data=GalaxyData.get(p.server); long seed=p.server.overworld().getSeed();
         CompoundTag out=new CompoundTag(); out.putInt("view",view); out.putString("center",center.toString()); out.putInt("planet",planet);
         out.putString("current",GalaxyData.current(p).toString()); out.putInt("version",GalaxyCatalog.VERSION);
+        out.putBoolean("canTransmit",com.dbzenith.race.RacialSkills.has(com.dbzenith.data.ModCapabilities.getOrThrow(p),"instant_transmission"));
         var wp=data.waypoint(p.getUUID()); out.putString("waypoint",wp==null?"":wp.key());
         ListTag entries=new ListTag();
         Set<GalaxyCatalog.Id> known=knownSystems(data);
@@ -26,7 +27,7 @@ public final class GalaxyService {
         } else if(view==SECTOR) {
             for(int i=0;i<GalaxyCatalog.SYSTEMS;i++) entries.add(summary(GalaxyCatalog.system(seed,data.salt(),new GalaxyCatalog.Id(center.x(),center.y(),center.z(),i)),known));
         } else if(view==SYSTEM) {
-            var s=GalaxyCatalog.system(seed,data.salt(),center); out.put("system",detail(s,data));
+            var s=GalaxyCatalog.system(seed,data.salt(),center);var system=detail(s,data);for(Tag raw:system.getList("bodies",Tag.TAG_COMPOUND)){var b=(CompoundTag)raw;b.putBoolean("visited",com.dbzenith.data.ModCapabilities.getOrThrow(p).hasFlag("planet_landing:"+new GalaxyCatalog.Ref(center,b.getInt("index")).key()));}out.put("system",system);
         } else {
             String needle=query.strip().toLowerCase(Locale.ROOT);
             int skipped=0;
@@ -70,6 +71,7 @@ public final class GalaxyService {
             CompoundTag body=new CompoundTag(); body.putInt("index",b.index()); body.putString("name",data.name(ref,b.name()));
             body.putString("type",GalaxyCatalog.label(b.kind())); body.putInt("color",b.kind().color); body.putInt("radius",b.radius());
             body.putDouble("gravity",b.gravity());body.putString("atmosphere",GalaxyCatalog.label(b.atmosphere()));body.putInt("temperature",b.temperature());
+            if(s.id().equals(IconicSystems.VEGETA)&&b.index()==0)body.putInt("color",0xB54B3B);
             body.putInt("day",b.dayTicks());body.putDouble("tilt",b.tilt());body.putBoolean("rings",b.rings());body.putDouble("orbit",b.orbit());body.putDouble("phase",b.phase());
             body.putBoolean("landable",b.kind().landable());body.putString("palette",b.kind().palette);body.putString("hazard",b.hazard());
             body.putString("landmark",b.landmark());body.putString("population",b.population());body.putBoolean("known",d!=null);
@@ -87,6 +89,10 @@ public final class GalaxyService {
         if(!InputGuard.allow(p,InputGuard.Kind.GALAXY)) return;
         try {
             var center=GalaxyCatalog.Id.parse(r.id());
+            if(r.action()==11){com.dbzenith.galaxy.space.Interstellar.cancel(p);return;}
+            if(r.action()==10){if(IconicSystems.all().contains(center))ModNetwork.sendTo(p,new GalaxyPackets.Data(0,true,survey(p,SYSTEM,center,0,"",0)));return;}
+            if(r.action()==8){com.dbzenith.galaxy.space.Interstellar.begin(p,new GalaxyCatalog.Ref(center,r.planet()));return;}
+            if(r.action()==9){com.dbzenith.galaxy.space.Interstellar.transmit(p,new GalaxyCatalog.Ref(center,r.planet()));return;}
             if(r.action()==7){if(p.getVehicle() instanceof com.dbzenith.world.SpacePodEntity pod)pod.launchOrbit(p);return;}
             if(r.action()==6){com.dbzenith.galaxy.planet.PlanetRuntime.travel(p,new GalaxyCatalog.Ref(center,r.planet()));return;}
             if(r.action()==WAYPOINT || r.action()==CLEAR_WAYPOINT) {

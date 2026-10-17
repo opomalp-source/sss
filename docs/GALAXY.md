@@ -237,3 +237,51 @@ Operator checks: `/dbz galaxy weather dust <players>` (also clear/acid/meteors/i
 weather event for 1200 ticks; it is transient and does not change the calendar/save. `/dbz galaxy landmark
 <players>` previews the nearest candidate within five cells. Previously generated chunks can lack a candidate's
 new structure. Interstellar travel/Instant Transmission and the remaining iconic worlds are Phase5; story last.
+
+## Phase 5 — courses and familiar ki (v0.143.0)
+
+Open `/galaxy` in orbit, inspect a system/planet and press **Jump**. A piloted Space Pod provides its drive;
+otherwise use existing ki flight with at least98% ki. A completed foot jump costs20% maximum ki and navigation
+recharges for200 ticks. Pods retain their pilot and vessel across the transfer. Existing legacy pod routes
+remain available; procedural Land now expects your current star system (creative operator previews exempt).
+The nominal trip lasts10-20 seconds by sector distance, with up to10 more seconds for preload. At30 seconds
+an unfinished trip aborts safely. Arrival waits for the existing async orbital preloader; no world is opened
+during charge, and normal active-world caps still apply. A failed/cancelled jump spends no jump cost.
+
+Star streaks expand into an original blue-violet tunnel, with a rising pitch/gain mix of the original orbital
+drone and a soft arrival fade. Low quality trims rays; calm/reduced-flash settings reduce motion and tint.
+Sneak disengages. Damage, death, losing the pod/ki flight, leaving the departure world or moving away interrupt
+the course. Ki flight drain, vacuum and stellar hazards continue during travel. Surface arrival is through
+ordinary planetary re-entry or Land in the same system; Jump does not instantiate the surface.
+
+The existing learned **Instant Transmission** skill retains its ki cost, cooldown and ki-seal checks. Its
+picker now includes familiar players across living worlds and a bounded list of personally visited planets;
+Previous/Next prevent destinations falling off the screen. A player becomes familiar when actually tracked
+nearby. Divine targets remain unreadable without god ki. Dead/Other World/Time Chamber cross-world targets
+are excluded; existing local/Home behavior remains. Cross-world person arrival checks loaded collision space.
+
+The atlas **Transmit** button works for any personally landed planet once the skill is learned; the same action
+is `/galaxy transmit "x:y:z:slot/planet"`. Planet casts require standing still while chunks preload. Learned
+skill, ki, cooldown and living state are checked again at completion, then the existing skill pays once. No
+charge for failed preparation or a blocked safe landing. Saved arrival regions survive reconnect/death via
+optional sparse GalaxyData records; old visited flags work and get an anchor the next time you touch ground.
+Landing respects collision shapes and the current form's headroom; it never clears a player's build.
+
+**Places**, at the top of the atlas, opens the six iconic charts. These reveal charts rather than claiming
+discovery or loading terrain. Earth, Namek (blue grass/water under a green three-sun sky), King Kai's10g planet
+and Beerus's Planet keep their existing dimensions and structures. Beerus's system still needs god ki.
+Two additive reserved charts introduce:
+
+| World | Address | Identity |
+|---|---|---|
+| Planet Vegeta | `27:-6:14:8/0` |10g, red desert, a ruined arrival courtyard |
+| Frieza Planet 79 | `-34:9:-21:8/0` |Breathable imperial world, metal outpost above sea level and existing soldier inhabitants |
+
+Only these two chart locations accept slot8. All previously valid catalogue-v1 addresses and terrain noise
+outputs are unchanged; new iconic generation cannot overwrite an old procedural planet. First landing records
+discovery; the two iconic primary names are protected. All art uses original code/block construction.
+
+Commands: `/galaxy jump "ref"`; operator `/dbz galaxy jump <players> "ref"` uses the same travel rules.
+`hyperspeedTravel` can disable jumps. Requests use existing rate limits; protocol46 adds a small S2C journey
+clock/name packet. Personal destination data is bounded and requested explicitly, with no terrain seeds sent.
+Crater/destruction work is Phase6/7; full performance/balance polish is Phase8. Story last.

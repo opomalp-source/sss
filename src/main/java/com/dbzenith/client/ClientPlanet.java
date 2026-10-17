@@ -27,7 +27,7 @@ public final class ClientPlanet {
     public static final class Overlay implements IGuiOverlay {
         @Override public void render(ForgeGui gui,net.minecraft.client.gui.GuiGraphics g,float pt,int w,int h){
             var mc=Minecraft.getInstance();var d=environment;
-            if(d==null||d.name().isEmpty()||mc.player==null||mc.options.hideGui||!mc.player.level().dimension().location().toString().equals(d.dimension()))return;
+            if(d==null||d.name().isEmpty()||mc.player==null||mc.options.hideGui||com.dbzenith.client.space.JourneyClient.active()||!mc.player.level().dimension().location().toString().equals(d.dimension()))return;
             String air=d.atmosphere()>=0&&d.atmosphere()<GalaxyCatalog.Atmosphere.values().length?GalaxyCatalog.label(GalaxyCatalog.Atmosphere.values()[d.atmosphere()]):"Unknown";
             String title=String.format(Locale.ROOT,"%s  |  %.2fg  |  %s",d.name(),d.gravity(),air);
             title=mc.font.plainSubstrByWidth(title,Math.min(310,w-24));int x=(w-mc.font.width(title))/2;

@@ -97,7 +97,13 @@ public final class SpaceRuntime {
         var ready=CompletableFuture.supplyAsync(()->level.getChunkSource().getChunkFuture(chunk.x,chunk.z,ChunkStatus.FULL,true),Util.backgroundExecutor()).thenCompose(f->f).thenApply(e->e.left().isPresent());
         s.pending.put(p.getUUID(),new Transit(p.level().dimension(),level.dimension(),ref,at,v,chunk,p.server.getTickCount(),ready));prepare(p);return true;
     }
+    public static boolean jump(ServerPlayer p,GalaxyCatalog.Ref ref){
+        if(!isSpace(p.level())||pending(p)||state(p.server).pending.size()>=16)return false;
+        try{var b=GalaxyCatalog.body(p.server.overworld().getSeed(),GalaxyData.get(p.server).salt(),ref);Vec3 c=SpaceMath.center(b),at=c.add(new Vec3(0,128,0).subtract(c).normalize().scale(SpaceMath.radius(b.radius())+900));return queue(p,open(p.server,ref.system()),ref,at,Vec3.ZERO);}
+        catch(IllegalArgumentException ex){p.displayClientMessage(Component.literal(ex.getMessage()),true);return false;}
+    }
     public static boolean pending(ServerPlayer p){return state(p.server).pending.containsKey(p.getUUID())||PlanetRuntime.pending(p);}
+    public static void cancel(ServerPlayer p){var s=state(p.server);var q=s.pending.remove(p.getUUID());if(q!=null){var l=p.server.getLevel(q.target);if(l!=null)l.getChunkSource().removeRegionTicket(TRANSIT,q.chunk,1,p.getUUID());}}
     public static void prepare(ServerPlayer p){var t=new CompoundTag();t.putBoolean("preparing",true);t.putString("dimension",p.level().dimension().location().toString());ModNetwork.sendTo(p,new SpaceScenePacket(t));}
     public static void scene(ServerPlayer p,boolean transition,Vec3 velocity){
         var ref=surfaceRef(p.serverLevel());var id=id(p.level().dimension());if(id==null&&ref!=null)id=ref.system();
@@ -148,7 +154,7 @@ public final class SpaceRuntime {
                     if(distance<radius+20){Vec3 at=center.add(n.scale(radius+22));p.teleportTo(at.x,at.y,at.z);p.setDeltaMovement(n.scale(.3));}
                     if(now%40==0&&!p.isCreative())p.hurt(p.damageSources().magic(),1);continue;
                 }
-                if(pending(p))continue;var ref=new GalaxyCatalog.Ref(system.id(),body.index());var discovery=data.discovery(ref);
+                if(pending(p)||Interstellar.active(p))continue;var ref=new GalaxyCatalog.Ref(system.id(),body.index());var discovery=data.discovery(ref);
                 if(discovery!=null&&discovery.destroyed()&&!discovery.restored())continue;
                 double[] surface=SpaceMath.surface(n,body.radius());var anchor=p.getPersistentData().getCompound("dbzenithLaunchAnchor");
                 if(anchor.getString("ref").equals(ref.key())&&SpaceMath.normal(anchor.getDouble("x"),anchor.getDouble("z"),body.radius()).dot(n)>.997){surface[0]=anchor.getDouble("x");surface[1]=anchor.getDouble("z");}
@@ -171,7 +177,7 @@ public final class SpaceRuntime {
             if(!cancel)try{if(q.ready.join()){
                 SpacePodEntity old=p.getVehicle() instanceof SpacePodEntity pod?pod:null;p.stopRiding();p.teleportTo(l,q.position.x,q.position.y,q.position.z,p.getYRot(),p.getXRot());
                 if(old!=null){old.discard();SpacePodEntity.orbit(p,q.position,q.velocity);}p.setDeltaMovement(q.velocity);p.connection.send(new ClientboundSetEntityMotionPacket(p));p.fallDistance=0;
-                checkpoint(p);PlanetEnvironment.enter(p);scene(p,true,q.velocity);s.used.put(l.dimension(),now);
+                checkpoint(p);PlanetEnvironment.enter(p);scene(p,true,q.velocity);s.used.put(l.dimension(),now);Interstellar.arrived(p);
             }}catch(CompletionException ex){DBZenith.LOGGER.error("Orbital preload failed",ex);p.displayClientMessage(Component.literal("Orbital transfer failed. Your departure world is safe."),false);}
             if(l!=null)l.getChunkSource().removeRegionTicket(TRANSIT,q.chunk,1,entry.getKey());it.remove();
         }

@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.142.0, 2026-10-17)
+# Handoff: where Dragon Block Zenith stands (v0.143.0, 2026-10-17)
 
 ## The prompt to paste into a new session
 
@@ -172,3 +172,28 @@ ground-contact discovery and real roof protection against server ki drain. All26
 existing Needs system consumes planetary temperatures/protection; thirst fixture isolated from biome cold.
 False-moon fixture isolated into the active test arena; older landing fixture explicitly simulates ground contact.
 Next: Phase5 hyperspeed, cross-dimensional Instant Transmission and remaining iconic systems. Story last.
+
+## Galaxy Phase 5 (v0.143.0, 2026-10-17)
+Interstellar owns capped per-player hyperspeed jobs: orbit only, actual piloted pod or near-full ki flight,
+10-20s nominal + bounded preload budget (30s total), cancellation/damage/death/realm checks, separate orbit
+cap retained. No destination created during the charge. Existing SpaceRuntime async transfer preserves pods;
+arrival commits ki/cooldown in the transfer callback. Sneak disengages. Protocol46 adds bounded JourneyPacket.
+JourneyClient draws original calm/quality-aware star streaks, progress and a soft arrival tint; original drone
+is mixed/pitched as a drive. Existing protection/flight drain still apply. Atlas Jump/Transmit + Places charts.
+
+Instant Transmission reuses RacialSkillEffects validation/cost/cooldown via an action callback. Personal
+arrivals are optional additive GalaxyData NBT, keyed by player UUID; ground contact backfills old visits.
+Planet casts preload surrounding chunks and revalidate on completion; collision-based non-destructive safe
+landing handles snow/slabs and actual body size. No ki spent if preparation fails. Known players are recorded
+on StartTracking; cross-world sensing respects god ki and living realms. Existing local/home/lock-on remain.
+Picker bounded/paged; atlas allows any personally visited planet. Beerus's god-ki gate remains.
+
+New iconic addresses are 27:-6:14:8/0 (Planet Vegeta,10g red desert/ruins) and -34:9:-21:8/0 (Frieza Planet79,
+breathable imperial outpost). Slot8 is valid only at these two previously invalid addresses; all previous
+v1 inputs, catalogue fingerprints and terrain remain stable. Original block templates, no downloaded assets.
+Namek biome tint now has blue grass/water; legacy structures/terrain unchanged. King Kai/Earth/Beerus retained.
+Three new GameTests exercise additive identities/arrival persistence, contact/god-ki/cost/cooldown checks,
+actual hyperspeed/cancellation and asynchronous personal Earth return. See DEVLOG for final verification.
+All266 required tests pass. Dev-client Survival landings/personal picker/actual Earth return verified;
+hyperspeed clips, supported Vegeta ruins and Namek tint checked. Frieza outpost is above sea level.
+Next: Phase6 extends protected batched craters, then staged planetary destruction and polish. Story last.

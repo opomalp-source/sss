@@ -133,8 +133,15 @@ public final class PlanetRuntime {
     }
     public static boolean hasPod(ServerPlayer p){return p.isCreative() || p.getVehicle() instanceof SpacePodEntity || p.getMainHandItem().is(ModItems.SPACE_POD.get())||p.getOffhandItem().is(ModItems.SPACE_POD.get());}
     public static boolean travel(ServerPlayer p,GalaxyCatalog.Ref ref){return queue(p,ref,null,false);}
+    public static boolean transmit(ServerPlayer p,GalaxyCatalog.Ref ref){
+        var d=ModCapabilities.getOrThrow(p);if(!com.dbzenith.galaxy.space.Interstellar.canTransmit(p)||!d.hasFlag("planet_landing:"+ref.key()))return false;
+        var anchor=GalaxyData.get(p.server).arrivals(p.getUUID()).get(ref);var tag=new CompoundTag();tag.putBoolean("transmission",true);tag.putString("ref",ref.key());tag.putFloat("yaw",anchor==null?p.getYRot():anchor.yaw());
+        tag.putDouble("x",anchor==null?8:anchor.x());tag.putDouble("y",anchor==null?72:anchor.y());tag.putDouble("z",anchor==null?8:anchor.z());tag.putBoolean("safeLanding",true);
+        return queue(p,ref,tag,true);
+    }
     public static boolean pending(ServerPlayer p){return state(p.server).pending.containsKey(p.getUUID());}
     public static boolean reenter(ServerPlayer p,GalaxyCatalog.Ref ref,double x,double z,net.minecraft.world.phys.Vec3 velocity){
+        if(!com.dbzenith.galaxy.space.Interstellar.accessible(p,ref))return false;
         var tag=new CompoundTag();tag.putString("ref",ref.key());tag.putDouble("x",x);tag.putDouble("y",com.dbzenith.galaxy.space.SpaceMath.ENTRY);tag.putDouble("z",z);tag.putFloat("yaw",p.getYRot());
         tag.putBoolean("entry",true);tag.putDouble("vx",velocity.x);tag.putDouble("vy",velocity.y);tag.putDouble("vz",velocity.z);return queue(p,ref,tag,true);
     }
@@ -149,9 +156,10 @@ public final class PlanetRuntime {
         if(s.pending.containsKey(p.getUUID()))return false;
         if(!reconnect && (!hasPod(p)||TimeChamber.isIn(p)||data.isDead()||!p.isAlive()||p.isSpectator())){p.displayClientMessage(Component.literal("Hold a Space Pod in the living world to land."),true);return false;}
         if(!reconnect&&data.isOnCooldown("space_travel",p.level().getGameTime())&&!p.isCreative()){p.displayClientMessage(Component.literal("Your Space Pod is recharging."),true);return false;}
+        if(!reconnect&&!p.isCreative()&&legacy(ref)==null&&!GalaxyData.current(p).equals(ref.system())){p.displayClientMessage(Component.literal("Reach this star system by hyperspeed before landing."),true);return false;}
         try {
             var legacy=legacy(ref);
-            if(reconnect&&legacy!=null&&(checkpoint==null||!checkpoint.getBoolean("entry"))){p.getPersistentData().remove(RETURN);return false;}
+            if(reconnect&&legacy!=null&&(checkpoint==null||!checkpoint.getBoolean("entry")&&!checkpoint.getBoolean("transmission"))){p.getPersistentData().remove(RETURN);return false;}
             if(legacy!=null&&!reconnect){
                 Planet planet=Arrays.stream(Planet.values()).filter(t->t.dimension().equals(legacy)).findFirst().orElse(Planet.EARTH);
                 return p.getVehicle() instanceof SpacePodEntity pod?pod.launch(p,planet):Planet.travel(p,planet);
@@ -167,7 +175,7 @@ public final class PlanetRuntime {
             ChunkPos chunk=new ChunkPos(BlockPos.containing(x,0,z));
             level.getChunkSource().addRegionTicket(LANDING,chunk,1,p.getUUID());
             // Calling getChunkFuture on the server thread would managedBlock; schedule its nonblocking path off-thread.
-            int around=checkpoint!=null&&checkpoint.getBoolean("bed")?1:0;
+            int around=checkpoint!=null&&(checkpoint.getBoolean("bed")||checkpoint.getBoolean("transmission"))?1:0;
             List<CompletableFuture<Boolean>> chunks=new ArrayList<>();
             for(int dx=-around;dx<=around;dx++)for(int dz=-around;dz<=around;dz++){
                 int cx=chunk.x+dx,cz=chunk.z+dz;
@@ -176,8 +184,19 @@ public final class PlanetRuntime {
             }
             CompletableFuture<Boolean> ready=CompletableFuture.allOf(chunks.toArray(CompletableFuture[]::new)).thenApply(v->chunks.stream().allMatch(CompletableFuture::join));
             s.pending.put(p.getUUID(),new Pending(ref,p.level().dimension(),p.getX(),p.getY(),p.getZ(),p.server.getTickCount(),target,chunk,ready,checkpoint));
-            p.displayClientMessage(Component.literal(reconnect?"Restoring your planet location...":"Preparing landing terrain..."),true);return true;
+            p.displayClientMessage(Component.literal(checkpoint!=null&&checkpoint.getBoolean("transmission")?"Sensing a familiar world. Stay still...":reconnect?"Restoring your planet location...":"Preparing landing terrain..."),true);return true;
         }catch(IllegalArgumentException ex){p.displayClientMessage(Component.literal(ex.getMessage()),true);return false;}
+    }
+    private static net.minecraft.world.phys.Vec3 transmissionLanding(ServerLevel l,ChunkPos chunk,ServerPlayer p){
+        for(int x=chunk.getMinBlockX()+3;x<=chunk.getMinBlockX()+12;x++)for(int z=chunk.getMinBlockZ()+3;z<=chunk.getMinBlockZ()+12;z++){
+            int y=l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,x,z);
+            for(int step=1;step<=4;step++){
+                var floor=new BlockPos(x,y-step,z);var state=l.getBlockState(floor);if(!state.getFluidState().isEmpty()||state.is(Blocks.MAGMA_BLOCK)||state.is(Blocks.POWDER_SNOW))break;
+                var shape=state.getCollisionShape(l,floor);if(shape.isEmpty())continue;
+                var at=new net.minecraft.world.phys.Vec3(x+.5,floor.getY()+shape.max(Direction.Axis.Y),z+.5);var box=p.getBoundingBox().move(at.subtract(p.position()));
+                if(l.getWorldBorder().isWithinBounds(floor)&&l.noCollision(p,box))return at;break;
+            }
+        }return null;
     }
     private static BlockPos landing(ServerLevel l,ChunkPos chunk){
         int cx=chunk.getMinBlockX()+8,cz=chunk.getMinBlockZ()+8;
@@ -223,6 +242,8 @@ public final class PlanetRuntime {
         for(var it=s.pending.entrySet().iterator();it.hasNext();){var entry=it.next();Pending q=entry.getValue();ServerPlayer p=server.getPlayerList().getPlayer(entry.getKey());ServerLevel l=server.getLevel(q.target);
             boolean cancel=p==null||l==null||now-q.start>600||!p.isAlive()||!p.level().dimension().equals(q.origin)||(q.checkpoint==null&&p.distanceToSqr(q.ox,q.oy,q.oz)>64);
             if(!cancel&&!q.ready.isDone())continue;
+            boolean transmission=q.checkpoint!=null&&q.checkpoint.getBoolean("transmission");
+            if(transmission&&(p==null||!com.dbzenith.galaxy.space.Interstellar.canTransmit(p)||p.distanceToSqr(q.ox,q.oy,q.oz)>4))cancel=true;
             if(!cancel){try{
                 if(q.ready.join()){
                     boolean bed=q.checkpoint!=null&&q.checkpoint.getBoolean("bed");
@@ -237,6 +258,15 @@ public final class PlanetRuntime {
                         }
                         x=safe.get().x;y=safe.get().y;z=safe.get().z;
                     }
+                    if(transmission){
+                        var safe=transmissionLanding(l,q.chunk,p);
+                        if(safe==null){p.displayClientMessage(Component.literal("Instant Transmission found no clear landing space. No ki spent."),true);l.getChunkSource().removeRegionTicket(LANDING,q.chunk,1,entry.getKey());it.remove();continue;}
+                        // Revalidate the learned skill after async generation; charge only a completed cast.
+                        if(!com.dbzenith.race.RacialSkillEffects.transmitAction(p,()->true)){
+                            l.getChunkSource().removeRegionTicket(LANDING,q.chunk,1,entry.getKey());it.remove();continue;
+                        }
+                        x=safe.x;y=safe.y;z=safe.z;com.dbzenith.galaxy.space.Interstellar.blink(p);
+                    }
                     SpacePodEntity vessel=p.getVehicle() instanceof SpacePodEntity pod?pod:null;
                     p.stopRiding();
                     p.teleportTo(l,x,y,z,q.checkpoint==null?p.getYRot():q.checkpoint.getFloat("yaw"),0);
@@ -250,6 +280,7 @@ public final class PlanetRuntime {
                     var d=GalaxyData.get(server);var body=body(l);if(body==null)body=GalaxyCatalog.body(server.overworld().getSeed(),d.salt(),q.ref);
                     com.dbzenith.galaxy.space.SpaceRuntime.scene(p,false,p.getDeltaMovement());
                     s.used.put(l.dimension(),now);checkpoint(p);PlanetEnvironment.enter(p);
+                    if(transmission)com.dbzenith.galaxy.space.Interstellar.blink(p);
                     p.displayClientMessage(Component.literal("Landed on "+d.name(q.ref,body.name())),false);
                 }else p.displayClientMessage(Component.literal("Landing terrain was unavailable. You remain at your departure point."),false);
             }catch(CompletionException ex){DBZenith.LOGGER.error("Planet landing generation failed",ex);p.displayClientMessage(Component.literal("Landing failed; your departure location is safe."),false);}}

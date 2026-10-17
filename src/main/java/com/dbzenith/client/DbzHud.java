@@ -41,7 +41,7 @@ public final class DbzHud implements IGuiOverlay {
     @Override
     public void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.options.hideGui || mc.options.renderDebug || mc.player == null || !ClientPlayerData.hasData()) return;
+        if (mc.options.hideGui || mc.options.renderDebug || mc.player == null || com.dbzenith.client.space.JourneyClient.active() || !ClientPlayerData.hasData()) return;
         PlayerData d = ClientPlayerData.get();
         DerivedStats s = d.getDerived();
         Font font = mc.font;

@@ -16,6 +16,13 @@ public final class GalaxyData extends SavedData {
     public record Discovery(UUID owner, String discoverer, long tick, String name, boolean destroyed, boolean restored, boolean base, String snapshot, String catalogName) {}
     private final Map<GalaxyCatalog.Ref,Discovery> discoveries=new TreeMap<>(Comparator.comparing(GalaxyCatalog.Ref::key));
     private final Map<UUID,GalaxyCatalog.Ref> waypoints=new LinkedHashMap<>();
+    public record Arrival(double x,double y,double z,float yaw){}
+    private final Map<UUID,Map<GalaxyCatalog.Ref,Arrival>> arrivals=new HashMap<>();
+    public Map<GalaxyCatalog.Ref,Arrival> arrivals(UUID player){return Collections.unmodifiableMap(arrivals.getOrDefault(player,Map.of()));}
+    public void arrival(UUID player,GalaxyCatalog.Ref ref,Arrival at){
+        if(!Double.isFinite(at.x+at.y+at.z)||at.y< -63||at.y>768)return;
+        if(arrivals.computeIfAbsent(player,k->new TreeMap<>(Comparator.comparing(GalaxyCatalog.Ref::key))).putIfAbsent(ref,at)==null)setDirty();
+    }
     private long salt=GalaxyCatalog.SALT;
     private CompoundTag unsupported;
     public static GalaxyData get(MinecraftServer server) {
@@ -40,6 +47,7 @@ public final class GalaxyData extends SavedData {
     public boolean rename(GalaxyCatalog.Ref ref,UUID player,String name) {
         Discovery d=discovery(ref);
         if(d==null || !d.owner.equals(player) || !validName(name)) return false;
+        if(ref.planet()==0&&IconicSystems.isNew(ref.system()))return false;
         if(ref.planet()==0 && Set.of(GalaxyCatalog.EARTH,GalaxyCatalog.NAMEK,GalaxyCatalog.NORTH,GalaxyCatalog.BEERUS).contains(ref.system())) return false;
         discoveries.put(ref,new Discovery(d.owner,d.discoverer,d.tick,name.strip(),d.destroyed,d.restored,d.base,d.snapshot,d.catalogName));
         setDirty(); return true;
@@ -76,7 +84,9 @@ public final class GalaxyData extends SavedData {
         });
         tag.put("discoveries",list); ListTag wp=new ListTag();
         waypoints.forEach((u,r)->{ CompoundTag t=new CompoundTag(); t.putUUID("player",u); t.putString("ref",r.key()); wp.add(t); });
-        tag.put("waypoints",wp); return tag;
+        tag.put("waypoints",wp);ListTag visits=new ListTag();arrivals.forEach((u,map)->map.forEach((ref,a)->{
+            var t=new CompoundTag();t.putUUID("player",u);t.putString("ref",ref.key());t.putDouble("x",a.x);t.putDouble("y",a.y);t.putDouble("z",a.z);t.putFloat("yaw",a.yaw);visits.add(t);
+        }));tag.put("arrivals",visits); return tag;
     }
     public static GalaxyData load(CompoundTag tag) {
         // SavedData swallows loader exceptions and may create a blank replacement. Preserve an unknown schema instead.
@@ -92,6 +102,7 @@ public final class GalaxyData extends SavedData {
             CompoundTag t=(CompoundTag)raw;
             try { data.waypoints.put(t.getUUID("player"),GalaxyCatalog.Ref.parse(t.getString("ref"))); } catch(IllegalArgumentException ignored) {}
         }
+        for(Tag raw:tag.getList("arrivals",Tag.TAG_COMPOUND)){var t=(CompoundTag)raw;try{data.arrival(t.getUUID("player"),GalaxyCatalog.Ref.parse(t.getString("ref")),new Arrival(t.getDouble("x"),t.getDouble("y"),t.getDouble("z"),t.getFloat("yaw")));}catch(IllegalArgumentException ex){DBZenith.LOGGER.warn("Skipping malformed planet arrival");}}
         return data;
     }
 }

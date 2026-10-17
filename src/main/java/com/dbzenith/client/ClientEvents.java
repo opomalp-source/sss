@@ -251,6 +251,12 @@ public final class ClientEvents {
             mc.setScreen(null);
             delayTicks = Math.max(delayTicks, 3);
         }
+        if(name.startsWith("places_")&&!(mc.screen instanceof com.dbzenith.client.screen.IconicScreen)){
+            mc.setScreen(new com.dbzenith.client.screen.IconicScreen(mc.screen));delayTicks=Math.max(delayTicks,6);
+        }
+        if(name.startsWith("transmission_")&&!(mc.screen instanceof com.dbzenith.client.screen.TransmissionScreen)){
+            com.dbzenith.network.ModNetwork.sendToServer(new com.dbzenith.network.RacialPackets.TransmitRequest());delayTicks=Math.max(delayTicks,20);
+        }
         if (name.startsWith("quests_") && !(mc.screen instanceof com.dbzenith.client.screen.QuestScreen)) {
             mc.setScreen(new com.dbzenith.client.screen.QuestScreen(name.contains("patrol") ? com.dbzenith.quest.Quest.Giver.PATROL : com.dbzenith.quest.Quest.Giver.MASTER));
             delayTicks = Math.max(delayTicks, 5);

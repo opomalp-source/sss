@@ -17,10 +17,17 @@ public final class GalaxyCommands {
         dispatcher.register(Commands.literal("galaxy").executes(c->{GalaxyService.open(c.getSource().getPlayerOrException());return 1;}).then(nameCommand()).then(Commands.literal("namehere").then(Commands.argument("name",StringArgumentType.greedyString()).executes(c->{
             var p=c.getSource().getPlayerOrException();var ref=com.dbzenith.galaxy.space.SpaceRuntime.surfaceRef(p.serverLevel());boolean ok=ref!=null&&GalaxyData.get(p.server).rename(ref,p.getUUID(),StringArgumentType.getString(c,"name"));
             if(ok){com.dbzenith.galaxy.space.SpaceRuntime.scene(p,false,p.getDeltaMovement());c.getSource().sendSuccess(()->Component.literal("Planet named."),false);}else c.getSource().sendFailure(Component.literal("Only the first discoverer can name this planet. Use 2-32 letters, numbers, spaces, apostrophes, dots or hyphens."));return ok?1:0;
-        }))).then(Commands.literal("home").executes(c->com.dbzenith.galaxy.planet.PlanetRuntime.home(c.getSource().getPlayerOrException())?1:0)));
+        }))).then(course("jump",false)).then(course("transmit",true)).then(Commands.literal("home").executes(c->com.dbzenith.galaxy.planet.PlanetRuntime.home(c.getSource().getPlayerOrException())?1:0)));
     }
+    private static LiteralArgumentBuilder<CommandSourceStack> course(String name,boolean transmission){return Commands.literal(name).then(Commands.argument("ref",StringArgumentType.string()).executes(c->{
+        var p=c.getSource().getPlayerOrException();if(!com.dbzenith.network.InputGuard.allow(p,com.dbzenith.network.InputGuard.Kind.GALAXY))return 0;
+        try{var ref=GalaxyCatalog.Ref.parse(StringArgumentType.getString(c,"ref"));return (transmission?com.dbzenith.galaxy.space.Interstellar.transmit(p,ref):com.dbzenith.galaxy.space.Interstellar.begin(p,ref))?1:0;}catch(IllegalArgumentException ex){c.getSource().sendFailure(Component.literal(ex.getMessage()));return 0;}
+    }));}
     public static LiteralArgumentBuilder<CommandSourceStack> branch() {
         return Commands.literal("galaxy").executes(c->{GalaxyService.open(c.getSource().getPlayerOrException());return 1;})
+            .then(Commands.literal("jump").then(Commands.argument("players",EntityArgument.players()).then(Commands.argument("ref",StringArgumentType.string()).executes(c->{
+                try{var ref=GalaxyCatalog.Ref.parse(StringArgumentType.getString(c,"ref"));int n=0;for(var p:EntityArgument.getPlayers(c,"players"))if(com.dbzenith.galaxy.space.Interstellar.begin(p,ref))n++;return n;}catch(IllegalArgumentException ex){return 0;}
+            }))))
             .then(Commands.literal("weather").then(Commands.argument("hazard",StringArgumentType.word()).then(Commands.argument("players",EntityArgument.players()).executes(c->{
                 try{var hazard=com.dbzenith.galaxy.planet.PlanetConditions.Hazard.valueOf(StringArgumentType.getString(c,"hazard").toUpperCase(java.util.Locale.ROOT));for(var p:EntityArgument.getPlayers(c,"players")){com.dbzenith.galaxy.planet.PlanetActivity.preview(p.serverLevel(),hazard);com.dbzenith.network.ModNetwork.sendTo(p,new com.dbzenith.network.PlanetActivityPacket(com.dbzenith.galaxy.planet.PlanetActivity.status(p)));}return 1;}catch(IllegalArgumentException ex){return 0;}
             }))))

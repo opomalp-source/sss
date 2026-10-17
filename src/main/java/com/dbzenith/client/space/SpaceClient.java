@@ -44,6 +44,7 @@ public final class SpaceClient {
     }
     @SubscribeEvent(priority=EventPriority.LOWEST) public static void movement(TickEvent.PlayerTickEvent e){
         if(!(e.player instanceof LocalPlayer p))return;
+        if(JourneyClient.active()){velocity=Vec3.ZERO;p.setDeltaMovement(Vec3.ZERO);movementLevel=null;return;}
         if(!SpaceRuntime.isSpace(p.level())||p.isPassenger()){movementLevel=null;return;}
         if(e.phase==TickEvent.Phase.START){
             if(movementLevel!=p.level().dimension()){movementLevel=p.level().dimension();velocity=p.getDeltaMovement();}
@@ -81,7 +82,7 @@ public final class SpaceClient {
     }
     public static final class Overlay implements IGuiOverlay {
         @Override public void render(ForgeGui gui,net.minecraft.client.gui.GuiGraphics g,float pt,int w,int h){
-            var mc=Minecraft.getInstance();var p=mc.player;if(p==null)return;
+            var mc=Minecraft.getInstance();var p=mc.player;if(p==null||JourneyClient.active())return;
             float alpha=fade>0?Math.min(1,fade/14f):0;
             if(preparing>0)alpha=Math.max(alpha,Math.min(.85f,(80-preparing)/12f));
             if(alpha>0)g.fill(0,0,w,h,((int)(alpha*255)<<24));

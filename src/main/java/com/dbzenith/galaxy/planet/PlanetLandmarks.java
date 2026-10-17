@@ -11,6 +11,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 public final class PlanetLandmarks {
     public record Site(int x,int y,int z,int kind){public String key(){return x+"_"+z;}}
     public static Site site(PlanetGenerator g,int cellX,int cellZ){
+        if(g.ref.planet()==0&&com.dbzenith.galaxy.IconicSystems.isNew(g.ref.system())&&cellX==0&&cellZ==0)return new Site(24,Math.max(g.terrain.sea()+2,g.terrain.height(24,24)+1),24,g.ref.system().equals(com.dbzenith.galaxy.IconicSystems.VEGETA)?0:4);
         if(g.kind==GalaxyCatalog.Kind.ASTEROIDS||g.kind==GalaxyCatalog.Kind.GAS_GIANT)return null;
         long hash=GalaxyCatalog.mix(g.terrain.seed^cellX*0x632be59bd9b4e019L^cellZ*0x94d049bb133111ebL);
         if(Math.floorMod(hash,5)!=0)return null;
@@ -68,13 +69,20 @@ public final class PlanetLandmarks {
         int minX=chunk.getPos().getMinBlockX(),minZ=chunk.getPos().getMinBlockZ();
         Site s=near(g,minX+8,minZ+8);if(s==null||s.x<minX-10||s.x>minX+25||s.z<minZ-10||s.z>minZ+25)return;
         var pos=new BlockPos.MutableBlockPos();var floor=chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);var surface=chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
-        for(int x=minX;x<minX+16;x++)for(int z=minZ;z<minZ+16;z++)for(int y=s.y-12;y<=s.y+14;y++){
+        int bottom=com.dbzenith.galaxy.IconicSystems.isNew(g.ref.system())?Math.min(s.y-12,g.terrain.height(s.x,s.z)-48):s.y-12;
+        for(int x=minX;x<minX+16;x++)for(int z=minZ;z<minZ+16;z++)for(int y=bottom;y<=s.y+14;y++){
             var state=piece(s,x,y,z);
             if(Math.abs(x-s.x)<=8&&Math.abs(z-s.z)<=8){
                 if(y<s.y-1&&y>=g.terrain.height(x,z))state=Blocks.DEEPSLATE_BRICKS.defaultBlockState();
                 else if(state==null&&y>=s.y)state=Blocks.AIR.defaultBlockState();
             }
-            if(state==null)continue;pos.set(x,y,z);chunk.setBlockState(pos,state,false);floor.update(x&15,y,z&15,state);surface.update(x&15,y,z&15,state);
+            if(state==null)continue;
+            if(g.ref.system().equals(com.dbzenith.galaxy.IconicSystems.VEGETA)&&s.kind==0&&z==s.z-6&&(x==s.x-6||x==s.x+1)&&y>=s.y&&y<s.y+7)state=Blocks.CHISELED_STONE_BRICKS.defaultBlockState();
+            if(g.ref.system().equals(com.dbzenith.galaxy.IconicSystems.FRIEZA)){
+                if(state.is(Blocks.STONE_BRICKS))state=Blocks.IRON_BLOCK.defaultBlockState();
+                else if(state.is(Blocks.CYAN_STAINED_GLASS))state=Blocks.RED_STAINED_GLASS.defaultBlockState();
+            }
+            pos.set(x,y,z);chunk.setBlockState(pos,state,false);floor.update(x&15,y,z&15,state);surface.update(x&15,y,z&15,state);
         }
     }
 }

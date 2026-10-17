@@ -49,13 +49,14 @@ public final class PlanetActivity {
     public static boolean landing(ServerPlayer p){
         var ref=SpaceRuntime.surfaceRef(p.serverLevel());if(ref==null||!p.onGround()||p.isSpectator()||!p.isAlive())return false;
         if(!p.serverLevel().noCollision(p,p.getBoundingBox())||p.serverLevel().noCollision(p,p.getBoundingBox().move(0,-.08,0)))return false;
-        var d=ModCapabilities.getOrThrow(p);String flag="planet_landing:"+ref.key();if(d.hasFlag(flag))return false;
-        var data=GalaxyData.get(p.server);var b=GalaxyCatalog.body(p.server.overworld().getSeed(),data.salt(),ref);
+        var d=ModCapabilities.getOrThrow(p);String flag="planet_landing:"+ref.key();
+        var data=GalaxyData.get(p.server);data.arrival(p.getUUID(),ref,new GalaxyData.Arrival(p.getX(),p.getY(),p.getZ(),p.getYRot()));if(d.hasFlag(flag))return false;
+        var b=GalaxyCatalog.body(p.server.overworld().getSeed(),data.salt(),ref);
         data.discover(ref,p.getUUID(),p.getGameProfile().getName(),p.server.overworld().getGameTime(),b.name());d.setFlag(flag,true);
         var found=data.discovery(ref);CompoundTag t=new CompoundTag();t.putString("dimension",p.level().dimension().location().toString());t.putBoolean("landing",true);
         t.putString("name",data.name(ref,b.name()));t.putString("type",GalaxyCatalog.label(b.kind()));t.putDouble("gravity",b.gravity());t.putString("discoverer",found.discoverer());
         ModNetwork.sendTo(p,new PlanetActivityPacket(t));SpaceRuntime.scene(p,false,p.getDeltaMovement());
-        if(found.owner().equals(p.getUUID())&&!(ref.planet()==0&&Set.of(GalaxyCatalog.EARTH,GalaxyCatalog.NAMEK,GalaxyCatalog.NORTH,GalaxyCatalog.BEERUS).contains(ref.system())))
+        if(found.owner().equals(p.getUUID())&&!(ref.planet()==0&&(IconicSystems.isNew(ref.system())||Set.of(GalaxyCatalog.EARTH,GalaxyCatalog.NAMEK,GalaxyCatalog.NORTH,GalaxyCatalog.BEERUS).contains(ref.system()))))
             p.sendSystemMessage(Component.literal("You discovered this planet. [Name it]").withStyle(s->s.withColor(ChatFormatting.AQUA).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,"/galaxy namehere "))));
         return true;
     }

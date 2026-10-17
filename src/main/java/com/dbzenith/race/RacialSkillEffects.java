@@ -84,6 +84,11 @@ public final class RacialSkillEffects {
 
     /** Instant Transmission's destination, set by the target picker just before the skill fires. */
     private static final java.util.Map<java.util.UUID, Vec3> TRANSMISSION = new java.util.HashMap<>();
+    private static final java.util.Map<java.util.UUID,java.util.function.BooleanSupplier> WORLD_TRANSMISSION=new java.util.HashMap<>();
+    public static boolean transmitAction(ServerPlayer player,java.util.function.BooleanSupplier action){
+        var d=ModCapabilities.getOrThrow(player);var skill=RacialSkills.byId("instant_transmission");if(skill==null||!RacialSkills.has(d,"instant_transmission"))return false;
+        WORLD_TRANSMISSION.put(player.getUUID(),action);try{return use(player,d,skill);}finally{WORLD_TRANSMISSION.remove(player.getUUID());}
+    }
 
     public static boolean transmit(ServerPlayer player, Vec3 destination) {
         PlayerData d = ModCapabilities.get(player).orElse(null);
@@ -308,6 +313,7 @@ public final class RacialSkillEffects {
                 level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 0.5f, 1.6f);
             }
             case "instant_transmission" -> {
+                var action=WORLD_TRANSMISSION.get(player.getUUID());if(action!=null)return action.getAsBoolean();
                 Vec3 dest = TRANSMISSION.get(player.getUUID());
                 if (dest == null) return false;
                 level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1, player.getZ(), 24, 0.3, 0.6, 0.3, 0.05);

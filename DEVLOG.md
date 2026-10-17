@@ -4022,3 +4022,36 @@ User approved the eight-phase immersive space design. This release is Phase 1 on
   scouter unloaded/loaded readings (Earth2 signals/max1000), plus a persistent planet rename. Local capped
   client smoke check remained59-60fps after materials finished; broad profiling remains Phase8.
 - README/TODO/HANDOFF/galaxy guide updated. Direct local install, no updater/deploy. Phase5 travel next; story last.
+
+### v0.143.0 — Galaxy Phase 5: hyperspeed and familiar worlds (2026-10-17)
+- Orbit-only hyperspeed via piloted pod or full ki flight, bounded nominal10-20s plus preload (30s total),
+  per-player/global pending caps, safe interruption, existing instance caps and no destination creation during
+  charging. Async orbital transfer preserves pods; ki/cooldown charged atomically on successful arrival.
+  Sneak disengages. Existing vacuum protection, flight drain, stellar danger and Beerus god-ki gate remain.
+- Original quality/calm-aware blue-violet star-streak tunnel, progress/name, rising original drone drive mix,
+  and soft accessibility-aware arrival tint. No downloaded assets. Atlas Jump/Transmit and iconic Places picker.
+- Cross-world Instant Transmission reuses existing learned skill cost/cooldown/seal checks, with bounded paged
+  destinations and real tracked contacts; god ki remains hidden. Familiar living players get collision-checked
+  arrivals. Personal planet returns preload9 nearby chunks, check actual form clearance and collision shapes,
+  revalidate the skill, and spend ki only for a completed cast. No build clearing. Snow-covered landing refusal
+  found in the integration test and fixed to support partial shapes. Existing local/home/lock-on retained.
+- Optional personal arrival records added to sparse GalaxyData without changing schema or old discovery
+  ownership; first physical contact backfills older visits. Planet choices also work through the atlas/command.
+- Additive iconic slot8 at only two previously invalid coordinates: Planet Vegeta10g red desert/ruins and
+  Frieza Planet79 metal outpost. All prior valid catalogue-v1 inputs and terrain noise unchanged; fingerprint
+  tests retained. Original block templates, Namek grass/water tint, existing Kai/Earth/Beerus content preserved.
+- Three new GameTests cover iconic identity/address and anchor persistence, tracked contact/god-ki/cost/cooldown,
+  real bounded hyperspeed and cancellation, plus actual asynchronous visited-Earth return. Existing fixture
+  updated to compare dimension counts on repeat saved runs; creation already triggers contact, so the stranger
+  case explicitly clears that contact before checking refusal. Full suite passed266 required tests.
+- Protocol46, hyperspeed config, README/TODO/HANDOFF/galaxy guide and version updated. Dev-client verification
+  and final release checks recorded below. Direct local install and main/tag push only; no updater/deploy.
+- Visual review removed overlapping flight/scouter/status HUD during the tunnel and matched Vegeta's orbital
+  material to its red terrain. Frieza Planet 79's guaranteed outpost is raised above sea level on a supported
+  platform; an additional 24-seed assertion prevents submerged arrival landmarks. Namek's blue grass checked.
+- Final verification: offline build + all266 required GameTests passed (phase143-testsfinal.log,63s), then
+  build -x test. Dev-client shots/240-frame travel clips checked with Crop.java: clean tunnel, red Vegeta
+  arrival, supported courtyard, actual Survival landing cards, three familiar worlds in the picker and
+  a real Frieza Planet 79 -> Earth cast (250 ->210 ki, existing cooldown). The outpost's lodestone at y66
+  and dry roof at y73 were checked in the dev world. Local capped scene smoke check stayed58-60fps;
+  this is not a broad performance benchmark. Removed atlas subtitle overlap with Places at small GUI size.

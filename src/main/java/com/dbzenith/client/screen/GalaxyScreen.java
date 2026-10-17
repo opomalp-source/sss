@@ -22,7 +22,7 @@ public final class GalaxyScreen extends Screen {
     private CompoundTag data;
     private GalaxyCatalog.Id center=GalaxyCatalog.EARTH;
     private EditBox search,coordinates;
-    private Button back,home,go,searchButton,waypoint,land,previous,next;
+    private Button back,home,go,searchButton,waypoint,land,previous,next,jump,transmit;
     private float yaw=.25f,tilt=.65f,zoom=1,targetZoom=1;
     private int mapX=14,mapY=65,mapW,mapH,sideX,sideW;
     private String selected="",status="",query="";
@@ -38,7 +38,8 @@ public final class GalaxyScreen extends Screen {
         }
     }
     @Override protected void init() {
-        sideW=Math.min(210,Math.max(142,width/3));sideX=width-sideW-14;mapW=sideX-mapX-10;mapH=height-mapY-44;
+        sideW=Math.min(210,Math.max(142,width/3));sideX=width-sideW-14;mapW=sideX-mapX-10;mapH=height-mapY-68;
+        button("Places",14,11,52,b->minecraft.setScreen(new IconicScreen(this)));
         search=new EditBox(font,width-206,11,135,18,Component.literal("Search discovered planets"));search.setMaxLength(32);search.setHint(Component.literal("Discovered planet name"));search.setValue(query);addRenderableWidget(search);
         searchButton=button("Find",width-66,11,52,b->{query=search.getValue();cursor=0;request(3);});
         back=button("Back",14,37,49,b->back());
@@ -53,6 +54,8 @@ public final class GalaxyScreen extends Screen {
         });
         waypoint=button("Waypoint",sideX+8,height-30,(sideW-20)/2,b->{if(planet>=0)request(4);else{planet=0;request(4);}});
         land=button("Land",sideX+sideW/2+2,height-30,(sideW-20)/2,b->{if(planet<0)planet=0;request(6);onClose();});
+        jump=button("Jump",sideX+8,height-52,(sideW-20)/2,b->{if(planet<0)planet=0;request(8);onClose();});
+        transmit=button("Transmit",sideX+sideW/2+2,height-52,(sideW-20)/2,b->{if(planet<0)planet=0;request(9);onClose();});
         previous=button("Previous",sideX+8,height-30,70,b->{cursor=Math.max(0,cursor-32);request(3);});
         next=button("Next",sideX+sideW-78,height-30,70,b->{cursor+=32;request(3);});
         if(data!=null) accept();
@@ -85,8 +88,9 @@ public final class GalaxyScreen extends Screen {
         if(data==null)return;
         zoom+=(targetZoom-zoom)*.2f;
         g.fillGradient(0,0,width,height,0xFF060D19,0xFF0B1927);
-        g.drawString(font,"GALAXY ATLAS",16,13,GOLD,false);
-        g.drawString(font,font.plainSubstrByWidth("NORTH GALAXY / SURVEY NETWORK",Math.max(70,width-240)),16,25,DIM,false);
+        g.drawString(font,font.plainSubstrByWidth("GALAXY ATLAS",Math.max(30,width-290)),75,13,GOLD,false);
+        jump.visible=transmit.visible=view==2;jump.active=!waiting&&com.dbzenith.galaxy.space.SpaceRuntime.isSpace(minecraft.level);
+        var selectedBody=data.getCompound("system").getList("bodies",Tag.TAG_COMPOUND);transmit.active=!waiting&&data.getBoolean("canTransmit")&&planet>=0&&planet<selectedBody.size()&&selectedBody.getCompound(planet).getBoolean("visited");
         frame(g,mapX,mapY,mapW,mapH);frame(g,sideX,mapY,sideW,mapH);
         nodes.clear();g.enableScissor(mapX+1,mapY+1,mapX+mapW-1,mapY+mapH-1);
         background(g);
@@ -187,6 +191,7 @@ public final class GalaxyScreen extends Screen {
                 lines.add("Moons: "+b.getList("moons",Tag.TAG_COMPOUND).size()+(b.getBoolean("rings")?" / rings":""));
                 lines.add("Palette: "+b.getString("palette"));lines.add("Hazards: "+b.getString("hazard"));lines.add("Landmark: "+b.getString("landmark"));lines.add("Population: "+b.getString("population"));
                 lines.add(b.getBoolean("known")?"Discovered by "+b.getString("discoverer"):"Unvisited / survey estimate");
+                lines.add("Jump: orbit + piloted pod or full ki.");lines.add("Transmit: learned skill and a personal landing.");
                 lines.add(center+"/"+planet);if(b.getBoolean("destroyed"))lines.add("DESTROYED / remnant");
             }else{
                 heading=sys.getString("name");lines.add(center.toString());lines.add(sys.getInt("stars")+" star(s) / "+bodies.size()+" planets");
