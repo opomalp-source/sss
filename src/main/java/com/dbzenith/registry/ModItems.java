@@ -75,6 +75,7 @@ public final class ModItems {
             () -> new com.dbzenith.item.ProstheticItem(new Item.Properties().stacksTo(4), true));   // CX-54
     public static final RegistryObject<Item> PROSTHETIC_LEG = ITEMS.register("prosthetic_leg",
             () -> new com.dbzenith.item.ProstheticItem(new Item.Properties().stacksTo(4), false));
+    public static final RegistryObject<Item> PICCOLO_CAPE = ITEMS.register("piccolo_cape", () -> new com.dbzenith.item.CapeItem(new Item.Properties().stacksTo(1)));
     public static final java.util.List<RegistryObject<Item>> GI = gi();
     /** Head clothing (the clothing rework): Piccolo's turban, a bandana, a headband. */
     public static final java.util.Map<com.dbzenith.item.HeadwearItem.Kind, RegistryObject<Item>> HEADWEAR = headwear();

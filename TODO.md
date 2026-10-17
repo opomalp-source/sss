@@ -329,3 +329,5 @@ to both mods folders.
 - [x] v0.148.0: rework all outfit materials and depth; distinct early/Cell Saga armor, Piccolo cape/mantle/turban, boot/glove coverage, icons and fallbacks.
 
 - [x] v0.148.1: compensate cape root for the existing flight rig lean so streamed cloth stays behind the flyer.
+
+- [x] v0.149.0: independent saved cape accessory, chest-independent render including Classic, equip/swap/remove, one-time legacy Piccolo extraction.

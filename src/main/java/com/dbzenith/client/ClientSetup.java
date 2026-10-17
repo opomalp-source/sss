@@ -107,6 +107,7 @@ public final class ClientSetup {
                 com.dbzenith.client.render.FirstPersonBody.register(renderer, scars);
                 renderer.addLayer(new com.dbzenith.client.render.CosmeticsLayer(renderer));
                 renderer.addLayer(new com.dbzenith.client.render.GearLayer(renderer, event.getEntityModels()));
+                renderer.addLayer(new com.dbzenith.client.render.CapeLayer(renderer, event.getEntityModels()));
                 renderer.addLayer(new com.dbzenith.client.render.BattleDamageLayer<>(renderer));
                 renderer.addLayer(new com.dbzenith.client.render.LimbRender.StumpLayer<>(renderer));    // CX-53
                 renderer.addLayer(new FormHairLayer(renderer, event.getEntityModels()));

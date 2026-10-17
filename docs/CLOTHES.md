@@ -1,4 +1,4 @@
-# Fighting clothes and head clothing
+# Fighting clothes and accessories
 
 ## Outfits
 
@@ -9,7 +9,7 @@ Each outfit is three pieces (top, trousers, boots), worn in the chest, legs and 
 |---|---|
 | Turtle gi | orange wrap gi with raised lapels and obi knot, navy undershirt, sash and wristbands; hand-drawn Turtle School emblems on chest/back |
 | Demon gi | purple gi, red sash and wristbands |
-| Piccolo's gi | sleeveless purple gi, blue obi, low brown shoes; ivory mantle/collar and long flared cape with modeled pleats and a finished lower edge |
+| Piccolo's gi | sleeveless purple gi, blue obi and low brown shoes; cape and turban are separate accessories |
 | Saiyan Saga battle armor | white raised chest shell and straps over a navy bodysuit; ribbed gold abdomen, shoulder guards and hip guards; white gloves and boots |
 | Cell Saga battle armor | distinct streamlined white shell over a blue bodysuit, flexible gold abdomen; no shoulder/hip guards; white gloves and boots |
 | Frieza Force armour | white plate with purple trim over a black bodysuit; pads sweeping up and out |
@@ -72,3 +72,24 @@ Headwear also has distinct generated Classic/NPC fallback sheets; its item textu
 
 ### v0.148.1 flight adjustment
 The cape root compensates for the motion rig's sampled forward pitch during ki flight, preventing wind lift from being added twice. The existing interpolated rig and spring chain drive it; hover/walking and the trailing panels keep their motion.
+
+
+## Separate cape accessory (v0.149.0)
+
+Piccolo's Cape uses its own saved back slot, leaving chest armor, leggings, boots and headwear available.
+Right-click it in either hand to equip it; equipping another swaps the previous item back into that hand.
+Press K and use **Remove cape** under **Back accessory** to return it to the inventory. If the inventory is full,
+it drops beside you. The slot icon shows the equipped item. Capes are cosmetic and stay with the character
+through death/Other World, relog and dimension travel; they grant no armor or set bonus.
+
+Craft with seven white wool: `WWW / W W / W W`. Available in the mod creative tab as **Piccolo's Cape**.
+Piccolo's Gi is now just the sleeveless gi: it does not automatically render a cape. First login after upgrading
+extracts one cape into the back slot if the character has a Piccolo top in their player inventory or armor slots.
+The existing top and all its NBT/wear remain intact. This migration runs once per character; old tops in external
+storage do not trigger it. Craft a separate cape for those. New characters do not receive a free cape.
+
+CapeLayer renders the existing pleated mantle/cape independently of GearLayer, including Classic art and vanilla
+armor. It retains Cloth springs and MotionEngine flight compensation. The server stores the item in PlayerData
+(schema3), the owner receives its NBT through existing full sync, and trackers receive one CAPE public-state bit.
+Protocol50 requires matching client/server versions. Clients only request removal; they cannot supply an item.
+Original cape/gi icons regenerate with `java tools/ArtGen.java only gear`.

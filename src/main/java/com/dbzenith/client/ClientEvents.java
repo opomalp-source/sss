@@ -151,6 +151,16 @@ public final class ClientEvents {
             mc.setScreen(new com.dbzenith.client.screen.PoseSheetScreen(name, clip, com.dbzenith.client.screen.PoseSheetScreen.stripCells(clip, 8), 0f, turn, pitch, null));
             delayTicks = Math.max(delayTicks, 4);
         }
+        if (delayTicks > 0 && name.contains("capeequip") && mc.player != null && mc.gameMode != null
+                && mc.player.getMainHandItem().getItem() instanceof com.dbzenith.item.CapeItem) {
+            mc.gameMode.useItem(mc.player, net.minecraft.world.InteractionHand.MAIN_HAND);
+            delayTicks = Math.max(delayTicks, 20);
+        }
+        if (delayTicks > 0 && name.startsWith("capeui_")) mc.setScreen(new com.dbzenith.client.screen.StatScreen());
+        if (delayTicks > 0 && name.contains("caperemove")) {
+            com.dbzenith.network.ModNetwork.sendToServer(new com.dbzenith.item.CapeItem.Remove());
+            delayTicks = Math.max(delayTicks, 20);
+        }
         if (name.startsWith("posesheet") && !(mc.screen instanceof com.dbzenith.client.screen.PoseSheetScreen ps && ps.key.equals(name))) {
             boolean npc = name.startsWith("posesheetnpc_");                     // posesheet[npc]_<slot | clips_<prefix>>_<phase%>[_<turn>]
             String[] parts = name.substring(name.indexOf('_') + 1).split("_");

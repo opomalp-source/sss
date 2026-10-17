@@ -42,6 +42,7 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
     /** In PvP mode (CX-19). */
     public static final int PVP = 1 << 15;
     public static final int MOON_EYES = 1 << 16;
+    public static final int CAPE = 1 << 17;
     /** Bits 20-27: the Kaioken stage (x2 = 2 ... x20 = 20), for the aura's red layer (CX-24). */
     public static final int KAIOKEN_SHIFT = 20;
     /** Bits 28-29: Ultra Instinct, 1 the Sign, 2 Mastered (a technique over the form; CX-24 phase 5). */
@@ -55,7 +56,7 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
     }
 
     public static PublicStatePacket of(int entityId, PlayerData d) {
-        int flags = (d.isCharging() ? CHARGING : 0) | (d.isFlying() ? FLYING : 0)
+        int flags = (d.hasCapeAccessory() ? CAPE : 0) | (d.isCharging() ? CHARGING : 0) | (d.isFlying() ? FLYING : 0)
                 | (d.isGuarding() ? GUARDING : 0) | (d.isChargingHeavy() ? HEAVY : 0)
                 | (Races.of(d.getRace()).tail() && d.hasTail() ? TAIL : 0) | (d.isMeditating() ? MEDITATING : 0) | (d.isTransforming() && d.isTransformHeld() ? TRANSFORMING : 0)
                 | (d.getKaiokenStage() > 0 ? KAIOKEN : 0) | (d.getRacialActive().contains("ki_barrier") ? BARRIER : 0)

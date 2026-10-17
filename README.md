@@ -3,9 +3,9 @@
 A Dragon Ball-inspired total-conversion mod for **Minecraft 1.20.1 / NeoForge 47.1.106**. Mod id `dbzenith`.
 Status, roadmap and decisions: [TODO.md](TODO.md), [FEATURE_MATRIX.md](FEATURE_MATRIX.md), [DEVLOG.md](DEVLOG.md), [BRIEF.md](BRIEF.md).
 
-## Latest release: 0.148.1
+## Latest release: 0.149.0
 
-Clothing rework: separate Saiyan Saga and Cell Saga armor, modeled shells/lapels/collars, detailed original materials and a long pleated Piccolo cape. [Clothing guide and recipes](docs/CLOTHES.md).
+Separate cape accessories: wear Piccolo’s pleated cape over any outfit or armor. Right-click to equip; K → Remove cape to take it off. Existing Piccolo wearers receive their detached cape on upgrade. [Clothing guide and recipes](docs/CLOTHES.md).
 
 Great Ape shoulders and hips spread as the body grows, giving thick limbs more room through idle, walking and stomps. [Great Ape guide](docs/GREAT_APE.md).
 

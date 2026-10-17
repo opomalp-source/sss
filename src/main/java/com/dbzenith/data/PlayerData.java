@@ -18,7 +18,18 @@ import net.minecraft.util.Mth;
  */
 public class PlayerData {
     /** Bump when the NBT layout changes and add a migration in {@link #load}. */
-    public static final int DATA_VERSION = 2;
+    public static final int DATA_VERSION = 3;
+
+    private net.minecraft.world.item.ItemStack capeAccessory = net.minecraft.world.item.ItemStack.EMPTY;
+    private boolean capeMigrationDone = true;
+    public net.minecraft.world.item.ItemStack capeAccessory() { return capeAccessory.copy(); }
+    public boolean hasCapeAccessory() { return !capeAccessory.isEmpty(); }
+    public void setCapeAccessory(net.minecraft.world.item.ItemStack stack) {
+        capeAccessory = stack.getItem() instanceof com.dbzenith.item.CapeItem ? stack.copyWithCount(1) : net.minecraft.world.item.ItemStack.EMPTY;
+        markDirty();
+    }
+    public boolean capeMigrationDone() { return capeMigrationDone; }
+    public void finishCapeMigration() { capeMigrationDone = true; markDirty(); }
 
     /** Techniques every v1 character could use before the deck system existed (migration). */
     private static final java.util.List<String> V1_TECHNIQUES =
@@ -1864,6 +1875,8 @@ public class PlayerData {
     public CompoundTag save() {
         CompoundTag tag = new CompoundTag();
         tag.putInt("DataVersion", DATA_VERSION);
+        tag.put("capeAccessory", capeAccessory.save(new CompoundTag()));
+        tag.putBoolean("capeMigrationDone", capeMigrationDone);
         CompoundTag attrs = new CompoundTag();
         for (Attribute a : Attribute.values()) attrs.putInt(a.id(), getAttribute(a));
         tag.put("attributes", attrs);
@@ -1990,6 +2003,8 @@ public class PlayerData {
      * Loads saved state. Missing keys fall back to defaults, so an empty tag yields a fresh, uninitialized character.
      */
     public void load(CompoundTag tag) {
+        setCapeAccessory(net.minecraft.world.item.ItemStack.of(tag.getCompound("capeAccessory")));
+        capeMigrationDone = tag.getBoolean("capeMigrationDone");
         CompoundTag attrs = tag.getCompound("attributes");
         for (Attribute a : Attribute.values()) {
             attributes[a.ordinal()] = attrs.contains(a.id()) ? Math.max(1, attrs.getInt(a.id())) : FALLBACK_ATTRIBUTE;

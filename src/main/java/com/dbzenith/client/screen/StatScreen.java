@@ -17,7 +17,10 @@ import net.minecraft.network.chat.Component;
  * "+" each (shift: +10), and what they add up to. Upgrades are requested from and checked by the server.
  */
 public class StatScreen extends MenuScreen {
-    private static final int ROW = 17;
+    private int rowHeight() {
+        // Keep the back slot above the footer even at a 240px GUI height.
+        return Math.min(17, Math.max(10, (cardH - 90) / Attribute.values().length));
+    }
 
     public StatScreen() {
         super(Component.translatable("screen.dbzenith.stats"), Page.STATS, null);
@@ -29,14 +32,20 @@ public class StatScreen extends MenuScreen {
 
     @Override
     protected void initPage() {
-        int x = cardX + 10, y = cardY + 26, lw = leftW() - 20;
+        int x = cardX + 10, y = cardY + 26, lw = leftW() - 20, row = rowHeight();
         Attribute[] attrs = Attribute.values();
         for (int i = 0; i < attrs.length; i++) {
             Attribute a = attrs[i];
-            addRenderableWidget(UiButton.of(UiButton.Style.CHIP, Component.literal("+"), x + lw - 16, y + i * ROW + 1, 16, 13,
+            addRenderableWidget(UiButton.of(UiButton.Style.CHIP, Component.literal("+"), x + lw - 16, y + i * row + 1, 16, 13,
                     b -> ModNetwork.sendToServer(new UpgradeAttributePacket(a, hasShiftDown() ? 10 : 1)))
                     .tip(Component.translatable("screen.dbzenith.upgrade_tooltip")));
         }
+        var capeButton = UiButton.of(UiButton.Style.SECONDARY,
+                Component.translatable("screen.dbzenith.cape_remove"), x + 24, y + attrs.length * row + 24, lw - 24, 18,
+                b -> ModNetwork.sendToServer(new com.dbzenith.item.CapeItem.Remove()))
+                .tip(Component.translatable("item.dbzenith.piccolo_cape.hint"));
+        capeButton.active = ClientPlayerData.get().hasCapeAccessory();
+        addRenderableWidget(capeButton);
         int by = cardY + cardH - 20, bx = cardX + 10;
         UiButton title = UiButton.of(UiButton.Style.SECONDARY, titleLabel(), bx, by, 120, 14, b -> {
             java.util.List<com.dbzenith.world.LifeSim.Title> earned = com.dbzenith.world.LifeSim.earnedTitles(ClientPlayerData.get());
@@ -70,7 +79,7 @@ public class StatScreen extends MenuScreen {
     protected void renderPage(GuiGraphics g, int mouseX, int mouseY, float partial) {
         PlayerData d = ClientPlayerData.get();
         DerivedStats s = d.getDerived();
-        int x = cardX + 10, lw = leftW() - 20;
+        int x = cardX + 10, lw = leftW() - 20, row = rowHeight();
 
         // who you are
         Component who = Component.translatable(d.getPrestige() > 0 ? "screen.dbzenith.identity_prestige" : "screen.dbzenith.identity_age",
@@ -89,15 +98,20 @@ public class StatScreen extends MenuScreen {
         int y = cardY + 26;
         for (int i = 0; i < attrs.length; i++) {
             Attribute a = attrs[i];
-            int ry = y + i * ROW;
-            boolean hot = mouseX >= x && mouseX < x + lw && mouseY >= ry && mouseY < ry + ROW - 2;
-            Ui.round(g, x, ry, lw, ROW - 2, 2, hot ? 0x1CFFFFFF : 0x0CFFFFFF);
+            int ry = y + i * row;
+            boolean hot = mouseX >= x && mouseX < x + lw && mouseY >= ry && mouseY < ry + row - 2;
+            Ui.round(g, x, ry, lw, row - 2, 2, hot ? 0x1CFFFFFF : 0x0CFFFFFF);
             Ui.text(g, font, Component.translatable(a.translationKey()), x + 6, ry + 3.5f, Ui.TEXT, 0.85f);
             String v = String.valueOf(d.getAttribute(a));
             Ui.text(g, font, v, x + lw * 0.5f - font.width(v) * 0.9f, ry + 3, 0xFFFFFFFF, 0.9f);
             String cost = costText(d, a);
             Ui.text(g, font, cost, x + lw - 22 - font.width(cost) * 0.7f, ry + 4, Ui.MUTED, 0.7f);
         }
+
+        int capeY = y + attrs.length * row + 10;
+        Ui.section(g, font, Component.translatable("screen.dbzenith.back_accessory"), x, capeY, lw);
+        Ui.round(g, x, capeY + 14, 20, 20, 2, 0x44000000);
+        if (d.hasCapeAccessory()) g.renderItem(d.capeAccessory(), x + 2, capeY + 16);
 
         // what they add up to
         int rx = cardX + leftW() + 4, rw = cardX + cardW - 10 - rx;

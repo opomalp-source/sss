@@ -13,7 +13,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
  * so mismatched client/server versions are refused at login instead of desyncing.
  */
 public final class ModNetwork {
-    private static final String PROTOCOL = "49";
+    private static final String PROTOCOL = "50";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(DBZenith.MOD_ID, "main"),
@@ -26,6 +26,9 @@ public final class ModNetwork {
     private ModNetwork() {}
 
     public static void register() {
+        CHANNEL.messageBuilder(com.dbzenith.item.CapeItem.Remove.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.dbzenith.item.CapeItem.Remove::encode).decoder(com.dbzenith.item.CapeItem.Remove::decode)
+                .consumerMainThread(com.dbzenith.item.CapeItem.Remove::handle).add();
         CHANNEL.messageBuilder(DoomPacket.class,nextId++,NetworkDirection.PLAY_TO_CLIENT).encoder(DoomPacket::encode).decoder(DoomPacket::decode).consumerMainThread(DoomPacket::handle).add();
         CHANNEL.messageBuilder(JourneyPacket.class,nextId++,NetworkDirection.PLAY_TO_CLIENT).encoder(JourneyPacket::encode).decoder(JourneyPacket::decode).consumerMainThread(JourneyPacket::handle).add();
         CHANNEL.messageBuilder(PlanetActivityPacket.class,nextId++,NetworkDirection.PLAY_TO_CLIENT).encoder(PlanetActivityPacket::encode).decoder(PlanetActivityPacket::decode).consumerMainThread(PlanetActivityPacket::handle).add();

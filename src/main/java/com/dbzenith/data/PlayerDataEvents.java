@@ -55,6 +55,7 @@ public final class PlayerDataEvents {
     public static void login(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             ModCapabilities.get(player).ifPresent(PlayerData::initDefaultsIfNeeded);
+            com.dbzenith.item.CapeItem.migrate(player);
             player.refreshDimensions(); // height (appearance.Stature) is only known once the data has loaded
             sync(player);
         }

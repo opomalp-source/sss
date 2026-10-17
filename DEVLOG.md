@@ -4180,3 +4180,14 @@ User approved the eight-phase immersive space design. This release is Phase 1 on
 - The final flight recording exposed double tilt: the wind-driven cape lift was added on top of the motion rig's forward flight lean, pushing the cape over the head. Compensate the root by the existing sampled rig pitch/engine weight while ki flight is active. Hover, walking, lower-panel flutter and original spring state remain. Per-player follow resets the compensation. No new movement system or server change. Validation below.
 
 - Validation: all281 required GameTests pass (build/phase1481-tests.log), build -x test succeeds. Crop.java review checks hover, fast airborne cruise starting60 blocks above the platform, settling and return to the ground pose. The cape now follows behind the flyer rather than projecting above the head. Main0.148.0 outfit/armor/growth visuals remain applicable; no material changes. Direct local install replaces0.148.0; no updater.
+
+
+## 2026-10-17 — Separate cape accessories (v0.149.0)
+- Piccolo's Cape is a craftable original item in a dedicated cosmetic back slot. Right-click in either hand equips/swaps; K Stats shows slot icon and Remove cape. Removal returns the original tagged stack, dropping only if inventory is full. Cosmetic slot survives death with the character, relog and dimension transfers. Chest armor/set bonuses remain independent.
+- CapeLayer reuses the pleated GearModel, Cloth chain and flight pitch compensation for any outfit and Classic art. Piccolo's top now renders only gi/sash; its icon/name no longer depict a bundled cape.
+- PlayerData schema3 stores the actual item and one-time legacy extraction flag. First upgrade login with a Piccolo top in player inventory/armor equips one detached cape without changing the original top. External storage is not scanned. Public CAPE bit reuses existing change/tracking sync; protocol50 adds a server-validated removal request containing no item data.
+- Validation recorded below. Direct installation only; no updater.
+
+Final automated validation: all284 required GameTests pass (build/phase149-testsfinal.log,1m25s), including full-inventory drop/no-duplication and actual respawn persistence. Offline build -x test succeeds (phase149-buildfinal.log). Compact Stats rows adapt to leave room above the footer. Final devshot review recorded below.
+
+Crop.java dev-client review passed: detached cape over Turtle gi, both Saiyan armor cuts, diamond chestplate and Classic art; rear/angled pleats; Piccolo gi without cape; actual airborne sprint; equipped/empty compact Stats slot with footer overlap fixed. Direct local installation via release.sh, no updater.

@@ -316,3 +316,16 @@ Release validation: all281 required tests pass (phase148-testsfinal.log, Gradle1
 GearLayer reuses MotionEngine.sample BODY.PITCH and engineWeight to compensate the cape root during ki flight; GearModel.follow resets the compensation per wearer. This prevents the wind angle from piling onto the rig lean and throwing the cape above the head. No server/physics change. Validation below.
 
 Final148.1 validation: all281 GameTests pass, build succeeds. Airborne sprint fromY160, hover/settling and return to ground checked with Crop.java. Compensated cape follows the flyer; all0.148.0 materials remain unchanged. Direct install/no updater.
+
+
+## Independent cape accessory (v0.149.0)
+CapeItem right-click moves/swaps one actual item into PlayerData.capeAccessory (defensive copies), K Stats removes,
+full inventory drops once. Retained on death as cosmetic character equipment. CapeLayer draws after GearLayer,
+including Classic; existing flight correction retained. Piccolo top no longer supplies cape/mantle. Schema3,
+protocol50, public CAPE bit. Legacy load without capeMigrationDone extracts once at login only if a Piccolo top
+is in player inventory/armor; external storage excluded. Recipe seven white wool. See docs/CLOTHES.md.
+Validation below; direct install/no updater. Story last.
+
+Final automated validation: all284 required GameTests pass (build/phase149-testsfinal.log,1m25s), including full-inventory drop/no-duplication and actual respawn persistence. Offline build -x test succeeds (phase149-buildfinal.log). Compact Stats rows adapt to leave room above the footer. Final devshot review recorded below.
+
+Crop.java dev-client review passed: detached cape over Turtle gi, both Saiyan armor cuts, diamond chestplate and Classic art; rear/angled pleats; Piccolo gi without cape; actual airborne sprint; equipped/empty compact Stats slot with footer overlap fixed. Direct local installation via release.sh, no updater.

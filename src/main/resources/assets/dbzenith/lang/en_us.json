@@ -1316,7 +1316,7 @@
   "settings.dbzenith.art_style.painted": "Painted",
   "settings.dbzenith.art_style.hd": "HD",
   "settings.dbzenith.art_style.classic": "Classic",
-  "item.dbzenith.namekian_top": "Piccolo's Gi and Cape",
+  "item.dbzenith.namekian_top": "Piccolo's Gi",
   "item.dbzenith.namekian_pants": "Piccolo's Gi Trousers",
   "item.dbzenith.namekian_boots": "Piccolo's Shoes",
   "item.dbzenith.majin_top": "Majin Vest",
@@ -2299,5 +2299,9 @@
   "subtitles.dbzenith.space_music": "Distant harmonies",
   "item.dbzenith.cell_armor_top": "Cell Saga Battle Armor Chestplate",
   "item.dbzenith.cell_armor_pants": "Cell Saga Battle Armor Bodysuit",
-  "item.dbzenith.cell_armor_boots": "Cell Saga Battle Armor Boots"
+  "item.dbzenith.cell_armor_boots": "Cell Saga Battle Armor Boots",
+  "item.dbzenith.piccolo_cape": "Piccolo's Cape",
+  "item.dbzenith.piccolo_cape.hint": "Right-click to wear over any outfit. K → Remove cape to take it off. Kept through death.",
+  "screen.dbzenith.cape_remove": "Remove cape",
+  "screen.dbzenith.back_accessory": "Back accessory"
 }

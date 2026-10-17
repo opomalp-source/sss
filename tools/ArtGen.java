@@ -1720,6 +1720,7 @@ public class ArtGen {
             fusion();
             parts();
             wardrobeIcons();
+            capeIcon();
             classicArmor();
             headwearFallbacks();
         }
@@ -2274,7 +2275,6 @@ public class ArtGen {
                 java.awt.Graphics2D d=im.createGraphics(); d.setStroke(new java.awt.BasicStroke(1.5f));
                 int c=base[n],t=trim[n];boolean armor=n==2||n==6||n==8;
                 if(slot.equals("top")) {
-                    if(n==3) iconPoly(d,0xEDEDE6,new int[]{10,22,42,54,51,13},new int[]{13,8,8,13,56,56});
                     iconPoly(d,c,new int[]{18,25,39,46,57,51,44,44,20,20,13,7},new int[]{10,15,15,10,21,33,29,54,54,29,33,21});
                     if(armor) {
                         iconPoly(d,0xEEEDE5,new int[]{20,44,44,41,23,20},new int[]{18,18,32,37,37,32});
@@ -2291,7 +2291,6 @@ public class ArtGen {
                         d.setColor(new java.awt.Color(t));d.drawLine(23,16,32,31);d.drawLine(41,16,32,31);iconRect(d,t,20,44,24,6);
                         d.setColor(new java.awt.Color(c).darker());d.drawLine(23,34,28,40);d.drawLine(41,34,36,40);
                     }
-                    if(n==3) {iconRect(d,0xEEEDE5,8,12,16,5);iconRect(d,0xEEEDE5,40,12,16,5);}
                     if(n==5) {iconRect(d,0xDDD9CF,31,18,2,34);d.setColor(new java.awt.Color(0x7C2030));d.drawRect(22,35,7,7);d.drawRect(35,35,7,7);}
                 } else if(slot.equals("pants")) {
                     int cloth=n==4||n==7?0xEFEDE8:n==5?0x2B2934:c;
@@ -2310,6 +2309,19 @@ public class ArtGen {
                 d.dispose();ImageIO.write(im,"png",new File(RES+"item/"+sets[n]+"_"+slot+".png"));
             }
         }
+        static void capeIcon() throws IOException {
+            BufferedImage im=new BufferedImage(64,64,BufferedImage.TYPE_INT_ARGB);
+            var d=im.createGraphics(); d.setStroke(new java.awt.BasicStroke(1.5f));
+            iconPoly(d,0xE8E6DE,new int[]{22,42,55,9},new int[]{13,13,56,56});
+            for(int x=18;x<50;x+=6) {
+                d.setColor(new java.awt.Color(0xB5B5BA)); d.drawLine(28+(x-28)/3,18,x,54);
+                d.setColor(new java.awt.Color(0xFAF8EF)); d.drawLine(29+(x-28)/3,18,x+1,53);
+            }
+            iconPoly(d,0xF4F2EC,new int[]{10,23,27,37,41,54,50,38,32,26,14},new int[]{13,7,9,9,7,13,23,21,17,21,23});
+            d.setColor(new java.awt.Color(0xC5C3C3));d.drawLine(15,15,24,12);d.drawLine(40,12,49,15);
+            d.dispose(); ImageIO.write(im,"png",new File(RES+"item/piccolo_cape.png"));
+        }
+
         static void iconRect(java.awt.Graphics2D d,int color,int x,int y,int w,int h) {d.setColor(new java.awt.Color(color));d.fillRect(x,y,w,h);}
         static void iconPoly(java.awt.Graphics2D d,int color,int[] x,int[] y) {
             var poly=new java.awt.Polygon(x,y,x.length);d.setColor(new java.awt.Color(color));d.fillPolygon(poly);
