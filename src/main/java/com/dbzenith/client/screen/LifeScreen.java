@@ -46,6 +46,13 @@ public class LifeScreen extends Screen {
         tattoo = Math.min(d.getTattoo(), Cosmetics.TATTOOS.size() - 1);
         raceLook = d.isRaceLook();
         skinTone = d.getSkinTone();
+        addRenderableWidget(new com.dbzenith.client.ui.ColorControl(this,left+40,top+SKIN_ROW,180,()->skinTone,c->{
+            skinTone=c;var current=ClientPlayerData.get();current.setSkinTone(c);
+            ModNetwork.sendToServer(new com.dbzenith.network.AppearancePacket(current.getHairCode(),current.getHairColor(),current.getEyeColor(),c));
+            var state=ClientPublicStates.get(minecraft.player.getId());
+            if(state!=null)ClientPublicStates.put(state.withAppearance(state.hairCode(),state.hairColor(),state.eyeColor(),c));
+        },com.dbzenith.appearance.Palettes.SKIN,Component.translatable("color.dbzenith.own_skin")));
+
         addRenderableWidget(ThemedButton.of(Component.translatable("screen.dbzenith.barber"), b ->
                 minecraft.setScreen(new HairEditorScreen(this, d.getHairCode(), d.getHairColor(), (code, color) ->
                         ModNetwork.sendToServer(new com.dbzenith.network.AppearancePacket(code, color, d.getEyeColor(), skinTone)))))
@@ -102,22 +109,6 @@ public class LifeScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        for (int i = 0; i < com.dbzenith.appearance.Palettes.SKIN.length; i++) {
-            int x = left + 40 + i * (SWATCH + 2), y = top + SKIN_ROW;
-            if (mx >= x && mx < x + SWATCH && my >= y && my < y + SWATCH) {
-                skinTone = com.dbzenith.appearance.Palettes.SKIN[i];
-                PlayerData d = ClientPlayerData.get();
-                ModNetwork.sendToServer(new com.dbzenith.network.AppearancePacket(d.getHairCode(), d.getHairColor(), d.getEyeColor(), skinTone));
-                PublicStatePacket s = ClientPublicStates.get(minecraft.player.getId());
-                if (s != null) ClientPublicStates.put(s.withAppearance(s.hairCode(), s.hairColor(), s.eyeColor(), skinTone));
-                return true;
-            }
-        }
-        return super.mouseClicked(mx, my, button);
-    }
-
-    @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         DbzTheme.screenBackground(g, width, height);
         DbzTheme.panel(g, left, top, W, H);
@@ -138,12 +129,6 @@ public class LifeScreen extends Screen {
                 : Component.translatable(d.isNearPartner() ? "screen.dbzenith.life_partner_near" : "screen.dbzenith.life_partner", d.getPartnerName());
         g.drawString(font, partner, left + 8, y, 0xFFFF90D0);
         DbzTheme.text(g, font, Component.translatable("screen.dbzenith.skin"), left + 8, top + SKIN_ROW + 1, DIM, 0.85f);
-        for (int i = 0; i < com.dbzenith.appearance.Palettes.SKIN.length; i++) {
-            int x = left + 40 + i * (SWATCH + 2), c = com.dbzenith.appearance.Palettes.SKIN[i];
-            g.fill(x - 1, top + SKIN_ROW - 1, x + SWATCH + 1, top + SKIN_ROW + SWATCH + 1, c == skinTone ? 0xFFFFFFFF : 0xFF404048);
-            g.fill(x, top + SKIN_ROW, x + SWATCH, top + SKIN_ROW + SWATCH, c < 0 ? 0xFF707078 : 0xFF000000 | c);
-            if (c < 0) g.fill(x + 2, top + SKIN_ROW + 4, x + SWATCH - 2, top + SKIN_ROW + 5, 0xFFE0E0E0);
-        }
         super.render(g, mouseX, mouseY, partialTick);
         if (minecraft != null && minecraft.player != null) {
             int px = left + W - 50, py = top + H - 34;

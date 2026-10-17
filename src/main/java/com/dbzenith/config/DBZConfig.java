@@ -778,7 +778,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue customHotbar;
         public final ForgeConfigSpec.BooleanValue hideVanillaHearts;
         public final ForgeConfigSpec.BooleanValue transformCutIn, transformCinematic, transformBurst, battleDamage, ultimateCinematic, damagePopups, prediction, enemyPanel, combatCallouts, comboCounter, combatLog, hitboxOverlay, pvpCamera;
-        public final ForgeConfigSpec.IntValue crosshairDotMode, crosshairStyle, crosshairSize, crosshairColor;
+        public final ForgeConfigSpec.IntValue crosshairDotMode, crosshairStyle, crosshairSize, crosshairColor, crosshairCustomColor;
         public final ForgeConfigSpec.DoubleValue crosshairOpacity;
         public final ForgeConfigSpec.DoubleValue shoulderOffset, shoulderHeight;
         public final ForgeConfigSpec.BooleanValue shoulderCamera, startThirdPerson;
@@ -855,6 +855,7 @@ public final class DBZConfig {
             crosshairDotMode = b.comment("The dot crosshair: 0 = in PvP only (out of PvP, crosshairStyle), 1 = always").defineInRange("crosshairDotMode", 0, 0, 1);
             crosshairStyle = b.comment("The crosshair out of PvP: 0 = a four-pointed star, 1 = the dot, 2 = vanilla's").defineInRange("crosshairStyle", 0, 0, 2);
             crosshairSize = b.comment("Crosshair size in pixels").defineInRange("crosshairSize", 3, 1, 8);
+            crosshairCustomColor = b.comment("Custom crosshair RGB; -1 keeps the legacy preset color.").defineInRange("crosshairCustomColor", -1, -1, 0xFFFFFF);
             crosshairColor = b.comment("Crosshair colour: 0 grey, 1 white, 2 gold, 3 red, 4 cyan, 5 green, 6 pink").defineInRange("crosshairColor", 0, 0, 6);
             crosshairOpacity = b.comment("Crosshair opacity, 0-1").defineInRange("crosshairOpacity", 0.9, 0.0, 1.0);
             lockOnRange = b.comment("Lock-on (key N): how far away a foe can be locked onto, in blocks")

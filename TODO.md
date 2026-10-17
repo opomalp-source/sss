@@ -331,3 +331,5 @@ to both mods folders.
 - [x] v0.148.1: compensate cape root for the existing flight rig lean so streamed cloth stays behind the flyer.
 
 - [x] v0.149.0: independent saved cape accessory, chest-independent render including Classic, equip/swap/remove, one-time legacy Piccolo extraction.
+
+- [x] v0.150.0: shared full RGB/hex picker for every existing editable color channel, including base aura, race details, custom techniques and crosshair.

@@ -329,3 +329,21 @@ Validation below; direct install/no updater. Story last.
 Final automated validation: all284 required GameTests pass (build/phase149-testsfinal.log,1m25s), including full-inventory drop/no-duplication and actual respawn persistence. Offline build -x test succeeds (phase149-buildfinal.log). Compact Stats rows adapt to leave room above the footer. Final devshot review recorded below.
 
 Crop.java dev-client review passed: detached cape over Turtle gi, both Saiyan armor cuts, diamond chestplate and Classic art; rear/angled pleats; Piccolo gi without cape; actual airborne sprint; equipped/empty compact Stats slot with footer overlap fixed. Direct local installation via release.sh, no updater.
+
+
+## 2026-10-17 — Full RGB customization (v0.150.0)
+Shared ColorControl/ColorPickerScreen replaces fixed swatch-only inputs in creation, Face, Barber, Life,
+Race Look, Ki Creator and crosshair Settings. Saturation/value square, rainbow hue rail, current swatch,
+#RRGGBB editor (optional #, case insensitive, shorthand), quick presets and explicit Apply/Cancel. Invalid drafts
+cannot apply, Escape cancels; original default/none sentinels remain separate from black. Face now exposes eye
+color after creation too, saved with existing AppearancePacket. Base aura editing retains form/Kaioken rules.
+Crosshair adds a client-only RGB override with -1 preserving the old index/default; Style reset clears it.
+No new network protocol, player schema or assets. docs/COLORS.md lists all channels and save behavior.
+Validation below. Direct local installation only; no updater. Story last.
+
+Final validation: all286 required GameTests pass (build/phase150-tests.log,1m8s); offline build -x test succeeds.
+New coverage includes4096 exact HSV round trips, invalid/short hex, black/default distinction, all appearance
+channels and custom-ki NBT, base aura output and public packet RGB precision. Crop.java review covers the
+reference AD2F17 picker, red invalid draft/disabled Apply, creation hair/body, Face eyes/aura, Barber, Ki Creator,
+Life, crosshair and Frost Demon skin/shell/horns. Dev client asserts11 successful Apply callbacks and unchanged
+parent state on Cancel. Original assets only (GUI geometry). Direct local install/no updater.

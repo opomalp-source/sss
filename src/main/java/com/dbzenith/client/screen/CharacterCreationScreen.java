@@ -161,6 +161,8 @@ public class CharacterCreationScreen extends Screen {
                 ox + W - 10 - 128, oy + H - 25, 128, 18, b -> confirm()));
         addRenderableWidget(UiButton.of(UiButton.Style.GHOST, Component.translatable("screen.dbzenith.create_later"),
                 ox + W - 10 - 128 - 84, oy + H - 25, 80, 18, b -> onClose()));
+        for (SwatchRow row : rows) addRenderableWidget(new com.dbzenith.client.ui.ColorControl(this,row.x,row.y,cw,
+                row.get,c->{row.set.accept(c);updatePreview();},row.colors));
         updatePreview();
     }
 
@@ -437,7 +439,7 @@ public class CharacterCreationScreen extends Screen {
             default -> { }
         }
         for (Object[] l : labels) Ui.section(g, font, (Component) l[0], (int) l[1], (int) l[2], (int) l[3]);
-        for (SwatchRow r : rows) Ui.swatches(g, r.x, r.y, SW, GAP, r.colors, r.get.getAsInt(), mouseX, mouseY);
+
         super.render(g, mouseX, mouseY, partialTick);
     }
 
@@ -532,15 +534,6 @@ public class CharacterCreationScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        for (SwatchRow r : rows) {
-            int i = Ui.swatchAt(mouseX, mouseY, r.x, r.y, SW, GAP, r.colors.length);
-            if (i >= 0) {
-                r.set.accept(r.colors[i]);
-                com.dbzenith.client.ClientSounds.uiClick();
-                updatePreview();
-                return true;
-            }
-        }
         if (super.mouseClicked(mouseX, mouseY, button)) return true;
         if (mouseX >= ox && mouseX < ox + pw && mouseY < oy + H - 24) {
             dragging = true;

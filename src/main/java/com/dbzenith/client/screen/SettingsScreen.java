@@ -145,7 +145,12 @@ public class SettingsScreen extends Screen {
         int wx = left + panelW - 158;
         for (Option opt : visibleOptions()) {
             Tooltip tip = Tooltip.create(Component.translatable("settings.dbzenith." + opt.key + ".desc"));
-            if (opt.value instanceof ForgeConfigSpec.BooleanValue bool) {
+            if (opt.key.equals("crosshair_color")) {
+                int[] colors=new int[com.dbzenith.client.ui.Crosshair.COLORS.length+1];colors[0]=-1;
+                System.arraycopy(com.dbzenith.client.ui.Crosshair.COLORS,0,colors,1,colors.length-1);
+                addRenderableWidget(new com.dbzenith.client.ui.ColorControl(this,wx,y,150,()->DBZConfig.CLIENT.crosshairCustomColor.get(),
+                        c->{DBZConfig.CLIENT.crosshairCustomColor.set(c);save();},colors));
+            } else if (opt.value instanceof ForgeConfigSpec.BooleanValue bool) {
                 ThemedButton b = ThemedButton.of(onOff(bool.get()), x -> {
                     bool.set(!bool.get());
                     save();
@@ -201,6 +206,7 @@ public class SettingsScreen extends Screen {
 
         addRenderableWidget(ThemedButton.of(Component.translatable("settings.dbzenith.reset"), b -> {
             for (Option o : options(tab)) reset(o.value);
+            if(tab==Tab.STYLE)DBZConfig.CLIENT.crosshairCustomColor.set(-1);
             save();
             rebuild();
         }).bounds(left + 8, top + panelH - 24, Math.min(110,panelW/2-66), 18).build());

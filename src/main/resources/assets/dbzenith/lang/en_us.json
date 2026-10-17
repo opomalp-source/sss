@@ -2303,5 +2303,11 @@
   "item.dbzenith.piccolo_cape": "Piccolo's Cape",
   "item.dbzenith.piccolo_cape.hint": "Right-click to wear over any outfit. K → Remove cape to take it off. Kept through death.",
   "screen.dbzenith.cape_remove": "Remove cape",
-  "screen.dbzenith.back_accessory": "Back accessory"
+  "screen.dbzenith.back_accessory": "Back accessory",
+  "color.dbzenith.title": "Choose color",
+  "color.dbzenith.default": "Default",
+  "color.dbzenith.own_skin": "Own skin",
+  "color.dbzenith.open": "Choose any color or enter a hex code",
+  "color.dbzenith.hex": "Hex color (#RRGGBB)",
+  "color.dbzenith.apply": "Apply"
 }

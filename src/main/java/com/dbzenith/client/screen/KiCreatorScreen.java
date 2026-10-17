@@ -99,6 +99,7 @@ public class KiCreatorScreen extends Screen {
             addRenderableWidget(b);
         }
 
+        addRenderableWidget(new com.dbzenith.client.ui.ColorControl(this,left+276,top+84,130,()->color,c->color=c,COLORS));
         int ex = left + 126;
         nameBox = new EditBox(font, ex + 40, top + 20, 150, 13, Component.translatable("kicreator.dbzenith.name"));
         nameBox.setMaxLength(CustomTechniques.NAME_LENGTH);
@@ -213,13 +214,6 @@ public class KiCreatorScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
-        int sx = left + 126 + 150, sy = top + 87;
-        for (int i = 0; i < COLORS.length; i++) {
-            if (mx >= sx + i * 10 && mx < sx + i * 10 + 9 && my >= sy && my < sy + 9) {
-                color = COLORS[i];
-                return true;
-            }
-        }
         return super.mouseClicked(mx, my, button);
     }
 
@@ -254,11 +248,6 @@ public class KiCreatorScreen extends Screen {
         for (int i = 0; i < 5; i++) {                                    // power pips
             int px = ex + 50 + i * 12;
             DbzTheme.slant(g, px, top + 87, 9, 9, 3, i < power ? 0xFFFFB040 : 0x60303848, i < power ? 0xFFB0400E : 0x60202430);
-        }
-        int sx = ex + 150, sy = top + 87;                                // colours
-        for (int i = 0; i < COLORS.length; i++) {
-            g.fill(sx + i * 10 - 1, sy - 1, sx + i * 10 + 10, sy + 10, COLORS[i] == color ? 0xFFFFFFFF : 0xFF404048);
-            g.fill(sx + i * 10, sy, sx + i * 10 + 9, sy + 9, 0xFF000000 | COLORS[i]);
         }
         int max = CustomTechniques.maxMods(d);
         DbzTheme.text(g, font, Component.translatable("kicreator.dbzenith.mods_n", Integer.bitCount(CustomTechniques.modBits(mods)), max), ex, top + 103, DbzTheme.DIM, 0.75f);

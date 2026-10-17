@@ -27,7 +27,7 @@ public class FaceScreen extends Screen {
 
     private final Screen parent;
     private final PublicStatePacket original;
-    private int face, highlight, aura;
+    private int face, highlight, aura, eyes;
     private boolean kept;
     private int left, top;
 
@@ -36,6 +36,7 @@ public class FaceScreen extends Screen {
         this.parent = parent;
         PlayerData d = ClientPlayerData.get();
         face = d.getFace();
+        eyes = d.getEyeColor();
         highlight = d.getHighlightColor();
         aura = d.getAuraColor();
         original = net.minecraft.client.Minecraft.getInstance().player == null ? null
@@ -63,12 +64,18 @@ public class FaceScreen extends Screen {
             kept = true;
             ModNetwork.sendToServer(new FacePacket(face, highlight, aura));
             PlayerData d = ClientPlayerData.get();                       // at once; the server confirms it
+            ModNetwork.sendToServer(new com.dbzenith.network.AppearancePacket(d.getHairCode(), d.getHairColor(), eyes, d.getSkinTone()));
+            d.setEyeColor(eyes);
             d.setFace(face);
             d.setHighlightColor(highlight);
             d.setAuraColor(aura);
             onClose();
         }).bounds(left + W - 136, top + H - 22, 62, 16).build());
         addRenderableWidget(ThemedButton.of(Component.translatable("gui.cancel"), b -> onClose()).bounds(left + W - 70, top + H - 22, 62, 16).build());
+        int[] colors = new int[COLORS.length+1]; colors[0]=-1;System.arraycopy(COLORS,0,colors,1,COLORS.length);
+        addRenderableWidget(new com.dbzenith.client.ui.ColorControl(this,rx+60,top+132,150,()->highlight,c->{highlight=c;preview();},colors,Component.translatable("screen.dbzenith.face_none")));
+        addRenderableWidget(new com.dbzenith.client.ui.ColorControl(this,rx+60,top+154,150,()->aura,c->{aura=c;preview();},colors,Component.translatable("screen.dbzenith.face_race")));
+        addRenderableWidget(new com.dbzenith.client.ui.ColorControl(this,rx+60,top+176,150,()->eyes,c->{eyes=c;preview();},com.dbzenith.appearance.Palettes.EYES));
         preview();
     }
 
@@ -80,27 +87,7 @@ public class FaceScreen extends Screen {
     /** Show the choice on your own model while the screen is open. */
     private void preview() {
         if (original == null) return;
-        ClientPublicStates.put(original.withFace(face, highlight, aura >= 0 ? aura : original.auraColor()));
-    }
-
-    @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        int rx = left + 150;
-        for (int row = 0; row < 2; row++) {
-            int sy = top + 132 + row * 22;
-            if (my < sy || my >= sy + 10) continue;
-            for (int i = 0; i <= COLORS.length; i++) {
-                int sx = rx + 60 + i * 12;
-                if (mx >= sx && mx < sx + 10) {
-                    int c = i == 0 ? -1 : COLORS[i - 1];
-                    if (row == 0) highlight = c;
-                    else aura = c;
-                    preview();
-                    return true;
-                }
-            }
-        }
-        return super.mouseClicked(mx, my, button);
+        ClientPublicStates.put(original.withAppearance(original.hairCode(),original.hairColor(),eyes,original.skinTone()).withFace(face, highlight, aura >= 0 ? aura : original.auraColor()));
     }
 
     @Override
@@ -129,22 +116,10 @@ public class FaceScreen extends Screen {
             Component v = Component.translatable(p.optionKey(FaceParts.get(face, p)));
             DbzTheme.text(g, font, v, rx + 135 - font.width(v) * 0.9f / 2, y + 3, DbzTheme.TEXT, 0.9f);
         }
-        swatches(g, rx, top + 132, "screen.dbzenith.face_highlight", highlight, "screen.dbzenith.face_none");
-        swatches(g, rx, top + 154, "screen.dbzenith.face_aura", aura, "screen.dbzenith.face_race");
-        super.render(g, mouseX, mouseY, partial);
-    }
-
-    private void swatches(GuiGraphics g, int rx, int y, String label, int chosen, String noneKey) {
-        DbzTheme.text(g, font, Component.translatable(label), rx, y + 1, DbzTheme.DIM, 0.85f);
-        int sx = rx + 60;
-        g.fill(sx - 1, y - 1, sx + 11, y + 11, chosen < 0 ? 0xFFFFFFFF : 0xFF404048);      // "none": a crossed box
-        g.fill(sx, y, sx + 10, y + 10, 0xFF181820);
-        for (int k = 1; k < 9; k++) g.fill(sx + k, y + k, sx + k + 1, y + k + 1, 0xFFB04040);
-        for (int i = 0; i < COLORS.length; i++) {
-            int x = sx + (i + 1) * 12;
-            g.fill(x - 1, y - 1, x + 11, y + 11, COLORS[i] == chosen ? 0xFFFFFFFF : 0xFF404048);
-            g.fill(x, y, x + 10, y + 10, 0xFF000000 | COLORS[i]);
-        }
+        DbzTheme.text(g,font,Component.translatable("screen.dbzenith.face_highlight"),rx,top+135,DbzTheme.DIM,.85f);
+        DbzTheme.text(g,font,Component.translatable("screen.dbzenith.face_aura"),rx,top+157,DbzTheme.DIM,.85f);
+        DbzTheme.text(g,font,Component.translatable("screen.dbzenith.eyes"),rx,top+179,DbzTheme.DIM,.85f);
+        super.render(g,mouseX,mouseY,partial);
     }
 
     @Override

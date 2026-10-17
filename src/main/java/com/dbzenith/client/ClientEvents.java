@@ -102,6 +102,11 @@ public final class ClientEvents {
     public static void devScreenshot(String name, int delayTicks) {
         if (!DEV_AUTOMATION) return;
         Minecraft mc = Minecraft.getInstance();
+        if (delayTicks == 0 && name.contains("pickcolor")) {
+            Screenshot.grab(mc.gameDirectory,"dbz_"+name.replaceAll("[^a-zA-Z0-9_-]","_")+".png",mc.getMainRenderTarget(),msg->{});
+            return;
+        }
+
         if(name.contains("spacequality0"))com.dbzenith.config.DBZConfig.CLIENT.spaceQuality.set(0);
         if(name.contains("spacequality1"))com.dbzenith.config.DBZConfig.CLIENT.spaceQuality.set(1);
         if(name.contains("spacequality2"))com.dbzenith.config.DBZConfig.CLIENT.spaceQuality.set(2);
@@ -316,6 +321,31 @@ public final class ClientEvents {
         if (name.startsWith("forms_") && !(mc.screen instanceof com.dbzenith.client.screen.FormScreen)) {
             mc.setScreen(new com.dbzenith.client.screen.FormScreen(null));
             delayTicks = Math.max(delayTicks, 5);
+        }
+        if (delayTicks > 0 && name.contains("pickcolor")) {
+            var pick=java.util.regex.Pattern.compile("pickcolor([0-9]+)").matcher(name);
+            if(pick.find() && mc.screen != null) {
+                var controls=mc.screen.children().stream().filter(c->c instanceof com.dbzenith.client.ui.ColorControl)
+                        .map(c->(com.dbzenith.client.ui.ColorControl)c).toList();
+                int index=Integer.parseInt(pick.group(1));
+                if(index>=controls.size())throw new IllegalStateException("Missing color control "+name);
+                var control=controls.get(index);int before=control.currentColor();control.onPress();
+                if(mc.screen instanceof com.dbzenith.client.screen.ColorPickerScreen picker) {
+                    var code=java.util.regex.Pattern.compile("_hex([0-9a-fA-F]{1,6})(?:_|$)").matcher(name);
+                    if(code.find())picker.inputHex(code.group(1));
+                    if(name.contains("applycolor")) {
+                        picker.commit();
+                        int expected=com.dbzenith.appearance.ColorValues.parse(code.group(1)).orElseThrow();
+                        if(control.currentColor()!=expected)throw new IllegalStateException("Color apply failed "+name);
+                        DBZenith.LOGGER.info("[color-check] applied {}",name);
+                    } else if(name.contains("cancelcolor")) {
+                        picker.onClose();
+                        if(control.currentColor()!=before)throw new IllegalStateException("Color cancel changed parent "+name);
+                        DBZenith.LOGGER.info("[color-check] cancelled {}",name);
+                    }
+                }
+            }
+            delayTicks=Math.max(delayTicks,12);
         }
         if (delayTicks > 0) {
             pendingShot = name;

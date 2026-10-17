@@ -94,6 +94,7 @@ public class HairEditorScreen extends Screen {
             onDone.accept(HairCode.encode(strands), color);
             minecraft.setScreen(parent);
         }).bounds(left + W - 74, by, 66, 18).build());
+        addRenderableWidget(new com.dbzenith.client.ui.ColorControl(this,left+8,top+H-64,128,()->color,c->{color=c;preview();},Palettes.HAIR));
         preview();
     }
 
@@ -228,15 +229,6 @@ public class HairEditorScreen extends Screen {
             }
             return true;
         }
-        // hair colour swatches
-        int sx = left + 8, sy = top + H - 64;
-        for (int i = 0; i < Palettes.HAIR.length; i++) {
-            if (mx >= sx + i * 11 && mx < sx + i * 11 + 9 && my >= sy && my < sy + 9) {
-                color = Palettes.HAIR[i];
-                preview();
-                return true;
-            }
-        }
         if (mx >= previewX0() && mx < left + W - 6 && my >= top + 20 && my < top + H - 30) dragging = true;
         return super.mouseClicked(mx, my, button);
     }
@@ -317,12 +309,6 @@ public class HairEditorScreen extends Screen {
         boolean custom = !HairCode.strands(p).equals(strands);
         g.drawCenteredString(font, custom ? Component.translatable("hair.dbzenith.custom") : Component.translatable(p.translationKey()),
                 left + 70, top + H - 43, custom ? DbzTheme.DIM : DbzTheme.TEXT);
-        int sx = left + 8, sy = top + H - 64;
-        for (int i = 0; i < Palettes.HAIR.length; i++) {
-            boolean sel = Palettes.HAIR[i] == color;
-            g.fill(sx + i * 11 - 1, sy - 1, sx + i * 11 + 10, sy + 10, sel ? 0xFFFFFFFF : 0xFF404048);
-            g.fill(sx + i * 11, sy, sx + i * 11 + 9, sy + 9, 0xFF000000 | Palettes.HAIR[i]);
-        }
         DbzTheme.text(g, font, status, left + 142, top + H - 18, DbzTheme.GOOD, 0.7f);
 
         // live preview, turned by dragging

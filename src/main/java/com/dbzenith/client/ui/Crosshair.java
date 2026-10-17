@@ -94,7 +94,7 @@ public final class Crosshair implements IGuiOverlay {
         DBZConfig.Client c = DBZConfig.CLIENT;
         int a = (int) (Mth.clamp(c.crosshairOpacity.get(), 0, 1) * 255);
         if (a <= 2) return;
-        int color = a << 24 | COLORS[Mth.clamp(c.crosshairColor.get(), 0, COLORS.length - 1)];
+        int color = a << 24 | (c.crosshairCustomColor.get() >= 0 ? c.crosshairCustomColor.get() : COLORS[Mth.clamp(c.crosshairColor.get(), 0, COLORS.length - 1)]);
         int size = c.crosshairSize.get();
         // drawn on the real screen pixels, not the GUI's coarse grid, so the dot is round and the star's points taper
         double gs = mc.getWindow().getGuiScale();

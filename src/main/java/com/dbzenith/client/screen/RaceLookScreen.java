@@ -113,6 +113,7 @@ public class RaceLookScreen extends Screen {
         rowsColors.add(all);
         rowsGet.add(get);
         rowsSet.add(set);
+        addRenderableWidget(new com.dbzenith.client.ui.ColorControl(this,cx,y+11,cw,get,c->{set.accept(c);preview();},all));
     }
 
     private void rebuild() {
@@ -139,23 +140,11 @@ public class RaceLookScreen extends Screen {
         Ui.text(g, font, Component.literal(title.getString().toUpperCase()), rx + 2, oy + 10, Ui.GOLD, 0.85f);
         Ui.card(g, rx, oy + 24, rw, H - 24 - 32);
         for (Object[] l : labels) Ui.section(g, font, (Component) l[0], cx, (int) l[1], cw);
-        for (int i = 0; i < rowsXY.size(); i++) {
-            Ui.swatches(g, rowsXY.get(i)[0], rowsXY.get(i)[1], SW, GAP, rowsColors.get(i), rowsGet.get(i).getAsInt(), mouseX, mouseY);
-        }
         super.render(g, mouseX, mouseY, partial);
     }
 
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
-        for (int i = 0; i < rowsXY.size(); i++) {
-            int k = Ui.swatchAt(mx, my, rowsXY.get(i)[0], rowsXY.get(i)[1], SW, GAP, rowsColors.get(i).length);
-            if (k >= 0) {
-                rowsSet.get(i).accept(rowsColors.get(i)[k]);
-                com.dbzenith.client.ClientSounds.uiClick();
-                preview();
-                return true;
-            }
-        }
         if (super.mouseClicked(mx, my, button)) return true;
         if (mx >= ox && mx < ox + pw) {
             dragging = true;
