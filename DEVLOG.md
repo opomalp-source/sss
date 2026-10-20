@@ -4360,3 +4360,43 @@ same way in every view, and a camera made for space.
   with view, direction and speed unchanged (telemetry), terrain visible on arrival and no loading screen; the
   planet below with a level horizon and an upright model in orbit; a hold when the ground wasn't ready, then the
   drop-in. A dev-only `DevWindow` moves the scripted client off-screen so background checks don't cover the desktop.
+
+## 2026-10-20 — Space rework phase 4: planets that look like their ground (v0.154.0)
+The fourth phase of the user's space flagship request: what you see of a planet, from orbit down to the top of the
+atmosphere, is drawn from the ground it generates.
+
+- **Planet maps (`galaxy/space/PlanetMaps`, server).** 512 × 256 maps in the sphere's own texture layout (texel →
+  mesh direction → body frame → `SpaceFrames.surface`, so each texel is exactly the ground the renderer puts there).
+  Procedural worlds sample `PlanetTerrain` (median of four heights per sample, seas/lava, top-block colours, forests,
+  relief); Earth and Namek their climate and biome noise at the estimated ground height (from vanilla's `depth`
+  parameter: sampling at y 64 read mountains as caves), oceans and depth, rivers as their banks, badlands/desert/
+  mushroom/stony-peak/snow colours, vanilla's grass colour map approximated from its known biome colours; flat
+  worlds their biome. Area-averaged texels with more samples along texels the poles stretch, and polar rows evened
+  out along their length (the first maps drew rays from the pole and speckles from single-point rivers).
+- **Regional maps.** 256² over 8,192 blocks on a 2,048 grid, for the ground far below and the approach terrain.
+- **Transport.** `PlanetMapPacket` (+ `Request`), protocol 52: on request, current system only, 12 per ten seconds,
+  one low-priority worker, 24 cached, deflated RGB. The scene carries Earth's departure anchor (rounded to 64).
+  Client: `OrbitalTextures` keeps the last 12 maps and 6 regions, box-filters them to the drawn size, falls back to
+  the old material until a map arrives.
+- **Clouds.** The cloud layer is vanilla's cloud cells at each surface point (summed-area table of `clouds.png`,
+  drift 0.03 blocks a tick on a mirror of LevelRenderer's tick counter), area-averaged, contrast faded at coarse
+  scales; on every planet with air (it was only temperate, ocean and jungle), at vanilla's cloud height.
+- **The view from far below (`SpaceSky.flat`).** Above y 180 on any surface: the ground flat to the edge of the
+  loaded chunks, then curving with the planet's radius to the true horizon (a sphere alone made a dome round the
+  chunks on small worlds), texture placed by ground distance, the regional map over the whole map, haze from the
+  loaded edge; Earth's frame centred on the camera there (far from the departure its disc wraps, which first showed
+  the wrong ground in the wrong light); above y 260 the cloud layer, clipped where the sky is behind it (it first
+  drew a dark rim above the horizon); a moonlit night floor. Replaces the fixed blue limb.
+- **Close orbit (`SpaceSky.cap`).** Within 1.6 radii a polar grid round the point under you replaces the coarse
+  sphere, with the regional map inside 1.3 radii. Per-vertex data computed once; 119 fps in close orbit (it first
+  cost 19 ms a frame).
+- **A bug found on the way:** the star pass turns face culling back on, so the new ground (wound the other way)
+  vanished entirely; the ground passes now disable culling themselves.
+- **Tests (`PlanetMapTests`, 6):** what you see from orbit is where you land (texel ↔ surface within 1.5 texels,
+  both mappings); a procedural map shows its own seas (>90% agreement); noise-world maps come from their own
+  climate (Namek, each texel its own ground, a flat world is one colour); maps travel small and whole (<400 KB,
+  texel for texel; gas giants have no map); clouds from above are vanilla's cells (tiling both ways, averages);
+  the terminator is where the ground's day ends. 310 GameTests pass.
+- **Checked in the dev client (background):** Earth from orbit (badlands, desert, oceans, snow where the world has
+  them), from 250, 330, 400 and 500 blocks (the loaded chunks continue into the map: coastline, ocean, forest),
+  close orbit with the regional map, a procedural ocean world by night from 230 and 420 blocks.

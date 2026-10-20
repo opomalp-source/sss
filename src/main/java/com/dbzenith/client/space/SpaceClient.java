@@ -82,7 +82,7 @@ public final class SpaceClient {
     }
     @SubscribeEvent public static void frame(TickEvent.RenderTickEvent e){if(e.phase==TickEvent.Phase.START)OrbitalTextures.beginFrame();}
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent e){
-        if(e.phase!=TickEvent.Phase.END)return;var mc=Minecraft.getInstance();if(mc.player==null||mc.isPaused())return;
+        if(e.phase!=TickEvent.Phase.END)return;OrbitalTextures.tick();var mc=Minecraft.getInstance();if(mc.player==null||mc.isPaused())return;
         if(hintTicks>0&&mc.screen==null)hintTicks--;if(fade>0)fade--;if(entry>0)entry--;if(preparing>0)preparing--;atmosphere=(float)vacuum();
         if((fade>0||preparing>0)&&mc.screen instanceof net.minecraft.client.gui.screens.ReceivingLevelScreen&&mc.level.hasChunkAt(mc.player.blockPosition()))mc.setScreen(null);
         if(Boolean.getBoolean("dbzenith.devAutomation")&&mc.player.tickCount%100==0)DBZenith.LOGGER.info("[space-profile] {} / {} fps / {}",mc.level.dimension().location(),mc.getFps(),OrbitalTextures.metrics()+" / "+SpaceProfile.metrics());

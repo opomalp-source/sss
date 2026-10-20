@@ -110,6 +110,45 @@ No loading screen: the destination is prepared, so `ReceivingLevelScreen` is sup
 light veil and status line stand in. A pod and its rider cross together and it keeps its name, health and
 state (`SpacePodEntity.carry`).
 
+## Planet maps (phase 4)
+
+What you see of a planet from space is drawn from the ground it generates (`galaxy/space/PlanetMaps`, server side;
+the client never receives a seed):
+
+- **Whole-planet maps** (512 × 256, equirectangular in the sphere's own texture layout). Texel (i, j) shows the
+  surface point the sphere renderer puts there: mesh direction → body frame `(-v.z, -v.x, v.y)` →
+  `SpaceFrames.surface`. Procedural worlds sample `PlanetTerrain` itself (heights, seas or lava, top blocks, forests,
+  relief lit from the north-west); Earth and Namek sample their own climate and biome noise at the estimated ground
+  height (vanilla's `depth` is `offset + 1 - y/128`, zero at the ground), so coasts, oceans and their depth, deserts,
+  badlands, snow and forests are where the world has them; rivers read as their banks. The small flat worlds are
+  their biome's colour. Each texel averages its area (more samples along texels the poles stretch), and rows near
+  the map's poles are evened out along their length (the mesh pinches them into small circles).
+- **Regional maps** (256², 32 blocks a texel, 8,192 blocks square on a 2,048-block grid) round the point under you:
+  the ground far below you on a surface, and the approach terrain within 1.3 radii in orbit. Same ground functions,
+  absolute surface coordinates (Earth's are the same for everyone).
+- **Transport.** The client asks (`PlanetMapPacket.Request`) the first time it draws a planet or needs a region;
+  the server renders off its thread (one low-priority worker), caches 24 maps, replies with deflated RGB (a full map
+  ~100–250 KB); requests only for planets of the system you are in, at most 12 per ten seconds. Until a map
+  arrives the old material shows. Protocol 52.
+- **Earth.** Its whole-planet map is the disc round your departure point (the scene carries the anchor, rounded to
+  64 blocks). Seen from far below on Earth's surface the frame is centred on you, so Earth's day there is vanilla's;
+  the regional map gives the ground, and the departure disc is used only within half its radius.
+
+**Clouds** are vanilla's own: a planet with air shows, at each surface point, the cloud cell vanilla draws there
+(12-block cells of `clouds.png`, drifting 0.03 blocks a tick with the client's cloud clock), averaged over each
+texel; the contrast fades at coarse scales so the 3,072-block cloud tile doesn't stripe the planet. The layer sits
+at vanilla's cloud height (128 blocks over the datum) at the altitude scale, at most 2% of the radius.
+
+**The view from far below** (surfaces above y 180). The ground is drawn as the world is: flat out to the edge of the
+loaded chunks, then curving away with the planet's radius (`scale × orbital radius` blocks) to the true horizon,
+every point placed by its ground distance from you, so the map lines up with the blocks; air thickens towards the
+horizon from the edge of the loaded ground; above y 260 (where vanilla stops drawing clouds) the same clouds from
+above, only where the ground is behind them. **Close orbit** (within 1.6 radii): a fine grid round the point under
+you instead of the whole sphere, with the regional map within 1.3 radii.
+
+**The terminator** is the same everywhere: the sphere is lit by the true star direction in the planet's turning
+frame, which is exactly where the Sun stands on the ground (`TransitionTests`, `PlanetMapTests`).
+
 ## Continuity telemetry
 
 Every committed transfer records both sides and its errors against this mapping (`SpaceTelemetry`, last 64 per
@@ -136,6 +175,9 @@ preload, at the orbital-to-surface altitude scale).
 | Co-rotation | a stopped player stays over the same ground to 1e-6 blocks a tick | `TransitionTests` |
 | Dive forecast | arrival within two ticks of the flight model | `TransitionTests` |
 | Real dive into Earth (dev client) | lands 0.00 blocks from the true crossing, view and velocity unchanged | telemetry |
+| Map texel ↔ surface point | within 1.5 texels both ways (equirectangular and Earth's disc) | `PlanetMapTests` |
+| Procedural seas on the map | over 90% of texels agree with the terrain's own sea level | `PlanetMapTests` |
+| Map on the wire | a full 512 × 256 map under 400 KB, texel for texel | `PlanetMapTests` |
 
 Later phases add the transition, camera, star-identity and performance tolerances from the rework plan
 (`DEVLOG.md`, 2026-10-20).

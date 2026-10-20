@@ -199,7 +199,9 @@ public final class SpaceRuntime {
         GalaxyData.get(p.server).chart(p.getUUID(),GalaxyData.current(p));StarField.sync(p);   // being in a system charts it; its sky is the catalogue around it
         var ref=surfaceRef(p.serverLevel());var id=id(p.level().dimension());if(id==null&&ref!=null)id=ref.system();
         CompoundTag t=new CompoundTag();t.putString("dimension",p.level().dimension().location().toString());
-        if(id!=null){t.put("system",GalaxyService.survey(p,GalaxyService.SYSTEM,id,-1,"",0).getCompound("system"));t.putString("id",id.toString());if(ref!=null)t.putInt("surfacePlanet",ref.planet());}
+        if(id!=null){t.put("system",GalaxyService.survey(p,GalaxyService.SYSTEM,id,-1,"",0).getCompound("system"));t.putString("id",id.toString());if(ref!=null)t.putInt("surfacePlanet",ref.planet());
+            if(id.equals(GalaxyCatalog.EARTH))for(var raw:t.getCompound("system").getList("bodies",net.minecraft.nbt.Tag.TAG_COMPOUND)){var b=(CompoundTag)raw;if(b.getInt("index")!=0)continue;   // Earth's map is centred on your departure (phase 4)
+                var earth=new GalaxyCatalog.Ref(id,0);int[] a=PlanetMaps.anchor(p,earth,GalaxyCatalog.body(p.server.overworld().getSeed(),GalaxyData.get(p.server).salt(),earth));b.putInt("anchorX",a[0]);b.putInt("anchorZ",a[1]);}}
         t.putBoolean("transition",transition);t.putDouble("vx",velocity.x);t.putDouble("vy",velocity.y);t.putDouble("vz",velocity.z);
         ModNetwork.sendTo(p,new SpaceScenePacket(t));
     }

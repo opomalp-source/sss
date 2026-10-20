@@ -371,3 +371,19 @@ course if it changes, and crosses at the entry altitude onto the ground below yo
 and view. If you arrive before the ground is ready you hover just inside the atmosphere ("Holding at the
 atmosphere: preparing the ground below...") and drop in the moment it is. Turning back gives the preparation up.
 A Space Pod crosses with you and stays the same pod. Details and tolerances: `docs/SPACE_FRAMES.md`.
+
+## Space rework, phase 4 — planets that look like their ground (v0.154.0)
+
+**From orbit you see where you will land.** Every landable planet's globe is drawn from its real terrain: Earth
+shows its own oceans, coasts, deserts, badlands, forests and snow (around where you took off), Namek its blue
+grass and seas, every procedural world its own seas, lava rifts, ice and forests. The maps arrive from the server
+a few seconds after you first see a planet; until then the old painted globe shows.
+
+**The clouds are vanilla's clouds.** A planet with air carries the very clouds that drift over its ground, seen from
+above; above 260 blocks, where vanilla stops drawing them, you look down on the same clouds.
+
+**Climbing out is continuous.** Above 180 blocks the ground beyond the loaded chunks is the planet's own map,
+flat as the world is near you and curving away to the true horizon, with haze thickening towards it; the higher
+you climb the more of the planet you see, until at the top of the atmosphere you are looking at the same globe
+you see from orbit. Close in from orbit, the ground under you sharpens into a detailed regional map as you
+descend. Day and night on the globe are the planet's own: the sunlit side is where it is day on the ground.

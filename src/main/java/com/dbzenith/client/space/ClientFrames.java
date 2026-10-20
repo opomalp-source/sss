@@ -29,8 +29,19 @@ public final class ClientFrames {
         return SpaceFrames.spinAt(earth(body), body.getDouble("tilt"), body.getInt("day"), game, day, center(body));
     }
 
+    /** Earth's map is centred on this player's departure point (the server sends it with the scene, phase 4). */
     public static SpaceFrames.Planet frame(CompoundTag body, float partial) {
-        return SpaceFrames.planet(center(body), body.getInt("radius"), earth(body), 0, 0, spin(body, partial));
+        return SpaceFrames.planet(center(body), body.getInt("radius"), earth(body), body.getInt("anchorX"), body.getInt("anchorZ"), spin(body, partial));
+    }
+
+    /** Earth's frame centred on a surface point of its own (the view far below, phase 4: its day there is vanilla's). */
+    public static SpaceFrames.Planet frameAt(CompoundTag body, float partial, double cx, double cz) {
+        return SpaceFrames.planet(center(body), body.getInt("radius"), earth(body), cx, cz, spin(body, partial));
+    }
+
+    /** The planet's frame unturned: the one its map and cloud layer are drawn in. */
+    public static SpaceFrames.Planet unturned(CompoundTag body) {
+        return SpaceFrames.planet(center(body), body.getInt("radius"), earth(body), body.getInt("anchorX"), body.getInt("anchorZ"), SpaceFrames.Spin.IDENTITY);
     }
 
     /** Earth's star frame (galactic to its sky), from vanilla's time of day and the system's real Sun. */

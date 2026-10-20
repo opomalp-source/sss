@@ -81,6 +81,8 @@ public final class SpaceSky {
             sphere(m,com.dbzenith.galaxy.space.SpaceFrames.toSurfaceVector(ground,rel).scale(100/d),SpaceMath.radius(other.getInt("radius"))*100/d,other,com.dbzenith.galaxy.space.SpaceFrames.toSurfaceVector(ground,SpaceMath.star(0,suns.size()).subtract(SpaceMath.center(other.getDouble("orbit"),other.getDouble("phase")))).normalize(),16,level.getGameTime()+pt,false,1);}
         for(int j=0;j<moons.size();j++){var moon=moons.getCompound(j);double phase=moon.getDouble("phase")+(level.getGameTime()+pt)*.000002/(j+1);Vec3 md=new Vec3(Math.cos(phase),Math.sin(phase)*.35,Math.sin(phase)).scale(radius*(2+j*.65));double d=md.length();
             sphere(m,com.dbzenith.galaxy.space.SpaceFrames.toSurfaceVector(ground,md).scale(100/d),Math.min(radius*.18,SpaceMath.radius(moon.getInt("radius"))*.5)*100/d,moon,primary.normalize(),24,level.getGameTime()+pt,false,1);}
+        if(camera.getPosition().y>180){int haze=((int)((1-vacuum)*.9*255)<<24)|(rgb&0xFFFFFF);   // the planet under you from altitude (phase 4)
+            below(m,b,camera.getPosition(),pt,(float)Math.min(1,(camera.getPosition().y-180)/60),haze);RenderSystem.setShader(GameRenderer::getPositionColorShader);RenderSystem.defaultBlendFunc();}
         if(b.getBoolean("rings")){ // translucent near-side arc of the planet's own equatorial ring
             var ring=Tesselator.getInstance().getBuilder();ring.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_COLOR);
             for(int i=0;i<96;i++){double a=i*Math.PI/48,aa=(i+1)*Math.PI/48;Vec3 n=new Vec3(Math.cos(a),.22,Math.sin(a)),nn=new Vec3(Math.cos(aa),.22,Math.sin(aa));vertex(ring,m,n.scale(140),0xB6ADA5,1,.26f);vertex(ring,m,n.add(0,.16,0).scale(140),0xD8CABC,1,.08f);vertex(ring,m,nn.add(0,.16,0).scale(140),0xD8CABC,1,.08f);vertex(ring,m,nn.scale(140),0xB6ADA5,1,.26f);}BufferUploader.drawWithShader(ring.end());
@@ -129,9 +131,12 @@ public final class SpaceSky {
                 if(OrbitalLod.visible(SpaceMath.center(body.getDouble("orbit"),body.getDouble("phase")).subtract(cameraPos),bound,look))body(m,body,cameraPos,level.getGameTime()+pt);
             }
             var suns=sys.getList("starsDetail",Tag.TAG_COMPOUND);for(int i=0;i<suns.size();i++){var s=suns.getCompound(i);sun(m,SpaceMath.star(i,suns.size()).subtract(cameraPos),s.getInt("color"),Math.min(450,200*s.getDouble("radius")),pt);}
+        }else if(!SpaceClient.surfaceBody().isEmpty()){
+            Vec3 sky=level.getSkyColor(camera.getPosition(),pt);int haze=((int)((1-vacuum)*.9*255)<<24)|((int)(sky.x*255)<<16)|((int)(sky.y*255)<<8)|(int)(sky.z*255);
+            below(m,SpaceClient.surfaceBody(),camera.getPosition(),pt,(float)Math.min(1,(camera.getPosition().y-180)/60),haze);   // the real planet under you (phase 4); close terrain draws over this sky pass
         }else if(vacuum>.1){
-            // A distant curved limb meets the real chunks below; close terrain always draws over this sky pass.
-            var body=SpaceClient.surfaceBody().copy();if(body.isEmpty()){body.putInt("color",0x477EAA);body.putString("type","Temperate");body.putString("atmosphere","Breathable");}
+            // Without a scene yet: a distant curved limb meets the real chunks below.
+            var body=new CompoundTag();body.putInt("color",0x477EAA);body.putString("type","Temperate");body.putString("atmosphere","Breathable");
             body.putBoolean("horizon",true);body.putInt("color",0x427A97);
             sphere(m,new Vec3(0,-330,0),270,body,new Vec3(.7,.5,.2),24,0,false,.25f+(vacuum*.75f));
         }
@@ -147,11 +152,12 @@ public final class SpaceSky {
         if(radius<.7){impostor(m,projected,radius,b.getInt("color"));return;}
         Vec3 light=SpaceMath.star(0,SpaceClient.system().getList("starsDetail",Tag.TAG_COMPOUND).size()).subtract(center).normalize();
         if(b.getBoolean("rings"))rings(m,projected,radius,relative.normalize(),false,b.getDouble("tilt"));
-        var spin=ClientFrames.spin(b,0);sphere(m,projected,radius,b,light,segments,time,false,1,spin);   // turned with its day, as its surface sky (phase 3)
+        var spin=ClientFrames.spin(b,0);boolean close=d<r*1.6&&b.getBoolean("landable");   // close in, the ground under you in detail: a finer grid and the regional map (phase 4)
+        if(close){var f=ClientFrames.frame(b,0);var under=SpaceFrames.toSurface(f,camera);cap(m,b,f,ClientFrames.unturned(b),d<r*1.3?OrbitalTextures.region(b,under.x,under.z):null,camera,r,light,1,0,0);}
+        else sphere(m,projected,radius,b,light,segments,time,false,1,spin);   // turned with its day, as its surface sky (phase 3)
         if(doom!=null&&doom.phase()==com.dbzenith.galaxy.planet.DoomData.ACTIVE)seams(m,projected,radius,DoomClient.progress(doom),b.getInt("index"));
-        if(b.getString("type").equals("Temperate")||b.getString("type").equals("Ocean")||b.getString("type").equals("Jungle")){
-            var clouds=b.copy();clouds.putBoolean("cloudLayer",true);sphere(m,projected,radius*1.009,clouds,light,segments,time,false,1,spin);
-        }
+        if(clouded(b)){var clouds=b.copy();clouds.putBoolean("cloudLayer",true);
+            if(close)cap(m,clouds,ClientFrames.frame(b,0),ClientFrames.unturned(b),null,camera,r*cloudLift(b),light,1,0,0);else sphere(m,projected,radius*cloudLift(b),clouds,light,segments,time,false,1,spin);}
         if(!b.getString("atmosphere").equals("None"))halo(m,projected,radius,b.getInt("color"),light);
         if(b.getBoolean("rings"))rings(m,projected,radius,relative.normalize(),true,b.getDouble("tilt"));
         var moons=b.getList("moons",Tag.TAG_COMPOUND);for(int i=0;i<moons.size();i++){
@@ -162,6 +168,105 @@ public final class SpaceSky {
             double moonRadius=Math.min(r*.18,SpaceMath.radius(moon.getInt("radius"))*.5)*100/Math.max(1,md);
             if(moonRadius<.7)impostor(m,moonAt.scale(100/Math.max(1,md)),moonRadius,mb.getInt("color"));else sphere(m,moonAt.scale(100/Math.max(1,md)),moonRadius,mb,light,12,time,false,1);
         }
+    }
+    /** Worlds with air have vanilla's clouds over their ground, so their sphere carries them too (phase 4). */
+    private static boolean clouded(CompoundTag b){String type=b.getString("type");
+        if(b.getBoolean("landable"))return !b.getString("atmosphere").equals("None")&&!type.equals("Gas giant")&&!type.equals("Asteroids");
+        return type.equals("Temperate")||type.equals("Ocean")||type.equals("Jungle");}
+    /** The cloud layer's height: vanilla's clouds (128 blocks over the datum) at the planet's altitude scale, at most 2% of its radius. */
+    private static double cloudLift(CompoundTag b){return 1+Math.min(.02,128*Math.PI/ClientFrames.unturned(b).size());}
+    /**
+     * The planet under you, seen from altitude (the space rework, phase 4): its own map, regional detail, clouds and
+     * terminator, as the world really is: flat out to the edge of the loaded chunks (they draw over it there), then
+     * curving away with the planet's radius to the true horizon, every point placed by its ground distance from you so
+     * the map lines up with the blocks. Earth's frame is centred on you here, so its day is vanilla's wherever you are.
+     */
+    private static void below(Matrix4f m,CompoundTag b,Vec3 camera,float pt,float alpha,int haze){
+        var f=ClientFrames.earth(b)?ClientFrames.frameAt(b,pt,camera.x,camera.z):ClientFrames.frame(b,pt);
+        double edge=Minecraft.getInstance().options.getEffectiveRenderDistance()*16;   // the loaded ground's reach
+        var map=ClientFrames.unturned(b);if(ClientFrames.earth(b)&&Math.hypot(camera.x-map.cx(),camera.z-map.cz())>SpaceFrames.EARTH_DISC/2)map=null;   // Earth's map is a disc round your departure: far from it, only the regional map
+        double horizon=flat(m,b,f,map,OrbitalTextures.region(b,camera.x,camera.z),camera,0,light(f),alpha,edge,haze,0);
+        if(clouded(b)&&camera.y>260){var clouds=b.copy();clouds.putBoolean("cloudLayer",true);   // vanilla stops drawing its clouds at 260: the same clouds, from above, no further than the ground's horizon
+            flat(m,clouds,f,ClientFrames.unturned(b),null,camera,128,light(f),alpha*(float)Math.min(1,(camera.y-260)/40),edge,0,horizon);}
+    }
+    /**
+     * The ground (or a layer {@code lift} blocks over it) round the point under the camera, flat to {@code edge} blocks and
+     * curving beyond, out to its horizon or {@code limit}; textured with the planet's map (through its frame {@code map};
+     * none: plain lit ground) and the regional map over it. Returns how far it reached (blocks of ground).
+     */
+    private static double flat(Matrix4f m,CompoundTag b,SpaceFrames.Planet f,SpaceFrames.Planet map,OrbitalTextures.Region region,Vec3 camera,double lift,Vec3 light,float alpha,double edge,int haze,double limit){
+        double radius=f.scale()*f.orbitalRadius(),h=Math.max(1,camera.y-SpaceFrames.DATUM-lift),reach=edge+radius*Math.acos(radius/(radius+h));if(limit>0)reach=Math.min(reach,limit);
+        int rings=40,sides=72;Vec3[][] p=new Vec3[rings+1][sides+1];float[][] lit=new float[rings+1][sides+1],mu=new float[rings+1][sides+1],mv=new float[rings+1][sides+1],ru=new float[rings+1][sides+1],rv=new float[rings+1][sides+1],dist=new float[rings+1][sides+1];
+        for(int i=0;i<=rings;i++){double s=reach*Math.pow(i/(double)rings,1.35),across,down;
+            if(s<=edge){across=s;down=h;}else{double phi=(s-edge)/radius;across=edge+radius*Math.sin(phi);down=h+radius*(1-Math.cos(phi));}
+            for(int k=0;k<=sides;k++){double t=k*Math.PI*2/sides,dx=Math.cos(t),dz=Math.sin(t),x=camera.x+dx*s,z=camera.z+dz*s;
+                p[i][k]=new Vec3(dx*across,-down,dz*across).normalize().scale(100);dist[i][k]=(float)s;
+                lit[i][k]=(float)(.16+.84*Math.pow(Math.max(0,SpaceFrames.normal(f,x,z).dot(light)),.65));   // the night side as dim as vanilla's moonlit ground, not black
+                if(map!=null){Vec3 nb=SpaceFrames.bodyNormal(map,x,z);double lon=Math.atan2(-nb.x,-nb.y);mu[i][k]=(float)((lon<0?lon+Math.PI*2:lon)/(Math.PI*2));mv[i][k]=(float)((Math.asin(Math.max(-1,Math.min(1,nb.z)))+Math.PI/2)/Math.PI);}
+                if(region!=null){ru[i][k]=(float)((x-region.x0())/region.span());rv[i][k]=(float)((z-region.z0())/region.span());}}}
+        var buffer=Tesselator.getInstance().getBuilder();RenderSystem.disableCull();   // drawn from either side (the star pass before this turns culling back on)
+        if(map!=null){RenderSystem.setShader(GameRenderer::getPositionTexColorShader);RenderSystem.setShaderTexture(0,OrbitalTextures.get(b,512));buffer.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_TEX_COLOR);
+            for(int i=0;i<rings;i++)for(int k=0;k<sides;k++){int[][] q={{i,k},{i+1,k},{i+1,k+1},{i,k+1}};float[] u=new float[4];
+                for(int j=0;j<4;j++)u[j]=mu[q[j][0]][q[j][1]];
+                float lo=Math.min(Math.min(u[0],u[1]),Math.min(u[2],u[3])),hi=Math.max(Math.max(u[0],u[1]),Math.max(u[2],u[3]));if(hi-lo>.5)for(int j=0;j<4;j++)if(u[j]<.5f)u[j]+=1;   // the map's seam
+                for(int j=0;j<4;j++){int a=q[j][0],o=q[j][1];Vec3 at=p[a][o];float l=lit[a][o];buffer.vertex(m,(float)at.x,(float)at.y,(float)at.z).uv(u[j],mv[a][o]).color(l,l,l,alpha).endVertex();}
+            }BufferUploader.drawWithShader(buffer.end());
+        }else if(region==null||lift==0){RenderSystem.setShader(GameRenderer::getPositionColorShader);buffer.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_COLOR);int plain=mix(haze&0xFFFFFF,0x3C4A3A,.5);
+            for(int i=0;i<rings;i++)for(int k=0;k<sides;k++){int[][] q={{i,k},{i+1,k},{i+1,k+1},{i,k+1}};for(int[] e:q)vertex(buffer,m,p[e[0]][e[1]],plain,lit[e[0]][e[1]],alpha);}
+            BufferUploader.drawWithShader(buffer.end());}
+        if(region!=null){RenderSystem.setShader(GameRenderer::getPositionTexColorShader);RenderSystem.setShaderTexture(0,region.texture());buffer.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_TEX_COLOR);
+            for(int i=0;i<rings;i++)for(int k=0;k<sides;k++){int[][] q={{i,k},{i+1,k},{i+1,k+1},{i,k+1}};float[] a=new float[4];float most=0;
+                for(int j=0;j<4;j++){float u=ru[q[j][0]][q[j][1]],v=rv[q[j][0]][q[j][1]];a[j]=(float)Math.max(0,Math.min(1,Math.min(Math.min(u,1-u),Math.min(v,1-v))/.08));most=Math.max(most,a[j]);}
+                if(most<=0)continue;
+                for(int j=0;j<4;j++){int e=q[j][0],o=q[j][1];Vec3 at=p[e][o];float l=lit[e][o];buffer.vertex(m,(float)at.x,(float)at.y,(float)at.z).uv(ru[e][o],rv[e][o]).color(l,l,l,alpha*a[j]).endVertex();}
+            }BufferUploader.drawWithShader(buffer.end());
+        }
+        float strength=(haze>>>24)/255f*alpha;RenderSystem.setShader(GameRenderer::getPositionColorShader);if(strength<=.01)return reach;
+        buffer.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_COLOR);   // air thickens towards the horizon, from the edge of the loaded ground
+        for(int i=0;i<rings;i++)for(int k=0;k<sides;k++){int[][] q={{i,k},{i+1,k},{i+1,k+1},{i,k+1}};
+            for(int[] e:q){double t=Math.max(0,Math.min(1,(dist[e[0]][e[1]]-edge*.7)/Math.max(1e-6,reach-edge*.7)));vertex(buffer,m,p[e[0]][e[1]],haze&0xFFFFFF,1,(float)(strength*t*t*(3-2*t)));}
+        }BufferUploader.drawWithShader(buffer.end());
+        return reach;
+    }
+    private static Vec3 light(SpaceFrames.Planet f){int count=SpaceClient.system().getList("starsDetail",Tag.TAG_COMPOUND).size();return SpaceMath.star(0,Math.max(1,count)).subtract(f.center()).normalize();}
+    /**
+     * A polar grid on the sphere of radius {@code r} round the point under {@code here}, out to the horizon, in the
+     * turning frame {@code f}: the planet's map laid through its own frame {@code map} (none: a plain lit ground), the
+     * regional map over it where it reaches, and air thickening towards the horizon from the edge of the loaded ground.
+     */
+    private static void cap(Matrix4f g,CompoundTag b,SpaceFrames.Planet f,SpaceFrames.Planet map,OrbitalTextures.Region region,Vec3 here,double r,Vec3 light,float alpha,double reach,int haze){
+        Vec3 c=f.center(),up=here.subtract(c).normalize();double d=Math.max(r*1.0002,here.distanceTo(c)),horizon=Math.acos(r/d),scale=100/d,ground=f.orbitalRadius();
+        Vec3 east=up.cross(Math.abs(up.y)<.9?new Vec3(0,1,0):new Vec3(1,0,0)).normalize(),south=up.cross(east);
+        boolean same=map!=null&&map.mapping()==f.mapping()&&map.cx()==f.cx()&&map.cz()==f.cz(),surface=region!=null||map!=null&&!same;   // the map's own frame is this one unturned: no trip through the surface
+        int rings=40,sides=72;Vec3[][] p=new Vec3[rings+1][sides+1];double[][][] s=new double[rings+1][sides+1][];float[][] lit=new float[rings+1][sides+1],seen=new float[rings+1][sides+1],mu=new float[rings+1][sides+1],mv=new float[rings+1][sides+1],angle=new float[rings+1][sides+1];
+        for(int i=0;i<=rings;i++){double a=horizon*Math.pow(i/(double)rings,1.35);for(int k=0;k<=sides;k++){double t=k*Math.PI*2/sides;Vec3 v=up.scale(Math.cos(a)).add(east.scale(Math.cos(t)*Math.sin(a))).add(south.scale(Math.sin(t)*Math.sin(a)));
+            p[i][k]=c.add(v.scale(r)).subtract(here).scale(scale);angle[i][k]=(float)a;lit[i][k]=(float)(.055+.945*Math.pow(Math.max(0,v.dot(light)),.65));
+            if(r>ground*1.0001){double miss=here.subtract(c).cross(p[i][k].normalize()).length();seen[i][k]=(float)Math.max(0,Math.min(1,(ground-miss)/(ground*.004)));}else seen[i][k]=1;   // a shell above the ground (clouds): only where the ground is behind it, no rim against the sky
+            if(surface)s[i][k]=SpaceFrames.surface(f,v);
+            if(map!=null){Vec3 nb=same?f.spin().invert(v):SpaceFrames.bodyNormal(map,s[i][k][0],s[i][k][1]);double lon=Math.atan2(-nb.x,-nb.y);mu[i][k]=(float)((lon<0?lon+Math.PI*2:lon)/(Math.PI*2));mv[i][k]=(float)((Math.asin(Math.max(-1,Math.min(1,nb.z)))+Math.PI/2)/Math.PI);}}}
+        var buffer=Tesselator.getInstance().getBuilder();RenderSystem.disableCull();   // drawn from either side (the star pass before this turns culling back on)
+        if(map!=null){RenderSystem.setShader(GameRenderer::getPositionTexColorShader);RenderSystem.setShaderTexture(0,OrbitalTextures.get(b,512));buffer.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_TEX_COLOR);
+            for(int i=0;i<rings;i++)for(int k=0;k<sides;k++){int[][] q={{i,k},{i+1,k},{i+1,k+1},{i,k+1}};float[] u=new float[4];
+                for(int j=0;j<4;j++)u[j]=mu[q[j][0]][q[j][1]];
+                float lo=Math.min(Math.min(u[0],u[1]),Math.min(u[2],u[3])),hi=Math.max(Math.max(u[0],u[1]),Math.max(u[2],u[3]));if(hi-lo>.5)for(int j=0;j<4;j++)if(u[j]<.5f)u[j]+=1;   // the map's seam
+                for(int j=0;j<4;j++){int a=q[j][0],o=q[j][1];Vec3 at=p[a][o];float l=lit[a][o];buffer.vertex(g,(float)at.x,(float)at.y,(float)at.z).uv(u[j],mv[a][o]).color(l,l,l,alpha*seen[a][o]).endVertex();}
+            }BufferUploader.drawWithShader(buffer.end());
+        }else{RenderSystem.setShader(GameRenderer::getPositionColorShader);buffer.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_COLOR);int plain=mix(haze&0xFFFFFF,0x3C4A3A,.5);
+            for(int i=0;i<rings;i++)for(int k=0;k<sides;k++){int[][] q={{i,k},{i+1,k},{i+1,k+1},{i,k+1}};for(int[] e:q)vertex(buffer,g,p[e[0]][e[1]],plain,lit[e[0]][e[1]],alpha*seen[e[0]][e[1]]);}
+            BufferUploader.drawWithShader(buffer.end());}
+        if(region!=null){RenderSystem.setShader(GameRenderer::getPositionTexColorShader);RenderSystem.setShaderTexture(0,region.texture());buffer.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_TEX_COLOR);
+            for(int i=0;i<rings;i++)for(int k=0;k<sides;k++){int[][] q={{i,k},{i+1,k},{i+1,k+1},{i,k+1}};float[] u=new float[4],v=new float[4],a=new float[4];float most=0;
+                for(int j=0;j<4;j++){double[] at=s[q[j][0]][q[j][1]];u[j]=(float)((at[0]-region.x0())/region.span());v[j]=(float)((at[1]-region.z0())/region.span());
+                    a[j]=(float)Math.max(0,Math.min(1,Math.min(Math.min(u[j],1-u[j]),Math.min(v[j],1-v[j]))/.08));most=Math.max(most,a[j]);}
+                if(most<=0)continue;
+                for(int j=0;j<4;j++){Vec3 at=p[q[j][0]][q[j][1]];float l=lit[q[j][0]][q[j][1]];buffer.vertex(g,(float)at.x,(float)at.y,(float)at.z).uv(u[j],v[j]).color(l,l,l,alpha*a[j]).endVertex();}
+            }BufferUploader.drawWithShader(buffer.end());
+        }
+        float strength=(haze>>>24)/255f*alpha;RenderSystem.setShader(GameRenderer::getPositionColorShader);if(strength<=.01)return;
+        buffer.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_COLOR);   // air thickens towards the horizon, from the edge of the loaded ground
+        for(int i=0;i<rings;i++)for(int k=0;k<sides;k++){int[][] q={{i,k},{i+1,k},{i+1,k+1},{i,k+1}};
+            for(int[] e:q){double t=Math.max(0,Math.min(1,(angle[e[0]][e[1]]-reach*.7)/Math.max(1e-6,horizon-reach*.7)));vertex(buffer,g,p[e[0]][e[1]],haze&0xFFFFFF,1,(float)(strength*t*t*(3-2*t)));}
+        }BufferUploader.drawWithShader(buffer.end());
     }
     private static void seams(Matrix4f m,Vec3 c,double r,float progress,int identity){
         if(progress<.15)return;var b=Tesselator.getInstance().getBuilder();b.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_COLOR);
@@ -209,7 +314,7 @@ public final class SpaceSky {
                 if(horizon){color=b.getBoolean("detonation")?0xFFF0C8:mix(0x5B98BC,base,Math.max(0,v.y));lit=1;a*=b.getBoolean("detonation")?.95f:.65f;}
                 float x=(float)(c.x+v.x*r),y=(float)(c.y+v.y*r),z=(float)(c.z+v.z*r);
                 if(vertexColor)buffer.vertex(m,x,y,z).color(((color>>16)&255)/255f*lit,((color>>8)&255)/255f*lit,(color&255)/255f*lit,a).endVertex();
-                else {float u=patch.u()+(corner>=2?patch.du():0)+(float)(spin!=null&&!clouds?0:time/(clouds?160000:1200000d)),vv=patch.v()+(corner==1||corner==2?patch.dv():0);
+                else {float u=patch.u()+(corner>=2?patch.du():0)+(float)(spin!=null?0:time/(clouds?160000:1200000d)),vv=patch.v()+(corner==1||corner==2?patch.dv():0);
                     buffer.vertex(m,x,y,z).uv(u,vv).color(lit,lit,lit,a).endVertex();}corner++;verts++;
             }
         }BufferUploader.drawWithShader(buffer.end());SpaceProfile.draw(verts);RenderSystem.setShader(GameRenderer::getPositionColorShader);

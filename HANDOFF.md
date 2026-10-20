@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.153.0, 2026-10-20)
+# Handoff: where Dragon Block Zenith stands (v0.154.0, 2026-10-20)
 
 ## The prompt to paste into a new session
 
@@ -375,5 +375,11 @@ Minecraft if it is running). Never the updater.
   `/dbz galaxy orbit Dev`, then `execute in dbzenith:orbit/v1/0_0_0_0 run tp Dev -11871 900 1754` (above Earth,
   clear of the inner belt), devshots `first_hidegui_lookplanet_x 4` then `first_hidegui_drivewalk_x 60` dive in;
   `/dbz galaxy transitions Dev` shows the telemetry; `/z/dev/down.sh` stops everything.
-- **Next, phase 4:** planet maps from the real terrain function (the orbital texture should match the ground you
-  land on), approach terrain for the landing region, a curved horizon, matching clouds and terminator.
+- **Phase 4 (v0.154.0) done:** server-rendered planet maps and regional maps from the real ground (`PlanetMaps`,
+  `PlanetMapPacket`, protocol 52), vanilla's clouds from above, the view from far below (`SpaceSky.flat`) and close
+  orbit (`SpaceSky.cap`); see `docs/SPACE_FRAMES.md` "Planet maps". RCON note: `~` in `/z/dev/rc.sh` commands
+  resolves at the server origin in the overworld; use `execute as Dev at Dev run tp Dev ~ 420 ~`.
+  `/dbz galaxy sample <kind> Dev` lands on a procedural world of that kind.
+- **Next, phase 5:** in-system cruise (server-tracked fast travel between planets of a system, never faster
+  physical movement), hyperspeed towards the chosen star (the waypoint from phase 2) with safe arrivals, passengers
+  in pods, a navigation HUD (target, distance, ETA, approach cues), blended audio across ascent/orbit/entry.
