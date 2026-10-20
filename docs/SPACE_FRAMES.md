@@ -17,7 +17,11 @@ a player, a view or a destination between them. Code: `galaxy/space/SpaceFrames`
 | **Camera-relative** | float, relative to the camera | the camera | the renderers (`SpaceSky`), which subtract the camera position in double before any float conversion |
 
 Galactic and star-system axes are the orbital dimension's axes, so a star's direction in the orbital sky is simply
-`normalize(target - here)` in galactic coordinates (used from phase 2). The orbital dimension keeps every
+`normalize(target - here)` in galactic coordinates (used from phase 2). Sky frames (phase 2, `StarSky`): orbit draws
+galactic directions as they are; Earth turns them on vanilla's celestial sphere (`Ry(-90°)·Rx(time of day)`, the
+same turn as its Sun and Moon); other planets turn them with `PlanetSkyMath.local` (their day, tilt and the
+ground under you), the same turn as their suns. Until phase 3 unifies planet spin, the sky's orientation
+changes across an ascent (surface sky frame to galactic axes). The orbital dimension keeps every
 coordinate within ±120,000 blocks horizontally and ±1,024 vertically, small enough for Minecraft's double positions
 and float rendering offsets; nothing uses one huge absolute float space.
 

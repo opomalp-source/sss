@@ -144,6 +144,7 @@ public final class ClientEvents {
             delayTicks = Math.max(delayTicks, 6);
         }
         if (name.contains("motionreload")) com.dbzenith.client.motion.MotionData.reloadNow();   // CX-31
+        if (name.contains("startarget")) com.dbzenith.client.space.StarSky.targetPressed();   // dev: press Target Star (the space rework, phase 2)
         if (name.startsWith("posestrip_") && !(mc.screen instanceof com.dbzenith.client.screen.PoseSheetScreen ps0 && ps0.key.equals(name))) {
             // posestrip_<clip>_<turn>[_<pitch>]: one clip at eight moments (a film strip), for judging motion
             String rest = name.substring("posestrip_".length());

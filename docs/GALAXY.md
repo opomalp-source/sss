@@ -317,3 +317,40 @@ semantics use protocol49. Existing saves, v1 catalogue identities and terrain ou
 See [Space polish](SPACE_POLISH.md) for measured local frame/sky timings, exact limits, controls, regression
 coverage and remaining hardware/human-soak validation. Motion hints are isolated by player and dimension;
 menus/focus loss clear thrust while retaining coast. All eight planned galaxy phases are implemented.
+
+
+## Space rework, phase 2 — every star is a real system (v0.152.0)
+
+**The night sky is the galaxy.** Every star point in Earth's night sky, on other planets and in orbit is a
+catalogue system within six sectors (6,000 ly) of your own: about 7,000 stars, in their true directions,
+coloured by star type and as bright as their luminosity over their distance squared. Binary and trinary systems
+show a faint companion beside their primary. The decorative random stars are gone; the soft galactic band glow
+remains as light only (catalogue v1 is a uniform cube, so there is no real disc to show as stars). Earth keeps
+vanilla's Sun and Moon, with the catalogue's stars turning on its celestial sphere; other planets turn their
+stars with their own day, like their suns; orbit uses the galaxy's own axes.
+
+**Targeting a star.** Look at a star and press **M** (Target Star): a ring marks it and a short line names it,
+with its star type(s), distance, and your state for it. Press **M** on the same star again to make it your
+waypoint (a gold diamond marks it from then on). **M** on empty sky clears the target. **,** (Galaxy Map) opens the
+atlas on the targeted star's sector with it selected, or the ordinary atlas with nothing targeted. Key bindings are
+in Controls under the mod's category.
+
+**Seeing is not knowing.** A star's states for you:
+
+| State | How | What you know |
+|---|---|---|
+| Unobserved | it's just there | its light in the sky |
+| Observed | you targeted it | name, star types, distance |
+| Charted | you have been in the system, someone landed on one of its planets, an iconic chart, or creative | its planets in the atlas |
+| Discovered / named / destroyed / restored | per planet, as before | as before |
+
+Uncharted systems in the atlas show their stars and "planets unknown"; Jump still reaches them, and arriving
+charts them. Being in a system (orbit or a surface) charts it.
+
+**How it works.** The client never receives the world seed, so the server computes the field
+(`galaxy/StarField`, from `GalaxyCatalog.head`: the catalogue's own first draws, so a star and its atlas entry are
+the same system by construction), off the server thread, caches eight fields, and streams it once per system change
+(`StarFieldPacket`: sector offset and slot, relative position, star types; about 18 bytes a star, ~130 KB). Target
+requests (`StarSelectPacket`) are rate-limited and accepted only for stars of your own sky. Observed and charted
+systems are sparse per-player records in the galaxy save (512 and 4,096 per player, oldest forgotten first). No
+star, target or chart creates a dimension, terrain or discovery. Protocol 51.

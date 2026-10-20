@@ -66,9 +66,19 @@ public final class GalaxyCatalog {
                 ^ Long.rotateLeft(mix(id.z),42) ^ mix(id.slot + 0x53544152L));
     }
     private static String name(Random r) { return START[r.nextInt(START.length)] + END[r.nextInt(END.length)]; }
-    public static SystemSpec system(long worldSeed, long salt, Id id) {
-        if(IconicSystems.isNew(id))return IconicSystems.system(worldSeed,salt,id);
-        Random r = new Random(seed(worldSeed, salt, id));
+    /**
+     * A system's star part (the space rework, phase 2): its name, galactic position and stars, exactly as
+     * {@link #system} draws them, without generating planets. What the sky and star selection use.
+     */
+    public record Head(Id id, String name, double x, double y, double z, List<Star> stars) {}
+    public static Head head(long worldSeed, long salt, Id id) {
+        if(IconicSystems.isNew(id)){var s=IconicSystems.system(worldSeed,salt,id);return new Head(id,s.name(),s.x(),s.y(),s.z(),s.stars());}
+        Head h=head(new Random(seed(worldSeed, salt, id)), id);
+        String shown=id.equals(EARTH)?"Earth system":id.equals(NAMEK)?"Namek system":id.equals(NORTH)?"North Galaxy outpost":id.equals(BEERUS)?"Beerus's system":h.name;
+        return new Head(id,shown,h.x,h.y,h.z,h.stars);
+    }
+    /** The first draws of a system's Random: name, position, stars (shared by {@link #system} and {@link #head}; v1 contract). */
+    private static Head head(Random r, Id id) {
         String name = name(r) + " " + (100 + r.nextInt(900));
         double x=id.x * 1000d + r.nextDouble()*800+100, y=id.y*1000d+r.nextDouble()*800+100, z=id.z*1000d+r.nextDouble()*800+100;
         int count = r.nextInt(12) == 0 ? 3 : r.nextInt(4) == 0 ? 2 : 1;
@@ -81,6 +91,13 @@ public final class GalaxyCatalog {
             double size=t.size*(.8+r.nextDouble()*.4);
             stars.add(new Star(t, id.equals(EARTH)?1:size, t.light, r.nextDouble()*Math.PI*2));
         }
+        return new Head(id,name,x,y,z,List.copyOf(stars));
+    }
+    public static SystemSpec system(long worldSeed, long salt, Id id) {
+        if(IconicSystems.isNew(id))return IconicSystems.system(worldSeed,salt,id);
+        Random r = new Random(seed(worldSeed, salt, id));
+        Head head=head(r,id);
+        String name=head.name;double x=head.x,y=head.y,z=head.z;List<Star> stars=head.stars;
         int n=3+r.nextInt(7);
         List<Body> bodies=new ArrayList<>();
         for(int i=0;i<n;i++) {

@@ -31,8 +31,12 @@ public final class ModKeys {
     public static final KeyMapping LOCK_ON = key("lock_on", GLFW.GLFW_KEY_N);
     /** Grip (the knocked-out rework): finish off a downed fighter in front of you; the direction held picks how. F, standing in for swapping hands only while someone is there to grip. */
     public static final KeyMapping GRIP = key("grip", GLFW.GLFW_KEY_F);
+    /** Star navigation (the space rework, phase 2): target the star under the crosshair; the same star again sets your waypoint. */
+    public static final KeyMapping TARGET_STAR = key("target_star", GLFW.GLFW_KEY_M);
+    /** The galaxy atlas, on the targeted star when there is one. */
+    public static final KeyMapping GALAXY_MAP = key("galaxy_map", GLFW.GLFW_KEY_COMMA);
 
-    public static final KeyMapping[] ALL = {CHARGE, LOWER_RELEASE, FLY, GUARD, KI_ATTACK, NEXT_TECHNIQUE, HEAVY, DASH, TRANSFORM, STATS, RADIAL, RACIAL, SKILL, KAIOKEN, PVP, KI_BLAST, LOCK_ON, GRIP};
+    public static final KeyMapping[] ALL = {CHARGE, LOWER_RELEASE, FLY, GUARD, KI_ATTACK, NEXT_TECHNIQUE, HEAVY, DASH, TRANSFORM, STATS, RADIAL, RACIAL, SKILL, KAIOKEN, PVP, KI_BLAST, LOCK_ON, GRIP, TARGET_STAR, GALAXY_MAP};
 
     private ModKeys() {}
 

@@ -4272,3 +4272,46 @@ error 0) and a real thrust-down re-entry: pitch 84.6° for 85°, velocity direct
 blocks west and 75 south of the departure, exactly along the 40° heading flown, scaled by Earth's 17× altitude
 ratio. The arrival still shows only a few chunks under the player: that is phase 3 and 4 work (preloading and
 approach terrain). Still true until phase 3: far from a world's middle the planet sits beside you in orbit.
+
+## 2026-10-20 — Space rework phase 2: every star is a real system (v0.152.0)
+The second phase of the user's space flagship request: every star point in a sky is a catalogue system, the same
+one the atlas, targeting, waypoints and travel use; seeing a star doesn't reveal its planets.
+
+- **One source of truth.** `GalaxyCatalog.head` returns a system's name, galactic position and stars by replaying
+  exactly the first draws `GalaxyCatalog.system` makes (now shared code); `system` itself is unchanged (the v1
+  fingerprint test and a new 206-system head/system comparison guard it).
+- **The field (`galaxy/StarField`).** Every system within 6,000 ly (six sectors) of the observer's system, about 7,200
+  around Earth, nearest first, computed off the server thread (sectors whose cube can't reach the radius are
+  skipped), eight fields cached per server. Sent once per system change, with the player's waypoint system
+  (`StarFieldPacket`, about 18 bytes a star: sector offset and slot, float relative position, packed star types).
+  The client never receives seeds; positions are floats so directions are exact to well under 0.05° (16-bit
+  quantising was tried and gave 0.2° near neighbours).
+- **The sky (`client/space/StarSky`).** One coloured VBO: size and alpha from log luminosity/distance², a faint
+  companion beside binary and trinary primaries. Drawn in each sky's own frame: orbit (galactic axes), Earth
+  (vanilla's celestial sphere, replacing vanilla's random star buffer `f_109471_` by an empty one while catalogue stars
+  are present), other planets (`PlanetSkyMath.local`, as their suns). The decorative 3,100-point field is gone; the
+  diffuse band glow stays and now turns with each sky. Earth's stars are drawn after solid blocks, just inside the far
+  plane with the depth test on (terrain hides them; the sky pass would have covered them) and with culling off.
+  At 180–480 blocks over Earth (the space sky's fade-in band) night stars no longer vanish: brightness is the
+  greater of the altitude fade and the night.
+- **Targeting.** `M` targets the star nearest the crosshair within 2.5° (bright stars a little easier); `M` on the
+  same star sets the waypoint; `M` on empty sky clears; `,` opens the atlas focused on the target (or plain). The
+  server accepts only stars of the player's own sky (`StarField.visible`), rate-limited, records them as observed
+  and replies with name, star types, distance (ly), state, planet count only when charted, waypoint flag; Beerus's
+  star is unreadable without god ki. A pulsing ring marks the target, a gold diamond the waypoint; an eight-second
+  label above the crosshair.
+- **States.** `GalaxyData` keeps per-player observed (512) and charted (4,096) systems, additive save keys, oldest
+  forgotten first. Being in a system (scene updates) charts it. `GalaxyService.state`: charted if any discovery
+  there, charted by you, current, iconic, or creative; else observed or unobserved. Survey replies for uncharted
+  systems show stars but no bodies and no planet count; the atlas says "planets unknown" and still allows Jump.
+- Protocol 51 (three packets). Keys `key.dbzenith.target_star` (M) and `key.dbzenith.galaxy_map` (,).
+- **Tests (`StarFieldTests`):** heads equal systems for 206 systems including iconic ones; the field is complete and
+  exact within the radius (sorted, unique, true offsets, completeness spot checks) and computes under 4 s; packet
+  round trip keeps every identity, star types and directions within 0.05° at about 18 bytes a star; targeting
+  refuses stars outside your sky, observes and waypoints visible ones; uncharted systems hide planets, observing
+  doesn't chart, being there does, home is always charted; observed/charted records persist with their caps. 297
+  GameTests pass.
+- **Checked in the dev client (background):** orbit, Earth at night below and above 180 blocks, an airless barren
+  world by day, targeting (a white dwarf at 3,646 ly, then a waypoint; a red-dwarf binary at 2,120 ly). The label
+  first sat on the planet readout and was clipped; it now sits above the crosshair. The test client's window was
+  minimised at one point (screenshots came out empty), so client runs are now kept short.

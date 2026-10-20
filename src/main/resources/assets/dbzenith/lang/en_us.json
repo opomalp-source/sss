@@ -1725,6 +1725,8 @@
   "subtitles.dbzenith.disc_whine": "Ki disc whines",
   "subtitles.dbzenith.beam_clash": "Beams grind against each other",
   "key.dbzenith.lock_on": "Lock-On (Shift: next foe)",
+  "key.dbzenith.target_star": "Target Star (again: set waypoint)",
+  "key.dbzenith.galaxy_map": "Galaxy Map",
   "key.dbzenith.grip": "Grip (finish off the downed)",
   "entity.dbzenith.severed_limb": "Severed Limb",
   "item.dbzenith.sewing_kit": "Sewing Kit",

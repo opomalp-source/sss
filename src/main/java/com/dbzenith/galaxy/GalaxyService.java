@@ -22,12 +22,12 @@ public final class GalaxyService {
             for(int dx=-2;dx<=2;dx++) for(int dy=-2;dy<=2;dy++) {
                 int x=center.x()+dx,y=center.y()+dy;
                 if(Math.abs(x)>GalaxyCatalog.LIMIT || Math.abs(y)>GalaxyCatalog.LIMIT) continue;
-                for(int i=0;i<GalaxyCatalog.SYSTEMS;i++) entries.add(summary(GalaxyCatalog.system(seed,data.salt(),new GalaxyCatalog.Id(x,y,center.z(),i)),data));
+                for(int i=0;i<GalaxyCatalog.SYSTEMS;i++) entries.add(seen(p,data,summary(GalaxyCatalog.system(seed,data.salt(),new GalaxyCatalog.Id(x,y,center.z(),i)),data)));
             }
         } else if(view==SECTOR) {
-            for(int i=0;i<GalaxyCatalog.SYSTEMS;i++) entries.add(summary(GalaxyCatalog.system(seed,data.salt(),new GalaxyCatalog.Id(center.x(),center.y(),center.z(),i)),data));
+            for(int i=0;i<GalaxyCatalog.SYSTEMS;i++) entries.add(seen(p,data,summary(GalaxyCatalog.system(seed,data.salt(),new GalaxyCatalog.Id(center.x(),center.y(),center.z(),i)),data)));
         } else if(view==SYSTEM) {
-            var s=GalaxyCatalog.system(seed,data.salt(),center);var system=detail(s,data);for(Tag raw:system.getList("bodies",Tag.TAG_COMPOUND)){var b=(CompoundTag)raw;b.putBoolean("visited",com.dbzenith.data.ModCapabilities.getOrThrow(p).hasFlag("planet_landing:"+new GalaxyCatalog.Ref(center,b.getInt("index")).key()));}out.put("system",system);
+            var s=GalaxyCatalog.system(seed,data.salt(),center);var system=seen(p,data,detail(s,data));for(Tag raw:system.getList("bodies",Tag.TAG_COMPOUND)){var b=(CompoundTag)raw;b.putBoolean("visited",com.dbzenith.data.ModCapabilities.getOrThrow(p).hasFlag("planet_landing:"+new GalaxyCatalog.Ref(center,b.getInt("index")).key()));}out.put("system",system);
         } else {
             var page=searchPage(data,seed,query,cursor);out.merge(page);entries=page.getList("entries",Tag.TAG_COMPOUND);
         }
@@ -103,5 +103,26 @@ public final class GalaxyService {
     public static void open(ServerPlayer p) {
         if(!InputGuard.allow(p,InputGuard.Kind.GALAXY))return;
         ModNetwork.sendTo(p,new GalaxyPackets.Data(0,true,survey(p,SECTOR,GalaxyData.current(p),-1,"",0)));
+    }
+    /** Opens the atlas on a star's sector with that star selected (star navigation's map shortcut; the caller checked the star). */
+    public static void openAt(ServerPlayer p,GalaxyCatalog.Id id){
+        var t=survey(p,SECTOR,id,-1,"",0);t.putString("focus",id.toString());ModNetwork.sendTo(p,new GalaxyPackets.Data(0,true,t));
+    }
+
+    /** A system's state for a player (the space rework, phase 2): its planets are known only once it is charted. */
+    public static final String UNOBSERVED="unobserved",OBSERVED="observed",CHARTED="charted";
+    public static String state(ServerPlayer p,GalaxyData data,GalaxyCatalog.Id id){
+        if(data.knownSystem(id)||data.charted(p.getUUID(),id)||id.equals(GalaxyData.current(p))||IconicSystems.all().contains(id)||p.isCreative())return CHARTED;
+        return data.observed(p.getUUID(),id)?OBSERVED:UNOBSERVED;
+    }
+    /**
+     * Marks a survey entry with the player's state for its system. An uncharted system shows its stars (anyone can see
+     * those) but neither its planets nor their count: those wait until someone has been there.
+     */
+    private static CompoundTag seen(ServerPlayer p,GalaxyData data,CompoundTag t){
+        var id=GalaxyCatalog.Id.parse(t.getString("id"));String state=state(p,data,id);t.putString("state",state);
+        boolean charted=CHARTED.equals(state);t.putBoolean("charted",charted);
+        if(!charted){t.putInt("planets",-1);if(t.contains("bodies"))t.put("bodies",new ListTag());}
+        return t;
     }
 }

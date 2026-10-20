@@ -140,6 +140,7 @@ public final class SpaceRuntime {
     public static void cancel(ServerPlayer p){var s=state(p.server);var q=s.pending.remove(p.getUUID());if(q!=null){var l=p.server.getLevel(q.target);if(l!=null)l.getChunkSource().removeRegionTicket(TRANSIT,q.chunk,1,p.getUUID());}}
     public static void prepare(ServerPlayer p){var t=new CompoundTag();t.putBoolean("preparing",true);t.putString("dimension",p.level().dimension().location().toString());ModNetwork.sendTo(p,new SpaceScenePacket(t));}
     public static void scene(ServerPlayer p,boolean transition,Vec3 velocity){
+        GalaxyData.get(p.server).chart(p.getUUID(),GalaxyData.current(p));StarField.sync(p);   // being in a system charts it; its sky is the catalogue around it
         var ref=surfaceRef(p.serverLevel());var id=id(p.level().dimension());if(id==null&&ref!=null)id=ref.system();
         CompoundTag t=new CompoundTag();t.putString("dimension",p.level().dimension().location().toString());
         if(id!=null){t.put("system",GalaxyService.survey(p,GalaxyService.SYSTEM,id,-1,"",0).getCompound("system"));t.putString("id",id.toString());if(ref!=null)t.putInt("surfacePlanet",ref.planet());}

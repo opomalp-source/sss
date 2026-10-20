@@ -67,7 +67,10 @@ public final class SpaceSky {
         rgb=mix(rgb,0x8B281A,DoomClient.intensity()*.75);
         buffer.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_COLOR);
         for(int face=0;face<6;face++){Vec3 n=switch(face){case 0->new Vec3(1,0,0);case 1->new Vec3(-1,0,0);case 2->new Vec3(0,1,0);case 3->new Vec3(0,-1,0);case 4->new Vec3(0,0,1);default->new Vec3(0,0,-1);};Vec3 side=Math.abs(n.y)>.5?new Vec3(1,0,0):n.cross(new Vec3(0,1,0));quad(buffer,m,n.scale(190),side.scale(190),n.cross(side).scale(190),rgb,1);}
-        BufferUploader.drawWithShader(buffer.end());buildStars();RenderSystem.setShaderColor(1,1,1,(float)Math.max(vacuum,(1-daylight)*.8));stars.bind();stars.drawWithShader(m,projection,GameRenderer.getPositionColorShader());VertexBuffer.unbind();RenderSystem.setShaderColor(1,1,1,1);
+        BufferUploader.drawWithShader(buffer.end());
+        Vec3 skyNormal=normal;var skyFrame=StarSky.frame(v->PlanetSkyMath.local(v,skyNormal,turns));float starAlpha=(float)Math.max(vacuum,(1-daylight)*.8);   // the galaxy turns with this planet's day, like its suns
+        buildStars();RenderSystem.setShaderColor(1,1,1,starAlpha);stars.bind();stars.drawWithShader(new Matrix4f(m).mul(new Matrix4f(skyFrame)),projection,GameRenderer.getPositionColorShader());VertexBuffer.unbind();RenderSystem.setShaderColor(1,1,1,1);
+        StarSky.render(m,projection,skyFrame,starAlpha);RenderSystem.setShader(GameRenderer::getPositionColorShader);RenderSystem.defaultBlendFunc();
         var moons=b.getList("moons",Tag.TAG_COMPOUND);double radius=SpaceMath.radius(b.getInt("radius"));
         for(int i=0;i<suns.size();i++){var star=suns.getCompound(i);Vec3 direction=SpaceMath.star(i,suns.size()).subtract(center);double size=Math.min(450,200*star.getDouble("radius")),cover=0;
             for(int j=0;j<moons.size();j++){var moon=moons.getCompound(j);double phase=moon.getDouble("phase")+(level.getGameTime()+pt)*.000002/(j+1);Vec3 md=new Vec3(Math.cos(phase),Math.sin(phase)*.35,Math.sin(phase)).scale(radius*(2+j*.65));cover=Math.max(cover,PlanetSkyMath.eclipse(direction,size,md,Math.min(radius*.18,SpaceMath.radius(moon.getInt("radius"))*.5)));}
@@ -88,13 +91,7 @@ public final class SpaceSky {
     private static Vec3 normal(double lon,double lat){return new Vec3(Math.cos(lat)*Math.cos(lon),Math.sin(lat),Math.cos(lat)*Math.sin(lon));}
     private static void buildStars(){
         if(stars!=null)return;var b=Tesselator.getInstance().getBuilder();b.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_COLOR);Random random=new Random(0x44425A5350414345L);Matrix4f identity=new Matrix4f();
-        for(int i=0;i<3100;i++){
-            double lon=random.nextDouble()*Math.PI*2,lat=Math.asin(random.nextDouble()*2-1);Vec3 n=normal(lon,lat),c=n.scale(170);
-            Vec3 side=n.cross(new Vec3(0,1,0)).normalize();if(side.lengthSqr()<.5)side=new Vec3(1,0,0);Vec3 up=n.cross(side).normalize();
-            double size=.055+Math.pow(random.nextDouble(),6)*.22;int[] colors={0x8CB6FF,0xCADFFF,0xFFF3D0,0xFFC88D,0xFF998A};int color=colors[random.nextInt(colors.length)];
-            quad(b,identity,c,side.scale(size),up.scale(size),color,.45f+random.nextFloat()*.55f);
-            if(size>.15)quad(b,identity,c,side.scale(size*3),up.scale(size*.16),color,.11f);
-        }
+        // No point stars here: every star is a catalogue system (StarSky, the space rework phase 2).
         // The galactic band is diffuse layered light with irregular seeded knots, rather than a flat texture strip.
         for(int i=0;i<1700;i++){
             double lon=random.nextDouble()*Math.PI*2,lat=random.nextGaussian()*.065+.18*Math.sin(lon);Vec3 n=normal(lon,lat),side=n.cross(new Vec3(0,1,0)).normalize(),up=n.cross(side).normalize();
@@ -120,7 +117,9 @@ public final class SpaceSky {
             int[][] faces={{0,1,2,3},{4,5,6,7},{0,4,7,3},{1,5,6,2},{3,2,6,7},{0,1,5,4}};
             for(var face:faces)for(int k:face)vertex(builder,m,corners[k],rgb,1,1);BufferUploader.drawWithShader(builder.end());
         }
-        buildStars();RenderSystem.setShaderColor(1,1,1,orbit?1:vacuum*vacuum);stars.bind();stars.drawWithShader(m,projection,GameRenderer.getPositionColorShader());VertexBuffer.unbind();RenderSystem.setShaderColor(1,1,1,1);
+        var skyFrame=orbit?new org.joml.Matrix3f():StarSky.earthFrame(level,pt);float starAlpha=orbit?1:Math.max(vacuum*vacuum,Math.min(1,level.getStarBrightness(pt)*(1-level.getRainLevel(pt))*2));   // orbit: the galaxy's own axes; high over Earth: its celestial sphere
+        buildStars();RenderSystem.setShaderColor(1,1,1,starAlpha);stars.bind();stars.drawWithShader(new Matrix4f(m).mul(new Matrix4f(skyFrame)),projection,GameRenderer.getPositionColorShader());VertexBuffer.unbind();RenderSystem.setShaderColor(1,1,1,1);
+        StarSky.render(m,projection,skyFrame,starAlpha);RenderSystem.setShader(GameRenderer::getPositionColorShader);RenderSystem.defaultBlendFunc();
         if(orbit){
             Vec3 cameraPos=camera.getPosition();var sys=SpaceClient.system();var bodies=sys.getList("bodies",Tag.TAG_COMPOUND);List<CompoundTag> sorted=new ArrayList<>();for(Tag t:bodies)sorted.add((CompoundTag)t);
             sorted.sort(Comparator.comparingDouble((CompoundTag b)->SpaceMath.center(b.getDouble("orbit"),b.getDouble("phase")).distanceToSqr(cameraPos)).reversed());

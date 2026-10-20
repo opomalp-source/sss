@@ -68,7 +68,7 @@ public final class GalaxyScreen extends Screen {
         int beforeView=view;
         view=data.getInt("view");center=GalaxyCatalog.Id.parse(data.getString("center"));planet=data.getInt("planet");
         coordinates.setValue(center.toString());scroll=detailScroll=0;status="";zoom=beforeView==view?1:.7f;targetZoom=1;
-        if(view!=2)selected="";
+        if(view!=2)selected=data.getString("focus");                            // star navigation opens the atlas on the targeted star
     }
     private boolean request(int action) {
         if(waiting) return false;
@@ -197,9 +197,11 @@ public final class GalaxyScreen extends Screen {
                 lines.add("Jump: orbit + piloted pod or full ki.");lines.add("Transmit: learned skill and a personal landing.");
                 lines.add(center+"/"+planet);if(b.getBoolean("destroyed"))lines.add("DESTROYED / remnant");
             }else{
-                heading=sys.getString("name");lines.add(center.toString());lines.add(sys.getInt("stars")+" star(s) / "+bodies.size()+" planets");
+                boolean charted=!sys.contains("charted")||sys.getBoolean("charted");
+                heading=sys.getString("name");lines.add(center.toString());lines.add(sys.getInt("stars")+" star(s) / "+(charted?bodies.size()+" planets":"planets unknown"));
                 for(Tag raw:sys.getList("starsDetail",Tag.TAG_COMPOUND)){var s=(CompoundTag)raw;lines.add(String.format(Locale.ROOT,"%s / %.2f luminosity",s.getString("type"),s.getDouble("light")));}
-                lines.add("Click a planet to inspect its atmosphere, gravity and moons.");lines.add("Waypoint defaults to planet index 0.");
+                if(charted){lines.add("Click a planet to inspect its atmosphere, gravity and moons.");lines.add("Waypoint defaults to planet index 0.");}
+                else{lines.add(stateLine(sys.getString("state")));lines.add("Its planets are charted once you, or anyone who has landed there, have been in the system.");lines.add("Jump still reaches it; the waypoint marks its star.");}
             }
         }else if(view==3){
             heading="Discovery archive";lines.add("Search: "+(query.isEmpty()?"all discoveries":query));
@@ -207,7 +209,7 @@ public final class GalaxyScreen extends Screen {
             lines.add("Only visited planets appear here. Surveying does not claim discovery.");
         }else if(!selected.isEmpty()){
             for(Tag raw:data.getList("entries",Tag.TAG_COMPOUND)){var t=(CompoundTag)raw;if(t.getString("id").equals(selected)){
-                heading=t.getString("name");lines.add(t.getString("id"));lines.add(t.getString("type"));lines.add(t.getInt("stars")+" star(s) / "+t.getInt("planets")+" planets");lines.add(t.getBoolean("known")?"Known system":"Uncharted system");lines.add("Click the selected star again to enter its chart.");break;
+                heading=t.getString("name");lines.add(t.getString("id"));lines.add(t.getString("type"));lines.add(t.getInt("stars")+" star(s) / "+(t.getInt("planets")<0?"planets unknown":t.getInt("planets")+" planets"));lines.add(stateLine(t.getString("state")));lines.add("Click the selected star again to enter its chart.");break;
             }}
         }else{
             lines.add("Drag the chart to rotate it.");lines.add("Scroll to zoom; scroll here for details.");lines.add("Stars brighten when selected. Known systems carry labels.");
@@ -284,4 +286,6 @@ public final class GalaxyScreen extends Screen {
         planet=body;query="";request(want);return true;
     }
     @Override public boolean isPauseScreen(){return false;}
+    /** A system's state for you (the space rework, phase 2): stars can be seen from afar, planets are charted by going there. */
+    private static String stateLine(String state){return switch(state){case "charted"->"Charted system";case "observed"->"Observed star: planets not yet charted";default->"Unobserved star";};}
 }

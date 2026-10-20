@@ -96,7 +96,31 @@ public final class GalaxyData extends SavedData {
         waypoints.forEach((u,r)->{ CompoundTag t=new CompoundTag(); t.putUUID("player",u); t.putString("ref",r.key()); wp.add(t); });
         tag.put("waypoints",wp);ListTag visits=new ListTag();arrivals.forEach((u,map)->map.forEach((ref,a)->{
             var t=new CompoundTag();t.putUUID("player",u);t.putString("ref",ref.key());t.putDouble("x",a.x);t.putDouble("y",a.y);t.putDouble("z",a.z);t.putFloat("yaw",a.yaw);visits.add(t);
-        }));tag.put("arrivals",visits); return tag;
+        }));tag.put("arrivals",visits);
+        tag.put("observed",systems(observed));tag.put("charted",systems(charted)); return tag;
+    }
+    private static ListTag systems(Map<UUID,LinkedHashSet<GalaxyCatalog.Id>> map){
+        ListTag list=new ListTag();map.forEach((u,set)->{var t=new CompoundTag();t.putUUID("player",u);var ids=new ListTag();for(var id:set)ids.add(StringTag.valueOf(id.toString()));t.put("systems",ids);list.add(t);});return list;
+    }
+    private static void systems(ListTag list,Map<UUID,LinkedHashSet<GalaxyCatalog.Id>> into,int cap){
+        for(Tag raw:list){var t=(CompoundTag)raw;if(!t.hasUUID("player"))continue;var set=new LinkedHashSet<GalaxyCatalog.Id>();
+            for(Tag id:t.getList("systems",Tag.TAG_STRING)){try{set.add(GalaxyCatalog.Id.parse(id.getAsString()));}catch(IllegalArgumentException ignored){}}
+            while(set.size()>cap)set.remove(set.iterator().next());into.put(t.getUUID("player"),set);}
+    }
+
+    // ---- observed and charted systems, per player (the space rework, phase 2; optional, additive save keys)
+    /** Most systems remembered per player: the oldest is forgotten first. */
+    public static final int OBSERVED_CAP=512,CHARTED_CAP=4096;
+    private final Map<UUID,LinkedHashSet<GalaxyCatalog.Id>> observed=new HashMap<>(),charted=new HashMap<>();
+    /** A star the player targeted in their sky: its star data is known, its planets are not. */
+    public void observe(UUID player,GalaxyCatalog.Id id){if(remember(observed,player,id,OBSERVED_CAP))setDirty();}
+    public boolean observed(UUID player,GalaxyCatalog.Id id){var s=observed.get(player);return s!=null&&s.contains(id);}
+    /** A system the player has been in: its planets are charted for them. */
+    public void chart(UUID player,GalaxyCatalog.Id id){if(remember(charted,player,id,CHARTED_CAP))setDirty();}
+    public boolean charted(UUID player,GalaxyCatalog.Id id){var s=charted.get(player);return s!=null&&s.contains(id);}
+    private static boolean remember(Map<UUID,LinkedHashSet<GalaxyCatalog.Id>> map,UUID player,GalaxyCatalog.Id id,int cap){
+        var set=map.computeIfAbsent(player,k->new LinkedHashSet<>());boolean fresh=!set.remove(id);set.add(id);
+        while(set.size()>cap)set.remove(set.iterator().next());return fresh;
     }
     public static GalaxyData load(CompoundTag tag) {
         // SavedData swallows loader exceptions and may create a blank replacement. Preserve an unknown schema instead.
@@ -114,6 +138,7 @@ public final class GalaxyData extends SavedData {
             try { data.waypoints.put(t.getUUID("player"),GalaxyCatalog.Ref.parse(t.getString("ref"))); } catch(IllegalArgumentException ignored) {}
         }
         for(Tag raw:tag.getList("arrivals",Tag.TAG_COMPOUND)){var t=(CompoundTag)raw;try{data.arrival(t.getUUID("player"),GalaxyCatalog.Ref.parse(t.getString("ref")),new Arrival(t.getDouble("x"),t.getDouble("y"),t.getDouble("z"),t.getFloat("yaw")));}catch(IllegalArgumentException ex){DBZenith.LOGGER.warn("Skipping malformed planet arrival");}}
+        systems(tag.getList("observed",Tag.TAG_COMPOUND),data.observed,OBSERVED_CAP);systems(tag.getList("charted",Tag.TAG_COMPOUND),data.charted,CHARTED_CAP);
         return data;
     }
 }

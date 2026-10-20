@@ -42,6 +42,11 @@ public final class ClientSetup {
     public static void registerOverlays(RegisterGuiOverlaysEvent event) {
         event.registerBelowAll("aura_edge", new com.dbzenith.client.fx.AuraEdgeOverlay());
         event.registerAboveAll("hud", new DbzHud());
+        event.registerAboveAll("star_target", (gui, g, pt, w, h) -> {                         // the targeted star, for a few seconds (the space rework, phase 2)
+            var mc = net.minecraft.client.Minecraft.getInstance(); String label = com.dbzenith.client.space.StarSky.label();
+            if (label == null || mc.options.hideGui || mc.screen != null) return;
+            label = mc.font.plainSubstrByWidth(label, w - 20); g.drawCenteredString(mc.font, label, w / 2, h / 2 - 26, com.dbzenith.client.space.StarSky.labelColor());   // above the crosshair, clear of the planet readout below it
+        });
         event.registerAboveAll("knocked_out", new ClientKnockouts.Overlay());                  // CX-51
         event.registerAboveAll("moon_gaze", new MoonGazeOverlay());                             // the Great Ape rework
         event.registerAboveAll("downed_prompt", new DownedHud.Prompt());                        // the knocked-out rework

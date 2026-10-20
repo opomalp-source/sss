@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.151.0, 2026-10-20)
+# Handoff: where Dragon Block Zenith stands (v0.152.0, 2026-10-20)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.151.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.152.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -365,3 +365,9 @@ Minecraft if it is running). Never the updater.
   nearby stars (positions, types, multiplicity; no seeds), replaying `GalaxyCatalog.system`'s Random calls up to
   the stars only so identities match catalogue v1 exactly. Replace `SpaceSky.buildStars` and vanilla's Earth stars
   (keep vanilla's Sun and Moon for the Great Ape).
+- **Phase 2 (v0.152.0) done:** every star is a catalogue system (`StarField` server, `StarSky` client, `M`/`,`
+  keys, observed/charted states; see `docs/GALAXY.md` "phase 2"). The dev client's window may be minimised by the
+  user; keep client runs short (screenshots come out empty when minimised).
+- **Next, phase 3:** the transition state machine and the free-orientation space camera (a small Forge mixin
+  config for mouse turning is expected), co-rotating planet frames (then the sky and spin agree across an ascent),
+  predictive preloading, no loading screen, pods carried over.

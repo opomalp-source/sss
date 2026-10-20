@@ -13,7 +13,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
  * so mismatched client/server versions are refused at login instead of desyncing.
  */
 public final class ModNetwork {
-    private static final String PROTOCOL = "50";
+    private static final String PROTOCOL = "51";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(DBZenith.MOD_ID, "main"),
@@ -34,6 +34,9 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(PlanetActivityPacket.class,nextId++,NetworkDirection.PLAY_TO_CLIENT).encoder(PlanetActivityPacket::encode).decoder(PlanetActivityPacket::decode).consumerMainThread(PlanetActivityPacket::handle).add();
         CHANNEL.messageBuilder(SpaceVelocityPacket.class,nextId++,NetworkDirection.PLAY_TO_SERVER).encoder(SpaceVelocityPacket::encode).decoder(SpaceVelocityPacket::decode).consumerMainThread(SpaceVelocityPacket::handle).add();
         CHANNEL.messageBuilder(SpaceScenePacket.class,nextId++,NetworkDirection.PLAY_TO_CLIENT).encoder(SpaceScenePacket::encode).decoder(SpaceScenePacket::decode).consumerMainThread(SpaceScenePacket::handle).add();
+        CHANNEL.messageBuilder(StarFieldPacket.class,nextId++,NetworkDirection.PLAY_TO_CLIENT).encoder(StarFieldPacket::encode).decoder(StarFieldPacket::decode).consumerMainThread(StarFieldPacket::handle).add();
+        CHANNEL.messageBuilder(StarSelectPacket.class,nextId++,NetworkDirection.PLAY_TO_SERVER).encoder(StarSelectPacket::encode).decoder(StarSelectPacket::decode).consumerMainThread(StarSelectPacket::handle).add();
+        CHANNEL.messageBuilder(StarSelectPacket.Info.class,nextId++,NetworkDirection.PLAY_TO_CLIENT).encoder(StarSelectPacket.Info::encode).decoder(StarSelectPacket.Info::decode).consumerMainThread(StarSelectPacket.Info::handle).add();
         CHANNEL.messageBuilder(PlanetEnvironmentPacket.class,nextId++,NetworkDirection.PLAY_TO_CLIENT).encoder(PlanetEnvironmentPacket::encode).decoder(PlanetEnvironmentPacket::decode).consumerMainThread(PlanetEnvironmentPacket::handle).add();
         CHANNEL.messageBuilder(GalaxyPackets.Request.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(GalaxyPackets.Request::encode).decoder(GalaxyPackets.Request::decode).consumerMainThread(GalaxyPackets.Request::handle).add();
