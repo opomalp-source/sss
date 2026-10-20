@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.152.0, 2026-10-20)
+# Handoff: where Dragon Block Zenith stands (v0.153.0, 2026-10-20)
 
 ## The prompt to paste into a new session
 
@@ -368,6 +368,12 @@ Minecraft if it is running). Never the updater.
 - **Phase 2 (v0.152.0) done:** every star is a catalogue system (`StarField` server, `StarSky` client, `M`/`,`
   keys, observed/charted states; see `docs/GALAXY.md` "phase 2"). The dev client's window may be minimised by the
   user; keep client runs short (screenshots come out empty when minimised).
-- **Next, phase 3:** the transition state machine and the free-orientation space camera (a small Forge mixin
-  config for mouse turning is expected), co-rotating planet frames (then the sky and spin agree across an ascent),
-  predictive preloading, no loading screen, pods carried over.
+- **Phase 3 (v0.153.0) done:** shared planet spin, co-rotation, the free space camera (no mixins needed: it parks
+  vanilla pitch between frames), the transfer state machine with entry forecasts, holds and no loading screen (see
+  `docs/SPACE_FRAMES.md` "Planet spin", "The space camera", "Transfers"). Background client recipe: `/z/dev/up.sh`
+  (server + scripted client; `Z:` is a `subst` of the repo's parent), `/z/dev/rc.sh "<command>"` (RCON),
+  `/dbz galaxy orbit Dev`, then `execute in dbzenith:orbit/v1/0_0_0_0 run tp Dev -11871 900 1754` (above Earth,
+  clear of the inner belt), devshots `first_hidegui_lookplanet_x 4` then `first_hidegui_drivewalk_x 60` dive in;
+  `/dbz galaxy transitions Dev` shows the telemetry; `/z/dev/down.sh` stops everything.
+- **Next, phase 4:** planet maps from the real terrain function (the orbital texture should match the ground you
+  land on), approach terrain for the landing region, a curved horizon, matching clouds and terminator.

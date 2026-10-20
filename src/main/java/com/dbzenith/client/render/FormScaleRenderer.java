@@ -25,6 +25,7 @@ public final class FormScaleRenderer {
         float width = bodyWidth(event.getEntity().getId());
         float height = com.dbzenith.appearance.Stature.heightScale(event.getEntity());
         event.getPoseStack().pushPose();
+        com.dbzenith.client.space.SpaceCamera.orient(event.getPoseStack(), event.getEntity(), event.getPartialTick());   // in orbit: standing on the local up (space rework phase 3)
         if (s != 1f || width != 1f || height != 1f) event.getPoseStack().scale(s * width, s * height, s * width);
     }
 

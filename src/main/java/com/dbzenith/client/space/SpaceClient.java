@@ -26,11 +26,15 @@ public final class SpaceClient {
     private static boolean focused(Minecraft mc){return mc.isWindowActive()||Boolean.getBoolean("dbzenith.devAutomation");}
     public static CompoundTag system(){return scene.getCompound("system");}
     public static float entryIntensity(){var p=Minecraft.getInstance().player;return p==null||!surface(p.level())?0:Math.min(1,entry/30f)*(float)Math.max(0,Math.min(1,(p.getY()-175)/100));}
+    /** Held at the edge of an atmosphere while its terrain is prepared (phase 3): the body's index and the entry altitude, or -1. */
+    private static int holdBody=-1;private static double holdAltitude;private static boolean intoOrbit;
     public static void receive(CompoundTag data){
-        if(data.getBoolean("preparing")){preparing=80;return;}
+        if(data.getBoolean("preparing")){preparing=600;intoOrbit=!SpaceRuntime.isSpace(Minecraft.getInstance().level);return;}   // until the transfer or a cancel
+        if(data.contains("hold")){holdBody=data.getBoolean("hold")?data.getInt("holdBody"):-1;holdAltitude=data.getDouble("holdAltitude");if(!data.getBoolean("hold"))preparing=0;if(!data.contains("system"))return;}
+        holdBody=-1;
         if(!scene.getString("dimension").equals(data.getString("dimension"))&&data.getString("dimension").contains("orbit/v1/"))hintTicks=200;
         scene=data;
-        if(data.getBoolean("transition")){preparing=0;fade=24;velocity=new Vec3(data.getDouble("vx"),data.getDouble("vy"),data.getDouble("vz"));
+        if(data.getBoolean("transition")){SpaceCamera.reset();preparing=0;fade=24;velocity=new Vec3(data.getDouble("vx"),data.getDouble("vy"),data.getDouble("vz"));
             var p=Minecraft.getInstance().player;if(p!=null)p.setDeltaMovement(velocity);
             if(!data.getString("dimension").contains("orbit/v1/"))entry=140;
         }
@@ -59,8 +63,22 @@ public final class SpaceClient {
         if(p.hurtTime>0)velocity=p.getDeltaMovement();
         if(p.horizontalCollision)velocity=new Vec3(p.getX()-start.x,velocity.y,p.getZ()-start.z);
         if(p.verticalCollision)velocity=new Vec3(velocity.x,p.getY()-start.y,velocity.z);
-        velocity=SpaceMath.step(velocity,forward,strafe,up,mc.screen==null&&focused(mc)&&mc.options.keySprint.isDown(),brake,p.getYRot(),p.getXRot(),powered);
-        p.setDeltaMovement(velocity);p.fallDistance=0;
+        boolean boost=mc.screen==null&&focused(mc)&&mc.options.keySprint.isDown();
+        if(SpaceCamera.active()){var f=SpaceCamera.basis();velocity=SpaceMath.step(velocity,forward,strafe,up,boost,brake,f[0],f[1],f[2],powered);}   // along the space camera's frame (phase 3)
+        else velocity=SpaceMath.step(velocity,forward,strafe,up,boost,brake,p.getYRot(),p.getXRot(),powered);
+        Vec3 drag=Vec3.ZERO;var anchor=SpaceCamera.anchor(p.position());                       // near a planet you turn with its ground: stopping keeps you over the same land (phase 3)
+        if(anchor.body()!=null&&anchor.weight()>0){var now=ClientFrames.spin(anchor.body(),0);var next=ClientFrames.spin(anchor.body(),1);Vec3 rel=p.position().subtract(ClientFrames.center(anchor.body()));
+            drag=next.apply(now.invert(rel)).subtract(rel).scale(anchor.weight());SpaceCamera.carry(now,next,anchor.weight());}
+        if(holdBody>=0){var bodies=system().getList("bodies",Tag.TAG_COMPOUND);                // held just inside the atmosphere's edge until its ground is ready: the crossing goes the moment it is
+            for(Tag raw:bodies){var b=(CompoundTag)raw;if(b.getInt("index")!=holdBody)continue;Vec3 c=ClientFrames.center(b);Vec3 n=p.position().subtract(c).normalize();
+                double alt=p.position().distanceTo(c)-SpaceMath.radius(b.getInt("radius")),out=velocity.dot(n),top=Math.max(1,holdAltitude-2);
+                if(alt<holdAltitude*.4)velocity=n.scale(Math.min(.1,Math.max(0,out)+.02));                         // too deep: a gentle lift, never a launch
+                else if(alt<=top)velocity=Vec3.ZERO;else if(out>0)velocity=velocity.subtract(n.scale(out));}}   // inside the band: hover over the same ground (the spin drag still applies); above it: no further out
+        p.setDeltaMovement(velocity.add(drag));p.fallDistance=0;
+    }
+    /** Space transfers change dimension without vanilla's loading screen: the destination was prepared, the sky carries on (phase 3). */
+    @SubscribeEvent public static void noLoadingScreen(net.minecraftforge.client.event.ScreenEvent.Opening e){
+        if(e.getNewScreen() instanceof net.minecraft.client.gui.screens.ReceivingLevelScreen&&(preparing>0||fade>0)&&com.dbzenith.galaxy.planet.PlanetConfig.SPACE.get())e.setNewScreen(null);   // closes vanilla's "Joining world" too (cancelling would leave it up)
     }
     @SubscribeEvent public static void frame(TickEvent.RenderTickEvent e){if(e.phase==TickEvent.Phase.START)OrbitalTextures.beginFrame();}
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent e){
@@ -89,9 +107,9 @@ public final class SpaceClient {
     public static final class Overlay implements IGuiOverlay {
         @Override public void render(ForgeGui gui,net.minecraft.client.gui.GuiGraphics g,float pt,int w,int h){
             var mc=Minecraft.getInstance();var p=mc.player;if(p==null||JourneyClient.active())return;
-            float alpha=fade>0?Math.min(1,fade/14f):0;
-            if(preparing>0)alpha=Math.max(alpha,Math.min(.85f,(80-preparing)/12f));
-            if(alpha>0)g.fill(0,0,w,h,((int)(alpha*255)<<24));
+            float alpha=fade>0?.35f*Math.min(1,fade/12f):0;                       // a light veil in the sky's colour, never a black screen (phase 3)
+            if(alpha>0){int tint=SpaceRuntime.isSpace(mc.level)?0x05070F:0x3A1E0C;g.fill(0,0,w,h,((int)(alpha*255)<<24)|tint);}
+            if(preparing>0&&600-preparing>30&&!mc.options.hideGui)g.drawCenteredString(mc.font,intoOrbit?"Leaving the atmosphere...":holdBody>=0?"Holding at the atmosphere: preparing the ground below...":"Preparing the ground below...",w/2,h-62,0xFF9FB4C4);
             if(entry>0&&surface(p.level())&&p.getY()>175){float intensity=Math.min(1,entry/30f)*(float)Math.min(1,(p.getY()-175)/100);
                 for(int i=0;i<12;i++){int a=(int)((12-i)*1.4f*intensity);int color=(a<<24)|0xFF652B;g.fill(i,i,w-i,i+2,color);g.fill(i,h-i-2,w-i,h-i,color);g.fill(i,i,i+2,h-i,color);g.fill(w-i-2,i,w-i,h-i,color);}}
             if(!SpaceRuntime.isSpace(p.level())||mc.options.hideGui)return;

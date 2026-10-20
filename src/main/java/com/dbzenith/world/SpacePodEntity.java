@@ -81,6 +81,16 @@ public class SpacePodEntity extends Entity {
         pilot.startRiding(pod, true);
         return pod;
     }
+    /**
+     * The space rework, phase 3: the pod that was left behind, carried to the pilot's new world: its saved data (name,
+     * identity, settings) loaded into the new one, at the pilot's place and moving with them. {@code landing}: coming down
+     * into an atmosphere. Minecraft can't move a ridden vehicle between dimensions, so this is the same pod rebuilt.
+     */
+    public static SpacePodEntity carry(SpacePodEntity old,ServerPlayer pilot,Vec3 at,Vec3 velocity,boolean landing){
+        var saved=old.saveWithoutId(new CompoundTag());old.discard();
+        var pod=create(pilot.level(),at);pod.load(saved);pod.setPos(at.x,at.y,at.z);pod.setDeltaMovement(velocity);
+        pod.setState(landing?LANDING:PARKED);pilot.level().addFreshEntity(pod);pilot.startRiding(pod,true);return pod;
+    }
     public static SpacePodEntity orbit(ServerPlayer pilot,Vec3 at,Vec3 velocity){
         var pod=create(pilot.level(),at);pod.setDeltaMovement(velocity);pilot.level().addFreshEntity(pod);pilot.startRiding(pod,true);return pod;
     }

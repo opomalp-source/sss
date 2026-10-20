@@ -37,6 +37,8 @@ import java.util.concurrent.*;
 public final class PlanetRuntime {
     private static final Map<MinecraftServer,State> STATES=new WeakHashMap<>();
     private static final TicketType<UUID> LANDING=TicketType.create("dbzenith_planet_landing",Comparator.<UUID>naturalOrder(),600);
+    /** The landing ticket keeps every chunk an entry prepares (5x5 around its crossing) loaded at full status until the transfer. */
+    private static final int LANDING_RADIUS=2;
     private static final String RETURN="dbzenithPlanetCheckpoint";
     private static final class State {
         final Map<ResourceKey<Level>,Long> used=new HashMap<>();
@@ -180,9 +182,9 @@ public final class PlanetRuntime {
             }
             double x=checkpoint==null?8:checkpoint.getDouble("x"),z=checkpoint==null?8:checkpoint.getDouble("z");
             ChunkPos chunk=new ChunkPos(BlockPos.containing(x,0,z));
-            level.getChunkSource().addRegionTicket(LANDING,chunk,1,p.getUUID());
+            level.getChunkSource().addRegionTicket(LANDING,chunk,LANDING_RADIUS,p.getUUID());
             // Calling getChunkFuture on the server thread would managedBlock; schedule its nonblocking path off-thread.
-            int around=checkpoint!=null&&(checkpoint.getBoolean("bed")||checkpoint.getBoolean("transmission"))?1:0;
+            int around=checkpoint!=null&&checkpoint.getBoolean("entry")?2:checkpoint!=null&&(checkpoint.getBoolean("bed")||checkpoint.getBoolean("transmission"))?1:0;   // an entry prepares 5x5 chunks under its crossing (phase 3)
             List<CompletableFuture<Boolean>> chunks=new ArrayList<>();
             for(int dx=-around;dx<=around;dx++)for(int dz=-around;dz<=around;dz++){
                 int cx=chunk.x+dx,cz=chunk.z+dz;
@@ -191,7 +193,7 @@ public final class PlanetRuntime {
             }
             CompletableFuture<Boolean> ready=CompletableFuture.allOf(chunks.toArray(CompletableFuture[]::new)).thenApply(v->chunks.stream().allMatch(CompletableFuture::join));
             s.pending.put(p.getUUID(),new Pending(ref,p.level().dimension(),p.getX(),p.getY(),p.getZ(),p.server.getTickCount(),target,chunk,ready,checkpoint));
-            p.displayClientMessage(Component.literal(checkpoint!=null&&checkpoint.getBoolean("transmission")?"Sensing a familiar world. Stay still...":reconnect?"Restoring your planet location...":"Preparing landing terrain..."),true);return true;
+            if(checkpoint==null||!checkpoint.getBoolean("entry"))p.displayClientMessage(Component.literal(checkpoint!=null&&checkpoint.getBoolean("transmission")?"Sensing a familiar world. Stay still...":reconnect?"Restoring your planet location...":"Preparing landing terrain..."),true);return true;   // an entry says so in the sky (SpaceClient)
         }catch(IllegalArgumentException ex){p.displayClientMessage(Component.literal(ex.getMessage()),true);return false;}
     }
     private static net.minecraft.world.phys.Vec3 transmissionLanding(ServerLevel l,ChunkPos chunk,ServerPlayer p){
@@ -248,6 +250,14 @@ public final class PlanetRuntime {
         State s=state(server);long now=server.getTickCount();
         for(var it=s.pending.entrySet().iterator();it.hasNext();){var entry=it.next();Pending q=entry.getValue();ServerPlayer p=server.getPlayerList().getPlayer(entry.getKey());ServerLevel l=server.getLevel(q.target);
             boolean cancel=GalaxyData.get(server).destroyed(q.ref)||PlanetDestruction.restoring(server,q.ref)||p==null||l==null||now-q.start>600||!p.isAlive()||!p.level().dimension().equals(q.origin)||(q.checkpoint==null&&p.distanceToSqr(q.ox,q.oy,q.oz)>64);
+            if(!cancel&&q.checkpoint!=null&&q.checkpoint.getBoolean("entry")){int at=com.dbzenith.galaxy.space.SpaceRuntime.entryProgress(p,q.ref);   // phase 3: cross only at the crossing; hold there if the terrain isn't ready
+                if(at<0){cancel=true;com.dbzenith.galaxy.space.SpaceRuntime.hold(p,q.ref,false);}
+                else if(at==0){
+                    var c=(now-q.start)%10==0?com.dbzenith.galaxy.space.SpaceRuntime.entryForecast(p,q.ref):null;   // the course changed: prepare under the new crossing instead (the trigger queues it next tick)
+                    if(c!=null){var moved=new ChunkPos(BlockPos.containing(c.position()));
+                        if(Math.max(Math.abs(moved.x-q.chunk.x),Math.abs(moved.z-q.chunk.z))>1){l.getChunkSource().removeRegionTicket(LANDING,q.chunk,LANDING_RADIUS,entry.getKey());it.remove();}}
+                    continue;}
+                else if(!q.ready.isDone()){if(!q.checkpoint.getBoolean("holding")){q.checkpoint.putBoolean("holding",true);com.dbzenith.galaxy.space.SpaceRuntime.hold(p,q.ref,true);}continue;}}
             if(!cancel&&!q.ready.isDone())continue;
             boolean transmission=q.checkpoint!=null&&q.checkpoint.getBoolean("transmission");
             if(transmission&&(p==null||!com.dbzenith.galaxy.space.Interstellar.canTransmit(p)||p.distanceToSqr(q.ox,q.oy,q.oz)>4))cancel=true;
@@ -261,16 +271,16 @@ public final class PlanetRuntime {
                         if(safe.isEmpty()){
                             p.setRespawnPosition(Level.OVERWORLD,null,0,false,false);
                             p.displayClientMessage(Component.literal("Your planet bed is missing or obstructed. You remain at your safe return point."),false);
-                            l.getChunkSource().removeRegionTicket(LANDING,q.chunk,1,entry.getKey());it.remove();continue;
+                            l.getChunkSource().removeRegionTicket(LANDING,q.chunk,LANDING_RADIUS,entry.getKey());it.remove();continue;
                         }
                         x=safe.get().x;y=safe.get().y;z=safe.get().z;
                     }
                     if(transmission){
                         var safe=transmissionLanding(l,q.chunk,p);
-                        if(safe==null){p.displayClientMessage(Component.literal("Instant Transmission found no clear landing space. No ki spent."),true);l.getChunkSource().removeRegionTicket(LANDING,q.chunk,1,entry.getKey());it.remove();continue;}
+                        if(safe==null){p.displayClientMessage(Component.literal("Instant Transmission found no clear landing space. No ki spent."),true);l.getChunkSource().removeRegionTicket(LANDING,q.chunk,LANDING_RADIUS,entry.getKey());it.remove();continue;}
                         // Revalidate the learned skill after async generation; charge only a completed cast.
                         if(!com.dbzenith.race.RacialSkillEffects.transmitAction(p,()->true)){
-                            l.getChunkSource().removeRegionTicket(LANDING,q.chunk,1,entry.getKey());it.remove();continue;
+                            l.getChunkSource().removeRegionTicket(LANDING,q.chunk,LANDING_RADIUS,entry.getKey());it.remove();continue;
                         }
                         x=safe.x;y=safe.y;z=safe.z;com.dbzenith.galaxy.space.Interstellar.blink(p);
                     }
@@ -280,11 +290,14 @@ public final class PlanetRuntime {
                     var from=com.dbzenith.galaxy.space.SpaceTelemetry.Sample.of(p,com.dbzenith.galaxy.space.SpaceRuntime.momentum(p));
                     var expected=new net.minecraft.world.phys.Vec3(x,y,z);
                     if(reentry){var c=com.dbzenith.galaxy.space.SpaceRuntime.entryCommit(p,q.ref);   // the view and motion the player has now; the landing point stays where its terrain was prepared
-                        if(c!=null){velocity=c.velocity();raw=c.rawVelocity();yaw=c.yaw();pitch=c.pitch();expected=c.position();}}
+                        if(c!=null){velocity=c.velocity();raw=c.rawVelocity();yaw=c.yaw();pitch=c.pitch();expected=c.position();
+                            double mx=q.chunk.getMiddleBlockX()+.5,mz=q.chunk.getMiddleBlockZ()+.5,inside=16*LANDING_RADIUS+4;
+                            if(Math.abs(c.position().x-mx)<inside&&Math.abs(c.position().z-mz)<inside){x=c.position().x;y=c.position().y;z=c.position().z;}}   // the actual crossing when it is on the prepared ground
+                        p.getPersistentData().putLong(com.dbzenith.galaxy.space.SpaceRuntime.SETTLE,com.dbzenith.galaxy.space.SpaceRuntime.clock(p)+40);}
                     SpacePodEntity vessel=p.getVehicle() instanceof SpacePodEntity pod?pod:null;
                     p.stopRiding();
                     p.teleportTo(l,x,y,z,yaw,pitch);
-                    if(vessel!=null){vessel.discard();SpacePodEntity.arrive(p,new net.minecraft.world.phys.Vec3(x,y,z));}p.fallDistance=0;p.setDeltaMovement(0,0,0);
+                    if(vessel!=null){if(reentry)SpacePodEntity.carry(vessel,p,new net.minecraft.world.phys.Vec3(x,y,z),velocity,true);else{vessel.discard();SpacePodEntity.arrive(p,new net.minecraft.world.phys.Vec3(x,y,z));}}p.fallDistance=0;p.setDeltaMovement(0,0,0);
                     if(reentry){
                         p.setDeltaMovement(velocity);
                         com.dbzenith.galaxy.space.SpaceTelemetry.record(p,com.dbzenith.galaxy.space.SpaceTelemetry.Kind.ENTRY,from,com.dbzenith.galaxy.space.SpaceTelemetry.Sample.of(p,velocity),
@@ -301,7 +314,7 @@ public final class PlanetRuntime {
                 }else p.displayClientMessage(Component.literal("Landing terrain was unavailable. You remain at your departure point."),false);
             }catch(CompletionException ex){DBZenith.LOGGER.error("Planet landing generation failed",ex);p.displayClientMessage(Component.literal("Landing failed; your departure location is safe."),false);}}
             else if(p!=null)p.displayClientMessage(Component.literal("Landing cancelled: departure changed or terrain timed out."),true);
-            if(l!=null)l.getChunkSource().removeRegionTicket(LANDING,q.chunk,1,entry.getKey());it.remove();
+            if(l!=null)l.getChunkSource().removeRegionTicket(LANDING,q.chunk,LANDING_RADIUS,entry.getKey());it.remove();
         }
         if(now%20==0)for(var l:server.getAllLevels())if(procedural(l)){
             if(pinned(l))s.used.put(l.dimension(),now);

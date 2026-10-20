@@ -304,7 +304,7 @@ public final class StarSky {
         if (!earth || !ready()) return;
         float pt = e.getPartialTick();
         float bright = Math.min(1, level.getStarBrightness(pt) * (1 - level.getRainLevel(pt)) * 2);   // vanilla night stars peak at 0.5
-        render(rotationOnly(e.getPoseStack().last().pose()), e.getProjectionMatrix(), earthFrame(level, pt), bright, true);
+        render(rotationOnly(e.getPoseStack().last().pose()), e.getProjectionMatrix(), ClientFrames.earthSky(pt), bright, true);
         RenderSystem.depthMask(true);
     }
 

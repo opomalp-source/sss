@@ -42,7 +42,8 @@ public final class SpaceSky {
             if(l.dimension().equals(net.minecraft.world.level.Level.OVERWORLD)||SpaceClient.surfaceBody().isEmpty()||sky==0)return;
             var b=SpaceClient.surfaceBody();var p=Minecraft.getInstance().player;if(p==null)return;
             int count=SpaceClient.system().getList("starsDetail",Tag.TAG_COMPOUND).size();Vec3 sun=SpaceMath.star(0,count).subtract(SpaceMath.center(b.getDouble("orbit"),b.getDouble("phase")));
-            double daylight=PlanetSkyMath.daylight(PlanetSkyMath.local(sun,SpaceMath.normal(p.getX(),p.getZ(),b.getInt("radius")),(l.getGameTime()+pt)/Math.max(1,b.getInt("day"))).normalize().y,count);
+            var ground=com.dbzenith.galaxy.space.SpaceFrames.basis(ClientFrames.frame(b,pt),p.getX(),p.getZ());   // the same ground frame as the sky
+            double daylight=PlanetSkyMath.daylight(com.dbzenith.galaxy.space.SpaceFrames.toSurfaceVector(ground,sun).normalize().y,count);
             float weight=sky/15f*(1-block/15f);color.mul(1-weight*(float)(1-daylight)*.75f);if(daylight>.4)color.lerp(new org.joml.Vector3f((float)daylight),weight*.55f);
         }
         @Override public boolean renderSky(ClientLevel l,int t,float pt,PoseStack ps,Camera camera,Matrix4f projection,boolean foggy,Runnable setupFog){
@@ -57,10 +58,10 @@ public final class SpaceSky {
     }
     private static void surface(ClientLevel level,float pt,PoseStack ps,Camera camera,Matrix4f projection){
         var b=SpaceClient.surfaceBody();var sys=SpaceClient.system();var suns=sys.getList("starsDetail",Tag.TAG_COMPOUND);if(suns.isEmpty())return;
-        Vec3 center=SpaceMath.center(b.getDouble("orbit"),b.getDouble("phase")),normal=SpaceMath.normal(camera.getPosition().x,camera.getPosition().z,b.getInt("radius"));
-        double tilt=Math.toRadians(b.getDouble("tilt"));normal=new Vec3(normal.x,normal.y*Math.cos(tilt)-normal.z*Math.sin(tilt),normal.y*Math.sin(tilt)+normal.z*Math.cos(tilt));
-        double turns=(level.getGameTime()+pt)/Math.max(1,b.getInt("day")),vacuum=b.getString("atmosphere").equals("None")?1:SpaceMath.atmosphere(camera.getPosition().y);
-        Vec3 primary=PlanetSkyMath.local(SpaceMath.star(0,suns.size()).subtract(center),normal,turns);double daylight=PlanetSkyMath.daylight(primary.normalize().y,suns.size());
+        Vec3 center=ClientFrames.center(b);
+        var ground=com.dbzenith.galaxy.space.SpaceFrames.basis(ClientFrames.frame(b,pt),camera.getPosition().x,camera.getPosition().z);   // your ground in the shared frames, turned with the planet's day (phase 3)
+        double vacuum=b.getString("atmosphere").equals("None")?1:SpaceMath.atmosphere(camera.getPosition().y);
+        Vec3 primary=com.dbzenith.galaxy.space.SpaceFrames.toSurfaceVector(ground,SpaceMath.star(0,suns.size()).subtract(center));double daylight=PlanetSkyMath.daylight(primary.normalize().y,suns.size());
         RenderSystem.disableDepthTest();RenderSystem.depthMask(false);RenderSystem.disableCull();RenderSystem.enableBlend();RenderSystem.defaultBlendFunc();FogRenderer.setupNoFog();RenderSystem.setShader(GameRenderer::getPositionColorShader);
         Matrix4f m=ps.last().pose();var buffer=Tesselator.getInstance().getBuilder();
         int skyColor=level.getBiome(camera.getBlockPosition()).value().getSkyColor();Vec3 sky=new Vec3((skyColor>>16&255)/255d,(skyColor>>8&255)/255d,(skyColor&255)/255d).scale(daylight*(1-vacuum));int rgb=((int)(sky.x*255)<<16)|((int)(sky.y*255)<<8)|(int)(sky.z*255);
@@ -68,18 +69,18 @@ public final class SpaceSky {
         buffer.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_COLOR);
         for(int face=0;face<6;face++){Vec3 n=switch(face){case 0->new Vec3(1,0,0);case 1->new Vec3(-1,0,0);case 2->new Vec3(0,1,0);case 3->new Vec3(0,-1,0);case 4->new Vec3(0,0,1);default->new Vec3(0,0,-1);};Vec3 side=Math.abs(n.y)>.5?new Vec3(1,0,0):n.cross(new Vec3(0,1,0));quad(buffer,m,n.scale(190),side.scale(190),n.cross(side).scale(190),rgb,1);}
         BufferUploader.drawWithShader(buffer.end());
-        Vec3 skyNormal=normal;var skyFrame=StarSky.frame(v->PlanetSkyMath.local(v,skyNormal,turns));float starAlpha=(float)Math.max(vacuum,(1-daylight)*.8);   // the galaxy turns with this planet's day, like its suns
+        var skyFrame=StarSky.frame(v->com.dbzenith.galaxy.space.SpaceFrames.toSurfaceVector(ground,v));float starAlpha=(float)Math.max(vacuum,(1-daylight)*.8);   // the galaxy turns with this planet's day, like its suns
         buildStars();RenderSystem.setShaderColor(1,1,1,starAlpha);stars.bind();stars.drawWithShader(new Matrix4f(m).mul(new Matrix4f(skyFrame)),projection,GameRenderer.getPositionColorShader());VertexBuffer.unbind();RenderSystem.setShaderColor(1,1,1,1);
         StarSky.render(m,projection,skyFrame,starAlpha);RenderSystem.setShader(GameRenderer::getPositionColorShader);RenderSystem.defaultBlendFunc();
         var moons=b.getList("moons",Tag.TAG_COMPOUND);double radius=SpaceMath.radius(b.getInt("radius"));
         for(int i=0;i<suns.size();i++){var star=suns.getCompound(i);Vec3 direction=SpaceMath.star(i,suns.size()).subtract(center);double size=Math.min(450,200*star.getDouble("radius")),cover=0;
             for(int j=0;j<moons.size();j++){var moon=moons.getCompound(j);double phase=moon.getDouble("phase")+(level.getGameTime()+pt)*.000002/(j+1);Vec3 md=new Vec3(Math.cos(phase),Math.sin(phase)*.35,Math.sin(phase)).scale(radius*(2+j*.65));cover=Math.max(cover,PlanetSkyMath.eclipse(direction,size,md,Math.min(radius*.18,SpaceMath.radius(moon.getInt("radius"))*.5)));}
-            sun(m,PlanetSkyMath.local(direction,normal,turns),mix(star.getInt("color"),0x15141D,cover),size,pt);
+            sun(m,com.dbzenith.galaxy.space.SpaceFrames.toSurfaceVector(ground,direction),mix(star.getInt("color"),0x15141D,cover),size,pt);
         }
         for(Tag raw:sys.getList("bodies",Tag.TAG_COMPOUND)){var other=(CompoundTag)raw;if(other.getInt("index")==b.getInt("index"))continue;Vec3 rel=SpaceMath.center(other.getDouble("orbit"),other.getDouble("phase")).subtract(center);double d=rel.length();
-            sphere(m,PlanetSkyMath.local(rel,normal,turns).scale(100/d),SpaceMath.radius(other.getInt("radius"))*100/d,other,PlanetSkyMath.local(SpaceMath.star(0,suns.size()).subtract(SpaceMath.center(other.getDouble("orbit"),other.getDouble("phase"))),normal,turns).normalize(),16,level.getGameTime()+pt,false,1);}
+            sphere(m,com.dbzenith.galaxy.space.SpaceFrames.toSurfaceVector(ground,rel).scale(100/d),SpaceMath.radius(other.getInt("radius"))*100/d,other,com.dbzenith.galaxy.space.SpaceFrames.toSurfaceVector(ground,SpaceMath.star(0,suns.size()).subtract(SpaceMath.center(other.getDouble("orbit"),other.getDouble("phase")))).normalize(),16,level.getGameTime()+pt,false,1);}
         for(int j=0;j<moons.size();j++){var moon=moons.getCompound(j);double phase=moon.getDouble("phase")+(level.getGameTime()+pt)*.000002/(j+1);Vec3 md=new Vec3(Math.cos(phase),Math.sin(phase)*.35,Math.sin(phase)).scale(radius*(2+j*.65));double d=md.length();
-            sphere(m,PlanetSkyMath.local(md,normal,turns).scale(100/d),Math.min(radius*.18,SpaceMath.radius(moon.getInt("radius"))*.5)*100/d,moon,primary.normalize(),24,level.getGameTime()+pt,false,1);}
+            sphere(m,com.dbzenith.galaxy.space.SpaceFrames.toSurfaceVector(ground,md).scale(100/d),Math.min(radius*.18,SpaceMath.radius(moon.getInt("radius"))*.5)*100/d,moon,primary.normalize(),24,level.getGameTime()+pt,false,1);}
         if(b.getBoolean("rings")){ // translucent near-side arc of the planet's own equatorial ring
             var ring=Tesselator.getInstance().getBuilder();ring.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_COLOR);
             for(int i=0;i<96;i++){double a=i*Math.PI/48,aa=(i+1)*Math.PI/48;Vec3 n=new Vec3(Math.cos(a),.22,Math.sin(a)),nn=new Vec3(Math.cos(aa),.22,Math.sin(aa));vertex(ring,m,n.scale(140),0xB6ADA5,1,.26f);vertex(ring,m,n.add(0,.16,0).scale(140),0xD8CABC,1,.08f);vertex(ring,m,nn.add(0,.16,0).scale(140),0xD8CABC,1,.08f);vertex(ring,m,nn.scale(140),0xB6ADA5,1,.26f);}BufferUploader.drawWithShader(ring.end());
@@ -117,7 +118,7 @@ public final class SpaceSky {
             int[][] faces={{0,1,2,3},{4,5,6,7},{0,4,7,3},{1,5,6,2},{3,2,6,7},{0,1,5,4}};
             for(var face:faces)for(int k:face)vertex(builder,m,corners[k],rgb,1,1);BufferUploader.drawWithShader(builder.end());
         }
-        var skyFrame=orbit?new org.joml.Matrix3f():StarSky.earthFrame(level,pt);float starAlpha=orbit?1:Math.max(vacuum*vacuum,Math.min(1,level.getStarBrightness(pt)*(1-level.getRainLevel(pt))*2));   // orbit: the galaxy's own axes; high over Earth: its celestial sphere
+        var skyFrame=orbit?new org.joml.Matrix3f():ClientFrames.earthSky(pt);float starAlpha=orbit?1:Math.max(vacuum*vacuum,Math.min(1,level.getStarBrightness(pt)*(1-level.getRainLevel(pt))*2));   // orbit: the galaxy's own axes; high over Earth: its celestial sphere
         buildStars();RenderSystem.setShaderColor(1,1,1,starAlpha);stars.bind();stars.drawWithShader(new Matrix4f(m).mul(new Matrix4f(skyFrame)),projection,GameRenderer.getPositionColorShader());VertexBuffer.unbind();RenderSystem.setShaderColor(1,1,1,1);
         StarSky.render(m,projection,skyFrame,starAlpha);RenderSystem.setShader(GameRenderer::getPositionColorShader);RenderSystem.defaultBlendFunc();
         if(orbit){
@@ -146,10 +147,10 @@ public final class SpaceSky {
         if(radius<.7){impostor(m,projected,radius,b.getInt("color"));return;}
         Vec3 light=SpaceMath.star(0,SpaceClient.system().getList("starsDetail",Tag.TAG_COMPOUND).size()).subtract(center).normalize();
         if(b.getBoolean("rings"))rings(m,projected,radius,relative.normalize(),false,b.getDouble("tilt"));
-        sphere(m,projected,radius,b,light,segments,time,false,1);
+        var spin=ClientFrames.spin(b,0);sphere(m,projected,radius,b,light,segments,time,false,1,spin);   // turned with its day, as its surface sky (phase 3)
         if(doom!=null&&doom.phase()==com.dbzenith.galaxy.planet.DoomData.ACTIVE)seams(m,projected,radius,DoomClient.progress(doom),b.getInt("index"));
         if(b.getString("type").equals("Temperate")||b.getString("type").equals("Ocean")||b.getString("type").equals("Jungle")){
-            var clouds=b.copy();clouds.putBoolean("cloudLayer",true);sphere(m,projected,radius*1.009,clouds,light,segments,time,false,1);
+            var clouds=b.copy();clouds.putBoolean("cloudLayer",true);sphere(m,projected,radius*1.009,clouds,light,segments,time,false,1,spin);
         }
         if(!b.getString("atmosphere").equals("None"))halo(m,projected,radius,b.getInt("color"),light);
         if(b.getBoolean("rings"))rings(m,projected,radius,relative.normalize(),true,b.getDouble("tilt"));
@@ -193,19 +194,22 @@ public final class SpaceSky {
             sphere(m,at.scale(100/distance),(f.radius()+Math.max(0,r*.065-f.radius())*Math.min(1,Math.max(0,(distance-200)/1800)))*100/distance,rock,new Vec3(.5,.7,.2),8,time,false,Math.min(1,age/25f));
         }
     }
-    private static void sphere(Matrix4f m,Vec3 c,double r,CompoundTag b,Vec3 light,int segments,double time,boolean atmosphere,float alpha){
+    private static void sphere(Matrix4f m,Vec3 c,double r,CompoundTag b,Vec3 light,int segments,double time,boolean atmosphere,float alpha){sphere(m,c,r,b,light,segments,time,atmosphere,alpha,null);}
+    /** A mesh direction in a turning planet's body frame (texture centre = the surface map's centre), turned into orbit; unturned without a spin. */
+    private static Vec3 turn(com.dbzenith.galaxy.space.SpaceFrames.Spin spin,Vec3 v){return spin==null?v:spin.apply(new Vec3(-v.z,-v.x,v.y));}
+    private static void sphere(Matrix4f m,Vec3 c,double r,CompoundTag b,Vec3 light,int segments,double time,boolean atmosphere,float alpha,com.dbzenith.galaxy.space.SpaceFrames.Spin spin){
         boolean clouds=b.getBoolean("cloudLayer"),horizon=b.getBoolean("horizon"),vertexColor=atmosphere||horizon;
         if(!vertexColor){RenderSystem.setShader(GameRenderer::getPositionTexColorShader);RenderSystem.setShaderTexture(0,OrbitalTextures.get(b,OrbitalLod.texture(r,clouds,com.dbzenith.config.DBZConfig.CLIENT.spaceQuality.get())));}
         var buffer=Tesselator.getInstance().getBuilder();buffer.begin(VertexFormat.Mode.QUADS,vertexColor?DefaultVertexFormat.POSITION_COLOR:DefaultVertexFormat.POSITION_TEX_COLOR);Vec3 view=c.scale(-1).normalize();int base=b.getInt("color"),verts=0;
         for(var patch:OrbitalLod.mesh(segments)){
-            if(patch.middle().dot(view)<-.03)continue;
-            int corner=0;for(Vec3 v:patch.corners()){
+            if(turn(spin,patch.middle()).dot(view)<-.03)continue;
+            int corner=0;for(Vec3 raw:patch.corners()){Vec3 v=turn(spin,raw);
                 float lit=(float)(.055+.945*Math.pow(Math.max(0,v.dot(light)),.65)),a=alpha;int color=base;
                 if(atmosphere){color=base==0?0x78BDE5:mix(base,0x92DFFF,.68);a*=(float)(Math.pow(1-Math.max(0,v.dot(view)),3)*.55);lit=.3f+.7f*lit;}
                 if(horizon){color=b.getBoolean("detonation")?0xFFF0C8:mix(0x5B98BC,base,Math.max(0,v.y));lit=1;a*=b.getBoolean("detonation")?.95f:.65f;}
                 float x=(float)(c.x+v.x*r),y=(float)(c.y+v.y*r),z=(float)(c.z+v.z*r);
                 if(vertexColor)buffer.vertex(m,x,y,z).color(((color>>16)&255)/255f*lit,((color>>8)&255)/255f*lit,(color&255)/255f*lit,a).endVertex();
-                else {float u=patch.u()+(corner>=2?patch.du():0)+(float)(time/(clouds?160000:1200000d)),vv=patch.v()+(corner==1||corner==2?patch.dv():0);
+                else {float u=patch.u()+(corner>=2?patch.du():0)+(float)(spin!=null&&!clouds?0:time/(clouds?160000:1200000d)),vv=patch.v()+(corner==1||corner==2?patch.dv():0);
                     buffer.vertex(m,x,y,z).uv(u,vv).color(lit,lit,lit,a).endVertex();}corner++;verts++;
             }
         }BufferUploader.drawWithShader(buffer.end());SpaceProfile.draw(verts);RenderSystem.setShader(GameRenderer::getPositionColorShader);

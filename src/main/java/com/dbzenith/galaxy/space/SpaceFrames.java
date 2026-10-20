@@ -42,7 +42,12 @@ public final class SpaceFrames {
      * One planet's frame: its orbital centre and radius, its surface mapping ({@code size}: the half-width of a
      * finite surface, or the disc radius), and the disc centre for {@link Mapping#DISC}.
      */
-    public record Planet(Vec3 center, double orbitalRadius, Mapping mapping, double size, double cx, double cz) {
+    public record Planet(Vec3 center, double orbitalRadius, Mapping mapping, double size, double cx, double cz, Spin spin) {
+        /** A planet frame that doesn't turn (the body-fixed frame itself). */
+        public Planet(Vec3 center, double orbitalRadius, Mapping mapping, double size, double cx, double cz) {
+            this(center, orbitalRadius, mapping, size, cx, cz, Spin.IDENTITY);
+        }
+
         /** Surface blocks per orbital block: the surface's east-west extent over the sphere's circumference. */
         public double scale() {
             return size / (Math.PI * orbitalRadius);
@@ -62,19 +67,104 @@ public final class SpaceFrames {
     /** The local tangent frame at a point of the sphere (all unit vectors in orbital space). */
     public record Basis(Vec3 east, Vec3 up, Vec3 south) {}
 
+    /**
+     * How a planet is turned at a moment: the rotation from its body-fixed frame (where the surface map lives) into
+     * orbital space, as the images of the body's x, y and z axes (phase 3). The surface sky, the orbital sphere and
+     * every crossing use the same one, so the ground under you, the planet below you and the stars agree.
+     */
+    public record Spin(Vec3 x, Vec3 y, Vec3 z) {
+        public static final Spin IDENTITY = new Spin(new Vec3(1, 0, 0), new Vec3(0, 1, 0), new Vec3(0, 0, 1));
+
+        /** Body-fixed to orbital. */
+        public Vec3 apply(Vec3 v) {
+            return x.scale(v.x).add(y.scale(v.y)).add(z.scale(v.z));
+        }
+
+        /** Orbital to body-fixed. */
+        public Vec3 invert(Vec3 v) {
+            return new Vec3(v.dot(x), v.dot(y), v.dot(z));
+        }
+
+        /** The axis it turns about (the body's z axis, the map's north-south axis). */
+        public Vec3 axis() {
+            return z;
+        }
+    }
+
+    /**
+     * A planet's spin: one turn per day about the body's z axis (the poles of the surface map), tilted about x by its
+     * axial tilt. {@code turns} is the game time over the day length.
+     */
+    public static Spin spin(double tiltDegrees, double turns) {
+        double a = turns * Math.PI * 2, c = Math.cos(a), s = Math.sin(a), t = Math.toRadians(tiltDegrees), ct = Math.cos(t), st = Math.sin(t);
+        Vec3 x = tilt(new Vec3(c, s, 0), ct, st), y = tilt(new Vec3(-s, c, 0), ct, st), z = tilt(new Vec3(0, 0, 1), ct, st);
+        return new Spin(x, y, z);
+    }
+
+    private static Vec3 tilt(Vec3 v, double c, double s) {
+        return new Vec3(v.x, v.y * c - v.z * s, v.y * s + v.z * c);
+    }
+
+    /**
+     * Earth's spin follows vanilla's sky: its stars turn as {@code Ry(-90°)·Rx(time of day)} (the turn vanilla draws its
+     * Sun, Moon and stars with), and a fixed turn puts vanilla's Sun where the system's star really is. This is the
+     * inverse of the frame Earth's stars are drawn in ({@link #earthSky}).
+     */
+    public static Spin earthSpin(double timeOfDay, Vec3 sunDirection) {
+        var sky = earthSkyMatrix(timeOfDay, sunDirection);
+        return new Spin(new Vec3(sky.m00, sky.m10, sky.m20), new Vec3(sky.m01, sky.m11, sky.m21), new Vec3(sky.m02, sky.m12, sky.m22));
+    }
+
+    /** The rotation taking orbital (galactic) directions into Earth's sky: {@code Ry(-90°)·Rx(time of day)·A^T}. */
+    public static org.joml.Matrix3d earthSkyMatrix(double timeOfDay, Vec3 sunDirection) {
+        Vec3 sun = unit(sunDirection);
+        var a = new org.joml.Matrix3d().rotation(new org.joml.Quaterniond().rotationTo(0, 1, 0, sun.x, sun.y, sun.z));
+        var sky = new org.joml.Matrix3d().rotateY(Math.toRadians(-90)).rotateX(Math.toRadians(timeOfDay * 360));
+        return sky.mul(a.transpose());
+    }
+
+    /** Vanilla's overworld time of day (0..1, 0 noon... as {@code DimensionType.timeOfDay}) for a day time. */
+    public static double earthTimeOfDay(double dayTime) {
+        double d = dayTime / 24000.0 - .25;
+        d -= Math.floor(d);
+        double e = .5 - Math.cos(d * Math.PI) / 2;
+        return (d * 2 + e) / 3;
+    }
+
     public static boolean earth(GalaxyCatalog.Body body, GalaxyCatalog.Ref ref) {
         return ref != null && ref.system().equals(GalaxyCatalog.EARTH) && ref.planet() == 0;
     }
 
-    /** A planet's frame. For Earth, {@code (cx, cz)} is the disc centre (departure point or spawn). */
+    /** A planet's frame, not turning. For Earth, {@code (cx, cz)} is the disc centre (departure point or spawn). */
     public static Planet planet(GalaxyCatalog.Body body, GalaxyCatalog.Ref ref, double cx, double cz) {
-        double r = SpaceMath.radius(body.radius());
-        if (earth(body, ref)) return new Planet(SpaceMath.center(body), r, Mapping.DISC, EARTH_DISC, cx, cz);
-        return new Planet(SpaceMath.center(body), r, Mapping.EQUIRECT, body.radius(), 0, 0);
+        return planet(body, ref, cx, cz, Spin.IDENTITY);
+    }
+
+    /** A planet's frame as it is turned at a moment ({@link #spin}, {@link #earthSpin}). */
+    public static Planet planet(GalaxyCatalog.Body body, GalaxyCatalog.Ref ref, double cx, double cz, Spin spin) {
+        return planet(SpaceMath.center(body), body.radius(), earth(body, ref), cx, cz, spin);
+    }
+
+    /** A planet's frame from its orbital centre and catalogue radius (what the client has). */
+    public static Planet planet(Vec3 center, int radius, boolean earth, double cx, double cz, Spin spin) {
+        double r = SpaceMath.radius(radius);
+        if (earth) return new Planet(center, r, Mapping.DISC, EARTH_DISC, cx, cz, spin);
+        return new Planet(center, r, Mapping.EQUIRECT, radius, 0, 0, spin);
+    }
+
+    /** A planet's spin at a moment: Earth's from vanilla's day time, every other planet's from its day length. */
+    public static Spin spinAt(boolean earth, double tiltDegrees, int dayTicks, double gameTime, double dayTime, Vec3 center) {
+        if (earth) return earthSpin(earthTimeOfDay(dayTime), SpaceMath.star(0, 1).subtract(center));
+        return spin(tiltDegrees, gameTime / Math.max(1, dayTicks));
     }
 
     /** The outward unit normal (relative to the planet centre, orbital axes) under a surface point. */
     public static Vec3 normal(Planet p, double x, double z) {
+        return p.spin.apply(bodyNormal(p, x, z));
+    }
+
+    /** The normal in the planet's own (body-fixed) frame. */
+    public static Vec3 bodyNormal(Planet p, double x, double z) {
         if (p.mapping == Mapping.DISC) {
             double dx = x - p.cx, dz = z - p.cz, d = Math.sqrt(dx * dx + dz * dz);
             if (d < 1e-9) return new Vec3(0, 1, 0);
@@ -87,7 +177,7 @@ public final class SpaceFrames {
 
     /** The surface point (x, z) under a normal; the inverse of {@link #normal}. */
     public static double[] surface(Planet p, Vec3 normal) {
-        Vec3 n = normal.normalize();
+        Vec3 n = unit(p.spin.invert(normal));
         if (p.mapping == Mapping.DISC) {
             double t = Math.acos(clamp(n.y, -1, 1)), h = Math.sqrt(n.x * n.x + n.z * n.z);
             if (h < 1e-12) return new double[]{p.cx, p.cz};

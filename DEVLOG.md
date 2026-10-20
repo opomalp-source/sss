@@ -4315,3 +4315,48 @@ one the atlas, targeting, waypoints and travel use; seeing a star doesn't reveal
   world by day, targeting (a white dwarf at 3,646 ly, then a waypoint; a red-dwarf binary at 2,120 ly). The label
   first sat on the planet readout and was clipped; it now sits above the crosshair. The test client's window was
   minimised at one point (screenshots came out empty), so client runs are now kept short.
+
+## 2026-10-20 — Space rework phase 3: one continuous flight (v0.153.0)
+The third phase of the user's space flagship request: crossings without loading screens, planets that turn the
+same way in every view, and a camera made for space.
+
+- **Planet spin (`SpaceFrames.Spin`).** One body-fixed → orbital rotation per planet, used by the orbital sphere
+  texture (`SpaceSky.sphere` maps mesh points through it), the surface sky (`SpaceFrames.basis` under the camera
+  replaces `PlanetSkyMath.local`), the space camera and every crossing (`SpaceRuntime.frame`). Procedural planets
+  turn with game time over their day and tilt; Earth turns with vanilla's day (`earthSkyMatrix`), so the catalogue
+  Sun is where vanilla draws the Sun and Earth's stars keep their place across an ascent. `ClientFrames` gives the
+  client the same frames.
+- **Co-rotation.** Within two radii (fading out by five) a player is dragged with the spin each tick, so a stopped
+  player stays over the same ground; the camera turns with them.
+- **Space camera (`client/space/SpaceCamera`), no mixins.** Up is a pure function of position (nearest planet's
+  normal, easing to galactic +Y); the mouse turns the view freely in that frame; roll levels the horizon (camera via
+  `ComputeCameraAngles`, model via `SpaceCamera.orient` in `FormScaleRenderer`). Vanilla turns the player before the
+  render tick starts, so the camera parks pitch between frames and reads the mouse deltas itself. Thrust uses the
+  camera's basis (`SpaceMath.step` overload).
+- **Transfer state machine.** Ascents preload ahead of a climb and commit only at `y = 512` (`await` transits; a
+  dive away cancels). Entries: `SpaceRuntime.entryForecast` predicts the crossing (arrival time with the measured
+  acceleration, `arrival`; sideways drift; the ground turned to the arrival tick), preloads 5×5 chunks about six
+  seconds ahead, re-forecasts every ten ticks and moves the preparation when the course moves more than a chunk,
+  commits at the real crossing (`entryProgress`), lands on the true crossing when it is on the prepared ground,
+  holds the player just inside the atmosphere (hovering over the same ground) when the ground isn't ready, and
+  gives up when the player turns away. 40-tick settle after every transfer, stamped in world game time (server tick
+  stamps reset on restart and blocked crossings after one). Pods cross as the same entity
+  (`SpacePodEntity.carry`).
+- **No loading screen.** `ReceivingLevelScreen` is dropped during a prepared transfer (`ScreenEvent.Opening`),
+  a light veil and status line stand in.
+- **Bugs found on the way (background dev client):** the landing ticket kept 3×3 chunks loaded while entries
+  prepared 5×5, so the outer chunks failed and a ready landing was silently thrown away ("Landing terrain was
+  unavailable"): the ticket now covers radius 2. The first hold pushed the player outward 0.02 a tick with no limit,
+  launching them back to space: holds now hover. Forecasts made at the dive's start speed ran long and, with
+  sideways drift, landed up to 270 blocks off: arrival now counts acceleration and the spin ahead. Entries no longer
+  show "Restoring your planet location...". The roll sign was backwards (planet overhead): fixed and checked with
+  the model upright and the planet below.
+- **Tests (`TransitionTests`, 7):** spins are proper rotations and still map both ways exactly, Earth's star sits
+  where vanilla's Sun is; co-rotation keeps you over the same ground; a climb is prepared ahead but crosses only
+  at the crossing; turning back gives the preparation up; a pod keeps its name across the transfer; Earth and
+  procedural spins use their own clocks; the dive forecast arrives within two ticks of the flight model.
+  `SpaceTests` compare the view in the turning ground frame. 304 GameTests pass.
+- **Checked in the dev client (background):** a dive into Earth from orbit lands 0.00 blocks from the true crossing
+  with view, direction and speed unchanged (telemetry), terrain visible on arrival and no loading screen; the
+  planet below with a level horizon and an upright model in orbit; a hold when the ground wasn't ready, then the
+  drop-in. A dev-only `DevWindow` moves the scripted client off-screen so background checks don't cover the desktop.

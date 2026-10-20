@@ -43,16 +43,22 @@ public final class SpaceRuntime {
     /** A player's last few positions, one per server tick, to measure their motion when no fresh client hint is at hand. */
     private static final class Track {final Vec3[] at=new Vec3[6];int n;ResourceKey<Level> dimension;
         void add(ServerPlayer p){if(!p.level().dimension().equals(dimension)){dimension=p.level().dimension();n=0;}at[n%at.length]=p.position();n++;}
-        Vec3 velocity(){if(n<2)return null;int k=Math.min(n,at.length)-1;return at[(n-1)%at.length].subtract(at[(n-1-k)%at.length]).scale(1d/k);}}
-    private record Transit(ResourceKey<Level> origin,ResourceKey<Level> target,GalaxyCatalog.Ref ref,Vec3 position,Vec3 velocity,ChunkPos chunk,long tick,CompletableFuture<Boolean> ready,SpaceTelemetry.Kind kind){}
+        Vec3 velocity(){if(n<2)return null;int k=Math.min(n,at.length)-1;return at[(n-1)%at.length].subtract(at[(n-1-k)%at.length]).scale(1d/k);}
+        Vec3 acceleration(){if(n<at.length)return Vec3.ZERO;Vec3 p0=at[n%6],p2=at[(n+2)%6],p3=at[(n+3)%6],p5=at[(n+5)%6];return p5.subtract(p3).subtract(p2.subtract(p0)).scale(1/6d);}   // (later velocity - earlier velocity) / 3 ticks, each over 2
+    }
+    private record Transit(ResourceKey<Level> origin,ResourceKey<Level> target,GalaxyCatalog.Ref ref,Vec3 position,Vec3 velocity,ChunkPos chunk,long tick,CompletableFuture<Boolean> ready,SpaceTelemetry.Kind kind,boolean await){}
     /** A crossing between a surface and orbit (SpaceFrames): where, how fast and which way, and the untouched velocity it came from (for telemetry). */
     public record Crossing(Vec3 position,Vec3 velocity,float yaw,float pitch,Vec3 rawVelocity){}
     /** The frame of a planet for this player: Earth maps a disc centred on their own departure point (or world spawn), every other planet its whole finite surface. */
-    public static SpaceFrames.Planet frame(ServerPlayer p,GalaxyCatalog.Ref ref,GalaxyCatalog.Body body){
+    public static SpaceFrames.Planet frame(ServerPlayer p,GalaxyCatalog.Ref ref,GalaxyCatalog.Body body){return frame(p,ref,body,0);}
+    /** The same, turned as it will be {@code ahead} ticks from now (a forecast crossing lands on the ground that will be under it then). */
+    public static SpaceFrames.Planet frame(ServerPlayer p,GalaxyCatalog.Ref ref,GalaxyCatalog.Body body,double ahead){
         double cx=0,cz=0;
         if(SpaceFrames.earth(body,ref)){var a=p.getPersistentData().getCompound("dbzenithLaunchAnchor");
             if(a.getString("ref").equals(ref.key())){cx=a.getDouble("x");cz=a.getDouble("z");}else{var s=p.server.overworld().getSharedSpawnPos();cx=s.getX()+.5;cz=s.getZ()+.5;}}
-        return SpaceFrames.planet(body,ref,cx,cz);
+        var o=p.server.overworld();double day=o.getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DAYLIGHT)?ahead:0;
+        var spin=SpaceFrames.spinAt(SpaceFrames.earth(body,ref),body.tilt(),body.dayTicks(),o.getGameTime()+ahead,o.getDayTime()+day,SpaceMath.center(body));   // turned as it is then (phase 3)
+        return SpaceFrames.planet(body,ref,cx,cz,spin);
     }
     /** Leaving a surface: the orbital point over the player, their velocity and view carried through the local ground frame (never falling back through the boundary). */
     public static Crossing ascentState(ServerPlayer p,SpaceFrames.Planet f){
@@ -60,11 +66,58 @@ public final class SpaceRuntime {
         Vec3 raw=momentum(p),kept=new Vec3(raw.x,Math.max(.18,raw.y),raw.z);float[] look=SpaceFrames.look(basis,p.getYRot(),p.getXRot(),true);
         return new Crossing(SpaceFrames.toOrbit(f,surface),SpaceFrames.cap(SpaceFrames.toOrbitVector(basis,kept),5.5),look[0],look[1],SpaceFrames.toOrbitVector(basis,raw));
     }
+    /** Ticks after any transfer during which no other crossing starts (phase 3: one crossing per crossing). */
+    public static final String SETTLE="dbzenithSettleUntil";
+    /** The clock for stamps saved with a player: the world's game time, which survives restarts (the server's tick count starts again at 0). */
+    public static long clock(ServerPlayer p){return p.server.overworld().getGameTime();}
     /** Entering an atmosphere: the surface point under the player at the entry height, their velocity and view carried down (always descending, at least gently). */
-    public static Crossing entryState(ServerPlayer p,SpaceFrames.Planet f){
-        Vec3 surface=SpaceFrames.toSurface(f,p.position());var basis=SpaceFrames.basis(f,surface.x,surface.z);
+    public static Crossing entryState(ServerPlayer p,SpaceFrames.Planet f){return entryState(p,f,p.position());}
+    /** The same, for the crossing at an orbital point {@code at} (the predicted one, while preparing). */
+    public static Crossing entryState(ServerPlayer p,SpaceFrames.Planet f,Vec3 at){
+        Vec3 surface=SpaceFrames.toSurface(f,at);var basis=SpaceFrames.basis(f,surface.x,surface.z);
         Vec3 raw=SpaceFrames.toSurfaceVector(basis,momentum(p));float[] look=SpaceFrames.look(basis,p.getYRot(),p.getXRot(),false);
         return new Crossing(new Vec3(surface.x,Math.max(300,Math.min(SpaceFrames.ENTRY_Y,surface.y)),surface.z),SpaceFrames.cap(new Vec3(raw.x,Math.min(-.3,raw.y),raw.z),5.5),look[0],look[1],raw);
+    }
+    /**
+     * A prepared re-entry's progress: 1 once the player is at or below the entry altitude (cross now), 0 while still above
+     * it and coming, -1 when they left that system or turned well away (give the preparation up).
+     */
+    public static int entryProgress(ServerPlayer p,GalaxyCatalog.Ref ref){
+        if(!isSpace(p.level())||!ref.system().equals(id(p.level().dimension())))return -1;
+        var planets=system(p.serverLevel()).planets();if(ref.planet()<0||ref.planet()>=planets.size())return -1;
+        var f=frame(p,ref,planets.get(ref.planet()));double alt=SpaceFrames.altitude(f,p.position());
+        if(alt<=f.entryAltitude())return 1;
+        Vec3 n=p.position().subtract(f.center()).normalize();double inbound=-momentum(p).dot(n);
+        return alt>f.entryAltitude()+Math.max(16,inbound*160)+f.entryAltitude()&&inbound<.02?-1:0;
+    }
+    /**
+     * Where a player heading into a planet's atmosphere will cross it, on the ground that will be under that point by then
+     * (the planet turns meanwhile); null while they are not heading in within the preload lead (about six seconds).
+     */
+    public static Crossing entryForecast(ServerPlayer p,GalaxyCatalog.Ref ref){
+        if(!isSpace(p.level())||!ref.system().equals(id(p.level().dimension())))return null;
+        var planets=system(p.serverLevel()).planets();if(ref.planet()<0||ref.planet()>=planets.size())return null;
+        var body=planets.get(ref.planet());var f=frame(p,ref,body);double alt=SpaceFrames.altitude(f,p.position());
+        Vec3 n=p.position().subtract(f.center()).normalize(),m=momentum(p);double inbound=-m.dot(n);
+        if(inbound<=.03)return null;
+        var track=state(p.server).tracks.get(p.getUUID());double a=track==null||!p.level().dimension().equals(track.dimension)?0:SpaceFrames.clamp(-track.acceleration().dot(n),0,.2);
+        double t=arrival(Math.max(0,alt-f.entryAltitude()),Math.max(.03,inbound),a);   // a dive under thrust speeds up: without that the forecast runs long and lands far off
+        if(t>120&&alt-f.entryAltitude()>4)return null;                                  // the preload starts about six seconds before the crossing
+        Vec3 drift=m.subtract(n.scale(m.dot(n))),ahead=p.position().add(drift.scale(t)).subtract(f.center());
+        var then=frame(p,ref,body,t);
+        return entryState(p,then,then.center().add(ahead.normalize().scale(then.orbitalRadius()+then.entryAltitude())));
+    }
+    /** Ticks to close {@code distance} at speed {@code v}, gaining {@code a} per tick up to the flight cap (3 blocks a tick unless already faster). */
+    public static double arrival(double distance,double v,double a){
+        double top=Math.max(v,3);if(a<1e-4||v>=top)return distance/v;
+        double rise=(top-v)/a,covered=v*rise+.5*a*rise*rise;
+        return distance<=covered?(Math.sqrt(v*v+2*a*distance)-v)/a:rise+(distance-covered)/top;
+    }
+    /** Holds a player at the edge of the atmosphere while its terrain is still being prepared (the client keeps them there). */
+    public static void hold(ServerPlayer p,GalaxyCatalog.Ref ref,boolean on){
+        var t=new CompoundTag();t.putString("dimension",p.level().dimension().location().toString());t.putBoolean("hold",on);
+        if(on&&isSpace(p.level())){var planets=system(p.serverLevel()).planets();if(ref.planet()>=0&&ref.planet()<planets.size()){var f=frame(p,ref,planets.get(ref.planet()));t.putInt("holdBody",ref.planet());t.putDouble("holdAltitude",f.entryAltitude());}}
+        ModNetwork.sendTo(p,new SpaceScenePacket(t));
     }
     /** At a re-entry's commit: the crossing from the player's current orbital state, or null when they are no longer in that system. */
     public static Crossing entryCommit(ServerPlayer p,GalaxyCatalog.Ref ref){
@@ -106,12 +159,14 @@ public final class SpaceRuntime {
         var level=InfiniverseAPI.get().getOrCreateLevel(server,key,()->new LevelStem(type,new OrbitGenerator(new FixedBiomeSource(biome),GalaxyCatalog.seed(server.overworld().getSeed(),GalaxyData.get(server).salt(),id),id)));
         PlanetRuntime.isolateBorder(level);level.getWorldBorder().setCenter(0,0);level.getWorldBorder().setSize(240000);s.used.put(key,(long)server.getTickCount());Remnants.configure(level);return level;
     }
-    public static boolean ascend(ServerPlayer p){
+    public static boolean ascend(ServerPlayer p){return ascend(p,false);}
+    /** {@code await}: prepared ahead by a flight that is still climbing; the transfer waits for the crossing itself (phase 3). Evacuations, pods and commands go at once. */
+    public static boolean ascend(ServerPlayer p,boolean await){
         var ref=surfaceRef(p.serverLevel());if(ref==null||ModCapabilities.getOrThrow(p).isDead()||!p.isAlive())return false;
         try{
             var body=GalaxyCatalog.body(p.server.overworld().getSeed(),GalaxyData.get(p.server).salt(),ref);
             anchor(p,ref);var c=ascentState(p,frame(p,ref,body));      // the commit recomputes this from where the player then is
-            return queue(p,open(p.server,ref.system()),ref,c.position(),c.velocity(),SpaceTelemetry.Kind.ASCENT);
+            return queue(p,open(p.server,ref.system()),ref,c.position(),c.velocity(),SpaceTelemetry.Kind.ASCENT,await);
         }catch(IllegalArgumentException ex){p.displayClientMessage(Component.literal(ex.getMessage()),true);return false;}
     }
     /** Operator preview of a body's daylight side, without creating its surface dimension. */
@@ -125,11 +180,12 @@ public final class SpaceRuntime {
     }
     /** Records where the player left a planet's surface (the departure point a return lands back on). */
     private static void anchor(ServerPlayer p,GalaxyCatalog.Ref ref){var anchor=new CompoundTag();anchor.putString("ref",ref.key());anchor.putDouble("x",p.getX());anchor.putDouble("z",p.getZ());p.getPersistentData().put("dbzenithLaunchAnchor",anchor);}
-    private static boolean queue(ServerPlayer p,ServerLevel level,GalaxyCatalog.Ref ref,Vec3 at,Vec3 v,SpaceTelemetry.Kind kind){
+    private static boolean queue(ServerPlayer p,ServerLevel level,GalaxyCatalog.Ref ref,Vec3 at,Vec3 v,SpaceTelemetry.Kind kind){return queue(p,level,ref,at,v,kind,false);}
+    private static boolean queue(ServerPlayer p,ServerLevel level,GalaxyCatalog.Ref ref,Vec3 at,Vec3 v,SpaceTelemetry.Kind kind,boolean await){
         State s=state(p.server);if(s.pending.containsKey(p.getUUID()))return false;
         if(s.pending.size()>=16)return false;ChunkPos chunk=new ChunkPos(BlockPos.containing(at));level.getChunkSource().addRegionTicket(TRANSIT,chunk,1,p.getUUID());
         var ready=CompletableFuture.supplyAsync(()->level.getChunkSource().getChunkFuture(chunk.x,chunk.z,ChunkStatus.FULL,true),Util.backgroundExecutor()).thenCompose(f->f).thenApply(e->e.left().isPresent());
-        s.pending.put(p.getUUID(),new Transit(p.level().dimension(),level.dimension(),ref,at,v,chunk,p.server.getTickCount(),ready,kind));prepare(p);return true;
+        s.pending.put(p.getUUID(),new Transit(p.level().dimension(),level.dimension(),ref,at,v,chunk,p.server.getTickCount(),ready,kind,await));prepare(p);return true;
     }
     public static boolean jump(ServerPlayer p,GalaxyCatalog.Ref ref){
         if(!isSpace(p.level())||pending(p)||state(p.server).pending.size()>=16)return false;
@@ -191,17 +247,22 @@ public final class SpaceRuntime {
                     if(distance<radius+20){Vec3 at=center.add(n.scale(radius+22));p.teleportTo(at.x,at.y,at.z);p.setDeltaMovement(n.scale(.3));}
                     if(now%40==0&&!p.isCreative())p.hurt(p.damageSources().magic(),1);continue;
                 }
-                if(pending(p)||Interstellar.active(p))continue;var ref=new GalaxyCatalog.Ref(system.id(),body.index());var discovery=data.discovery(ref);
+                if(pending(p)||Interstellar.active(p)||clock(p)<p.getPersistentData().getLong(SETTLE))continue;var ref=new GalaxyCatalog.Ref(system.id(),body.index());var discovery=data.discovery(ref);
                 if(discovery!=null&&discovery.destroyed()&&!discovery.restored())continue;
-                var f=frame(p,ref,body);                                           // the same mapping the ascent used: a return lands where you left
-                if(SpaceFrames.altitude(f,p.position())>f.entryAltitude()||momentum(p).dot(n)>=.03)continue;
-                var c=entryState(p,f);
-                if(PlanetRuntime.reenter(p,ref,c.position(),c.velocity(),c.yaw(),c.pitch()))prepare(p);
+                var c=entryForecast(p,ref);                                        // the preload starts about five seconds before the crossing, under where we will cross (phase 3)
+                if(c!=null&&PlanetRuntime.reenter(p,ref,c.position(),c.velocity(),c.yaw(),c.pitch()))prepare(p);
             }
             for(int i=0;i<system.stars().size();i++)if(p.position().distanceTo(SpaceMath.star(i,system.stars().size()))<950&&now%20==0&&!p.isCreative()){p.hurt(p.damageSources().onFire(),6);p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.BLINDNESS,50,0,false,false));break;}
             if(now%100==0)checkpoint(p);
-        }else if(p.getY()>=SpaceMath.ASCENT&&surfaceRef(p.serverLevel())!=null&&!pending(p)&&now>p.getPersistentData().getLong("dbzenithAscentRetry")){
-            if(p.getAbilities().flying||p.getVehicle() instanceof SpacePodEntity pod&&pod.state()==SpacePodEntity.ORBIT_LAUNCH){if(!ascend(p)){p.getPersistentData().putLong("dbzenithAscentRetry",now+100);if(p.getVehicle() instanceof SpacePodEntity pod)pod.orbitRefused();}}
+        }else if(surfaceRef(p.serverLevel())!=null){
+            // the ascent (phase 3): preload a few seconds ahead of the crossing at the climb rate, commit only at the crossing itself,
+            // release the preload when the climb turns back
+            var q=state(p.server).pending.get(p.getUUID());boolean pod=p.getVehicle() instanceof SpacePodEntity sp&&sp.state()==SpacePodEntity.ORBIT_LAUNCH,flying=p.getAbilities().flying||pod;
+            double vy=momentum(p).y,lead=Math.max(32,Math.min(200,vy*80));
+            if(q!=null){if(q.await&&(!flying||p.getY()<SpaceFrames.ASCENT_Y-lead-64))cancel(p);}
+            else if(flying&&!pending(p)&&clock(p)>p.getPersistentData().getLong("dbzenithAscentRetry")&&clock(p)>=p.getPersistentData().getLong(SETTLE)
+                    &&(p.getY()>=SpaceFrames.ASCENT_Y||vy>.05&&p.getY()>=SpaceFrames.ASCENT_Y-lead)){
+                if(!ascend(p,p.getY()<SpaceFrames.ASCENT_Y)){p.getPersistentData().putLong("dbzenithAscentRetry",clock(p)+100);if(p.getVehicle() instanceof SpacePodEntity sp)sp.orbitRefused();}}
         }
     }
     @SubscribeEvent(priority=EventPriority.LOW) public static void tick(TickEvent.ServerTickEvent e){
@@ -209,6 +270,7 @@ public final class SpaceRuntime {
         for(var it=s.pending.entrySet().iterator();it.hasNext();){var entry=it.next();var q=entry.getValue();var p=server.getPlayerList().getPlayer(entry.getKey());var l=server.getLevel(q.target);
             boolean cancel=p==null||l==null||!p.isAlive()||!p.level().dimension().equals(q.origin)||now-q.tick>600;
             if(!cancel&&!q.ready.isDone())continue;
+            if(!cancel&&q.await&&p.getY()<SpaceFrames.ASCENT_Y)continue;   // prepared early: the transfer itself waits for the crossing
             if(!cancel)try{if(q.ready.join()){
                 Vec3 at=q.position,v=q.velocity,expected=q.velocity;float yaw=p.getYRot(),pitch=p.getXRot();var from=SpaceTelemetry.Sample.of(p,momentum(p));
                 if(q.kind==SpaceTelemetry.Kind.ASCENT&&surfaceRef(p.serverLevel())!=null){   // from where the player is now, not where they asked to leave
@@ -216,8 +278,9 @@ public final class SpaceRuntime {
                     at=c.position();v=c.velocity();yaw=c.yaw();pitch=c.pitch();expected=c.rawVelocity();
                 }
                 SpacePodEntity old=p.getVehicle() instanceof SpacePodEntity pod?pod:null;p.stopRiding();p.teleportTo(l,at.x,at.y,at.z,yaw,pitch);
-                if(old!=null){old.discard();SpacePodEntity.orbit(p,at,v);}p.setDeltaMovement(v);p.connection.send(new ClientboundSetEntityMotionPacket(p));p.fallDistance=0;
+                if(old!=null)SpacePodEntity.carry(old,p,at,v,false);   // the same pod (name, settings) carried acrossp.setDeltaMovement(v);p.connection.send(new ClientboundSetEntityMotionPacket(p));p.fallDistance=0;
                 SpaceTelemetry.record(p,q.kind,from,SpaceTelemetry.Sample.of(p,v),(int)(now-q.tick),at,expected,new float[]{yaw,pitch});
+                p.getPersistentData().putLong(SETTLE,clock(p)+40);
                 checkpoint(p);PlanetEnvironment.enter(p);scene(p,true,v);s.used.put(l.dimension(),now);Interstellar.arrived(p);
             }}catch(CompletionException ex){DBZenith.LOGGER.error("Orbital preload failed",ex);p.displayClientMessage(Component.literal("Orbital transfer failed. Your departure world is safe."),false);}
             if(l!=null)l.getChunkSource().removeRegionTicket(TRANSIT,q.chunk,1,entry.getKey());it.remove();

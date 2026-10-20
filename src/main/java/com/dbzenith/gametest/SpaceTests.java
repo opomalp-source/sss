@@ -55,24 +55,26 @@ public final class SpaceTests {
         h.assertTrue(buf.readableBytes()<65536,"orbital metadata stays under 64 KiB");SpaceScenePacket.decode(buf);buf.release();
         var up=SpaceTelemetry.last(p.server,p.getUUID(),SpaceTelemetry.Kind.ASCENT);   // continuity of the actual crossing (space rework phase 1)
         h.assertTrue(up!=null&&up.positionError()<.01&&up.headingError()<.5&&up.pitchError()<.5,"ascent keeps position and view: "+(up==null?"no record":up.line()));
-        Vec3 left=up.to().velocity();h.assertTrue(SpaceFrames.angle(left,new Vec3(.2,1,.1))<5&&Math.abs(left.length()/new Vec3(.2,1,.1).length()-1)<.1,"ascent keeps velocity: "+left+" from "+up.from().velocity()+" hint "+SpaceRuntime.momentum(p));
-        h.assertTrue(Math.abs(p.getYRot()-30)<.5&&Math.abs(p.getXRot()+15)<.5,"over the departure the view carries straight across: "+p.getYRot()+"/"+p.getXRot());
+        h.assertTrue(up.directionError()<5&&Math.abs(up.speedError())<.1,"ascent keeps velocity through the turning ground frame: "+up.line());
         var body=SpaceRuntime.system(p.serverLevel()).planets().get(0);var ref=new GalaxyCatalog.Ref(GalaxyCatalog.EARTH,0);var frame=SpaceRuntime.frame(p,ref,body);
+        float[] seen=SpaceFrames.look(SpaceFrames.basis(frame,source.getX()+.5,source.getZ()+.5),30,-15,true);   // phase 3: the planet turns, so the view is the departure view in its frame
+        h.assertTrue(SpaceFrames.angle(SpaceFrames.forward(p.getYRot(),p.getXRot()),SpaceFrames.forward(seen[0],seen[1]))<.5,"the view carries across in the ground frame: "+p.getYRot()+"/"+p.getXRot());
         Vec3 n=SpaceFrames.normal(frame,source.getX()+.5,source.getZ()+.5),at=frame.center().add(n.scale(frame.orbitalRadius()+frame.entryAltitude()-1));
         var basis=SpaceFrames.basis(frame,source.getX()+.5,source.getZ()+.5);Vec3 inbound=n.scale(-1).add(basis.east().scale(.4));
+        p.getPersistentData().remove(SpaceRuntime.SETTLE);   // as if the two-second settle after the ascent had passed
         p.teleportTo(p.serverLevel(),at.x,at.y,at.z,30,20);p.setDeltaMovement(inbound);SpaceRuntime.velocityHint(p,inbound);
         SpaceRuntime.player(new net.minecraftforge.event.TickEvent.PlayerTickEvent(net.minecraftforge.event.TickEvent.Phase.END,p));
         h.assertTrue(PlanetRuntime.pending(p),"entry proximity queues surface preload");
-        pollEntry(h,p,source,0);
+        pollEntry(h,p,source,0,SpaceFrames.look(basis,30,20,false));   // the orbital view carried into the ground frame
     });}
-    private static void pollEntry(GameTestHelper h,ServerPlayer p,BlockPos source,int tries){Delays.after(h,5,()->{
-        if(SpaceRuntime.isSpace(p.level())||PlanetRuntime.pending(p)){h.assertTrue(tries<100,"surface preload/reentry completes");pollEntry(h,p,source,tries+1);return;}
+    private static void pollEntry(GameTestHelper h,ServerPlayer p,BlockPos source,int tries,float[] view){Delays.after(h,5,()->{
+        if(SpaceRuntime.isSpace(p.level())||PlanetRuntime.pending(p)){h.assertTrue(tries<100,"surface preload/reentry completes");pollEntry(h,p,source,tries+1,view);return;}
         h.assertTrue(p.level().dimension().equals(Level.OVERWORLD),"re-entry returns to original Earth dimension");
-        h.assertTrue(Math.abs(p.getX()-source.getX()-.5)<.01&&Math.abs(p.getZ()-source.getZ()-.5)<.01,"matching surface location survives orbital round trip");
+        h.assertTrue(Math.hypot(p.getX()-source.getX()-.5,p.getZ()-source.getZ()-.5)<16,"the round trip lands within 16 blocks of the departure (the planet turned under this client-less player during the preload): "+p.getX()+","+p.getZ());
         h.assertTrue(p.getY()>300&&p.getDeltaMovement().y<0,"re-entry is above the surface with downward momentum");
         Vec3 want=new Vec3(.4,-1,0),got=p.getDeltaMovement();                      // the inbound velocity, in the ground frame (it used to keep 15% of its sideways speed, along world axes)
         h.assertTrue(SpaceFrames.angle(got,want)<5&&Math.abs(got.length()/want.length()-1)<.1,"re-entry keeps the velocity's direction and speed: "+got);
-        h.assertTrue(Math.abs(p.getYRot()-30)<.5&&Math.abs(p.getXRot()-20)<2,"re-entry keeps the view (pitch used to snap to level): "+p.getYRot()+"/"+p.getXRot());
+        h.assertTrue(SpaceFrames.angle(SpaceFrames.forward(p.getYRot(),p.getXRot()),SpaceFrames.forward(view[0],view[1]))<2,"re-entry keeps the view (pitch used to snap to level): "+p.getYRot()+"/"+p.getXRot()+" for "+view[0]+"/"+view[1]);
         var down=SpaceTelemetry.last(p.server,p.getUUID(),SpaceTelemetry.Kind.ENTRY);
         h.assertTrue(down!=null&&down.headingError()<.5&&down.directionError()<5,"entry telemetry: "+(down==null?"no record":down.line()));
         TestPlayers.remove(h,p);h.succeed();

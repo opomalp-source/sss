@@ -354,3 +354,20 @@ the same system by construction), off the server thread, caches eight fields, an
 requests (`StarSelectPacket`) are rate-limited and accepted only for stars of your own sky. Observed and charted
 systems are sparse per-player records in the galaxy save (512 and 4,096 per player, oldest forgotten first). No
 star, target or chart creates a dimension, terrain or discovery. Protocol 51.
+
+## Space rework, phase 3 — one continuous flight (v0.153.0)
+
+**Planets turn, and you turn with them.** Every planet spins on its own day (Earth on vanilla's day, so its Sun
+in space is where its Sun is in the sky), and the orbital sphere, the surface sky and every crossing use the same
+spin. Near a planet (within two radii) you are carried with its ground: stop over a place and you stay over it.
+
+**Free flight in orbit.** The view turns freely (no pitch limit, no flip over the poles). "Down" is the nearest
+planet when you are close (your model and the horizon level out to it), easing to the galaxy's own up further out.
+W/S/A/D and Space thrust along where you look.
+
+**No loading screens.** Climbing out of an atmosphere prepares orbit a few seconds ahead and crosses exactly at
+`y = 512`; diving into one forecasts where you will cross, prepares the ground there while you fall, follows your
+course if it changes, and crosses at the entry altitude onto the ground below you, keeping your speed, direction
+and view. If you arrive before the ground is ready you hover just inside the atmosphere ("Holding at the
+atmosphere: preparing the ground below...") and drop in the moment it is. Turning back gives the preparation up.
+A Space Pod crosses with you and stays the same pod. Details and tolerances: `docs/SPACE_FRAMES.md`.
