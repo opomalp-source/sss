@@ -4209,3 +4209,66 @@ channels and custom-ki NBT, base aura output and public packet RGB precision. Cr
 reference AD2F17 picker, red invalid draft/disabled Apply, creation hair/body, Face eyes/aura, Barber, Ki Creator,
 Life, crosshair and Frost Demon skin/shell/horns. Dev client asserts11 successful Apply callbacks and unchanged
 parent state on Cancel. Original assets only (GUI geometry). Direct local install/no updater.
+
+## 2026-10-20 — Space rework: audit, plan and phase 1 (frames, continuity fixes, telemetry) (v0.151.0)
+The user asked for the whole space experience to become the mod's flagship: every visible star a real destination,
+continuous ascent and re-entry, planets that look like the ground you land on, good movement and camera, connected
+interstellar travel, clear navigation, blended audio, destruction that fits, and multiplayer/performance/save
+safety. Investigate first, then a plan, then phases. The user asked for no showcases: work on, and run the dev
+client only in the background for our own checks.
+
+**Audit (v0.150.0, all 286 GameTests green).** Reproduced numerically by replaying the exact formulas
+(`SpaceMath.normal/surface`, `SpaceRuntime.ascend`, the entry block) outside the game:
+- Ascent kept the world yaw/pitch while arriving along the departure point's outward normal: from x=1024, 2048 and
+  3500 on a 4,096-radius world the planet below was tilted 45°, 90° and 154° from straight down.
+- Re-entry kept 15% of the horizontal speed, along world x/z instead of the ground frame, and forced pitch to 0.
+- Earth (radius 30 million) put every departure at the sphere's top and mapped an entry 5° away to x≈833,000 (20°:
+  3.3 million); only entries within about 4° of the departure returned home.
+- Ascent arrived 1,200–2,700 surface-equivalent blocks up; re-entry started 780–1,775 up and arrived at y=340.
+- At the 5.5 blocks/tick cap the outermost planet was 14 minutes from its star.
+Confirmed in code: the 3,100 sky stars come from one fixed random seed (same in every system, unrelated to the
+catalogue) and the galactic band is decorative; Earth draws vanilla's stars; the catalogue needs the server-only
+world seed; orbital textures come from a hash of the planet's name, not its terrain; re-entry preloaded one chunk;
+every dimension change shows vanilla's loading screen behind an 85% fade; hyperspeed freezes you on a timer and
+arrives with a forced view and zero velocity; Space Pods are deleted and re-created on transfers.
+
+**Plan (approved):** 1 frames + reproduced bugs; 2 real catalogue stars, look-to-select, waypoints, map identity; 3
+transition state machine, preloading, no loading screen, free-orientation space camera, co-rotating planet frames,
+pods carried over; 4 terrain-derived planet maps and approach terrain; 5 in-system cruise, hyperspeed towards the
+chosen star, passengers, HUD, audio; 6 destruction identity and multiplayer hardening; 7 profiling, soak, balance.
+Minecraft limits and compromises (dimension changes reset the client world; "up" is always world vertical;
+client motion over about 10 blocks/tick fails movement checks; orbit is ±1,024 blocks tall; surfaces are flat;
+Earth is endless; the client can't compute the catalogue; v1 is a uniform cube) are recorded in the plan reply and
+`docs/SPACE_FRAMES.md`.
+
+**Phase 1 (this version):**
+- `galaxy/space/SpaceFrames`: every surface/orbit transform in one place. Equirectangular mapping for finite worlds
+  (unchanged, so departures from a world's middle still arrive on top of the sphere), and for Earth an azimuthal
+  equidistant disc of 32,768 blocks centred on the player's own departure point (spawn before one exists). One
+  altitude scale per planet (`size / (π × orbital radius)`), crossings at y=512 (ascent) and y=364 (re-entry
+  arrival) seen identically from both sides, a 148-block dead band. A local ground frame (east, up, south) carries
+  velocity and view across in both directions; speeds are kept in blocks per tick.
+- `SpaceRuntime`: ascent and entry use the frames; the ascent recomputes its arrival from where the player is when
+  the preload finishes (it used the request position); entry triggers at the mapped altitude; the 4° anchor snap
+  is gone (the frames are exact). `momentum` falls back to motion measured from the player's last six positions
+  instead of the server-side delta movement, which isn't a player's flight (this made a velocity test flaky).
+- `PlanetRuntime.reenter` carries the full arrival position, velocity, yaw and pitch; the commit refreshes the
+  view and velocity from the player's state at that moment (the landing point stays where its terrain was
+  prepared).
+- `SpaceTelemetry` + `/dbz galaxy transitions [player]`: every committed transfer's position, view and velocity
+  errors against the mapping (last 64, in memory; `-Ddbzenith.spaceTrace=true` logs them).
+- The scripted dev client keeps space input while unfocused (dev automation only).
+- `tools/release.sh` takes `CO_AUTHOR` to override the commit trailer (the default is unchanged).
+- Guide: `docs/SPACE_FRAMES.md` (the six spaces, the three kinds of distance, mapping limits, tolerances).
+
+**Tests:** `SpaceFrameTests` (exact surface/orbit round trips on four world sizes and three Earth centres,
+orthonormal ground frames, velocity and view carried and back within 0.01°, crossing heights and dead band, Earth
+entries 1–179° away landing proportionally and never beyond the disc, ten ascent/entry cycles without drift).
+The real ascent/re-entry test now asserts position, view and velocity continuity through the telemetry. 291
+GameTests pass, three complete runs in a row.
+
+**Checked in the dev client (background, not shown to the user):** a real Earth ascent (position and view
+error 0) and a real thrust-down re-entry: pitch 84.6° for 85°, velocity direction and speed unchanged, landing 62
+blocks west and 75 south of the departure, exactly along the 40° heading flown, scaled by Earth's 17× altitude
+ratio. The arrival still shows only a few chunks under the player: that is phase 3 and 4 work (preloading and
+approach terrain). Still true until phase 3: far from a world's middle the planet sits beside you in orbit.

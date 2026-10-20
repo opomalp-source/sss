@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.148.1, 2026-10-17)
+# Handoff: where Dragon Block Zenith stands (v0.151.0, 2026-10-20)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.148.1. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.151.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -347,3 +347,21 @@ channels and custom-ki NBT, base aura output and public packet RGB precision. Cr
 reference AD2F17 picker, red invalid draft/disabled Apply, creation hair/body, Face eyes/aura, Barber, Ki Creator,
 Life, crosshair and Frost Demon skin/shell/horns. Dev client asserts11 successful Apply callbacks and unchanged
 parent state on Cancel. Original assets only (GUI geometry). Direct local install/no updater.
+
+## Space rework (from v0.151.0, 2026-10-20)
+The user's flagship request: every visible star a real destination, continuous ascent/re-entry, planets that
+match their ground, good movement/camera, connected interstellar travel, clear navigation, blended audio,
+destruction that fits, multiplayer/performance/save safety. Approved seven-phase plan in DEVLOG.md (2026-10-20)
+and TODO.md "Space rework". Work through the phases without asking about routine choices; ask before
+destructive save changes or scope changes. No showcases for the user: run the dev client only in the background
+for our own checks. Each phase: tests, background client checks, docs/devlog/TODO/HANDOFF, version bump,
+`CO_AUTHOR="Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" tools/release.sh`, push main and the tag,
+direct install into `C:\Users\musta\AppData\Roaming\.minecraft\mods` (old jars removed, ask the user to close
+Minecraft if it is running). Never the updater.
+
+- **Phase 1 (v0.151.0) done:** `SpaceFrames` is the single source of surface/orbit transforms (see
+  `docs/SPACE_FRAMES.md`); `SpaceTelemetry` + `/dbz galaxy transitions`; `SpaceFrameTests`.
+- **Next, phase 2:** catalogue-backed stars. The client never gets the world seed, so the server must stream the
+  nearby stars (positions, types, multiplicity; no seeds), replaying `GalaxyCatalog.system`'s Random calls up to
+  the stars only so identities match catalogue v1 exactly. Replace `SpaceSky.buildStars` and vanilla's Earth stars
+  (keep vanilla's Sun and Moon for the Great Ape).

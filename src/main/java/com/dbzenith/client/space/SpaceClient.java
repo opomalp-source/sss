@@ -22,6 +22,8 @@ public final class SpaceClient {
     private static CompoundTag scene=new CompoundTag();private static Vec3 velocity=Vec3.ZERO,start=Vec3.ZERO;
     private static ResourceKey<Level> movementLevel;private static double forward,strafe,up;private static boolean brake;
     private static int fade,entry,preparing,hintTicks;private static float atmosphere;
+    /** Input counts while the window has focus (and always for the scripted dev client, which runs unfocused). */
+    private static boolean focused(Minecraft mc){return mc.isWindowActive()||Boolean.getBoolean("dbzenith.devAutomation");}
     public static CompoundTag system(){return scene.getCompound("system");}
     public static float entryIntensity(){var p=Minecraft.getInstance().player;return p==null||!surface(p.level())?0:Math.min(1,entry/30f)*(float)Math.max(0,Math.min(1,(p.getY()-175)/100));}
     public static void receive(CompoundTag data){
@@ -40,13 +42,13 @@ public final class SpaceClient {
     @SubscribeEvent public static void camera(ViewportEvent.ComputeCameraAngles e){var mc=Minecraft.getInstance();if(mc.player!=null&&SpaceRuntime.isSpace(mc.level)&&com.dbzenith.config.DBZConfig.CLIENT.flightCinematicCamera.get())e.setRoll(e.getRoll()+(float)Math.sin((mc.player.tickCount+e.getPartialTick())*.012)*.22f);}
     @SubscribeEvent(priority=EventPriority.LOWEST) public static void input(MovementInputUpdateEvent e){
         var mc=Minecraft.getInstance();
-        if(!SpaceRuntime.isSpace(e.getEntity().level())||e.getEntity().isPassenger()||mc.screen!=null||!mc.isWindowActive()){forward=strafe=up=0;brake=false;return;}
+        if(!SpaceRuntime.isSpace(e.getEntity().level())||e.getEntity().isPassenger()||mc.screen!=null||!focused(mc)){forward=strafe=up=0;brake=false;return;}
         var i=e.getInput();forward=i.forwardImpulse;strafe=i.leftImpulse;up=i.jumping?1:0;brake=i.shiftKeyDown;
         i.forwardImpulse=i.leftImpulse=0;i.jumping=i.shiftKeyDown=false;i.up=i.down=i.left=i.right=false;
     }
     @SubscribeEvent(priority=EventPriority.LOWEST) public static void movement(TickEvent.PlayerTickEvent e){
         if(!(e.player instanceof LocalPlayer p))return;
-        var mc=Minecraft.getInstance();if(mc.screen!=null||!mc.isWindowActive()){forward=strafe=up=0;brake=false;}
+        var mc=Minecraft.getInstance();if(mc.screen!=null||!focused(mc)){forward=strafe=up=0;brake=false;}
         if(JourneyClient.active()){velocity=Vec3.ZERO;p.setDeltaMovement(Vec3.ZERO);movementLevel=null;return;}
         if(!SpaceRuntime.isSpace(p.level())||p.isPassenger()){movementLevel=null;forward=strafe=up=0;brake=false;return;}
         if(e.phase==TickEvent.Phase.START){
@@ -57,7 +59,7 @@ public final class SpaceClient {
         if(p.hurtTime>0)velocity=p.getDeltaMovement();
         if(p.horizontalCollision)velocity=new Vec3(p.getX()-start.x,velocity.y,p.getZ()-start.z);
         if(p.verticalCollision)velocity=new Vec3(velocity.x,p.getY()-start.y,velocity.z);
-        velocity=SpaceMath.step(velocity,forward,strafe,up,mc.screen==null&&mc.isWindowActive()&&mc.options.keySprint.isDown(),brake,p.getYRot(),p.getXRot(),powered);
+        velocity=SpaceMath.step(velocity,forward,strafe,up,mc.screen==null&&focused(mc)&&mc.options.keySprint.isDown(),brake,p.getYRot(),p.getXRot(),powered);
         p.setDeltaMovement(velocity);p.fallDistance=0;
     }
     @SubscribeEvent public static void frame(TickEvent.RenderTickEvent e){if(e.phase==TickEvent.Phase.START)OrbitalTextures.beginFrame();}

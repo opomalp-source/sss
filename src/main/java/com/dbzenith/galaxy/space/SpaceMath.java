@@ -5,7 +5,7 @@ import net.minecraft.world.phys.Vec3;
 
 /** Public orbital geometry, deliberately independent of terrain seeds. Units are local blocks, never galaxy coordinates. */
 public final class SpaceMath {
-    public static final double ASCENT=512, ENTRY=340;
+    public static final double ASCENT=512, ENTRY=364;
     public static double radius(int surfaceRadius){return Math.max(80,Math.min(600,surfaceRadius/12d));}
     public static Vec3 center(double orbit,double phase){return new Vec3(Math.cos(phase)*orbit*6000,128,Math.sin(phase)*orbit*6000);}
     public static Vec3 center(GalaxyCatalog.Body b){return center(b.orbit(),b.phase());}

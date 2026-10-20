@@ -145,9 +145,10 @@ public final class PlanetRuntime {
         return queue(p,ref,tag,true);
     }
     public static boolean pending(ServerPlayer p){return state(p.server).pending.containsKey(p.getUUID());}
-    public static boolean reenter(ServerPlayer p,GalaxyCatalog.Ref ref,double x,double z,net.minecraft.world.phys.Vec3 velocity){
+    /** Queues a re-entry to a surface point (SpaceFrames: the point under the crossing), arriving with this velocity and view. */
+    public static boolean reenter(ServerPlayer p,GalaxyCatalog.Ref ref,net.minecraft.world.phys.Vec3 at,net.minecraft.world.phys.Vec3 velocity,float yaw,float pitch){
         if(!com.dbzenith.galaxy.space.Interstellar.accessible(p,ref))return false;
-        var tag=new CompoundTag();tag.putString("ref",ref.key());tag.putDouble("x",x);tag.putDouble("y",com.dbzenith.galaxy.space.SpaceMath.ENTRY);tag.putDouble("z",z);tag.putFloat("yaw",p.getYRot());
+        var tag=new CompoundTag();tag.putString("ref",ref.key());tag.putDouble("x",at.x);tag.putDouble("y",at.y);tag.putDouble("z",at.z);tag.putFloat("yaw",yaw);tag.putFloat("pitch",pitch);
         tag.putBoolean("entry",true);tag.putDouble("vx",velocity.x);tag.putDouble("vy",velocity.y);tag.putDouble("vz",velocity.z);return queue(p,ref,tag,true);
     }
     public static boolean home(ServerPlayer p){
@@ -273,12 +274,21 @@ public final class PlanetRuntime {
                         }
                         x=safe.x;y=safe.y;z=safe.z;com.dbzenith.galaxy.space.Interstellar.blink(p);
                     }
+                    boolean reentry=q.checkpoint!=null&&q.checkpoint.getBoolean("entry");
+                    float yaw=q.checkpoint==null?p.getYRot():q.checkpoint.getFloat("yaw"),pitch=reentry?q.checkpoint.getFloat("pitch"):0;
+                    net.minecraft.world.phys.Vec3 velocity=reentry?new net.minecraft.world.phys.Vec3(q.checkpoint.getDouble("vx"),q.checkpoint.getDouble("vy"),q.checkpoint.getDouble("vz")):net.minecraft.world.phys.Vec3.ZERO,raw=velocity;
+                    var from=com.dbzenith.galaxy.space.SpaceTelemetry.Sample.of(p,com.dbzenith.galaxy.space.SpaceRuntime.momentum(p));
+                    var expected=new net.minecraft.world.phys.Vec3(x,y,z);
+                    if(reentry){var c=com.dbzenith.galaxy.space.SpaceRuntime.entryCommit(p,q.ref);   // the view and motion the player has now; the landing point stays where its terrain was prepared
+                        if(c!=null){velocity=c.velocity();raw=c.rawVelocity();yaw=c.yaw();pitch=c.pitch();expected=c.position();}}
                     SpacePodEntity vessel=p.getVehicle() instanceof SpacePodEntity pod?pod:null;
                     p.stopRiding();
-                    p.teleportTo(l,x,y,z,q.checkpoint==null?p.getYRot():q.checkpoint.getFloat("yaw"),0);
+                    p.teleportTo(l,x,y,z,yaw,pitch);
                     if(vessel!=null){vessel.discard();SpacePodEntity.arrive(p,new net.minecraft.world.phys.Vec3(x,y,z));}p.fallDistance=0;p.setDeltaMovement(0,0,0);
-                    if(q.checkpoint!=null&&q.checkpoint.getBoolean("entry")){
-                        var velocity=new net.minecraft.world.phys.Vec3(q.checkpoint.getDouble("vx"),q.checkpoint.getDouble("vy"),q.checkpoint.getDouble("vz"));p.setDeltaMovement(velocity);
+                    if(reentry){
+                        p.setDeltaMovement(velocity);
+                        com.dbzenith.galaxy.space.SpaceTelemetry.record(p,com.dbzenith.galaxy.space.SpaceTelemetry.Kind.ENTRY,from,com.dbzenith.galaxy.space.SpaceTelemetry.Sample.of(p,velocity),
+                                (int)(now-q.start),expected,raw,new float[]{yaw,pitch});
                         p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket(p));p.getPersistentData().putLong("dbzenithReentryUntil",now+140);
                         com.dbzenith.galaxy.space.SpaceRuntime.scene(p,true,velocity);
                     }

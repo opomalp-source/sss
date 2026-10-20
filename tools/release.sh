@@ -1,7 +1,7 @@
 #!/bin/bash
 # Releases a version (after bumping mod_version and building): commits, tags, installs the jar into the local mods
 # folder (only if Minecraft isn't running). No updater publication, per user request.
-# usage: tools/release.sh <version> "<commit subject>"
+# usage: tools/release.sh <version> "<commit subject>"  (CO_AUTHOR="Co-Authored-By: ..." overrides the trailer)
 # Build and test first:
 #   rm -f run-gametest/world/serverconfig/dbzenith-server.toml; ./gradlew --offline build runGameTestServer
 #   ./gradlew --offline build -x test
@@ -13,7 +13,7 @@ git add -A src tools docs libs .gitignore README.md DEVLOG.md TODO.md gradle.pro
 git commit -q -F - <<MSGEOF
 $MSG
 
-Co-Authored-By: Codex <noreply@openai.com>
+${CO_AUTHOR:-Co-Authored-By: Codex <noreply@openai.com>}
 MSGEOF
 git tag v$V
 if command -v powershell >/dev/null; then                                   # Windows: the user's requested mods folder

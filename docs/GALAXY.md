@@ -1,5 +1,8 @@
 # Galaxy and space
 
+The space rework (v0.151.0 onward) defines every coordinate space, scale and surface/orbit transform in
+[Space frames and scales](SPACE_FRAMES.md). Where the phases below describe older behaviour, that guide wins.
+
 ## Phase 1 — Galaxy atlas (v0.139.0)
 
 Open **`/galaxy`** (any player), or use **Galaxy map** below the Space Pod destination menu.

@@ -37,16 +37,49 @@ public final class SpaceRuntime {
     private static final Map<MinecraftServer,State> STATES=new WeakHashMap<>();
     private static final class State {
         final Map<UUID,Transit> pending=new HashMap<>();final Map<ResourceKey<Level>,Long> used=new HashMap<>();
-        final Map<UUID,Motion> motion=new HashMap<>();
+        final Map<UUID,Motion> motion=new HashMap<>();final Map<UUID,Track> tracks=new HashMap<>();
         final Map<ResourceKey<Level>,GalaxyCatalog.SystemSpec> systems=new HashMap<>();final Set<ResourceKey<Level>> retiring=new HashSet<>();
     }
-    private record Transit(ResourceKey<Level> origin,ResourceKey<Level> target,GalaxyCatalog.Ref ref,Vec3 position,Vec3 velocity,ChunkPos chunk,long tick,CompletableFuture<Boolean> ready){}
+    /** A player's last few positions, one per server tick, to measure their motion when no fresh client hint is at hand. */
+    private static final class Track {final Vec3[] at=new Vec3[6];int n;ResourceKey<Level> dimension;
+        void add(ServerPlayer p){if(!p.level().dimension().equals(dimension)){dimension=p.level().dimension();n=0;}at[n%at.length]=p.position();n++;}
+        Vec3 velocity(){if(n<2)return null;int k=Math.min(n,at.length)-1;return at[(n-1)%at.length].subtract(at[(n-1-k)%at.length]).scale(1d/k);}}
+    private record Transit(ResourceKey<Level> origin,ResourceKey<Level> target,GalaxyCatalog.Ref ref,Vec3 position,Vec3 velocity,ChunkPos chunk,long tick,CompletableFuture<Boolean> ready,SpaceTelemetry.Kind kind){}
+    /** A crossing between a surface and orbit (SpaceFrames): where, how fast and which way, and the untouched velocity it came from (for telemetry). */
+    public record Crossing(Vec3 position,Vec3 velocity,float yaw,float pitch,Vec3 rawVelocity){}
+    /** The frame of a planet for this player: Earth maps a disc centred on their own departure point (or world spawn), every other planet its whole finite surface. */
+    public static SpaceFrames.Planet frame(ServerPlayer p,GalaxyCatalog.Ref ref,GalaxyCatalog.Body body){
+        double cx=0,cz=0;
+        if(SpaceFrames.earth(body,ref)){var a=p.getPersistentData().getCompound("dbzenithLaunchAnchor");
+            if(a.getString("ref").equals(ref.key())){cx=a.getDouble("x");cz=a.getDouble("z");}else{var s=p.server.overworld().getSharedSpawnPos();cx=s.getX()+.5;cz=s.getZ()+.5;}}
+        return SpaceFrames.planet(body,ref,cx,cz);
+    }
+    /** Leaving a surface: the orbital point over the player, their velocity and view carried through the local ground frame (never falling back through the boundary). */
+    public static Crossing ascentState(ServerPlayer p,SpaceFrames.Planet f){
+        Vec3 surface=new Vec3(p.getX(),Math.max(SpaceFrames.ASCENT_Y,p.getY()),p.getZ());var basis=SpaceFrames.basis(f,surface.x,surface.z);
+        Vec3 raw=momentum(p),kept=new Vec3(raw.x,Math.max(.18,raw.y),raw.z);float[] look=SpaceFrames.look(basis,p.getYRot(),p.getXRot(),true);
+        return new Crossing(SpaceFrames.toOrbit(f,surface),SpaceFrames.cap(SpaceFrames.toOrbitVector(basis,kept),5.5),look[0],look[1],SpaceFrames.toOrbitVector(basis,raw));
+    }
+    /** Entering an atmosphere: the surface point under the player at the entry height, their velocity and view carried down (always descending, at least gently). */
+    public static Crossing entryState(ServerPlayer p,SpaceFrames.Planet f){
+        Vec3 surface=SpaceFrames.toSurface(f,p.position());var basis=SpaceFrames.basis(f,surface.x,surface.z);
+        Vec3 raw=SpaceFrames.toSurfaceVector(basis,momentum(p));float[] look=SpaceFrames.look(basis,p.getYRot(),p.getXRot(),false);
+        return new Crossing(new Vec3(surface.x,Math.max(300,Math.min(SpaceFrames.ENTRY_Y,surface.y)),surface.z),SpaceFrames.cap(new Vec3(raw.x,Math.min(-.3,raw.y),raw.z),5.5),look[0],look[1],raw);
+    }
+    /** At a re-entry's commit: the crossing from the player's current orbital state, or null when they are no longer in that system. */
+    public static Crossing entryCommit(ServerPlayer p,GalaxyCatalog.Ref ref){
+        if(!isSpace(p.level())||!ref.system().equals(id(p.level().dimension())))return null;
+        var planets=system(p.serverLevel()).planets();if(ref.planet()<0||ref.planet()>=planets.size())return null;
+        return entryState(p,frame(p,ref,planets.get(ref.planet())));
+    }
     private record Motion(Vec3 velocity,int tick,ResourceKey<Level> dimension){}
     public static boolean velocityHint(ServerPlayer p,Vec3 v){
         if(!p.isAlive()||!Double.isFinite(v.lengthSqr())||v.lengthSqr()>30.25001||!isSpace(p.level())&&(p.getY()<450||surfaceRef(p.serverLevel())==null))return false;
         state(p.server).motion.put(p.getUUID(),new Motion(v,p.server.getTickCount(),p.level().dimension()));return true;
     }
-    public static Vec3 momentum(ServerPlayer p){var m=state(p.server).motion.get(p.getUUID());return m!=null&&m.dimension.equals(p.level().dimension())&&p.server.getTickCount()-m.tick<30?m.velocity:p.getDeltaMovement();}
+    /** The player's motion: their client's fresh hint, else what their last few positions measure (a server player's own delta movement is not their flight). */
+    public static Vec3 momentum(ServerPlayer p){var s=state(p.server);var m=s.motion.get(p.getUUID());if(m!=null&&m.dimension.equals(p.level().dimension())&&p.server.getTickCount()-m.tick<30)return m.velocity;
+        var t=s.tracks.get(p.getUUID());var v=t==null||!p.level().dimension().equals(t.dimension)?null:t.velocity();return v!=null&&v.lengthSqr()<=30.25?v:p.getDeltaMovement();}
     private static State state(MinecraftServer s){return STATES.computeIfAbsent(s,k->new State());}
     public static boolean isSpace(Level l){return id(l.dimension())!=null;}
     public static GalaxyCatalog.Id id(ResourceKey<Level> key){
@@ -76,12 +109,9 @@ public final class SpaceRuntime {
     public static boolean ascend(ServerPlayer p){
         var ref=surfaceRef(p.serverLevel());if(ref==null||ModCapabilities.getOrThrow(p).isDead()||!p.isAlive())return false;
         try{
-            var body=GalaxyCatalog.body(p.server.overworld().getSeed(),GalaxyData.get(p.server).salt(),ref);Vec3 normal=SpaceMath.normal(p.getX(),p.getZ(),body.radius());
-            Vec3 at=SpaceMath.center(body).add(normal.scale(SpaceMath.radius(body.radius())+100));
-            Vec3 oldVelocity=momentum(p);double longitude=Math.atan2(normal.x,normal.y);Vec3 east=new Vec3(Math.cos(longitude),-Math.sin(longitude),0),north=east.cross(normal).normalize();
-            Vec3 v=normal.scale(Math.max(.18,Math.min(3,oldVelocity.y))).add(east.scale(oldVelocity.x)).add(north.scale(oldVelocity.z));if(v.lengthSqr()>30.25)v=v.normalize().scale(5.5);
-            var anchor=new CompoundTag();anchor.putString("ref",ref.key());anchor.putDouble("x",p.getX());anchor.putDouble("z",p.getZ());p.getPersistentData().put("dbzenithLaunchAnchor",anchor);
-            return queue(p,open(p.server,ref.system()),ref,at,v);
+            var body=GalaxyCatalog.body(p.server.overworld().getSeed(),GalaxyData.get(p.server).salt(),ref);
+            anchor(p,ref);var c=ascentState(p,frame(p,ref,body));      // the commit recomputes this from where the player then is
+            return queue(p,open(p.server,ref.system()),ref,c.position(),c.velocity(),SpaceTelemetry.Kind.ASCENT);
         }catch(IllegalArgumentException ex){p.displayClientMessage(Component.literal(ex.getMessage()),true);return false;}
     }
     /** Operator preview of a body's daylight side, without creating its surface dimension. */
@@ -89,17 +119,21 @@ public final class SpaceRuntime {
         if(!isSpace(p.level()))return false;var system=system(p.serverLevel());if(index<0||index>=system.planets().size())return false;
         var b=system.planets().get(index);Vec3 c=SpaceMath.center(b),at=c.add(new Vec3(0,128,0).subtract(c).normalize().scale(SpaceMath.radius(b.radius())+900));
         Vec3 look=c.subtract(at).normalize();float yaw=(float)Math.toDegrees(Math.atan2(-look.x,look.z)),pitch=(float)-Math.toDegrees(Math.asin(look.y));
-        p.teleportTo(p.serverLevel(),at.x,at.y,at.z,yaw,pitch);p.setDeltaMovement(Vec3.ZERO);velocityHint(p,Vec3.ZERO);scene(p,true,Vec3.ZERO);return true;
+        var from=SpaceTelemetry.Sample.of(p,momentum(p));
+        p.teleportTo(p.serverLevel(),at.x,at.y,at.z,yaw,pitch);p.setDeltaMovement(Vec3.ZERO);velocityHint(p,Vec3.ZERO);scene(p,true,Vec3.ZERO);
+        SpaceTelemetry.record(p,SpaceTelemetry.Kind.APPROACH,from,SpaceTelemetry.Sample.of(p,Vec3.ZERO),0,at,Vec3.ZERO,new float[]{yaw,pitch});return true;
     }
-    private static boolean queue(ServerPlayer p,ServerLevel level,GalaxyCatalog.Ref ref,Vec3 at,Vec3 v){
+    /** Records where the player left a planet's surface (the departure point a return lands back on). */
+    private static void anchor(ServerPlayer p,GalaxyCatalog.Ref ref){var anchor=new CompoundTag();anchor.putString("ref",ref.key());anchor.putDouble("x",p.getX());anchor.putDouble("z",p.getZ());p.getPersistentData().put("dbzenithLaunchAnchor",anchor);}
+    private static boolean queue(ServerPlayer p,ServerLevel level,GalaxyCatalog.Ref ref,Vec3 at,Vec3 v,SpaceTelemetry.Kind kind){
         State s=state(p.server);if(s.pending.containsKey(p.getUUID()))return false;
         if(s.pending.size()>=16)return false;ChunkPos chunk=new ChunkPos(BlockPos.containing(at));level.getChunkSource().addRegionTicket(TRANSIT,chunk,1,p.getUUID());
         var ready=CompletableFuture.supplyAsync(()->level.getChunkSource().getChunkFuture(chunk.x,chunk.z,ChunkStatus.FULL,true),Util.backgroundExecutor()).thenCompose(f->f).thenApply(e->e.left().isPresent());
-        s.pending.put(p.getUUID(),new Transit(p.level().dimension(),level.dimension(),ref,at,v,chunk,p.server.getTickCount(),ready));prepare(p);return true;
+        s.pending.put(p.getUUID(),new Transit(p.level().dimension(),level.dimension(),ref,at,v,chunk,p.server.getTickCount(),ready,kind));prepare(p);return true;
     }
     public static boolean jump(ServerPlayer p,GalaxyCatalog.Ref ref){
         if(!isSpace(p.level())||pending(p)||state(p.server).pending.size()>=16)return false;
-        try{var b=GalaxyCatalog.body(p.server.overworld().getSeed(),GalaxyData.get(p.server).salt(),ref);Vec3 c=SpaceMath.center(b),at=c.add(new Vec3(0,128,0).subtract(c).normalize().scale(SpaceMath.radius(b.radius())+900));return queue(p,open(p.server,ref.system()),ref,at,Vec3.ZERO);}
+        try{var b=GalaxyCatalog.body(p.server.overworld().getSeed(),GalaxyData.get(p.server).salt(),ref);Vec3 c=SpaceMath.center(b),at=c.add(new Vec3(0,128,0).subtract(c).normalize().scale(SpaceMath.radius(b.radius())+900));return queue(p,open(p.server,ref.system()),ref,at,Vec3.ZERO,SpaceTelemetry.Kind.HYPERSPEED);}
         catch(IllegalArgumentException ex){p.displayClientMessage(Component.literal(ex.getMessage()),true);return false;}
     }
     public static boolean pending(ServerPlayer p){return state(p.server).pending.containsKey(p.getUUID())||PlanetRuntime.pending(p);}
@@ -118,11 +152,11 @@ public final class SpaceRuntime {
         if(!isSpace(p.level())&&!t.isEmpty())try{
             var id=GalaxyCatalog.Id.parse(t.getString("system"));Vec3 at=new Vec3(t.getDouble("x"),t.getDouble("y"),t.getDouble("z"));
             if(!Double.isFinite(at.lengthSqr())||Math.abs(at.x)>119000||Math.abs(at.z)>119000||at.y< -950||at.y>950)throw new IllegalArgumentException("Invalid orbital checkpoint");
-            queue(p,open(p.server,id),new GalaxyCatalog.Ref(id,0),at,Vec3.ZERO);
+            queue(p,open(p.server,id),new GalaxyCatalog.Ref(id,0),at,Vec3.ZERO,SpaceTelemetry.Kind.RESTORE);
         }catch(IllegalArgumentException ex){p.displayClientMessage(Component.literal(ex.getMessage()),true);}
         scene(p,false,Vec3.ZERO);
     }}
-    @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent e){if(e.getEntity() instanceof ServerPlayer p){checkpoint(p);state(p.server).motion.remove(p.getUUID());}}
+    @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent e){if(e.getEntity() instanceof ServerPlayer p){checkpoint(p);state(p.server).motion.remove(p.getUUID());state(p.server).tracks.remove(p.getUUID());}}
     @SubscribeEvent public static void changed(PlayerEvent.PlayerChangedDimensionEvent e){if(e.getEntity() instanceof ServerPlayer p){
         state(p.server).motion.remove(p.getUUID());
         if(isSpace(p.level()))checkpoint(p);else p.getPersistentData().remove(CHECKPOINT);
@@ -142,6 +176,7 @@ public final class SpaceRuntime {
     @SubscribeEvent(priority=EventPriority.LOWEST) public static void player(TickEvent.PlayerTickEvent e){
         if(e.phase!=TickEvent.Phase.END||!(e.player instanceof ServerPlayer p)||!PlanetConfig.SPACE.get()&&!isSpace(p.level()))return;
         long now=p.server.getTickCount();
+        if(isSpace(p.level())||p.getY()>400)state(p.server).tracks.computeIfAbsent(p.getUUID(),k->new Track()).add(p);   // measured motion near and in space
         if(isSpace(p.level())){
             if(!p.getPersistentData().contains("dbzenithOrbitMayfly"))p.getPersistentData().putBoolean("dbzenithOrbitMayfly",p.getAbilities().mayfly&&!ModCapabilities.getOrThrow(p).isFlying());
             if(!p.getAbilities().mayfly){p.getAbilities().mayfly=true;p.onUpdateAbilities();}p.fallDistance=0;
@@ -149,20 +184,18 @@ public final class SpaceRuntime {
             var system=system(p.serverLevel());var data=GalaxyData.get(p.server);
             for(var body:system.planets()){
                 Vec3 center=SpaceMath.center(body);double radius=SpaceMath.radius(body.radius()),distance=p.position().distanceTo(center);
-                if(distance>radius+90)continue;
+                if(distance>radius+600)continue;                                   // above every entry altitude (SpaceFrames)
                 Vec3 n=p.position().subtract(center).normalize();if(n.lengthSqr()<.5)n=new Vec3(0,1,0);
-                if(!body.kind().landable()){
+                if(!body.kind().landable()){if(distance>radius+90)continue;
                     if(distance<radius+20){Vec3 at=center.add(n.scale(radius+22));p.teleportTo(at.x,at.y,at.z);p.setDeltaMovement(n.scale(.3));}
                     if(now%40==0&&!p.isCreative())p.hurt(p.damageSources().magic(),1);continue;
                 }
                 if(pending(p)||Interstellar.active(p))continue;var ref=new GalaxyCatalog.Ref(system.id(),body.index());var discovery=data.discovery(ref);
                 if(discovery!=null&&discovery.destroyed()&&!discovery.restored())continue;
-                double[] surface=SpaceMath.surface(n,body.radius());var anchor=p.getPersistentData().getCompound("dbzenithLaunchAnchor");
-                if(anchor.getString("ref").equals(ref.key())&&SpaceMath.normal(anchor.getDouble("x"),anchor.getDouble("z"),body.radius()).dot(n)>.997){surface[0]=anchor.getDouble("x");surface[1]=anchor.getDouble("z");}
-                if(distance<radius+65&&momentum(p).dot(n)<.03){
-                    Vec3 motion=momentum(p);Vec3 entryVelocity=new Vec3(motion.x*.15,-Math.max(.8,Math.min(3,Math.abs(motion.dot(n)))),motion.z*.15);
-                    if(PlanetRuntime.reenter(p,ref,surface[0],surface[1],entryVelocity))prepare(p);
-                }
+                var f=frame(p,ref,body);                                           // the same mapping the ascent used: a return lands where you left
+                if(SpaceFrames.altitude(f,p.position())>f.entryAltitude()||momentum(p).dot(n)>=.03)continue;
+                var c=entryState(p,f);
+                if(PlanetRuntime.reenter(p,ref,c.position(),c.velocity(),c.yaw(),c.pitch()))prepare(p);
             }
             for(int i=0;i<system.stars().size();i++)if(p.position().distanceTo(SpaceMath.star(i,system.stars().size()))<950&&now%20==0&&!p.isCreative()){p.hurt(p.damageSources().onFire(),6);p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.BLINDNESS,50,0,false,false));break;}
             if(now%100==0)checkpoint(p);
@@ -176,9 +209,15 @@ public final class SpaceRuntime {
             boolean cancel=p==null||l==null||!p.isAlive()||!p.level().dimension().equals(q.origin)||now-q.tick>600;
             if(!cancel&&!q.ready.isDone())continue;
             if(!cancel)try{if(q.ready.join()){
-                SpacePodEntity old=p.getVehicle() instanceof SpacePodEntity pod?pod:null;p.stopRiding();p.teleportTo(l,q.position.x,q.position.y,q.position.z,p.getYRot(),p.getXRot());
-                if(old!=null){old.discard();SpacePodEntity.orbit(p,q.position,q.velocity);}p.setDeltaMovement(q.velocity);p.connection.send(new ClientboundSetEntityMotionPacket(p));p.fallDistance=0;
-                checkpoint(p);PlanetEnvironment.enter(p);scene(p,true,q.velocity);s.used.put(l.dimension(),now);Interstellar.arrived(p);
+                Vec3 at=q.position,v=q.velocity,expected=q.velocity;float yaw=p.getYRot(),pitch=p.getXRot();var from=SpaceTelemetry.Sample.of(p,momentum(p));
+                if(q.kind==SpaceTelemetry.Kind.ASCENT&&surfaceRef(p.serverLevel())!=null){   // from where the player is now, not where they asked to leave
+                    var body=GalaxyCatalog.body(server.overworld().getSeed(),GalaxyData.get(server).salt(),q.ref);anchor(p,q.ref);var c=ascentState(p,frame(p,q.ref,body));
+                    at=c.position();v=c.velocity();yaw=c.yaw();pitch=c.pitch();expected=c.rawVelocity();
+                }
+                SpacePodEntity old=p.getVehicle() instanceof SpacePodEntity pod?pod:null;p.stopRiding();p.teleportTo(l,at.x,at.y,at.z,yaw,pitch);
+                if(old!=null){old.discard();SpacePodEntity.orbit(p,at,v);}p.setDeltaMovement(v);p.connection.send(new ClientboundSetEntityMotionPacket(p));p.fallDistance=0;
+                SpaceTelemetry.record(p,q.kind,from,SpaceTelemetry.Sample.of(p,v),(int)(now-q.tick),at,expected,new float[]{yaw,pitch});
+                checkpoint(p);PlanetEnvironment.enter(p);scene(p,true,v);s.used.put(l.dimension(),now);Interstellar.arrived(p);
             }}catch(CompletionException ex){DBZenith.LOGGER.error("Orbital preload failed",ex);p.displayClientMessage(Component.literal("Orbital transfer failed. Your departure world is safe."),false);}
             if(l!=null)l.getChunkSource().removeRegionTicket(TRANSIT,q.chunk,1,entry.getKey());it.remove();
         }

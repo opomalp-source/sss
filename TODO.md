@@ -333,3 +333,12 @@ to both mods folders.
 - [x] v0.149.0: independent saved cape accessory, chest-independent render including Classic, equip/swap/remove, one-time legacy Piccolo extraction.
 
 - [x] v0.150.0: shared full RGB/hex picker for every existing editable color channel, including base aura, race details, custom techniques and crosshair.
+
+# Space rework (user request, 2026-10-20): the galaxy as the flagship
+- [x] v0.151.0 Phase 1: audit and plan, SpaceFrames (one mapping, Earth disc, altitude scale, dead band, ground-frame velocity and view), measured momentum, transfer telemetry, continuity tests
+- [ ] Phase 2: every visible star a catalogue system (server-streamed nearby stars, Earth and planet skies), look-to-select, waypoints, map identity, observed vs discovered
+- [ ] Phase 3: transition state machine (predictive preload, dead band, timeouts, cancellation, fallback, no loading screen), free-orientation space camera, co-rotating planet frames, pods carried over
+- [ ] Phase 4: planet maps from the real terrain function, approach terrain for the landing region, curved horizon, matching clouds and terminator
+- [ ] Phase 5: in-system cruise, hyperspeed towards the chosen star with safe arrivals, passengers, navigation HUD, blended audio
+- [ ] Phase 6: destruction and restoration identity everywhere, stale-landing refusal, multiplayer and reconnect hardening
+- [ ] Phase 7: profiling, soak, balance and polish

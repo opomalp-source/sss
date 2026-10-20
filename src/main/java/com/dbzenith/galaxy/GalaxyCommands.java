@@ -37,6 +37,8 @@ public final class GalaxyCommands {
                 int cx=Math.floorDiv(p.getBlockX(),512),cz=Math.floorDiv(p.getBlockZ(),512);for(int x=cx-5;x<=cx+5;x++)for(int z=cz-5;z<=cz+5;z++){var s=com.dbzenith.galaxy.planet.PlanetLandmarks.site(g,x,z);if(s!=null){double d=p.distanceToSqr(s.x(),s.y(),s.z());if(d<distance){distance=d;best=s;}}}
                 if(best!=null){p.teleportTo(p.serverLevel(),best.x()+.5,best.y()+16,best.z()+18.5,180,35);found++;}
             }return found;})))
+            .then(Commands.literal("transitions").executes(c->transitions(c.getSource(),null))     // continuity of recent space transfers (docs/SPACE_FRAMES.md)
+                .then(Commands.argument("player",EntityArgument.player()).executes(c->transitions(c.getSource(),EntityArgument.getPlayer(c,"player")))))
             .then(Commands.literal("orbit").then(Commands.argument("players",EntityArgument.players()).executes(c->{int n=0;for(var p:EntityArgument.getPlayers(c,"players"))if(com.dbzenith.galaxy.space.SpaceRuntime.ascend(p))n++;return n;})))
             .then(Commands.literal("approach").then(Commands.argument("players",EntityArgument.players()).then(Commands.argument("planet",IntegerArgumentType.integer(0,8)).executes(c->{int n=0;for(var p:EntityArgument.getPlayers(c,"players"))if(com.dbzenith.galaxy.space.SpaceRuntime.approach(p,IntegerArgumentType.getInteger(c,"planet")))n++;return n;}))))
             .then(Commands.literal("map").then(Commands.argument("players",EntityArgument.players()).executes(c->{
@@ -90,5 +92,13 @@ public final class GalaxyCommands {
                     else c.getSource().sendSuccess(()->Component.literal("Planet named."),false);return ok?1:0;
                 } catch(IllegalArgumentException ex){c.getSource().sendFailure(Component.literal(ex.getMessage()));return 0;}
             })));
+    }
+    /** The last eight space transfers (of one player or everyone) with their continuity errors. */
+    private static int transitions(CommandSourceStack source,ServerPlayer player){
+        var list=com.dbzenith.galaxy.space.SpaceTelemetry.recent(source.getServer(),player==null?null:player.getUUID(),8);
+        if(list.isEmpty()){source.sendSuccess(()->Component.literal("No space transfers recorded since the server started."),false);return 0;}
+        for(var r:list){var name=source.getServer().getPlayerList().getPlayer(r.player());String who=name==null?r.player().toString().substring(0,8):name.getGameProfile().getName();
+            source.sendSuccess(()->Component.literal(who+": "+r.line()),false);}
+        return list.size();
     }
 }
