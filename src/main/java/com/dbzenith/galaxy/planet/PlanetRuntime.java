@@ -313,7 +313,8 @@ public final class PlanetRuntime {
                     p.displayClientMessage(Component.literal("Landed on "+d.name(q.ref,body.name())),false);
                 }else p.displayClientMessage(Component.literal("Landing terrain was unavailable. You remain at your departure point."),false);
             }catch(CompletionException ex){DBZenith.LOGGER.error("Planet landing generation failed",ex);p.displayClientMessage(Component.literal("Landing failed; your departure location is safe."),false);}}
-            else if(p!=null)p.displayClientMessage(Component.literal("Landing cancelled: departure changed or terrain timed out."),true);
+            else if(p!=null)p.displayClientMessage(Component.literal(GalaxyData.get(server).destroyed(q.ref)||PlanetDestruction.restoring(server,q.ref)?"Landing cancelled: that planet is sealed. You stay where you are.":"Landing cancelled: departure changed or terrain timed out."),true);
+            if(p!=null&&q.checkpoint!=null&&q.checkpoint.getBoolean("entry")&&q.checkpoint.getBoolean("holding")&&!p.level().dimension().equals(q.target))com.dbzenith.galaxy.space.SpaceRuntime.hold(p,q.ref,false);   // never leave a held player hovering (phase 6)
             if(l!=null)l.getChunkSource().removeRegionTicket(LANDING,q.chunk,LANDING_RADIUS,entry.getKey());it.remove();
         }
         if(now%20==0)for(var l:server.getAllLevels())if(procedural(l)){

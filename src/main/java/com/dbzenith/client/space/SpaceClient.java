@@ -30,6 +30,7 @@ public final class SpaceClient {
     private static int holdBody=-1;private static double holdAltitude;private static boolean intoOrbit;
     public static void receive(CompoundTag data){
         if(data.getBoolean("preparing")){preparing=600;intoOrbit=!SpaceRuntime.isSpace(Minecraft.getInstance().level);return;}   // until the transfer or a cancel
+        if(data.getBoolean("push")){velocity=new Vec3(data.getDouble("vx"),data.getDouble("vy"),data.getDouble("vz"));return;}   // put back out (a world that can't take you, a gas giant)
         if(data.contains("hold")){holdBody=data.getBoolean("hold")?data.getInt("holdBody"):-1;holdAltitude=data.getDouble("holdAltitude");if(!data.getBoolean("hold"))preparing=0;if(!data.contains("system"))return;}
         holdBody=-1;
         if(!scene.getString("dimension").equals(data.getString("dimension"))&&data.getString("dimension").contains("orbit/v1/"))hintTicks=200;
@@ -47,7 +48,7 @@ public final class SpaceClient {
     public static boolean braking(){return brake;}
     public static boolean surface(Level l){if(l==null||!com.dbzenith.galaxy.planet.PlanetConfig.SPACE.get())return false;String d=l.dimension().location().toString();return d.equals("minecraft:overworld")||d.equals("dbzenith:namek")||d.equals("dbzenith:northern_planet")||d.equals("dbzenith:beerus_planet")||d.startsWith("dbzenith:planet/v1/");}
     public static double vacuum(){var p=Minecraft.getInstance().player;return p==null?0:SpaceRuntime.isSpace(p.level())?1:surface(p.level())?SpaceMath.atmosphere(p.getY()):0;}
-    @SubscribeEvent public static void logout(ClientPlayerNetworkEvent.LoggingOut e){scene=new CompoundTag();movementLevel=null;velocity=Vec3.ZERO;fade=entry=preparing=hintTicks=0;OrbitalTextures.clear();SpaceSky.clearCaches();}
+    @SubscribeEvent public static void logout(ClientPlayerNetworkEvent.LoggingOut e){scene=new CompoundTag();holdBody=-1;arrival=0;movementLevel=null;velocity=Vec3.ZERO;fade=entry=preparing=hintTicks=0;OrbitalTextures.clear();SpaceSky.clearCaches();}
     public static CompoundTag surfaceBody(){var l=Minecraft.getInstance().level;if(l==null||!scene.contains("surfacePlanet")||!scene.getString("dimension").equals(l.dimension().location().toString()))return new CompoundTag();var list=system().getList("bodies",Tag.TAG_COMPOUND);int index=scene.getInt("surfacePlanet");return index>=0&&index<list.size()?list.getCompound(index):new CompoundTag();}
     @SubscribeEvent public static void camera(ViewportEvent.ComputeCameraAngles e){var mc=Minecraft.getInstance();if(mc.player!=null&&SpaceRuntime.isSpace(mc.level)&&com.dbzenith.config.DBZConfig.CLIENT.flightCinematicCamera.get())e.setRoll(e.getRoll()+(float)Math.sin((mc.player.tickCount+e.getPartialTick())*.012)*.22f);}
     @SubscribeEvent(priority=EventPriority.LOWEST) public static void input(MovementInputUpdateEvent e){

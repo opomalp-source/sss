@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.155.0, 2026-10-20)
+# Handoff: where Dragon Block Zenith stands (v0.156.0, 2026-10-20)
 
 ## The prompt to paste into a new session
 
@@ -384,6 +384,9 @@ Minecraft if it is running). Never the updater.
   (see `docs/SPACE_FRAMES.md` "Travel"). Dev recipe: `/dbz galaxy jump Dev "0:0:0:0/0"` (quote refs over RCON),
   `/dbz galaxy cruise Dev 1`; devshot flags `navtarget` (M) and `navengage` (`.`). A runtime orbit dimension that
   has unloaded can't be the target of `execute in`: jump there instead.
-- **Next, phase 6:** destruction and restoration identity everywhere (sky, map, navigation, travel), refusing stale
-  landings onto sealed worlds, and multiplayer/reconnect hardening (two players on one world, reconnection during each
-  transition stage, loaded-world caps, stalled preloads).
+- **Phase 6 (v0.156.0) done:** debris identity, the atmosphere turning players back, stale-landing and hold release,
+  scene on dimension change (`docs/SPACE_FRAMES.md` "Safety and identity"). Tests that open orbital systems should
+  reuse Earth's or Vegeta's: the orbital slot cap is reachable in a full GameTest run.
+- **Next, phase 7:** profiling (frame time in close orbit and the view from far below, map/region generation time on
+  the server, memory of map caches), a soak run (repeated ascents, entries, cruises, jumps), balance (cruise and
+  hyperspeed timings, ki costs) and polish (limb glow from far below, HUD wording), then the story-mode work last.

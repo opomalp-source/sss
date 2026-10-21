@@ -4441,3 +4441,25 @@ passengers, a quiet navigation HUD and blended travel audio.
 - **Checked in the dev client (background):** Orath 693 → Earth (200,000 ly) and back: streaming coloured star
   streaks, arrival telemetry 0.00 blocks / 0.00° / 0.0% speed; a cruise from Earth to its neighbour, set down beside
   it with its real map; the planet bracket and label, the cruise line.
+
+## 2026-10-21 — Space rework phase 6: identity and safety (v0.156.0)
+The sixth phase of the user's space flagship request: destruction and restoration consistent everywhere, no stale
+landings, and hardening for reconnects, caps and other players.
+
+- **Debris everywhere.** Other planets' skies draw a destroyed world as a dim debris smudge (it was drawn whole),
+  including while its destruction is live on the client.
+- **The atmosphere turns you back.** A landable world that can't take a landing (sealed, restoring, slot cap,
+  Beerus's without god ki) used to let you fly straight into it; now below half its entry altitude without a landing
+  under way you are put back at its edge, moving outward, with the reason. `SpaceRuntime.push` also sends the new
+  motion to the client's own flight state (the gas-giant bounce jittered because the client kept its old velocity).
+  A refused landing retries every two seconds instead of re-queuing (and messaging) every tick.
+- **Stale landings.** A dropped entry always releases the atmospheric hold (a destroyed or timed-out preparation used
+  to leave the client hovering); the message says the planet is sealed when it is; the client resets hold and
+  arrival state on logout.
+- **Scene on any dimension change** into space or a surface (a teleport by command left the client drawing the
+  previous system).
+- **Tests (`SafetyTests`, 4):** a world that can't take you turns you back at its edge, moving outward; a destroyed
+  world is debris in the survey, has no map, prepares no landing and lets you fly among its remnants, and restored
+  has its ground again; a stale landing is dropped while you stay in orbit; disconnecting mid-cruise or mid-landing
+  leaves nothing pending. (The orbital slot cap held in testing: a test that opened one system too many was
+  refused, as players would be.) 319 GameTests pass.

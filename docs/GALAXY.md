@@ -409,3 +409,11 @@ every boundary with the pilot. Only the pilot can set a course.
 **Quiet cues.** Only when they matter: "Atmosphere of … in N s" while you dive in, "Stellar heat" too near a star,
 and your speed for a moment after you steer or brake ("Holding position" once you stop). `/dbz galaxy cruise
 <players> <planet>` cruises from a command.
+
+## Space rework, phase 6 — identity and safety (v0.156.0)
+
+A destroyed planet is debris wherever you see it from: orbit, the atlas, the navigation line ("debris") and the
+skies of its neighbours. You can't land on it, but you can fly among its remnants. A planet that can't take you just
+now (sealed, being restored, all planet slots busy, or Beerus's world without god ki) turns you back at the edge of
+its atmosphere and says why, instead of letting you fly into it. A landing being prepared for a world that is
+destroyed in the meantime is called off and you stay where you are.

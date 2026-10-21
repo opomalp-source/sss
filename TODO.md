@@ -340,5 +340,5 @@ to both mods folders.
 - [x] v0.153.0 Phase 3: transfer state machine (forecast preload, follow the course, cross at the crossing, hold, give up, settle), no loading screen, shared planet spin, co-rotation, free-orientation space camera, pods carried over
 - [x] v0.154.0 Phase 4: planet maps from the real ground (server-rendered, procedural and vanilla noise worlds), regional approach maps, the view from far below (flat then curving), vanilla clouds from above, matching terminator
 - [x] v0.155.0 Phase 5: in-system cruise, hyperspeed through the real star field with course-aligned safe arrivals, pod passengers, engage key and quiet navigation HUD, travel audio
-- [ ] Phase 6: destruction and restoration identity everywhere, stale-landing refusal, multiplayer and reconnect hardening
+- [x] v0.156.0 Phase 6: destroyed worlds as debris everywhere, atmosphere turns you back from worlds that cannot take a landing, stale landings dropped and holds released, scene on any dimension change, disconnect safety
 - [ ] Phase 7: profiling, soak, balance and polish

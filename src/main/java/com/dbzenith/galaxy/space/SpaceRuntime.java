@@ -68,6 +68,13 @@ public final class SpaceRuntime {
     }
     /** Ticks after any transfer during which no other crossing starts (phase 3: one crossing per crossing). */
     public static final String SETTLE="dbzenithSettleUntil";
+    /** When a refused landing may be asked for again (world game time). */
+    static final String RETRY="dbzenithEntryRetry";
+    /** Puts a player (and their pod) back out at {@code at}, moving at {@code v}: the client takes the new motion as its own (phase 6). */
+    static void push(ServerPlayer p,Vec3 at,Vec3 v){
+        if(p.getVehicle()!=null){p.getVehicle().teleportTo(at.x,at.y,at.z);p.getVehicle().setDeltaMovement(v);}else{p.teleportTo(at.x,at.y,at.z);p.setDeltaMovement(v);}
+        velocityHint(p,v);var t=new CompoundTag();t.putString("dimension",p.level().dimension().location().toString());t.putBoolean("push",true);t.putDouble("vx",v.x);t.putDouble("vy",v.y);t.putDouble("vz",v.z);ModNetwork.sendTo(p,new SpaceScenePacket(t));
+    }
     /** The clock for stamps saved with a player: the world's game time, which survives restarts (the server's tick count starts again at 0). */
     public static long clock(ServerPlayer p){return p.server.overworld().getGameTime();}
     /** Entering an atmosphere: the surface point under the player at the entry height, their velocity and view carried down (always descending, at least gently). */
@@ -275,13 +282,18 @@ public final class SpaceRuntime {
                 if(distance>radius+600)continue;                                   // above every entry altitude (SpaceFrames)
                 Vec3 n=p.position().subtract(center).normalize();if(n.lengthSqr()<.5)n=new Vec3(0,1,0);
                 if(!body.kind().landable()){if(distance>radius+90)continue;
-                    if(distance<radius+20){Vec3 at=center.add(n.scale(radius+22));p.teleportTo(at.x,at.y,at.z);p.setDeltaMovement(n.scale(.3));}
+                    if(distance<radius+20)push(p,center.add(n.scale(radius+22)),n.scale(.3));
                     if(now%40==0&&!p.isCreative())p.hurt(p.damageSources().magic(),1);continue;
                 }
                 if(pending(p)||Interstellar.active(p)||Cruise.active(p)||passenger(p)||clock(p)<p.getPersistentData().getLong(SETTLE))continue;var ref=new GalaxyCatalog.Ref(system.id(),body.index());var discovery=data.discovery(ref);   // a passenger crosses with the pilot
-                if(discovery!=null&&discovery.destroyed()&&!discovery.restored())continue;
+                if(discovery!=null&&discovery.destroyed()&&!discovery.restored())continue;   // its remnants: fly among them
+                var f=frame(p,ref,body);
+                if(SpaceFrames.altitude(f,p.position())<f.entryAltitude()*.5){   // a world that can't take a landing now (sealed, restoring, no free slot): the air turns you back (phase 6)
+                    push(p,center.add(n.scale(radius+f.entryAltitude())),n.scale(.2));
+                    if(now%60==0)p.displayClientMessage(Component.literal("The atmosphere turns you back: "+data.name(ref,body.name())+" can't take a landing right now."),true);continue;}
+                if(clock(p)<p.getPersistentData().getLong(RETRY))continue;          // a refused landing asks again in two seconds, not every tick
                 var c=entryForecast(p,ref);                                        // the preload starts about five seconds before the crossing, under where we will cross (phase 3)
-                if(c!=null&&PlanetRuntime.reenter(p,ref,c.position(),c.velocity(),c.yaw(),c.pitch()))prepare(p);
+                if(c!=null){if(PlanetRuntime.reenter(p,ref,c.position(),c.velocity(),c.yaw(),c.pitch()))prepare(p);else p.getPersistentData().putLong(RETRY,clock(p)+40);}
             }
             for(int i=0;i<system.stars().size();i++)if(p.position().distanceTo(SpaceMath.star(i,system.stars().size()))<950&&now%20==0&&!p.isCreative()){p.hurt(p.damageSources().onFire(),6);p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.BLINDNESS,50,0,false,false));break;}
             if(now%100==0)checkpoint(p);

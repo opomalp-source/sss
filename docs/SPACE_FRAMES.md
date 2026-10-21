@@ -171,6 +171,24 @@ frame, which is exactly where the Sun stands on the ground (`TransitionTests`, `
   where you started at no cost. A dead or disconnected traveller is never moved. Only a pod's pilot sets its course;
   a passenger sees the same trip and crosses with the pilot (`SpacePodEntity.carry` brings every rider).
 
+## Safety and identity (phase 6)
+
+- **A destroyed world is debris everywhere.** In orbit its remnants (as before); from another planet's surface a
+  dim debris smudge (also while its destruction is still live on the client); the survey says `destroyed` and not
+  landable; it has no map; no landing is ever prepared for it, and you may fly among its remnants. Cruise and
+  hyperspeed arrivals (700 and 900 blocks out) stay clear of its debris (within 1.5 radii). Restored, it is the same
+  world with the same ground and map.
+- **Never into a planet.** A landable world that can't take a landing now (sealed, restoring, no free planet slot,
+  Beerus's without god ki) turns you back at its atmosphere: below half the entry altitude without a landing under
+  way you are put back at its edge, moving outward, with the reason (`SpaceRuntime.push`; the client takes the new
+  motion as its own, which also fixes the jitter of the gas-giant bounce). A refused landing is asked for again every
+  two seconds, not every tick.
+- **Stale landings never land.** A preparation for a world destroyed or being restored is dropped ("that planet is
+  sealed"); any dropped entry also releases the atmospheric hold, so nobody is left hovering. Disconnecting or dying
+  mid-transit leaves nothing pending; the client's hold and arrival state reset on logout.
+- **The scene follows you.** Any dimension change into space or a surface (a command, a portal, another mod) sends
+  that place's sky and system, so the client never draws the previous system.
+
 ## Continuity telemetry
 
 Every committed transfer records both sides and its errors against this mapping (`SpaceTelemetry`, last 64 per
@@ -203,6 +221,9 @@ preload, at the orbital-to-surface altitude scale).
 | Cruise | 3–15 s; ends exactly 700 blocks over the planet, clear of stars (1,500) and bodies (2 radii); a cancelled one stops on the way | `TravelTests` |
 | Hyperspeed arrival | 900 blocks short of the planet, heading for it, along the course unless that is unsafe; the course is the catalogue's light years | `TravelTests` |
 | Real hyperspeed (dev client) | 0.00 blocks, view and velocity unchanged on arrival | telemetry |
+| Turned back | put back at the entry altitude (within 1 orbital block), moving outward, nothing prepared | `SafetyTests` |
+| Destroyed / restored | debris in the survey, no map, no landing, flight among remnants; restored with its ground | `SafetyTests` |
+| Stale landing / leaving mid-transit | dropped within 5 ticks; nothing pending after a disconnect | `SafetyTests` |
 
 Later phases add the transition, camera, star-identity and performance tolerances from the rework plan
 (`DEVLOG.md`, 2026-10-20).
