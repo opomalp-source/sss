@@ -27,6 +27,9 @@ public final class SpaceAudio {
             for(int i=0;i<sounds.size();i++){var loop=new Loop(sounds.get(i),i);loops.add(loop);mc.getSoundManager().play(loop);}
         }
     }
+    /** A travel moment (phase 5): spooling up, or arriving; quiet, scaled by the space ambience volume. */
+    public static void cue(boolean arriving){var mc=Minecraft.getInstance();float v=com.dbzenith.config.DBZConfig.CLIENT.spaceAmbienceVolume.get().floatValue();if(v<=0)return;
+        mc.getSoundManager().play(SimpleSoundInstance.forUI(arriving?ModSounds.KI_TRAVEL.get():ModSounds.AURA_CHARGE.get(),arriving?.7f:.55f,.35f*v));}
     @SubscribeEvent(priority=EventPriority.LOWEST) public static void muffle(PlaySoundEvent e){
         var s=e.getSound();if(s!=null&&!(s instanceof Loop)&&s.getSource()==SoundSource.MUSIC&&SpaceClient.vacuum()>.9){e.setSound(null);return;}if(s==null||s instanceof Loop||s.getSource()==SoundSource.MASTER||s.getSource()==SoundSource.VOICE||s.isRelative())return;
         double vacuum=SpaceClient.vacuum();if(vacuum<.01)return;
@@ -47,10 +50,10 @@ public final class SpaceAudio {
                 var b=(net.minecraft.nbt.CompoundTag)raw;nearest=Math.min(nearest,mc.player.position().distanceTo(SpaceMath.center(b.getDouble("orbit"),b.getDouble("phase")))-SpaceMath.radius(b.getInt("radius")));
             }
             float swell=(float)Math.max(0,1-nearest/6000);boolean sealed=com.dbzenith.item.SpaceSuitItem.sealed(mc.player)||mc.player.isPassenger();
-            float target=switch(kind){case 0->space?.14f+swell*.10f:DoomClient.intensity()*.5f;case 1->space&&sealed?.48f:0;case 2->space&&!mc.player.isCreative()?.14f:0;case 3->entry*.75f;case 5->PlanetExperience.weatherVolume();case 6->JourneyClient.active()?.3f+JourneyClient.strength()*.35f:0;default->space?.12f+swell*.2f:0;};
+            float target=switch(kind){case 0->space?.14f+swell*.10f:DoomClient.intensity()*.5f;case 1->space&&sealed?.48f:0;case 2->space&&!mc.player.isCreative()?.14f:0;case 3->entry*.75f;case 5->PlanetExperience.weatherVolume();case 6->JourneyClient.active()?.3f+JourneyClient.strength()*.35f:CruiseClient.active()?.18f+CruiseClient.speed(0)*.3f:0;default->space?.12f+swell*.2f:0;};
             if(kind==4)target*=com.dbzenith.config.DBZConfig.CLIENT.spaceMusicVolume.get().floatValue();
             else if(kind==0||kind==5||kind==6)target*=com.dbzenith.config.DBZConfig.CLIENT.spaceAmbienceVolume.get().floatValue();
-            volume+=(target-volume)*.045f;pitch=kind==6?.6f+JourneyClient.strength()*1.2f:kind==5?.55f:kind==3?.8f+entry*.25f:1;
+            volume+=(target-volume)*.045f;pitch=kind==6?(CruiseClient.active()?.7f+CruiseClient.speed(0)*.7f:.6f+JourneyClient.strength()*1.2f):kind==5?.55f:kind==3?.8f+entry*.25f:1;
         }
     }
     private record Muffled(SoundInstance original,float gain,float tone) implements SoundInstance {

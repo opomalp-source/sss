@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.154.0, 2026-10-20)
+# Handoff: where Dragon Block Zenith stands (v0.155.0, 2026-10-20)
 
 ## The prompt to paste into a new session
 
@@ -380,6 +380,10 @@ Minecraft if it is running). Never the updater.
   orbit (`SpaceSky.cap`); see `docs/SPACE_FRAMES.md` "Planet maps". RCON note: `~` in `/z/dev/rc.sh` commands
   resolves at the server origin in the overworld; use `execute as Dev at Dev run tp Dev ~ 420 ~`.
   `/dbz galaxy sample <kind> Dev` lands on a procedural world of that kind.
-- **Next, phase 5:** in-system cruise (server-tracked fast travel between planets of a system, never faster
-  physical movement), hyperspeed towards the chosen star (the waypoint from phase 2) with safe arrivals, passengers
-  in pods, a navigation HUD (target, distance, ETA, approach cues), blended audio across ascent/orbit/entry.
+- **Phase 5 (v0.155.0) done:** cruise, hyperspeed in the star field, passengers, engage key `.`, `NavigationHud`
+  (see `docs/SPACE_FRAMES.md` "Travel"). Dev recipe: `/dbz galaxy jump Dev "0:0:0:0/0"` (quote refs over RCON),
+  `/dbz galaxy cruise Dev 1`; devshot flags `navtarget` (M) and `navengage` (`.`). A runtime orbit dimension that
+  has unloaded can't be the target of `execute in`: jump there instead.
+- **Next, phase 6:** destruction and restoration identity everywhere (sky, map, navigation, travel), refusing stale
+  landings onto sealed worlds, and multiplayer/reconnect hardening (two players on one world, reconnection during each
+  transition stage, loaded-world caps, stalled preloads).

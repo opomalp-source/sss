@@ -124,7 +124,7 @@ public final class SpaceSky {
         buildStars();RenderSystem.setShaderColor(1,1,1,starAlpha);stars.bind();stars.drawWithShader(new Matrix4f(m).mul(new Matrix4f(skyFrame)),projection,GameRenderer.getPositionColorShader());VertexBuffer.unbind();RenderSystem.setShaderColor(1,1,1,1);
         StarSky.render(m,projection,skyFrame,starAlpha);RenderSystem.setShader(GameRenderer::getPositionColorShader);RenderSystem.defaultBlendFunc();
         if(orbit){
-            Vec3 cameraPos=camera.getPosition();var sys=SpaceClient.system();var bodies=sys.getList("bodies",Tag.TAG_COMPOUND);List<CompoundTag> sorted=new ArrayList<>();for(Tag t:bodies)sorted.add((CompoundTag)t);
+            Vec3 cameraPos=CruiseClient.view(camera.getPosition(),pt).add(JourneyClient.away(pt));var sys=SpaceClient.system();var bodies=sys.getList("bodies",Tag.TAG_COMPOUND);List<CompoundTag> sorted=new ArrayList<>();for(Tag t:bodies)sorted.add((CompoundTag)t);   // seen from along a cruise, or receding at hyperspeed (phase 5)
             sorted.sort(Comparator.comparingDouble((CompoundTag b)->SpaceMath.center(b.getDouble("orbit"),b.getDouble("phase")).distanceToSqr(cameraPos)).reversed());
             Vec3 look=new Vec3(camera.getLookVector().x(),camera.getLookVector().y(),camera.getLookVector().z());
             for(var body:sorted){double bound=SpaceMath.radius(body.getInt("radius"))*Math.max(4,3+body.getList("moons",Tag.TAG_COMPOUND).size()*.65);var event=DoomClient.body(body.getInt("index"));if(event!=null&&event.phase()==com.dbzenith.galaxy.planet.DoomData.DESTROYED&&DoomClient.aftermath(event)<180)bound*=4;

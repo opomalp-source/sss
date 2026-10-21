@@ -149,6 +149,28 @@ you instead of the whole sphere, with the regional map within 1.3 radii.
 **The terminator** is the same everywhere: the sphere is lit by the true star direction in the planet's turning
 frame, which is exactly where the Sun stands on the ground (`TransitionTests`, `PlanetMapTests`).
 
+## Travel (phase 5)
+
+- **Units.** Between stars, light years (the catalogue's units). Within a system, AU: Earth's orbit is 1 AU,
+  12,000 orbital blocks (planet *i* orbits at `(2 + 1.7 i) / 2` AU). Speeds in blocks a second.
+- **Cruise (`Cruise`).** From orbit to a planet of the same system: the server keeps you in place, the client draws
+  the sky from a point moving along the course (`CruiseClient.view`, smoothstep easing, the same on both sides) and
+  the server sets you down at its end, 700 blocks over the planet on your side of it (or over its top when that
+  line is blocked), drifting towards it. The course must clear every star by 1,500 blocks and every other body by
+  twice its radius; otherwise it is refused. 3–15 s (`40 + 0.8 √distance` ticks). Cancelled, you stop where the
+  view had got to. Nothing moves faster than flight: there is one same-dimension teleport at the end.
+- **Hyperspeed (`Interstellar`, `SpaceRuntime.jump`).** The course is the catalogue's own vector between the two
+  systems (`SpaceRuntime.course`). After a spool-up (up to 2.5 s) the client flies the real star field along it
+  (`StarSky.voyage`): each star where and as bright as it is from the moving point, drawn out into a streak; your
+  own system recedes behind you. Courses longer than 5,000 ly fly 8,000 ly of the field at a pace the eye can follow
+  (the field wraps in a 12,000-ly cube) and draw the destination star ahead, as bright as the true distance still to
+  go. You arrive on the line you came along, 900 blocks short of the target planet and still heading for it (the
+  sunward approach when that line is in a star's glare or beside another body), keeping your view, and ease to a
+  stop over about two seconds unless you steer. The arrival flash covers the change to the destination's own sky.
+- **Rules.** One course at a time (a second is refused; disengage first). Disengaging before the transfer leaves you
+  where you started at no cost. A dead or disconnected traveller is never moved. Only a pod's pilot sets its course;
+  a passenger sees the same trip and crosses with the pilot (`SpacePodEntity.carry` brings every rider).
+
 ## Continuity telemetry
 
 Every committed transfer records both sides and its errors against this mapping (`SpaceTelemetry`, last 64 per
@@ -178,6 +200,9 @@ preload, at the orbital-to-surface altitude scale).
 | Map texel ↔ surface point | within 1.5 texels both ways (equirectangular and Earth's disc) | `PlanetMapTests` |
 | Procedural seas on the map | over 90% of texels agree with the terrain's own sea level | `PlanetMapTests` |
 | Map on the wire | a full 512 × 256 map under 400 KB, texel for texel | `PlanetMapTests` |
+| Cruise | 3–15 s; ends exactly 700 blocks over the planet, clear of stars (1,500) and bodies (2 radii); a cancelled one stops on the way | `TravelTests` |
+| Hyperspeed arrival | 900 blocks short of the planet, heading for it, along the course unless that is unsafe; the course is the catalogue's light years | `TravelTests` |
+| Real hyperspeed (dev client) | 0.00 blocks, view and velocity unchanged on arrival | telemetry |
 
 Later phases add the transition, camera, star-identity and performance tolerances from the rework plan
 (`DEVLOG.md`, 2026-10-20).

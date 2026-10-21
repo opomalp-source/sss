@@ -4400,3 +4400,44 @@ atmosphere, is drawn from the ground it generates.
 - **Checked in the dev client (background):** Earth from orbit (badlands, desert, oceans, snow where the world has
   them), from 250, 330, 400 and 500 blocks (the loaded chunks continue into the map: coastline, ocean, forest),
   close orbit with the regional map, a procedural ocean world by night from 230 and 420 blocks.
+
+## 2026-10-21 — Space rework phase 5: travel and navigation (v0.155.0)
+The fifth phase of the user's space flagship request: in-system cruise, hyperspeed through the real galaxy,
+passengers, a quiet navigation HUD and blended travel audio.
+
+- **Cruise (`galaxy/space/Cruise`, `client/space/CruiseClient`, `CruisePacket`).** Server-held: the player stays put
+  while the client draws the sky from a point moving along the course (same smoothstep on both sides; the space
+  camera's up follows it), then one same-dimension teleport at the end (a pod with everyone in it). Ends 700 blocks
+  over the target on your side (or over its top), drifting towards it; must clear stars by 1,500 and other bodies by
+  2 radii; 3–15 s; cancel stops on the way; death/disconnect never moves you. `/dbz galaxy cruise`.
+- **Hyperspeed in the world.** The full-screen tunnel overlay is gone. `JourneyPacket` carries the course (catalogue
+  light years, `SpaceRuntime.course`); `StarSky.voyage` redraws the field each frame from the moving point with
+  streaks; the departure system recedes (`JourneyClient.away`); courses over 5,000 ly fly 8,000 ly of the field
+  wrapped in a 12,000-ly cube (a 200,000-ly course first left every streamed star behind in a tenth of the trip:
+  a black sky) and draw the destination star by the true remaining distance. Arrival (`SpaceRuntime.arrival`): on the
+  course line 900 short of the target planet, heading for it, view kept, then eased to a stop (`SpaceClient.arrive`);
+  the sunward approach when that line is unsafe.
+- **Bugs found on the way:** after every ascent and jump the server never applied the arrival velocity (an
+  end-of-line comment had swallowed the statement since phase 3); `Interstellar.arrived` teleported the player a
+  second time to a fixed approach point; teleports by command left the client with the previous system's scene (the
+  scene is now sent on any dimension change into space or a surface).
+- **Engage key** (`.`, `key.dbzenith.engage`): cruise to the targeted planet, hyperspeed to the waypoint, or
+  disengage (`CruisePacket.Engage`, rate-limited). One course at a time; only the pilot sets a pod's course;
+  hyperspeed refused during a cruise and the reverse.
+- **Passengers.** Pods seat two (the second just behind the pilot); `SpacePodEntity.carry` brings every rider through
+  ascents, entries and jumps with their own scene; passengers never trigger crossings themselves
+  (`SpaceRuntime.passenger`); the crew all get the journey and cruise packets.
+- **Navigation HUD (`NavigationHud`).** Planet targeting by M (disc or 1.5°), a bracket placed with the world's own
+  camera matrices (field of view and roll exact) and an edge chevron off screen; one line above the planet readout:
+  name, distance in AU, landable, engage hint; cues for the atmosphere coming up, stellar heat, speed for two seconds
+  after steering or braking and "Holding position".
+- **Audio.** The travel loop serves cruise too (pitch with the cruise's speed); a soft spool-up and an arrival sound
+  from the existing original sounds, scaled by the space ambience volume. Protocol 53.
+- **Tests (`TravelTests`, 5):** bounded cruise times and a forward-only course; cruises across four systems end
+  700 over the planet clear of stars and bodies; hyperspeed arrivals for three destinations (catalogue course,
+  clearance, distance, heading, along the course); a real cruise holds you then sets you down exactly, a cancelled
+  one stops part-way; a pod seats two (not three) and the carried pod brings the passenger. Hyperspeed tests from
+  earlier phases unchanged. 315 GameTests pass.
+- **Checked in the dev client (background):** Orath 693 → Earth (200,000 ly) and back: streaming coloured star
+  streaks, arrival telemetry 0.00 blocks / 0.00° / 0.0% speed; a cruise from Earth to its neighbour, set down beside
+  it with its real map; the planet bracket and label, the cruise line.

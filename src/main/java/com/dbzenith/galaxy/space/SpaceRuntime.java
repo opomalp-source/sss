@@ -187,11 +187,39 @@ public final class SpaceRuntime {
         var ready=CompletableFuture.supplyAsync(()->level.getChunkSource().getChunkFuture(chunk.x,chunk.z,ChunkStatus.FULL,true),Util.backgroundExecutor()).thenCompose(f->f).thenApply(e->e.left().isPresent());
         s.pending.put(p.getUUID(),new Transit(p.level().dimension(),level.dimension(),ref,at,v,chunk,p.server.getTickCount(),ready,kind,await));prepare(p);return true;
     }
+    /**
+     * Hyperspeed into a system (the space rework, phase 5): you arrive on the line you came along, short of the target
+     * planet and still moving that way (the client eases you to a stop), never in a star's glare or beside another body.
+     */
     public static boolean jump(ServerPlayer p,GalaxyCatalog.Ref ref){
         if(!isSpace(p.level())||pending(p)||state(p.server).pending.size()>=16)return false;
-        try{var b=GalaxyCatalog.body(p.server.overworld().getSeed(),GalaxyData.get(p.server).salt(),ref);Vec3 c=SpaceMath.center(b),at=c.add(new Vec3(0,128,0).subtract(c).normalize().scale(SpaceMath.radius(b.radius())+900));return queue(p,open(p.server,ref.system()),ref,at,Vec3.ZERO,SpaceTelemetry.Kind.HYPERSPEED);}
+        try{var a=arrival(p.server,GalaxyData.current(p),ref,p.position());return queue(p,open(p.server,ref.system()),ref,a.position(),a.velocity(),SpaceTelemetry.Kind.HYPERSPEED);}
         catch(IllegalArgumentException ex){p.displayClientMessage(Component.literal(ex.getMessage()),true);return false;}
     }
+    /** The course from one system to another, in light years (catalogue positions; galactic axes are the orbital axes). */
+    public static Vec3 course(MinecraftServer server,GalaxyCatalog.Id from,GalaxyCatalog.Id to){
+        long seed=server.overworld().getSeed(),salt=GalaxyData.get(server).salt();var a=GalaxyCatalog.system(seed,salt,from);var b=GalaxyCatalog.system(seed,salt,to);
+        return new Vec3(b.x()-a.x(),b.y()-a.y(),b.z()-a.z());
+    }
+    /** Where a course arrives: {@code from} the system you left (or, within one system, from {@code here}). */
+    public record Arrival(Vec3 position,Vec3 velocity){}
+    public static Arrival arrival(MinecraftServer server,GalaxyCatalog.Id from,GalaxyCatalog.Ref ref,Vec3 here){
+        var data=GalaxyData.get(server);var spec=GalaxyCatalog.system(server.overworld().getSeed(),data.salt(),ref.system());
+        var b=spec.planets().get(Math.max(0,Math.min(spec.planets().size()-1,ref.planet())));Vec3 c=SpaceMath.center(b);double r=SpaceMath.radius(b.radius());
+        Vec3 course=course(server,from,ref.system());
+        if(course.lengthSqr()<1e-9)course=c.subtract(here);
+        Vec3 dir=course.lengthSqr()<1e-9?c.subtract(new Vec3(0,128,0)).normalize():course.normalize(),at=c.subtract(dir.scale(r+900));
+        if(!clear(spec,at,b.index())){at=c.add(new Vec3(0,128,0).subtract(c).normalize().scale(r+900));dir=c.subtract(at).normalize();}   // the old sunward approach
+        return new Arrival(at,dir.scale(2));
+    }
+    /** Clear of every star's glare and every other body. */
+    static boolean clear(GalaxyCatalog.SystemSpec spec,Vec3 at,int target){
+        for(int i=0;i<spec.stars().size();i++)if(at.distanceTo(SpaceMath.star(i,spec.stars().size()))<1500)return false;
+        for(var o:spec.planets())if(o.index()!=target&&at.distanceTo(SpaceMath.center(o))<SpaceMath.radius(o.radius())*4+300)return false;
+        return true;
+    }
+    /** Riding a pod someone else pilots (they cross with the pilot, never on their own). */
+    public static boolean passenger(ServerPlayer p){return p.getVehicle()!=null&&p.getVehicle().getFirstPassenger()!=p;}
     public static boolean pending(ServerPlayer p){return state(p.server).pending.containsKey(p.getUUID())||PlanetRuntime.pending(p);}
     public static void cancel(ServerPlayer p){var s=state(p.server);var q=s.pending.remove(p.getUUID());if(q!=null){var l=p.server.getLevel(q.target);if(l!=null)l.getChunkSource().removeRegionTicket(TRANSIT,q.chunk,1,p.getUUID());}}
     public static void prepare(ServerPlayer p){var t=new CompoundTag();t.putBoolean("preparing",true);t.putString("dimension",p.level().dimension().location().toString());ModNetwork.sendTo(p,new SpaceScenePacket(t));}
@@ -218,6 +246,7 @@ public final class SpaceRuntime {
     @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent e){if(e.getEntity() instanceof ServerPlayer p){checkpoint(p);state(p.server).motion.remove(p.getUUID());state(p.server).tracks.remove(p.getUUID());}}
     @SubscribeEvent public static void changed(PlayerEvent.PlayerChangedDimensionEvent e){if(e.getEntity() instanceof ServerPlayer p){
         state(p.server).motion.remove(p.getUUID());
+        if(isSpace(p.level())||surfaceRef(p.serverLevel())!=null)scene(p,false,Vec3.ZERO);   // any way in (a command, a portal, another mod): the client gets this place's sky and system (phase 5)
         if(isSpace(p.level()))checkpoint(p);else p.getPersistentData().remove(CHECKPOINT);
         if(!isSpace(p.level())&&p.getPersistentData().contains("dbzenithOrbitMayfly")){
             p.getAbilities().mayfly=p.isCreative()||p.isSpectator()||ModCapabilities.getOrThrow(p).isFlying()||p.getPersistentData().getBoolean("dbzenithOrbitMayfly");
@@ -249,7 +278,7 @@ public final class SpaceRuntime {
                     if(distance<radius+20){Vec3 at=center.add(n.scale(radius+22));p.teleportTo(at.x,at.y,at.z);p.setDeltaMovement(n.scale(.3));}
                     if(now%40==0&&!p.isCreative())p.hurt(p.damageSources().magic(),1);continue;
                 }
-                if(pending(p)||Interstellar.active(p)||clock(p)<p.getPersistentData().getLong(SETTLE))continue;var ref=new GalaxyCatalog.Ref(system.id(),body.index());var discovery=data.discovery(ref);
+                if(pending(p)||Interstellar.active(p)||Cruise.active(p)||passenger(p)||clock(p)<p.getPersistentData().getLong(SETTLE))continue;var ref=new GalaxyCatalog.Ref(system.id(),body.index());var discovery=data.discovery(ref);   // a passenger crosses with the pilot
                 if(discovery!=null&&discovery.destroyed()&&!discovery.restored())continue;
                 var c=entryForecast(p,ref);                                        // the preload starts about five seconds before the crossing, under where we will cross (phase 3)
                 if(c!=null&&PlanetRuntime.reenter(p,ref,c.position(),c.velocity(),c.yaw(),c.pitch()))prepare(p);
@@ -280,7 +309,8 @@ public final class SpaceRuntime {
                     at=c.position();v=c.velocity();yaw=c.yaw();pitch=c.pitch();expected=c.rawVelocity();
                 }
                 SpacePodEntity old=p.getVehicle() instanceof SpacePodEntity pod?pod:null;p.stopRiding();p.teleportTo(l,at.x,at.y,at.z,yaw,pitch);
-                if(old!=null)SpacePodEntity.carry(old,p,at,v,false);   // the same pod (name, settings) carried acrossp.setDeltaMovement(v);p.connection.send(new ClientboundSetEntityMotionPacket(p));p.fallDistance=0;
+                if(old!=null)SpacePodEntity.carry(old,p,at,v,false);   // the same pod (name, settings, passengers) carried across
+                p.setDeltaMovement(v);p.connection.send(new ClientboundSetEntityMotionPacket(p));p.fallDistance=0;
                 SpaceTelemetry.record(p,q.kind,from,SpaceTelemetry.Sample.of(p,v),(int)(now-q.tick),at,expected,new float[]{yaw,pitch});
                 p.getPersistentData().putLong(SETTLE,clock(p)+40);
                 checkpoint(p);PlanetEnvironment.enter(p);scene(p,true,v);s.used.put(l.dimension(),now);Interstellar.arrived(p);

@@ -77,6 +77,7 @@ public final class ClientInput {
 
         while (ModKeys.FLY.consumeClick()) ModNetwork.sendToServer(new InputPacket(InputPacket.Action.TOGGLE_FLIGHT));
         while (ModKeys.TARGET_STAR.consumeClick()) com.dbzenith.client.space.StarSky.targetPressed();   // the space rework, phase 2
+        while (ModKeys.ENGAGE.consumeClick()) com.dbzenith.client.space.NavigationHud.engagePressed();   // phase 5
         while (ModKeys.GALAXY_MAP.consumeClick()) com.dbzenith.client.space.StarSky.mapPressed();
         while (ModKeys.LOWER_RELEASE.consumeClick()) ModNetwork.sendToServer(new InputPacket(InputPacket.Action.LOWER_RELEASE));
         while (ModKeys.NEXT_TECHNIQUE.consumeClick()) {

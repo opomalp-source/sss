@@ -35,8 +35,10 @@ public final class ModKeys {
     public static final KeyMapping TARGET_STAR = key("target_star", GLFW.GLFW_KEY_M);
     /** The galaxy atlas, on the targeted star when there is one. */
     public static final KeyMapping GALAXY_MAP = key("galaxy_map", GLFW.GLFW_KEY_COMMA);
+    /** Engage (the space rework, phase 5): cruise to the targeted planet, or hyperspeed to the waypoint star; again to disengage. */
+    public static final KeyMapping ENGAGE = key("engage", GLFW.GLFW_KEY_PERIOD);
 
-    public static final KeyMapping[] ALL = {CHARGE, LOWER_RELEASE, FLY, GUARD, KI_ATTACK, NEXT_TECHNIQUE, HEAVY, DASH, TRANSFORM, STATS, RADIAL, RACIAL, SKILL, KAIOKEN, PVP, KI_BLAST, LOCK_ON, GRIP, TARGET_STAR, GALAXY_MAP};
+    public static final KeyMapping[] ALL = {CHARGE, LOWER_RELEASE, FLY, GUARD, KI_ATTACK, NEXT_TECHNIQUE, HEAVY, DASH, TRANSFORM, STATS, RADIAL, RACIAL, SKILL, KAIOKEN, PVP, KI_BLAST, LOCK_ON, GRIP, TARGET_STAR, GALAXY_MAP, ENGAGE};
 
     private ModKeys() {}
 

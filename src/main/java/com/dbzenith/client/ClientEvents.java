@@ -146,6 +146,8 @@ public final class ClientEvents {
         if (name.contains("motionreload")) com.dbzenith.client.motion.MotionData.reloadNow();   // CX-31
         if (name.contains("startarget")) com.dbzenith.client.space.StarSky.targetPressed();   // dev: press Target Star (the space rework, phase 2)
         if (name.contains("lookplanet")) com.dbzenith.client.space.SpaceCamera.lookAtNearestPlanet();   // dev: aim at the planet below (the space rework, phase 3)
+        if (name.contains("navtarget")) com.dbzenith.client.space.StarSky.targetPressed();   // dev: M (a planet under the crosshair first; phase 5)
+        if (name.contains("navengage")) com.dbzenith.client.space.NavigationHud.engagePressed();   // dev: the engage key
         if (name.startsWith("posestrip_") && !(mc.screen instanceof com.dbzenith.client.screen.PoseSheetScreen ps0 && ps0.key.equals(name))) {
             // posestrip_<clip>_<turn>[_<pitch>]: one clip at eight moments (a film strip), for judging motion
             String rest = name.substring("posestrip_".length());

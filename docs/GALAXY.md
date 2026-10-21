@@ -387,3 +387,25 @@ flat as the world is near you and curving away to the true horizon, with haze th
 you climb the more of the planet you see, until at the top of the atmosphere you are looking at the same globe
 you see from orbit. Close in from orbit, the ground under you sharpens into a detailed regional map as you
 descend. Day and night on the globe are the planet's own: the sunlit side is where it is day on the ground.
+
+## Space rework, phase 5 — travel and navigation (v0.155.0)
+
+**Targeting.** In orbit, **M** on a planet targets it: a bracket marks it and a line shows its name, distance (AU;
+Earth's orbit is 1 AU), whether you can land, and the key to go there. M on a star targets the star as before; M on
+the same star again makes it your waypoint.
+
+**Engage (`.`).** With a planet targeted, `.` cruises there: the planets swing past and grow, and a few seconds
+later you are a short way above it, still drifting towards it. With no planet targeted, `.` goes to hyperspeed for
+your waypoint star. `.` again (or Sneak) disengages: a cruise stops where it had got to, hyperspeed drops you back
+where you started at no cost. Courses through a star's glare are refused.
+
+**Hyperspeed in the stars.** No more curtain: after a short spool-up you fly through the real galaxy towards the
+star you chose. The stars stream past in their own colours, your system falls away behind you, the destination star
+grows ahead, and you arrive coming in on the same line, heading for the planet you aimed at, easing to a stop.
+
+**Passengers.** A Space Pod seats two: the first in pilots, the second rides along, sees the same trip, and crosses
+every boundary with the pilot. Only the pilot can set a course.
+
+**Quiet cues.** Only when they matter: "Atmosphere of … in N s" while you dive in, "Stellar heat" too near a star,
+and your speed for a moment after you steer or brake ("Holding position" once you stop). `/dbz galaxy cruise
+<players> <planet>` cruises from a command.

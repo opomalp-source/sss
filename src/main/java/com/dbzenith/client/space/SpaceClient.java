@@ -21,7 +21,7 @@ import net.minecraftforge.fml.common.Mod;
 public final class SpaceClient {
     private static CompoundTag scene=new CompoundTag();private static Vec3 velocity=Vec3.ZERO,start=Vec3.ZERO;
     private static ResourceKey<Level> movementLevel;private static double forward,strafe,up;private static boolean brake;
-    private static int fade,entry,preparing,hintTicks;private static float atmosphere;
+    private static int fade,entry,preparing,hintTicks,arrival;private static float atmosphere;
     /** Input counts while the window has focus (and always for the scripted dev client, which runs unfocused). */
     private static boolean focused(Minecraft mc){return mc.isWindowActive()||Boolean.getBoolean("dbzenith.devAutomation");}
     public static CompoundTag system(){return scene.getCompound("system");}
@@ -39,6 +39,12 @@ public final class SpaceClient {
             if(!data.getString("dimension").contains("orbit/v1/"))entry=140;
         }
     }
+    /** Set down after a cruise or hyperspeed (the space rework, phase 5): moving on at {@code v} (null: as the scene said), eased to a stop over a couple of seconds unless you steer. */
+    public static void arrive(Vec3 v){var l=Minecraft.getInstance().level;if(v!=null){velocity=v;movementLevel=l==null?null:l.dimension();}arrival=50;}
+    /** For the navigation HUD (phase 5): flight speed in orbit (blocks a tick, relative to the local frame), and whether you are steering or braking. */
+    public static double speed(){return velocity.length();}
+    public static boolean steering(){return forward!=0||strafe!=0||up!=0;}
+    public static boolean braking(){return brake;}
     public static boolean surface(Level l){if(l==null||!com.dbzenith.galaxy.planet.PlanetConfig.SPACE.get())return false;String d=l.dimension().location().toString();return d.equals("minecraft:overworld")||d.equals("dbzenith:namek")||d.equals("dbzenith:northern_planet")||d.equals("dbzenith:beerus_planet")||d.startsWith("dbzenith:planet/v1/");}
     public static double vacuum(){var p=Minecraft.getInstance().player;return p==null?0:SpaceRuntime.isSpace(p.level())?1:surface(p.level())?SpaceMath.atmosphere(p.getY()):0;}
     @SubscribeEvent public static void logout(ClientPlayerNetworkEvent.LoggingOut e){scene=new CompoundTag();movementLevel=null;velocity=Vec3.ZERO;fade=entry=preparing=hintTicks=0;OrbitalTextures.clear();SpaceSky.clearCaches();}
@@ -53,7 +59,7 @@ public final class SpaceClient {
     @SubscribeEvent(priority=EventPriority.LOWEST) public static void movement(TickEvent.PlayerTickEvent e){
         if(!(e.player instanceof LocalPlayer p))return;
         var mc=Minecraft.getInstance();if(mc.screen!=null||!focused(mc)){forward=strafe=up=0;brake=false;}
-        if(JourneyClient.active()){velocity=Vec3.ZERO;p.setDeltaMovement(Vec3.ZERO);movementLevel=null;return;}
+        if(JourneyClient.active()||CruiseClient.active()){velocity=Vec3.ZERO;p.setDeltaMovement(Vec3.ZERO);movementLevel=null;return;}
         if(!SpaceRuntime.isSpace(p.level())||p.isPassenger()){movementLevel=null;forward=strafe=up=0;brake=false;return;}
         if(e.phase==TickEvent.Phase.START){
             if(movementLevel!=p.level().dimension()){movementLevel=p.level().dimension();velocity=p.getDeltaMovement();}
@@ -66,6 +72,7 @@ public final class SpaceClient {
         boolean boost=mc.screen==null&&focused(mc)&&mc.options.keySprint.isDown();
         if(SpaceCamera.active()){var f=SpaceCamera.basis();velocity=SpaceMath.step(velocity,forward,strafe,up,boost,brake,f[0],f[1],f[2],powered);}   // along the space camera's frame (phase 3)
         else velocity=SpaceMath.step(velocity,forward,strafe,up,boost,brake,p.getYRot(),p.getXRot(),powered);
+        if(arrival>0){arrival--;if(forward!=0||strafe!=0||up!=0)arrival=0;else velocity=velocity.scale(.94);}   // set down after a cruise or hyperspeed: eased to a stop unless you steer (phase 5)
         Vec3 drag=Vec3.ZERO;var anchor=SpaceCamera.anchor(p.position());                       // near a planet you turn with its ground: stopping keeps you over the same land (phase 3)
         if(anchor.body()!=null&&anchor.weight()>0){var now=ClientFrames.spin(anchor.body(),0);var next=ClientFrames.spin(anchor.body(),1);Vec3 rel=p.position().subtract(ClientFrames.center(anchor.body()));
             drag=next.apply(now.invert(rel)).subtract(rel).scale(anchor.weight());SpaceCamera.carry(now,next,anchor.weight());}

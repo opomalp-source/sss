@@ -87,9 +87,14 @@ public class SpacePodEntity extends Entity {
      * into an atmosphere. Minecraft can't move a ridden vehicle between dimensions, so this is the same pod rebuilt.
      */
     public static SpacePodEntity carry(SpacePodEntity old,ServerPlayer pilot,Vec3 at,Vec3 velocity,boolean landing){
+        var riders=new java.util.ArrayList<ServerPlayer>();for(var e:old.getPassengers())if(e instanceof ServerPlayer q&&q!=pilot)riders.add(q);   // a passenger comes too (phase 5)
+        for(var q:riders)q.stopRiding();
         var saved=old.saveWithoutId(new CompoundTag());old.discard();
         var pod=create(pilot.level(),at);pod.load(saved);pod.setPos(at.x,at.y,at.z);pod.setDeltaMovement(velocity);
-        pod.setState(landing?LANDING:PARKED);pilot.level().addFreshEntity(pod);pilot.startRiding(pod,true);return pod;
+        pod.setState(landing?LANDING:PARKED);pilot.level().addFreshEntity(pod);pilot.startRiding(pod,true);
+        for(var q:riders){q.teleportTo(pilot.serverLevel(),at.x,at.y,at.z,q.getYRot(),q.getXRot());q.startRiding(pod,true);q.fallDistance=0;
+            com.dbzenith.galaxy.planet.PlanetEnvironment.enter(q);com.dbzenith.galaxy.space.SpaceRuntime.scene(q,true,velocity);}
+        return pod;
     }
     public static SpacePodEntity orbit(ServerPlayer pilot,Vec3 at,Vec3 velocity){
         var pod=create(pilot.level(),at);pod.setDeltaMovement(velocity);pilot.level().addFreshEntity(pod);pilot.startRiding(pod,true);return pod;
@@ -157,7 +162,7 @@ public class SpacePodEntity extends Entity {
     public InteractionResult interact(Player player, InteractionHand hand) {
         if (state() != PARKED || player.isSecondaryUseActive()) return InteractionResult.PASS;
         if (!level().isClientSide) {
-            if (getPassengers().isEmpty()) player.startRiding(this);
+            if (getPassengers().size() < 2) player.startRiding(this);   // the first in pilots; a second rides along
         } else if (getPassengers().isEmpty() || getFirstPassenger() == player) {
             com.dbzenith.client.ClientHooks.openPlanetScreen(); // client-only class; this branch never runs on a server
         }
@@ -191,8 +196,15 @@ public class SpacePodEntity extends Entity {
     }
 
     @Override
+    protected void positionRider(Entity passenger, Entity.MoveFunction move) {
+        if (!hasPassenger(passenger)) return;
+        Vec3 back = getPassengers().indexOf(passenger) == 0 ? Vec3.ZERO : Vec3.directionFromRotation(0, getYRot()).scale(-.55);   // the passenger sits just behind the pilot
+        move.accept(passenger, getX() + back.x, getY() + getPassengersRidingOffset() + passenger.getMyRidingOffset() + (back == Vec3.ZERO ? 0 : .15), getZ() + back.z);
+    }
+
+    @Override
     protected boolean canAddPassenger(Entity passenger) {
-        return getPassengers().isEmpty() && passenger instanceof Player;
+        return getPassengers().size() < 2 && passenger instanceof Player;
     }
 
     @Override

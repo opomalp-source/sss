@@ -40,6 +40,7 @@ public final class GalaxyCommands {
             .then(Commands.literal("transitions").executes(c->transitions(c.getSource(),null))     // continuity of recent space transfers (docs/SPACE_FRAMES.md)
                 .then(Commands.argument("player",EntityArgument.player()).executes(c->transitions(c.getSource(),EntityArgument.getPlayer(c,"player")))))
             .then(Commands.literal("orbit").then(Commands.argument("players",EntityArgument.players()).executes(c->{int n=0;for(var p:EntityArgument.getPlayers(c,"players"))if(com.dbzenith.galaxy.space.SpaceRuntime.ascend(p))n++;return n;})))
+            .then(Commands.literal("cruise").then(Commands.argument("players",EntityArgument.players()).then(Commands.argument("planet",IntegerArgumentType.integer(0,8)).executes(c->{int n=0;for(var p:EntityArgument.getPlayers(c,"players"))if(com.dbzenith.galaxy.space.Cruise.begin(p,IntegerArgumentType.getInteger(c,"planet")))n++;return n;}))))   // in-system cruise (phase 5)
             .then(Commands.literal("approach").then(Commands.argument("players",EntityArgument.players()).then(Commands.argument("planet",IntegerArgumentType.integer(0,8)).executes(c->{int n=0;for(var p:EntityArgument.getPlayers(c,"players"))if(com.dbzenith.galaxy.space.SpaceRuntime.approach(p,IntegerArgumentType.getInteger(c,"planet")))n++;return n;}))))
             .then(Commands.literal("map").then(Commands.argument("players",EntityArgument.players()).executes(c->{
                 for(var p:EntityArgument.getPlayers(c,"players"))GalaxyService.open(p);return 1;

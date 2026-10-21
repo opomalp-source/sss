@@ -339,6 +339,6 @@ to both mods folders.
 - [x] v0.152.0 Phase 2: every visible star a catalogue system (server-streamed field of ~7,000 stars, Earth and planet skies), look-to-select (M), waypoints, atlas focus (,), observed vs charted, uncharted planets hidden
 - [x] v0.153.0 Phase 3: transfer state machine (forecast preload, follow the course, cross at the crossing, hold, give up, settle), no loading screen, shared planet spin, co-rotation, free-orientation space camera, pods carried over
 - [x] v0.154.0 Phase 4: planet maps from the real ground (server-rendered, procedural and vanilla noise worlds), regional approach maps, the view from far below (flat then curving), vanilla clouds from above, matching terminator
-- [ ] Phase 5: in-system cruise, hyperspeed towards the chosen star with safe arrivals, passengers, navigation HUD, blended audio
+- [x] v0.155.0 Phase 5: in-system cruise, hyperspeed through the real star field with course-aligned safe arrivals, pod passengers, engage key and quiet navigation HUD, travel audio
 - [ ] Phase 6: destruction and restoration identity everywhere, stale-landing refusal, multiplayer and reconnect hardening
 - [ ] Phase 7: profiling, soak, balance and polish

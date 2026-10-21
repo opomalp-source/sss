@@ -132,7 +132,7 @@ public final class SpaceCamera {
     }
 
     private static void start(Entity player) {
-        up = up(player.position());
+        up = up(CruiseClient.view(player.position(), 0));
         Vec3 f = Vec3.directionFromRotation(player.getXRot(), player.getYRot());
         pitch = Math.toDegrees(-Math.asin(Mth.clamp(f.dot(up), -1, 1)));
         Vec3 h = f.subtract(up.scale(f.dot(up)));
@@ -168,7 +168,7 @@ public final class SpaceCamera {
                     pitch = Mth.clamp(pitch + dpitch, -90, 90);
                 }
             }
-            Vec3 next = up(p.getPosition(e.renderTickTime));                  // carry the heading as up turns with where we are
+            Vec3 next = up(CruiseClient.view(p.getPosition(e.renderTickTime), e.renderTickTime));                  // carry the heading as up turns with where we are
             Vec3 axis = up.cross(next);
             if (axis.lengthSqr() > 1e-14) heading = rotate(heading, axis.normalize(), Math.asin(Math.min(1, axis.length())));
             up = next;
@@ -237,7 +237,7 @@ public final class SpaceCamera {
     /** Turns a player model so its up is {@link #up} at its place (other players too); called inside the model's own pose. */
     public static void orient(com.mojang.blaze3d.vertex.PoseStack pose, Entity e, float partial) {
         if (!SpaceRuntime.isSpace(e.level())) return;
-        Vec3 u = up(e.getPosition(partial));
+        Vec3 u = up(CruiseClient.view(e.getPosition(partial), partial));
         Vec3 axis = new Vec3(0, 1, 0).cross(u);
         double angle = Math.acos(Mth.clamp(u.y, -1, 1));
         if (angle < 1e-4) return;

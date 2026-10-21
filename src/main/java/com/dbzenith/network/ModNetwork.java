@@ -13,7 +13,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
  * so mismatched client/server versions are refused at login instead of desyncing.
  */
 public final class ModNetwork {
-    private static final String PROTOCOL = "52";
+    private static final String PROTOCOL = "53";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(DBZenith.MOD_ID, "main"),
@@ -39,6 +39,8 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(StarSelectPacket.Info.class,nextId++,NetworkDirection.PLAY_TO_CLIENT).encoder(StarSelectPacket.Info::encode).decoder(StarSelectPacket.Info::decode).consumerMainThread(StarSelectPacket.Info::handle).add();
         CHANNEL.messageBuilder(PlanetMapPacket.class,nextId++,NetworkDirection.PLAY_TO_CLIENT).encoder(PlanetMapPacket::encode).decoder(PlanetMapPacket::decode).consumerMainThread(PlanetMapPacket::handle).add();
         CHANNEL.messageBuilder(PlanetMapPacket.Request.class,nextId++,NetworkDirection.PLAY_TO_SERVER).encoder(PlanetMapPacket.Request::encode).decoder(PlanetMapPacket.Request::decode).consumerMainThread(PlanetMapPacket.Request::handle).add();
+        CHANNEL.messageBuilder(CruisePacket.class,nextId++,NetworkDirection.PLAY_TO_CLIENT).encoder(CruisePacket::encode).decoder(CruisePacket::decode).consumerMainThread(CruisePacket::handle).add();
+        CHANNEL.messageBuilder(CruisePacket.Engage.class,nextId++,NetworkDirection.PLAY_TO_SERVER).encoder(CruisePacket.Engage::encode).decoder(CruisePacket.Engage::decode).consumerMainThread(CruisePacket.Engage::handle).add();
         CHANNEL.messageBuilder(PlanetEnvironmentPacket.class,nextId++,NetworkDirection.PLAY_TO_CLIENT).encoder(PlanetEnvironmentPacket::encode).decoder(PlanetEnvironmentPacket::decode).consumerMainThread(PlanetEnvironmentPacket::handle).add();
         CHANNEL.messageBuilder(GalaxyPackets.Request.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(GalaxyPackets.Request::encode).decoder(GalaxyPackets.Request::decode).consumerMainThread(GalaxyPackets.Request::handle).add();

@@ -57,6 +57,10 @@ public final class StarSky {
     private static String[] ids = new String[0];
     private static float[] dir = new float[0];
     private static float[] flux = new float[0];
+    /** Each star's position from the field's centre (light years) and its light, for drawing the field from elsewhere (hyperspeed, phase 5). */
+    private static float[] pos = new float[0], light = new float[0];
+    /** Where the field is being seen from this frame (light years from its centre). */
+    private static Vec3 seenFrom = Vec3.ZERO;
     private static short[] types = new short[0];
     private static VertexBuffer buffer;
     private static boolean dirty;
@@ -79,7 +83,7 @@ public final class StarSky {
         }
         int n = m.count();
         String[] newIds = new String[n];
-        float[] newDir = new float[n * 3], newFlux = new float[n];
+        float[] newDir = new float[n * 3], newFlux = new float[n], newPos = new float[n * 3], newLight = new float[n];
         for (int i = 0; i < n; i++) {
             int x = c.x() + m.sectors()[i * 4], y = c.y() + m.sectors()[i * 4 + 1], z = c.z() + m.sectors()[i * 4 + 2], slot = m.sectors()[i * 4 + 3];
             newIds[i] = x + ":" + y + ":" + z + ":" + slot;
@@ -91,8 +95,15 @@ public final class StarSky {
             double light = 0;
             for (int k = 0; k < count(m.stars()[i]); k++) light += GalaxyCatalog.StarType.values()[type(m.stars()[i], k)].light;
             newFlux[i] = (float) (light / Math.pow(d / 1000, 2));
+            newLight[i] = (float) light;
+            newPos[i * 3] = (float) dx;
+            newPos[i * 3 + 1] = (float) dy;
+            newPos[i * 3 + 2] = (float) dz;
         }
+        if (!m.center().equals(center)) JourneyClient.fieldArrived();         // the sky of a system just arrived in: seen from its own centre again
         center = m.center();
+        pos = newPos;
+        light = newLight;
         ids = newIds;
         dir = newDir;
         flux = newFlux;
@@ -175,14 +186,73 @@ public final class StarSky {
         RenderSystem.depthMask(false);
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA, com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE);
-        RenderSystem.setShaderColor(1, 1, 1, alpha);
-        buffer.bind();
-        buffer.drawWithShader(m, projection, GameRenderer.getPositionColorShader());
-        VertexBuffer.unbind();
-        RenderSystem.setShaderColor(1, 1, 1, 1);
+        seenFrom = JourneyClient.offset(Minecraft.getInstance().getFrameTime());
+        if (seenFrom.lengthSqr() > 1e-9) voyage(m, projection, alpha, JourneyClient.motion(Minecraft.getInstance().getFrameTime()));   // under way between the stars
+        else {
+            RenderSystem.setShaderColor(1, 1, 1, alpha);
+            buffer.bind();
+            buffer.drawWithShader(m, projection, GameRenderer.getPositionColorShader());
+            VertexBuffer.unbind();
+            RenderSystem.setShaderColor(1, 1, 1, 1);
+        }
         markers(m, alpha);
         RenderSystem.defaultBlendFunc();
         RenderSystem.enableCull();
+    }
+
+    /** A star's direction as seen from {@link #seenFrom}. */
+    private static Vector3f now(int i) {
+        if (seenFrom.lengthSqr() < 1e-9) return new Vector3f(dir[i * 3], dir[i * 3 + 1], dir[i * 3 + 2]);
+        return new Vector3f((float) (pos[i * 3] - seenFrom.x), (float) (pos[i * 3 + 1] - seenFrom.y), (float) (pos[i * 3 + 2] - seenFrom.z)).normalize();
+    }
+
+    private static VertexBuffer voyageBuffer;
+
+    /** Wraps a light-year offset into the 12,000-ly cube round the viewer (an endless field for long courses). */
+    private static double wrap(double v, boolean far) {
+        return far ? v - 12000 * Math.floor((v + 6000) / 12000) : v;
+    }
+
+    /**
+     * The field seen from {@link #seenFrom} while moving {@code motion} light years a tick (hyperspeed, phase 5): each
+     * star where it now is and as bright as it now is, drawn out into a streak along its apparent motion.
+     */
+    private static void voyage(Matrix4f m, Matrix4f projection, float alpha, Vec3 motion) {
+        boolean far = JourneyClient.course().length() > 5000;                  // beyond the streamed field: stream it as an endless field and draw the destination ahead
+        BufferBuilder b = Tesselator.getInstance().getBuilder();
+        b.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        for (int i = 0; i < ids.length; i++) {
+            double x = wrap(pos[i * 3] - seenFrom.x, far), y = wrap(pos[i * 3 + 1] - seenFrom.y, far), z = wrap(pos[i * 3 + 2] - seenFrom.z, far), d = Math.sqrt(x * x + y * y + z * z);
+            if (d < 1e-3) continue;
+            double px = x + motion.x * 5, py = y + motion.y * 5, pz = z + motion.z * 5, pd = Math.sqrt(px * px + py * py + pz * pz);   // where it seemed five ticks ago
+            double t = Math.max(0, Math.min(1.3, (Math.log10(Math.max(1e-6, light[i] / Math.pow(Math.max(.3, d) / 1000, 2))) + 2.6) / 4.2));
+            float size = (float) Math.min(1.2, .06 + .3 * t * t), a = (float) Math.min(1, .4 + .6 * t);
+            int rgb = GalaxyCatalog.StarType.values()[type(types[i], 0)].color;
+            Vector3f head = new Vector3f((float) (x / d), (float) (y / d), (float) (z / d)), tail = new Vector3f((float) (px / pd), (float) (py / pd), (float) (pz / pd));
+            Vector3f h = new Vector3f(head).mul(SHELL), tl = new Vector3f(tail).mul(SHELL);
+            if (h.distance(tl) < size) {
+                star(b, head, size, rgb, a);
+                continue;
+            }
+            Vector3f side = new Vector3f(h).sub(tl).cross(head).normalize().mul(size * .7f);
+            float r = (rgb >> 16 & 255) / 255f, g = (rgb >> 8 & 255) / 255f, bl = (rgb & 255) / 255f;
+            b.vertex(tl.x - side.x, tl.y - side.y, tl.z - side.z).color(r, g, bl, 0).endVertex();
+            b.vertex(tl.x + side.x, tl.y + side.y, tl.z + side.z).color(r, g, bl, 0).endVertex();
+            b.vertex(h.x + side.x, h.y + side.y, h.z + side.z).color(r, g, bl, a).endVertex();
+            b.vertex(h.x - side.x, h.y - side.y, h.z - side.z).color(r, g, bl, a).endVertex();
+        }
+        if (far && JourneyClient.active()) {                                    // the destination star ahead, as bright as the distance still to go allows
+            Vec3 left = JourneyClient.remaining(Minecraft.getInstance().getFrameTime());
+            double remaining = Math.max(.05, left.length()), t = Math.max(0, Math.min(1.3, (Math.log10(40 / Math.pow(remaining / 1000, 2)) + 2.6) / 4.2));
+            star(b, new Vector3f((float) (left.x / remaining), (float) (left.y / remaining), (float) (left.z / remaining)), (float) Math.min(1.4, .08 + .4 * t * t), 0xFFF2D6, (float) Math.min(1, .5 + .5 * t));
+        }
+        if (voyageBuffer == null) voyageBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
+        voyageBuffer.bind();
+        voyageBuffer.upload(b.end());
+        RenderSystem.setShaderColor(1, 1, 1, alpha);
+        voyageBuffer.drawWithShader(m, projection, GameRenderer.getPositionColorShader());
+        VertexBuffer.unbind();
+        RenderSystem.setShaderColor(1, 1, 1, 1);
     }
 
     private static void build() {
@@ -247,7 +317,7 @@ public final class StarSky {
     }
 
     private static void ring(BufferBuilder b, Matrix4f m, int i, float radius, int segments, int rgb, float alpha) {
-        Vector3f n = new Vector3f(dir[i * 3], dir[i * 3 + 1], dir[i * 3 + 2]), c = new Vector3f(n).mul(SHELL);
+        Vector3f n = now(i), c = new Vector3f(n).mul(SHELL);
         Vector3f a = Math.abs(n.y) < .9f ? new Vector3f(0, 1, 0) : new Vector3f(1, 0, 0);
         Vector3f side = new Vector3f(n).cross(a).normalize(), up = new Vector3f(n).cross(side).normalize();
         float r = (rgb >> 16 & 255) / 255f, g = (rgb >> 8 & 255) / 255f, bl = (rgb & 255) / 255f, w = .08f;
@@ -318,6 +388,7 @@ public final class StarSky {
     /** {@code M}: target the star under the crosshair; the same star again makes it the waypoint; nothing there clears it. */
     public static void targetPressed() {
         var mc = Minecraft.getInstance();
+        if (NavigationHud.targetBody()) return;                                     // a planet of this system under the crosshair (phase 5)
         if (!ready() || !framed || mc.player == null) return;
         var look = mc.gameRenderer.getMainCamera().getLookVector();
         Vector3f g = new Matrix3f(lastFrame).transpose().transform(new Vector3f(look));   // into galactic directions
@@ -334,6 +405,7 @@ public final class StarSky {
             }
         }
         if (best < 0) {
+            NavigationHud.clearBody();
             if (!target.isEmpty()) ModNetwork.sendToServer(new StarSelectPacket("", StarSelectPacket.CLEAR));
             clearTarget();
             return;
