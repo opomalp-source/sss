@@ -4463,3 +4463,21 @@ landings, and hardening for reconnects, caps and other players.
   has its ground again; a stale landing is dropped while you stay in orbit; disconnecting mid-cruise or mid-landing
   leaves nothing pending. (The orbital slot cap held in testing: a test that opened one system too many was
   refused, as players would be.) 319 GameTests pass.
+
+## 2026-10-21 — Space rework phase 7: profiling, soak and polish (v0.157.0)
+The last phase of the user's space flagship request: measured, soaked and polished. The seven-phase space rework is
+complete.
+
+- **Profiled honestly** (uncapped, vsync off, hardware and settings recorded in `docs/SPACE_FRAMES.md`
+  "Performance"): the close-orbit grid and the view from far below were redoing their per-vertex trigonometry every
+  frame; they now keep it between frames (`SpaceSky.Grid`), halving the sky pass (close orbit 5.0 → 2.4 ms, far
+  below 3.1 → 2.1 ms).
+- **Map drawing 4× faster:** Earth's whole map 27.6 s → about 7 s, its regional map 7.6 → 2.2 s, a procedural map
+  0.74 → 0.32 s: one climate sample per point (biome lookup from that sample's `TargetPoint` with its depth moved to
+  the ground, instead of sampling the noise again), at most 16 samples a texel, two low-priority threads with rows in
+  parallel. Each map's drawing time is logged.
+- **Soak:** four full cycles (orbit, dive and land, orbit, cruise, hyperspeed out and back): all transfers exact, no
+  errors, caches bounded.
+- **Polish:** a soft air glow along the horizon seen from far below on worlds with air, lit like the ground under it;
+  no rain above the clouds (vanilla drew Earth's rain at 450 blocks up) and no rain sounds there either.
+- 319 GameTests pass.

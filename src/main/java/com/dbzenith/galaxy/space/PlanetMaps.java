@@ -53,12 +53,14 @@ public final class PlanetMaps {
 
     private static final Map<MinecraftServer, Map<Key, CompletableFuture<int[]>>> CACHE = new WeakHashMap<>();
     private static final Map<UUID, long[]> REQUESTS = new HashMap<>();
-    private static final ExecutorService WORKER = Executors.newSingleThreadExecutor(r -> {
-        var t = new Thread(r, "DBZ-planet-maps");
+    /** Two low-priority threads draw maps (their rows in parallel), apart from world generation's own workers. */
+    private static final ForkJoinPool WORKER = new ForkJoinPool(2, pool -> {
+        var t = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
+        t.setName("DBZ-planet-maps-" + t.getPoolIndex());
         t.setDaemon(true);
         t.setPriority(Thread.MIN_PRIORITY);
         return t;
-    });
+    }, null, false);
 
     /** What a texel shows: the colour of the ground at a surface point. */
     public interface Ground {
@@ -83,7 +85,7 @@ public final class PlanetMaps {
     /** Draws a map: 0xRRGGBB per texel, row by row. */
     public static int[] render(SpaceFrames.Planet unturned, Ground ground, int width, int height) {
         int[] out = new int[width * height];
-        for (int j = 0; j < height; j++) for (int i = 0; i < width; i++) out[j * width + i] = texel(unturned, ground, i, j, width, height);
+        java.util.stream.IntStream.range(0, height).parallel().forEach(j -> { for (int i = 0; i < width; i++) out[j * width + i] = texel(unturned, ground, i, j, width, height); });   // rows in parallel on the maps pool
         poles(out, width, height);
         return out;
     }
@@ -117,7 +119,7 @@ public final class PlanetMaps {
     public static int[] region(Ground ground, double x0, double z0) {
         int[] out = new int[REGION * REGION];
         double cell = (double) SPAN / REGION;
-        for (int j = 0; j < REGION; j++) for (int i = 0; i < REGION; i++) {
+        java.util.stream.IntStream.range(0, REGION).parallel().forEach(j -> { for (int i = 0; i < REGION; i++) {
             int r = 0, g = 0, b = 0;
             for (int k = 0; k < 4; k++) {
                 int c = ground.color(x0 + (i + .25 + (k & 1) * .5) * cell, z0 + (j + .25 + (k >> 1) * .5) * cell, cell / 2);
@@ -126,7 +128,7 @@ public final class PlanetMaps {
                 b += c & 255;
             }
             out[j * REGION + i] = ((r / 4) << 16) | ((g / 4) << 8) | (b / 4);
-        }
+        }});
         return out;
     }
 
@@ -137,7 +139,7 @@ public final class PlanetMaps {
     public static int texel(SpaceFrames.Planet unturned, Ground ground, int i, int j, int width, int height) {
         boolean disc = unturned.mapping() == SpaceFrames.Mapping.DISC;   // a disc texel narrows towards the map poles; an equirectangular one keeps its width in x
         double across = Math.max(.02, Math.cos(-Math.PI / 2 + (j + .5) * Math.PI / height)), footprint = 2 * unturned.size() / width * (disc ? across : 1) / 2;   // blocks per sample, along the row
-        int along = disc ? (int) Math.min(16, Math.max(2, Math.ceil(2 / across))) : 3, r = 0, g = 0, b = 0;
+        int along = disc ? (int) Math.min(8, Math.max(2, Math.ceil(2 / across))) : 3, r = 0, g = 0, b = 0;   // (the polar rows are evened out afterwards anyway)
         for (int k = 0; k < along * 2; k++) {
             double[] at = surface(unturned, i + .25 + (k & 1) * .5, j + ((k >> 1) + .5) / along, width, height);
             int c = ground.color(at[0], at[1], footprint);
@@ -228,14 +230,15 @@ public final class PlanetMaps {
             return (x, z, footprint) -> flat;
         }
         boolean fixed = source.possibleBiomes().size() == 1;   // Namek: one biome, oceans only from the climate
+        var multi = source instanceof net.minecraft.world.level.biome.MultiNoiseBiomeSource m ? m : null;
         return (x, z, footprint) -> {
             int qx = (int) Math.floor(x) >> 2, qz = (int) Math.floor(z) >> 2;
             var climate = sampler.sample(qx, 16, qz);
             double continent = Climate.unquantizeCoord(climate.continentalness());
             double surface = 128 * (Climate.unquantizeCoord(climate.depth()) + .5);   // vanilla's depth is offset + 1 - y/128 (here at y 64): zero at the ground
             int qy = (int) Math.floor(Math.max(-60, Math.min(300, surface + 4))) >> 2;
-            Holder<Biome> holder = source.getNoiseBiome(qx, qy, qz, sampler);   // the biome at the ground, not under it (mountains would read as caves)
-            if (isCave(holder)) holder = source.getNoiseBiome(qx, qy + 6, qz, sampler);
+            Holder<Biome> holder = multi != null ? multi.getNoiseBiome(at(climate, qy)) : source.getNoiseBiome(qx, qy, qz, sampler);   // the biome at the ground, not under it (mountains would read as caves); one climate sample serves both
+            if (isCave(holder)) holder = multi != null ? multi.getNoiseBiome(at(climate, qy + 6)) : source.getNoiseBiome(qx, qy + 6, qz, sampler);
             Biome biome = holder.value();
             int water = biome.getWaterColor();
             boolean ocean = fixed ? surface < 61 : holder.is(BiomeTags.IS_OCEAN);
@@ -258,6 +261,11 @@ public final class PlanetMaps {
             if (river) color = mix(color, water, .2);
             return scale(color, Math.max(.82, Math.min(1.2, .9 + height * .3)));   // higher ground a touch brighter
         };
+    }
+
+    /** The climate at quart height {@code qy} from one sampled at y 64: only its depth changes with height (vanilla's depth falls 1/128 a block). */
+    private static Climate.TargetPoint at(Climate.TargetPoint c, int qy) {
+        return new Climate.TargetPoint(c.temperature(), c.humidity(), c.continentalness(), c.erosion(), Climate.quantizeCoord((float) (Climate.unquantizeCoord(c.depth()) - (qy * 4 - 64) / 128d)), c.weirdness());
     }
 
     private static boolean isCave(Holder<Biome> b) {
@@ -325,7 +333,13 @@ public final class PlanetMaps {
             if (found != null && !found.isCompletedExceptionally()) return found;
             var ground = ground(server, ref);
             if (ground == null) return CompletableFuture.completedFuture(null);
-            var future = CompletableFuture.supplyAsync(work.apply(ground), WORKER);
+            var job = work.apply(ground);
+            var future = CompletableFuture.supplyAsync(() -> {
+                long began = System.nanoTime();
+                int[] map = job.get();
+                DBZenith.LOGGER.info("[planet-maps] {} {} drawn in {} ms", key.ref(), key.span() == 0 ? "map" : "region " + key.ax() + "," + key.az(), (System.nanoTime() - began) / 1_000_000);
+                return map;
+            }, WORKER);
             cache.put(key, future);
             return future;
         }

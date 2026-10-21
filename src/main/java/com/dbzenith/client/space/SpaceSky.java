@@ -53,8 +53,8 @@ public final class SpaceSky {
             long began=System.nanoTime();try{render(l,pt,ps,camera,projection,(float)SpaceMath.atmosphere(camera.getPosition().y),false);}finally{SpaceProfile.sky(System.nanoTime()-began);}setupFog.run();return true;
         }
         @Override public boolean renderClouds(ClientLevel l,int t,float pt,PoseStack p,double x,double y,double z,Matrix4f m){return SpaceClient.surface(l)&&(y>260||SpaceClient.surfaceBody().getString("atmosphere").equals("None"));}
-        @Override public boolean renderSnowAndRain(ClientLevel l,int t,float pt,LightTexture light,double x,double y,double z){return !l.dimension().equals(net.minecraft.world.level.Level.OVERWORLD)&&SpaceClient.surface(l);}
-        @Override public boolean tickRain(ClientLevel l,int t,Camera camera){return !l.dimension().equals(net.minecraft.world.level.Level.OVERWORLD)&&SpaceClient.surface(l);}
+        @Override public boolean renderSnowAndRain(ClientLevel l,int t,float pt,LightTexture light,double x,double y,double z){return y>200&&SpaceClient.surface(l)||!l.dimension().equals(net.minecraft.world.level.Level.OVERWORLD)&&SpaceClient.surface(l);}   // no rain above the clouds it falls from (phase 7)
+        @Override public boolean tickRain(ClientLevel l,int t,Camera camera){return camera.getPosition().y>200&&SpaceClient.surface(l)||!l.dimension().equals(net.minecraft.world.level.Level.OVERWORLD)&&SpaceClient.surface(l);}
     }
     private static void surface(ClientLevel level,float pt,PoseStack ps,Camera camera,Matrix4f projection){
         var b=SpaceClient.surfaceBody();var sys=SpaceClient.system();var suns=sys.getList("starsDetail",Tag.TAG_COMPOUND);if(suns.isEmpty())return;
@@ -197,11 +197,16 @@ public final class SpaceSky {
      */
     private static double flat(Matrix4f m,CompoundTag b,SpaceFrames.Planet f,SpaceFrames.Planet map,OrbitalTextures.Region region,Vec3 camera,double lift,Vec3 light,float alpha,double edge,int haze,double limit){
         double radius=f.scale()*f.orbitalRadius(),h=Math.max(1,camera.y-SpaceFrames.DATUM-lift),reach=edge+radius*Math.acos(radius/(radius+h));if(limit>0)reach=Math.min(reach,limit);
-        int rings=40,sides=72;Vec3[][] p=new Vec3[rings+1][sides+1];float[][] lit=new float[rings+1][sides+1],mu=new float[rings+1][sides+1],mv=new float[rings+1][sides+1],ru=new float[rings+1][sides+1],rv=new float[rings+1][sides+1],dist=new float[rings+1][sides+1];
+        int rings=40,sides=72;Vec3[][] p=new Vec3[rings+1][sides+1];float[][] dist=new float[rings+1][sides+1];
+        var level=Minecraft.getInstance().level;long turn=level==null?0:level.getGameTime()/20;
+        String key=b.getInt("index")+":"+lift+":"+(map!=null)+":"+(region==null?"-":region.x0()+","+region.z0())+":"+Math.floorDiv((long)camera.x,2)+","+Math.floorDiv((long)camera.z,2)+":"+(long)(reach/16)+":"+turn;
+        var g=grid("flat"+lift,rings,sides);boolean fresh=!key.equals(g.key);g.key=key;   // the costly per-vertex data only when you have moved a little or the planet has turned (phase 7)
+        float[][] lit=g.lit,mu=g.mu,mv=g.mv,ru=g.ru,rv=g.rv;
         for(int i=0;i<=rings;i++){double s=reach*Math.pow(i/(double)rings,1.35),across,down;
             if(s<=edge){across=s;down=h;}else{double phi=(s-edge)/radius;across=edge+radius*Math.sin(phi);down=h+radius*(1-Math.cos(phi));}
-            for(int k=0;k<=sides;k++){double t=k*Math.PI*2/sides,dx=Math.cos(t),dz=Math.sin(t),x=camera.x+dx*s,z=camera.z+dz*s;
+            for(int k=0;k<=sides;k++){double t=k*Math.PI*2/sides,dx=Math.cos(t),dz=Math.sin(t);
                 p[i][k]=new Vec3(dx*across,-down,dz*across).normalize().scale(100);dist[i][k]=(float)s;
+                if(!fresh)continue;double x=camera.x+dx*s,z=camera.z+dz*s;
                 lit[i][k]=(float)(.16+.84*Math.pow(Math.max(0,SpaceFrames.normal(f,x,z).dot(light)),.65));   // the night side as dim as vanilla's moonlit ground, not black
                 if(map!=null){Vec3 nb=SpaceFrames.bodyNormal(map,x,z);double lon=Math.atan2(-nb.x,-nb.y);mu[i][k]=(float)((lon<0?lon+Math.PI*2:lon)/(Math.PI*2));mv[i][k]=(float)((Math.asin(Math.max(-1,Math.min(1,nb.z)))+Math.PI/2)/Math.PI);}
                 if(region!=null){ru[i][k]=(float)((x-region.x0())/region.span());rv[i][k]=(float)((z-region.z0())/region.span());}}}
@@ -222,6 +227,13 @@ public final class SpaceSky {
                 for(int j=0;j<4;j++){int e=q[j][0],o=q[j][1];Vec3 at=p[e][o];float l=lit[e][o];buffer.vertex(m,(float)at.x,(float)at.y,(float)at.z).uv(ru[e][o],rv[e][o]).color(l,l,l,alpha*a[j]).endVertex();}
             }BufferUploader.drawWithShader(buffer.end());
         }
+        if(lift==0&&!b.getString("atmosphere").equals("None")){   // the air along the horizon, lit like the ground under it: a thin glow against space (phase 7)
+            RenderSystem.setShader(GameRenderer::getPositionColorShader);RenderSystem.blendFunc(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA,com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE);
+            buffer.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_COLOR);int air=0x78BDE5,low=Math.max(0,rings-4);
+            for(int k=0;k<sides;k++){Vec3 a=p[rings][k],e=p[rings][k+1],ua=a.add(0,7,0).normalize().scale(100),ue=e.add(0,7,0).normalize().scale(100);float la=lit[rings][k],le=lit[rings][k+1];
+                vertex(buffer,m,a,air,la,.5f*alpha);vertex(buffer,m,ua,air,la,0);vertex(buffer,m,ue,air,le,0);vertex(buffer,m,e,air,le,.5f*alpha);
+                vertex(buffer,m,p[low][k],air,lit[low][k],0);vertex(buffer,m,a,air,la,.4f*alpha);vertex(buffer,m,e,air,le,.4f*alpha);vertex(buffer,m,p[low][k+1],air,lit[low][k+1],0);}
+            BufferUploader.drawWithShader(buffer.end());RenderSystem.defaultBlendFunc();}
         float strength=(haze>>>24)/255f*alpha;RenderSystem.setShader(GameRenderer::getPositionColorShader);if(strength<=.01)return reach;
         buffer.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_COLOR);   // air thickens towards the horizon, from the edge of the loaded ground
         for(int i=0;i<rings;i++)for(int k=0;k<sides;k++){int[][] q={{i,k},{i+1,k},{i+1,k+1},{i,k+1}};
@@ -229,6 +241,12 @@ public final class SpaceSky {
         }BufferUploader.drawWithShader(buffer.end());
         return reach;
     }
+    /** Per-vertex data of a ground grid that changes only as you move or the planet turns, kept between frames (phase 7). */
+    private static final class Grid{String key="";float[][] lit,mu,mv,ru,rv,angle;double[][][] s;Vec3[][] dirs;}
+    private static final Map<String,Grid> GRIDS=new HashMap<>();
+    private static Grid grid(String slot,int rings,int sides){var g=GRIDS.computeIfAbsent(slot,k->new Grid());
+        if(g.lit==null||g.lit.length!=rings+1){g.lit=new float[rings+1][sides+1];g.mu=new float[rings+1][sides+1];g.mv=new float[rings+1][sides+1];g.ru=new float[rings+1][sides+1];g.rv=new float[rings+1][sides+1];g.angle=new float[rings+1][sides+1];g.s=new double[rings+1][sides+1][];g.dirs=new Vec3[rings+1][sides+1];g.key="";}
+        if(GRIDS.size()>8)GRIDS.clear();return g;}
     private static Vec3 light(SpaceFrames.Planet f){int count=SpaceClient.system().getList("starsDetail",Tag.TAG_COMPOUND).size();return SpaceMath.star(0,Math.max(1,count)).subtract(f.center()).normalize();}
     /**
      * A polar grid on the sphere of radius {@code r} round the point under {@code here}, out to the horizon, in the
@@ -239,12 +257,18 @@ public final class SpaceSky {
         Vec3 c=f.center(),up=here.subtract(c).normalize();double d=Math.max(r*1.0002,here.distanceTo(c)),horizon=Math.acos(r/d),scale=100/d,ground=f.orbitalRadius();
         Vec3 east=up.cross(Math.abs(up.y)<.9?new Vec3(0,1,0):new Vec3(1,0,0)).normalize(),south=up.cross(east);
         boolean same=map!=null&&map.mapping()==f.mapping()&&map.cx()==f.cx()&&map.cz()==f.cz(),surface=region!=null||map!=null&&!same;   // the map's own frame is this one unturned: no trip through the surface
-        int rings=40,sides=72;Vec3[][] p=new Vec3[rings+1][sides+1];double[][][] s=new double[rings+1][sides+1][];float[][] lit=new float[rings+1][sides+1],seen=new float[rings+1][sides+1],mu=new float[rings+1][sides+1],mv=new float[rings+1][sides+1],angle=new float[rings+1][sides+1];
-        for(int i=0;i<=rings;i++){double a=horizon*Math.pow(i/(double)rings,1.35);for(int k=0;k<=sides;k++){double t=k*Math.PI*2/sides;Vec3 v=up.scale(Math.cos(a)).add(east.scale(Math.cos(t)*Math.sin(a))).add(south.scale(Math.sin(t)*Math.sin(a)));
-            p[i][k]=c.add(v.scale(r)).subtract(here).scale(scale);angle[i][k]=(float)a;lit[i][k]=(float)(.055+.945*Math.pow(Math.max(0,v.dot(light)),.65));
-            if(r>ground*1.0001){double miss=here.subtract(c).cross(p[i][k].normalize()).length();seen[i][k]=(float)Math.max(0,Math.min(1,(ground-miss)/(ground*.004)));}else seen[i][k]=1;   // a shell above the ground (clouds): only where the ground is behind it, no rim against the sky
-            if(surface)s[i][k]=SpaceFrames.surface(f,v);
-            if(map!=null){Vec3 nb=same?f.spin().invert(v):SpaceFrames.bodyNormal(map,s[i][k][0],s[i][k][1]);double lon=Math.atan2(-nb.x,-nb.y);mu[i][k]=(float)((lon<0?lon+Math.PI*2:lon)/(Math.PI*2));mv[i][k]=(float)((Math.asin(Math.max(-1,Math.min(1,nb.z)))+Math.PI/2)/Math.PI);}}}
+        int rings=40,sides=72;Vec3[][] p=new Vec3[rings+1][sides+1];float[][] seen=new float[rings+1][sides+1];
+        var level=Minecraft.getInstance().level;long turn=level==null?0:level.getGameTime()/20;
+        String key=b.getInt("index")+":"+r+":"+same+":"+(region==null?"-":region.x0()+","+region.z0())+":"+Math.round(up.x*4000)+","+Math.round(up.y*4000)+","+Math.round(up.z*4000)+":"+Math.round(horizon*2000)+":"+turn;
+        var cache=grid("cap"+r,rings,sides);boolean fresh=!key.equals(cache.key);cache.key=key;   // the costly per-vertex data only when you have moved a little or the planet has turned (phase 7)
+        float[][] lit=cache.lit,mu=cache.mu,mv=cache.mv,angle=cache.angle;double[][][] s=cache.s;Vec3[][] dirs=cache.dirs;
+        for(int i=0;i<=rings;i++){double a=horizon*Math.pow(i/(double)rings,1.35);for(int k=0;k<=sides;k++){
+            if(fresh){double t=k*Math.PI*2/sides;Vec3 v=up.scale(Math.cos(a)).add(east.scale(Math.cos(t)*Math.sin(a))).add(south.scale(Math.sin(t)*Math.sin(a)));
+                dirs[i][k]=v;angle[i][k]=(float)a;lit[i][k]=(float)(.055+.945*Math.pow(Math.max(0,v.dot(light)),.65));
+                if(surface)s[i][k]=SpaceFrames.surface(f,v);
+                if(map!=null){Vec3 nb=same?f.spin().invert(v):SpaceFrames.bodyNormal(map,s[i][k][0],s[i][k][1]);double lon=Math.atan2(-nb.x,-nb.y);mu[i][k]=(float)((lon<0?lon+Math.PI*2:lon)/(Math.PI*2));mv[i][k]=(float)((Math.asin(Math.max(-1,Math.min(1,nb.z)))+Math.PI/2)/Math.PI);}}
+            Vec3 v=dirs[i][k];p[i][k]=c.add(v.scale(r)).subtract(here).scale(scale);
+            if(r>ground*1.0001){double miss=here.subtract(c).cross(p[i][k].normalize()).length();seen[i][k]=(float)Math.max(0,Math.min(1,(ground-miss)/(ground*.004)));}else seen[i][k]=1;}}   // a shell above the ground (clouds): only where the ground is behind it, no rim against the sky
         var buffer=Tesselator.getInstance().getBuilder();RenderSystem.disableCull();   // drawn from either side (the star pass before this turns culling back on)
         if(map!=null){RenderSystem.setShader(GameRenderer::getPositionTexColorShader);RenderSystem.setShaderTexture(0,OrbitalTextures.get(b,512));buffer.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_TEX_COLOR);
             for(int i=0;i<rings;i++)for(int k=0;k<sides;k++){int[][] q={{i,k},{i+1,k},{i+1,k+1},{i,k+1}};float[] u=new float[4];

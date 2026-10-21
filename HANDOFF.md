@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.156.0, 2026-10-20)
+# Handoff: where Dragon Block Zenith stands (v0.157.0, 2026-10-20)
 
 ## The prompt to paste into a new session
 
@@ -387,6 +387,8 @@ Minecraft if it is running). Never the updater.
 - **Phase 6 (v0.156.0) done:** debris identity, the atmosphere turning players back, stale-landing and hold release,
   scene on dimension change (`docs/SPACE_FRAMES.md` "Safety and identity"). Tests that open orbital systems should
   reuse Earth's or Vegeta's: the orbital slot cap is reachable in a full GameTest run.
-- **Next, phase 7:** profiling (frame time in close orbit and the view from far below, map/region generation time on
-  the server, memory of map caches), a soak run (repeated ascents, entries, cruises, jumps), balance (cruise and
-  hyperspeed timings, ki costs) and polish (limb glow from far below, HUD wording), then the story-mode work last.
+- **Phase 7 (v0.157.0) done; the space rework is complete.** Profile, map timings and soak in `docs/SPACE_FRAMES.md`
+  "Performance"; `/z/dev/soak.sh <n>` runs one soak cycle. For honest frame times set `enableVsync:false` and
+  `maxFps:260` in `run-clienttest/options.txt` (restored to vsync/120 afterwards).
+- **Possible follow-ups (not requested):** draw the far-below grids from a vertex buffer instead of immediate mode;
+  cloud shadows on the map; a waypoint list in the atlas. Story mode was left for last, as the user asked.

@@ -417,3 +417,9 @@ skies of its neighbours. You can't land on it, but you can fly among its remnant
 now (sealed, being restored, all planet slots busy, or Beerus's world without god ki) turns you back at the edge of
 its atmosphere and says why, instead of letting you fly into it. A landing being prepared for a world that is
 destroyed in the meantime is called off and you stay where you are.
+
+## Space rework, phase 7 — polish (v0.157.0)
+
+High over a world with air, a thin glow of atmosphere now lines the curved horizon. Rain no longer falls around you
+above the clouds. Planet maps arrive several times sooner (Earth's in a few seconds), and the detailed views of the
+ground from orbit and from high above cost about half as much as before.

@@ -189,6 +189,34 @@ frame, which is exactly where the Sun stands on the ground (`TransitionTests`, `
 - **The scene follows you.** Any dimension change into space or a surface (a command, a portal, another mod) sends
   that place's sky and system, so the client never draws the previous system.
 
+## Performance (phase 7)
+
+Measured 2026-10-21 in the dev client: Ryzen 7 5800X, RTX 3060 Ti, 32 GB, 1280 × 720, render distance 12, fancy
+graphics, vsync off and the frame rate uncapped (a capped counter proves nothing). Frame time is the interval
+between frames (presentation included); the sky pass is its CPU and driver submission time. Each figure is the
+mean of 600 frames.
+
+| Scene | Frame (mean / p95) | Sky pass |
+|---|---|---|
+| Orbit, far from every body | 1.09 / 1.25 ms | 0.14 ms |
+| Close orbit over Earth (grid, regional map, clouds) | 3.67 / 6.17 ms (was 6.28 / 7.42) | 2.45 ms (was 5.00) |
+| Earth from y 450 (the view from far below) | 3.06 / 4.13 ms (was 4.09 / 5.16) | 2.11 ms (was 3.08) |
+| Earth at y 100 (vanilla sky, for comparison) | 2.17 / 2.79 ms | — |
+
+The close and far-below grids keep their per-vertex data (texture coordinates, lighting, surface points) between
+frames and redo it only after moving a little (2 blocks on a surface, about 0.01° round a planet) or a second of
+the planet's turning; positions are recomputed every frame.
+
+Server map drawing (two low-priority threads, rows in parallel; logged as `[planet-maps]`): Earth's whole map
+6.3–7.1 s (was 27.6 s: biome lookup now reuses the one climate sample, and texels near the map poles take at most 16
+samples), a regional map of Earth 2.2 s (was 7.6), a procedural planet's map 0.32 s (was 0.74). Until a map arrives
+the old painted globe shows.
+
+Soak (four cycles of orbit → dive into Earth and land → orbit → cruise → hyperspeed to Vegeta's system and back):
+every transfer 0.00 blocks / 0.00° / 0.0% speed; no errors; client caches stayed within their bounds (48 materials,
+12 maps, 6 regions). One dive missed the atmosphere because the scripted aim looked at the horizon; that is the
+script, not the game.
+
 ## Continuity telemetry
 
 Every committed transfer records both sides and its errors against this mapping (`SpaceTelemetry`, last 64 per
