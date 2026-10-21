@@ -43,6 +43,25 @@ public final class SafetyTests {
         SpaceRuntime.player(new TickEvent.PlayerTickEvent(TickEvent.Phase.END, p));
     }
 
+    @GameTest(template = "empty", batch = "safety_death")
+    public static void dyingInSpaceDoesNotCrash(GameTestHelper h) {
+        // vanilla removes a dead player when the death animation ends (their data goes with it) but keeps ticking them
+        // behind the death screen; every space tick used to ask for that data and kick the player, again on every rejoin
+        var p = at(h, GalaxyCatalog.EARTH, new Vec3(30000, 400, 30000), GameType.SURVIVAL);
+        p.kill();
+        p.remove(net.minecraft.world.entity.Entity.RemovalReason.KILLED);
+        h.assertTrue(com.dbzenith.data.ModCapabilities.get(p).isEmpty(), "a removed player's data is gone, as in game");
+        var tick = new TickEvent.PlayerTickEvent(TickEvent.Phase.END, p);
+        SpaceRuntime.player(tick);
+        com.dbzenith.galaxy.planet.PlanetEnvironment.player(tick);
+        com.dbzenith.galaxy.planet.PlanetActivity.player(tick);
+        com.dbzenith.galaxy.planet.PlanetDestruction.player(tick);
+        Cruise.player(tick);
+        com.dbzenith.galaxy.space.Interstellar.player(tick);
+        TestPlayers.remove(h, p);
+        h.succeed();
+    }
+
     @GameTest(template = "empty", batch = "safety_beerus")
     public static void aWorldThatCantTakeYouTurnsYouBack(GameTestHelper h) {
         var server = h.getLevel().getServer();

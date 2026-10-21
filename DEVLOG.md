@@ -4481,3 +4481,12 @@ complete.
 - **Polish:** a soft air glow along the horizon seen from far below on worlds with air, lit like the ground under it;
   no rain above the clouds (vanilla drew Earth's rain at 450 blocks up) and no rain sounds there either.
 - 319 GameTests pass.
+
+## 2026-10-21 — Hotfix: dying in space or on another planet kicked the player (v0.157.1)
+Reported by the user ("if you died anywhere the game crashes"). Vanilla removes a dead player when the death animation
+ends (about a second; Forge drops their capability data then) but keeps ticking them behind the death screen. In
+orbit and on every non-Earth planet the space ticks (`PlanetEnvironment`, `SpaceRuntime`, `PlanetActivity`,
+`PlanetDestruction`) asked for that data and threw, which disconnected the player ("Internal server error") and did
+so again on every rejoin while dead. The handlers now skip dead players. Reproduced and confirmed fixed in the dev
+client (deaths on Earth, in orbit and on a procedural jungle world, each respawning in the Otherworld);
+`SafetyTests.dyingInSpaceDoesNotCrash` ticks a dead, removed player through every space handler. 320 GameTests pass.

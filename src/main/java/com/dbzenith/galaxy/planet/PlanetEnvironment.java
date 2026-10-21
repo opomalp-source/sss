@@ -66,7 +66,7 @@ public final class PlanetEnvironment {
     @SubscribeEvent public static void living(LivingEvent.LivingTickEvent e){if(e.getEntity().level() instanceof ServerLevel l)applyGravity(e.getEntity(),gravity(l));}
     @SubscribeEvent public static void fall(LivingFallEvent e){if(e.getEntity().level() instanceof ServerLevel l)e.setDamageMultiplier((float)(e.getDamageMultiplier()*gravity(l)));}
     @SubscribeEvent(priority=EventPriority.LOWEST) public static void player(TickEvent.PlayerTickEvent e){
-        if(e.phase!=TickEvent.Phase.END||!(e.player instanceof ServerPlayer p))return;
+        if(e.phase!=TickEvent.Phase.END||!(e.player instanceof ServerPlayer p)||!p.isAlive())return;   // a dead player (removed, their data gone) still ticks behind the death screen
         var b=PlanetRuntime.body(p.serverLevel());boolean orbit=com.dbzenith.galaxy.space.SpaceRuntime.isSpace(p.level());if(b==null&&!orbit)return;
         var atmosphere=orbit?GalaxyCatalog.Atmosphere.NONE:b.atmosphere();
         var tag=p.getPersistentData();long now=p.server.overworld().getGameTime();

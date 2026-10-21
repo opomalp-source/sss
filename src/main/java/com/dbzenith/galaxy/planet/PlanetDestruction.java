@@ -172,7 +172,7 @@ public final class PlanetDestruction {
         Remnants.tick(s);
     }
     @SubscribeEvent public static void player(TickEvent.PlayerTickEvent e){
-        if(e.phase!=TickEvent.Phase.END||!(e.player instanceof ServerPlayer p)||p.tickCount%20!=0)return;
+        if(e.phase!=TickEvent.Phase.END||!(e.player instanceof ServerPlayer p)||!p.isAlive()||p.tickCount%20!=0)return;
         var ref=SpaceRuntime.surfaceRef(p.serverLevel());if(ref!=null&&GalaxyData.get(p.server).destroyed(ref))evacuate(p);
     }
     @SubscribeEvent public static void stop(ServerStoppedEvent e){LOADING.remove(e.getServer());}

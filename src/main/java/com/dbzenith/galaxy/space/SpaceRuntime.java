@@ -269,7 +269,7 @@ public final class SpaceRuntime {
         try{l.close();}catch(java.io.IOException ex){throw new IllegalStateException("Failed to close orbit storage",ex);}var s=state(l.getServer());s.used.remove(l.dimension());s.systems.remove(l.dimension());s.retiring.remove(l.dimension());
     }}
     @SubscribeEvent(priority=EventPriority.LOWEST) public static void player(TickEvent.PlayerTickEvent e){
-        if(e.phase!=TickEvent.Phase.END||!(e.player instanceof ServerPlayer p)||!PlanetConfig.SPACE.get()&&!isSpace(p.level()))return;
+        if(e.phase!=TickEvent.Phase.END||!(e.player instanceof ServerPlayer p)||!p.isAlive()||!PlanetConfig.SPACE.get()&&!isSpace(p.level()))return;   // not while dead (see PlanetEnvironment)
         long now=p.server.getTickCount();
         if(isSpace(p.level())||p.getY()>400)state(p.server).tracks.computeIfAbsent(p.getUUID(),k->new Track()).add(p);   // measured motion near and in space
         if(isSpace(p.level())){

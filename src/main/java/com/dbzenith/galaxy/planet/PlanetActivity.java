@@ -99,7 +99,7 @@ public final class PlanetActivity {
         if(!l.noCollision(mob))return;mob.setPersistenceRequired();if(l.addFreshEntity(mob))data.claim(key);
     }
     @SubscribeEvent public static void player(TickEvent.PlayerTickEvent e){
-        if(e.phase!=TickEvent.Phase.END||!(e.player instanceof ServerPlayer p))return;
+        if(e.phase!=TickEvent.Phase.END||!(e.player instanceof ServerPlayer p)||!p.isAlive())return;
         if(p.tickCount%20==0)landing(p);
         if(p.tickCount%100==0&&(SpaceRuntime.surfaceRef(p.serverLevel())!=null||SpaceRuntime.isSpace(p.level())))ModNetwork.sendTo(p,new PlanetActivityPacket(status(p)));
         var b=PlanetRuntime.body(p.serverLevel());if(b==null)return;
