@@ -163,8 +163,9 @@ public final class PlanetMaps {
             return level == null ? null : vanilla(level);
         }
         var biomes = server.registryAccess().registryOrThrow(Registries.BIOME);
-        var biome = biomes.getHolder(ResourceKey.create(Registries.BIOME, new ResourceLocation(DBZenith.MOD_ID, "planet_" + body.kind().name().toLowerCase(Locale.ROOT))));
-        return procedural(new PlanetTerrain(body.seed(), body.kind()), biome.map(Holder::value).orElse(null));
+        String own = com.dbzenith.galaxy.IconicSystems.biome(ref);
+        var biome = biomes.getHolder(ResourceKey.create(Registries.BIOME, new ResourceLocation(DBZenith.MOD_ID, own != null ? own : "planet_" + body.kind().name().toLowerCase(Locale.ROOT))));
+        return procedural(new PlanetTerrain(body.seed(), body.kind(), com.dbzenith.galaxy.IconicSystems.style(ref)), biome.map(Holder::value).orElse(null));
     }
 
     // ---- procedural worlds: the terrain function itself ----

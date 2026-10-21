@@ -37,6 +37,7 @@ public final class SpaceCamera {
     private static boolean active, parked;
     /** Up, the heading (perpendicular to up) and the pitch in degrees (Minecraft's sign: positive looks down). */
     private static Vec3 up = new Vec3(0, 1, 0), heading = new Vec3(0, 0, 1);
+    private static long lastFrame;
     private static double pitch;
     /** What the entity was given last (to tell the mouse's turn from a teleport's). */
     private static float setYaw, setPitch;
@@ -162,13 +163,16 @@ public final class SpaceCamera {
                 start(p);
             } else {
                 double dyaw = Mth.wrapDegrees(p.getYRot() - setYaw), dpitch = p.getXRot() - (parked ? 0 : setPitch);
-                if (Math.abs(dyaw) > 60 || Math.abs(dpitch) > 60) start(p);    // not the mouse: the server set our look
+                if (Math.abs(dyaw) > 150 || Math.abs(dpitch) > 150) start(p);  // not the mouse (a fast flick stays the mouse): the server set our look
                 else {
                     heading = rotate(heading, up, Math.toRadians(-dyaw));
                     pitch = Mth.clamp(pitch + dpitch, -90, 90);
                 }
             }
-            Vec3 next = up(CruiseClient.view(p.getPosition(e.renderTickTime), e.renderTickTime));                  // carry the heading as up turns with where we are
+            Vec3 target = up(CruiseClient.view(p.getPosition(e.renderTickTime), e.renderTickTime));                // carry the heading as up turns with where we are
+            long now = System.nanoTime();double dt = lastFrame == 0 ? 0 : Math.min(.1, (now - lastFrame) / 1e9);lastFrame = now;
+            double gap = Math.acos(Mth.clamp(up.dot(target), -1, 1)), turn = Math.toRadians(70) * dt;                    // never faster than 70 degrees a second: no sudden roll
+            Vec3 next = gap <= turn || gap < 1e-9 ? target : rotateTowards(up, target, turn / gap);
             Vec3 axis = up.cross(next);
             if (axis.lengthSqr() > 1e-14) heading = rotate(heading, axis.normalize(), Math.asin(Math.min(1, axis.length())));
             up = next;

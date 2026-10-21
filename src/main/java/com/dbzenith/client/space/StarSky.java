@@ -423,6 +423,11 @@ public final class StarSky {
     }
 
     /** The label under the crosshair, shown for a few seconds after targeting (null when quiet). */
+    /** The targeted star's readable information while its card shows (eight seconds), else null. */
+    public static CompoundTag card() {
+        return target.isEmpty() || info.isEmpty() || System.currentTimeMillis() > infoUntil ? null : info;
+    }
+
     public static String label() {
         if (target.isEmpty() || info.isEmpty() || System.currentTimeMillis() > infoUntil) return null;
         StringBuilder s = new StringBuilder(info.getString("name"));

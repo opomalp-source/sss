@@ -8,7 +8,13 @@ import net.minecraft.world.level.block.state.BlockState;
 public final class PlanetTerrain {
     public final long seed;
     public final GalaxyCatalog.Kind kind;
-    public PlanetTerrain(long seed,GalaxyCatalog.Kind kind){this.seed=seed;this.kind=kind;}
+    /** A series world's own landscape ({@link com.dbzenith.galaxy.IconicSystems#style}): 0 the kind's, YARDRAT rolling hills and shell stalks, CEREAL scarred highlands and rock spires. */
+    public final int style;
+    public static final int YARDRAT=1,CEREAL=2;
+    public PlanetTerrain(long seed,GalaxyCatalog.Kind kind){this(seed,kind,0);}
+    public PlanetTerrain(long seed,GalaxyCatalog.Kind kind,int style){this.seed=seed;this.kind=kind;this.style=style;}
+    /** Cereal's rock spires: where its stone stands bare. */
+    private boolean spire(int x,int z){return style==CEREAL&&noise(x,z,13)>.74;}
     private double hash(int x,int y,int z){return (GalaxyCatalog.mix(seed ^ x*0x9e3779b97f4a7c15L ^ y*0x632be59bd9b4e019L ^ z*0x94d049bb133111ebL)>>>11)*0x1.0p-53;}
     private static double ease(double x){return x*x*(3-2*x);}
     private static double lerp(double t,double a,double b){return a+(b-a)*t;}
@@ -33,6 +39,9 @@ public final class PlanetTerrain {
             case GAS_GIANT -> 110;
             default -> 72+continental*27+hills*15;
         };
+        if(style==YARDRAT)base=76+continental*14+Math.pow(Math.abs(hills),1.4)*22;          // soft, rounded hills
+        if(style==CEREAL){double ridge=1-Math.abs(noise(x,z,140)),spike=noise(x,z,13);      // sharp ridges and standing rock
+            base=80+continental*28+ridge*ridge*ridge*50+(spike>.74?(spike-.74)*170:0);}
         if(kind==GalaxyCatalog.Kind.VOLCANIC && Math.abs(noise(x,z,110))<.055)base=48;
         return Math.max(15,Math.min(220,(int)(base+detail*3)));
     }
@@ -61,6 +70,7 @@ public final class PlanetTerrain {
         if(y<h-5 && y>-53 && y<55 && noise(x+y*2,z-y,31)>.62 && noise(x-y,z+y*3,19)>.36)return Blocks.AIR.defaultBlockState();
         if(y==h){
             if(h<sea()-1)return (kind==GalaxyCatalog.Kind.VOLCANIC?Blocks.MAGMA_BLOCK:kind==GalaxyCatalog.Kind.TOXIC_SWAMP?Blocks.CLAY:Blocks.SAND).defaultBlockState();
+            if(spire(x,z))return Blocks.ANDESITE.defaultBlockState();
             return top();
         }
         if(y>h-4)return (kind==GalaxyCatalog.Kind.DESERT?Blocks.RED_SANDSTONE:kind==GalaxyCatalog.Kind.ICE?Blocks.PACKED_ICE:
@@ -79,11 +89,20 @@ public final class PlanetTerrain {
         if(kind==GalaxyCatalog.Kind.CRYSTAL && hash(x,77,z)>.94 && y<=h+1+(int)(hash(x,76,z)*9))
             return (y==h+1?Blocks.AMETHYST_BLOCK:Blocks.BUDDING_AMETHYST).defaultBlockState();
         if(kind==GalaxyCatalog.Kind.ICE&&y==h+1&&hash(x,3,z)>.55)return Blocks.SNOW.defaultBlockState();
+        if(style==YARDRAT){   // Yardrat's shell stalks: a pale teal stem under a rounded cap, a soft glow at its heart (chunk-independent cells, like the trees)
+            int cell=11,cx=Math.floorDiv(x,cell),cz=Math.floorDiv(z,cell),tx=cx*cell+cell/2,tz=cz*cell+cell/2,th=height(tx,tz),tall=6+(int)(hash(cx,9,cz)*6);
+            if(th>sea()&&hash(cx,8,cz)>.45){
+                if(x==tx&&z==tz&&y<=th+tall)return Blocks.STRIPPED_WARPED_STEM.defaultBlockState();
+                int dx=x-tx,dz=z-tz,dy=y-(th+tall);
+                if(dy>=1&&dy<=2&&dx*dx+dz*dz<=(dy==1?5:2))return (dy==1&&dx==0&&dz==0?Blocks.PEARLESCENT_FROGLIGHT:Blocks.WARPED_WART_BLOCK).defaultBlockState();
+            }
+            return Blocks.AIR.defaultBlockState();
+        }
         // Chunk-independent, compact trees: their cells reserve space so crowns never depend on chunk order.
         if(kind==GalaxyCatalog.Kind.JUNGLE||kind==GalaxyCatalog.Kind.TEMPERATE||kind==GalaxyCatalog.Kind.TRAINING){
             int cell=kind==GalaxyCatalog.Kind.JUNGLE?9:15,cx=Math.floorDiv(x,cell),cz=Math.floorDiv(z,cell),tx=cx*cell+cell/2,tz=cz*cell+cell/2;
             int th=height(tx,tz),tall=kind==GalaxyCatalog.Kind.JUNGLE?9:5;
-            if(th>sea() && hash(cx,8,cz)>.35){
+            if(th>sea() && hash(cx,8,cz)>(style==CEREAL?.8:.35)&&!spire(tx,tz)){   // Cereal's highlands are sparse
                 if(x==tx&&z==tz&&y<=th+tall)return (kind==GalaxyCatalog.Kind.JUNGLE?Blocks.JUNGLE_LOG:Blocks.OAK_LOG).defaultBlockState();
                 if(Math.abs(x-tx)<=2&&Math.abs(z-tz)<=2&&y>=th+tall-2&&y<=th+tall+1)
                     return (kind==GalaxyCatalog.Kind.JUNGLE?Blocks.JUNGLE_LEAVES:Blocks.OAK_LEAVES).defaultBlockState().setValue(LeavesBlock.PERSISTENT,true);

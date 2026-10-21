@@ -8,7 +8,7 @@ public final class PlanetSkyMath {
         Vec3 east=new Vec3(surfaceNormal.y,-surfaceNormal.x,0).normalize();if(east.lengthSqr()<.1)east=new Vec3(1,0,0);
         return new Vec3(d.dot(east),d.dot(surfaceNormal),d.dot(east.cross(surfaceNormal).normalize()));
     }
-    public static double daylight(double sunAltitude,int stars){return Math.max(stars>=3?.42:.055,Math.min(1,.08+Math.max(0,sunAltitude)*.92));}
+    public static double daylight(double sunAltitude,int stars){return Math.max(stars>=3?.8:.055,   /* three suns: one is always up (Namek's eternal day) */Math.min(1,.08+Math.max(0,sunAltitude)*.92));}
     public static double eclipse(Vec3 sun,double sunRadius,Vec3 moon,double moonRadius){
         double sep=Math.acos(Math.max(-1,Math.min(1,sun.normalize().dot(moon.normalize()))));
         double sr=Math.atan2(sunRadius,sun.length()),mr=Math.atan2(moonRadius,moon.length());

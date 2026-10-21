@@ -85,6 +85,9 @@ public final class GalaxyScreen extends Screen {
         else if(view==2 && planet>=0){planet=-1;scroll=0;}
         else{planet=-1;request(Math.max(0,view-1));}
     }
+    private List<String> wrap(String text,int width){var out=new ArrayList<String>();var line=new StringBuilder();
+        for(var w:text.split(" ")){if(line.length()>0&&font.width(line+" "+w)>width){out.add(line.toString());line.setLength(0);}if(line.length()>0)line.append(' ');line.append(w);}
+        if(line.length()>0)out.add(line.toString());return out;}
     @Override public void render(GuiGraphics g,int mx,int my,float pt) {
         if(data==null)return;
         zoom+=(targetZoom-zoom)*.2f;
@@ -188,6 +191,7 @@ public final class GalaxyScreen extends Screen {
             if(planet>=0 && planet<bodies.size()){
                 var b=bodies.getCompound(planet);heading=b.getString("name");
                 lines.add(b.getBoolean("destroyed")?"DESTROYED / debris remnant":b.getString("type")+(b.getBoolean("landable")?"":" / upper clouds only"));
+                if(!b.getString("lore").isEmpty())lines.addAll(wrap(b.getString("lore"),190));   // the world's story (IconicSystems.lore)
                 lines.add(String.format(Locale.ROOT,"Gravity %.2fg",b.getDouble("gravity")));lines.add("Air: "+b.getString("atmosphere"));
                 lines.add("Surface radius: "+b.getInt("radius")+" blocks");lines.add("Temperature: "+b.getInt("temperature")+" C");
                 lines.add(String.format(Locale.ROOT,"Day: %.0f min / tilt %.1f deg",b.getInt("day")/1200d,b.getDouble("tilt")));

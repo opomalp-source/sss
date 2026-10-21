@@ -117,7 +117,7 @@ public final class PlanetRuntime {
         var key=key(ref);var level=server.getLevel(key);if(level!=null)return level;
         if(loaded(server)>=PlanetConfig.MAX_LOADED.get())throw new IllegalArgumentException("All planet slots are occupied. Leave a planet and allow it to unload first.");
         var biomes=server.registryAccess().registryOrThrow(Registries.BIOME);
-        var biome=biomes.getHolderOrThrow(ResourceKey.create(Registries.BIOME,new ResourceLocation(DBZenith.MOD_ID,"planet_"+descriptor.kind().name().toLowerCase(Locale.ROOT))));
+        var biome=biomes.getHolderOrThrow(ResourceKey.create(Registries.BIOME,new ResourceLocation(DBZenith.MOD_ID,java.util.Objects.requireNonNullElse(com.dbzenith.galaxy.IconicSystems.biome(ref),"planet_"+descriptor.kind().name().toLowerCase(Locale.ROOT)))));
         var types=server.registryAccess().registryOrThrow(Registries.DIMENSION_TYPE);
         var type=types.getHolderOrThrow(ResourceKey.create(Registries.DIMENSION_TYPE,new ResourceLocation(DBZenith.MOD_ID,"planet")));
         level=InfiniverseAPI.get().getOrCreateLevel(server,key,()->new LevelStem(type,new PlanetGenerator(new FixedBiomeSource(biome),descriptor.seed(),ref.key(),descriptor.kind().ordinal(),descriptor.radius(),1)));
@@ -311,6 +311,7 @@ public final class PlanetRuntime {
                     s.used.put(l.dimension(),now);checkpoint(p);PlanetEnvironment.enter(p);
                     if(transmission)com.dbzenith.galaxy.space.Interstellar.blink(p);
                     p.displayClientMessage(Component.literal("Landed on "+d.name(q.ref,body.name())),false);
+                    var lore=com.dbzenith.galaxy.IconicSystems.lore(q.ref);if(!lore.isEmpty())p.displayClientMessage(Component.literal(lore).withStyle(net.minecraft.ChatFormatting.GRAY,net.minecraft.ChatFormatting.ITALIC),false);
                 }else p.displayClientMessage(Component.literal("Landing terrain was unavailable. You remain at your departure point."),false);
             }catch(CompletionException ex){DBZenith.LOGGER.error("Planet landing generation failed",ex);p.displayClientMessage(Component.literal("Landing failed; your departure location is safe."),false);}}
             else if(p!=null)p.displayClientMessage(Component.literal(GalaxyData.get(server).destroyed(q.ref)||PlanetDestruction.restoring(server,q.ref)?"Landing cancelled: that planet is sealed. You stay where you are.":"Landing cancelled: departure changed or terrain timed out."),true);

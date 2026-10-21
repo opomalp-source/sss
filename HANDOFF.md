@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.157.0, 2026-10-20)
+# Handoff: where Dragon Block Zenith stands (v0.158.0, 2026-10-21)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.152.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.158.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -390,5 +390,10 @@ Minecraft if it is running). Never the updater.
 - **Phase 7 (v0.157.0) done; the space rework is complete.** Profile, map timings and soak in `docs/SPACE_FRAMES.md`
   "Performance"; `/z/dev/soak.sh <n>` runs one soak cycle. For honest frame times set `enableVsync:false` and
   `maxFps:260` in `run-clienttest/options.txt` (restored to vsync/120 afterwards).
+- **v0.157.1 hotfix:** space ticks skip dead players (dying anywhere off Earth disconnected you).
+- **v0.158.0:** four series worlds (`IconicSystems`, `IconicLandmarks`; lore and sources in `docs/GALAXY.md`), ki
+  flight in orbit (`SpaceMath.step`: target velocity, no brake), camera up limited to 70° a second, and one space HUD
+  in `SpaceUi` + `NavigationHud.Overlay` (the old Journey, SpaceClient and star-target text overlays are gone; the
+  surface readout in `ClientPlanet` uses the same kit). New HUD pieces should use `SpaceUi`.
 - **Possible follow-ups (not requested):** draw the far-below grids from a vertex buffer instead of immediate mode;
   cloud shadows on the map; a waypoint list in the atlas. Story mode was left for last, as the user asked.

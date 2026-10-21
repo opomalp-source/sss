@@ -81,7 +81,8 @@ easing to the galaxy's `+Y` by five radii (`SpaceCamera.up`). The mouse turns th
 pitch limit, no flips at the poles) and the roll that keeps the horizon level is applied to the camera
 (`ComputeCameraAngles`) and to the player model (`SpaceCamera.orient`). No mixins: Minecraft turns the player
 before the render tick starts, so the camera parks the vanilla pitch between frames and reads the mouse itself.
-Thrust follows the camera's own forward, left and up.
+Flight follows the camera's own forward, left and up. Up turns towards a new planet's normal at most 70° a second
+(`SpaceCamera` rate limit), so passing from one world's pull to the next never snaps the horizon.
 
 ## Transfers (phase 3)
 

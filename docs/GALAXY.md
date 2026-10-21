@@ -423,3 +423,38 @@ destroyed in the meantime is called off and you stay where you are.
 High over a world with air, a thin glow of atmosphere now lines the curved horizon. Rain no longer falls around you
 above the clouds. Planet maps arrive several times sooner (Earth's in a few seconds), and the detailed views of the
 ground from orbit and from high above cost about half as much as before.
+
+## The series worlds, ki flight in orbit and the space HUD (v0.158.0)
+
+Four more of the series' own worlds join Earth, Namek, King Kai's and Beerus's at reserved addresses (`IconicSystems`,
+slot 8, additive: no existing address changes). Each world's landing message adds a line of its lore; the atlas
+shows the same line. What is drawn from the series (sources: Kanzenshuu's Planet Vegeta, Planet Freeza No. 79,
+Planet Yardrat and Planet Namek pages, the official Dragon Ball site's Cereal article, fan wikis for detail):
+
+| World | Address | What you find |
+|---|---|---|
+| Planet Vegeta | `27:-6:14:8` | As it was before Frieza destroyed it: once Planet Plant, the Tuffles' world. Red desert under a red sun, ten times Earth's gravity, two moons; a Saiyan city of round domed buildings round the royal palace, a pad of attack pods. |
+| Planet Frieza No. 79 | `-34:9:-21:8` | A Frieza Force base on a temperate world: a white base under a purple dome with two Medical Machines (glass capsules of treatment liquid) and a control console, three landing pads. Vegeta recovered here after Earth. |
+| Yardrat | `7:-2:9:8` | Rolling hills under a yellow sky, pale teal plants with glowing caps, Yardratian spires round the elder's, a meditation ring. Goku learned Instant Transmission here from Elder Pybara. |
+| Cereal | `-46:14:31:8` | Scarred highlands with stone spires, sparse trees, no moon; the Sugarians' colony of high-rises under a glass dome, with a landing pad. Granolah's home, laid waste by the Saiyans and the Frieza Force and rebuilt by the Heeters. |
+
+Namek now has its series look in full: a fixed eternal day (`dimension_type/namek.json`, `fixed_time` 6000; three
+suns never let it get darker than 80 % daylight), green sky and darker green seas.
+
+**Saves.** Planet Vegeta and Frieza No. 79 keep their terrain (style 0), so ground you have visited never changes;
+where you already landed, the old landmark stays and the new place appears only in a world that had not generated
+those chunks. Yardrat and Cereal are new addresses with their own landscapes (`PlanetTerrain.YARDRAT`, `CEREAL`,
+derived from the address: no saved field). Each world's sky, grass and water come from its own biome
+(`planet_vegeta`, `planet_frieza79`, `planet_yardrat`, `planet_cereal`).
+
+**Ki flight in orbit.** No more thrust and brake. You fly as you fly with ki on a planet: WASD in the direction you
+look, Jump rises, Sneak sinks, Sprint for full speed. Letting go settles you to a stop in about two seconds. Cruise
+speed 36 blocks a second, full speed 100 (`SpaceMath.CRUISE`, `SPRINT`); without ki flight you still drift.
+
+**The space HUD.** One look for everything (dark glass, small-caps labels, thin gauges, every element easing in
+and out): a flight strip above the hotbar (system, speed, nearest body and distance, air when it runs low) that dims
+while you drift; a card beside a targeted planet (type, landable, distance, time to reach it, the cruise key) or
+star (kind, charted or not, light years, the waypoint or hyperspeed key); a travel card at the top during
+hyperspeed, cruise or a crossing, with progress and the key that stops it; caution and danger banners only while
+they apply (atmosphere coming up, a star's heat); the flight controls for ten seconds each time you reach orbit. On a
+planet's surface the world's name, gravity and air show on a glass card for a few seconds after you arrive.

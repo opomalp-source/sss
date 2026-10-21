@@ -26,9 +26,10 @@ public final class SpaceTests {
             h.assertTrue(Math.abs(back[0]-x*radius)<1e-6&&Math.abs(back[1]-z*radius)<1e-6,"spherical location mapping round trips, including Earth scale");
         }
         Vec3 drift=new Vec3(1.2,-.4,.8);h.assertTrue(SpaceMath.step(drift,0,0,0,false,false,0,0,false).distanceTo(drift)<1e-9,"unpowered space preserves inertia");
-        h.assertTrue(SpaceMath.step(drift,0,0,0,false,true,0,0,true).length()<drift.length(),"powered braking slows drift");
+        Vec3 settle=drift;for(int i=0;i<200;i++)settle=SpaceMath.step(settle,0,0,0,false,false,0,0,true);h.assertTrue(settle.equals(Vec3.ZERO),"powered flight eases to a stop when you let go");
+        Vec3 sink=Vec3.ZERO;for(int i=0;i<200;i++)sink=SpaceMath.step(sink,0,0,0,false,true,0,0,true);h.assertTrue(sink.y<-1.7&&sink.y>=-SpaceMath.CRUISE-1e-6,"sneak sinks at cruise speed");
         Vec3 v=Vec3.ZERO;for(int i=0;i<400;i++)v=SpaceMath.step(v,1,1,1,true,false,0,-30,true);
-        h.assertTrue(v.length()<=5.500001&&v.y>0,"thrust follows aim and bounded boost speed");
+        h.assertTrue(v.length()<=SpaceMath.SPRINT+1e-6&&v.length()>SpaceMath.SPRINT-.01&&v.y>0,"flight follows aim and reaches full speed, no further");
         h.assertTrue(SpaceMath.atmosphere(100)==0&&SpaceMath.atmosphere(512)==1,"continuous atmosphere endpoints");h.succeed();
     }
     @GameTest(template="empty") public static void orbitalAddressesAndSparseBeltAreDeterministic(GameTestHelper h){

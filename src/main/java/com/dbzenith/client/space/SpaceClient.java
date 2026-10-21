@@ -44,6 +44,10 @@ public final class SpaceClient {
     public static void arrive(Vec3 v){var l=Minecraft.getInstance().level;if(v!=null){velocity=v;movementLevel=l==null?null:l.dimension();}arrival=50;}
     /** For the navigation HUD (phase 5): flight speed in orbit (blocks a tick, relative to the local frame), and whether you are steering or braking. */
     public static double speed(){return velocity.length();}
+    /** What a crossing is doing right now (for the travel card), or null. */
+    public static String status(){if(preparing<=0||600-preparing<=30)return null;return intoOrbit?"Leaving the atmosphere":holdBody>=0?"Holding at the atmosphere":"Preparing the ground below";}
+    /** Whether the flight controls are worth showing (a while after first reaching orbit). */
+    public static boolean hinting(){return hintTicks>0;}
     public static boolean steering(){return forward!=0||strafe!=0||up!=0;}
     public static boolean braking(){return brake;}
     public static boolean surface(Level l){if(l==null||!com.dbzenith.galaxy.planet.PlanetConfig.SPACE.get())return false;String d=l.dimension().location().toString();return d.equals("minecraft:overworld")||d.equals("dbzenith:namek")||d.equals("dbzenith:northern_planet")||d.equals("dbzenith:beerus_planet")||d.startsWith("dbzenith:planet/v1/");}
@@ -117,14 +121,8 @@ public final class SpaceClient {
             var mc=Minecraft.getInstance();var p=mc.player;if(p==null||JourneyClient.active())return;
             float alpha=fade>0?.35f*Math.min(1,fade/12f):0;                       // a light veil in the sky's colour, never a black screen (phase 3)
             if(alpha>0){int tint=SpaceRuntime.isSpace(mc.level)?0x05070F:0x3A1E0C;g.fill(0,0,w,h,((int)(alpha*255)<<24)|tint);}
-            if(preparing>0&&600-preparing>30&&!mc.options.hideGui)g.drawCenteredString(mc.font,intoOrbit?"Leaving the atmosphere...":holdBody>=0?"Holding at the atmosphere: preparing the ground below...":"Preparing the ground below...",w/2,h-62,0xFF9FB4C4);
             if(entry>0&&surface(p.level())&&p.getY()>175){float intensity=Math.min(1,entry/30f)*(float)Math.min(1,(p.getY()-175)/100);
                 for(int i=0;i<12;i++){int a=(int)((12-i)*1.4f*intensity);int color=(a<<24)|0xFF652B;g.fill(i,i,w-i,i+2,color);g.fill(i,h-i-2,w-i,h-i,color);g.fill(i,i,i+2,h-i,color);g.fill(w-i-2,i,w-i,h-i,color);}}
-            if(!SpaceRuntime.isSpace(p.level())||mc.options.hideGui)return;
-            var bodies=system().getList("bodies",Tag.TAG_COMPOUND);CompoundTag nearest=null;double best=Double.MAX_VALUE;
-            for(Tag raw:bodies){var b=(CompoundTag)raw;double d=p.position().distanceTo(SpaceMath.center(b.getDouble("orbit"),b.getDouble("phase")))-SpaceMath.radius(b.getInt("radius"));if(d<best){best=d;nearest=b;}}
-            if(nearest!=null){String text=mc.font.plainSubstrByWidth(nearest.getString("name")+"  /  "+String.format(java.util.Locale.ROOT,"%,.0f m",Math.max(0,best)),w/2-16);g.drawString(mc.font,text,w-mc.font.width(text)-10,14,0xFFC6E4EF,false);}
-            if(hintTicks>0&&!DoomClient.warning())g.drawCenteredString(mc.font,"W/S thrust  /  Space rise  /  Sneak brake  /  V ki flight",w/2,h-103,0xFF819DAF);
         }
     }
 }

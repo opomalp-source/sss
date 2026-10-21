@@ -4490,3 +4490,41 @@ orbit and on every non-Earth planet the space ticks (`PlanetEnvironment`, `Space
 so again on every rejoin while dead. The handlers now skip dead players. Reproduced and confirmed fixed in the dev
 client (deaths on Earth, in orbit and on a procedural jungle world, each respawning in the Otherworld);
 `SafetyTests.dyingInSpaceDoesNotCrash` ticks a dead, removed player through every space handler. 320 GameTests pass.
+
+## 2026-10-21 — The series worlds, ki flight in orbit and a new space HUD (v0.158.0)
+The user's request after the space rework: space still felt "a little janky" (the thrust and brake system, and the
+camera in orbit), its UI didn't feel high end, and the series' own planets should be in space, lore accurate.
+(The death crash in the same message was v0.157.1.)
+
+- **Lore research.** Kanzenshuu (Planet Vegeta, Planet Freeza No. 79, Planet Yardrat, Planet Namek), the official
+  Dragon Ball site's article on Cereal and the Sugarians, and fan wikis for detail. The user chose Planet Vegeta as
+  it was before Frieza destroyed it.
+- **Four series worlds** at reserved addresses (`IconicSystems`, slot 8, additive): Planet Vegeta (red desert under
+  a red sun, ten times Earth's gravity, a Saiyan city of domed buildings round the palace, an attack-pod pad),
+  Planet Frieza No. 79 (the Frieza Force base: Medical Machines, control console, three landing pads), Yardrat
+  (rolling hills, yellow sky, glowing teal plants, Yardratian spires) and Cereal (scarred highlands with stone spires,
+  the Sugarians' glass-domed colony and its pad). Each has its own sky, grass and water (a biome each), its place on
+  a plaza at the landing site (`IconicLandmarks`, pure functions of the offset), and a lore line on landing and in
+  the atlas. Namek has a fixed eternal day (`dimension_type/namek.json`) and darker green seas; three suns never let
+  a sky get darker than 80 % daylight.
+- **Saves.** Vegeta's and Frieza 79's terrain are unchanged (style 0); Yardrat's and Cereal's landscapes come from
+  their address, not a saved field. Where a world already generated its landing site, the old landmark stays.
+- **Ki flight in orbit** (`SpaceMath.step`): instead of thrust with inertia and a brake key, you fly as with ki on a
+  planet. WASD towards where you look, Jump rises, Sneak sinks, Sprint for full speed; the velocity eases to the one
+  you ask for and settles to a stop about two seconds after you let go. 36 blocks a second, 100 at full speed.
+  Unpowered (no ki flight) you still drift. Pods use the same model.
+- **Camera in orbit** (`SpaceCamera`): "up" turns towards a new planet's normal at most 70° a second, so crossing
+  from one world's pull to the next never snaps the horizon; a fast mouse flick is no longer mistaken for the server
+  resetting your view (which re-centred the camera).
+- **Space HUD** (`SpaceUi`, `NavigationHud.Overlay`): one visual language (dark glass, small caps, thin gauges, keys
+  as chips, everything easing in and out) replaces five separate text overlays. Flight strip, target cards for
+  planets (bracket closing in, distance, ETA, cruise key) and stars (kind, charted, light years, waypoint or
+  hyperspeed key) beside the crosshair, a world filling the view getting its card there too instead of a
+  bracket, an edge chevron for an off-screen target, a travel card for hyperspeed, cruise and crossings,
+  caution and danger banners, the controls as chips for ten seconds on reaching orbit. The planet readout on a
+  surface uses the same look and fades after a few seconds (the air reserve stays while it matters). Checked in the
+  dev client: arrival, targeting near and far, star card, hyperspeed, the controls row and a landing. The flight
+  itself can't be driven from the test harness; `SpaceTests` covers it.
+- **Tests.** `SpaceTests` checks the new flight (letting go settles to a stop, Sneak sinks at cruise speed, full
+  speed reached and never passed); `InterstellarTests` checks the four worlds' identities, that only Yardrat and
+  Cereal get their own landscapes, and each world's lore, plaza and place. 320 GameTests pass.

@@ -35,6 +35,10 @@ public final class CruiseClient {
         return name;
     }
 
+    public static float progress() {
+        return active ? Math.min(1, elapsed / (float) duration) : 0;
+    }
+
     /** Seconds left. */
     public static float remaining() {
         return Math.max(0, duration - elapsed) / 20f;

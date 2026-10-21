@@ -21,16 +21,27 @@ public final class SpaceMath {
         Vec3 n=normal.normalize();return new double[]{Math.atan2(n.x,n.y)/Math.PI*radius,Math.asin(Math.max(-1,Math.min(1,n.z)))*2/Math.PI*radius};
     }
     public static double atmosphere(double height){double t=Math.max(0,Math.min(1,(height-180)/300));return t*t*(3-2*t);}
-    /** No coast drag. Opposing thrust and sneak brake; boost remains bounded for vanilla movement validation. */
+    /** Flying speeds (blocks a tick): cruising, and sprinting (within vanilla's movement checks). */
+    public static final double CRUISE=1.8,SPRINT=5.0;
+    /**
+     * Ki flight in space (the space flight rework): you go where you look. WASD sets the direction (forward, strafe),
+     * Space rises and Sneak sinks along your up; speed eases towards {@link #CRUISE} (Sprint: {@link #SPRINT}) and,
+     * with nothing pressed, eases out to a stop relative to the local frame. Without flight (no ki flight, no pod) you
+     * only drift: space keeps your momentum.
+     */
     public static Vec3 step(Vec3 velocity,double forward,double strafe,double up,boolean boost,boolean brake,float yaw,float pitch,boolean powered){
         return step(velocity,forward,strafe,up,boost,brake,Vec3.directionFromRotation(pitch,yaw),new Vec3(Math.cos(Math.toRadians(yaw)),0,Math.sin(Math.toRadians(yaw))),new Vec3(0,1,0),powered);
     }
-    /** The same, thrusting along an explicit frame (the space camera's: where you look, your left and your up). */
+    /** The same along an explicit frame (the space camera's: where you look, your left and your up); {@code brake} is Sneak, sinking. */
     public static Vec3 step(Vec3 velocity,double forward,double strafe,double up,boolean boost,boolean brake,Vec3 look,Vec3 left,Vec3 upward,boolean powered){
-        Vec3 v=velocity;if(brake&&powered)v=v.scale(.82);
-        if(powered){
-            Vec3 input=look.scale(forward).add(left.scale(strafe)).add(upward.scale(up*.7));if(input.lengthSqr()>1)input=input.normalize();
-            v=v.add(input.scale(boost?.10:.045));}
-        double cap=!powered||boost?5.5:Math.max(3,Math.min(5.5,velocity.length()));return v.lengthSqr()>cap*cap?v.normalize().scale(cap):v;
+        if(!powered)return velocity;
+        double rise=up-(brake?1:0);
+        Vec3 input=look.scale(forward).add(left.scale(strafe)).add(upward.scale(rise));
+        boolean moving=input.lengthSqr()>1e-6;
+        Vec3 target=moving?input.normalize().scale(boost?SPRINT:CRUISE):Vec3.ZERO;
+        double ease=moving?(boost?.07:.12):.09;                                   // speeding up is brisk, sprinting builds, letting go settles in about two seconds
+        Vec3 v=velocity.add(target.subtract(velocity).scale(ease));
+        if(!moving&&v.lengthSqr()<1e-4)v=Vec3.ZERO;
+        return v.lengthSqr()>SPRINT*SPRINT?v.normalize().scale(SPRINT):v;
     }
 }

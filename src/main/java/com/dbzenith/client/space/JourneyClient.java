@@ -40,6 +40,11 @@ public final class JourneyClient {
     public static Vec3 course(){return active||holding.lengthSqr()>0?course:Vec3.ZERO;}
     /** The new system's sky has arrived: its stars are drawn from its own centre again. */
     public static void fieldArrived(){holding=Vec3.ZERO;}
+    public static String name(){return name;}
+    public static float progress(){return Math.min(1,elapsed/(float)Math.max(1,duration));}
+    public static float remaining(){return Math.max(0,duration-elapsed)/20f;}
+    public static boolean spooling(){return active&&elapsed<spool();}
+    public static boolean stabilizing(){return active&&elapsed>=duration;}
     public static float strength(){if(!active)return 0;return Math.min(1,Math.min(elapsed/45f,(duration-elapsed+35)/60f));}
     public static void receive(JourneyPacket m){
         if(!active)cancelSent=false;
@@ -51,17 +56,11 @@ public final class JourneyClient {
     @SubscribeEvent public static void logout(ClientPlayerNetworkEvent.LoggingOut e){active=false;arrival=0;holding=Vec3.ZERO;}
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent e){if(e.phase==TickEvent.Phase.END){if(active){elapsed=Math.min(duration,elapsed+1);if(++heard>80)active=false;if(!cancelSent&&Minecraft.getInstance().options.keyShift.isDown()){cancelSent=true;com.dbzenith.network.ModNetwork.sendToServer(new com.dbzenith.network.GalaxyPackets.Request(0,11,"0:0:0:0",0,"",0));}}if(arrival>0)arrival--;}}
     @SubscribeEvent(priority=EventPriority.LOWEST) public static void input(MovementInputUpdateEvent e){if(!active)return;var i=e.getInput();i.forwardImpulse=i.leftImpulse=0;i.jumping=i.shiftKeyDown=i.up=i.down=i.left=i.right=false;}
-    /** A quiet line at the bottom and the arrival's soft flash; the stars themselves show the journey. */
+    /** The arrival's soft flash; the stars show the journey and the travel card ({@link NavigationHud}) its progress. */
     public static final class Overlay implements IGuiOverlay {
         @Override public void render(ForgeGui gui,net.minecraft.client.gui.GuiGraphics g,float pt,int w,int h){
             var mc=Minecraft.getInstance();if(mc.player==null)return;
             if(arrival>0)g.fill(0,0,w,h,((int)(arrival/35f*30*com.dbzenith.config.DBZConfig.CLIENT.screenFlash.get()*(CameraFx.calm()?.25:1))<<24)|0x639CBF);
-            if(!active||mc.options.hideGui)return;
-            String state=elapsed<spool()?"Spooling up":elapsed>=duration?"Stabilizing arrival":String.format(java.util.Locale.ROOT,"%.1f s",Math.max(0,duration-elapsed)/20f);
-            String line="Hyperspeed  ·  "+mc.font.plainSubstrByWidth(name,w/2)+"  ·  "+state+"  ·  Sneak: disengage";
-            int y=h-90,width=Math.min(170,w-40),left=w/2-width/2;   // with the navigation HUD, above the planet readout
-            g.drawCenteredString(mc.font,line,w/2,y,0xFFB9D9EC);
-            g.fill(left,y+12,left+width,y+13,0x80243951);g.fill(left,y+12,left+Math.min(width,elapsed*width/duration),y+13,0xFF9FD9ED);
         }
     }
 }

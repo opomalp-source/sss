@@ -342,3 +342,5 @@ to both mods folders.
 - [x] v0.155.0 Phase 5: in-system cruise, hyperspeed through the real star field with course-aligned safe arrivals, pod passengers, engage key and quiet navigation HUD, travel audio
 - [x] v0.156.0 Phase 6: destroyed worlds as debris everywhere, atmosphere turns you back from worlds that cannot take a landing, stale landings dropped and holds released, scene on any dimension change, disconnect safety
 - [x] v0.157.0 Phase 7: profiled (uncapped, recorded), grid caches halve the sky pass, map drawing 4x faster, four-cycle soak, horizon air glow, no rain above the clouds. The space rework is complete.
+- [x] v0.157.1 Hotfix: dying in space or on another planet no longer disconnects the player (space ticks skip dead players).
+- [x] v0.158.0 Series worlds (Planet Vegeta before its destruction, Planet Frieza No. 79, Yardrat, Cereal; Namek's eternal day), ki flight in orbit instead of thrust and brake, rate-limited camera up, one high-end space HUD (`SpaceUi`).

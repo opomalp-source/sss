@@ -17,10 +17,14 @@ public final class InterstellarTests {
     @GameTest(template="empty") public static void iconicAddressesAndPersonalArrivalsRoundTrip(GameTestHelper h){
         h.assertTrue(GalaxyCatalog.Id.parse("27:-6:14:8").equals(IconicSystems.VEGETA),"additive reserved Vegeta address");boolean rejected=false;try{new GalaxyCatalog.Id(1,2,3,8);}catch(IllegalArgumentException ex){rejected=true;}h.assertTrue(rejected,"ordinary systems still have eight slots");
         var a=GalaxyCatalog.body(42,GalaxyCatalog.SALT,new GalaxyCatalog.Ref(IconicSystems.VEGETA,0));var b=GalaxyCatalog.body(42,GalaxyCatalog.SALT,new GalaxyCatalog.Ref(IconicSystems.FRIEZA,0));
-        h.assertTrue(a.name().equals("Planet Vegeta")&&a.gravity()==10&&a.kind()==GalaxyCatalog.Kind.DESERT&&b.name().equals("Frieza Planet 79"),"authored iconic identities and high gravity");
+        h.assertTrue(a.name().equals("Planet Vegeta")&&a.gravity()==10&&a.kind()==GalaxyCatalog.Kind.DESERT&&b.name().equals("Planet Frieza No. 79"),"authored iconic identities and high gravity");
+        var y=GalaxyCatalog.body(42,GalaxyCatalog.SALT,new GalaxyCatalog.Ref(IconicSystems.YARDRAT,0));var c=GalaxyCatalog.body(42,GalaxyCatalog.SALT,new GalaxyCatalog.Ref(IconicSystems.CEREAL,0));
+        h.assertTrue(y.name().equals("Yardrat")&&c.name().equals("Cereal")&&IconicSystems.all().size()==8&&IconicSystems.all().stream().distinct().count()==8,"the series worlds are all in the catalogue, once each");
+        h.assertTrue(IconicSystems.style(new GalaxyCatalog.Ref(IconicSystems.VEGETA,0))==0&&IconicSystems.style(new GalaxyCatalog.Ref(IconicSystems.FRIEZA,0))==0&&IconicSystems.style(new GalaxyCatalog.Ref(IconicSystems.YARDRAT,1))==0&&IconicSystems.style(new GalaxyCatalog.Ref(IconicSystems.CEREAL,0))==PlanetTerrain.CEREAL,"only the new worlds get their own landscape, so visited ground never changes");
+        for(var w:new GalaxyCatalog.Id[]{IconicSystems.VEGETA,IconicSystems.FRIEZA,IconicSystems.YARDRAT,IconicSystems.CEREAL})h.assertTrue(!IconicSystems.lore(new GalaxyCatalog.Ref(w,0)).isEmpty()&&IconicLandmarks.paving(w,0,0)!=null&&java.util.Objects.equals(IconicLandmarks.piece(w,3,2,-5),IconicLandmarks.piece(w,3,2,-5)),"each series world has its lore, plaza and place");
         for(int seed=0;seed<24;seed++){
             var g=new PlanetGenerator(new net.minecraft.world.level.biome.FixedBiomeSource(h.getLevel().getBiome(h.absolutePos(BlockPos.ZERO))),seed,new GalaxyCatalog.Ref(IconicSystems.FRIEZA,0).key(),GalaxyCatalog.Kind.TEMPERATE.ordinal(),4096,1);
-            var site=PlanetLandmarks.site(g,0,0);h.assertTrue(site!=null&&site.kind()==4&&site.y()>g.terrain.sea()+1,"Frieza outpost always stands above the ocean");
+            var site=PlanetLandmarks.site(g,0,0);h.assertTrue(site!=null&&site.kind()==9&&site.y()>g.terrain.sea()+1,"the Frieza Force base always stands above the ocean");
         }
         var data=new GalaxyData();var uuid=java.util.UUID.randomUUID();var ref=new GalaxyCatalog.Ref(IconicSystems.VEGETA,0);var anchor=new GalaxyData.Arrival(30,81,-25,90);data.arrival(uuid,ref,anchor);
         h.assertTrue(GalaxyData.load(data.save(new CompoundTag())).arrivals(uuid).get(ref).equals(anchor),"personal arrival anchors persist independently of players and clones");

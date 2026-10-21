@@ -1,5 +1,5 @@
 {
-  "type": "dbzenith:planet",
+  "type": "dbzenith:namek",
   "generator": {
     "type": "minecraft:noise",
     "settings": "minecraft:overworld",

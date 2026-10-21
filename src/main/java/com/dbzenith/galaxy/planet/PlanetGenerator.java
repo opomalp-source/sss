@@ -30,7 +30,7 @@ public final class PlanetGenerator extends ChunkGenerator {
     private final long seed;public final PlanetTerrain terrain;
     public PlanetGenerator(BiomeSource biomes,long seed,String ref,int kind,int radius,int version){
         super(biomes);if(version!=1)throw new IllegalArgumentException("Unsupported planet terrain version");
-        this.seed=seed;this.ref=GalaxyCatalog.Ref.parse(ref);this.kind=GalaxyCatalog.Kind.values()[kind];this.radius=radius;this.terrain=new PlanetTerrain(seed,this.kind);
+        this.seed=seed;this.ref=GalaxyCatalog.Ref.parse(ref);this.kind=GalaxyCatalog.Kind.values()[kind];this.radius=radius;this.terrain=new PlanetTerrain(seed,this.kind,com.dbzenith.galaxy.IconicSystems.style(this.ref));
     }
     @Override protected Codec<? extends ChunkGenerator> codec(){return CODEC;}
     @Override public int getGenDepth(){return 384;}

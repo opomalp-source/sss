@@ -11,7 +11,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 public final class PlanetLandmarks {
     public record Site(int x,int y,int z,int kind){public String key(){return x+"_"+z;}}
     public static Site site(PlanetGenerator g,int cellX,int cellZ){
-        if(g.ref.planet()==0&&com.dbzenith.galaxy.IconicSystems.isNew(g.ref.system())&&cellX==0&&cellZ==0)return new Site(24,Math.max(g.terrain.sea()+2,g.terrain.height(24,24)+1),24,g.ref.system().equals(com.dbzenith.galaxy.IconicSystems.VEGETA)?0:4);
+        if(g.ref.planet()==0&&com.dbzenith.galaxy.IconicSystems.isNew(g.ref.system())&&cellX==0&&cellZ==0)return new Site(24,Math.max(g.terrain.sea()+2,g.terrain.height(24,24)+1),24,9);   // the series world's own place (IconicLandmarks)
         if(g.kind==GalaxyCatalog.Kind.ASTEROIDS||g.kind==GalaxyCatalog.Kind.GAS_GIANT)return null;
         long hash=GalaxyCatalog.mix(g.terrain.seed^cellX*0x632be59bd9b4e019L^cellZ*0x94d049bb133111ebL);
         if(Math.floorMod(hash,5)!=0)return null;
@@ -65,9 +65,26 @@ public final class PlanetLandmarks {
             }
         };
     }
+    /** A series world's place on a round plaza: the ground filled up to it and cleared above it, the place built on it (only in this chunk). */
+    private static void iconic(PlanetGenerator g,ChunkAccess chunk,Site s){
+        int minX=chunk.getPos().getMinBlockX(),minZ=chunk.getPos().getMinBlockZ(),r=IconicLandmarks.RADIUS;
+        var pos=new BlockPos.MutableBlockPos();var floor=chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);var surface=chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
+        for(int x=minX;x<minX+16;x++)for(int z=minZ;z<minZ+16;z++){int dx=x-s.x,dz=z-s.z;double d=Math.sqrt(dx*dx+dz*dz);if(d>r)continue;
+            int ground=g.terrain.height(x,z),bottom=Math.min(s.y-2,ground-1),top=Math.max(s.y+34,ground+16);
+            for(int y=bottom;y<=top;y++){BlockState state;int dy=y-s.y;
+                if(dy<-1)state=y<=ground?null:g.terrain.top();                 // fill hollows up to the plaza
+                else if(dy==-1)state=IconicLandmarks.paving(g.ref.system(),dx,dz);
+                else{state=IconicLandmarks.piece(g.ref.system(),dx,dy,dz);if(state==null)state=Blocks.AIR.defaultBlockState();}
+                if(state==null)continue;
+                pos.set(x,y,z);chunk.setBlockState(pos,state,false);floor.update(x&15,y,z&15,state);surface.update(x&15,y,z&15,state);
+                if(!state.getFluidState().isEmpty())chunk.markPosForPostprocessing(pos);}
+        }
+    }
     public static void decorate(PlanetGenerator g,ChunkAccess chunk){
         int minX=chunk.getPos().getMinBlockX(),minZ=chunk.getPos().getMinBlockZ();
-        Site s=near(g,minX+8,minZ+8);if(s==null||s.x<minX-10||s.x>minX+25||s.z<minZ-10||s.z>minZ+25)return;
+        Site origin=g.ref.planet()==0&&IconicLandmarks.has(g.ref.system())?site(g,0,0):null;
+        if(origin!=null&&origin.kind==9&&origin.x>=minX-IconicLandmarks.RADIUS&&origin.x<=minX+15+IconicLandmarks.RADIUS&&origin.z>=minZ-IconicLandmarks.RADIUS&&origin.z<=minZ+15+IconicLandmarks.RADIUS){iconic(g,chunk,origin);return;}
+        Site s=near(g,minX+8,minZ+8);if(s==null||s.kind==9||s.x<minX-10||s.x>minX+25||s.z<minZ-10||s.z>minZ+25)return;
         var pos=new BlockPos.MutableBlockPos();var floor=chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);var surface=chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
         int bottom=com.dbzenith.galaxy.IconicSystems.isNew(g.ref.system())?Math.min(s.y-12,g.terrain.height(s.x,s.z)-48):s.y-12;
         for(int x=minX;x<minX+16;x++)for(int z=minZ;z<minZ+16;z++)for(int y=bottom;y<=s.y+14;y++){
