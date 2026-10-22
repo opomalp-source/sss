@@ -46,7 +46,11 @@ public final class Living {
 
     @SubscribeEvent
     public static void onServerStarting(ServerStartingEvent event) {
-        NamedFighter.onMemory = Rumors::fromMemory;
+        NamedFighter.onMemory = (c, m) -> {
+            Rumors.fromMemory(c, m);
+            var server = net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
+            if (server != null && LivingConfig.enabled()) Errands.onMemory(LivingData.get(server), c, m);   // a threat beaten
+        };
     }
 
     @SubscribeEvent
@@ -59,14 +63,22 @@ public final class Living {
         if (t % 40 == 10) Social.tick(s, LivingData.get(s), now);
         if (t % 100 == 30) Residents.tick(s, LivingData.get(s), now);
         if (t % 200 == 70) housekeeping(s, LivingData.get(s), now);
+        if (t % 10 == 5) Lessons.tick(s, now);
+        if (t % 40 == 25) {
+            Companions.tick(s, LivingData.get(s), now);
+            Errands.tick(s, LivingData.get(s));
+        }
+        if (t % 100 == 80) Travelers.tick(s, LivingData.get(s), now);
     }
 
     /** Alerts that have passed; wanted players forgiven; the day's news. */
     static void housekeeping(MinecraftServer s, LivingData ld, long now) {
+        if (ld.errands().stream().filter(e -> e.taker == null).count() < (long) Errands.OFFERS * ld.settlements().size()) Errands.refresh(s, ld, now);
         for (Settlement x : ld.settlements()) if (!x.wanted.isEmpty() && now > x.alarmUntil + WANTED) x.wanted.clear();
         long day = Math.floorDiv(s.overworld().getDayTime(), 24000L);
         if (day != ld.lastNewsDay) {
             ld.lastNewsDay = day;
+            for (Settlement x : ld.settlements()) x.unreachable.clear();               // a new day: places get another try (things get rebuilt)
             Rumors.daily(ld, now);
             ld.setDirty();
         }
@@ -91,6 +103,11 @@ public final class Living {
         if (event.isCanceled() || !LivingConfig.enabled() || !(event.getEntity() instanceof Resident r) || r.level().isClientSide) return;
         if (!(event.getSource().getEntity() instanceof LivingEntity by) || by == r || by instanceof Resident) return;
         if (by.getUUID().equals(r.sparWith)) return;                                       // a spar, not an attack
+        if (by instanceof ServerPlayer own && r.isCompanionOf(own)) {                     // its own player: a scolding, not an alarm
+            NamedFighter cc = r.character();
+            if (cc != null) cc.player(own.getUUID(), own.getGameProfile().getName()).shift(-3, 0);
+            return;
+        }
         NamedFighter c = r.character();
         if (c == null) return;
         LivingData ld = LivingData.get(r.getServer());
@@ -135,6 +152,7 @@ public final class Living {
             return;
         }
         if (!(event.getSource().getEntity() instanceof ServerPlayer p)) return;            // a player drove off the town's attackers
+        Errands.onKill(ld, p, dead);                                                    // a guard's errand: monsters near town
         Settlement s = ld.at(dead.level().dimension().location().toString(), dead.blockPosition());
         if (s == null || !s.alarmed(now) || !hostile(dead)) return;
         Fame.add(p.server, p, 10, now);
@@ -144,6 +162,18 @@ public final class Living {
             if (cw != null) cw.player(p.getUUID(), p.getGameProfile().getName()).shift(8, 0);
         }
         Nemesis.data().setDirty();
+    }
+
+    /** A resident starts a fight with a player: a spar has its own words, a defence of the town others (data barks). */
+    public static boolean greetFight(KiFighter k, ServerPlayer p) {
+        if (!(k instanceof Resident r) || !LivingConfig.enabled()) return false;
+        NamedFighter c = r.character();
+        if (c == null) return false;
+        String text = Conversations.bark(p.getUUID().equals(r.sparWith) ? "spar_start" : "defend", r, c, p);
+        if (text == null) return false;
+        p.sendSystemMessage(net.minecraft.network.chat.Component.literal(c.name + ": ").withStyle(net.minecraft.ChatFormatting.GOLD)
+                .append(net.minecraft.network.chat.Component.literal(text).withStyle(net.minecraft.ChatFormatting.WHITE)));
+        return true;
     }
 
     /** A threat to townsfolk: monsters (not creepers: let them be), invaders' fighters, fighters after a resident. */
@@ -216,5 +246,7 @@ public final class Living {
     @SubscribeEvent
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         Social.forget(event.getEntity().getUUID());
+        for (NamedFighter c : Companions.of(event.getEntity().getUUID()))                // your companions go home till you come back
+            if (Companions.mode(c) != Companions.Mode.HOME) c.companionMode = Companions.Mode.HOME.id();
     }
 }

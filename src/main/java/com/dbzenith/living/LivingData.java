@@ -26,6 +26,7 @@ public final class LivingData extends SavedData {
 
     private final Map<UUID, Settlement> settlements = new LinkedHashMap<>();
     private final Map<UUID, Rumor> rumors = new LinkedHashMap<>();
+    private final Map<UUID, Errand> errands = new LinkedHashMap<>();
     private final Map<UUID, Integer> fame = new HashMap<>();
     /** The highest fame tier each player has reached (a new one is news once). */
     private final Map<UUID, Integer> fameTiers = new HashMap<>();
@@ -90,6 +91,24 @@ public final class LivingData extends SavedData {
         setDirty();
     }
 
+    public java.util.Collection<Errand> errands() {
+        return errands.values();
+    }
+
+    public Errand errand(UUID id) {
+        return id == null ? null : errands.get(id);
+    }
+
+    public void add(Errand e) {
+        errands.put(e.id, e);
+        setDirty();
+    }
+
+    public void removeErrand(UUID id) {
+        errands.remove(id);
+        setDirty();
+    }
+
     public int fame(UUID player) {
         return fame.getOrDefault(player, 0);
     }
@@ -121,6 +140,9 @@ public final class LivingData extends SavedData {
         ListTag r = new ListTag();
         for (Rumor x : rumors.values()) r.add(x.save());
         tag.put("rumors", r);
+        ListTag er = new ListTag();
+        for (Errand x : errands.values()) er.add(x.save());
+        tag.put("errands", er);
         CompoundTag f = new CompoundTag();
         fame.forEach((k, v) -> f.putInt(k.toString(), v));
         tag.put("fame", f);
@@ -144,6 +166,13 @@ public final class LivingData extends SavedData {
         for (Tag t : tag.getList("rumors", Tag.TAG_COMPOUND)) {
             Rumor r = Rumor.load((CompoundTag) t);
             if (r != null) d.rumors.put(r.id(), r);
+        }
+        for (Tag t : tag.getList("errands", Tag.TAG_COMPOUND)) {
+            CompoundTag c = (CompoundTag) t;
+            if (c.hasUUID("id")) {
+                Errand e = Errand.load(c);
+                d.errands.put(e.id, e);
+            }
         }
         CompoundTag f = tag.getCompound("fame");
         for (String k : f.getAllKeys()) {

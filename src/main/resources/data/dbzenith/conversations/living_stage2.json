@@ -1,0 +1,156 @@
+{
+  "_doc": "Living world stage 2 (docs/LIVING_WORLD.md): recruiting companions and giving them orders, masters' lessons, errands. Same format as core.json. Extra conditions: companion, companion_mode, refusal (none, no_fighter, wanted, taken, crowded, hostile, stranger, town_danger, students, duty, afraid, proud), lesson (none, practice, test), lesson_refusal (none, not_master, wanted, stranger, nothing), errand (none, offer, mine, ready, full), traveler. Extra actions: recruit, command:<follow|wait|defend|passive|aggressive|home>, dismiss, lesson_start, lesson_test, lesson_quit, errand_accept, errand_turn_in, errand_abandon. Extra placeholders: {lesson}, {errand}, {errand_progress}, {reward}.",
+  "nodes": {
+    "recruit": {
+      "say": [
+        {"when": {"refusal": "none"}, "text": ["Travel with you? I'd be glad to. Where are we headed?", "I was hoping you'd ask. Lead the way."]},
+        {"when": {"refusal": "none", "traveler": true}, "text": ["The road's better with company. I'm in.", "Ha! I was about to move on anyway. Let's go together."]},
+        {"when": {"refusal": "none", "occupation": "student"}, "text": ["Really? With you? I'll learn more in a week out there than a year in the dojo!"]},
+        {"when": {"refusal": "no_fighter"}, "text": ["Me? I'm no fighter. I'd only slow you down.", "Ha! I can barely lift a sack of rice. Find someone who can fight."]},
+        {"when": {"refusal": "wanted"}, "text": ["After what you did here? Never."]},
+        {"when": {"refusal": "taken"}, "text": ["I already travel with someone. I don't break my word."]},
+        {"when": {"refusal": "crowded"}, "text": ["You've got enough company already, don't you think?"]},
+        {"when": {"refusal": "hostile"}, "text": ["Travel with you? I'd sooner fight you.", "You must be joking."]},
+        {"when": {"refusal": "stranger"}, "text": ["I barely know you. Come back when I do.", "Hm. Help out around here a little first, and we'll see."]},
+        {"when": {"refusal": "town_danger"}, "text": ["Not while {town} is in danger!"]},
+        {"when": {"refusal": "students"}, "text": ["My students need me here. Perhaps one day, when they are ready to stand without me."]},
+        {"when": {"refusal": "duty"}, "text": ["My post is here. Earn {town}'s trust first, then ask me again."]},
+        {"when": {"refusal": "afraid"}, "text": ["Out there? With the kind of fights you get into? No thank you."]},
+        {"when": {"refusal": "proud"}, "text": ["Follow someone weaker than me? Come back when you can beat me.", "Ha! You'd need me more than I'd need you."]}
+      ],
+      "options": [
+        {"id": "join", "text": "Then let's go.", "when": {"refusal": "none"}, "do": ["recruit"], "next": "order_ack"},
+        {"id": "back", "text": "Never mind.", "next": "root"}
+      ]
+    },
+    "orders": {
+      "say": [
+        {"text": ["What do you need?", "I'm listening."]},
+        {"when": {"companion_mode": "wait"}, "text": ["Still waiting right here, like you said."]},
+        {"when": {"companion_mode": "home"}, "text": ["Ready to head out again?", "Back for me? Good, I was getting restless."]},
+        {"when": {"companion_mode": "passive"}, "text": ["Still keeping my head down. What now?"]}
+      ],
+      "options": [
+        {"id": "follow", "text": "Follow me.", "do": ["command:follow"], "next": "order_ack"},
+        {"id": "wait", "text": "Wait here.", "do": ["command:wait"], "next": "order_ack"},
+        {"id": "defend", "text": "Defend me.", "do": ["command:defend"], "next": "order_ack"},
+        {"id": "aggressive", "text": "Fight alongside me.", "do": ["command:aggressive"], "next": "order_ack"},
+        {"id": "passive", "text": "Stay out of fights.", "do": ["command:passive"], "next": "order_ack"},
+        {"id": "home", "text": "Go home for now.", "do": ["command:home"], "next": "order_ack"},
+        {"id": "train", "text": "Let's train.", "do": ["spar", "remember:spar"]},
+        {"id": "talk", "text": "Let's talk.", "next": "root"},
+        {"id": "part", "text": "Let's part ways.", "next": "part_confirm"},
+        {"id": "bye", "text": "Never mind."}
+      ]
+    },
+    "order_ack": {
+      "say": [
+        {"text": ["Right."]},
+        {"when": {"companion_mode": "follow"}, "text": ["Right behind you.", "Lead the way."]},
+        {"when": {"companion_mode": "wait"}, "text": ["I'll wait here.", "I won't move from this spot."]},
+        {"when": {"companion_mode": "defend"}, "text": ["Nobody touches you while I'm around.", "I've got your back."]},
+        {"when": {"companion_mode": "aggressive"}, "text": ["Let's show them what we've got!", "Finally, some real fighting!"]},
+        {"when": {"companion_mode": "passive"}, "text": ["I'll keep my head down.", "Fine, I'll stay out of it."]},
+        {"when": {"companion_mode": "home"}, "text": ["I'll be at home. Come find me when you need me.", "I'll head back. You know where I live."]}
+      ],
+      "options": [{"id": "bye", "text": "Good."}]
+    },
+    "part_confirm": {
+      "say": ["You want to go our separate ways?"],
+      "options": [
+        {"id": "yes", "text": "Yes. Thank you for everything.", "do": ["dismiss", "affinity:2"], "next": "parted"},
+        {"id": "no", "text": "No, forget I said that.", "next": "orders"}
+      ]
+    },
+    "parted": {
+      "say": [{"text": ["It was good traveling with you, {player}.", "Take care out there. You know where to find me."]}],
+      "options": [{"id": "bye", "text": "Goodbye."}]
+    },
+    "lesson_offer": {
+      "say": [
+        {"text": ["{lesson}? Very well. Watch closely, I will show it once.", "So you want to learn {lesson}. Good. Watch."]},
+        {"when": {"trait": "calm"}, "text": ["{lesson}. Breathe, and watch my hands."]}
+      ],
+      "options": [
+        {"id": "watch", "text": "I'm watching.", "do": ["lesson_start"], "next": "lesson_demo"},
+        {"id": "back", "text": "Not now.", "next": "root"}
+      ]
+    },
+    "lesson_demo": {
+      "say": ["The power comes from your center, not your hands. Now gather your ki here, beside me, and hold it steady until I say."],
+      "options": [{"id": "bye", "text": "I'll try."}]
+    },
+    "lesson_status": {
+      "say": [
+        {"when": {"lesson": "practice"}, "text": ["Keep gathering your ki near me. Steady... steady.", "Not yet. Charge your ki beside me and hold it."]},
+        {"when": {"lesson": "test"}, "text": ["Your control is good. Now prove it in a real spar with me. Ready?", "One thing left: face me. Show me {lesson} has a place in your fighting."]}
+      ],
+      "options": [
+        {"id": "test", "text": "I'm ready.", "when": {"lesson": "test"}, "do": ["lesson_test"]},
+        {"id": "quit", "text": "I'd like to stop this lesson.", "do": ["lesson_quit", "affinity:-1"], "next": "root"},
+        {"id": "bye", "text": "Later."}
+      ]
+    },
+    "train_talk": {
+      "say": [
+        {"text": ["Train you? Show me first that you can listen. Spar with my students, come back often, and we'll see.", "I don't take students lightly. Prove your commitment."]},
+        {"when": {"lesson_refusal": "nothing"}, "text": ["I have taught you all I can, or all you can use. The rest you must find on your own road.", "There is nothing more I can show you. Go on, you have outgrown this dojo."]},
+        {"when": {"lesson_refusal": "stranger"}, "text": ["I don't teach strangers. Help this town, spar with my students, and come back.", "Earn my trust first. Then we'll talk about lessons."]}
+      ],
+      "options": [
+        {"id": "commit", "text": "I'm committed.", "when": {"not_flag": "asked_training"}, "do": ["flag:asked_training", "affinity:3"], "next": "root"},
+        {"id": "back", "text": "I'll think about it.", "next": "root"}
+      ]
+    },
+    "errand_offer": {
+      "say": [{"text": ["Actually, yes. {errand} There are {reward} training points in it for you.", "Now that you mention it... {errand} I can give you {reward} training points for it."]}],
+      "options": [
+        {"id": "accept", "text": "I'll do it.", "do": ["errand_accept"], "next": "errand_accepted"},
+        {"id": "back", "text": "Not right now.", "next": "root"}
+      ]
+    },
+    "errand_accepted": {
+      "say": [{"text": ["Thank you! Come back to me when it's done.", "You're a lifesaver. Let me know when it's done."]}],
+      "options": [{"id": "bye", "text": "I'll be back."}]
+    },
+    "errand_status": {
+      "say": [
+        {"when": {"errand": "mine"}, "text": ["How's it going? Remember: {errand} ({errand_progress} so far)", "Any luck? {errand_progress} so far."]},
+        {"when": {"errand": "ready"}, "text": ["You did it? Thank you!", "Done already? I knew I could count on you."]}
+      ],
+      "options": [
+        {"id": "turn_in", "text": "Here, it's done.", "when": {"errand": "ready"}, "do": ["errand_turn_in"], "next": "errand_thanks"},
+        {"id": "keep", "text": "I'm still on it.", "when": {"errand": "mine"}},
+        {"id": "abandon", "text": "I can't do it after all.", "when": {"errand": "mine"}, "do": ["errand_abandon"], "next": "errand_abandoned"}
+      ]
+    },
+    "errand_thanks": {
+      "say": [{"text": ["You're a good sort, {player}. Here, as promised.", "As promised. {town} owes you one."]}],
+      "options": [{"id": "bye", "text": "Glad to help."}]
+    },
+    "errand_abandoned": {
+      "say": [{"text": ["Oh. Well... I understand.", "That's a shame. Never mind, then."]}],
+      "options": [{"id": "bye", "text": "Sorry."}]
+    }
+  },
+  "barks": {
+    "errand_spar_students": [{"text": ["My students need a real opponent. Spar with {count} of them for me.", "My students grow lazy against each other. Spar with {count} of them."]}],
+    "errand_spar_me": [{"text": ["Would you train with me? Just one spar. I want to see how far I am from someone like you.", "Spar with me! Please? I won't get better fighting the same people every day."]}],
+    "errand_defeat_threat": [{"text": ["There's a fighter called {target} about, not far from {town}. Deal with them before they come here.", "Word is {target} has been seen near here. Stop them, and {town} sleeps easier."]}],
+    "errand_defeat_threat_monsters": [{"text": ["Monsters have been prowling round {town} at night. Thin them out: {count} should do.", "Something keeps coming at the walls after dark. Put down {count} of those monsters for me."]}],
+    "errand_deliver": [{"text": ["Could you take a message to {target}{town2}? Tell them I've been thinking of them.", "Would you see {target}{town2} for me? Just tell them I said hello. They'll know."]}],
+    "errand_bring_items": [{"text": ["I'm short of {item}. Could you bring me {count}?", "Could you find me {count} {item}? I'm all out."]}],
+    "errand_resolve_rivalry": [{"text": ["{target} and I... we haven't been getting along. Would you talk to them for me?", "I've fallen out with {target}. I'm too proud to go myself. Would you talk to them?"]}],
+    "errand_visit_landmark": [{"text": ["They say {target} is out there, around {x}, {z}. Go and see it for me, and tell me what it's like!", "I've always wanted to see {target}. It's around {x}, {z}. Go, and tell me everything!"]}],
+    "spar_start": [
+      {"text": ["All right, let's see what you've got!", "Don't hold back!", "Here I come!"]},
+      {"when": {"occupation": "master"}, "text": ["Show me. Everything.", "Begin."]}
+    ],
+    "defend": [
+      {"text": ["You picked the wrong town to attack!", "Leave {town} alone!", "Not one step further!"]},
+      {"when": {"occupation": "guard"}, "text": ["In the name of {town}: stand down!", "You're done here."]},
+      {"when": {"occupation": "master"}, "text": ["You will regret raising your hand in my town.", "Students, behind me."]},
+      {"when": {"occupation": "student"}, "text": ["For the dojo!", "{master}, watch this!"]}
+    ]
+  }
+}

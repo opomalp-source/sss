@@ -90,6 +90,13 @@ public final class NamedFighter {
     public long moodUntil;
     /** Rumors it knows (ids in the living world's store), newest last, bounded. */
     public final java.util.Deque<UUID> knowledge = new java.util.ArrayDeque<>();
+    /** A companion: the player it travels with, how ({@code living.Companions.Mode} id) and where it was told to wait. */
+    public UUID companionOf;
+    public String companionMode = "";
+    public long waitPos;
+    /** A traveler on the road: where to (a settlement, or null for elsewhere) and when it gets there; 0 when not travelling. */
+    public UUID travelTo;
+    public long travelUntil;
     /** The in-game day its growth is being counted for, and its level when that day began. */
     public long day = Long.MIN_VALUE;
     public int dayStartLevel;
@@ -202,6 +209,11 @@ public final class NamedFighter {
         t.putInt("look", look);
         t.putString("mood", mood);
         t.putLong("moodUntil", moodUntil);
+        if (companionOf != null) t.putUUID("companionOf", companionOf);
+        t.putString("companionMode", companionMode);
+        t.putLong("waitPos", waitPos);
+        if (travelTo != null) t.putUUID("travelTo", travelTo);
+        t.putLong("travelUntil", travelUntil);
         ListTag kn = new ListTag();
         for (UUID k : knowledge) kn.add(net.minecraft.nbt.NbtUtils.createUUID(k));
         t.put("knowledge", kn);
@@ -262,6 +274,11 @@ public final class NamedFighter {
         c.look = t.getInt("look");
         c.mood = t.getString("mood");
         c.moodUntil = t.getLong("moodUntil");
+        c.companionOf = t.hasUUID("companionOf") ? t.getUUID("companionOf") : null;
+        c.companionMode = t.getString("companionMode");
+        c.waitPos = t.getLong("waitPos");
+        c.travelTo = t.hasUUID("travelTo") ? t.getUUID("travelTo") : null;
+        c.travelUntil = t.getLong("travelUntil");
         for (Tag k : t.getList("knowledge", Tag.TAG_INT_ARRAY)) c.knowledge.add(net.minecraft.nbt.NbtUtils.loadUUID(k));
         CompoundTag ps = t.getCompound("players");
         for (String k : ps.getAllKeys()) {

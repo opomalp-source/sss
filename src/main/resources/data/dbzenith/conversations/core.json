@@ -35,7 +35,13 @@
         {"id": "directions", "text": "Where can I find...", "when": {"has_town": true, "wanted": false}, "next": "directions"},
         {"id": "mind", "text": "What's on your mind?", "when": {"talks_min": 2, "wanted": false}, "next": "mind"},
         {"id": "spar", "text": "Want to spar?", "when": {"fighter": true, "wanted": false, "alarm": false}, "next": "spar_ask"},
-        {"id": "master", "text": "Will you train me?", "when": {"occupation": "master", "wanted": false}, "next": "train_talk"},
+        {"id": "errand_mine", "text": "About that task...", "when": {"errand": ["mine", "ready"]}, "next": "errand_status"},
+        {"id": "errand_ask", "text": "Need any help?", "when": {"errand": "offer", "wanted": false, "alarm": false}, "next": "errand_offer"},
+        {"id": "lesson", "text": "Teach me {lesson}.", "when": {"occupation": "master", "lesson": "none", "lesson_refusal": "none"}, "next": "lesson_offer"},
+        {"id": "lesson_going", "text": "About my lesson...", "when": {"occupation": "master", "lesson": ["practice", "test"]}, "next": "lesson_status"},
+        {"id": "master", "text": "Will you train me?", "when": {"occupation": "master", "wanted": false, "lesson": "none", "lesson_refusal": ["stranger", "nothing"]}, "next": "train_talk"},
+        {"id": "orders", "text": "About our travels...", "when": {"companion": true}, "next": "orders"},
+        {"id": "recruit", "text": "Will you travel with me?", "when": {"companion": false, "fighter": true, "wanted": false}, "next": "recruit"},
         {"id": "apologize", "text": "I'm sorry for what happened.", "when": {"wanted": true, "not_flag": "apologized"}, "do": ["flag:apologized", "affinity:4"], "next": "apology"},
         {"id": "bye", "text": "Goodbye."}
       ]
@@ -151,17 +157,6 @@
       "options": [
         {"id": "start", "text": "Let's go!", "when": {"mood": ["happy", "relaxed", "excited", "annoyed", "angry"]}, "do": ["spar", "remember:spar"]},
         {"id": "back", "text": "Actually, never mind.", "next": "root"}
-      ]
-    },
-    "train_talk": {
-      "say": [
-        {"text": ["Train you? Show me first that you can listen. Spar with my students, come back often, and we'll see.", "I don't take students lightly. Prove your commitment."]},
-        {"when": {"relation": ["ally", "training_partner", "friendly_rival"]}, "text": ["You have come far. Keep your guard up and your breathing steady; power follows control.", "Your stance is better than last time. Remember: a ki blast is a breath, not a shout."]},
-        {"when": {"stronger": false}, "text": ["You are already stronger than I am. What could I teach you? Patience, perhaps."]}
-      ],
-      "options": [
-        {"id": "commit", "text": "I'm committed.", "when": {"not_flag": "asked_training"}, "do": ["flag:asked_training", "affinity:3"], "next": "root"},
-        {"id": "back", "text": "I'll think about it.", "next": "root"}
       ]
     },
     "apology": {

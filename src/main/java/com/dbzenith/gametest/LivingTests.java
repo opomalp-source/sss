@@ -1,6 +1,7 @@
 package com.dbzenith.gametest;
 
 import com.dbzenith.DBZenith;
+import com.dbzenith.living.Companions;
 import com.dbzenith.living.Conversations;
 import com.dbzenith.living.Fame;
 import com.dbzenith.living.LivingData;
@@ -358,5 +359,195 @@ public final class LivingTests {
                 if (level.getBlockState(q).getBlock() instanceof net.minecraft.world.level.block.BedBlock) beds++;
         h.assertTrue(beds == 7 * 4, "two beds a home: " + beds / 2);
         h.succeed();
+    }
+
+    // ------------------------------------------------------------------ stage 2: companions, lessons, errands, travelers
+
+    @GameTest(template = EMPTY, batch = "living_6", timeoutTicks = 200)
+    public static void companionsDecideForThemselvesAndFollowOrders(GameTestHelper h) {
+        Settlement s = town(h);
+        Resident guard = resident(h, s, Occupation.GUARD, new BlockPos(1, 1, 1), 601);
+        Resident cook = resident(h, s, Occupation.COOK, new BlockPos(2, 1, 1), 602);
+        guard.brain().arena = new net.minecraft.world.phys.AABB(0, -500, 0, 1, -499, 1);         // no fights with other tests' fighters nearby
+        ServerPlayer p = TestPlayers.create(h);
+        cleanup(h, 200, s, guard, cook, p);
+        BlockPos near = h.absolutePos(new BlockPos(1, 1, 3));
+        p.teleportTo(near.getX() + 0.5, near.getY(), near.getZ() + 0.5);
+        long now = h.getLevel().getGameTime();
+        NamedFighter cg = guard.character(), cc = cook.character();
+        Bond b = cg.player(p.getUUID(), "Dev");
+        h.assertTrue(Companions.refusal(cc, cc.player(p.getUUID(), "Dev"), p, s, now).equals("no_fighter"), "a cook is no fighter");
+        h.assertTrue(Companions.refusal(cg, b, p, s, now).equals("stranger"), "nobody follows a stranger");
+        b.shift(40, 0);
+        h.assertTrue(Companions.refusal(cg, b, p, s, now).equals("none"), "a guard who trusts you will");
+        Conversations.open(guard, p);
+        h.assertTrue(Conversations.offered(p).contains("recruit"), "you can ask: " + Conversations.offered(p));
+        Conversations.choose(p, guard.getId(), Conversations.offered(p).indexOf("recruit"));
+        Conversations.choose(p, guard.getId(), Conversations.offered(p).indexOf("join"));
+        h.assertTrue(Companions.of(cg, p.getUUID()) && Companions.mode(cg) == Companions.Mode.FOLLOW, "it joins and follows");
+        h.assertTrue(!guard.canAttack(p), "it never turns on you");
+        Conversations.close(p, false);
+        Conversations.open(guard, p);
+        Conversations.choose(p, guard.getId(), Conversations.offered(p).indexOf("orders"));
+        Conversations.choose(p, guard.getId(), Conversations.offered(p).indexOf("wait"));
+        h.assertTrue(Companions.mode(cg) == Companions.Mode.WAIT && cg.waitPos == guard.blockPosition().asLong(), "it waits where told");
+        Conversations.close(p, false);
+        Companions.command(cg, guard, Companions.Mode.FOLLOW);
+        for (int x = 0; x <= 2; x++)
+            for (int z = 0; z <= 40; z++) h.setBlock(new BlockPos(x, 0, z), net.minecraft.world.level.block.Blocks.STONE);
+        BlockPos far = h.absolutePos(new BlockPos(1, 1, 38));
+        p.teleportTo(far.getX() + 0.5, far.getY(), far.getZ() + 0.5);
+        h.succeedWhen(() -> {
+            h.assertTrue(guard.distanceTo(p) < 8, "it catches up: " + String.format("%.1f", guard.distanceTo(p)));
+            TestPlayers.remove(h, p);
+            h.assertTrue(Companions.mode(cg) == Companions.Mode.HOME, "you log out: it goes home");
+            h.assertTrue(Companions.of(cg, p.getUUID()), "and is still your companion");
+            Companions.leave(h.getLevel().getServer(), cg, "living.dbzenith.companion.parted", now);
+            for (int x = 0; x <= 2; x++)
+                for (int z = 0; z <= 40; z++) h.setBlock(new BlockPos(x, 0, z), net.minecraft.world.level.block.Blocks.AIR);
+            forget(h, s, guard, cook);
+        });
+    }
+
+    @GameTest(template = EMPTY, batch = "living_7", timeoutTicks = 200)
+    public static void mastersTeachExistingTechniquesStepByStep(GameTestHelper h) {
+        Settlement s = town(h);
+        Resident master = resident(h, s, Occupation.MASTER, new BlockPos(1, 1, 1), 701);
+        ServerPlayer p = TestPlayers.create(h);
+        cleanup(h, 200, s, master, p);
+        BlockPos near = h.absolutePos(new BlockPos(2, 1, 2));
+        p.teleportTo(near.getX() + 0.5, near.getY(), near.getZ() + 0.5);
+        var d = com.dbzenith.data.ModCapabilities.getOrThrow(p);
+        d.setRace(com.dbzenith.stats.Race.HUMAN);
+        NamedFighter c = master.character();
+        Bond b = c.player(p.getUUID(), "Dev");
+        h.assertTrue(com.dbzenith.living.Lessons.refusal(c, b, p, s).equals("stranger"), "no lessons for a stranger");
+        b.shift(30, 0);
+        var next = com.dbzenith.living.Lessons.teachable(c, b, d);
+        h.assertTrue(!next.isEmpty(), "something to teach");
+        var t = next.get(0);
+        h.assertTrue(com.dbzenith.living.Lessons.CURRICULUM.contains(t) && !d.knows(t.id()), "an existing technique you don't know: " + t.id());
+        h.assertTrue(com.dbzenith.living.Lessons.start(master, c, b, p), "the lesson begins");
+        h.assertTrue(com.dbzenith.living.Lessons.step(b) == com.dbzenith.living.Lessons.Step.PRACTICE, "after the demonstration: ki control");
+        boolean[] sparred = {false};
+        h.succeedWhen(() -> {
+            d.setCharging(true);                                                       // holding ki near the master
+            var step = com.dbzenith.living.Lessons.step(b);
+            if (step == com.dbzenith.living.Lessons.Step.TEST && !sparred[0]) {
+                h.assertTrue(com.dbzenith.living.Lessons.test(master, c, b, p) && p.getUUID().equals(master.sparWith), "the test is a spar");
+                master.sparWith = null;
+                master.setTarget(null);
+                b.spars++;                                                             // the spar ends
+                sparred[0] = true;
+            }
+            h.assertTrue(d.knows(t.id()), "learned " + t.id() + "? step " + step + ", practised " + com.dbzenith.living.Lessons.practiced(p.getUUID(), c.id));
+            h.assertTrue(b.flags.contains("taught:" + t.id()) && !com.dbzenith.living.Lessons.teachable(c, b, d).contains(t), "never taught twice");
+            d.setCharging(false);
+            forget(h, s, master, p);
+        });
+    }
+
+    @GameTest(template = EMPTY, batch = "living_8", timeoutTicks = 60)
+    public static void errandsComeFromTheTownAndPayOnce(GameTestHelper h) {
+        Settlement s = town(h);
+        Resident cook = resident(h, s, Occupation.COOK, new BlockPos(1, 1, 1), 801);
+        Resident friend = resident(h, s, Occupation.CITIZEN, new BlockPos(2, 1, 2), 802);
+        ServerPlayer p = TestPlayers.create(h);
+        cleanup(h, 60, s, cook, friend, p);
+        BlockPos near = h.absolutePos(new BlockPos(1, 1, 3));
+        p.teleportTo(near.getX() + 0.5, near.getY(), near.getZ() + 0.5);
+        LivingData ld = LivingData.get(h.getLevel().getServer());
+        long now = h.getLevel().getGameTime();
+        NamedFighter cc = cook.character(), cf = friend.character();
+        for (var e : new ArrayList<>(ld.errands())) if (s.id.equals(e.settlement)) ld.removeErrand(e.id);
+        com.dbzenith.living.Errand e = com.dbzenith.living.ErrandsTestAccess.make(h.getLevel().getServer(), ld, s, cc, now);
+        h.assertTrue(e != null && e.kind == com.dbzenith.living.Errand.Kind.BRING_ITEMS, "the cook needs ingredients");
+        ld.add(e);
+        h.assertTrue(com.dbzenith.living.Errands.accept(ld, cc, p, now) && p.getUUID().equals(e.taker), "taken");
+        h.assertTrue(!com.dbzenith.living.Errands.turnIn(ld, cc, p, now), "not without the goods");
+        var item = net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(net.minecraft.resources.ResourceLocation.tryParse(e.item));
+        p.getInventory().add(new net.minecraft.world.item.ItemStack(item, e.count));
+        var d = com.dbzenith.data.ModCapabilities.getOrThrow(p);
+        long tp = d.getTrainingPoints();
+        h.assertTrue(com.dbzenith.living.Errands.turnIn(ld, cc, p, now), "turned in");
+        h.assertTrue(d.getTrainingPoints() == tp + e.rewardTp, "paid");
+        h.assertTrue(!com.dbzenith.living.Errands.turnIn(ld, cc, p, now) && d.getTrainingPoints() == tp + e.rewardTp, "once");
+        h.assertTrue(cc.players.get(p.getUUID()).flags.contains("helped"), "and remembered");
+        com.dbzenith.living.Errand msg = new com.dbzenith.living.Errand(UUID.randomUUID());
+        msg.kind = com.dbzenith.living.Errand.Kind.DELIVER;
+        msg.giver = cc.id;
+        msg.settlement = s.id;
+        msg.target = cf.id;
+        msg.targetName = cf.name;
+        msg.expires = now + 24000;
+        ld.add(msg);
+        com.dbzenith.living.Errands.accept(ld, cc, p, now);
+        Conversations.open(friend, p);
+        h.assertTrue(msg.done(), "the message is delivered by talking to them");
+        Conversations.close(p, false);
+        h.assertTrue(com.dbzenith.living.Errands.turnIn(ld, cc, p, now), "and the errand turned in");
+        forget(h, s, cook, friend, p);
+        h.succeed();
+    }
+
+    @GameTest(template = EMPTY, batch = "living_9", timeoutTicks = 60)
+    public static void travelersCarryNewsBetweenTowns(GameTestHelper h) {
+        Settlement a = town(h), b = town(h, new BlockPos(1, 1, 1));
+        b.name = "Other Town";
+        Resident local = resident(h, a, Occupation.CITIZEN, new BlockPos(1, 1, 1), 901);
+        cleanup(h, 60, a, local);
+        LivingData ld = LivingData.get(h.getLevel().getServer());
+        long now = h.getLevel().getGameTime();
+        NamedFighter t = Residents.create(Nemesis.data(), null, Occupation.TRAVELER, a.center, now, 902);
+        t.status = NamedFighter.Status.AWAY;
+        t.travelTo = a.id;
+        t.travelUntil = now;
+        Rumor news = Rumors.add(ld, Rumor.Kind.STRONG_FIGHTER, UUID.randomUUID(), "Kabura", null, "", "elite", null, now, List.of());
+        Rumor home = Rumors.add(ld, Rumor.Kind.TRAINING_HARD, local.character().id, local.character().name, null, "", "", a.id, now, List.of(local.character()));
+        com.dbzenith.living.Travelers.arriveNow(h.getLevel().getServer(), t, now);
+        h.assertTrue(a.id.equals(t.settlement) && t.status == NamedFighter.Status.PRESENT && t.travelUntil > now, "it arrives and stays a while");
+        h.assertTrue(local.character().knowledge.contains(news.id()), "it brings news from the road: traveler knows news " + t.knowledge.contains(news.id())
+                + ", knows " + t.knowledge.size() + ", local knows " + local.character().knowledge.size() + ", rumors " + ld.rumors().size() + ", news tick " + news.tick() + " now " + now);
+        h.assertTrue(t.knowledge.contains(home.id()), "and takes the town's");
+        com.dbzenith.living.Travelers.leaveNow(h.getLevel().getServer(), t, now);
+        h.assertTrue(t.status == NamedFighter.Status.AWAY && t.settlement == null && t.travelTo != null && !a.id.equals(t.travelTo) && t.travelUntil > now, "then on to another town");
+        t.status = NamedFighter.Status.DEAD;
+        LivingData.get(h.getLevel().getServer()).remove(b.id);
+        forget(h, a, local);
+        h.succeed();
+    }
+
+    @GameTest(template = EMPTY, batch = "living_10", timeoutTicks = 400)
+    public static void travelersWalkOutThroughAGate(GameTestHelper h) {
+        corridor(h, true);                                                               // closed: the spot may be open sea
+        Settlement s = town(h, new BlockPos(1, 1, 8));                                    // every place, the gate included, at the far end
+        ServerPlayer p = TestPlayers.create(h);
+        long now = h.getLevel().getGameTime();
+        NamedFighter t = Residents.create(Nemesis.data(), s, Occupation.TRAVELER, s.pois.get(0).pos(), now, 1001);
+        Resident body = Residents.spawnBody(h.getLevel(), t, h.absolutePos(new BlockPos(1, 1, 1)));
+        body.brain().arena = new net.minecraft.world.phys.AABB(0, -500, 0, 1, -499, 1);
+        t.travelUntil = now;                                                              // time to move on
+        cleanup(h, 400, s, body, p);
+        BlockPos near = h.absolutePos(new BlockPos(1, 4, 4));                            // on the roof, out of its way
+        p.teleportTo(near.getX() + 0.5, near.getY(), near.getZ() + 0.5);
+        h.succeedWhen(() -> {
+            h.assertTrue(body.isRemoved(), "it walks out: " + body.leaving + " at " + body.blockPosition().subtract(h.absolutePos(BlockPos.ZERO)));
+            h.assertTrue(t.status == NamedFighter.Status.AWAY && t.settlement == null && t.body == null, "and is on the road: " + t.status + " " + t.settlement + " " + t.body + " " + t.travelUntil + " now " + h.getLevel().getGameTime());
+            t.status = NamedFighter.Status.DEAD;
+            corridor(h, false);
+            forget(h, s, p);
+        });
+        Delays.after(h, 397, () -> corridor(h, false));
+    }
+
+    /** A glass corridor on stone, x 0..2, z 0..9 inside (or, false, cleared again). */
+    private static void corridor(GameTestHelper h, boolean build) {
+        for (int x = -1; x <= 3; x++)
+            for (int z = -1; z <= 10; z++)
+                for (int y = 0; y <= 3; y++) {
+                    boolean wall = x == -1 || x == 3 || z == -1 || z == 10 || y == 0 || y == 3;
+                    h.setBlock(new BlockPos(x, y, z), !build || !wall ? net.minecraft.world.level.block.Blocks.AIR
+                            : y == 0 ? net.minecraft.world.level.block.Blocks.STONE : net.minecraft.world.level.block.Blocks.GLASS);
+                }
     }
 }

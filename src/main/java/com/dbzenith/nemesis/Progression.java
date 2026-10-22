@@ -133,7 +133,7 @@ public final class Progression {
         return probe == null ? List.of() : probe.techniques();
     }
 
-    static AiProfile profile(NamedFighter c) {
+    public static AiProfile profile(NamedFighter c) {
         if (c.resident()) return com.dbzenith.living.Residents.profile(c);
         EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.tryParse(c.type));
         return type == null ? AiProfile.of(net.minecraft.world.entity.EntityType.PIG) : AiProfile.of(type);

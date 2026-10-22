@@ -130,6 +130,56 @@ All in `com.dbzenith.living` unless named otherwise.
   recoverMinutes. The living world needs the Nemesis system on.
 - **Network:** protocol 56 (three conversation packets).
 
+## 4b. Built (stage 2, v0.162.0)
+
+- **Companions** (`Companions`, `CompanionGoal`): ask a fighter resident "Will you travel with me?". Whether it will is
+  its own decision (`Companions.refusal`): civilians aren't fighters, nobody goes with a stranger (affinity under 15),
+  someone it dislikes, or someone its town wants; a master won't leave its students below 45 affinity, a guard its post
+  below 30, the cowardly the safety of town below 50; the arrogant won't follow anyone weaker; nobody leaves while the
+  town is on alert; one companion can't be shared; `living.maxCompanions` (2). Each refusal has its own lines. Its
+  orders, in conversation: follow, wait here, defend me (it goes for whoever attacks you), fight alongside me (also what
+  you attack, and threats round you), stay out of fights, go home for now, let's train (a spar), let's talk, let's part
+  ways. It keeps up with you (walks, runs, and appears beside you when left far behind or across a wall), never attacks
+  you or your other companions (a stray blow from you costs a little goodwill, not a spar or an alarm), fights with the
+  combat AI by its orders, and leaves if it comes to dislike you. When you log out, when it is hurt badly enough to go
+  recover, or when its town is attacked (guards and masters), it goes home; talk to it to bring it along again. All of
+  it is on its character (`companionOf`, `companionMode`, `waitPos`), so it survives saving.
+- **Masters' lessons** (`Lessons`): a master teaches existing techniques only (its school's curriculum: Ki Blast, Ki
+  Sense, Rapid Volley, Wave Beam, Solar Flare, Explosive Wave; and anything its character learned), the first one you
+  don't know, can use (race, level) and haven't been taught by it. Only someone it trusts (affinity 15). Three steps,
+  kept on your bond with it so they survive saving: it demonstrates the technique (fired harmlessly into the sky, or its
+  aura for a self technique), you hold your ki charged beside it for five seconds in all, then a test spar with it;
+  when that spar ends you have the technique (`TechniqueLibrary.learnFree`), it is never taught twice, and the master
+  is glad of a student. You can give a lesson up.
+- **Errands** (`Errand`, `Errands`, kept in `LivingData`): quests made from the town's real state, up to three offered
+  per town, one per resident: a master wants two of its students sparred; a student wants to train with you; a guard
+  names a real threat (an active named fighter of the Frieza Force, the Red Ribbon or the damned within 600 blocks), or
+  else wants five monsters near town killed; someone wants a message taken to someone (in another town when there is
+  one); the cook wants ingredients, the merchant goods; someone at odds with a neighbour (their bond says so) asks you to
+  talk to them; the curious want to hear about a real landmark nearby (Kami's Lookout, the tournament grounds, the Cell
+  Games arena, the Frypan Mountains: read from the terrain without making chunks). Progress is read off the world
+  (spars counted on bonds, the threat's defeat in its own memory, kills near town, who you talked to, where you went,
+  what is in your bag); turned in to whoever asked, once (it is removed before the reward is given): training points,
+  their goodwill, a little fame. Untaken errands lapse after three days, taken ones after five (with a little
+  disappointment). At most three at a time per player.
+- **Travelers** (`Travelers`, `Occupation.TRAVELER`): `living.travelers` (2) fighters of the road. On the road they are
+  abstract (Nemesis status AWAY, where they head and when they get there; a quarter day per 500 blocks); they arrive at
+  a town (seen coming in at a gate when the town is loaded), lodge at the restaurant for a day or two as residents (they
+  chat, train, can be talked to and recruited), then walk out through a gate if someone is about to see it, or are
+  simply gone. They hear the world's newest news on the road and tell each town up to three things on arrival, taking
+  its news with them. A companion traveler stops travelling while it is one. A stale body of a townsperson who is away
+  (on the road, recovering) is refused when its chunk loads.
+- **Town lines for fights:** townsfolk have their own words when a spar starts and when they defend their town (data
+  barks "spar_start" and "defend"), instead of the Nemesis rival lines.
+- **Fixes from play:** residents crowding one table or the kitchen no longer mark it unreachable (close enough counts,
+  and places get another try each day); a companion left behind with no clear spot beside you appears where you stand.
+- **Conversations:** new conditions (companion, companion_mode, refusal, lesson, lesson_refusal, errand, traveler),
+  actions (recruit, command, dismiss, lesson_start, lesson_test, lesson_quit, errand_accept, errand_turn_in,
+  errand_abandon) and placeholders ({lesson}, {errand}, {errand_progress}, {reward}); the stage-2 dialogue is in
+  `data/dbzenith/conversations/living_stage2.json`. Up to twelve answers (the key 0 picks the tenth).
+- **Commands:** `/dbz living errands`, `/dbz living travelers`; `talk` and `choose` print the options offered.
+- **Config:** `living.travelers`, `living.maxCompanions`.
+
 ## 5. Testing
 
 - **GameTests** (`gametest.LivingTests`, 8): the living data and the residents' new fields survive saving; schedules
@@ -155,21 +205,32 @@ All in `com.dbzenith.living` unless named otherwise.
   in every resident's seed), names running out (a pool of fifty; the dead give theirs back), a conversation panel that
   hid the person you talk to (two columns, lower).
 
+- **Stage 2 tests** (`LivingTests`, 5 more): a companion decides for itself (a cook isn't a fighter; nobody follows a
+  stranger; a guard who trusts you does), joins through the conversation, takes orders (wait where told), never turns
+  on you, catches up when you go 38 blocks away, goes home when you log out and is still your companion; a master
+  teaches an existing technique you don't know, step by step (demonstration, ki held beside it, the test spar), and
+  never the same one twice; the cook's errand is taken, refused without the goods, paid once and remembered, and a
+  message is delivered by talking to its recipient; a traveler arrives, brings news from the road and takes the town's,
+  then moves on; a traveler due to leave walks out through the gate and is on the road. 354 GameTests pass, twice in a
+  row.
+- **Made robust on the way** (the new batches moved where other tests are placed): the duel ring-out test's staying
+  player can no longer be knocked out by a neighbouring test, the Nemesis promotion test clears earlier tests'
+  leftover characters first, travelers ignore rumors dated in the future (tests make some).
+- **Dev client (stage 2):** errands from the real town (the cook's raw cod, a guard naming a real Nemesis Saiyan
+  Warrior about, messages, a student's spar) offered, taken, turned in (the cod taken from the bag, 150 training points,
+  the cook's opinion up); a refusal (an arrogant student stronger than Dev); a guard who joined, the orders menu, the
+  guard catching up in the forest; a master's lesson (Ki Sense: the offer and the demonstration); two travelers on the
+  road, arrived, one in town telling Dev its news.
+
 ## 6. Not done / limits
 
-- **Stage 2** (next release): companions and their commands (follow, wait, defend, avoid combat, fight alongside,
-  return home, train, talk; refusals by personality and relationship; leaving; logout handling), martial arts masters
-  teaching through lessons (existing techniques only, via `TechniqueLibrary.learnFree`; sparring, ki control,
-  demonstrations), dynamic quests from the town's real state (spar students, defeat a real threat, deliver a message,
-  settle a rivalry, visit a landmark), and travelers moving abstractly between settlements (and carrying news). The
-  data already has the hooks (`Occupation.TRAVELER`, `Activity.TRAVEL`, gates, `Rumors.hears`).
+- Lessons' ki-control step and the test spar were checked by GameTests, not by hand in the dev client (it can't hold a
+  key); the walk to a gate likewise.
+- Errands have no journal screen yet: what you took is said in chat when you take it and by whoever asked.
+- The enemy-factions combat test still fails now and then (its fighters' outcome varies), as before this release.
 - One town is built (Ginger Town); other settlements come from the same builder by command. West City stays a
   landmark placeholder.
 - Drills between residents are visual (strikes and guards, no damage); real NPC-against-NPC spars with the combat AI
   would need the AI to accept an allied sparring partner as a target.
 - Doorways are open (no doors), so routines need no door handling.
 - Iron golems would attack residents (they are `Monster`s to vanilla, as all the mod's fighters are); towns have none.
-- Townsfolk who defend the town greet the attacker with the Nemesis system's rival lines; town-specific battle lines
-  would read better.
-- The duel test `leavingTheArenaLosesTheRound` can still fail now and then depending on batch order (seen before this
-  release).

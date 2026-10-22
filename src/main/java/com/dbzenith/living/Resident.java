@@ -49,6 +49,8 @@ public class Resident extends KiFighter implements SkinVariant {
     public UUID talkingTo;
     /** Running for its life until (civilians). */
     public long fleeUntil;
+    /** A traveler on its way out of town (its routine takes it to a gate). */
+    public boolean leaving;
     private AiProfile profileCache;
 
     public Resident(EntityType<? extends KiFighter> type, Level world) {
@@ -125,13 +127,15 @@ public class Resident extends KiFighter implements SkinVariant {
         goalSelector.addGoal(2, new CombatAiGoal(this));
         goalSelector.addGoal(3, new LegacyMelee(this, 1.1, false));
         goalSelector.addGoal(4, new TalkGoal(this));
-        goalSelector.addGoal(5, new RoutineGoal(this));
+        goalSelector.addGoal(5, new CompanionGoal(this));
+        goalSelector.addGoal(6, new RoutineGoal(this));
         goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8f));
         goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+        targetSelector.addGoal(0, new CompanionGoal.Target(this));                       // a companion fights by its orders
         targetSelector.addGoal(1, new HurtByTargetGoal(this) {
             @Override
             public boolean canUse() {
-                return aiMayFight() && super.canUse();
+                return aiMayFight() && Companions.mode(character()) != Companions.Mode.PASSIVE && super.canUse();
             }
         }.setAlertOthers(Resident.class));
         targetSelector.addGoal(2, new net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.Mob.class, 10, true, false,
@@ -146,6 +150,25 @@ public class Resident extends KiFighter implements SkinVariant {
         if (hand != InteractionHand.MAIN_HAND || getTarget() != null || FleeGoal.fleeing(this)) return InteractionResult.PASS;
         if (!level().isClientSide && player instanceof ServerPlayer sp) Conversations.open(this, sp);
         return InteractionResult.sidedSuccess(level().isClientSide);
+    }
+
+    /** Whether it travels with this player. */
+    public boolean isCompanionOf(Player p) {
+        return p != null && Companions.of(character(), p.getUUID());
+    }
+
+    /** Never its own player or that player's other companions; a passive companion fights no one. */
+    @Override
+    public boolean canAttack(net.minecraft.world.entity.LivingEntity target) {
+        if (!level().isClientSide && !target.getUUID().equals(sparWith)) {                   // a training spar is allowed
+            NamedFighter c = character();
+            if (c != null && c.companionOf != null) {
+                if (target.getUUID().equals(c.companionOf)) return false;
+                if (target instanceof Resident o && Companions.of(o.character(), c.companionOf)) return false;
+                if (Companions.mode(c) == Companions.Mode.PASSIVE) return false;
+            }
+        }
+        return super.canAttack(target);
     }
 
     // ------------------------------------------------------------------ a townsperson, not a monster

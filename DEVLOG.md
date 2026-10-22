@@ -4646,3 +4646,31 @@ it with no second identity, memory, personality or relationship system. This rel
   under the painted anatomy's outer layer (also the Saiyan Warrior's hidden face, regenerated), a square slab on the
   sea, bare grounds, sleepers woken by their own routine, identical people in two towns, names running out, a dialogue
   panel hiding the person you talk to.
+
+## 2026-10-22 — The living world, stage 2 (v0.162.0)
+The rest of the living world request: companions, masters who teach, quests from the town's real state, travelers.
+Details in `docs/LIVING_WORLD.md` (section 4b).
+
+- **Companions:** ask a fighter resident to travel with you; it decides for itself (civilians don't fight; nobody
+  follows a stranger, an enemy or someone its town wants; masters keep to their students, guards to their post, the
+  cowardly to the town, the proud won't follow the weaker; nobody leaves a town under attack), each refusal in its own
+  words. Orders in conversation: follow, wait, defend me, fight alongside me, stay out of fights, go home, train, talk,
+  part ways. It keeps up (appearing beside you when left behind), fights with the combat AI by its orders, never at you
+  or your other companions, leaves if it comes to dislike you, and goes home when you log out, when it must recover or
+  when its town needs it. Kept on its Nemesis character.
+- **Masters' lessons:** existing techniques only (the school's curriculum and what the master learned), the first you
+  don't know and can use; a demonstration, ki held beside the master, a test spar; then it is yours (learnFree), never
+  taught twice.
+- **Errands:** made from what is going on in town: spar the master's students, train with a student, defeat a real
+  named threat about (or the monsters round town), carry a message (to another town if there is one), bring the cook
+  or merchant goods, settle a quarrel the bonds show, see a real landmark. Progress read off the world, rewards once
+  (training points, goodwill, fame), lapsing when left too long.
+- **Travelers:** abstract on the road, residents for a day or two in a town, out through a gate; they carry the world's
+  news from town to town.
+- **Town lines** for spars and defence instead of the Nemesis rival lines.
+- **Tests:** 5 more in `LivingTests`; 354 GameTests pass, twice in a row. Made robust on the way (the new batches moved
+  other tests): the duel ring-out test, the Nemesis promotion test, travelers ignoring future-dated rumors.
+- **Dev client:** errands offered, taken and turned in (the cod gone from the bag, 150 TP); an arrogant student's
+  refusal; a guard joining, its orders, catching up in the forest; a master's Ki Sense lesson; travelers arrived with
+  news. Fixed from play: a companion with no room beside you never caught up; crowded tables were marked unreachable;
+  repeated words in an errand offer.

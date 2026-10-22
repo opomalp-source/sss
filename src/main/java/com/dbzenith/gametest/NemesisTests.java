@@ -211,6 +211,16 @@ public final class NemesisTests {
 
     @GameTest(template = EMPTY, batch = "nemesis_1")
     public static void promotionBindsOneBodyAndRefusesCopies(GameTestHelper h) {
+        NemesisData data = Nemesis.data();                                              // earlier tests' leftovers (bodies discarded, characters kept) don't crowd it out
+        for (NamedFighter x : data.all()) {
+            if (!x.active() || x.resident()) continue;
+            boolean stale = x.status != NamedFighter.Status.PRESENT || x.body == null;
+            if (!stale) {
+                stale = true;
+                for (var l : h.getLevel().getServer().getAllLevels()) if (l.getEntity(x.body) != null) stale = false;
+            }
+            if (stale) x.status = NamedFighter.Status.RETIRED;
+        }
         KiFighter k = calm(h, ModNpcs.KI_SOLDIER.get(), new BlockPos(1, 1, 1));
         NamedFighter c = Nemesis.promote(k, "test");
         h.assertTrue(c != null && c.id.equals(k.nemesisId()), "an ordinary soldier becomes a named character");

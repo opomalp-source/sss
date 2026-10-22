@@ -88,6 +88,30 @@ public final class LivingCommands {
                     }
                     return ld.rumors().size();
                 }))
+                .then(Commands.literal("errands").executes(ctx -> {
+                    LivingData ld = LivingData.get(ctx.getSource().getServer());
+                    var d = com.dbzenith.nemesis.Nemesis.data();
+                    for (Errand e : ld.errands()) {
+                        NamedFighter g = d == null ? null : d.get(e.giver);
+                        ServerPlayer taker = e.taker == null ? null : ctx.getSource().getServer().getPlayerList().getPlayer(e.taker);
+                        say(ctx.getSource(), String.format(Locale.ROOT, "[%s] from %s: %s (%d/%d, %d TP) %s", e.kind.id(), g == null ? "?" : g.name,
+                                Errands.summary(e), Math.min(e.progress, e.count), e.count, e.rewardTp,
+                                e.taker == null ? "offered" : "taken by " + (taker == null ? e.taker : taker.getGameProfile().getName())));
+                    }
+                    return ld.errands().size();
+                }))
+                .then(Commands.literal("travelers").executes(ctx -> {
+                    LivingData ld = LivingData.get(ctx.getSource().getServer());
+                    long now = ctx.getSource().getServer().overworld().getGameTime();
+                    for (NamedFighter c : Travelers.all()) {
+                        Settlement at = ld.settlement(c.settlement), to = ld.settlement(c.travelTo);
+                        say(ctx.getSource(), String.format(Locale.ROOT, "%s: %s, %s, knows %d rumors%s", c.name,
+                                Travelers.onRoad(c) ? "on the road to " + (to == null ? "elsewhere" : to.name) : "in " + (at == null ? "?" : at.name),
+                                (c.travelUntil - now) / 1000 + " hours " + (Travelers.onRoad(c) ? "to go" : "before moving on"), c.knowledge.size(),
+                                c.companionOf == null ? "" : ", a companion"));
+                    }
+                    return Travelers.all().size();
+                }))
                 .then(Commands.literal("talk").then(Commands.argument("resident", EntityArgument.entity()).executes(ctx -> {
                     ServerPlayer p = ctx.getSource().getPlayerOrException();                // as if you right-clicked it (debugging, screenshots)
                     if (!(EntityArgument.getEntity(ctx, "resident") instanceof Resident r)) {
@@ -95,9 +119,10 @@ public final class LivingCommands {
                         return 0;
                     }
                     Conversations.open(r, p);
+                    say(ctx.getSource(), "options: " + numbered(Conversations.offered(p)));
                     return 1;
                 })))
-                .then(Commands.literal("choose").then(Commands.argument("option", IntegerArgumentType.integer(1, 8)).executes(ctx -> {
+                .then(Commands.literal("choose").then(Commands.argument("option", IntegerArgumentType.integer(1, 12)).executes(ctx -> {
                     ServerPlayer p = ctx.getSource().getPlayerOrException();
                     Integer entity = Conversations.entity(p);
                     if (entity == null) {
@@ -105,6 +130,7 @@ public final class LivingCommands {
                         return 0;
                     }
                     Conversations.choose(p, entity, IntegerArgumentType.getInteger(ctx, "option") - 1);
+                    say(ctx.getSource(), "options: " + numbered(Conversations.offered(p)));
                     return 1;
                 })))
                 .then(Commands.literal("fame").then(Commands.argument("player", EntityArgument.player())
@@ -132,6 +158,12 @@ public final class LivingCommands {
         Settlement s = LivingData.get(src.getServer()).nearest(src.getLevel().dimension().location().toString(), BlockPos.containing(src.getPosition()), 100000);
         if (s == null) src.sendFailure(Component.literal("No settlement in this world"));
         return s;
+    }
+
+    static String numbered(java.util.List<String> ids) {
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < ids.size(); i++) b.append(i + 1).append(' ').append(ids.get(i)).append(i + 1 < ids.size() ? ", " : "");
+        return b.toString();
     }
 
     static void say(CommandSourceStack src, String line) {

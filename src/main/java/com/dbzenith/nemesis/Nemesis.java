@@ -237,6 +237,7 @@ public final class Nemesis {
                 profile.seed(b.habits, weight);
                 k.brain().note("remembers " + p.getGameProfile().getName() + "'s style");
             }
+            if (c.resident() && !k.greeted && com.dbzenith.living.Living.greetFight(k, p)) k.greeted = true;   // townsfolk have their own words
             if (k.leaveAt == 0 && !k.greeted) {                                       // encounters greet on arrival themselves
                 Dialogue.Context ctx = context(c, b, p);
                 ctx.days = days;
@@ -522,6 +523,7 @@ public final class Nemesis {
         long now = victim.level().getGameTime();
         if (victim instanceof KiFighter k && of(k) != null) {
             NamedFighter c = of(k);
+            if (k instanceof com.dbzenith.living.Resident rr && rr.isCompanionOf(p) && k.sparWith == null) return;   // your companion, struck by mistake: no spar
             Bond b = c.player(p.getUUID(), p.getGameProfile().getName());
             data().index(c, p.getUUID());
             if (k.training) {                                                          // its training interrupted
@@ -642,6 +644,10 @@ public final class Nemesis {
         NemesisData d = data();
         if (d == null) return;
         NamedFighter c = d.get(k.nemesisId());
+        if (c != null && c.resident() && c.status != NamedFighter.Status.PRESENT) {     // a townsperson away (on the road, recovering): not here
+            event.setCanceled(true);
+            return;
+        }
         if (c == null || !c.active() || c.body != null && !c.body.equals(k.getUUID())) {
             event.setCanceled(true);                                                  // a duplicate, or someone dead or retired
             return;

@@ -165,6 +165,7 @@ public final class Rumors {
             int told = 0;
             for (Rumor r : fresh) {
                 if (told >= 2 || now - r.tick() > 7 * 24000) break;
+            if (r.tick() > now) continue;
                 if (s.id.equals(r.origin()) || people.stream().anyMatch(c -> c.knowledge.contains(r.id()))) continue;
                 boolean any = false;
                 for (NamedFighter c : people) if (hears(Occupation.of(c), r.kind())) any |= learn(c, r);

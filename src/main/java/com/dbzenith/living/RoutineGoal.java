@@ -33,6 +33,8 @@ final class RoutineGoal extends Goal {
     private double bestDist = Double.MAX_VALUE;
     private int failures;
     private boolean placed;
+    /** A place it gave up on as crowded (it stays where it got to until its day moves on). */
+    private BlockPos crowded;
 
     RoutineGoal(Resident r) {
         this.r = r;
@@ -45,7 +47,9 @@ final class RoutineGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        return active() && !r.level().isClientSide && r.getTarget() == null && !FleeGoal.fleeing(r) && r.talkingTo == null && r.nemesisId() != null;
+        if (!active() || r.level().isClientSide || r.getTarget() != null || FleeGoal.fleeing(r) || r.talkingTo != null || r.nemesisId() == null) return false;
+        Companions.Mode m = Companions.mode(r.character());
+        return m == null || m == Companions.Mode.HOME;                                   // a companion out with its player has no day of its own
     }
 
     @Override
@@ -87,7 +91,7 @@ final class RoutineGoal extends Goal {
         }
         if (dest == null) return;
         double d = Math.sqrt(r.distanceToSqr(dest.getX() + 0.5, dest.getY(), dest.getZ() + 0.5));
-        if (d > ARRIVED) {
+        if (d > ARRIVED && !(d <= 3.0 && r.getNavigation().isDone() && now - progressAt > 40)) {   // close enough when the spot is taken
             if (r.isSleeping()) r.stopSleeping();
             if (r.getNavigation().isDone()) r.getNavigation().moveTo(dest.getX() + 0.5, dest.getY(), dest.getZ() + 0.5, speed());
             if (d < bestDist - 0.5) {
@@ -97,7 +101,14 @@ final class RoutineGoal extends Goal {
                 progressAt = now;
                 bestDist = Double.MAX_VALUE;
                 r.getNavigation().stop();
-                if (++failures >= 3) unreachable();
+                if (++failures >= 3) {
+                    if (d > 6) unreachable();                                               // really out of reach
+                    else {
+                        failures = 0;                                                       // crowded: it stays where it got to
+                        crowded = dest;
+                        dest = r.blockPosition();
+                    }
+                }
             }
             arrivedAt = 0;
             return;
@@ -129,9 +140,10 @@ final class RoutineGoal extends Goal {
             arrivedAt = 0;
         }
         int[] idx = {-1};
-        BlockPos to = s == null ? stroll(c, now) : where(c, s, a, now, idx);
+        BlockPos to = s == null ? stroll(c, now) : r.leaving ? pick(s, Poi.Kind.GATE, null, c.id.getMostSignificantBits(), 0, idx, s.center) : where(c, s, a, now, idx);
         if (to == null) return;
-        if (!to.equals(dest)) {
+        if (!to.equals(dest) && !to.equals(crowded)) {
+            crowded = null;
             dest = to;
             destIndex = idx[0];
             bestDist = Double.MAX_VALUE;
@@ -241,6 +253,10 @@ final class RoutineGoal extends Goal {
 
     void there(long now) {
         long stay = now - arrivedAt;
+        if (r.leaving) {                                                                 // a traveler at the gate: on its way
+            Travelers.atGate(r);
+            return;
+        }
         switch (r.activity) {
             case SLEEP -> {
                 if (!r.isSleeping() && stay > 20) {

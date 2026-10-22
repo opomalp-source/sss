@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.161.0, 2026-10-22)
+# Handoff: where Dragon Block Zenith stands (v0.162.0, 2026-10-22)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.161.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.162.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -449,3 +449,19 @@ what stage 2 still holds are in `docs/LIVING_WORLD.md` (continue from there).
   @e[type=dbzenith:resident,sort=nearest,limit=1]` then `dbz living choose <n>` and a devshot to see the dialogue
   screen; `/dbz living fame Dev 120` for a famous welcome; `damage <resident> 1 minecraft:player_attack by Dev` for an
   attack. Posing residents for screenshots: summon with `NoAI` (their bodies keep facing south).
+
+## The living world, stage 2 (v0.162.0, 2026-10-22)
+Companions, masters' lessons, errands and travelers; details in `docs/LIVING_WORLD.md` section 4b.
+- `living.Companions` (refusal rules, join, orders, leaving) and `CompanionGoal` (following, catching up, `Target` for
+  defend/fight-alongside); state on `NamedFighter.companionOf/companionMode/waitPos`. `Resident.canAttack` keeps them off
+  their player; `Nemesis.onBlow` and `Living.onHurt` ignore a player's stray blow at their own companion.
+- `living.Lessons`: curriculum + the master's learned techniques, steps on bond flags `lesson:<id>:<step>[:<spars>]`,
+  `taught:<id>` so nothing is taught twice; completion when the master's bond counts a new spar.
+- `living.Errand`/`Errands`: made from the town's state (`make`), kept in `LivingData`, progress read off the world,
+  turned in once. `living.Travelers`: abstract travel (status AWAY + `travelTo`/`travelUntil`), arrival news, walking
+  out through a gate (`Resident.leaving`); no new travelers are made on the GameTest server.
+- Dialogue data for all of it: `data/dbzenith/conversations/living_stage2.json`. Dev: `/dbz nemesis bond <name> Dev
+  40 0` to make a resident trust Dev, then `dbz living talk ...` / `choose <n>` (options are printed);
+  `/dbz living errands`, `/dbz living travelers`. Residents with epithets need their full name in selectors.
+- Tests that depend on where the framework places them broke when batches were added: give such tests their own
+  floor/walls (`AiTests.pen`, `LivingTests.corridor`, `DuelTests.stall`) and clean up.

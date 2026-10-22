@@ -359,8 +359,10 @@ to both mods folders.
   in their own beds, work, training, patrols), moods and goals, social life (chats, gossip, dojo drills), branching
   server-checked conversations with a dialogue screen, rumors from real events, town alerts, wanted players, fame.
   docs/LIVING_WORLD.md.
-- [ ] Living world stage 2: companions and their commands, masters' lessons (existing techniques only), dynamic quests
-  from the town's state, travelers between settlements (docs/LIVING_WORLD.md section 6)
-- [ ] Living world: town-specific lines for townsfolk defending their town (they use the Nemesis rival lines now)
-- [ ] Living world feedback from play: schedules, chat frequency, conversation content, fame pacing
-- [ ] `DuelTests.leavingTheArenaLosesTheRound` still fails now and then depending on batch order
+- [x] v0.162.0 Living world stage 2: companions who decide for themselves and take orders, masters' lessons (existing
+  techniques only, demonstration, ki control, test spar), errands from the town's real state, travelers carrying news
+  between towns, town lines for spars and defence. docs/LIVING_WORLD.md section 4b.
+- [ ] Living world feedback from play: schedules, chat frequency, conversation content, fame pacing, errand rewards,
+  companion trust thresholds
+- [ ] An errand journal (taken errands are only told in chat and by whoever asked)
+- [ ] `AiTests.npcsOfEnemySidesFightEachOther` still fails now and then (fight outcome varies)

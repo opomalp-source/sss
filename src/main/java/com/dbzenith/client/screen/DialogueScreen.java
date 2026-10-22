@@ -79,6 +79,10 @@ public class DialogueScreen extends Screen {
             pick(key - GLFW.GLFW_KEY_1);
             return true;
         }
+        if (key == GLFW.GLFW_KEY_0) {                                                    // 0 is the tenth
+            pick(9);
+            return true;
+        }
         return super.keyPressed(key, scan, mods);
     }
 

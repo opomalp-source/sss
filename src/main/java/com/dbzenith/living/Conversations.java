@@ -73,7 +73,7 @@ public final class Conversations {
         }
     }
 
-    static final int MAX_OPTIONS = 8, MAX_STEPS = 64;
+    static final int MAX_OPTIONS = 12, MAX_STEPS = 64;
     static final double REACH = 8;
     private static Map<String, Node> nodes = new HashMap<>();
     private static Map<String, List<Line>> barks = new HashMap<>();
@@ -267,6 +267,13 @@ public final class Conversations {
             case "fought" -> (b.wins + b.losses + b.draws > 0) == v.getAsBoolean();
             case "activity" -> any(v, x.body.activity.id());
             case "has_town" -> (x.town != null) == v.getAsBoolean();
+            case "companion" -> Companions.of(c, x.player.getUUID()) == v.getAsBoolean();
+            case "companion_mode" -> Companions.of(c, x.player.getUUID()) && any(v, Companions.mode(c).id());
+            case "refusal" -> any(v, Companions.refusal(c, b, x.player, x.town, x.now));
+            case "lesson" -> any(v, Lessons.step(b).name().toLowerCase(Locale.ROOT));
+            case "lesson_refusal" -> any(v, Lessons.refusal(c, b, x.player, x.town));
+            case "errand" -> any(v, errandState(x));
+            case "traveler" -> (Occupation.of(c) == Occupation.TRAVELER) == v.getAsBoolean();
             default -> false;
         };
     }
@@ -308,6 +315,10 @@ public final class Conversations {
         if (out.contains("{master}")) out = out.replace("{master}", master(x));
         if (out.contains("{rival}")) out = out.replace("{rival}", rival(c));
         if (out.contains("{rumor}")) out = out.replace("{rumor}", tell(x));
+        if (out.contains("{lesson}")) out = out.replace("{lesson}", Lessons.lessonName(c, x.bond, x.player));
+        if (out.contains("{errand}")) out = out.replace("{errand}", errandText(x));
+        if (out.contains("{errand_progress}")) out = out.replace("{errand_progress}", errandProgress(x));
+        if (out.contains("{reward}")) out = out.replace("{reward}", errandReward(x));
         int i;
         while ((i = out.indexOf("{where:")) >= 0) {
             int j = out.indexOf('}', i);
@@ -327,6 +338,45 @@ public final class Conversations {
         Bond top = null;
         for (Bond b : c.characters.values()) if (top == null || b.rivalry > top.rivalry) top = b;
         return top == null || top.rivalry < 15 ? "nobody in particular" : top.name;
+    }
+
+    /** Where this player stands on this resident's errand: offer, mine (under way), ready (to turn in), full (too many), none. */
+    static String errandState(Ctx x) {
+        Errand e = Errands.takenFrom(x.living, x.npc.id, x.player.getUUID());
+        if (e != null) {
+            Errands.update(x.living, e, x.player);
+            return e.done() ? "ready" : "mine";
+        }
+        if (Errands.offeredBy(x.living, x.npc.id) == null) return "none";
+        return Errands.of(x.living, x.player.getUUID()).size() >= 3 ? "full" : "offer";
+    }
+
+    static Errand errand(Ctx x) {
+        Errand e = Errands.takenFrom(x.living, x.npc.id, x.player.getUUID());
+        return e != null ? e : Errands.offeredBy(x.living, x.npc.id);
+    }
+
+    /** The errand in the resident's words, from the data's "errand_<kind>" barks (else a plain summary). */
+    static String errandText(Ctx x) {
+        Errand e = errand(x);
+        if (e == null) return "";
+        String key = "errand_" + e.kind.id() + (e.kind == Errand.Kind.DEFEAT_THREAT && e.target == null ? "_monsters" : "");
+        List<Line> l = barks.get(key);
+        String s = l == null ? null : pick(l, x, e.kind.ordinal());
+        if (s == null) return Errands.summary(e);
+        BlockPos at = BlockPos.of(e.place);
+        return fill(s.replace("{errand}", "").replace("{target}", e.targetName).replace("{count}", String.valueOf(e.count)).replace("{item}", Errands.itemName(e.item))
+                .replace("{town2}", e.kind == Errand.Kind.DELIVER && !e.item.isEmpty() ? " in " + e.item : "").replace("{x}", String.valueOf(at.getX())).replace("{z}", String.valueOf(at.getZ())), x);
+    }
+
+    static String errandProgress(Ctx x) {
+        Errand e = errand(x);
+        return e == null ? "" : Math.min(e.progress, e.count) + "/" + e.count;
+    }
+
+    static String errandReward(Ctx x) {
+        Errand e = errand(x);
+        return e == null ? "" : String.valueOf(e.rewardTp);
     }
 
     /** Tells the player the next rumor (and remembers it was told them). */
@@ -382,6 +432,7 @@ public final class Conversations {
         }
         b.talks++;
         close(p, false);
+        Errands.onTalk(LivingData.get(p.server), c, p);                                 // a message for them, a quarrel to settle
         Session s = new Session(r.getId(), c.id, "root", now);
         SESSIONS.put(p.getUUID(), s);
         r.talkingTo = p.getUUID();
@@ -480,6 +531,24 @@ public final class Conversations {
                     return true;
                 }
             }
+            case "recruit" -> {
+                if (Companions.refusal(c, b, x.player, x.town, x.now).equals("none")) Companions.join(c, x.player, x.now);
+            }
+            case "command" -> {
+                Companions.Mode m = Companions.Mode.byId(arg);
+                if (m != null && Companions.of(c, x.player.getUUID())) Companions.command(c, x.body, m);
+            }
+            case "dismiss" -> {
+                if (Companions.of(c, x.player.getUUID())) Companions.leave(x.player.server, c, "living.dbzenith.companion.parted", x.now);
+            }
+            case "lesson_start" -> Lessons.start(x.body, c, b, x.player);
+            case "lesson_test" -> {
+                if (Lessons.test(x.body, c, b, x.player)) return true;
+            }
+            case "lesson_quit" -> Lessons.quit(b);
+            case "errand_accept" -> Errands.accept(x.living, c, x.player, x.now);
+            case "errand_turn_in" -> Errands.turnIn(x.living, c, x.player, x.now);
+            case "errand_abandon" -> Errands.abandon(x.living, c, x.player);
             case "close" -> {
                 return true;
             }

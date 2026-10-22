@@ -2417,5 +2417,20 @@
   "living.dbzenith.activity.wander": "Wandering",
   "living.dbzenith.activity.patrol": "On patrol",
   "living.dbzenith.activity.shop": "Shopping",
-  "living.dbzenith.activity.travel": "Traveling"
+  "living.dbzenith.activity.travel": "Traveling",
+  "living.dbzenith.companion.joined": "%s joins you.",
+  "living.dbzenith.companion.gone": "%s can no longer travel with you.",
+  "living.dbzenith.companion.left_angry": "%s has had enough of you and leaves.",
+  "living.dbzenith.companion.recovering": "%s is hurt and goes home to recover.",
+  "living.dbzenith.companion.town_needs": "%s heads back: %s needs them.",
+  "living.dbzenith.companion.parted": "%s goes back to their own life.",
+  "living.dbzenith.lesson.demo": "%s demonstrates %s. Now charge your ki beside them and hold it.",
+  "living.dbzenith.lesson.practiced": "%s nods: your control is good. For %s, one thing is left: a spar with your master.",
+  "living.dbzenith.lesson.learned": "%s has taught you %s!",
+  "living.dbzenith.lesson.passed": "%s is satisfied: you passed the %s lesson.",
+  "living.dbzenith.errand.taken": "Task for %s:",
+  "living.dbzenith.errand.done": "%s thanks you: %s training points.",
+  "living.dbzenith.errand.delivered": "You give %s the message from %s.",
+  "living.dbzenith.errand.reconciled": "%s and %s are on better terms again.",
+  "living.dbzenith.errand.ready": "Task complete: go back to whoever asked."
 }

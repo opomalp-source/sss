@@ -32,5 +32,7 @@ public final class LivingConfig {
     public static int activeRange() { return i(() -> DBZConfig.SERVER.livingActiveRange, 64); }
     public static int townPopulation() { return i(() -> DBZConfig.SERVER.livingTownPopulation, 10); }
     public static int maxChats() { return i(() -> DBZConfig.SERVER.livingMaxConversationsPerTick, 3); }
+    public static int travelers() { return i(() -> DBZConfig.SERVER.livingTravelers, 2); }
+    public static int maxCompanions() { return i(() -> DBZConfig.SERVER.livingMaxCompanions, 2); }
     public static long recoverTicks() { return i(() -> DBZConfig.SERVER.livingRecoverMinutes, 10) * 1200L; }
 }

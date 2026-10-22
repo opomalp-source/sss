@@ -66,19 +66,34 @@ public final class DuelTests {
 
     @GameTest(template = EMPTY, timeoutTicks = 200)
     public static void leavingTheArenaLosesTheRound(GameTestHelper helper) {
+        stall(helper, true);                                                     // the one who stays, stays (the spot may be open sea)
         ServerPlayer[] p = pair(helper);
         ServerPlayer a = p[0], b = p[1];
+        a.getAbilities().invulnerable = true;                                   // a stray blow from a neighbouring test is no knock-out
         Duel d = Duels.start(a, b, 1, Duel.Rules.FULL);
         Duels.skipCountdown(d);
         Vec3 c = d.center();
         b.teleportTo(c.x, c.y + 60, c.z + 40);                                  // well out (and up, clear of other tests)
         Delays.after(helper, 5 * 20 + 10, () -> {
             helper.assertTrue(!Duels.inDuel(a), "over");
-            helper.assertTrue(d.wins(0) == 1, "a ring out for the one who stayed: " + d.wins(0) + "-" + d.wins(1));
+            stall(helper, false);
+            helper.assertTrue(d.wins(0) == 1, "a ring out for the one who stayed: " + d.wins(0) + "-" + d.wins(1) + " a at "
+                    + a.position().subtract(c) + " hp " + a.getHealth() + " removed " + a.isRemoved() + " b at " + b.position().subtract(c));
             TestPlayers.remove(helper, a);
             TestPlayers.remove(helper, b);
             helper.succeed();
         });
+    }
+
+    /** A stone floor and glass walls round the cell at (1, 2, 1) (or, false, cleared again). */
+    private static void stall(GameTestHelper helper, boolean build) {
+        for (int x = 0; x <= 2; x++)
+            for (int z = 0; z <= 2; z++)
+                for (int y = 1; y <= 3; y++) {
+                    boolean cell = x == 1 && z == 1 && y >= 2;
+                    helper.setBlock(new BlockPos(x, y, z), !build || cell ? net.minecraft.world.level.block.Blocks.AIR
+                            : y == 1 ? net.minecraft.world.level.block.Blocks.STONE : net.minecraft.world.level.block.Blocks.GLASS);
+                }
     }
 
     @GameTest(template = EMPTY)
