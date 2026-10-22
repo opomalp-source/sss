@@ -13,7 +13,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
  * so mismatched client/server versions are refused at login instead of desyncing.
  */
 public final class ModNetwork {
-    private static final String PROTOCOL = "55";
+    private static final String PROTOCOL = "56";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(DBZenith.MOD_ID, "main"),
@@ -29,6 +29,15 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(com.dbzenith.item.CapeItem.Remove.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(com.dbzenith.item.CapeItem.Remove::encode).decoder(com.dbzenith.item.CapeItem.Remove::decode)
                 .consumerMainThread(com.dbzenith.item.CapeItem.Remove::handle).add();
+        CHANNEL.messageBuilder(com.dbzenith.living.ConversationPackets.Show.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)      // conversations with townsfolk
+                .encoder(com.dbzenith.living.ConversationPackets.Show::encode).decoder(com.dbzenith.living.ConversationPackets.Show::decode)
+                .consumerMainThread(com.dbzenith.living.ConversationPackets.Show::handle).add();
+        CHANNEL.messageBuilder(com.dbzenith.living.ConversationPackets.Choose.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.dbzenith.living.ConversationPackets.Choose::encode).decoder(com.dbzenith.living.ConversationPackets.Choose::decode)
+                .consumerMainThread(com.dbzenith.living.ConversationPackets.Choose::handle).add();
+        CHANNEL.messageBuilder(com.dbzenith.living.ConversationPackets.Leave.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.dbzenith.living.ConversationPackets.Leave::encode).decoder(com.dbzenith.living.ConversationPackets.Leave::decode)
+                .consumerMainThread(com.dbzenith.living.ConversationPackets.Leave::handle).add();
         CHANNEL.messageBuilder(com.dbzenith.nemesis.NemesisPackets.Request.class, nextId++, NetworkDirection.PLAY_TO_SERVER)   // the Nemesis History screen
                 .encoder(com.dbzenith.nemesis.NemesisPackets.Request::encode).decoder(com.dbzenith.nemesis.NemesisPackets.Request::decode)
                 .consumerMainThread(com.dbzenith.nemesis.NemesisPackets.Request::handle).add();

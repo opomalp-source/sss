@@ -279,6 +279,8 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue nemesisEnabled, nemesisPromote, nemesisWorldSim, nemesisAmbushes, nemesisAlliances, nemesisDialogue;
         public final ForgeConfigSpec.IntValue nemesisMaxCharacters, nemesisMaxPresent, nemesisCooldownMinutes;
         public final ForgeConfigSpec.DoubleValue nemesisReturnMinDays, nemesisReturnMaxDays, nemesisEncounterChance, nemesisSurvivalChance, nemesisGrowthPerDay;
+        public final ForgeConfigSpec.BooleanValue livingEnabled, livingAutoTown, livingSocial, livingRumors;
+        public final ForgeConfigSpec.IntValue livingActiveRange, livingTownPopulation, livingMaxConversationsPerTick, livingRecoverMinutes;
 
         // --- life sim ---
         public final ForgeConfigSpec.BooleanValue agingEnabled;
@@ -778,6 +780,17 @@ public final class DBZConfig {
             nemesisAmbushes = b.comment("Characters with a serious grudge may ambush").define("ambushes", true);
             nemesisAlliances = b.comment("Friendly characters may come to your aid").define("alliances", true);
             nemesisDialogue = b.comment("Characters speak (chat lines)").define("dialogue", true);
+            b.pop();
+
+            b.comment("The living world (docs/LIVING_WORLD.md): towns, residents with daily routines, conversations, rumors").push("living");
+            livingEnabled = b.comment("Residents live their days (routines, moods, social life); off: they stand where they are").define("enabled", true);
+            livingAutoTown = b.comment("Build Ginger Town near spawn in NEW worlds (existing worlds: /dbz settlement build)").define("autoBuildTown", true);
+            livingActiveRange = b.comment("Blocks from a player within which residents run their full routine (farther: 4x less often)").defineInRange("activeRange", 64, 16, 256);
+            livingTownPopulation = b.comment("Most residents a town keeps (newcomers replace the dead up to this)").defineInRange("townPopulation", 10, 0, 14);
+            livingSocial = b.comment("Residents chat, gossip and train together").define("socialLife", true);
+            livingRumors = b.comment("Real events (fights, forms, deaths, attacks) become rumors that spread from town to town").define("rumors", true);
+            livingMaxConversationsPerTick = b.comment("Most resident-to-resident chats started per social tick (performance)").defineInRange("maxChatsPerTick", 3, 0, 32);
+            livingRecoverMinutes = b.comment("Longest a knocked-out resident stays away before coming home (real minutes)").defineInRange("recoverMinutes", 10, 1, 1440);
             b.pop();
 
             b.comment("Optional life-sim layer").push("life_sim");

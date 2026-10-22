@@ -79,7 +79,19 @@ public final class NpcLooks {
             Map.entry("yamcha", look(HairCode.Preset.SWEPT, 0x141418, RaceTraits.Feature.NONE, false, 0, -1, false)),
             Map.entry("majin_buu", look(null, 0, RaceTraits.Feature.TENTACLE, false, 0xF0A0C8, -1, false, Extra.CAPE)),
             Map.entry("training_monkey", look(null, 0, RaceTraits.Feature.NONE, false, 0, 0x8A5A30, false)),
-            Map.entry("damned_warrior", look(HairCode.Preset.WILD, 0x2A2430, RaceTraits.Feature.NONE, false, 0, -1, false)));
+            Map.entry("damned_warrior", look(HairCode.Preset.WILD, 0x2A2430, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            // the living world's townsfolk (v0.161.0)
+            Map.entry("townsfolk_citizen_a", look(HairCode.Preset.SWEPT, 0x5A3A20, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("townsfolk_citizen_b", look(HairCode.Preset.LONG, 0x1A1414, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("townsfolk_citizen_c", look(HairCode.Preset.BUZZ, 0x141210, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("townsfolk_citizen_d", look(HairCode.Preset.PONYTAIL, 0xC86A2A, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("townsfolk_merchant", look(HairCode.Preset.BOWL, 0x8A8A8A, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("townsfolk_cook", look(HairCode.Preset.TOPKNOT, 0x141418, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("townsfolk_student", look(HairCode.Preset.SPIKY, 0x141418, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("townsfolk_student_b", look(HairCode.Preset.PONYTAIL, 0x141210, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("townsfolk_master", look(HairCode.Preset.SAGE, 0xE8E6E0, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("townsfolk_guard", look(HairCode.Preset.BUZZ, 0x5A3A20, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.CAP)),
+            Map.entry("townsfolk_traveler", look(HairCode.Preset.WILD, 0x4A2E1A, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.CAPE)));
 
     private NpcLooks() {}
 
@@ -91,7 +103,9 @@ public final class NpcLooks {
             Map.entry("martial_arts_master", BodyShape.LEAN), Map.entry("beerus", BodyShape.LEAN), Map.entry("whis", BodyShape.LEAN),
             Map.entry("north_kai", BodyShape.LEAN), Map.entry("grand_kai", BodyShape.LEAN), Map.entry("sproutling", BodyShape.LEAN),
             Map.entry("hit", BodyShape.LEAN), Map.entry("tournament_announcer", BodyShape.LEAN), Map.entry("training_monkey", BodyShape.LEAN),
-            Map.entry("yamu", BodyShape.LEAN), Map.entry("jewel", BodyShape.LEAN), Map.entry("ranfan", BodyShape.LEAN));
+            Map.entry("yamu", BodyShape.LEAN), Map.entry("jewel", BodyShape.LEAN), Map.entry("ranfan", BodyShape.LEAN),
+            Map.entry("townsfolk_citizen_b", BodyShape.LEAN), Map.entry("townsfolk_citizen_d", BodyShape.LEAN), Map.entry("townsfolk_student_b", BodyShape.LEAN),
+            Map.entry("townsfolk_master", BodyShape.LEAN), Map.entry("townsfolk_merchant", BodyShape.BULKY));
 
     /** The build an NPC's body is shaped to (BodyShape): athletic unless said otherwise. */
     public static int build(String skin) {

@@ -42,7 +42,9 @@ public final class NamedFighter {
     }
 
     /** What it is after, which colours what it does next. */
-    public enum Goal { TRAIN, REVENGE, RIVALRY, PROTECT, WANDER, REST }
+    public enum Goal { TRAIN, REVENGE, RIVALRY, PROTECT, WANDER, REST,
+        // the living world's ambitions (docs/LIVING_WORLD.md)
+        STRONGEST, IMPRESS_MASTER, BUSINESS, EXPLORE, FIND_STUDENT, PROTECT_TOWN }
 
     public final UUID id;
     public String name = "", epithet = "";
@@ -74,6 +76,20 @@ public final class NamedFighter {
     /** A canon character (bosses, the tournament roster) keeps its own name; a promoted fighter gets one. */
     public boolean canon;
     public int survivedDeaths;
+
+    // ---- the living world (docs/LIVING_WORLD.md): where it lives and what it does there
+    /** Its occupation id ({@code living.Occupation}), "" for a fighter with none. */
+    public String occupation = "";
+    /** The settlement it lives in, and its home there (a block position as a long; 0: none). */
+    public UUID settlement;
+    public long home;
+    /** Which of the town's looks it wears (residents). */
+    public int look;
+    /** Its mood now ({@code living.Mood} id) and until when (game time). */
+    public String mood = "";
+    public long moodUntil;
+    /** Rumors it knows (ids in the living world's store), newest last, bounded. */
+    public final java.util.Deque<UUID> knowledge = new java.util.ArrayDeque<>();
     /** The in-game day its growth is being counted for, and its level when that day began. */
     public long day = Long.MIN_VALUE;
     public int dayStartLevel;
@@ -89,6 +105,14 @@ public final class NamedFighter {
     public Rank rank() {
         return Rank.of(reputation);
     }
+
+    /** A townsperson of the living world (it has an occupation): its life is run by {@code living}, not by encounters. */
+    public boolean resident() {
+        return !occupation.isEmpty();
+    }
+
+    /** Told of every memory a character makes (the living world turns the notable ones into rumors). */
+    public static java.util.function.BiConsumer<NamedFighter, Memory> onMemory;
 
     public boolean active() {
         return status == Status.PRESENT || status == Status.AWAY || status == Status.RECOVERING;
@@ -131,6 +155,7 @@ public final class NamedFighter {
     public void remember(Memory m) {
         history.addLast(m);
         while (history.size() > NemesisData.MAX_HISTORY) history.removeFirst();
+        if (onMemory != null) onMemory.accept(this, m);
     }
 
     /** The latest memory of this kind about {@code who} (null: any), or null. */
@@ -171,6 +196,15 @@ public final class NamedFighter {
         t.putBoolean("canon", canon);
         t.putLong("day", day);
         t.putInt("dayLevel", dayStartLevel);
+        t.putString("occupation", occupation);
+        if (settlement != null) t.putUUID("settlement", settlement);
+        t.putLong("home", home);
+        t.putInt("look", look);
+        t.putString("mood", mood);
+        t.putLong("moodUntil", moodUntil);
+        ListTag kn = new ListTag();
+        for (UUID k : knowledge) kn.add(net.minecraft.nbt.NbtUtils.createUUID(k));
+        t.put("knowledge", kn);
         CompoundTag ps = new CompoundTag();
         players.forEach((k, v) -> ps.put(k.toString(), v.save()));
         t.put("players", ps);
@@ -222,6 +256,13 @@ public final class NamedFighter {
         c.canon = t.getBoolean("canon");
         c.day = t.contains("day") ? t.getLong("day") : Long.MIN_VALUE;
         c.dayStartLevel = t.getInt("dayLevel");
+        c.occupation = t.getString("occupation");
+        c.settlement = t.hasUUID("settlement") ? t.getUUID("settlement") : null;
+        c.home = t.getLong("home");
+        c.look = t.getInt("look");
+        c.mood = t.getString("mood");
+        c.moodUntil = t.getLong("moodUntil");
+        for (Tag k : t.getList("knowledge", Tag.TAG_INT_ARRAY)) c.knowledge.add(net.minecraft.nbt.NbtUtils.loadUUID(k));
         CompoundTag ps = t.getCompound("players");
         for (String k : ps.getAllKeys()) {
             try {

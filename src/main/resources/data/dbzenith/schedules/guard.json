@@ -1,0 +1,4 @@
+{"_doc": "A town guard: rounds by day and into the night, a short rest.", "blocks": [
+  {"from": 2, "to": 9, "do": "sleep"}, {"from": 9, "to": 10, "do": "eat"}, {"from": 10, "to": 14, "do": "patrol"},
+  {"from": 14, "to": 15, "do": "eat"}, {"from": 15, "to": 20, "do": "patrol"}, {"from": 20, "to": 21, "do": "social"},
+  {"from": 21, "to": 2, "do": "patrol"}]}

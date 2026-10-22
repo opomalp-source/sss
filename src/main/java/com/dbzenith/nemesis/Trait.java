@@ -15,7 +15,8 @@ import java.util.Locale;
  *   <li><b>loyal</b>: takes an ally's defeat personally, comes to an ally's aid;</li>
  *   <li><b>calm</b>: steadier, slower to hate;</li>
  *   <li><b>friendly</b>: quicker to respect and befriend;</li>
- *   <li><b>ambitious</b>: trains harder, chases reputation and new forms.</li>
+ *   <li><b>ambitious</b>: trains harder, chases reputation and new forms;</li>
+ *   <li><b>curious</b>: wanders, asks, collects rumors; <b>shy</b>: keeps to itself; <b>greedy</b>: haggles, wants paying.</li>
  * </ul>
  */
 public enum Trait {
@@ -26,7 +27,11 @@ public enum Trait {
     LOYAL(new Temper.Shift(0.0, 0.0, 0.0, 0.0, 0.20, 0.10, 0.0, 0.05)),
     CALM(new Temper.Shift(-0.05, 0.10, 0.20, -0.05, 0.05, 0.0, -0.20, 0.10)),
     FRIENDLY(new Temper.Shift(-0.10, 0.0, 0.05, -0.10, 0.15, 0.0, 0.0, 0.0)),
-    AMBITIOUS(new Temper.Shift(0.05, 0.0, 0.0, 0.10, 0.0, 0.10, 0.05, 0.05));
+    AMBITIOUS(new Temper.Shift(0.05, 0.0, 0.0, 0.10, 0.0, 0.10, 0.05, 0.05)),
+    // the living world's temperaments (docs/LIVING_WORLD.md): they colour conversations and daily life
+    CURIOUS(new Temper.Shift(0.0, -0.05, -0.05, 0.0, 0.0, 0.05, 0.05, 0.0)),
+    SHY(new Temper.Shift(-0.10, 0.10, 0.05, -0.05, 0.0, -0.10, -0.05, 0.0)),
+    GREEDY(new Temper.Shift(0.05, 0.0, 0.0, 0.05, -0.15, 0.0, 0.0, 0.0));
 
     public final Temper.Shift shift;
 

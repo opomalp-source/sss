@@ -161,7 +161,7 @@ public final class Nemesis {
         long now = k.level().getGameTime();
         NamedFighter c = new NamedFighter(id);
         long seed = id.getMostSignificantBits() ^ id.getLeastSignificantBits();
-        AiProfile prof = AiProfile.of(k);
+        AiProfile prof = k.aiProfile();
         NemesisData d = data();
         c.type = typeId(k);
         c.name = canonName != null ? canonName : Names.pick(path(k), seed, d == null ? List.of() : d.all());
@@ -534,7 +534,7 @@ public final class Nemesis {
                 c.remember(new Memory(Memory.Kind.INTERRUPTED, now, p.getUUID(), ""));
                 b.shift(-10, 5);
             }
-            if (b.state.friendly() && k.sparWith == null && k.getTarget() != p) {      // a friend struck: a spar
+            if (b.state.friendly() && k.aiMayFight() && k.sparWith == null && k.getTarget() != p) {      // a friend struck: a spar
                 k.sparWith = p.getUUID();
                 k.setTarget(p);
                 refresh(c, b, now);
@@ -677,6 +677,7 @@ public final class Nemesis {
             if (k.sparWith != null) Spars.tick(c, k, now);
             if (k.protecting != null) Encounters.guard(c, k, s);
             if (k.training) training(c, k, now);
+            if (c.resident()) k.leaveAt = 0;                                           // townsfolk are at home here
             if (k.leaveAt > 0 && now >= k.leaveAt && (k.getTarget() == null || k.spared != null) && !com.dbzenith.combat.KnockOut.isDown(k)) {
                 depart(c, k, NamedFighter.Status.AWAY, "leaves");
             }

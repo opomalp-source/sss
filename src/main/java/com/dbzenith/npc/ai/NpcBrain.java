@@ -100,7 +100,7 @@ public final class NpcBrain {
 
     public NpcBrain(KiFighter mob) {
         this.mob = mob;
-        this.profile = AiProfile.of(mob);
+        this.profile = mob.aiProfile();
         this.seed = mob.getUUID().getMostSignificantBits() ^ mob.getUUID().getLeastSignificantBits();
         this.personality = profile.born(seed);
         this.style = personality.style();

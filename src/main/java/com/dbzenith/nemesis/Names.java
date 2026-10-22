@@ -25,7 +25,12 @@ public final class Names {
             "namekian_warrior", List.of("Oboen", "Tymp", "Cymba", "Lutar", "Banjol", "Kazu", "Sitarr", "Harpen", "Celest", "Marimba"),
             "android_unit", List.of("Unit R-41", "Unit R-46", "Unit R-52", "Unit R-58", "Unit R-63", "Unit R-67", "Unit R-74", "Unit R-79"),
             "damned_warrior", List.of("Morrow", "Gravell", "Sorrowk", "Vexan", "Dirgeon", "Ashkar", "Wrathe", "Grimald"),
-            "ogre_guard", List.of("Akabo", "Aokuro", "Kinjo", "Tetsuo", "Gongo", "Zakuro"));
+            "ogre_guard", List.of("Akabo", "Aokuro", "Kinjo", "Tetsuo", "Gongo", "Zakuro"),
+            // the people of Ginger Town, after spices
+            "resident", List.of("Nutmeg", "Clove", "Cinna", "Saffra", "Paprik", "Turmen", "Cardam", "Anisse", "Sumako", "Macey", "Tarrag",
+                    "Chervy", "Cumino", "Sansho", "Shichi", "Fenugre", "Galang", "Ajowan", "Wasab", "Mustar", "Pimento", "Sesamy", "Corian", "Lovage",
+                    "Basilo", "Thymon", "Rosmar", "Oregan", "Dillon", "Sagey", "Parsli", "Chivo", "Junipa", "Vanilo", "Licoris", "Caraway", "Borage",
+                    "Hyssop", "Marjor", "Annatto", "Nigella", "Zaatar", "Epazot", "Kokum", "Amchur", "Kalonji", "Perilla", "Mitsuba", "Tamarin", "Ginsen"));
 
     /** A name not in use (falls back to a numbered one). */
     public static String pick(String type, long seed, java.util.Collection<NamedFighter> taken) {

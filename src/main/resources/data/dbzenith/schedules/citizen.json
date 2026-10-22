@@ -1,0 +1,5 @@
+{"_doc": "A town resident with no particular trade. Hours 0-24 (sunrise is 6). Activities: sleep, home, work, train, social, eat, wander, patrol, shop, travel. docs/LIVING_WORLD.md", "blocks": [
+  {"from": 22, "to": 6, "do": "sleep"}, {"from": 6, "to": 7, "do": "home"}, {"from": 7, "to": 8, "do": "eat"},
+  {"from": 8, "to": 11, "do": "wander"}, {"from": 11, "to": 12, "do": "shop"}, {"from": 12, "to": 13, "do": "eat"},
+  {"from": 13, "to": 17, "do": "social"}, {"from": 17, "to": 19, "do": "wander"}, {"from": 19, "to": 20, "do": "eat"},
+  {"from": 20, "to": 22, "do": "home"}]}

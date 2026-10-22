@@ -42,6 +42,12 @@ public final class Bond {
     public String placeShown = "";
     public String statusShown = "";
 
+    /** Conversation choices it remembers about a player (asked its name, accepted an errand...), for the living world. */
+    public final Set<String> flags = new LinkedHashSet<>();
+    /** Conversations had (the living world), and the rumors already told them (ids, newest last, bounded). */
+    public int talks;
+    public final Deque<String> told = new ArrayDeque<>();
+
     /** Dialogue lines recently said to this one (no repeats). */
     public final Deque<String> recentLines = new ArrayDeque<>();
 
@@ -101,6 +107,9 @@ public final class Bond {
         t.putString("placeShown", placeShown);
         t.putString("statusShown", statusShown);
         t.put("recent", strings(recentLines));
+        t.put("flags", strings(flags));
+        t.putInt("talks", talks);
+        t.put("told", strings(told));
         return t;
     }
 
@@ -143,6 +152,9 @@ public final class Bond {
         b.placeShown = t.getString("placeShown");
         b.statusShown = t.getString("statusShown");
         for (Tag s : t.getList("recent", Tag.TAG_STRING)) b.recentLines.add(s.getAsString());
+        read(t.getList("flags", Tag.TAG_STRING), b.flags);
+        b.talks = t.getInt("talks");
+        read(t.getList("told", Tag.TAG_STRING), b.told);
         return b;
     }
 

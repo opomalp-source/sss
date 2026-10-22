@@ -1,0 +1,4 @@
+{"_doc": "A martial arts master: teaches at the dojo, walks the town in the afternoon.", "blocks": [
+  {"from": 21, "to": 5, "do": "sleep"}, {"from": 5, "to": 7, "do": "train"}, {"from": 7, "to": 8, "do": "eat"},
+  {"from": 8, "to": 12, "do": "work"}, {"from": 12, "to": 13, "do": "eat"}, {"from": 13, "to": 16, "do": "work"},
+  {"from": 16, "to": 18, "do": "wander"}, {"from": 18, "to": 19, "do": "eat"}, {"from": 19, "to": 21, "do": "home"}]}

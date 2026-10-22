@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.160.0, 2026-10-22)
+# Handoff: where Dragon Block Zenith stands (v0.161.0, 2026-10-22)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.160.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.161.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -428,3 +428,24 @@ Built on the combat AI; the whole design, tests and limits are in `docs/NEMESIS.
 - Dev recipe: `/dbz nemesis list`, `/dbz nemesis info <name>`, `/dbz nemesis encounter Dev revenge <name>`, devshot
   name `rivals_...` opens the Rivals screen. GameTest batches run concurrently in the same place: world tests must
   clean up before their timeout (`NemesisTests.cleanup`).
+
+## The living world, stage 1 (v0.161.0, 2026-10-22)
+Skyrim/Oblivion-style townsfolk on top of the Nemesis system and the combat AI; the design, what is built, tests and
+what stage 2 still holds are in `docs/LIVING_WORLD.md` (continue from there).
+- Package `living`: `LivingData` (saved data `dbzenith_living`: settlements and their `Poi`s, rumors, fame),
+  `TownBuilder` (Ginger Town), `Resident` (entity `dbzenith:resident`, a `KiFighter` whose identity is a Nemesis
+  `NamedFighter` with `occupation`, `settlement`, `home`, `look`, `mood`, `knowledge`), `Residents` (making and peopling,
+  recovery, lost bodies, newcomers), `Schedules` (data `data/dbzenith/schedules/`), `RoutineGoal`, `FleeGoal`,
+  `TalkGoal`, `Mood`, `Social`, `Conversations` (data `data/dbzenith/conversations/`, `ConversationPackets`,
+  `client/screen/DialogueScreen`, protocol 56), `Rumors` (lines in `data/dbzenith/rumors/`), `Fame`, `Living` (clock,
+  attacks, deaths, the new-world town), `LivingCommands`, `LivingConfig` (`[living]`).
+- Hooks into older code: `KiFighter.aiProfile()` / `aiMayFight()` (the AI asks the body, residents answer from who they
+  are), `Faction.TOWNSFOLK`, `NamedFighter.resident()` and `onMemory` (rumors), residents skipped by Nemesis encounters,
+  the world simulation, the character limit and departures; `Bond.talks`/`told`.
+- New worlds get Ginger Town on the first login (never an existing world, never the GameTest server); existing worlds
+  use `/dbz settlement build nearby`. Skins: `tools/ArtGen.java only townsfolk` (`dress()` clears the anatomy's outer
+  layer under clothes, `hatless()` over the face).
+- Dev recipe: `/dbz settlement build nearby`, `/dbz settlement info`, `execute as Dev run dbz living talk
+  @e[type=dbzenith:resident,sort=nearest,limit=1]` then `dbz living choose <n>` and a devshot to see the dialogue
+  screen; `/dbz living fame Dev 120` for a famous welcome; `damage <resident> 1 minecraft:player_attack by Dev` for an
+  attack. Posing residents for screenshots: summon with `NoAI` (their bodies keep facing south).

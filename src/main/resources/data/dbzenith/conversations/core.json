@@ -1,0 +1,198 @@
+{
+  "_doc": "Conversations with townsfolk (docs/LIVING_WORLD.md). nodes: {id: {say: [{when, text: [...]}], options: [{id, text, when, do, next}]}}. Conditions: occupation, mood, trait, not_trait, personality, goal, relation, affinity_min/max, first, talks_min, fame_min/max, hour_min/max, alarm, wanted, has_rumor, flag, not_flag, fighter, stronger, fought, activity, has_town. Actions: flag:x, unflag:x, affinity:N, rivalry:N, mood:x, tell_rumor, remember[:detail], spar, close. Placeholders: {player} {npc} {occupation} {town} {mood} {fame} {level} {hour} {master} {rival} {rumor} {where:<place kind>}. No next: the conversation ends.",
+  "nodes": {
+    "root": {
+      "say": [
+        {"text": ["Hm? Oh, hello.", "Yes? Can I help you?", "Nice day, isn't it?", "Hello there, traveler."]},
+        {"when": {"first": true}, "text": ["I don't think we've met. I'm {npc}.", "A new face! Welcome to {town}. I'm {npc}.", "Oh! You're not from around here, are you? Name's {npc}."]},
+        {"when": {"first": true, "trait": "shy"}, "text": ["Oh... um, hello. I'm {npc}. Sorry, I don't talk to strangers much.", "H-hi. {npc}. That's me."]},
+        {"when": {"first": true, "occupation": "merchant"}, "text": ["Welcome, welcome! {npc}, merchant of {town}. Best prices this side of the mountains.", "A customer! I'm {npc}. If you need anything, I probably sell it."]},
+        {"when": {"first": true, "occupation": "master"}, "text": ["Hmm. Your ki is... interesting. I am {npc}, I teach at the dojo here.", "You carry yourself like a fighter. I am {npc}, master of the {town} dojo."]},
+        {"when": {"first": true, "occupation": "guard"}, "text": ["Hold on. Haven't seen you before. I'm {npc}, I keep the peace in {town}. Behave and we'll get along.", "Name's {npc}, town guard. Visitors are welcome. Trouble isn't."]},
+        {"when": {"first": true, "occupation": "student"}, "text": ["Whoa, are you a fighter too? I'm {npc}! I train at the dojo under {master}!", "Hey! I'm {npc}. I'm going to be the strongest in {town} one day!"]},
+        {"when": {"first": true, "occupation": "cook"}, "text": ["Hungry? You look hungry. I'm {npc}, I run the kitchen at the restaurant.", "Welcome! I'm {npc}. Fighters eat a lot, I know. Come by the restaurant."]},
+        {"when": {"mood": "happy"}, "text": ["Good to see you, {player}! What a day!", "Ah, {player}! I'm in a fine mood today."]},
+        {"when": {"mood": "tired"}, "text": ["*yawn* Oh, it's you, {player}. It's late...", "Mm? Sorry, I'm half asleep."]},
+        {"when": {"mood": "annoyed"}, "text": ["What is it?", "Make it quick, {player}."]},
+        {"when": {"mood": "angry"}, "text": ["Not now. I'm in no mood.", "What do YOU want?"]},
+        {"when": {"mood": "worried"}, "text": ["Did you see that? I don't feel safe today.", "Oh, {player}... Everyone's on edge."]},
+        {"when": {"mood": "excited"}, "text": ["{player}! I can't believe it's really you!", "Oh wow, oh wow, it's {player}!"]},
+        {"when": {"relation": ["ally", "training_partner", "friendly_rival"]}, "text": ["{player}! Always good to see a friend.", "There you are, {player}. I was hoping you'd come by."]},
+        {"when": {"relation": ["bitter_rival", "sworn_enemy"]}, "text": ["You. What do you want?", "I haven't forgotten, {player}."]},
+        {"when": {"fame_min": 100, "talks_min": 2}, "text": ["People talk about you, you know, {player}.", "Everyone in {town} knows your name now, {player}."]},
+        {"when": {"fame_min": 300}, "text": ["The {player}? Here, in {town}? Wait till I tell everyone!", "I've heard so much about you, {player}. Is it all true?"]},
+        {"when": {"alarm": true}, "text": ["Not now! Can't you see we're under attack?", "Get inside! It's not safe!"]},
+        {"when": {"alarm": true, "fighter": true}, "text": ["Stay sharp, {player}. They could come back any moment.", "If you can fight, help us hold them off!"]},
+        {"when": {"wanted": true}, "text": ["You've got some nerve showing your face here after what you did.", "Stay away from me! Guards!"]},
+        {"when": {"activity": "sleep"}, "text": ["Wha-? It's the middle of the night! Go to bed, {player}.", "Zzz... huh? Come back in the morning."]},
+        {"when": {"activity": "work", "occupation": "merchant", "trait": "greedy"}, "text": ["Browsing or buying? Browsing costs nothing. Today.", "Everything's for sale, {player}. For the right price."]}
+      ],
+      "options": [
+        {"id": "who", "text": "Who are you?", "next": "about"},
+        {"id": "work", "text": "What do you do here?", "next": "work"},
+        {"id": "news", "text": "Heard any news?", "when": {"wanted": false}, "next": "news"},
+        {"id": "town", "text": "Tell me about {town}.", "when": {"has_town": true, "wanted": false}, "next": "town"},
+        {"id": "directions", "text": "Where can I find...", "when": {"has_town": true, "wanted": false}, "next": "directions"},
+        {"id": "mind", "text": "What's on your mind?", "when": {"talks_min": 2, "wanted": false}, "next": "mind"},
+        {"id": "spar", "text": "Want to spar?", "when": {"fighter": true, "wanted": false, "alarm": false}, "next": "spar_ask"},
+        {"id": "master", "text": "Will you train me?", "when": {"occupation": "master", "wanted": false}, "next": "train_talk"},
+        {"id": "apologize", "text": "I'm sorry for what happened.", "when": {"wanted": true, "not_flag": "apologized"}, "do": ["flag:apologized", "affinity:4"], "next": "apology"},
+        {"id": "bye", "text": "Goodbye."}
+      ]
+    },
+    "about": {
+      "say": [
+        {"text": ["I'm {npc}. I've lived in {town} a while now.", "Just {npc}. Nothing special about me."]},
+        {"when": {"occupation": "master"}, "text": ["I am {npc}. I have walked the path of martial arts longer than you have been alive, I'd wager.", "{npc}. I teach. Once I fought; now I watch others learn what I learned the hard way."]},
+        {"when": {"occupation": "guard"}, "text": ["{npc}. I watch the roads and keep the peace. Somebody has to.", "I'm {npc}, the guard. If anything dangerous comes to {town}, it goes through me first."]},
+        {"when": {"occupation": "student"}, "text": ["I'm {npc}! I'm a student at the dojo. {master} says I've got potential!", "{npc}, student of {master}. I train every day so I can be as strong as the fighters you hear about!"]},
+        {"when": {"occupation": "merchant"}, "text": ["{npc}, purveyor of fine goods. My family has kept shop in {town} for three generations.", "A merchant. Capsules, tools, rice, you name it."]},
+        {"when": {"occupation": "cook"}, "text": ["{npc}. I cook. Big portions. Fighters eat like ten people, you know.", "I run the kitchen. Ever tried my fried dumplings? No? We'll fix that."]},
+        {"when": {"trait": "curious"}, "text": ["I'm {npc}. And you? Where are you from? What's it like out there?", "{npc}. I've always wanted to see the world beyond {town}."]},
+        {"when": {"trait": "shy"}, "text": ["Me? Oh, I'm... nobody really. Just {npc}.", "I-I'm {npc}. I keep to myself, mostly."]}
+      ],
+      "options": [
+        {"id": "back", "text": "I had another question.", "next": "root"},
+        {"id": "bye", "text": "Nice to meet you.", "do": ["affinity:1"]}
+      ]
+    },
+    "work": {
+      "say": [
+        {"text": ["Oh, a bit of this and that. Mostly I enjoy the quiet life in {town}.", "I help out where I can. It's a small town; everyone does a bit of everything."]},
+        {"when": {"occupation": "merchant"}, "text": ["I keep the shop, {where:shop} from here. Buy low, sell high, smile a lot.", "Trade! Goods come in from the city, I sell them on. Business has been good lately."]},
+        {"when": {"occupation": "cook"}, "text": ["I run the kitchen at the restaurant, {where:tavern} from here. Come at noon or evening.", "Cooking! Breakfast at dawn, lunch at noon, dinner after sunset. The fighters from the dojo eat most of it."]},
+        {"when": {"occupation": "guard"}, "text": ["I walk the rounds: the roads, the gates, the plaza. Day and night, in shifts.", "Keeping {town} safe. Bandits, wild animals, the odd hothead who thinks he's the strongest in the world."]},
+        {"when": {"occupation": "student"}, "text": ["I train at the dojo! Mornings and afternoons. {master} is tough, but fair.", "Training, training, training! I'm going to master the Ki Blast, then something even bigger."]},
+        {"when": {"occupation": "master"}, "text": ["I teach the young ones at the dojo. Discipline first, then technique, then power.", "I run the dojo. Strength without control is just noise."]}
+      ],
+      "options": [
+        {"id": "back", "text": "I see. Something else...", "next": "root"},
+        {"id": "bye", "text": "I'll let you get back to it."}
+      ]
+    },
+    "news": {
+      "say": [
+        {"when": {"has_rumor": true}, "text": ["Well, I did hear something... {rumor}", "Funny you should ask. {rumor}", "You didn't hear? {rumor}"]},
+        {"when": {"has_rumor": false}, "text": ["Nothing new, I'm afraid. Quiet days in {town}.", "Hmm, no. Nothing I haven't told you already.", "Not a thing. Maybe ask around."]},
+        {"when": {"has_rumor": false, "occupation": "merchant"}, "text": ["Nothing yet. But merchants hear everything sooner or later. Come back tomorrow."]},
+        {"when": {"has_rumor": true, "occupation": "guard"}, "text": ["Between you and me... {rumor}", "Keep this quiet. {rumor}"]},
+        {"when": {"has_rumor": true, "trait": "curious"}, "text": ["Oh, oh! Did you hear? {rumor}"]}
+      ],
+      "options": [
+        {"id": "more", "text": "Anything else?", "when": {"has_rumor": true}, "next": "news"},
+        {"id": "back", "text": "Interesting. Something else...", "next": "root"},
+        {"id": "bye", "text": "Thanks for telling me."}
+      ]
+    },
+    "town": {
+      "say": [
+        {"text": ["{town}? It's a quiet place. A plaza with a fountain, a shop, a restaurant and a dojo. Everybody knows everybody.", "Small, but it's home. The dojo draws fighters from all over, you know."]},
+        {"when": {"occupation": "guard"}, "text": ["Two roads, two gates, one fountain. Easy to watch, hard to sneak into. Just how I like it."]},
+        {"when": {"occupation": "master"}, "text": ["Peaceful people. Too peaceful, perhaps; they forget the world outside has monsters in it."]},
+        {"when": {"alarm": true}, "text": ["Normally it's peaceful! Today... today I'm not so sure."]}
+      ],
+      "options": [
+        {"id": "dojo", "text": "Who runs the dojo?", "next": "dojo"},
+        {"id": "back", "text": "Something else...", "next": "root"},
+        {"id": "bye", "text": "Thanks."}
+      ]
+    },
+    "dojo": {
+      "say": [
+        {"text": ["That would be {master}. Strict, but the students adore them.", "{master}. They say they once fought in the World Martial Arts Tournament."]},
+        {"when": {"occupation": "master"}, "text": ["I do. My door is open to anyone willing to sweat."]}
+      ],
+      "options": [
+        {"id": "back", "text": "Something else...", "next": "root"},
+        {"id": "bye", "text": "Thanks."}
+      ]
+    },
+    "directions": {
+      "say": ["What are you looking for?"],
+      "options": [
+        {"id": "to_dojo", "text": "The dojo.", "next": "dir_dojo"},
+        {"id": "to_shop", "text": "The shop.", "next": "dir_shop"},
+        {"id": "to_tavern", "text": "Somewhere to eat.", "next": "dir_tavern"},
+        {"id": "to_gate", "text": "The way out of town.", "next": "dir_gate"},
+        {"id": "back", "text": "Never mind.", "next": "root"}
+      ]
+    },
+    "dir_dojo": {"say": ["The dojo is {where:dojo}. Follow the sound of shouting."], "options": [{"id": "back", "text": "Thanks. One more thing...", "next": "root"}, {"id": "bye", "text": "Thanks."}]},
+    "dir_shop": {"say": ["The shop is {where:shop}. The market stalls are {where:market}."], "options": [{"id": "back", "text": "Thanks. One more thing...", "next": "root"}, {"id": "bye", "text": "Thanks."}]},
+    "dir_tavern": {"say": ["The restaurant is {where:tavern}. Tell them {npc} sent you."], "options": [{"id": "back", "text": "Thanks. One more thing...", "next": "root"}, {"id": "bye", "text": "Thanks."}]},
+    "dir_gate": {"say": ["The nearest gate is {where:gate}. Safe travels."], "options": [{"id": "back", "text": "Thanks. One more thing...", "next": "root"}, {"id": "bye", "text": "Thanks."}]},
+    "mind": {
+      "say": [
+        {"text": ["Oh, nothing much. Just enjoying the day.", "Hmm... I was thinking about dinner, honestly."]},
+        {"when": {"goal": "strongest"}, "text": ["I want to be the strongest in {town}. No, the world! You'll see.", "Every day I get a little stronger. One day nobody will be able to beat me."]},
+        {"when": {"goal": "impress_master"}, "text": ["I want {master} to notice me. I train harder than anyone, but they never say a word.", "If I could just land one clean hit on {master} in practice..."]},
+        {"when": {"goal": "find_student"}, "text": ["I am looking for a student worthy of everything I know. They are rare.", "Teaching is easy. Finding someone worth teaching is hard."]},
+        {"when": {"goal": "business"}, "text": ["Business, business. A good month means a good year.", "If more travelers came through, I could finally expand."]},
+        {"when": {"goal": "business", "trait": "greedy"}, "text": ["Money, {player}. Money is on my mind. It always is."]},
+        {"when": {"goal": "explore"}, "text": ["I keep thinking about what's past the mountains. One day I'll go and see.", "Have you been far? I'd love to travel someday."]},
+        {"when": {"goal": "protect_town"}, "text": ["Keeping these people safe. That's all I think about.", "Something's coming. I can feel it. I want {town} to be ready."]},
+        {"when": {"goal": "rest"}, "text": ["Peace and quiet. That's all I want out of life.", "A nap in the sun by the fountain. Perfect."]},
+        {"when": {"mood": "worried"}, "text": ["Honestly? I'm scared. With all these fighters around, how long until one comes here?"]}
+      ],
+      "options": [
+        {"id": "encourage", "text": "I'm sure it'll work out.", "do": ["affinity:2", "mood:happy"], "next": "root"},
+        {"id": "back", "text": "I see.", "next": "root"},
+        {"id": "bye", "text": "Take care."}
+      ]
+    },
+    "spar_ask": {
+      "say": [
+        {"text": ["A spar? Sure, I could use the practice. Go easy... or don't!", "You're on! Just a spar, mind."]},
+        {"when": {"stronger": true}, "text": ["You want to spar with me? Ha! All right, I'll go easy on you.", "Bold. Very well, let's see what you've got."]},
+        {"when": {"stronger": false}, "text": ["Me? Against you? Well... I'll learn something, at least.", "All right! Don't hold back too much, I want to learn."]},
+        {"when": {"trait": "shy"}, "text": ["Oh... um, okay. If you want to."]},
+        {"when": {"mood": ["tired", "worried"]}, "text": ["Not today, I'm not up to it.", "Maybe another time."]}
+      ],
+      "options": [
+        {"id": "start", "text": "Let's go!", "when": {"mood": ["happy", "relaxed", "excited", "annoyed", "angry"]}, "do": ["spar", "remember:spar"]},
+        {"id": "back", "text": "Actually, never mind.", "next": "root"}
+      ]
+    },
+    "train_talk": {
+      "say": [
+        {"text": ["Train you? Show me first that you can listen. Spar with my students, come back often, and we'll see.", "I don't take students lightly. Prove your commitment."]},
+        {"when": {"relation": ["ally", "training_partner", "friendly_rival"]}, "text": ["You have come far. Keep your guard up and your breathing steady; power follows control.", "Your stance is better than last time. Remember: a ki blast is a breath, not a shout."]},
+        {"when": {"stronger": false}, "text": ["You are already stronger than I am. What could I teach you? Patience, perhaps."]}
+      ],
+      "options": [
+        {"id": "commit", "text": "I'm committed.", "when": {"not_flag": "asked_training"}, "do": ["flag:asked_training", "affinity:3"], "next": "root"},
+        {"id": "back", "text": "I'll think about it.", "next": "root"}
+      ]
+    },
+    "apology": {
+      "say": [
+        {"text": ["Sorry doesn't heal bruises. But... I'll remember you said it.", "Hmph. Words are cheap. Show me with deeds."]},
+        {"when": {"trait": "friendly"}, "text": ["Well... everyone makes mistakes. Just don't do it again."]},
+        {"when": {"trait": "vengeful"}, "text": ["I don't forgive that easily."]}
+      ],
+      "options": [{"id": "bye", "text": "I understand."}]
+    }
+  },
+  "barks": {
+    "famous": [
+      {"text": ["Hey, isn't that {player}?", "Look, it's {player}! The one everyone talks about!", "{player}! Welcome to {town}!"]},
+      {"when": {"occupation": "student"}, "text": ["{player}! Will you watch me train? Please?", "Wow, the real {player}! I'm a huge fan!"]},
+      {"when": {"occupation": "merchant"}, "text": ["{player}! A hero like you needs supplies, surely?"]},
+      {"when": {"trait": "competitive", "fighter": true}, "text": ["So you're {player}. You don't look so tough to me.", "{player}, huh? One day I'll beat you."]}
+    ],
+    "friend": [
+      {"text": ["Hey, {player}!", "Good to see you again, {player}.", "{player}! Over here!"]}
+    ],
+    "wanted": [
+      {"text": ["You! Stay back!", "It's the one who attacked us!", "Guards! Guards!"]},
+      {"when": {"fighter": true}, "text": ["You've got some nerve coming back here.", "Leave {town}. Now."]}
+    ],
+    "smalltalk": [
+      {"text": ["Lovely weather today.", "Did you try the new dumplings at the restaurant?", "The fountain's running again, I see.", "My back's been killing me all week.", "Have you seen the students training? So much energy."]},
+      {"when": {"occupation": "guard"}, "text": ["Quiet shift. I like quiet shifts.", "Keep your eyes open on the east road tonight."]},
+      {"when": {"occupation": "student"}, "text": ["{master} made us do a thousand push-ups today!", "I almost had my ki blast stable this morning!"]},
+      {"when": {"occupation": "merchant"}, "text": ["Prices are up again. Don't ask me why.", "Business is slow. Tell your friends about my shop!"]},
+      {"when": {"mood": "worried"}, "text": ["I don't like how many fighters are around lately.", "I heard there was trouble on the roads."]}
+    ]
+  }
+}

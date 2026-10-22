@@ -4605,3 +4605,44 @@ on the combat AI's foundation (one personality system, per-opponent learning). E
   Saiyan (gold hair), greeted Dev, lost (humiliated), got away, came back for revenge with a Saiyan line; the Rivals
   screen. Fixed on the way: the spared credit (the game forgets the last attacker after five seconds), duplicate
   memories, a stale status, the overlapping tabs, bare skin under a form's raised hairline.
+
+## 2026-10-22 — The living world, stage 1 (v0.161.0)
+The user's request after the Nemesis system: NPCs who live in a world after Skyrim and Oblivion (homes, jobs, daily
+routines, moods, goals, conversations, gossip, teaching, quests, companions, travel), built on the two systems before
+it with no second identity, memory, personality or relationship system. This release is stage 1; stage 2
+(companions, masters' lessons, dynamic quests, travelers) is planned in `docs/LIVING_WORLD.md`, which has the details.
+
+- **Ginger Town** (`living.TownBuilder`): a round clearing levelled into the land, crossing roads with gates, lamps
+  and hedges, a plaza with a fountain, benches and market stalls, seven dome houses with two beds each, a shop, a
+  restaurant, the dojo, trees and flower beds; every place a resident uses is a registered point of interest. New
+  worlds get it once near spawn on dry, flat land; existing worlds never on their own (`/dbz settlement build
+  [nearby]`).
+- **Townsfolk** (`living.Resident`, `dbzenith:resident`): each is a Nemesis character with an occupation (citizen,
+  merchant, cook, student, master, guard), a home, a look and a temperament fit for the trade (new traits: curious,
+  shy, greedy). Eleven original townsfolk skins from ArtGen with 3D hair. Fighters fight with the combat AI and defend
+  the town (`Faction.TOWNSFOLK`); civilians flee home. Recovery at home, lost bodies replaced, the dead mourned,
+  newcomers. Residents stay out of the Nemesis encounters, world simulation and character limit.
+- **Daily life:** data-driven schedules per occupation, lived each resident's own way (an hour earlier or later, a day
+  off, shy, competitive, curious, tired, worried, an alert); routines that walk them there and do it (asleep in their
+  own beds, minding the counter, drills at the dojo, the guards' round, wandering), layered by distance to players;
+  moods and goals; chats between residents that move their bonds and pass on news, overheard by players nearby; dojo
+  drills; greetings for famous players and friends, warnings for wanted ones.
+- **Conversations:** data-driven branching nodes with conditions on the real record (trade, mood, traits, goal,
+  relationship, first meeting, fame, the hour, an alert, wanted, news, flags) and actions (flags, affinity, mood, tell
+  news, remember, spar); a dialogue screen (number keys, the world in view); every pick checked on the server.
+- **Rumors and fame:** the Nemesis system's notable memories and the town's own events become rumors, heard first where
+  they happened, passed on in chats, and spread to other towns by trade once a day; told to the player they concern,
+  they say so. Fame grows with beating known fighters and defending towns; a new tier is news.
+- **World events:** an attack on a resident alerts the town (civilians run, fighters defend, the attacker is wanted and
+  remembered, it is news); guards see off monsters and invaders inside the town.
+- **Config** `[living]`, commands `/dbz settlement build|list|info|alarm`, `/dbz living rumors|fame|talk|choose`.
+  Protocol 56.
+- **Tests:** `LivingTests` (8); 349 GameTests pass, twice in a row. Two older tests depended on where the framework
+  placed them and broke under the new batch order: the planet-transmission test (its landing chunk could be open sea:
+  it now has dry land) and the enemy-factions test (now fought in a closed pen of its own).
+- **Dev client:** two towns built (a coast, a forest clearing); lunch at the restaurant, an overheard chat naming the
+  real master, beds at night with the guards on patrol, the conversation screen (welcome for a famous player, news
+  about you), an attack answered by the guards, students and master. Fixed from the screenshots: clothes and faces
+  under the painted anatomy's outer layer (also the Saiyan Warrior's hidden face, regenerated), a square slab on the
+  sea, bare grounds, sleepers woken by their own routine, identical people in two towns, names running out, a dialogue
+  panel hiding the person you talk to.

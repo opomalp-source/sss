@@ -19,6 +19,7 @@ public class ArtGen {
             if (args[1].equals("training_dummy")) TrainingDummy.make();
             if (args[1].equals("meters")) MeterArt.all();
             if (args[1].equals("masters")) NpcArt.masters();
+            if (args[1].equals("townsfolk")) NpcArt.townsfolk();                  // the living world's people (v0.161.0)
             if (args[1].equals("saiyan_warrior")) NpcArt.saiyanWarrior();          // the Nemesis system's rival (v0.160.0)
             if (args[1].equals("gear")) Gear.all();                           // the clothes (the clothing rework)
             System.out.println("ArtGen done: " + args[1]);
@@ -548,6 +549,7 @@ public class ArtGen {
             namekianWarrior();
             enma();
             saiyanWarrior();
+            townsfolk();
             ogre("ogre_clerk_red", 0xFFD84A3A, false);
             ogre("ogre_clerk_blue", 0xFF4A78D8, false);
             ogre("ogre_guard", 0xFFC8402E, true);
@@ -624,6 +626,35 @@ public class ArtGen {
                 Canvas t = new Canvas(128, 128);
                 s.paint(t);
                 for (int y = 0; y < 128; y++) for (int x = 0; x < 128; x++) over(x, y, t.get(x, y));
+                return this;
+            }
+
+            /** Paints clothes like {@link #paint}, and clears the outer layer over every clothed pixel (the painted anatomy's
+             *  muscles live there and would show through a shirt). */
+            Npc dress(Hd.HdSkin s) {
+                Canvas t = new Canvas(128, 128);
+                s.paint(t);
+                for (int y = 0; y < 128; y++) for (int x = 0; x < 128; x++) {
+                    int p = t.get(x, y);
+                    if ((p >>> 24) == 0) continue;
+                    over(x, y, p);
+                    int[] o = outer(x / 2, y / 2);
+                    if (o != null) for (int dy = 0; dy < 2; dy++) for (int dx = 0; dx < 2; dx++) c.set(o[0] * 2 + dx, o[1] * 2 + dy, 0);
+                }
+                return this;
+            }
+
+            /** The outer-layer texel over a base texel (64x64 layout), or null for the head and anything else. */
+            static int[] outer(int x, int y) {
+                if (y >= 16 && y < 32 && x < 56) return new int[]{x, y + 16};                 // right leg, body, right arm
+                if (y >= 48 && x >= 16 && x < 32) return new int[]{x - 16, y};                // left leg
+                if (y >= 48 && x >= 32 && x < 48) return new int[]{x + 16, y};                // left arm
+                return null;
+            }
+
+            /** Clears the head's outer layer (the painted anatomy fills it with plain skin, over the face). */
+            Npc hatless() {
+                for (int y = 0; y < 32; y++) for (int x = 64; x < 128; x++) c.set(x, y, 0);
                 return this;
             }
 
@@ -749,8 +780,89 @@ public class ArtGen {
         /** A Saiyan warrior (the Nemesis rival): tanned, in Saiyan battle armour (its shoulder pads are 3D, its wild hair and
          *  tail are parts: NpcLooks), dark eyes, heavy brows. */
         static void saiyanWarrior() throws IOException {
-            new Npc().body("athletic", 0xFFE6B890).layer("entity/gear/battle_armor_top.png").layer("entity/gear/battle_armor_pants.png")
+            new Npc().body("athletic", 0xFFE6B890).hatless().layer("entity/gear/battle_armor_top.png").layer("entity/gear/battle_armor_pants.png")
                     .layer("entity/gear/battle_armor_boots.png").face(3, 0xFF1A1414, true, 2, 0xFF141010, 3, 0).scalp(0xFF1C1A1E).save("saiyan_warrior");
+        }
+
+        /** A townsperson's clothes (the living world, v0.161.0): a top, trousers or a skirt, shoes, an optional apron or belt. */
+        static Hd.HdSkin outfit(int top, int bottom, int shoes, int belt, int apron, boolean skirt, boolean longSleeves, boolean stripes, int seed) {
+            int[] t = ramp(top, 6), b = ramp(bottom, 6), s = ramp(shoes, 4), bl = belt == 0 ? null : ramp(belt, 4), ap = apron == 0 ? null : ramp(apron, 5);
+            Hd.HdSkin k = new Hd.HdSkin();
+            k.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                if (bl != null && vv > 0.8 && vv < 0.88) return row(vv, 0.805, h) ? ink(bl) : flat(bl, f, 0);
+                if (ap != null && f == Face.FRONT && vv > 0.3 && Math.abs(uu - 0.5) < 0.36) return cloth(ap, f, x, y, w, h, seed + 1);
+                if (ap != null && f == Face.FRONT && vv <= 0.3 && Math.abs(uu - 0.5) < 0.1) return flat(ap, f, 0);           // the apron's bib
+                if (vv >= 0.88) return cloth(b, f, x, y, w, h, seed + 2);
+                if (stripes && (y * 4 / h) % 2 == 0 && vv > 0.12) return flat(ramp(0xFFF2F2F4, 4), f, 0);
+                if (f == Face.FRONT && vv < 0.1 && Math.abs(uu - 0.5) < 0.16 - vv) return ink(t);                              // the collar
+                return cloth(t, f, x, y, w, h, seed + 3);
+            };
+            k.arm = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (!longSleeves && vv > 0.36) return 0;
+                if (vv > 0.86) return 0;
+                if (stripes && (y * 4 / h) % 2 == 0) return flat(ramp(0xFFF2F2F4, 4), f, 0);
+                return vv > 0.82 || !longSleeves && vv > 0.32 ? ink(t) : cloth(t, f, x, y, w, h, seed + 4);
+            };
+            k.leg = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (vv > 0.84 || f == Face.BOTTOM) return row(vv, 0.845, h) ? ink(s) : flat(s, f, 0);
+                if (ap != null && f == Face.FRONT && vv < 0.4) return cloth(ap, f, x, y, w, h, seed + 5);
+                if (skirt && vv > 0.55) return 0;
+                return cloth(b, f, x, y, w, h, seed + 6);
+            };
+            return k;
+        }
+
+        /** A martial artist's gi: a wrap top crossed at the chest, a belt, loose trousers tied at the ankle, bare feet or slippers. */
+        static Hd.HdSkin gi(int top, int bottom, int belt, int seed) {
+            int[] t = ramp(top, 6), b = ramp(bottom, 6), bl = ramp(belt, 4), sl = ramp(0xFF2A2420, 4);
+            Hd.HdSkin k = new Hd.HdSkin();
+            k.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                if (vv > 0.78 && vv < 0.88) return row(vv, 0.785, h) || row(vv, 0.875, h) ? ink(bl) : flat(bl, f, 0);
+                if (vv >= 0.88) return cloth(b, f, x, y, w, h, seed);
+                if (f == Face.FRONT && Math.abs((uu - 0.5) - (0.32 - vv * 0.4)) < 0.03 && vv < 0.78) return ink(t);            // the crossed lapel
+                if (f == Face.FRONT && vv < 0.32 && Math.abs(uu - 0.5) < 0.3 - vv * 0.9) return 0;                             // the open neck
+                return cloth(t, f, x, y, w, h, seed + 1);
+            };
+            k.arm = (f, x, y, w, h) -> v(y, h) > 0.5 ? 0 : v(y, h) > 0.46 ? ink(t) : cloth(t, f, x, y, w, h, seed + 2);
+            k.leg = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (vv > 0.88 || f == Face.BOTTOM) return flat(sl, f, 0);
+                if (vv > 0.8) return row(vv, 0.805, h) ? ink(b) : cloth(b, f, x, y, w, h, seed + 3);
+                return cloth(b, f, x, y, w, h, seed + 4);
+            };
+            return k;
+        }
+
+        /** The people of a town (the living world): citizens, a merchant, a cook, students, a master, a guard and a traveler. */
+        static void townsfolk() throws IOException {
+            new Npc().body("athletic", 0xFFEEC6A0).hatless().dress(outfit(0xFFF2F0EA, 0xFF34508A, 0xFF5A3A22, 0xFF3A2A1A, 0, false, false, false, 801))
+                    .face(1, 0xFF4A3220, true, 1, 0xFF5A3A20, 1, 1).scalp(0xFF5A3A20).save("townsfolk_citizen_a");
+            new Npc().body("lean", 0xFFF2D2BC).hatless().dress(outfit(0xFFE48AA8, 0xFF3A4C8A, 0xFF2A2A30, 0, 0, true, true, false, 811))
+                    .face(4, 0xFF2A1A12, true, 0, 0xFF1A1414, 1, 2).scalp(0xFF1A1414).save("townsfolk_citizen_b");
+            new Npc().body("athletic", 0xFFC08A62).hatless().dress(outfit(0xFF4A7A44, 0xFFB09A70, 0xFF3A2A1E, 0, 0, false, true, false, 821))
+                    .face(3, 0xFF2A1A10, true, 2, 0xFF141210, 0, 1).scalp(0xFF141210).save("townsfolk_citizen_c");
+            new Npc().body("lean", 0xFFE6C29C).hatless().dress(outfit(0xFFE8B83A, 0xFF6A6A72, 0xFF8A4A2A, 0, 0, false, true, false, 831))
+                    .face(4, 0xFF3A6A3A, true, 0, 0xFFC86A2A, 1, 2).scalp(0xFFC86A2A).save("townsfolk_citizen_d");
+            new Npc().body("bulky", 0xFFE6B890).hatless().dress(outfit(0xFF4A78C0, 0xFF2E2A30, 0xFF3A2A1E, 0, 0xFF8A5A34, false, false, true, 841))
+                    .face(2, 0xFF3A2A1A, true, 1, 0xFF8A8A8A, 1, 1).scalp(0xFF8A8A8A).save("townsfolk_merchant");
+            new Npc().body("athletic", 0xFFF0C8A0).hatless().dress(outfit(0xFFF6F4EE, 0xFF3A3A40, 0xFF1E1E24, 0, 0xFFE8E4DA, false, true, false, 851))
+                    .face(0, 0xFF2A1A12, true, 1, 0xFF141418, 1, 1).scalp(0xFF141418).save("townsfolk_cook");
+            new Npc().body("athletic", 0xFFF0C8A0).hatless().dress(gi(0xFFF4F2EC, 0xFFF4F2EC, 0xFF1A1A1E, 861))
+                    .face(1, 0xFF141418, true, 1, 0xFF141418, 1, 1).scalp(0xFF141418).save("townsfolk_student");
+            new Npc().body("lean", 0xFFC4895C).hatless().dress(gi(0xFFE8862A, 0xFFE8862A, 0xFF2A4A9A, 871))
+                    .face(4, 0xFF2A1A10, true, 0, 0xFF141210, 1, 2).scalp(0xFF141210).save("townsfolk_student_b");
+            new Npc().body("lean", 0xFFE0B48C).hatless().dress(gi(0xFF2A5A44, 0xFF1E3A30, 0xFFF2F0EA, 881))
+                    .face(0, 0xFF241A12, true, 1, 0xFFE8E6E0, 0, 0).scalp(0xFFE8E6E0).save("townsfolk_master");
+            new Npc().body("athletic", 0xFFEEC6A0).hatless().dress(outfit(0xFF8A845A, 0xFF5A5640, 0xFF1E1E24, 0xFF2A2420, 0, false, true, false, 891))
+                    .face(3, 0xFF3A2A1A, true, 2, 0xFF5A3A20, 0, 0).scalp(0xFF5A3A20).save("townsfolk_guard");
+            new Npc().body("athletic", 0xFFD8A878).hatless().layer("entity/gear/hoodie_top.png", 0xC8B490).layer("entity/gear/hoodie_pants.png", 0x8A7A60)
+                    .layer("entity/gear/hoodie_boots.png").face(3, 0xFF3A2A1A, true, 2, 0xFF4A2E1A, 0, 1).scalp(0xFF4A2E1A).save("townsfolk_traveler");
         }
 
         /** A soldier of the tyrant's army: a green-skinned alien in white armour with purple pads (3D) and a scouter. */

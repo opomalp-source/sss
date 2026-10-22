@@ -198,6 +198,16 @@ public class KiFighter extends Monster implements Animated {
         setPersistenceRequired();
     }
 
+    /** Its AI profile (side, temperaments, race and forms, flight): by type; town residents by who they are. */
+    public com.dbzenith.npc.ai.AiProfile aiProfile() {
+        return com.dbzenith.npc.ai.AiProfile.of(getType());
+    }
+
+    /** Whether it fights at all (civilians don't: they flee). */
+    public boolean aiMayFight() {
+        return true;
+    }
+
     /** Where it must stay to fight (the tournament ring), or null. */
     public AABB aiBounds() {
         return null;

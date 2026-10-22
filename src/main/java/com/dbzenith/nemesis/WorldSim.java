@@ -34,7 +34,7 @@ public final class WorldSim {
     /** One step (public for tests and /dbz nemesis simulate). */
     public static void step(NemesisData d, long now) {
         List<NamedFighter> active = new ArrayList<>();
-        for (NamedFighter c : d.all()) if (c.active()) active.add(c);
+        for (NamedFighter c : d.all()) if (c.active() && !c.resident()) active.add(c);           // townsfolk live their own lives (living.LivingSim)
         if (active.isEmpty()) return;
         active.sort(Comparator.comparing(c -> c.id));
         for (int i = 0; i < Math.min(BATCH, active.size()); i++) {

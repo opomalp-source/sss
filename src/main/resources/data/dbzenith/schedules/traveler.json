@@ -1,0 +1,4 @@
+{"_doc": "A visitor passing through: sees the sights, eats, trains, sleeps at the inn (a home).", "blocks": [
+  {"from": 22, "to": 6, "do": "sleep"}, {"from": 6, "to": 7, "do": "eat"}, {"from": 7, "to": 10, "do": "wander"},
+  {"from": 10, "to": 12, "do": "train"}, {"from": 12, "to": 13, "do": "eat"}, {"from": 13, "to": 17, "do": "social"},
+  {"from": 17, "to": 19, "do": "shop"}, {"from": 19, "to": 22, "do": "eat"}]}

@@ -248,9 +248,14 @@ public final class AiTests {
 
     @GameTest(template = EMPTY, timeoutTicks = 600, batch = "npc_ai_3")
     public static void npcsOfEnemySidesFightEachOther(GameTestHelper h) {
+        pen(h, true);                                                                    // a closed pen, wherever the test is placed (it may be open sea)
+        Delays.after(h, 597, () -> pen(h, false));
         KiFighter namek = fighter(h, ModNpcs.NAMEKIAN_WARRIOR.get(), new BlockPos(1, 1, 1));
         KiFighter soldier = fighter(h, ModNpcs.SPROUTLING.get(), new BlockPos(1, 1, 4));   // a Saibaman: Frieza Force, melee only, no flight
         namek.brain().setPersonality(Personality.HONORABLE);
+        AABB pair = new AABB(Vec3.atLowerCornerOf(h.absolutePos(new BlockPos(-3, 0, -3))), Vec3.atLowerCornerOf(h.absolutePos(new BlockPos(6, 6, 9))));
+        namek.brain().arena = pair;                                                      // each other only, in the pen: other tests run alongside
+        soldier.brain().arena = pair;
         cleanup(h, 600, namek, soldier);
         PlayerTeam a = team(h, "aiA", namek), b = team(h, "aiB", soldier);
         h.assertTrue(Faction.enemies(namek, soldier) && !Faction.allied(namek, soldier), "different teams: enemies");
@@ -259,12 +264,24 @@ public final class AiTests {
         namek.setTarget(soldier);
         float nm = namek.getHealth(), sm = soldier.getHealth();
         h.succeedWhen(() -> {
-            h.assertTrue(namek.getHealth() < nm, "the soldier hurts the Namekian");
+            h.assertTrue(namek.getHealth() < nm, "the soldier hurts the Namekian: " + String.join(" / ", soldier.brain().describe()) + " at " + soldier.blockPosition().subtract(namek.blockPosition()));
             h.assertTrue(soldier.getHealth() < sm, "and the Namekian fights back: " + String.join(" / ", namek.brain().describe()));
             dropTeams(h, a, b);
             namek.discard();
             soldier.discard();
+            pen(h, false);
         });
+    }
+
+    /** A closed glass pen on a stone floor (or, {@code false}, its blocks cleared again: later batches reuse the spot). */
+    private static void pen(GameTestHelper h, boolean build) {
+        for (int x = -3; x <= 5; x++)
+            for (int z = -3; z <= 8; z++)
+                for (int y = 0; y <= 5; y++) {
+                    boolean wall = x == -3 || x == 5 || z == -3 || z == 8 || y == 0 || y == 5;
+                    h.setBlock(new BlockPos(x, y, z), !build || !wall ? net.minecraft.world.level.block.Blocks.AIR
+                            : y == 0 ? net.minecraft.world.level.block.Blocks.STONE : net.minecraft.world.level.block.Blocks.GLASS);
+                }
     }
 
     @GameTest(template = EMPTY, timeoutTicks = 200, batch = "npc_ai_4")

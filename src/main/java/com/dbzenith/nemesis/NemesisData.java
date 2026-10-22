@@ -46,7 +46,7 @@ public final class NemesisData extends SavedData {
 
     public int activeCount() {
         int n = 0;
-        for (NamedFighter c : all.values()) if (c.active()) n++;
+        for (NamedFighter c : all.values()) if (c.active() && !c.resident()) n++;              // townsfolk count against the town's own limit
         return n;
     }
 
@@ -79,7 +79,7 @@ public final class NemesisData extends SavedData {
         int max = NemesisConfig.maxCharacters();
         if (activeCount() > max) {
             List<NamedFighter> active = new ArrayList<>();
-            for (NamedFighter c : all.values()) if (c.active() && c.status != NamedFighter.Status.PRESENT) active.add(c);
+            for (NamedFighter c : all.values()) if (c.active() && c.status != NamedFighter.Status.PRESENT && !c.resident()) active.add(c);
             active.sort(Comparator.comparingDouble(NemesisData::importance));
             for (NamedFighter c : active) {
                 if (activeCount() <= max) break;

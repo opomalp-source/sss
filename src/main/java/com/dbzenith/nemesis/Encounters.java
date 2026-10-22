@@ -91,7 +91,7 @@ public final class Encounters {
         Choice best = null;
         double bestScore = 0;
         for (NamedFighter c : d.knowing(p.getUUID())) {
-            if (!c.active() || c.status == NamedFighter.Status.PRESENT || c.returnAt > now || c.body != null) continue;
+            if (!c.active() || c.resident() || c.status == NamedFighter.Status.PRESENT || c.returnAt > now || c.body != null) continue;
             if (type(c) == null || c.type.contains("mr_satan") || ROSTER_TYPES.contains(path(c))) continue;
             Bond b = c.players.get(p.getUUID());
             var t = c.temper();
@@ -280,7 +280,7 @@ public final class Encounters {
 
     static List<NamedFighter> due(UUID player, long now) {
         List<NamedFighter> out = new ArrayList<>();
-        for (NamedFighter c : Nemesis.data().knowing(player)) if (c.active() && c.body == null && c.returnAt <= now) out.add(c);
+        for (NamedFighter c : Nemesis.data().knowing(player)) if (c.active() && !c.resident() && c.body == null && c.returnAt <= now) out.add(c);
         return out;
     }
 }

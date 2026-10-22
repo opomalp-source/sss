@@ -43,6 +43,8 @@ public final class InterstellarTests {
     }
     @GameTest(template="empty",batch="interstellar_trip",timeoutTicks=1400) public static void realHyperspeedAndVisitedPlanetTransmissionWork(GameTestHelper h){
         var p=TestPlayers.create(h);p.setGameMode(GameType.CREATIVE);p.setNoGravity(true);h.setBlock(1,1,1,Blocks.STONE);
+        { var lvl=h.getLevel();var cp=new net.minecraft.world.level.ChunkPos(h.absolutePos(new BlockPos(1,2,1)));             // dry land to come home to, wherever the test is placed (it may be open sea)
+          for(int dx=3;dx<=5;dx++)for(int dz=3;dz<=5;dz++){int x=cp.getMinBlockX()+dx,z=cp.getMinBlockZ()+dz;lvl.setBlockAndUpdate(new BlockPos(x,lvl.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,x,z),z),Blocks.STONE.defaultBlockState());} }
         var at=h.absolutePos(new BlockPos(1,2,1));p.teleportTo(at.getX()+.5,at.getY(),at.getZ()+.5);p.setOnGround(true);PlanetActivity.landing(p);
         h.assertTrue(ModCapabilities.getOrThrow(p).hasFlag("planet_landing:0:0:0:0/0"),"real Earth landing establishes personal visit");
         h.assertTrue(!Interstellar.begin(p,new GalaxyCatalog.Ref(IconicSystems.VEGETA,0)),"cannot jump from the ground");

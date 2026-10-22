@@ -1,0 +1,25 @@
+{
+  "_doc": "What townsfolk say about real events (docs/LIVING_WORLD.md), by rumor kind; '<kind>_you' when told to the player it is about. Placeholders: {subject} {object} {player} {detail} {place} {when}.",
+  "lines": {
+    "beat_player": ["They say {subject} beat a fighter called {object} {place}, {when}.", "{subject} knocked {object} flat {place}. People can't stop talking about it.", "I heard {object} lost to {subject} {when}. Bad luck."],
+    "beat_player_you": ["Word is {subject} beat you {place}. Is that true?", "People say {subject} got the better of you {when}. Don't let it get you down."],
+    "lost_to_player": ["{object} beat {subject} {place}, {when}. That one's a real fighter.", "Did you hear? {subject} lost to someone named {object}!"],
+    "lost_to_player_you": ["Everyone's saying you beat {subject} {when}! Nicely done.", "So you're the one who beat {subject}? The whole town's talking."],
+    "humiliated": ["{subject} got beaten and then spared {place}. Imagine the shame!", "They say someone spared {subject}'s life {when}. A fighter like that won't forget it."],
+    "humiliated_you": ["You spared {subject}? Kind of you. Or foolish. Fighters like that come back."],
+    "survived_death": ["{subject} was finished off {place}, they say... and walked away anyway. Gives me chills.", "People thought {subject} was dead. They were wrong."],
+    "new_form": ["Something big happened {place}: {subject} reached {detail}! You could feel it for miles.", "{subject} has a new form, {detail}. The ground shook, they say."],
+    "tournament_win": ["{subject} won the tournament! Everyone's talking about it.", "The champion now is {subject}. Can you believe it?"],
+    "duel": ["{subject} and {object} fought {place}, {when}. {subject} won.", "Two fighters went at it {place}: {subject} beat {object}."],
+    "retreated": ["{subject} ran from a fight {place}. Not so tough after all.", "I heard {subject} turned tail {when}."],
+    "town_attacked": ["{subject} attacked {detail} {when}! We were all terrified.", "Did you hear? {detail} was attacked by {subject}!"],
+    "town_attacked_you": ["You're the one who attacked {detail}! Stay away from me!"],
+    "player_famous": ["Have you heard of {subject}? A fighter everyone's talking about.", "There's a fighter called {subject}. People say they're becoming a legend.", "{subject}'s name is on everyone's lips lately."],
+    "player_famous_you": ["You're getting famous, you know! People talk about you all over.", "Ha! Do you know your name's on everyone's lips?"],
+    "strong_fighter": ["{subject} is making a name for themselves. A {detail}, they say.", "Watch out for {subject}. Getting stronger by the day."],
+    "training_hard": ["{subject} has been training like a madman lately.", "Have you seen {subject} at the dojo? Doesn't stop."],
+    "newcomer": ["We have a newcomer: {subject} just moved to {detail}.", "Have you met {subject}? Just moved in."],
+    "mourning": ["Poor {subject}... gone. It isn't the same without them.", "We lost {subject} {when}. I still can't believe it."],
+    "fell": ["They say {subject} is dead. Fell {place}, {when}.", "{subject} won't be fighting anyone anymore. Gone for good."]
+  }
+}

@@ -1,0 +1,3 @@
+{"_doc": "Runs the restaurant: early start, busy at meal times.", "blocks": [
+  {"from": 22, "to": 5, "do": "sleep"}, {"from": 5, "to": 6, "do": "home"}, {"from": 6, "to": 21, "do": "work"},
+  {"from": 21, "to": 22, "do": "home"}]}

@@ -13,17 +13,21 @@ import net.minecraft.world.entity.player.Player;
  *   <li>the Frieza Force (soldiers, Saibamen, Frieza) against the Namekians;</li>
  *   <li>the damned of Limbo against the other world's ogres;</li>
  *   <li>the Red Ribbon Army keeps to itself; Broly and the tournament fighters have no allies.</li>
+ *   <li>townsfolk stand together against the Frieza Force, the Red Ribbon Army and the damned.</li>
  * </ul>
  */
 public enum Faction {
-    FRIEZA_FORCE, RED_RIBBON, NAMEKIANS, OTHERWORLD, DAMNED, LONER, TOURNAMENT;
+    FRIEZA_FORCE, RED_RIBBON, NAMEKIANS, OTHERWORLD, DAMNED, LONER, TOURNAMENT,
+    /** The people of a town (docs/LIVING_WORLD.md): they stand together. */
+    TOWNSFOLK;
 
     public boolean alliedWith(Faction o) {
         return this == o && this != LONER && this != TOURNAMENT;
     }
 
     public boolean enemyOf(Faction o) {
-        return pair(this, o, FRIEZA_FORCE, NAMEKIANS) || pair(this, o, DAMNED, OTHERWORLD);
+        return pair(this, o, FRIEZA_FORCE, NAMEKIANS) || pair(this, o, DAMNED, OTHERWORLD)
+                || pair(this, o, TOWNSFOLK, FRIEZA_FORCE) || pair(this, o, TOWNSFOLK, RED_RIBBON) || pair(this, o, TOWNSFOLK, DAMNED);   // invaders
     }
 
     private static boolean pair(Faction a, Faction b, Faction x, Faction y) {
@@ -31,7 +35,7 @@ public enum Faction {
     }
 
     public static Faction of(LivingEntity e) {
-        return e instanceof KiFighter k ? AiProfile.of(k).faction() : null;
+        return e instanceof KiFighter k ? k.aiProfile().faction() : null;
     }
 
     /** Allies: never targeted, never hit on purpose, protected when hurt. */

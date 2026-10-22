@@ -354,3 +354,13 @@ to both mods folders.
   growth with the existing forms, returns and encounters, NPC-to-NPC world simulation, ranks, the Saiyan Warrior, the
   Rivals history screen. docs/NEMESIS.md.
 - [ ] Nemesis feedback from play: encounter pacing, dialogue, balance of growth and returns
+- [x] v0.161.0 The living world, stage 1: Ginger Town (built once for new worlds, by command elsewhere), townsfolk as
+  Nemesis characters with occupations, homes and original skins, data-driven daily schedules and routines (sleeping
+  in their own beds, work, training, patrols), moods and goals, social life (chats, gossip, dojo drills), branching
+  server-checked conversations with a dialogue screen, rumors from real events, town alerts, wanted players, fame.
+  docs/LIVING_WORLD.md.
+- [ ] Living world stage 2: companions and their commands, masters' lessons (existing techniques only), dynamic quests
+  from the town's state, travelers between settlements (docs/LIVING_WORLD.md section 6)
+- [ ] Living world: town-specific lines for townsfolk defending their town (they use the Nemesis rival lines now)
+- [ ] Living world feedback from play: schedules, chat frequency, conversation content, fame pacing
+- [ ] `DuelTests.leavingTheArenaLosesTheRound` still fails now and then depending on batch order

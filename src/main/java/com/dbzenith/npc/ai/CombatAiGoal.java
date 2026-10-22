@@ -30,7 +30,7 @@ public final class CombatAiGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        return enabled() && mob.brain().wantsToFight(mob.level().getGameTime());
+        return enabled() && mob.aiMayFight() && mob.brain().wantsToFight(mob.level().getGameTime());
     }
 
     @Override

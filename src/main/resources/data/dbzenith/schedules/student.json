@@ -1,0 +1,4 @@
+{"_doc": "A martial arts student: the dojo by day, friends in the evening.", "blocks": [
+  {"from": 22, "to": 6, "do": "sleep"}, {"from": 6, "to": 7, "do": "eat"}, {"from": 7, "to": 12, "do": "train"},
+  {"from": 12, "to": 13, "do": "eat"}, {"from": 13, "to": 17, "do": "train"}, {"from": 17, "to": 19, "do": "social"},
+  {"from": 19, "to": 20, "do": "eat"}, {"from": 20, "to": 22, "do": "home"}]}

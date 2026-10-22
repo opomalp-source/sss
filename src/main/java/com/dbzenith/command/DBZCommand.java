@@ -95,6 +95,8 @@ public final class DBZCommand {
                 .then(com.dbzenith.combat.CraterCommands.branch())
                 .then(com.dbzenith.npc.ai.AiCommands.branch())                      // the combat AI's debug readout
                 .then(com.dbzenith.nemesis.NemesisCommands.branch())                  // the Nemesis system
+                .then(com.dbzenith.living.LivingCommands.settlement())              // the living world: towns
+                .then(com.dbzenith.living.LivingCommands.living())                  // and their talk
                 .then(Commands.literal("apestomp").then(Commands.argument("targets", EntityArgument.players()).executes(ctx -> {
                     int count = 0;
                     for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) if (com.dbzenith.transform.ApeStomp.press(p)) count++;

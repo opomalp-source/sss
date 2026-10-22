@@ -124,6 +124,13 @@ public final class ModNpcs {
         }
     }
 
+    // ------------------------------------------------------------------ the living world (docs/LIVING_WORLD.md)
+
+    /** A townsperson: the body of a named resident (its look, trade and home come from who it is). */
+    public static final RegistryObject<EntityType<com.dbzenith.living.Resident>> RESIDENT = TYPES.register("resident",
+            () -> EntityType.Builder.<com.dbzenith.living.Resident>of(com.dbzenith.living.Resident::new, MobCategory.CREATURE)
+                    .sized(0.6f, 1.9f).clientTrackingRange(10).build("resident"));
+
     /** The fighter profile of an entity type (its techniques), or null if it is no fighter of ours. */
     public static KiFighter.Profile profileOf(EntityType<?> type) {
         var key = ForgeRegistries.ENTITY_TYPES.getKey(type);
@@ -171,6 +178,7 @@ public final class ModNpcs {
         event.put(TRAINING_CRICKET.get(), net.minecraft.world.entity.Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.3).add(Attributes.MAX_HEALTH, 10).build());
         event.put(OGRE_GUARD.get(), KiFighter.attributes(220, 10, 0.25).add(Attributes.KNOCKBACK_RESISTANCE, 0.7).build());
         event.put(DAMNED_WARRIOR.get(), KiFighter.attributes(90, 8, 0.29).build());
+        event.put(RESIDENT.get(), KiFighter.attributes(40, 4, 0.25).build());
         for (var t : TOURNAMENT_FIGHTERS.values()) event.put(t.get(), KiFighter.attributes(120, 8, 0.3).add(Attributes.KNOCKBACK_RESISTANCE, 0.3).build());
     }
 
