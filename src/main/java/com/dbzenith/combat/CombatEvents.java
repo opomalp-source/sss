@@ -172,6 +172,20 @@ public final class CombatEvents {
                     if (impact >= 0) impact = ImpactPacket.GUARD;
                 }
                 guarded = gd > 0;
+            } else if (victim instanceof com.dbzenith.npc.KiFighter kf && kf.brainOrNull() != null && kf.brainOrNull().resources().guarding()) {   // an NPC's guard (the combat AI)
+                double share = DamageCalculator.toVanilla(raw) / kf.toughness() / Math.max(1f, kf.getMaxHealth());
+                var g = com.dbzenith.npc.ai.NpcGuard.onHit(kf, kf.brainOrNull().resources(), source.getEntity(), share, isStrike || isMelee, isKi,
+                        isStrike && com.dbzenith.combat.engine.CombatEngine.pendingUnblockable, victim.level().getGameTime());
+                if (g == com.dbzenith.npc.ai.NpcGuard.Outcome.PARRY) {
+                    dealt = raw = 0;
+                    impact = ImpactPacket.PARRY;
+                } else if (g == com.dbzenith.npc.ai.NpcGuard.Outcome.BLOCK) {
+                    dealt = raw = raw * com.dbzenith.npc.ai.NpcGuard.CHIP;
+                    if (impact >= 0) impact = ImpactPacket.GUARD;
+                } else if (g == com.dbzenith.npc.ai.NpcGuard.Outcome.BREAK && impact >= 0) {
+                    impact = ImpactPacket.GUARD_BREAK;
+                }
+                guarded = g == com.dbzenith.npc.ai.NpcGuard.Outcome.PARRY || g == com.dbzenith.npc.ai.NpcGuard.Outcome.BLOCK;
             }
             float amount = !plain && (isKi || isThrow || isMelee || isStrike) ? DamageCalculator.toVanilla(raw) : event.getAmount();
             if (victim instanceof com.dbzenith.npc.KiFighter fighter) amount /= (float) fighter.toughness(); // leveled foes
@@ -200,6 +214,10 @@ public final class CombatEvents {
             if (victim instanceof com.dbzenith.npc.TrainingDummy td) td.record(dealt);   // its string of blows
         }
 
+        if (source.getEntity() != null && source.getEntity() != victim) {       // fighters watching learn from it (the combat AI)
+            double aiShare = victimData != null ? dealt / Math.max(1, victimData.getDerived().maxBody()) : event.getAmount() / Math.max(1f, victim.getMaxHealth());
+            com.dbzenith.npc.ai.AiEvents.onBlow(source.getEntity(), victim, aiShare, guarded, evaded, isKi);
+        }
         if (dealt > 0 && !evaded && source.getEntity() instanceof net.minecraft.world.entity.LivingEntity foe && foe != victim) {   // the PvP meters (CX-20)
             double share = victimData != null ? dealt / Math.max(1, victimData.getDerived().maxBody()) : event.getAmount() / Math.max(1f, victim.getMaxHealth());
             com.dbzenith.combat.meter.MeterLogic.onBlow(foe, victim, share);

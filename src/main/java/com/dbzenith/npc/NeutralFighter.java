@@ -3,7 +3,6 @@ package com.dbzenith.npc;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
@@ -19,7 +18,8 @@ public class NeutralFighter extends KiFighter {
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));
-        goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.1, false));
+        goalSelector.addGoal(2, new com.dbzenith.npc.ai.CombatAiGoal(this));
+        goalSelector.addGoal(3, new LegacyMelee(this, 1.1, false));
         goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.7));
         goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 10f));
         goalSelector.addGoal(8, new RandomLookAroundGoal(this));

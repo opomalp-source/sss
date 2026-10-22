@@ -191,6 +191,7 @@ public final class KiCombat {
             d.setKi(d.getKi() - cost);
         }
         d.setCooldown(cd, now + b.cooldown);
+        com.dbzenith.npc.ai.AiEvents.onKi(p, isCharged ? "ki:charged_blast" : "ki:rapid_blast");   // the combat AI watches
         Technique shape = Technique.builder(isCharged ? "ki:charged_blast" : "ki:rapid_blast")
                 .speed(b.speed).size((float) lerp(b.size, b.sizeMax, t)).explosion((float) lerp(b.explosion, b.explosionMax, t))
                 .life(b.life).build();

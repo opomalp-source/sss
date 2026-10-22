@@ -270,6 +270,11 @@ public final class DBZConfig {
         public final ForgeConfigSpec.DoubleValue enemyDamagePerLevel;
         public final ForgeConfigSpec.DoubleValue bossEnrageHealth;
 
+        // --- NPC combat AI (docs/COMBAT_AI.md) ---
+        public final ForgeConfigSpec.BooleanValue aiEnabled, aiFlight, aiTransform, aiFactionWars, aiMemory;
+        public final ForgeConfigSpec.IntValue aiQuality, aiDecisionTicks, aiActiveRange, aiReactionTicks, aiMemoryMaxNpcs;
+        public final ForgeConfigSpec.DoubleValue aiFormPowerShare, aiMistakes;
+
         // --- life sim ---
         public final ForgeConfigSpec.BooleanValue agingEnabled;
         public final ForgeConfigSpec.DoubleValue agingDaysPerYear;
@@ -730,6 +735,27 @@ public final class DBZConfig {
             enemyHealthPerLevel = b.comment("Health gained per enemy level (fraction of base)").defineInRange("healthPerLevel", 0.5, 0.0, 100.0);
             enemyDamagePerLevel = b.comment("Damage gained per enemy level (fraction of base)").defineInRange("damagePerLevel", 0.55, 0.0, 100.0);
             bossEnrageHealth = b.comment("Bosses enrage below this share of their health").defineInRange("bossEnrageHealth", 0.5, 0.0, 1.0);
+            b.pop();
+
+            b.comment("NPC combat AI (docs/COMBAT_AI.md): how every NPC fighter thinks in a fight").push("npc_ai");
+            aiEnabled = b.comment("Use the combat AI (off: the old walk-up-and-swing behaviour)").define("enabled", true);
+            aiQuality = b.comment("Highest AI quality: 0 light for everyone, 1 normal, 2 full (bosses and elite fighters think harder)")
+                    .defineInRange("quality", 2, 0, 2);
+            aiDecisionTicks = b.comment("Ticks between an ordinary fighter's decisions (bosses decide twice as often, light AI half as often); staggered across fighters")
+                    .defineInRange("decisionTicks", 6, 2, 40);
+            aiActiveRange = b.comment("Fighters think in full only with a player within this many blocks, or while fighting")
+                    .defineInRange("activeRange", 48, 16, 160);
+            aiReactionTicks = b.comment("Reaction time to what a foe does (ticks) for an ordinary fighter; better fighters react faster, never under 3")
+                    .defineInRange("reactionTicks", 8, 3, 40);
+            aiFlight = b.comment("Fighters who can fly take to the air").define("flight", true);
+            aiTransform = b.comment("Fighters with a form line transform (the existing forms of their race)").define("transform", true);
+            aiFormPowerShare = b.comment("How much of a form's multiplier an NPC gets on its damage: 1 + (multiplier - 1) x this")
+                    .defineInRange("formPowerShare", 0.3, 0.0, 1.0);
+            aiMistakes = b.comment("Scale of the deliberate imperfection (0: none, 1: as designed, 2: twice as sloppy)")
+                    .defineInRange("mistakes", 1.0, 0.0, 2.0);
+            aiFactionWars = b.comment("Fighters of enemy factions fight on sight (off: only when one is already fighting near the other)").define("factionWars", false);
+            aiMemory = b.comment("Bosses remember each opponent across fights (what worked and what failed)").define("memory", true);
+            aiMemoryMaxNpcs = b.comment("Most NPCs remembered (the longest unseen are forgotten first)").defineInRange("memoryMaxNpcs", 256, 8, 4096);
             b.pop();
 
             b.comment("Optional life-sim layer").push("life_sim");

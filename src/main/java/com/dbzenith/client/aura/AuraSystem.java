@@ -214,6 +214,28 @@ public final class AuraSystem {
             int stage = self && previewTech != null ? previewStage : state == null ? 0 : state.kaiokenStage();
             follow(s, p, form, tech, stage, state, self);
         }
+        if (mc.player != null) {                                                    // NPC fighters (the combat AI): their form and charge, from synced data
+            for (com.dbzenith.npc.KiFighter k : mc.level.getEntitiesOfClass(com.dbzenith.npc.KiFighter.class, mc.player.getBoundingBox().inflate(96))) {
+                int f = k.aiFlags();
+                String formId = k.aiFormId();
+                State s = STATES.get(k.getId());
+                boolean shown = (f & (com.dbzenith.npc.KiFighter.AI_CHARGING | com.dbzenith.npc.KiFighter.AI_TRANSFORMING)) != 0 || !"base".equals(formId);
+                if (!shown && s == null) continue;
+                int flags = ((f & com.dbzenith.npc.KiFighter.AI_CHARGING) != 0 ? PublicStatePacket.CHARGING : 0)
+                        | ((f & com.dbzenith.npc.KiFighter.AI_TRANSFORMING) != 0 ? PublicStatePacket.TRANSFORMING : 0)
+                        | ((f & com.dbzenith.npc.KiFighter.AI_FLYING) != 0 ? PublicStatePacket.FLYING : 0);
+                PublicStatePacket state = PublicStatePacket.npc(k.getId(), flags, k.aiAuraColor(), formId);
+                AuraDef form = wanted(state);
+                if (s == null) {
+                    if (form == null) continue;
+                    s = new State(k.getId());
+                    STATES.put(k.getId(), s);
+                }
+                s.seen = now;
+                if (form != null && form.followsFighter) form = tintedFor(s, form, state.auraColor());
+                follow(s, k, form, null, 0, state, false);
+            }
+        }
         ObjectIterator<State> it = STATES.values().iterator();
         while (it.hasNext()) {
             State s = it.next();

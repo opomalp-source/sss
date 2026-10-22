@@ -67,7 +67,7 @@ public class BossFighter extends KiFighter {
         if (!enraged && getHealth() < getMaxHealth() * com.dbzenith.config.DBZConfig.SERVER.bossEnrageHealth.get()) enrage();
         if (teleportCooldown > 0) teleportCooldown--;
         LivingEntity t = getTarget();
-        if (t != null && teleportCooldown == 0 && distanceToSqr(t) > 12 * 12) {
+        if (t != null && teleportCooldown == 0 && distanceToSqr(t) > 12 * 12 && !com.dbzenith.npc.ai.CombatAiGoal.enabled()) {   // the combat AI picks its moment itself
             teleportBehind(t);
             teleportCooldown = 160 + random.nextInt(80);
         }
@@ -89,6 +89,14 @@ public class BossFighter extends KiFighter {
                 p.displayClientMessage(Component.translatable("message.dbzenith.boss_enraged", getDisplayName()), true);
             }
         }
+    }
+
+    /** The combat AI's pursuit: vanishes behind a far foe, on the same cooldown as before. Returns whether it did. */
+    public boolean aiVanishBehind(LivingEntity t) {
+        if (teleportCooldown > 0 || t == null || !level().hasChunkAt(t.blockPosition())) return false;
+        teleportBehind(t);
+        teleportCooldown = 160 + random.nextInt(80);
+        return true;
     }
 
     private void teleportBehind(LivingEntity t) {

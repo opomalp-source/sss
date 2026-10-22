@@ -253,8 +253,19 @@ public final class AnimController {
         if (mc.level == null) return;
         if (com.dbzenith.client.Prediction.swallow(msg)) return;            // already shown (phase 7)
         Entity e = mc.level.getEntity(msg.entityId());
-        if (msg.kind() == AnimEventPacket.STUMBLE && e instanceof net.minecraft.world.entity.LivingEntity l && !(e instanceof AbstractClientPlayer)) {
-            NpcActions.play(l, Anims.STUMBLE);                                  // an NPC fighter stumbling (CX-52)
+        if (e instanceof net.minecraft.world.entity.LivingEntity l && !(e instanceof AbstractClientPlayer)) {
+            KeyframeAnimation npc = switch (msg.kind()) {                       // an NPC fighter stumbling (CX-52), casting (the combat AI)
+                case AnimEventPacket.STUMBLE -> Anims.STUMBLE;
+                case AnimEventPacket.VOLLEY -> Anims.KI_VOLLEY;
+                case AnimEventPacket.BEAM -> Anims.beamFor(null, msg.data());
+                case AnimEventPacket.THROW -> Anims.kiThrow(msg.data());
+                case AnimEventPacket.WAVE -> Anims.KI_WAVE;
+                case AnimEventPacket.FOCUS -> Anims.KI_FOCUS;
+                case AnimEventPacket.BLAST -> Anims.KI_BLAST;
+                case AnimEventPacket.DASH -> Anims.DASH;
+                default -> null;
+            };
+            if (npc != null) NpcActions.play(l, npc);
             return;
         }
         if (!(e instanceof AbstractClientPlayer player)) return;

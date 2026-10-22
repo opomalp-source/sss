@@ -71,6 +71,11 @@ public record PublicStatePacket(int entityId, int flags, int release, int auraCo
                 d.getRaceStyle(), d.getRaceSkinColor(), d.getRaceMarkColor(), d.getRacePartColor());
     }
 
+    /** An NPC fighter's visible state, made on the client from its synced data (the combat AI): its aura, charge, flight, form. */
+    public static PublicStatePacket npc(int entityId, int flags, int auraColor, String form) {
+        return new PublicStatePacket(entityId, flags, 100, auraColor, form, 0, 0, 0, 0, 0, 0, 0, "", 0, 100, 0, "", 0, 0, "", 0, 0, 0, 0);
+    }
+
     public int stateHash() {
         int h = (((flags * 31 + release) * 31 + auraColor) * 31 + form.hashCode());
         h = ((h * 31 + race) * 31 + bodyType) * 31 + hairStyle;

@@ -1959,6 +1959,7 @@
   "log.dbzenith.duel_draw": "%s and %s fought to a draw",
   "log.dbzenith.duel_won": "%s beat %s %s (%s)",
   "log.dbzenith.knockout": "%s knocked out %s",
+  "log.dbzenith.npc_transform": "%s transformed: %s",
   "log.dbzenith.combo": "%s: a %s-hit combo on %s (%s)",
   "log.dbzenith.kill.melee": "%s defeated %s with their fists",
   "log.dbzenith.kill.ki": "%s blasted %s",

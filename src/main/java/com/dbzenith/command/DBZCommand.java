@@ -93,6 +93,7 @@ public final class DBZCommand {
                 .then(com.dbzenith.galaxy.GalaxyCommands.branch())
                 .then(com.dbzenith.galaxy.planet.DoomCommands.branch())
                 .then(com.dbzenith.combat.CraterCommands.branch())
+                .then(com.dbzenith.npc.ai.AiCommands.branch())                      // the combat AI's debug readout
                 .then(Commands.literal("apestomp").then(Commands.argument("targets", EntityArgument.players()).executes(ctx -> {
                     int count = 0;
                     for (ServerPlayer p : EntityArgument.getPlayers(ctx, "targets")) if (com.dbzenith.transform.ApeStomp.press(p)) count++;

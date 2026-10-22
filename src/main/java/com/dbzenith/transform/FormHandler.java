@@ -216,6 +216,7 @@ public final class FormHandler {
         Form from = Forms.byId(data.getFormId());
         data.setFormId(form.id());
         TransformationExperience.completed(data, form);
+        com.dbzenith.npc.ai.AiEvents.onTransform(player, form.id());        // fighters watching see it (the combat AI)
         if (!form.isBase()) data.setFlag("has_transformed", true);
         data.recomputeIfStale();
         if (!Kaioken.formAllows(form)) Kaioken.stop(player, data, true);

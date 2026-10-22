@@ -119,7 +119,31 @@ public final class Fighter {
             if (d != null && d.isGuarding()) return State.GUARDING;
             if (d != null && d.isCharging()) return State.CHARGING;
         }
+        if (entity instanceof com.dbzenith.npc.KiFighter k) {                    // the combat AI's guard and charge (docs/COMBAT_AI.md)
+            if (k.hasAiFlag(com.dbzenith.npc.KiFighter.AI_GUARDING)) return State.GUARDING;
+            if (k.hasAiFlag(com.dbzenith.npc.KiFighter.AI_CHARGING)) return State.CHARGING;
+        }
         return State.IDLE;
+    }
+
+    /** The move under way has landed on someone (the combat AI times its chains by it). */
+    public boolean landed() {
+        return landed;
+    }
+
+    /** Until when the last move's chain stays open. */
+    public long chainUntil() {
+        return chainUntil;
+    }
+
+    /** The move under way is past its active frames without having landed: a whiff, open to punishment. */
+    public boolean whiffing() {
+        return move != null && !landed && moveTick >= move.startup + move.active;
+    }
+
+    /** Winding up a move (its startup), {@code ticksLeft} before it can hit. */
+    public int windupLeft() {
+        return move == null || moveTick >= move.startup ? -1 : move.startup - moveTick;
     }
 
     Vec3 position() {

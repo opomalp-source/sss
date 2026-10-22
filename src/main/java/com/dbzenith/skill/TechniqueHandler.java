@@ -108,6 +108,7 @@ public final class TechniqueHandler {
         if (!player.getAbilities().instabuild) data.setKi(data.getKi() - cost);
         data.setCooldown(technique.id(), now + (long) (TechniqueMastery.cooldownTicks(data, technique) * com.dbzenith.combat.Wounds.cooldown(player)));   // slower when badly hurt (CX-52)
         TechniqueMastery.gain(data, technique);
+        com.dbzenith.npc.ai.AiEvents.onKi(player, technique.id());              // fighters watching see it (the combat AI)
         com.dbzenith.combat.engine.SpecialMeter.spend(player, data, meter);
         if (tier.cinematic()) {
             com.dbzenith.network.UltimatePacket cine = new com.dbzenith.network.UltimatePacket(player.getId(), technique.id(),

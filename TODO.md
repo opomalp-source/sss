@@ -344,3 +344,10 @@ to both mods folders.
 - [x] v0.157.0 Phase 7: profiled (uncapped, recorded), grid caches halve the sky pass, map drawing 4x faster, four-cycle soak, horizon air glow, no rain above the clouds. The space rework is complete.
 - [x] v0.157.1 Hotfix: dying in space or on another planet no longer disconnects the player (space ticks skip dead players).
 - [x] v0.158.0 Series worlds (Planet Vegeta before its destruction, Planet Frieza No. 79, Yardrat, Cereal; Namek's eternal day), ki flight in orbit instead of thrust and brake, rate-limited camera up, one high-end space HUD (`SpaceUi`).
+
+# NPC combat AI (user request, 2026-10-21)
+- [x] v0.159.0 Combat AI for every NPC fighter: utility decisions with personality, targeting and threat, melee
+  with guard/parry/vanish/counter, ki from real pools, transformations along each race's existing forms, safe flight,
+  gradual adaptation, factions and squads, learning (bosses remember opponents), events and pacing, config and
+  `/dbz ai` debug. docs/COMBAT_AI.md.
+- [ ] Nemesis system on the `AiMemory` + `Personality` foundation (the user has a prompt for it)

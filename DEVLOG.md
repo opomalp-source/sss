@@ -4528,3 +4528,44 @@ camera in orbit), its UI didn't feel high end, and the series' own planets shoul
 - **Tests.** `SpaceTests` checks the new flight (letting go settles to a stop, Sneak sinks at cruise speed, full
   speed reached and never passed); `InterstellarTests` checks the four worlds' identities, that only Yardrat and
   Cereal get their own landscapes, and each world's lore, plaza and place. 320 GameTests pass.
+
+## 2026-10-22 — Combat AI for every NPC fighter (v0.159.0)
+The user's request: an advanced, deterministic Dragon Ball combat AI for every combat-capable NPC, built into the
+existing systems with no placeholders. Everything is in `docs/COMBAT_AI.md` (audit, design, each stage, tests, limits).
+
+- **Audit first.** Every fighter (`KiFighter` and subclasses: Saibaman, Frieza Force Soldier, Red Ribbon Android,
+  Namekian Warrior, Ogre Guard, Damned Warrior, Frieza, Broly, the tournament roster) walked up and swung
+  (`MeleeAttackGoal`) and fired a random technique on a timer. No guard, dodging, flight, ki or stamina pools,
+  transformations, factions or awareness. **There was no Nemesis system** anywhere (code, docs, TODO, devlog, git
+  history); this version builds a compatible foundation instead of a fake one.
+- **The brain** (`npc.ai`, `NpcBrain` run by `CombatAiGoal`): a small state machine (idle, powering up, fighting)
+  over a utility choice among seventeen actions, scored from a `Situation` by `UtilityScorer` (a pure function of
+  named terms: health, ki, stamina, relative power, distance, what the foe does and tends to do, techniques ready,
+  forms, personality, allies, what it has learned). Deterministic variation (`AiRandom`), commitment and hysteresis,
+  reaction delays by quality (never under 3 ticks), staggered decisions, small deliberate mistakes.
+- **Melee** through the combat engine like a player, paying stamina per move; strings by style, finishers for the
+  moment (sweep a turtle, spike from above, uppercut, rush, smash), baiting dodgers, punishing whiffs. **Guard**
+  (`NpcGuard`, the players' rules and config: front only, parry, chip, meter, break), vanishes and counters on the
+  reactive layer, sidesteps of incoming ki. NPC guard and charge show through the existing fighter-state packet.
+- **Ki** from a real pool (`NpcResources`), the technique's own cost and cooldown, leading aim that is never perfect,
+  fire held when an ally is in the way, chargeable techniques charged (3 s at most), ki charging, cast animations for
+  NPCs (existing `AnimEventPacket`).
+- **Transformations** with the existing forms of each NPC's race (`NpcForms`): Frieza's Frost Demon line, Broly's
+  Legendary Saiyan line, the Android upgrades, Super and Orange Namekian; unlock, cost, power-up time, interruption,
+  drain and fall-back by the players' rules; escalation one tier at a time only when outmatched, held back by pride,
+  ruled out when unaffordable or far ahead, 8 s between changes. Seen by all: synced form, NPC auras
+  (`AuraSystem`), power-up particles, the burst, a combat-log line.
+- **Flight** on the players' `FlightModel`, with checks every tick: never into unloaded chunks, walls or ceilings,
+  an altitude band, safe landings.
+- **Adaptation** (`OpponentProfile`: brawler, blast spam, turtle, dodger, rusher, kiter, charger, transformer, flier,
+  repeated technique, slow moving averages), **personality** (`Personality`, nine kinds, the only personality
+  system), **factions and squads** (`Faction`, scoreboard teams first; flanking, ranged support, protecting weakened
+  allies, falling back together), **learning** (`FightLog` for everyone; `AiMemory` saved data for bosses, per
+  opponent), **events** (foe transformed, exhausted, new technique, own low health, ally fell).
+- **Config** `[npc_ai]` (enabled, quality, decision and reaction ticks, activation range, flight, transform, form power
+  share, mistakes, faction wars, memory) and **debug** `/dbz ai inspect|watch|personality|memory|stats`.
+- **Balance changes:** NPC ki damage per technique is `kiDamage x sqrt(damage multiplier)` (a volley did six
+  blasts' damage before); forms add 30% of their multiplier to NPC damage; bosses still enrage at half health.
+- **Tests:** `AiTests` (10). 331 GameTests pass, twice in a row. Dev client: Frieza transformed twice against a
+  stronger Dev with his reasons in the readout, his form aura drawn on the NPC, a soldier fled by air and landed, a
+  soldier flew up to fight Dev in the air. Protocol 54 (NPC entity data).

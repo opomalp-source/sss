@@ -89,6 +89,7 @@ public final class Evasion {
         openCounter(g, attacker, now);
         SpecialMeter.gain(victim, c.specialPerVanish.get());
         com.dbzenith.combat.meter.MeterLogic.onVanish(victim);                  // the technique bar (CX-20)
+        com.dbzenith.npc.ai.AiEvents.onDodge(victim, attacker);                 // fighters watching note it (the combat AI)
         com.dbzenith.duel.Duels.onDefense(victim, false);
         level.playSound(null, dest.x, dest.y, dest.z, ModSounds.VANISH.get(), SoundSource.PLAYERS, 0.8f, 1.6f);
         tell(victim, "message.dbzenith.vanish", ChatFormatting.AQUA);

@@ -133,6 +133,8 @@ public final class CombatEngine {
                 }
             }
         }
+        if (e instanceof com.dbzenith.npc.KiFighter k && !k.aiPayMove(m.staminaCost, m.kiCost)) return;   // NPCs pay for their moves too (the combat AI)
+        com.dbzenith.npc.ai.AiEvents.onMove(e, m);                              // fighters watching see it coming
         f.move = m;
         f.moveTick = 0;
         f.landed = false;

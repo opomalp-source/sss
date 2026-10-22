@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.158.0, 2026-10-21)
+# Handoff: where Dragon Block Zenith stands (v0.159.0, 2026-10-22)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.158.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.159.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -397,3 +397,20 @@ Minecraft if it is running). Never the updater.
   surface readout in `ClientPlanet` uses the same kit). New HUD pieces should use `SpaceUi`.
 - **Possible follow-ups (not requested):** draw the far-below grids from a vertex buffer instead of immediate mode;
   cloud shadows on the map; a waypoint list in the atlas. Story mode was left for last, as the user asked.
+
+## NPC combat AI (v0.159.0, 2026-10-22)
+Every `KiFighter` now runs the combat AI in `npc.ai` (`NpcBrain` via `CombatAiGoal`); the full design, every stage,
+the tests and the limits are in `docs/COMBAT_AI.md`, which is the place to continue from. Key points:
+- No Nemesis system existed before. The foundation is `Personality` (the only NPC personality system, saved on the
+  entity as `dbzAi`) and `AiMemory` (saved data `dbzenith_ai_memory`, bosses only, per NPC and opponent UUID: fights,
+  wins, losses, flights, grudge, per-action payoffs). The user offered a Nemesis prompt; build on these, not beside.
+- NPC transformations use only existing `Forms` of the NPC's race/variant (`NpcForms`); visuals are synced entity
+  data (`KiFighter.AI_FORM`, `AI_FLAGS`) read by `AuraSystem` and the motion engine. Protocol 54.
+- Hooks in the combat code are one line each into `AiEvents` (CombatEngine.start, CombatEvents, Evasion, KiCombat,
+  TechniqueHandler, FormHandler). `[npc_ai]` config; `/dbz ai inspect` explains any fighter's choice.
+- Dev-client recipe: the dev world's Dev player may be dead or on a leftover procedural planet; respawn with
+  `/dbz devshot Dev respawn 1`, `/dbz revive Dev`, then `execute in minecraft:overworld run tp Dev ...`. Attribute
+  ids for `/dbz set` are full names (`strength`, `constitution`, ...). A bedrock arena at 1180..1220, y 127-129,
+  x/z around 1200 in the dev world keeps craters from eating the floor.
+- Tests that let NPCs think must run in their own batch, set `brain().arena`, and discard their NPCs before timing
+  out (see `AiTests.cleanup`): later batches reuse the same spot.

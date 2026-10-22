@@ -6,7 +6,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -38,7 +37,8 @@ public class TournamentFighter extends KiFighter {
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));
-        goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.2, true));
+        goalSelector.addGoal(2, new com.dbzenith.npc.ai.CombatAiGoal(this));
+        goalSelector.addGoal(3, new LegacyMelee(this, 1.2, true));
         goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 12f));
         goalSelector.addGoal(8, new RandomLookAroundGoal(this));
     }
@@ -63,6 +63,15 @@ public class TournamentFighter extends KiFighter {
     @Override
     public boolean isInvulnerableTo(DamageSource source) {
         return (opponent == null && !source.isCreativePlayer()) || super.isInvulnerableTo(source);
+    }
+
+    /** The ring: the combat AI keeps its fight on the tiles (no flying, no retreating out). */
+    @Override
+    public net.minecraft.world.phys.AABB aiBounds() {
+        net.minecraft.core.BlockPos ring = Tournament.current() == null ? null : Tournament.current().ring;
+        if (ring == null) return null;
+        int r = TournamentGrounds.RING;
+        return new net.minecraft.world.phys.AABB(ring.getX() - r + 1, ring.getY() - 2, ring.getZ() - r + 1, ring.getX() + r, ring.getY() + 6, ring.getZ() + r);
     }
 
     @Override
