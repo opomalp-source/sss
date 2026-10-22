@@ -180,6 +180,21 @@ All in `com.dbzenith.living` unless named otherwise.
 - **Commands:** `/dbz living errands`, `/dbz living travelers`; `talk` and `choose` print the options offered.
 - **Config:** `living.travelers`, `living.maxCompanions`.
 
+## 4c. Companions and parties (v0.163.0)
+
+- A companion counts its player's party (the Party tab's group, `social.SocialData`) as friends
+  (`Companions.friendOf`, `Resident.isFriendOf`): it never targets a party-mate or a party-mate's companion, a
+  party-mate's stray blow at it is forgiven like its own player's (a little goodwill lost; no spar, no town alarm,
+  never wanted for it), and in "defend me" and "fight alongside me" it also goes for whoever attacks a party-mate within
+  16 blocks.
+- The Party tab lists each member's companions under them (name, trade, orders: following, waiting, defending,
+  fighting alongside, staying out of fights, at home), not selectable; the header counts them. Without a party it lists
+  your own companions. The server adds them to the party snapshot (`SocialService.companions`).
+- It still travels with, and takes orders from, its own player only.
+- GameTest `companionsCountYourPartyAsFriends`; 355 GameTests pass, twice in a row. Dev client: the Party tab alone
+  ("Your companions: Tarrag · Town guard · at home") and in a party ("1 companion", Tarrag defending under Dev).
+  Devshot names `party_...` open the Party tab, `partyc_...` create a party first (dev only).
+
 ## 5. Testing
 
 - **GameTests** (`gametest.LivingTests`, 8): the living data and the residents' new fields survive saving; schedules

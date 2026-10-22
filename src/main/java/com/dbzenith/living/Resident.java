@@ -152,6 +152,11 @@ public class Resident extends KiFighter implements SkinVariant {
         return InteractionResult.sidedSuccess(level().isClientSide);
     }
 
+    /** Whether this player is its player or one of their party (its friends). */
+    public boolean isFriendOf(Player p) {
+        return p != null && !level().isClientSide && Companions.friendOf(character(), p.getUUID(), getServer());
+    }
+
     /** Whether it travels with this player. */
     public boolean isCompanionOf(Player p) {
         return p != null && Companions.of(character(), p.getUUID());
@@ -163,8 +168,9 @@ public class Resident extends KiFighter implements SkinVariant {
         if (!level().isClientSide && !target.getUUID().equals(sparWith)) {                   // a training spar is allowed
             NamedFighter c = character();
             if (c != null && c.companionOf != null) {
-                if (target.getUUID().equals(c.companionOf)) return false;
-                if (target instanceof Resident o && Companions.of(o.character(), c.companionOf)) return false;
+                if (Companions.friendOf(c, target.getUUID(), getServer())) return false;           // its player, and their party
+                if (target instanceof Resident o && o.character() != null && o.character().companionOf != null
+                        && Companions.friendOf(c, o.character().companionOf, getServer())) return false;   // and their companions
                 if (Companions.mode(c) == Companions.Mode.PASSIVE) return false;
             }
         }

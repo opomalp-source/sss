@@ -362,6 +362,8 @@ to both mods folders.
 - [x] v0.162.0 Living world stage 2: companions who decide for themselves and take orders, masters' lessons (existing
   techniques only, demonstration, ki control, test spar), errands from the town's real state, travelers carrying news
   between towns, town lines for spars and defence. docs/LIVING_WORLD.md section 4b.
+- [x] v0.163.0 Companions and parties: party-mates are a companion's friends (never fought, blows forgiven, defended),
+  and the Party tab lists each member's companions.
 - [ ] Living world feedback from play: schedules, chat frequency, conversation content, fame pacing, errand rewards,
   companion trust thresholds
 - [ ] An errand journal (taken errands are only told in chat and by whoever asked)

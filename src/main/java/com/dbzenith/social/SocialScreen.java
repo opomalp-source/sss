@@ -29,10 +29,19 @@ public final class SocialScreen extends MenuScreen {
         int x=cardX+12,y=cardY+12,w=cardW-24;
         if(member()){
             int split=x+w/2,left=w/2-8,right=w-w/2-8;
-            var group=own();List<CompoundTag> members=new ArrayList<>();for(Tag t:group.getList("Members",Tag.TAG_COMPOUND))members.add((CompoundTag)t);
+            var group=own();List<CompoundTag> members=new ArrayList<>();
+            for(Tag t:group.getList("Members",Tag.TAG_COMPOUND)){                  // each member, then the companions travelling with them
+                var m=(CompoundTag)t;members.add(m);
+                if(!clan)for(var c:rows("Companions"))if(c.getUUID("Owner").equals(m.getUUID("Id")))members.add(c);
+            }
             int count=Math.max(1,(cardH-114)/23),pages=Math.max(1,(members.size()+count-1)/count);pageNumber=Math.min(pageNumber,pages-1);
             for(int i=pageNumber*count;i<Math.min(members.size(),(pageNumber+1)*count);i++){
-                var row=members.get(i);String id=row.getUUID("Id").toString();boolean owner=row.getUUID("Id").equals(group.getUUID("Owner"));
+                var row=members.get(i);
+                if(row.contains("Mode")){                                                   // a companion: shown, not selectable
+                    button(font.plainSubstrByWidth(companionLabel(row),(int)((left-14)/.8)-12),x+14,y+38+(i-pageNumber*count)*23,left-14,()->{}).active=false;
+                    continue;
+                }
+                String id=row.getUUID("Id").toString();boolean owner=row.getUUID("Id").equals(group.getUUID("Owner"));
                 boolean online=rows("Players").stream().anyMatch(p->p.getUUID("Id").equals(row.getUUID("Id")));
                 String name=(owner?"* ":"")+row.getString("Name")+(online?"":" (offline)");
                 var b=button(font.plainSubstrByWidth(name,(int)(left/.8)-12),x,y+38+(i-pageNumber*count)*23,left,()->{selected=id;rebuildWidgets();});b.selected(selected.equals(id));
@@ -62,13 +71,21 @@ public final class SocialScreen extends MenuScreen {
             pager(x,cardY+cardH-53,w,pages);
         }
     }
+    /** "Tarrag · Town guard · defending": a companion, its trade and its orders. */
+    private static String companionLabel(CompoundTag c){
+        String mode=switch(c.getString("Mode")){case "wait"->"waiting";case "defend"->"defending";case "aggressive"->"fighting alongside";
+            case "passive"->"staying out of fights";case "home"->"at home";default->"following";};
+        return "↳ "+c.getString("Name")+"  ·  "+Component.translatable("living.dbzenith.occupation."+c.getString("Occupation")).getString()+"  ·  "+mode;
+    }
     private void pager(int x,int y,int w,int pages){if(pages<=1)return;button("<",x,y,24,()->{pageNumber--;rebuildWidgets();}).active=pageNumber>0;button((pageNumber+1)+" / "+pages,x+28,y,w-56,()->{}).active=false;button(">",x+w-24,y,24,()->{pageNumber++;rebuildWidgets();}).active=pageNumber+1<pages;}
     @Override public void tick(){super.tick();if(++ticks%100==0)action("refresh","");if(revision!=SocialState.revision){boolean focus=input!=null&&input.isFocused();int cursor=input==null?0:input.getCursorPosition();rebuildWidgets();if(focus&&input!=null){setFocused(input);input.setCursorPosition(Math.min(cursor,input.getValue().length()));}}if(input!=null)input.tick();}
     @Override protected void renderPage(GuiGraphics g,int mx,int my,float partial){
         int x=cardX+12,y=cardY+12,w=cardW-24;
         if(member()){
             var group=own();Ui.text(g,font,group.getString("Name"),x,y,Ui.GOLD,1);
-            Ui.text(g,font,group.getList("Members",Tag.TAG_COMPOUND).size()+" / "+(clan?32:8)+" members  |  * Leader",x,y+16,Ui.MUTED,.75f);
+            int companions=clan?0:rows("Companions").size();
+            Ui.text(g,font,group.getList("Members",Tag.TAG_COMPOUND).size()+" / "+(clan?32:8)+" members"+(companions>0?"  ·  "+companions+(companions==1?" companion":" companions"):"")
+                    +"  |  * Leader",x,y+16,Ui.MUTED,.75f);
             Ui.text(g,font,leader()?"Invite an online player":"Only your leader can send invitations",x+w/2+8,y+23,Ui.MUTED,.7f);
             String online=String.join(", ",rows("Players").stream().map(r->r.getString("Name")).filter(n->minecraft.player==null||!n.equals(minecraft.player.getGameProfile().getName())).limit(4).toList());
             if(cardH>=245)g.drawWordWrap(font,Component.literal("Online: "+(online.isEmpty()?"No other players":online)),x+w/2+8,y+116,w/2-12,Ui.MUTED);
@@ -76,6 +93,10 @@ public final class SocialScreen extends MenuScreen {
             Ui.text(g,font,clan?"Create a clan, join an open clan, or accept an invitation.":"Start a party and invite your friends to join.",x,y,Ui.MUTED,.75f);
             if(!clan||invitations){long count=rows("Invites").stream().filter(r->r.getBoolean("Clan")==clan).count();if(count==0)Ui.text(g,font,"No pending invitations. Invitations expire after 2 minutes.",x,y+(clan?80:60),Ui.MUTED,.75f);}
             else if(rows("Directory").isEmpty())Ui.text(g,font,"No clans yet. Create the first one above.",x,y+80,Ui.MUTED,.8f);
+            if(!clan&&!rows("Companions").isEmpty()){                                    // your companions travel in any party you make
+                String names=String.join(", ",rows("Companions").stream().map(SocialScreen::companionLabel).map(s->s.substring(2)).toList());
+                Ui.paragraph(g,font,Component.literal("Your companions: "+names),x,cardY+cardH-46,w,Ui.MUTED,.75f,2);
+            }
         }
         Ui.text(g,font,font.plainSubstrByWidth(message,(int)(w/.75)),x,cardY+cardH-18,Ui.GOLD,.75f);
     }

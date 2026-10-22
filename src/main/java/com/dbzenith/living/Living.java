@@ -103,7 +103,7 @@ public final class Living {
         if (event.isCanceled() || !LivingConfig.enabled() || !(event.getEntity() instanceof Resident r) || r.level().isClientSide) return;
         if (!(event.getSource().getEntity() instanceof LivingEntity by) || by == r || by instanceof Resident) return;
         if (by.getUUID().equals(r.sparWith)) return;                                       // a spar, not an attack
-        if (by instanceof ServerPlayer own && r.isCompanionOf(own)) {                     // its own player: a scolding, not an alarm
+        if (by instanceof ServerPlayer own && r.isFriendOf(own)) {                        // its player or their party: a scolding, not an alarm
             NamedFighter cc = r.character();
             if (cc != null) cc.player(own.getUUID(), own.getGameProfile().getName()).shift(-3, 0);
             return;

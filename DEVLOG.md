@@ -4674,3 +4674,13 @@ Details in `docs/LIVING_WORLD.md` (section 4b).
   refusal; a guard joining, its orders, catching up in the forest; a master's Ki Sense lesson; travelers arrived with
   news. Fixed from play: a companion with no room beside you never caught up; crowded tables were marked unreachable;
   repeated words in an errand offer.
+
+## 2026-10-22 — Companions and parties (v0.163.0)
+The user asked whether companions are in your party. They weren't: the party was only a list of players. Now:
+- A companion counts its player's party as friends: it never targets a party-mate or their companions, a party-mate's
+  stray blow is forgiven like its own player's (no spar, no town alarm, never wanted), and when defending or fighting
+  alongside it also goes for whoever attacks a party-mate nearby. It still follows and obeys only its own player.
+- The Party tab lists each member's companions under them (trade and orders), counted in the header; without a party it
+  shows your own.
+- Test `companionsCountYourPartyAsFriends`; 355 GameTests pass, twice in a row. Dev client: the Party tab alone and in
+  a party with a defending companion.

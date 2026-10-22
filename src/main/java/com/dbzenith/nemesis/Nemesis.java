@@ -523,7 +523,7 @@ public final class Nemesis {
         long now = victim.level().getGameTime();
         if (victim instanceof KiFighter k && of(k) != null) {
             NamedFighter c = of(k);
-            if (k instanceof com.dbzenith.living.Resident rr && rr.isCompanionOf(p) && k.sparWith == null) return;   // your companion, struck by mistake: no spar
+            if (k instanceof com.dbzenith.living.Resident rr && rr.isFriendOf(p) && k.sparWith == null) return;   // a companion of yours or your party, struck by mistake: no spar
             Bond b = c.player(p.getUUID(), p.getGameProfile().getName());
             data().index(c, p.getUUID());
             if (k.training) {                                                          // its training interrupted

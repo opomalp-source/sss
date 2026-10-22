@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.162.0, 2026-10-22)
+# Handoff: where Dragon Block Zenith stands (v0.163.0, 2026-10-22)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.162.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.163.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -465,3 +465,10 @@ Companions, masters' lessons, errands and travelers; details in `docs/LIVING_WOR
   `/dbz living errands`, `/dbz living travelers`. Residents with epithets need their full name in selectors.
 - Tests that depend on where the framework places them broke when batches were added: give such tests their own
   floor/walls (`AiTests.pen`, `LivingTests.corridor`, `DuelTests.stall`) and clean up.
+
+## Companions and parties (v0.163.0, 2026-10-22)
+- `living.Companions.friendOf` (its player or their party, from `social.SocialData`) drives `Resident.canAttack`,
+  `Resident.isFriendOf` (used by `Living.onHurt` and `Nemesis.onBlow`) and the defend modes' targets
+  (`CompanionGoal.Target`, party-mates within 16 blocks).
+- `SocialService.snapshot` adds "Companions" rows (owner, name, occupation, mode, level); `SocialScreen` lists them under
+  their player. Devshot `party_...` opens the Party tab; `partyc_...` creates a party first.

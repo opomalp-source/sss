@@ -75,6 +75,24 @@ public final class Companions {
         return c != null && player != null && player.equals(c.companionOf);
     }
 
+    /** Whether {@code who} is its player or in its player's party (party-mates are friends: never fought, blows forgiven). */
+    public static boolean friendOf(NamedFighter c, UUID who, MinecraftServer server) {
+        if (c == null || c.companionOf == null || who == null) return false;
+        if (who.equals(c.companionOf)) return true;
+        if (server == null) return false;
+        var party = com.dbzenith.social.SocialData.get(server).membership(c.companionOf, false);
+        return party != null && party.members.containsKey(who);
+    }
+
+    /** The other members of a companion's player's party (empty without one). */
+    static List<UUID> partyMates(NamedFighter c, MinecraftServer server) {
+        List<UUID> out = new ArrayList<>();
+        if (c == null || c.companionOf == null || server == null) return out;
+        var party = com.dbzenith.social.SocialData.get(server).membership(c.companionOf, false);
+        if (party != null) for (UUID m : party.members.keySet()) if (!m.equals(c.companionOf)) out.add(m);
+        return out;
+    }
+
     /** A player's companions. */
     public static List<NamedFighter> of(UUID player) {
         List<NamedFighter> out = new ArrayList<>();

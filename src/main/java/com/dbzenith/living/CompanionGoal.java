@@ -9,6 +9,7 @@ import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 
 import java.util.EnumSet;
+import java.util.UUID;
 
 /**
  * A companion on the move ({@link Companions}): it keeps with its player (walking, running to catch up, and appearing
@@ -98,6 +99,12 @@ final class CompanionGoal extends Goal {
             ServerPlayer p = Companions.leader(r, c);
             if (p == null || p.level() != r.level()) return false;
             pick = valid(p.getLastHurtByMob(), p.getLastHurtByMobTimestamp(), p);
+            if (pick == null) for (UUID id : Companions.partyMates(c, r.getServer())) {        // and your party's, close by
+                ServerPlayer mate = r.getServer().getPlayerList().getPlayer(id);
+                if (mate == null || mate.level() != r.level() || mate.distanceToSqr(r) > 16 * 16) continue;
+                pick = valid(mate.getLastHurtByMob(), mate.getLastHurtByMobTimestamp(), mate);
+                if (pick != null) break;
+            }
             if (pick == null && m == Companions.Mode.AGGRESSIVE) {
                 pick = valid(p.getLastHurtMob(), p.getLastHurtMobTimestamp(), p);
                 if (pick == null) {

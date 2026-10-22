@@ -75,11 +75,22 @@ public final class SocialService {
     public static CompoundTag snapshot(ServerPlayer p,String message) {
         SocialData d=SocialData.get(p.server);CompoundTag tag=new CompoundTag();tag.putString("Message",message);
         for(boolean clan:new boolean[]{false,true}) { var own=d.membership(p.getUUID(),clan);if(own!=null)tag.put(clan?"Clan":"Party",SocialData.groupTag(own)); }
+        tag.put("Companions",companions(p,d));                                   // the living world's companions of the party (or your own)
         ListTag directory=new ListTag(),invites=new ListTag(),players=new ListTag();long now=p.server.overworld().getGameTime();
         for(var g:d.groups.values())if(g.clan){CompoundTag row=new CompoundTag();row.putUUID("Id",g.id);row.putString("Name",g.name);row.putBoolean("Open",g.open);row.putInt("Count",g.members.size());directory.add(row);}
         for(var i:d.invites)if(i.target().equals(p.getUUID())&&i.expires()>=now){var g=d.groups.get(i.group());if(g!=null){CompoundTag row=new CompoundTag();row.putUUID("Id",g.id);row.putString("Name",g.name);row.putBoolean("Clan",g.clan);invites.add(row);}}
         for(var online:p.server.getPlayerList().getPlayers()){CompoundTag row=new CompoundTag();row.putUUID("Id",online.getUUID());row.putString("Name",online.getGameProfile().getName());var g=d.membership(online.getUUID(),true);row.putString("Clan",g==null?"":g.name);players.add(row);}
         tag.put("Directory",directory);tag.put("Invites",invites);tag.put("Players",players);return tag;
+    }
+    /** Companions travelling with your party's members (or with you, without a party): who, whose, their trade and orders. */
+    static ListTag companions(ServerPlayer p,SocialData d) {
+        ListTag out=new ListTag();var party=d.membership(p.getUUID(),false);
+        java.util.List<UUID> people=party==null?java.util.List.of(p.getUUID()):new java.util.ArrayList<>(party.members.keySet());
+        for(UUID owner:people)for(var c:com.dbzenith.living.Companions.of(owner)){
+            CompoundTag row=new CompoundTag();row.putUUID("Owner",owner);row.putString("Name",c.name);row.putString("Occupation",c.occupation);
+            var mode=com.dbzenith.living.Companions.mode(c);row.putString("Mode",mode==null?"follow":mode.id());row.putInt("Level",c.level);out.add(row);
+        }
+        return out;
     }
     public static void refresh(MinecraftServer server) { for(var p:server.getPlayerList().getPlayers()){p.refreshDisplayName();p.refreshTabListName();SocialNetwork.send(p,"");} }
     @SubscribeEvent public static void login(PlayerEvent.PlayerLoggedInEvent e) {

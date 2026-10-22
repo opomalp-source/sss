@@ -550,4 +550,38 @@ public final class LivingTests {
                             : y == 0 ? net.minecraft.world.level.block.Blocks.STONE : net.minecraft.world.level.block.Blocks.GLASS);
                 }
     }
+
+    @GameTest(template = EMPTY, batch = "living_11", timeoutTicks = 60)
+    public static void companionsCountYourPartyAsFriends(GameTestHelper h) {
+        Settlement s = town(h);
+        Resident guard = resident(h, s, Occupation.GUARD, new BlockPos(1, 1, 1), 1101);
+        ServerPlayer a = TestPlayers.create(h), b = TestPlayers.create(h), outsider = TestPlayers.create(h);
+        cleanup(h, 60, s, guard, a, b, outsider);
+        for (ServerPlayer p : new ServerPlayer[]{a, b, outsider}) {
+            BlockPos at = h.absolutePos(new BlockPos(1, 1, 3));
+            p.teleportTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+        }
+        var social = com.dbzenith.social.SocialData.get(h.getLevel().getServer());
+        com.dbzenith.social.SocialService.act(a, "create", false, "");
+        var party = social.membership(a.getUUID(), false);
+        com.dbzenith.social.SocialService.act(a, "invite", false, b.getGameProfile().getName());
+        com.dbzenith.social.SocialService.act(b, "accept", false, party.id.toString());
+        h.assertTrue(social.membership(b.getUUID(), false) == party, "a party of two");
+        long now = h.getLevel().getGameTime();
+        NamedFighter c = guard.character();
+        c.player(a.getUUID(), "A").shift(40, 0);
+        Companions.join(c, a, now);
+        h.assertTrue(guard.isFriendOf(a) && guard.isFriendOf(b) && !guard.isFriendOf(outsider), "its player and their party are friends; others aren't");
+        h.assertTrue(!guard.canAttack(a) && !guard.canAttack(b) && guard.canAttack(outsider), "it never fights the party");
+        guard.hurt(h.getLevel().damageSources().playerAttack(b), 1f);
+        h.assertTrue(!s.alarmed(now + 1) && !s.wanted.contains(b.getUUID()), "a party-mate's stray blow is no attack on the town");
+        var snap = com.dbzenith.social.SocialService.snapshot(b, "");
+        var rows = snap.getList("Companions", net.minecraft.nbt.Tag.TAG_COMPOUND);
+        h.assertTrue(rows.size() == 1 && rows.getCompound(0).getUUID("Owner").equals(a.getUUID()) && rows.getCompound(0).getString("Name").equals(c.name),
+                "the Party tab lists it under its player: " + rows);
+        Companions.leave(h.getLevel().getServer(), c, "living.dbzenith.companion.parted", now);
+        com.dbzenith.social.SocialService.act(a, "disband", false, "");
+        forget(h, s, guard, a, b, outsider);
+        h.succeed();
+    }
 }

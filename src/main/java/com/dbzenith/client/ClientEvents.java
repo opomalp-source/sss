@@ -195,6 +195,15 @@ public final class ClientEvents {
         if (name.startsWith("rivals_") && !(mc.screen instanceof com.dbzenith.client.screen.RivalsScreen)) {     // the Nemesis History
             mc.setScreen(new com.dbzenith.client.screen.RivalsScreen(null));
         }
+        if (name.startsWith("partyc_") && !(mc.screen instanceof com.dbzenith.social.SocialScreen)) {                   // dev: make a party first
+            com.dbzenith.social.SocialNetwork.action("create", false, "");
+            mc.setScreen(new com.dbzenith.social.SocialScreen(false));
+            delayTicks = Math.max(delayTicks, 20);
+        }
+        if (name.startsWith("party_") && !(mc.screen instanceof com.dbzenith.social.SocialScreen)) {                    // the Party tab (companions)
+            mc.setScreen(new com.dbzenith.social.SocialScreen(false));
+            delayTicks = Math.max(delayTicks, 10);
+        }
         if (name.startsWith("styles_") && !(mc.screen instanceof com.dbzenith.client.screen.StyleScreen)) {               // CX-20
             mc.setScreen(new com.dbzenith.client.screen.StyleScreen(null));
             delayTicks = Math.max(delayTicks, 6);
