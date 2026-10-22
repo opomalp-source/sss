@@ -105,6 +105,8 @@ public final class ModItems {
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.dbzenith.npc.ModNpcs.KI_SOLDIER, 0xE8E8E8, 0x3A3A4A, new Item.Properties()));
     public static final RegistryObject<Item> ANDROID_UNIT_EGG = ITEMS.register("android_unit_spawn_egg",
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.dbzenith.npc.ModNpcs.ANDROID_UNIT, 0x808890, 0xC02020, new Item.Properties()));
+    public static final RegistryObject<Item> SAIYAN_WARRIOR_EGG = ITEMS.register("saiyan_warrior_spawn_egg",          // the Nemesis system's rival archetype
+            () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.dbzenith.npc.ModNpcs.SAIYAN_WARRIOR, 0xF3F1E8, 0x6B3E1E, new Item.Properties()));
     /** A spawn egg for each style master (CX-20). */
     public static final java.util.Map<com.dbzenith.style.MasterRoster, RegistryObject<Item>> MASTER_EGGS = new java.util.EnumMap<>(com.dbzenith.style.MasterRoster.class);
 

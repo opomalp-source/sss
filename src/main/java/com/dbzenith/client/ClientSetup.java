@@ -128,6 +128,7 @@ public final class ClientSetup {
         event.registerEntityRenderer(ModEntities.SPACE_POD.get(), com.dbzenith.client.render.SpacePodRenderer::new);
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.SPROUTLING.get(), ctx -> new FighterRenderer<>(ctx, "sproutling", 0.7f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.KI_SOLDIER.get(), ctx -> new FighterRenderer<>(ctx, "ki_soldier", 1f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.SAIYAN_WARRIOR.get(), ctx -> new FighterRenderer<>(ctx, "saiyan_warrior", 1f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.TRAINING_DUMMY.get(), ctx -> new FighterRenderer<>(ctx, "training_dummy", 1f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.ANDROID_UNIT.get(), ctx -> new FighterRenderer<>(ctx, "android_unit", 1f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.TYRANT_LORD.get(), ctx -> new FighterRenderer<>(ctx, "tyrant_lord", 1.1f));

@@ -13,7 +13,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
  * so mismatched client/server versions are refused at login instead of desyncing.
  */
 public final class ModNetwork {
-    private static final String PROTOCOL = "54";
+    private static final String PROTOCOL = "55";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(DBZenith.MOD_ID, "main"),
@@ -29,6 +29,12 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(com.dbzenith.item.CapeItem.Remove.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(com.dbzenith.item.CapeItem.Remove::encode).decoder(com.dbzenith.item.CapeItem.Remove::decode)
                 .consumerMainThread(com.dbzenith.item.CapeItem.Remove::handle).add();
+        CHANNEL.messageBuilder(com.dbzenith.nemesis.NemesisPackets.Request.class, nextId++, NetworkDirection.PLAY_TO_SERVER)   // the Nemesis History screen
+                .encoder(com.dbzenith.nemesis.NemesisPackets.Request::encode).decoder(com.dbzenith.nemesis.NemesisPackets.Request::decode)
+                .consumerMainThread(com.dbzenith.nemesis.NemesisPackets.Request::handle).add();
+        CHANNEL.messageBuilder(com.dbzenith.nemesis.NemesisPackets.Data.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.dbzenith.nemesis.NemesisPackets.Data::encode).decoder(com.dbzenith.nemesis.NemesisPackets.Data::decode)
+                .consumerMainThread(com.dbzenith.nemesis.NemesisPackets.Data::handle).add();
         CHANNEL.messageBuilder(DoomPacket.class,nextId++,NetworkDirection.PLAY_TO_CLIENT).encoder(DoomPacket::encode).decoder(DoomPacket::decode).consumerMainThread(DoomPacket::handle).add();
         CHANNEL.messageBuilder(JourneyPacket.class,nextId++,NetworkDirection.PLAY_TO_CLIENT).encoder(JourneyPacket::encode).decoder(JourneyPacket::decode).consumerMainThread(JourneyPacket::handle).add();
         CHANNEL.messageBuilder(PlanetActivityPacket.class,nextId++,NetworkDirection.PLAY_TO_CLIENT).encoder(PlanetActivityPacket::encode).decoder(PlanetActivityPacket::decode).consumerMainThread(PlanetActivityPacket::handle).add();

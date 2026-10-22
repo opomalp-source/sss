@@ -275,6 +275,11 @@ public final class DBZConfig {
         public final ForgeConfigSpec.IntValue aiQuality, aiDecisionTicks, aiActiveRange, aiReactionTicks, aiMemoryMaxNpcs;
         public final ForgeConfigSpec.DoubleValue aiFormPowerShare, aiMistakes;
 
+        // --- the Nemesis system (docs/NEMESIS.md) ---
+        public final ForgeConfigSpec.BooleanValue nemesisEnabled, nemesisPromote, nemesisWorldSim, nemesisAmbushes, nemesisAlliances, nemesisDialogue;
+        public final ForgeConfigSpec.IntValue nemesisMaxCharacters, nemesisMaxPresent, nemesisCooldownMinutes;
+        public final ForgeConfigSpec.DoubleValue nemesisReturnMinDays, nemesisReturnMaxDays, nemesisEncounterChance, nemesisSurvivalChance, nemesisGrowthPerDay;
+
         // --- life sim ---
         public final ForgeConfigSpec.BooleanValue agingEnabled;
         public final ForgeConfigSpec.DoubleValue agingDaysPerYear;
@@ -756,6 +761,23 @@ public final class DBZConfig {
             aiFactionWars = b.comment("Fighters of enemy factions fight on sight (off: only when one is already fighting near the other)").define("factionWars", false);
             aiMemory = b.comment("Bosses remember each opponent across fights (what worked and what failed)").define("memory", true);
             aiMemoryMaxNpcs = b.comment("Most NPCs remembered (the longest unseen are forgotten first)").defineInRange("memoryMaxNpcs", 256, 8, 4096);
+            b.pop();
+
+            b.comment("The Nemesis system (docs/NEMESIS.md): named fighters who remember you, grow, return and become rivals").push("nemesis");
+            nemesisEnabled = b.comment("Named characters, their memories, rivalries and returns").define("enabled", true);
+            nemesisPromote = b.comment("Ordinary fighters who beat you, or survive you, become named characters").define("promote", true);
+            nemesisMaxCharacters = b.comment("Most named characters active at once (the least important retire to make room)").defineInRange("maxCharacters", 48, 4, 512);
+            nemesisMaxPresent = b.comment("Most named characters brought into the world by encounters at once").defineInRange("maxPresent", 4, 1, 32);
+            nemesisCooldownMinutes = b.comment("Real minutes between special encounters for one player").defineInRange("encounterCooldownMinutes", 15, 1, 1440);
+            nemesisEncounterChance = b.comment("Chance an eligible encounter happens when one is due (checked every half minute)").defineInRange("encounterChance", 0.3, 0.0, 1.0);
+            nemesisReturnMinDays = b.comment("Shortest time before a defeated or departed character returns (in-game days)").defineInRange("returnMinDays", 0.5, 0.0, 100.0);
+            nemesisReturnMaxDays = b.comment("Longest time before it returns (in-game days)").defineInRange("returnMaxDays", 2.0, 0.0, 100.0);
+            nemesisSurvivalChance = b.comment("Chance a named character finished off by a player survives anyway and returns (0: death is final)").defineInRange("survivalChance", 0.45, 0.0, 1.0);
+            nemesisGrowthPerDay = b.comment("Most fighter levels a character can gain in an in-game day of training").defineInRange("growthPerDay", 1.5, 0.0, 50.0);
+            nemesisWorldSim = b.comment("Characters train, duel, befriend and fall out with each other while away (abstractly, no entities)").define("worldSimulation", true);
+            nemesisAmbushes = b.comment("Characters with a serious grudge may ambush").define("ambushes", true);
+            nemesisAlliances = b.comment("Friendly characters may come to your aid").define("alliances", true);
+            nemesisDialogue = b.comment("Characters speak (chat lines)").define("dialogue", true);
             b.pop();
 
             b.comment("Optional life-sim layer").push("life_sim");

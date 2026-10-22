@@ -350,4 +350,7 @@ to both mods folders.
   with guard/parry/vanish/counter, ki from real pools, transformations along each race's existing forms, safe flight,
   gradual adaptation, factions and squads, learning (bosses remember opponents), events and pacing, config and
   `/dbz ai` debug. docs/COMBAT_AI.md.
-- [ ] Nemesis system on the `AiMemory` + `Personality` foundation (the user has a prompt for it)
+- [x] v0.160.0 The Nemesis system: persistent named characters, memories, relationships, traits, data-driven dialogue,
+  growth with the existing forms, returns and encounters, NPC-to-NPC world simulation, ranks, the Saiyan Warrior, the
+  Rivals history screen. docs/NEMESIS.md.
+- [ ] Nemesis feedback from play: encounter pacing, dialogue, balance of growth and returns

@@ -64,6 +64,8 @@ public final class NpcBrain {
     long actionSince, commitUntil;
     String reason = "";
     String formNote = "";
+    private java.util.List<Temper.Shift> shifts = java.util.List.of();
+    private Temper temperCache;
     long counter, nextDecision = Long.MIN_VALUE, lastDecision;
     private final Deque<String> notes = new ArrayDeque<>();
     int fights;
@@ -128,6 +130,19 @@ public final class NpcBrain {
     public void setPersonality(Personality p) {
         personality = p;
         style = p.style();
+        temperCache = null;
+    }
+
+    /** The traits it fights with: its personality, shifted by any Nemesis traits it has. */
+    public Temper temper() {
+        if (temperCache == null) temperCache = Temper.of(personality, shifts);
+        return temperCache;
+    }
+
+    /** The Nemesis system gives a named character its traits' shifts (none for ordinary fighters). */
+    public void setShifts(java.util.List<Temper.Shift> s) {
+        shifts = s == null ? java.util.List.of() : java.util.List.copyOf(s);
+        temperCache = null;
     }
 
     public NpcResources resources() {
@@ -211,7 +226,7 @@ public final class NpcBrain {
         return AiRandom.chance(seed, counter, salt, p);
     }
 
-    void note(String what) {
+    public void note(String what) {
         String line = mob.level().getGameTime() + ": " + what;
         if (!notes.isEmpty() && notes.peekLast().endsWith(what)) return;
         notes.addLast(line);
@@ -345,13 +360,14 @@ public final class NpcBrain {
     Situation perceive(LivingEntity t, long now) {
         Situation s = new Situation();
         s.personality = personality;
+        s.temper = temper();
         s.style = style;
         s.quality = quality();
         s.experience = fights / (fights + 5.0);
         s.boss = mob instanceof BossFighter;
         s.canFly = Locomotion.mayFly(mob, this);
         s.flying = move.flying;
-        s.meleeOnly = mob.profile().techniques().isEmpty();
+        s.meleeOnly = mob.techniques().isEmpty();
         s.noRetreat = mob.aiBounds() != null;
         s.health = Power.health(mob);
         s.ki = res.kiShare();
@@ -374,7 +390,7 @@ public final class NpcBrain {
         for (Action a : Action.values()) s.bias[a.ordinal()] = log.bias(a) + eventBias(a, now);
         s.allies = squad.size();
         s.allyInDanger = allyInDanger != null && allyAttacker != null && allyAttacker != t;
-        s.squadRetreat = squadRetreat || now - allyFellAt < 100 && personality.courage < 0.4;
+        s.squadRetreat = squadRetreat || now - allyFellAt < 100 && temper().courage < 0.4;
         s.rangedRole = rangedRole;
         s.incoming = incomingEta;
         s.profile = foe;
@@ -416,12 +432,12 @@ public final class NpcBrain {
     /** Short-lived nudges from events (an ally fell, its own health dropping low, a new technique seen). */
     private double eventBias(Action a, long now) {
         double b = 0;
-        if (now - allyFellAt < 100 && personality.aggression > 0.6 && a == Action.PRESSURE) b += 0.2;          // avenging
+        if (now - allyFellAt < 100 && temper().aggression > 0.6 && a == Action.PRESSURE) b += 0.2;          // avenging
         if (now - lowHealthAt < 200) {
             if (personality == Personality.COWARDLY && a == Action.RETREAT) b += 0.3;
-            if (personality.recklessness > 0.6 && a == Action.BIG_TECHNIQUE) b += 0.2;                         // all in
+            if (temper().recklessness > 0.6 && a == Action.BIG_TECHNIQUE) b += 0.2;                         // all in
         }
-        if (now - foeNewTechAt < 100 && (a == Action.KEEP_DISTANCE || a == Action.GUARD)) b += 0.15 * personality.caution;
+        if (now - foeNewTechAt < 100 && (a == Action.KEEP_DISTANCE || a == Action.GUARD)) b += 0.15 * temper().caution;
         String rep = foe.repeated();
         if (!rep.isEmpty() && a == Action.STRAFE) b += 0.1 * quality();                                         // read the habit
         return b;
@@ -656,7 +672,7 @@ public final class NpcBrain {
                     break;
                 }
                 if (b.chargeTicks() > 0) {
-                    int planned = (int) Math.min(KiTactics.MAX_CHARGE, Math.max(15, b.chargeTicks() * (0.25 + 0.35 * personality.patience) * (dist > 16 ? 1.3 : 1)));
+                    int planned = (int) Math.min(KiTactics.MAX_CHARGE, Math.max(15, b.chargeTicks() * (0.25 + 0.35 * temper().patience) * (dist > 16 ? 1.3 : 1)));
                     ki.beginCharge(b, planned, now);
                     commitUntil = Math.max(commitUntil, now + planned + 2);
                     note("charging " + b.id());
@@ -849,13 +865,13 @@ public final class NpcBrain {
         LivingEntity foeNow = mob.getTarget();
         int index = 0;
         for (KiFighter k : squad) if (k.getTarget() == foeNow && foeNow != null && k.getId() < mob.getId()) index++;
-        boolean hasKi = !mob.profile().techniques().isEmpty();
+        boolean hasKi = !mob.techniques().isEmpty();
         rangedRole = hasKi && index > 0 && index % 2 == 1;
         flankAngle = index == 0 ? 0 : (index % 2 == 1 ? 65 : -65) * ((index + 1) / 2);
         if (foeNow != null && !squad.isEmpty()) {                                  // the whole squad outmatched: fall back together
             double ours = Power.standing(mob);
             for (KiFighter k : squad) if (k.getTarget() == foeNow) ours += Power.standing(k);
-            if (ours < Power.standing(foeNow) * 0.35 && personality.courage < 0.85) squadRetreat = true;
+            if (ours < Power.standing(foeNow) * 0.35 && temper().courage < 0.85) squadRetreat = true;
         }
     }
 
@@ -916,7 +932,7 @@ public final class NpcBrain {
 
     void allyFell(long now) {
         allyFellAt = now;
-        note(personality.courage < 0.4 ? "an ally fell: shaken" : personality.aggression > 0.6 ? "an ally fell: furious" : "an ally fell");
+        note(temper().courage < 0.4 ? "an ally fell: shaken" : temper().aggression > 0.6 ? "an ally fell: furious" : "an ally fell");
         nextDecision = Math.min(nextDecision, now + reaction());
     }
 
@@ -942,6 +958,7 @@ public final class NpcBrain {
             log.seed(o.payoff, o.tries);
             if (o.fights > 0) note("remembers " + foeName + " (" + o.wins + "-" + o.losses + ")");
         }
+        com.dbzenith.nemesis.Nemesis.onFightStart(mob, t, foe);                     // a named character remembers the meeting
     }
 
     boolean remembers() {
@@ -976,6 +993,7 @@ public final class NpcBrain {
             if (how == Outcome.FLED) o.fled++;
             mem.learn(n, o, log);
         }
+        com.dbzenith.nemesis.Nemesis.onFightEnd(mob, foeId, foe, how);
         if (how != null) note("fight " + how.name().toLowerCase() + " vs " + foeName);
         foeId = null;
         fightStart = -1;

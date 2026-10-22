@@ -109,7 +109,7 @@ public final class UtilityScorer {
 
     /** One action's score, its terms added to {@code t} (returns NO when it makes no sense). */
     static double score(Action a, Situation s, Terms t) {
-        Personality p = s.personality;
+        Temper p = s.temper();
         FightStyle st = s.style;
         OpponentProfile pr = s.profile;
         double d = s.distance;
@@ -163,7 +163,7 @@ public final class UtilityScorer {
             }
             case KEEP_DISTANCE -> {
                 if (!ranged) {
-                    if (p != Personality.COWARDLY) return NO;
+                    if (p.kind != Personality.COWARDLY) return NO;
                     t.add("cowardice", 0.2);
                     break;
                 }

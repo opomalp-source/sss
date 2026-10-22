@@ -59,7 +59,7 @@ public final class AiEvents {
     }
 
     /** Who last hit {@code victim} within {@code ticks} (an entity id, or -1). */
-    static int lastAttacker(LivingEntity victim, long now, int ticks) {
+    public static int lastAttacker(LivingEntity victim, long now, int ticks) {
         Blow b = LAST_HIT.get(victim.getId());
         return b != null && now - b.tick <= ticks ? b.attacker : -1;
     }
@@ -75,6 +75,7 @@ public final class AiEvents {
         if (victim instanceof KiFighter k && k.brainOrNull() != null && !evaded) k.brainOrNull().onHurt(attacker, guarded ? 0 : share, now);
         if (attacker instanceof KiFighter k && k.brainOrNull() != null && !evaded && !guarded) k.brainOrNull().log.dealt(share);
         if (evaded && attacker instanceof KiFighter k && k.brainOrNull() != null && k.getTarget() == victim) k.brainOrNull().foe.onDodge();
+        if (!evaded) com.dbzenith.nemesis.Nemesis.onBlow(attacker, victim);             // helping a character, interrupting one, sparring
     }
 
     /** A melee move started (CombatEngine). */
@@ -87,14 +88,20 @@ public final class AiEvents {
     public static void onKi(LivingEntity e, String technique) {
         if (e.level().isClientSide) return;
         long now = e.level().getGameTime();
-        for (KiFighter k : watching(e)) k.brainOrNull().observedKi(technique, now);
+        for (KiFighter k : watching(e)) {
+            k.brainOrNull().observedKi(technique, now);
+            com.dbzenith.nemesis.Nemesis.observed(k, e, technique, null);
+        }
     }
 
     /** Someone took a form (players through FormHandler, NPCs through their own). */
     public static void onTransform(LivingEntity e, String form) {
         if (e.level().isClientSide) return;
         long now = e.level().getGameTime();
-        for (KiFighter k : watching(e)) k.brainOrNull().observedTransform(form, now);
+        for (KiFighter k : new java.util.ArrayList<>(watching(e))) {
+            k.brainOrNull().observedTransform(form, now);
+            com.dbzenith.nemesis.Nemesis.observed(k, e, null, form);
+        }
     }
 
     /** {@code victim} vanished out of {@code attacker}'s blow (Evasion). */

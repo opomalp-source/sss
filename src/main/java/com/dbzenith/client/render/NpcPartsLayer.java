@@ -51,12 +51,14 @@ public class NpcPartsLayer<T extends Mob> extends RenderLayer<T, PlayerModel<T>>
         boolean hat = look.extras().contains(NpcLooks.Extra.HAT), cap = look.extras().contains(NpcLooks.Extra.CAP);
         if (!code.isEmpty() && !hat) {
             VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(com.dbzenith.client.hair.HairRender.MATERIAL));
-            int c = look.hairColor();
+            com.dbzenith.transform.Form npcForm = npc instanceof com.dbzenith.npc.KiFighter kf ? com.dbzenith.transform.Forms.byId(kf.aiFormId())
+                    : com.dbzenith.transform.Forms.BASE;                                // an NPC's form shapes and colours its hair, as a player's does
+            int c = npcForm.hairColor() >= 0 ? npcForm.hairColor() & 0xFFFFFF : look.hairColor();
             {                                                                           // a cap flattens the hair to the fitted scalp
                 pose.pushPose();
                 m.head.translateAndRotate(pose);
                 var hair = cap ? com.dbzenith.client.hair.HairStyles.of(com.dbzenith.appearance.HairCode.Preset.BUZZ, com.dbzenith.client.hair.HairLook.BASE)
-                        : com.dbzenith.client.hair.HairCodes.shape(code, com.dbzenith.transform.Forms.BASE);
+                        : com.dbzenith.client.hair.HairCodes.shape(code, npcForm);
                 com.dbzenith.client.hair.HairRender.render(pose, vc, hair, com.dbzenith.client.hair.HairSim.step(npc, m.head, hair, partialTick, 0), light, overlay, c, -1);
                 pose.popPose();
             }

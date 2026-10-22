@@ -33,6 +33,9 @@ public final class ModNpcs {
     public static final KiFighter.Profile NAMEKIAN_PROFILE = new KiFighter.Profile("entity.dbzenith.namekian_warrior", 30, List.of(Techniques.KI_BLAST), 70);
     public static final KiFighter.Profile BRUTE_PROFILE = new KiFighter.Profile("entity.dbzenith.rampage_brute", 70,
             List.of(Techniques.WAVE_BEAM, Techniques.RAPID_VOLLEY), 70);
+    /** A Saiyan warrior of the Frieza Force: the rival archetype of the Nemesis system (named on sight). */
+    public static final KiFighter.Profile SAIYAN_PROFILE = new KiFighter.Profile("entity.dbzenith.saiyan_warrior", 30,
+            List.of(Techniques.KI_BLAST, Techniques.CRIMSON_BEAM), 60);
 
     public static final RegistryObject<EntityType<KiFighter>> SPROUTLING = TYPES.register("sproutling",
             () -> EntityType.Builder.<KiFighter>of((t, l) -> new KiFighter(t, l, SPROUTLING_PROFILE), MobCategory.MONSTER)
@@ -43,6 +46,9 @@ public final class ModNpcs {
     public static final RegistryObject<EntityType<KiFighter>> ANDROID_UNIT = TYPES.register("android_unit",
             () -> EntityType.Builder.<KiFighter>of((t, l) -> new KiFighter(t, l, ANDROID_PROFILE), MobCategory.MONSTER)
                     .sized(0.6f, 1.95f).clientTrackingRange(8).build("android_unit"));
+    public static final RegistryObject<EntityType<KiFighter>> SAIYAN_WARRIOR = TYPES.register("saiyan_warrior",
+            () -> EntityType.Builder.<KiFighter>of((t, l) -> new KiFighter(t, l, SAIYAN_PROFILE), MobCategory.MONSTER)
+                    .sized(0.6f, 1.9f).clientTrackingRange(10).build("saiyan_warrior"));
     public static final RegistryObject<EntityType<BossFighter>> TYRANT_LORD = TYPES.register("tyrant_lord",
             () -> EntityType.Builder.<BossFighter>of((t, l) -> new BossFighter(t, l, TYRANT_PROFILE, BossEvent.BossBarColor.PURPLE, 0xC890FF),
                     MobCategory.MONSTER).sized(0.7f, 2.1f).clientTrackingRange(10).fireImmune().build("tyrant_lord"));
@@ -118,6 +124,24 @@ public final class ModNpcs {
         }
     }
 
+    /** The fighter profile of an entity type (its techniques), or null if it is no fighter of ours. */
+    public static KiFighter.Profile profileOf(EntityType<?> type) {
+        var key = ForgeRegistries.ENTITY_TYPES.getKey(type);
+        if (key == null) return null;
+        return switch (key.getPath()) {
+            case "sproutling" -> SPROUTLING_PROFILE;
+            case "ki_soldier" -> SOLDIER_PROFILE;
+            case "android_unit" -> ANDROID_PROFILE;
+            case "saiyan_warrior" -> SAIYAN_PROFILE;
+            case "tyrant_lord" -> TYRANT_PROFILE;
+            case "rampage_brute" -> BRUTE_PROFILE;
+            case "namekian_warrior" -> NAMEKIAN_PROFILE;
+            case "ogre_guard" -> OGRE_PROFILE;
+            case "damned_warrior" -> DAMNED_PROFILE;
+            default -> null;
+        };
+    }
+
     public static EntityType<com.dbzenith.tournament.TournamentFighter> tournamentFighter(com.dbzenith.tournament.Roster r) {
         return TOURNAMENT_FIGHTERS.get(r).get();
     }
@@ -132,6 +156,7 @@ public final class ModNpcs {
     public static void attributes(EntityAttributeCreationEvent event) {
         event.put(SPROUTLING.get(), KiFighter.attributes(16, 3, 0.32).build());
         event.put(KI_SOLDIER.get(), KiFighter.attributes(30, 4, 0.27).build());
+        event.put(SAIYAN_WARRIOR.get(), KiFighter.attributes(45, 5, 0.29).build());
         event.put(TRAINING_DUMMY.get(), TrainingDummy.attributes().build());
         event.put(ANDROID_UNIT.get(), KiFighter.attributes(60, 6, 0.24).add(Attributes.ARMOR, 8).build());
         event.put(TYRANT_LORD.get(), KiFighter.attributes(400, 6, 0.3).add(Attributes.KNOCKBACK_RESISTANCE, 0.6).build());
@@ -151,7 +176,7 @@ public final class ModNpcs {
 
     @SubscribeEvent
     public static void spawnPlacements(SpawnPlacementRegisterEvent event) {
-        for (var type : List.of(SPROUTLING, KI_SOLDIER, ANDROID_UNIT)) {
+        for (var type : List.of(SPROUTLING, KI_SOLDIER, ANDROID_UNIT, SAIYAN_WARRIOR)) {
             event.register(type.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                     Monster::checkMonsterSpawnRules, SpawnPlacementRegisterEvent.Operation.REPLACE);
         }

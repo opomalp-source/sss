@@ -73,6 +73,39 @@ public final class OpponentProfile {
         return v + (x - v) * ALPHA;
     }
 
+    /** Its habits as numbers (kept between fights by the Nemesis system). */
+    public double[] habits() {
+        return new double[]{melee, ki, guard, dodge, charge, rush, kite, flying, transforms};
+    }
+
+    /**
+     * Starts from habits remembered from earlier fights, trusted as much as {@code weight} (0..1: a clever fighter
+     * recalls more): the readings carry on from there, so a changed style still shows, only later.
+     */
+    public void seed(double[] h, double weight) {
+        if (h == null || h.length < 9) return;
+        melee = h[0];
+        ki = h[1];
+        guard = h[2];
+        dodge = h[3];
+        charge = h[4];
+        rush = h[5];
+        kite = h[6];
+        flying = h[7];
+        transforms = h[8];
+        double w = Math.max(0, Math.min(0.9, weight));
+        samples = Math.max(samples, (int) Math.round(40 * w / (1 - w)));
+    }
+
+    public int samples() {
+        return samples;
+    }
+
+    /** Techniques seen, and how often. */
+    public java.util.Map<String, Integer> techniques() {
+        return techniques;
+    }
+
     /** Tests: one blow seen. */
     public void observeMeleeForTest() {
         onMelee();

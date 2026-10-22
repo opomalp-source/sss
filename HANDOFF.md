@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.159.0, 2026-10-22)
+# Handoff: where Dragon Block Zenith stands (v0.160.0, 2026-10-22)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.159.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.160.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -401,9 +401,8 @@ Minecraft if it is running). Never the updater.
 ## NPC combat AI (v0.159.0, 2026-10-22)
 Every `KiFighter` now runs the combat AI in `npc.ai` (`NpcBrain` via `CombatAiGoal`); the full design, every stage,
 the tests and the limits are in `docs/COMBAT_AI.md`, which is the place to continue from. Key points:
-- No Nemesis system existed before. The foundation is `Personality` (the only NPC personality system, saved on the
-  entity as `dbzAi`) and `AiMemory` (saved data `dbzenith_ai_memory`, bosses only, per NPC and opponent UUID: fights,
-  wins, losses, flights, grudge, per-action payoffs). The user offered a Nemesis prompt; build on these, not beside.
+- No Nemesis system existed before v0.160.0; it is now built (next section). `AiMemory` keeps per-opponent combat
+  learning for bosses; the Nemesis system keeps identities and relationships.
 - NPC transformations use only existing `Forms` of the NPC's race/variant (`NpcForms`); visuals are synced entity
   data (`KiFighter.AI_FORM`, `AI_FLAGS`) read by `AuraSystem` and the motion engine. Protocol 54.
 - Hooks in the combat code are one line each into `AiEvents` (CombatEngine.start, CombatEvents, Evasion, KiCombat,
@@ -414,3 +413,18 @@ the tests and the limits are in `docs/COMBAT_AI.md`, which is the place to conti
   x/z around 1200 in the dev world keeps craters from eating the floor.
 - Tests that let NPCs think must run in their own batch, set `brain().arena`, and discard their NPCs before timing
   out (see `AiTests.cleanup`): later batches reuse the same spot.
+
+## The Nemesis system (v0.160.0, 2026-10-22)
+Built on the combat AI; the whole design, tests and limits are in `docs/NEMESIS.md` (continue from there).
+- `nemesis.NemesisData` (saved data `dbzenith_nemesis`) holds every named character (`NamedFighter`): identity,
+  growth, bonds per player and per character (`Bond`, `Relationship`), history (`Memory`). Bodies are `KiFighter`s
+  carrying `dbzNemesis`; `Nemesis.onJoin` refuses stale copies.
+- One personality system: `Personality` + Nemesis `Trait`s = `npc.ai.Temper`, which the combat AI uses.
+- Hooks are one line each in KnockOut (knock-out, bleed-out), Grip (characters may spare), NpcBrain (fight start and
+  end), NpcForms, AiEvents (blows, ki, forms). Dialogue is data (`data/dbzenith/nemesis_dialogue/`).
+- Encounters (`Encounters`), the world simulation (`WorldSim`), progression (`Progression`), spars (`Spars`), the
+  Rivals screen (`client/screen/RivalsScreen`, `NemesisPackets`, protocol 55), the Saiyan Warrior NPC
+  (`tools/ArtGen.java only saiyan_warrior`).
+- Dev recipe: `/dbz nemesis list`, `/dbz nemesis info <name>`, `/dbz nemesis encounter Dev revenge <name>`, devshot
+  name `rivals_...` opens the Rivals screen. GameTest batches run concurrently in the same place: world tests must
+  clean up before their timeout (`NemesisTests.cleanup`).

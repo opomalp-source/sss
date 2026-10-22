@@ -40,6 +40,7 @@ public final class NpcLooks {
             Map.entry("martial_arts_master", look(null, 0, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.SHELL)),
             Map.entry("patrol_officer", look(HairCode.Preset.BUZZ, 0x3A2414, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.CAP)),
             Map.entry("ki_soldier", look(null, 0, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.SCOUTER, Extra.FROST_PADS)),
+            Map.entry("saiyan_warrior", look(HairCode.Preset.WILD, 0x141418, RaceTraits.Feature.NONE, false, 0, 0x6B3E1E, true, Extra.PADS)),   // the Nemesis rival
             Map.entry("android_unit", look(HairCode.Preset.SLICK, 0x141418, RaceTraits.Feature.NONE, false, 0, -1, false)),
             Map.entry("sproutling", look(null, 0, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.DOME)),
             Map.entry("tyrant_lord", look(null, 0, RaceTraits.Feature.NONE, false, 0, 0xF0EEF4, false)),

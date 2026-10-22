@@ -4569,3 +4569,39 @@ existing systems with no placeholders. Everything is in `docs/COMBAT_AI.md` (aud
 - **Tests:** `AiTests` (10). 331 GameTests pass, twice in a row. Dev client: Frieza transformed twice against a
   stronger Dev with his reasons in the readout, his form aura drawn on the NPC, a soldier fled by air and landed, a
   soldier flew up to fight Dev in the air. Protocol 54 (NPC entity data).
+
+## 2026-10-22 — The Nemesis system (v0.160.0)
+The user's request after the combat AI: a working Nemesis system after Shadow of Mordor and Shadow of War, NPCs as
+persistent characters who remember, grow, return, become rivals, friends or enemies, and live their own lives. Built
+on the combat AI's foundation (one personality system, per-opponent learning). Everything is in `docs/NEMESIS.md`.
+
+- **Identities** (`nemesis.NamedFighter`, `NemesisData` saved data, bounded): name and epithet, race, personality and
+  traits, level and growth, techniques learned, forms reached, reputation and rank, status, goal, history, a bond with
+  each player and character. Bodies carry their character's id; copies and bodies of the dead are refused. Named on
+  sight: Frieza and Broly (one each per world), the tournament roster, Saiyan Warriors; promoted: fighters who knock a
+  player out, and one in four left alive by one.
+- **Memory and relationships:** 30 kinds of memory; affinity and rivalry behind nine relationship states, with
+  hysteresis, moving both ways; reactions depend on temperament (the honorable respect mercy, the proud resent it, the
+  loyal avenge allies). Traits (vengeful, intelligent, competitive, loyal, calm, friendly, ambitious) shift the
+  personality the combat AI fights with (`npc.ai.Temper`), and can be gained after major experiences.
+- **Dialogue** from data (`data/dbzenith/nemesis_dialogue/core.json`, 138 original lines, 16 situations), conditions on
+  recorded facts only, placeholders from the record, no recent repeats; right-click a named character to talk.
+- **Growth** with the mod's own scales: fighter levels (capped a day and near the strongest player met), each race's
+  existing forms, existing techniques; Saiyans grow more from defeat.
+- **Fates and returns:** left alive, a character gets away and recovers; finished, it may survive (and come back
+  vengeful) or die for good; done with its business it leaves; beaten too often by someone it respects, it retires.
+  Encounters: revenge, rival challenges, ambushes, finding a character training, rivals intervening in your fights,
+  friends coming to help; sparring with friends (and betrayal). Fair arrival levels, cooldowns, eligibility,
+  loaded safe ground. Characters recall a player's fighting habits at the start of the next fight.
+- **World simulation** (abstract, bounded, deterministic): training while away, fading feelings, duels between
+  enemies, training partnerships, betrayals, tournaments; ranks from Unknown Fighter to Legendary Warrior.
+- **The Saiyan Warrior** (new NPC, original skin from ArtGen, wild hair, tail, armour, egg, rare spawns); every NPC's
+  hair now follows its form (gold Super Saiyan hair on a Saiyan rival).
+- **Nemesis History screen:** a Rivals tab in the character menu: portrait, rank, relationship, rivalry, record, forms
+  seen, last power and place, your story; only what the player discovered (`NemesisPackets`, protocol 55). The
+  social Party/Clans tabs now fit any number of menu pages (they covered the new tab).
+- **Config** `[nemesis]` and `/dbz nemesis list|info|promote|encounter|simulate|bond`.
+- **Tests:** `NemesisTests` (11); 341 GameTests pass, twice. Dev client: a Saiyan Warrior named on sight went Super
+  Saiyan (gold hair), greeted Dev, lost (humiliated), got away, came back for revenge with a Saiyan line; the Rivals
+  screen. Fixed on the way: the spared credit (the game forgets the last attacker after five seconds), duplicate
+  memories, a stale status, the overlapping tabs, bare skin under a form's raised hairline.

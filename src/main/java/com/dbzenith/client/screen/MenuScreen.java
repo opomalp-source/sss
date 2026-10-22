@@ -14,7 +14,7 @@ import net.minecraft.network.chat.Component;
  * the page fills. Esc closes the menu (or returns to whatever opened it).
  */
 public abstract class MenuScreen extends Screen {
-    public enum Page { STATS, TECHNIQUES, SKILLS, FORMS, STYLES }
+    public enum Page { STATS, TECHNIQUES, SKILLS, FORMS, STYLES, RIVALS }
 
     private final Page page;
     protected final Screen parent;
@@ -35,6 +35,7 @@ public abstract class MenuScreen extends Screen {
             case SKILLS -> new RacialScreen(parent);
             case FORMS -> new FormScreen(parent);
             case STYLES -> new StyleScreen(parent);
+            case RIVALS -> new RivalsScreen(parent);                                // the Nemesis History
         };
     }
 

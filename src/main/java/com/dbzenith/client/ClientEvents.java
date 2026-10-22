@@ -192,6 +192,9 @@ public final class ClientEvents {
             mc.setScreen(new com.dbzenith.client.screen.PoseSheetScreen(name, (clips ? "clips " : "") + id, cells, phase, turn, pitch, subject));
             delayTicks = Math.max(delayTicks, 4);
         }
+        if (name.startsWith("rivals_") && !(mc.screen instanceof com.dbzenith.client.screen.RivalsScreen)) {     // the Nemesis History
+            mc.setScreen(new com.dbzenith.client.screen.RivalsScreen(null));
+        }
         if (name.startsWith("styles_") && !(mc.screen instanceof com.dbzenith.client.screen.StyleScreen)) {               // CX-20
             mc.setScreen(new com.dbzenith.client.screen.StyleScreen(null));
             delayTicks = Math.max(delayTicks, 6);

@@ -64,6 +64,19 @@ public class KiFighter extends Monster implements Animated {
     private final double baseHealth;
     private final double baseDamage;
     private NpcBrain brain;
+    // the Nemesis system (docs/NEMESIS.md): the character this body belongs to, and what it is up to
+    private java.util.UUID nemesisId;
+    private List<Technique> learned = List.of();
+    /** When it leaves the world after its fight (0: it stays), whether it is training, whom it spars with or watches over. */
+    public long leaveAt;
+    public boolean training;
+    public java.util.UUID sparWith, protecting, spared;
+    /** Who knocked it down (a player), for when it gets away. */
+    public java.util.UUID downedBy;
+    /** Whether it has greeted its foe this fight; when its last spar ended. */
+    public boolean greeted;
+    public long lastSparEnd;
+    public long lastTalk;
 
     public KiFighter(EntityType<? extends KiFighter> type, Level world, Profile profile) {
         super(type, world);
@@ -152,6 +165,39 @@ public class KiFighter extends Monster implements Animated {
         return damageMultiplier() * formFactor();
     }
 
+    /** The named character this body belongs to, or null for an ordinary fighter. */
+    public java.util.UUID nemesisId() {
+        return nemesisId;
+    }
+
+    public void setNemesisId(java.util.UUID id) {
+        nemesisId = id;
+    }
+
+    /** The techniques it fights with: its kind's, and any its character has learned. */
+    public List<Technique> techniques() {
+        if (learned.isEmpty()) return profile.techniques();
+        List<Technique> all = new java.util.ArrayList<>(profile.techniques());
+        for (Technique t : learned) if (!all.contains(t)) all.add(t);
+        return all;
+    }
+
+    public void setLearned(List<Technique> list) {
+        learned = list == null ? List.of() : List.copyOf(list);
+    }
+
+    /** Shows it as a named character: its name over its head, and its level ({@code fresh}: a new body, at full health). */
+    public void showAs(String name, int lvl, boolean fresh) {
+        if (fresh || lvl != level) {
+            float share = getHealth() / Math.max(1f, getMaxHealth());
+            setFighterLevel(lvl);
+            if (!fresh) setHealth(Math.max(1f, getMaxHealth() * share));
+        }
+        setCustomName(Component.literal(name));
+        setCustomNameVisible(true);
+        setPersistenceRequired();
+    }
+
     /** Where it must stay to fight (the tournament ring), or null. */
     public AABB aiBounds() {
         return null;
@@ -178,6 +224,7 @@ public class KiFighter extends Monster implements Animated {
     @Override
     public boolean canAttack(LivingEntity target) {
         if (brain != null && brain.arena != null && !brain.arena.contains(target.position())) return false;
+        if (nemesisId != null && target instanceof Player p && !p.getUUID().equals(sparWith) && (p.getUUID().equals(spared) || com.dbzenith.nemesis.Nemesis.friendlyTo(this, p))) return false;   // friends, the spared
         return super.canAttack(target);
     }
 
@@ -204,6 +251,16 @@ public class KiFighter extends Monster implements Animated {
         goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
+    }
+
+    /** Talking to a named character (right-click, when it isn't fighting): it answers from what it remembers. */
+    @Override
+    protected net.minecraft.world.InteractionResult mobInteract(Player player, net.minecraft.world.InteractionHand hand) {
+        if (nemesisId != null && hand == net.minecraft.world.InteractionHand.MAIN_HAND && getTarget() == null) {
+            if (!level().isClientSide && player instanceof net.minecraft.server.level.ServerPlayer sp) com.dbzenith.nemesis.Nemesis.talk(this, sp);
+            return net.minecraft.world.InteractionResult.sidedSuccess(level().isClientSide);
+        }
+        return super.mobInteract(player, hand);
     }
 
     /** Walk up and swing: the old melee, only while the combat AI is switched off. */
@@ -327,6 +384,7 @@ public class KiFighter extends Monster implements Animated {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("fighterLevel", level);
+        if (nemesisId != null) tag.putUUID("dbzNemesis", nemesisId);
         if (brain != null) tag.put("dbzAi", brain.save());
     }
 
@@ -334,6 +392,7 @@ public class KiFighter extends Monster implements Animated {
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         level = Math.max(1, tag.getInt("fighterLevel"));
+        nemesisId = tag.hasUUID("dbzNemesis") ? tag.getUUID("dbzNemesis") : null;
         var health = getAttribute(Attributes.MAX_HEALTH);
         if (health != null && health.getBaseValue() != defaultHealth()) { // saved before levels became toughness
             health.setBaseValue(defaultHealth());

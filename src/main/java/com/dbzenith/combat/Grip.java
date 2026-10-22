@@ -291,7 +291,7 @@ public final class Grip {
         for (LivingEntity v : KnockOut.downed()) {
             if (!(v instanceof Player) || isGripped(v) || Carry.isCarried(v)) continue;
             for (Mob m : v.level().getEntitiesOfClass(Mob.class, v.getBoundingBox().inflate(16),
-                    m -> m instanceof KiFighter && m.isAlive() && !KnockOut.isDown(m) && !isGripping(m) && !Carry.isCarrying(m)
+                    m -> m instanceof KiFighter && m.isAlive() && !KnockOut.isDown(m) && !isGripping(m) && !Carry.isCarrying(m) && !com.dbzenith.nemesis.Nemesis.spares((KiFighter) m, v)
                             && (m.getTarget() == v || v.getLastHurtByMob() == m))) {
                 if (m.distanceTo(v) > 2.4) {
                     m.getNavigation().moveTo(v, 1.0);

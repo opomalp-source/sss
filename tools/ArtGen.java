@@ -19,6 +19,7 @@ public class ArtGen {
             if (args[1].equals("training_dummy")) TrainingDummy.make();
             if (args[1].equals("meters")) MeterArt.all();
             if (args[1].equals("masters")) NpcArt.masters();
+            if (args[1].equals("saiyan_warrior")) NpcArt.saiyanWarrior();          // the Nemesis system's rival (v0.160.0)
             if (args[1].equals("gear")) Gear.all();                           // the clothes (the clothing rework)
             System.out.println("ArtGen done: " + args[1]);
             return;
@@ -546,6 +547,7 @@ public class ArtGen {
             rampageBrute();
             namekianWarrior();
             enma();
+            saiyanWarrior();
             ogre("ogre_clerk_red", 0xFFD84A3A, false);
             ogre("ogre_clerk_blue", 0xFF4A78D8, false);
             ogre("ogre_guard", 0xFFC8402E, true);
@@ -647,6 +649,17 @@ public class ArtGen {
                 return layer("entity/face_hd/mouth_" + mouth + ".png");
             }
 
+            /** Hair roots on the scalp (the top, the back down to the nape, the sides' upper edge) under its 3D hair: no bare
+             *  skin shows between locks or below a hairline raised by a form. */
+            Npc scalp(int color) {
+                int[] tone = ramp(color, 4);
+                for (int y = 0; y < 16; y++) for (int x = 16; x < 32; x++) c.set(x, y, tone[(x + y / 3) % 3]);                 // the top
+                for (int y = 16; y < 29; y++) for (int x = 48; x < 64; x++) c.set(x, y, tone[(x / 2 + (y > 26 ? 1 : 0)) % 3]); // the back to the nape
+                for (int y = 16; y < 20; y++) for (int x = 0; x < 16; x++) c.set(x, y, tone[(x / 2) % 3]);                  // the sides' upper edge
+                for (int y = 16; y < 20; y++) for (int x = 32; x < 48; x++) c.set(x, y, tone[(x / 2) % 3]);
+                return this;
+            }
+
             void save(String name) throws IOException {
                 c.save("entity/fighter/" + name + ".png");
             }
@@ -731,6 +744,13 @@ public class ArtGen {
             s.arm = (f, x, y, w, h) -> v(y, h) > 0.86 ? 0 : v(y, h) > 0.82 ? ink(navy) : cloth(navy, f, x, y, w, h, 613);
             s.leg = (f, x, y, w, h) -> v(y, h) > 0.8 || f == Face.BOTTOM ? (row(v(y, h), 0.805, h) ? ink(black) : flat(black, f, 0)) : cloth(navy, f, x, y, w, h, 614);
             new Npc().body("athletic", 0xFFEEC6A0).paint(s).face(3, 0xFF3A2A1A, true, 0, 0xFF3A2414, 0, 0).save("patrol_officer");
+        }
+
+        /** A Saiyan warrior (the Nemesis rival): tanned, in Saiyan battle armour (its shoulder pads are 3D, its wild hair and
+         *  tail are parts: NpcLooks), dark eyes, heavy brows. */
+        static void saiyanWarrior() throws IOException {
+            new Npc().body("athletic", 0xFFE6B890).layer("entity/gear/battle_armor_top.png").layer("entity/gear/battle_armor_pants.png")
+                    .layer("entity/gear/battle_armor_boots.png").face(3, 0xFF1A1414, true, 2, 0xFF141010, 3, 0).scalp(0xFF1C1A1E).save("saiyan_warrior");
         }
 
         /** A soldier of the tyrant's army: a green-skinned alien in white armour with purple pads (3D) and a scouter. */

@@ -165,6 +165,7 @@ public final class NpcForms {
         changedAt = now;
         cooldownUntil = now + (f.isBase() ? 200 : 160);
         k.aiFormChanged(f);
+        com.dbzenith.nemesis.Nemesis.ownForm(k, f.id());                             // its foe has now seen it
         ServerLevel level = (ServerLevel) k.level();
         if (f.isBase()) {
             level.sendParticles(new DustParticleOptions(new Vector3f(0.85f, 0.95f, 1f), 2.0f), k.getX(), k.getY() + 1, k.getZ(), 10, 0.6, 1.0, 0.6, 0.1);

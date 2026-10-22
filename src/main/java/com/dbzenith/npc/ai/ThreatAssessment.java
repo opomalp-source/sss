@@ -59,7 +59,7 @@ final class ThreatAssessment {
     }
 
     static double score(KiFighter mob, NpcBrain b, LivingEntity c, long now) {
-        Personality p = b.personality;
+        Temper p = b.temper();
         double s = 1.0;
         if (c == mob.getTarget()) s += 0.35;
         if (c instanceof net.minecraft.world.entity.Mob m && m.getTarget() == mob) s += 0.4;

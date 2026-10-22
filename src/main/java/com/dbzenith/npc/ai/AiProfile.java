@@ -29,6 +29,8 @@ public record AiProfile(Faction faction, List<Personality> personalities, Race r
                 Tier.LIGHT, false, 0x9BE870));
         BY_TYPE.put("ki_soldier", new AiProfile(Faction.FRIEZA_FORCE, List.of(Personality.AGGRESSIVE, Personality.BALANCED, Personality.ARROGANT,
                 Personality.COWARDLY), null, null, true, Tier.NORMAL, false, PLAIN_AURA));
+        BY_TYPE.put("saiyan_warrior", new AiProfile(Faction.FRIEZA_FORCE, List.of(Personality.ARROGANT, Personality.AGGRESSIVE, Personality.BALANCED,
+                Personality.RECKLESS), Race.SAIYAN, Variant.SAIYAN, true, Tier.NORMAL, true, 0xFFE6A0));
         BY_TYPE.put("android_unit", new AiProfile(Faction.RED_RIBBON, List.of(Personality.TACTICAL, Personality.PATIENT), Race.ANDROID, Variant.ANDROID,
                 true, Tier.NORMAL, false, 0x9AD0FF));
         BY_TYPE.put("namekian_warrior", new AiProfile(Faction.NAMEKIANS, List.of(Personality.HONORABLE, Personality.DEFENSIVE, Personality.PATIENT),

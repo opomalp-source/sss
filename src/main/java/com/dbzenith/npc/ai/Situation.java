@@ -8,6 +8,12 @@ package com.dbzenith.npc.ai;
 public final class Situation {
     // ---- who is deciding
     public Personality personality = Personality.BALANCED;
+    /** Its personality with any Nemesis traits (null: the personality alone). */
+    public Temper temper;
+
+    public Temper temper() {
+        return temper != null ? temper : Temper.of(personality);
+    }
     public FightStyle style = FightStyle.BALANCED;
     /** How well it thinks, 0..1 (light 0.5, normal 0.75, elite 1). */
     public double quality = 0.75;

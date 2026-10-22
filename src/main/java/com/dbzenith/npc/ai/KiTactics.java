@@ -41,7 +41,7 @@ final class KiTactics {
     }
 
     List<Technique> known() {
-        return mob.profile().techniques();
+        return mob.techniques();
     }
 
     boolean ready(Technique t, long now) {

@@ -167,6 +167,7 @@ public final class KnockOut {
         d.until = now + d.total;
         DOWN.put(v, d);
         speed(v, d.crawl ? -0.8 : -1.0);
+        com.dbzenith.nemesis.Nemesis.onKnockedOut(v, source);                    // a win or a loss to remember (the Nemesis system)
         v.level().playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.2f, 0.6f);
         v.level().playSound(null, v.getX(), v.getY(), v.getZ(), com.dbzenith.registry.ModSounds.LAND.get(), SoundSource.PLAYERS, 1.2f, 0.7f);
         Blood.spill(v, v.position().add(0, v.getBbHeight() * 0.4, 0), 10);
@@ -253,6 +254,10 @@ public final class KnockOut {
                 } else d.giveUp = 0;
             }
             if (now >= d.until) {
+                if (com.dbzenith.nemesis.Nemesis.onBledOut(v, d.hadNoAi)) {                   // a named character left alive gets away
+                    end(v, d);
+                    continue;
+                }
                 finish(v, endSource(v));                                     // bled out
                 continue;
             }

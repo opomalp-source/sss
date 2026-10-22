@@ -217,7 +217,9 @@ discipline) and a melee `FightStyle` (aggressive, defensive, tactical, balanced)
 (stable), saved on the entity (`dbzAi.personality`), changeable with `/dbz ai personality`. Defaults: Frieza arrogant,
 Broly reckless, soldiers aggressive/balanced/arrogant/cowardly, Saibamen reckless/aggressive, androids tactical/patient,
 Namekians honorable/defensive/patient, ogres defensive/honorable, the damned aggressive/reckless/arrogant, the
-tournament roster one each (Mr. Satan arrogant, Spopovich reckless, Nam honorable, Ranfan tactical, ...).
+tournament roster one each (Mr. Satan arrogant, Spopovich reckless, Nam honorable, Ranfan tactical, ...). Since v0.160.0 a named
+character's Nemesis traits shift these numbers (`Temper` = personality + traits; docs/NEMESIS.md), and it starts a
+fight from the habits it remembers of that player.
 
 ### 3.9 Teams
 `Faction` (there were none): Frieza Force (soldiers, Saibamen, Frieza) vs the Namekians; the damned vs the ogres;

@@ -26,10 +26,12 @@ public final class SocialClient {
     @SubscribeEvent public static void init(ScreenEvent.Init.Post e){
         if(!(e.getScreen() instanceof MenuScreen screen))return;
         var mc=Minecraft.getInstance();int w=Math.min(screen.width,600),h=Math.min(screen.height,340),x=(screen.width-w)/2+8,y=(screen.height-h)/2+22;
-        int tab=(w-16)/7,index=0;
-        for(var widget:e.getListenersList())if(widget instanceof UiButton button&&button.getY()==y){button.setX(x+index*tab);button.setWidth(tab-2);if(screen instanceof SocialScreen)button.selected(false);index++;}
+        java.util.List<UiButton> pages=new java.util.ArrayList<>();
+        for(var widget:e.getListenersList())if(widget instanceof UiButton button&&button.getY()==y)pages.add(button);
+        int tab=(w-16)/(pages.size()+2),index=0;                                 // the menu's pages, then Party and Clans
+        for(UiButton button:pages){button.setX(x+index*tab);button.setWidth(tab-2);if(screen instanceof SocialScreen)button.selected(false);index++;}
         for(boolean clan:new boolean[]{false,true}){
-            final boolean mode=clan;var button=UiButton.of(UiButton.Style.TAB,Component.literal(clan?"Clans":"Party"),x+(clan?6:5)*tab,y,tab-2,16,b->mc.setScreen(new SocialScreen(mode)));
+            final boolean mode=clan;var button=UiButton.of(UiButton.Style.TAB,Component.literal(clan?"Clans":"Party"),x+(pages.size()+(clan?1:0))*tab,y,tab-2,16,b->mc.setScreen(new SocialScreen(mode)));
             button.selected(screen instanceof SocialScreen s&&s.clan==clan);e.addListener(button);
         }
     }
