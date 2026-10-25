@@ -89,6 +89,7 @@ public final class Residents {
             case MERCHANT, COOK -> NamedFighter.Goal.BUSINESS;
             case TRAVELER -> NamedFighter.Goal.EXPLORE;
             case CITIZEN -> c.has(Trait.CURIOUS) ? NamedFighter.Goal.EXPLORE : NamedFighter.Goal.REST;
+            case SCIENTIST -> NamedFighter.Goal.RESEARCH;
         };
     }
 
@@ -141,14 +142,47 @@ public final class Residents {
         NemesisData d = Nemesis.data();
         List<Poi> homes = s.of(Poi.Kind.HOME);
         List<NamedFighter> out = new ArrayList<>();
-        int n = Math.min(Math.min(limit, PLAN.size()), homes.size() * 2);
+        List<Occupation> plan = planOf(s);
+        int n = Math.min(Math.min(limit, plan.size()), homes.size() * 2);
         long now = level.getGameTime();
         for (int i = 0; i < n; i++) {
             Poi home = homes.get(i / 2);
-            NamedFighter c = create(d, s, PLAN.get(i), home.pos(), now, i + 1);
+            NamedFighter c = create(d, s, plan.get(i), home.pos(), now, i + 1);
             spawnBody(level, c, home.pos());
             out.add(c);
         }
+        return out;
+    }
+
+    /** Who moves into a settlement, in order: its own population (a planned city's) or the default town's. */
+    static List<Occupation> planOf(Settlement s) {
+        if (s.population.isEmpty()) return PLAN;
+        List<Occupation> out = new ArrayList<>();
+        for (String id : s.population) {
+            Occupation o = Occupation.byId(id);
+            if (o != null) out.add(o);
+        }
+        return out.isEmpty() ? PLAN : out;
+    }
+
+    /** How many live in a settlement: a planned one by its own population (scaled by living.settlementDensity), else townPopulation. */
+    public static int limitOf(Settlement s) {
+        if (s.population.isEmpty()) return LivingConfig.townPopulation();
+        return (int) Math.round(planOf(s).size() * LivingConfig.density() / 100.0);
+    }
+
+    /**
+     * Peoples a settlement that world generation built (docs/WORLD_STRUCTURES.md): residents by its plan, two to a home,
+     * no bodies yet (each appears at home once its home is loaded, {@link #tick}). Returns them.
+     */
+    public static List<NamedFighter> settle(Settlement s, long now) {
+        NemesisData d = Nemesis.data();
+        List<NamedFighter> out = new ArrayList<>();
+        if (d == null) return out;
+        List<Poi> homes = s.of(Poi.Kind.HOME);
+        List<Occupation> plan = planOf(s);
+        int n = Math.min(Math.min(limitOf(s), plan.size()), homes.size() * 2);
+        for (int i = 0; i < n; i++) out.add(create(d, s, plan.get(i), homes.get(i / 2).pos(), now, i + 1));
         return out;
     }
 
@@ -248,7 +282,7 @@ public final class Residents {
     static void newcomers(net.minecraft.server.MinecraftServer server, LivingData ld, NemesisData d, long now) {
         for (Settlement s : ld.settlements()) {
             List<NamedFighter> people = of(s);
-            int limit = LivingConfig.townPopulation();
+            int limit = limitOf(s);
             if (people.size() >= limit || s.alarmed(now)) continue;
             long day = Math.floorDiv(now, 24000L);
             if (s.lastNewcomerDay == day) continue;
@@ -265,9 +299,10 @@ public final class Residents {
             }
             if (home == null || fewest >= 2) continue;
             Occupation need = Occupation.CITIZEN;                                          // the trade the town lacks first
-            for (Occupation o : PLAN) {
+            List<Occupation> plan = planOf(s);
+            for (Occupation o : plan) {
                 long have = people.stream().filter(c -> Occupation.of(c) == o).count();
-                long want = PLAN.subList(0, Math.min(limit, PLAN.size())).stream().filter(x -> x == o).count();
+                long want = plan.subList(0, Math.min(limit, plan.size())).stream().filter(x -> x == o).count();
                 if (have < want) {
                     need = o;
                     break;

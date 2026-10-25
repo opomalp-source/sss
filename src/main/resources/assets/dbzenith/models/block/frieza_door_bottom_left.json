@@ -1,0 +1,5 @@
+{
+  "parent": "minecraft:block/door_bottom_left",
+  "render_type": "minecraft:cutout",
+  "textures": {"bottom": "dbzenith:block/frieza_door_bottom", "top": "dbzenith:block/frieza_door_top"}
+}

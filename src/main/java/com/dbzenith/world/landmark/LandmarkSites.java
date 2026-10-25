@@ -29,15 +29,23 @@ public final class LandmarkSites {
     public record Terrain(ChunkGenerator generator, RandomState random, LevelHeightAccessor heights, int seaLevel) {
         /** The ground's top (the first solid block's y) at a column. */
         public int height(int x, int z) {
+            SAMPLES.incrementAndGet();
             return generator.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, heights, random) - 1;
         }
 
         /** Whether the column is under water. */
         public boolean wet(int x, int z) {
-            return generator.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, heights, random) - 1 > height(x, z);
+            return wetOver(x, z, height(x, z));
+        }
+
+        /** Whether the column is under water, its ground's top ({@link #height}) already known. */
+        public boolean wetOver(int x, int z, int ground) {
+            SAMPLES.incrementAndGet();
+            return generator.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, heights, random) - 1 > ground;
         }
 
         public Holder<Biome> biome(int x, int y, int z) {
+            SAMPLES.incrementAndGet();
             return generator.getBiomeSource().getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z), random.sampler());
         }
 
@@ -45,6 +53,9 @@ public final class LandmarkSites {
             return new Terrain(level.getChunkSource().getGenerator(), level.getChunkSource().randomState(), level, level.getSeaLevel());
         }
     }
+
+    /** Terrain samples taken (each costs the noise of a whole column): for timing the searches. */
+    static final java.util.concurrent.atomic.AtomicLong SAMPLES = new java.util.concurrent.atomic.AtomicLong();
 
     /** How many spots each cell tries, in turn, before it goes without (the first that suits holds the landmark). */
     static final int ATTEMPTS = 4;
@@ -69,6 +80,14 @@ public final class LandmarkSites {
 
     /** The landmark of a cell (at the first of its spots that suits), or null when the cell goes without. */
     public static LandmarkPlan plan(Landmark type, long worldSeed, int cellX, int cellZ, Terrain terrain) {
+        if (type.unique) {                                                              // one per world: only its chosen cell
+            long[] chosen = uniqueCell(type, worldSeed, terrain);
+            if (chosen == null || chosen[0] != cellX || chosen[1] != cellZ) return null;
+        }
+        return cellPlan(type, worldSeed, cellX, cellZ, terrain);
+    }
+
+    private static LandmarkPlan cellPlan(Landmark type, long worldSeed, int cellX, int cellZ, Terrain terrain) {
         String key = worldSeed + ":" + type.ordinal() + ":" + cellX + ":" + cellZ;
         Optional<LandmarkPlan> cached = PLANS.get(key);
         if (cached != null) return cached.orElse(null);
@@ -79,9 +98,55 @@ public final class LandmarkSites {
         return made;
     }
 
+    /** How far (in cells, round the world's centre) a unique landmark looks for its one site. */
+    static final int UNIQUE_RINGS = 6;
+    private static final ConcurrentHashMap<String, Optional<long[]>> UNIQUE = new ConcurrentHashMap<>();
+
+    /** A unique landmark's cell: the first cell, ring by ring out from the world's centre, whose site suits; null if none. */
+    public static long[] uniqueCell(Landmark type, long worldSeed, Terrain terrain) {
+        String key = worldSeed + ":" + type.ordinal();
+        Optional<long[]> cached = UNIQUE.get(key);
+        if (cached != null) return cached.orElse(null);
+        synchronized (UNIQUE) {                                                         // one search; other generation threads wait for it
+            cached = UNIQUE.get(key);
+            if (cached != null) return cached.orElse(null);
+            long[] saved = LandmarkGuard.savedSite(type);                               // sited before in this world's life
+            if (saved != null && saved.length == 2) {
+                UNIQUE.put(key, Optional.of(saved));
+                return saved;
+            }
+            long[] found = searchUnique(type, worldSeed, terrain, key);
+            if (found != null) LandmarkGuard.saveSite(type, found);
+            return found;
+        }
+    }
+
+    private static long[] searchUnique(Landmark type, long worldSeed, Terrain terrain, String key) {
+        long[] found = null;
+        long t0 = System.nanoTime(), s0 = SAMPLES.get();
+        for (int r = 0; r <= UNIQUE_RINGS && found == null; r++)
+            for (int cx = -r; cx <= r && found == null; cx++)
+                for (int cz = -r; cz <= r && found == null; cz++) {
+                    if (Math.max(Math.abs(cx), Math.abs(cz)) != r) continue;
+                    if (cellPlan(type, worldSeed, cx, cz, terrain) != null) found = new long[]{cx, cz};
+                }
+        if (UNIQUE.putIfAbsent(key, Optional.ofNullable(found)) == null)
+            com.dbzenith.DBZenith.LOGGER.info("Unique landmark {}: {} ({} ms, about {} terrain samples)", type.id,
+                    found == null ? "no site within " + UNIQUE_RINGS + " cells" : "cell " + found[0] + ", " + found[1], (System.nanoTime() - t0) / 1_000_000, SAMPLES.get() - s0);
+        return found;
+    }
+
+    /** Forgets every plan (the guard changed what may be built). */
+    static void clearCache() {
+        PLANS.clear();
+        UNIQUE.clear();
+    }
+
     private static LandmarkPlan make(Site site, long worldSeed, Terrain t) {
-        if (!biomeFits(site, t) || crowded(site, worldSeed, t)) return null;
-        return shape(site, t);
+        if (LandmarkGuard.blocked(site.type(), site.x(), site.z(), site.type().radius + 16)) return null;   // not on ground explored before it
+        if (!biomeFits(site, t)) return null;
+        LandmarkPlan p = shape(site, t);                                                // its own ground first: much cheaper than the neighbours' plans
+        return p == null || crowded(site, worldSeed, t) ? null : p;
     }
 
     private static boolean biomeFits(Site site, Terrain t) {

@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {"bottom": "dbzenith:block/capsule_white_seam", "top": "dbzenith:block/capsule_white_seam", "side": "dbzenith:block/capsule_white_seam"}
+}

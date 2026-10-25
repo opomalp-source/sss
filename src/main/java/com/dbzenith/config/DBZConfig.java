@@ -280,7 +280,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.IntValue nemesisMaxCharacters, nemesisMaxPresent, nemesisCooldownMinutes;
         public final ForgeConfigSpec.DoubleValue nemesisReturnMinDays, nemesisReturnMaxDays, nemesisEncounterChance, nemesisSurvivalChance, nemesisGrowthPerDay;
         public final ForgeConfigSpec.BooleanValue livingEnabled, livingAutoTown, livingSocial, livingRumors;
-        public final ForgeConfigSpec.IntValue livingActiveRange, livingTownPopulation, livingMaxConversationsPerTick, livingRecoverMinutes, livingTravelers, livingMaxCompanions;
+        public final ForgeConfigSpec.IntValue livingActiveRange, livingTownPopulation, livingMaxConversationsPerTick, livingRecoverMinutes, livingTravelers, livingMaxCompanions, livingDensity;
 
         // --- life sim ---
         public final ForgeConfigSpec.BooleanValue agingEnabled;
@@ -793,6 +793,7 @@ public final class DBZConfig {
             livingRecoverMinutes = b.comment("Longest a knocked-out resident stays away before coming home (real minutes)").defineInRange("recoverMinutes", 10, 1, 1440);
             livingTravelers = b.comment("Travelers on the roads between towns (they carry news; recruitable)").defineInRange("travelers", 2, 0, 8);
             livingMaxCompanions = b.comment("Most companions one player may travel with").defineInRange("maxCompanions", 2, 0, 4);
+            livingDensity = b.comment("How many of a planned settlement's people live there (percent of its plan; West City plans twenty)").defineInRange("settlementDensity", 100, 0, 200);
             b.pop();
 
             b.comment("Optional life-sim layer").push("life_sim");

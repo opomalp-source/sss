@@ -32,6 +32,8 @@ public final class LivingData extends SavedData {
     private final Map<UUID, Integer> fameTiers = new HashMap<>();
     /** Ginger Town has been built for this world (new worlds get it once). */
     public boolean townPlaced;
+    /** World-generated settlements already registered (each once in a world's life). */
+    private final java.util.Set<UUID> visited = new java.util.HashSet<>();
 
     public static LivingData get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(LivingData::load, LivingData::new, NAME);
@@ -48,6 +50,18 @@ public final class LivingData extends SavedData {
     public void add(Settlement s) {
         settlements.put(s.id, s);
         setDirty();
+    }
+
+    /** Marks a generated settlement as registered; false if it already was. */
+    public boolean firstVisit(UUID id) {
+        boolean f = visited.add(id);
+        if (f) setDirty();
+        return f;
+    }
+
+    /** Lets a generated settlement be registered again (dev: {@code /dbz structures resettle}). */
+    public void forgetVisit(UUID id) {
+        if (visited.remove(id)) setDirty();
     }
 
     /** Forgets a settlement (its residents keep their identities; with no town they wander). */
@@ -150,6 +164,9 @@ public final class LivingData extends SavedData {
         fameTiers.forEach((k, v) -> ft.putInt(k.toString(), v));
         tag.put("fameTiers", ft);
         tag.putLong("newsDay", lastNewsDay);
+        ListTag vis = new ListTag();
+        for (UUID v : visited) vis.add(net.minecraft.nbt.NbtUtils.createUUID(v));
+        tag.put("visited", vis);
         return tag;
     }
 
@@ -189,6 +206,7 @@ public final class LivingData extends SavedData {
             }
         }
         d.lastNewsDay = tag.contains("newsDay") ? tag.getLong("newsDay") : Long.MIN_VALUE;
+        for (Tag v : tag.getList("visited", Tag.TAG_INT_ARRAY)) d.visited.add(net.minecraft.nbt.NbtUtils.loadUUID(v));
         return d;
     }
 

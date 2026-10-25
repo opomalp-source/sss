@@ -27,6 +27,26 @@ public final class Settlement {
     public long lastNewcomerDay = Long.MIN_VALUE;
     /** Players who attacked its people lately (guards go for them; civilians run). Not saved: it blows over. */
     public final java.util.Set<UUID> wanted = new java.util.HashSet<>();
+    /** Who lives here by trade (occupation ids, in the order they move in; empty: the default town plan), and its look
+     *  (a civilization id, for what is built and said). */
+    public final List<String> population = new ArrayList<>();
+    public String style = "";
+    /** Waypoints for long walks across it ({@link Routes}; empty: walked straight). */
+    public final List<BlockPos> ways = new ArrayList<>();
+    /** Its buildings for long walks ({@link Routes.Room}: a box and the waypoint at its door). */
+    public final List<Routes.Room> rooms = new ArrayList<>();
+    /** The map made of them, with what the world has shown of open ground between waypoints (not saved; renewed daily). */
+    private Routes.Map map;
+
+    public Routes.Map routes() {
+        if (map == null) map = new Routes.Map(ways, rooms);
+        return map;
+    }
+
+    /** Forgets what was learned of the ground (things get built and knocked down). */
+    public void forgetRoutes() {
+        map = null;
+    }
     /** Points nobody could reach (dropped from use), by index. */
     public final java.util.Set<Integer> unreachable = new java.util.HashSet<>();
 
@@ -61,7 +81,15 @@ public final class Settlement {
         t.put("pois", l);
         t.putLong("alarm", alarmUntil);
         t.putLong("newcomer", lastNewcomerDay);
+        ListTag pop = new ListTag();
+        for (String o : population) pop.add(net.minecraft.nbt.StringTag.valueOf(o));
+        t.put("population", pop);
+        t.putString("style", style);
         t.putIntArray("unreachable", unreachable.stream().mapToInt(Integer::intValue).toArray());
+        t.putLongArray("ways", ways.stream().mapToLong(BlockPos::asLong).toArray());
+        ListTag rs = new ListTag();
+        for (Routes.Room r : rooms) rs.add(new net.minecraft.nbt.IntArrayTag(r.save()));
+        t.put("rooms", rs);
         return t;
     }
 
@@ -78,6 +106,13 @@ public final class Settlement {
         for (int i : t.getIntArray("unreachable")) s.unreachable.add(i);
         s.alarmUntil = t.getLong("alarm");
         s.lastNewcomerDay = t.contains("newcomer") ? t.getLong("newcomer") : Long.MIN_VALUE;
+        for (Tag o : t.getList("population", Tag.TAG_STRING)) s.population.add(o.getAsString());
+        s.style = t.getString("style");
+        for (long w : t.getLongArray("ways")) s.ways.add(BlockPos.of(w));
+        for (Tag r : t.getList("rooms", Tag.TAG_INT_ARRAY)) {
+            Routes.Room room = Routes.Room.load(((net.minecraft.nbt.IntArrayTag) r).getAsIntArray());
+            if (room != null) s.rooms.add(room);
+        }
         return s;
     }
 }

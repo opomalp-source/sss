@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {"bottom": "dbzenith:block/saiyan_wall", "top": "dbzenith:block/saiyan_wall", "side": "dbzenith:block/saiyan_wall"}
+}

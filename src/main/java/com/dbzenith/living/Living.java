@@ -78,7 +78,10 @@ public final class Living {
         long day = Math.floorDiv(s.overworld().getDayTime(), 24000L);
         if (day != ld.lastNewsDay) {
             ld.lastNewsDay = day;
-            for (Settlement x : ld.settlements()) x.unreachable.clear();               // a new day: places get another try (things get rebuilt)
+            for (Settlement x : ld.settlements()) {                                        // a new day: places get another try (things get rebuilt)
+                x.unreachable.clear();
+                x.forgetRoutes();
+            }
             Rumors.daily(ld, now);
             ld.setDirty();
         }

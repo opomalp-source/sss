@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {"bottom": "dbzenith:block/divine_roof_pink", "top": "dbzenith:block/divine_roof_pink", "side": "dbzenith:block/divine_roof_pink"}
+}

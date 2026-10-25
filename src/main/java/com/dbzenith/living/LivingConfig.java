@@ -34,5 +34,6 @@ public final class LivingConfig {
     public static int maxChats() { return i(() -> DBZConfig.SERVER.livingMaxConversationsPerTick, 3); }
     public static int travelers() { return i(() -> DBZConfig.SERVER.livingTravelers, 2); }
     public static int maxCompanions() { return i(() -> DBZConfig.SERVER.livingMaxCompanions, 2); }
+    public static int density() { return i(() -> DBZConfig.SERVER.livingDensity, 100); }
     public static long recoverTicks() { return i(() -> DBZConfig.SERVER.livingRecoverMinutes, 10) * 1200L; }
 }

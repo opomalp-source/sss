@@ -21,7 +21,9 @@ public enum Landmark {
             Biomes.SAVANNA, Biomes.SAVANNA_PLATEAU, Biomes.WINDSWEPT_SAVANNA, Biomes.PLAINS)),
     FRYPAN("frypan_mountains", 1792, 240, 0xf7a9L, Set.of(Biomes.BADLANDS, Biomes.ERODED_BADLANDS, Biomes.WOODED_BADLANDS, Biomes.DESERT,
             Biomes.SAVANNA, Biomes.SAVANNA_PLATEAU, Biomes.WINDSWEPT_SAVANNA)),
-    WEST_CITY("west_city", 1792, 200, 0x3e57L, Set.of(Biomes.BEACH));
+    /** West City with Capsule Corporation (docs/WORLD_STRUCTURES.md): one per world, never on already explored ground. */
+    WEST_CITY("west_city", 2048, 132, 0x3e57L, Set.of(Biomes.PLAINS, Biomes.SUNFLOWER_PLAINS, Biomes.MEADOW, Biomes.SAVANNA, Biomes.FOREST,
+            Biomes.BIRCH_FOREST, Biomes.BEACH), true, true);
 
     public static final Landmark[] ALL = values();
 
@@ -29,13 +31,23 @@ public enum Landmark {
     public final int spacing, radius;
     public final long salt;
     public final Set<ResourceKey<Biome>> biomes;
+    /** Canon and one of a kind: built once per world (the first site that suits, spiralling out from the world's centre). */
+    public final boolean unique;
+    /** Added after worlds already existed: never built in regions that were on disk before it (see {@link LandmarkGuard}). */
+    public final boolean guarded;
 
     Landmark(String id, int spacing, int radius, long salt, Set<ResourceKey<Biome>> biomes) {
+        this(id, spacing, radius, salt, biomes, false, false);
+    }
+
+    Landmark(String id, int spacing, int radius, long salt, Set<ResourceKey<Biome>> biomes, boolean unique, boolean guarded) {
         this.id = id;
         this.spacing = spacing;
         this.radius = radius;
         this.salt = salt;
         this.biomes = biomes;
+        this.unique = unique;
+        this.guarded = guarded;
     }
 
     public static Landmark byId(String id) {

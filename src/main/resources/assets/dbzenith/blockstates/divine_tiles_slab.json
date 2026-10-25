@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "type=bottom": {"model": "dbzenith:block/divine_tiles_slab"},
+    "type=top": {"model": "dbzenith:block/divine_tiles_slab_top"},
+    "type=double": {"model": "dbzenith:block/divine_tiles"}
+  }
+}

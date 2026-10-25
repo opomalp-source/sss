@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.163.0, 2026-10-22)
+# Handoff: where Dragon Block Zenith stands (v0.164.0, 2026-10-25)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.163.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.164.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -472,3 +472,22 @@ Companions, masters' lessons, errands and travelers; details in `docs/LIVING_WOR
   (`CompanionGoal.Target`, party-mates within 16 blocks).
 - `SocialService.snapshot` adds "Companions" rows (owner, name, occupation, mode, level); `SocialScreen` lists them under
   their player. Devshot `party_...` opens the Party tab; `partyc_...` creates a party first.
+
+## World structures (v0.164.0, 2026-10-23)
+- Plan and references: `docs/WORLD_STRUCTURES.md` (7 milestones; this is the first).
+- Blocks: `world/arch/CivilizationBlocks` registers from the generated `CivilizationBlockList`; assets, loot, tags and
+  lang come from `java tools/BlockFamilyGen.java` (run from the repo root; it rewrites them, merging tag files and
+  en_us.json). `CivilizationBlocks.get("capsule_white_stairs")` etc.
+- Settlements from worldgen: extend `world/settle/SettlementPlan` (a `LandmarkPlan` with `places`, `people`, `name`,
+  `style`, `reach`, `centre`); `SettlementSites` registers it with the living world once, when a player comes near.
+  Add the kind to `Landmark` (`unique`, `guarded` flags) and to `LandmarkSites.shape`.
+- `LandmarkGuard`: guarded kinds never build in regions that existed when a server first ran with them.
+- West City: `world/landmark/WestCity` (a building frame `F` turns each building to face the road). Dev:
+  `/landmark tp west_city`, `/dbz structures info|places|register|rebuild west_city`.
+- Long walks: `living/Routes` (a settlement's `ways` and `rooms`, saved; `Settlement.routes()` keeps the learned map,
+  forgotten daily). Declare them in a plan with `way(...)` (returns its index), `room(...)`/`roundRoom(...)` (door
+  = a way index). Rooms are matched in order: put inner rooms (an upper floor) before the building's. Check a new
+  settlement with `/dbz structures places` standing at its centre (everything must be loaded), then watch a morning
+  and an evening after `/dbz structures resettle`, grepping the server log for "gave up on place".
+- Residents: `living/DoorGoal` (door left open while someone is in the doorway); `CivilizationBlocks.SlidingDoor`
+  has no collision when open.

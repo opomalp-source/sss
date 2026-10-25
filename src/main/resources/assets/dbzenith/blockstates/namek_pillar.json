@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "axis=y": {"model": "dbzenith:block/namek_pillar"},
+    "axis=z": {"model": "dbzenith:block/namek_pillar_horizontal", "x": 90},
+    "axis=x": {"model": "dbzenith:block/namek_pillar_horizontal", "x": 90, "y": 90}
+  }
+}

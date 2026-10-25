@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {"bottom": "dbzenith:block/divine_gold", "top": "dbzenith:block/divine_gold", "side": "dbzenith:block/divine_gold"}
+}

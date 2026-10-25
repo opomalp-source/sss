@@ -35,6 +35,16 @@ final class RoutineGoal extends Goal {
     private boolean placed;
     /** A place it gave up on as crowded (it stays where it got to until its day moves on). */
     private BlockPos crowded;
+    /** The leg it is walking (a waypoint on a long walk, or the place itself), and the place that leg is for. */
+    private BlockPos leg, legFor;
+
+    /** Its town's map for long walks (none: it walks straight). */
+    private Routes.Map routes() {
+        NamedFighter c = r.character();
+        if (c == null || c.settlement == null || r.getServer() == null) return null;
+        Settlement s = LivingData.get(r.getServer()).settlement(c.settlement);
+        return s == null ? null : s.routes();
+    }
 
     RoutineGoal(Resident r) {
         this.r = r;
@@ -93,9 +103,22 @@ final class RoutineGoal extends Goal {
         double d = Math.sqrt(r.distanceToSqr(dest.getX() + 0.5, dest.getY(), dest.getZ() + 0.5));
         if (d > ARRIVED && !(d <= 3.0 && r.getNavigation().isDone() && now - progressAt > 40)) {   // close enough when the spot is taken
             if (r.isSleeping()) r.stopSleeping();
-            if (r.getNavigation().isDone()) r.getNavigation().moveTo(dest.getX() + 0.5, dest.getY(), dest.getZ() + 0.5, speed());
-            if (d < bestDist - 0.5) {
-                bestDist = d;
+            if (!dest.equals(legFor)) {
+                legFor = dest;
+                leg = null;
+            }
+            if (r.getNavigation().isDone()) {
+                BlockPos goal = Routes.next(routes(), r.level(), r.blockPosition(), dest);                // a long walk goes by the town's waypoints
+                if (!goal.equals(leg)) {                                                     // a new leg: progress is measured on it
+                    leg = goal;
+                    bestDist = Double.MAX_VALUE;
+                    progressAt = now;
+                }
+                r.getNavigation().moveTo(goal.getX() + 0.5, goal.getY(), goal.getZ() + 0.5, speed());
+            }
+            double dl = leg == null ? d : Math.sqrt(r.distanceToSqr(leg.getX() + 0.5, leg.getY(), leg.getZ() + 0.5));
+            if (dl < bestDist - 0.5) {
+                bestDist = dl;
                 progressAt = now;
             } else if (now - progressAt > 160) {                                         // stuck
                 progressAt = now;
@@ -146,6 +169,8 @@ final class RoutineGoal extends Goal {
             crowded = null;
             dest = to;
             destIndex = idx[0];
+            leg = null;
+            r.getNavigation().stop();                                                       // the way there is worked out afresh
             bestDist = Double.MAX_VALUE;
             progressAt = now;
             arrivedAt = 0;
@@ -242,7 +267,9 @@ final class RoutineGoal extends Goal {
         LivingData ld = LivingData.get(r.getServer());
         Settlement s = ld.settlement(c.settlement);
         if (s != null) {
-            s.unreachable.add(destIndex);
+            if (s.unreachable.add(destIndex))
+                com.dbzenith.DBZenith.LOGGER.info("{} of {} gave up on place #{} at {} (stuck at {}, heading for {})", c.name, s.name, destIndex,
+                        dest.toShortString(), r.blockPosition().toShortString(), leg == null ? "it" : leg.toShortString());
             ld.setDirty();
         }
         dest = null;

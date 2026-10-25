@@ -368,3 +368,17 @@ to both mods folders.
   companion trust thresholds
 - [ ] An errand journal (taken errands are only told in chat and by whoever asked)
 - [ ] `AiTests.npcsOfEnemySidesFightEachOther` still fails now and then (fight outcome varies)
+
+## World structures and civilizations (docs/WORLD_STRUCTURES.md)
+- [x] v0.164.0 Block families (Capsule Corporation, Saiyan, Namekian, Frieza Force, Divine: 63 blocks plus stairs,
+  slabs, walls, rounded corners, sliding doors), settlements from world generation that join the living world, the
+  existing-world guard, unique landmarks, West City with Capsule Corporation, the scientist trade, `/dbz structures`.
+- [ ] Kame House (unique island), traditional villages, the Red Ribbon Army's facilities
+- [ ] Namek: villages, elders' houses, the Grand Elder's house; Namekian residents
+- [ ] Planet Vegeta (Saiyan city, royal palace, base, training halls) and Sadala
+- [ ] Frieza Force installations and alien trading posts
+- [ ] Divine: the Room of Spirit and Time's building and quarters; Beerus's Planet rework; King Kai's planet
+- [ ] Babidi's Spaceship (multi-floor dungeon); original places (monasteries, ruins, mercenary bases, camps)
+- [ ] Capsule Corporation machines with their own uses (the capsule room, the lab benches)
+- [ ] West City: wider stairs in the apartment blocks; a ring road so the outer avenues end cleanly
+- [ ] Residents: why some still give up on a place now and then (logged "gave up on place")

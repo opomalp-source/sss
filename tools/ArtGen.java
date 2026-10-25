@@ -863,6 +863,23 @@ public class ArtGen {
                     .face(3, 0xFF3A2A1A, true, 2, 0xFF5A3A20, 0, 0).scalp(0xFF5A3A20).save("townsfolk_guard");
             new Npc().body("athletic", 0xFFD8A878).hatless().layer("entity/gear/hoodie_top.png", 0xC8B490).layer("entity/gear/hoodie_pants.png", 0x8A7A60)
                     .layer("entity/gear/hoodie_boots.png").face(3, 0xFF3A2A1A, true, 2, 0xFF4A2E1A, 0, 1).scalp(0xFF4A2E1A).save("townsfolk_traveler");
+            Hd.HdSkin coat = new Hd.HdSkin();                                                       // a scientist's lab coat over a blue shirt
+            int[] cw = ramp(0xFFF4F4F2, 6), shirt = ramp(0xFF3E6FB8, 5), slacks = ramp(0xFF3A3C44, 5), shoe = ramp(0xFF2A2420, 4);
+            coat.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                if (f == Face.FRONT && Math.abs(uu - 0.5) < 0.12 && vv < 0.86) return vv < 0.1 ? ink(shirt) : cloth(shirt, f, x, y, w, h, 902);
+                if (f == Face.FRONT && Math.abs(Math.abs(uu - 0.5) - 0.12) < 0.03) return ink(cw);
+                return cloth(cw, f, x, y, w, h, 903);
+            };
+            coat.arm = (f, x, y, w, h) -> v(y, h) > 0.86 ? 0 : v(y, h) > 0.82 ? ink(cw) : cloth(cw, f, x, y, w, h, 904);
+            coat.leg = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (vv > 0.86 || f == Face.BOTTOM) return flat(shoe, f, 0);
+                if (vv < 0.3) return cloth(cw, f, x, y, w, h, 905);                                // the coat's skirt
+                return cloth(slacks, f, x, y, w, h, 906);
+            };
+            new Npc().body("lean", 0xFFF0CDB0).hatless().dress(coat).face(4, 0xFF3A5A8A, true, 0, 0xFF6A5A8A, 1, 1).scalp(0xFF6A5A8A).save("townsfolk_scientist");
         }
 
         /** A soldier of the tyrant's army: a green-skinned alien in white armour with purple pads (3D) and a scouter. */

@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {"bottom": "dbzenith:block/namek_accent", "top": "dbzenith:block/namek_accent", "side": "dbzenith:block/namek_accent"}
+}

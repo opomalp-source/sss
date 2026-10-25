@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "type=bottom": {"model": "dbzenith:block/capsule_white_seam_slab"},
+    "type=top": {"model": "dbzenith:block/capsule_white_seam_slab_top"},
+    "type=double": {"model": "dbzenith:block/capsule_white_seam"}
+  }
+}

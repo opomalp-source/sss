@@ -1,0 +1,4 @@
+{"_doc": "A researcher: long hours in the lab, a late lunch, home in the evening (docs/LIVING_WORLD.md).", "blocks": [
+  {"from": 23, "to": 7, "do": "sleep"}, {"from": 7, "to": 8, "do": "eat"}, {"from": 8, "to": 13, "do": "work"},
+  {"from": 13, "to": 14, "do": "eat"}, {"from": 14, "to": 19, "do": "work"}, {"from": 19, "to": 21, "do": "social"},
+  {"from": 21, "to": 23, "do": "home"}]}

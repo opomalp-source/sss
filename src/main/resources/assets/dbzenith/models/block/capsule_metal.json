@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {"top": "dbzenith:block/capsule_metal_top", "bottom": "dbzenith:block/capsule_metal_top", "side": "dbzenith:block/capsule_metal"}
+}

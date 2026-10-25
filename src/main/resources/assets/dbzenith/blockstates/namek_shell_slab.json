@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "type=bottom": {"model": "dbzenith:block/namek_shell_slab"},
+    "type=top": {"model": "dbzenith:block/namek_shell_slab_top"},
+    "type=double": {"model": "dbzenith:block/namek_shell"}
+  }
+}

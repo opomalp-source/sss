@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {"bottom": "dbzenith:block/saiyan_training", "top": "dbzenith:block/saiyan_training", "side": "dbzenith:block/saiyan_training"}
+}

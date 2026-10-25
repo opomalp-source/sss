@@ -5,6 +5,15 @@
     "dbzenith:lookout_marble_wall",
     "dbzenith:korin_stone_wall",
     "dbzenith:cell_spire_cap_wall",
-    "dbzenith:city_concrete_wall"
+    "dbzenith:city_concrete_wall",
+    "dbzenith:capsule_white_wall",
+    "dbzenith:capsule_metal_wall",
+    "dbzenith:saiyan_metal_wall",
+    "dbzenith:saiyan_royal_wall",
+    "dbzenith:namek_shell_wall",
+    "dbzenith:namek_temple_wall",
+    "dbzenith:frieza_white_wall",
+    "dbzenith:frieza_reinforced_wall",
+    "dbzenith:divine_stone_wall"
   ]
 }

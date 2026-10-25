@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {"bottom": "dbzenith:block/saiyan_damaged", "top": "dbzenith:block/saiyan_damaged", "side": "dbzenith:block/saiyan_damaged"}
+}

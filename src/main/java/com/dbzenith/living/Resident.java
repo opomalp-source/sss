@@ -56,7 +56,10 @@ public class Resident extends KiFighter implements SkinVariant {
     public Resident(EntityType<? extends KiFighter> type, Level world) {
         super(type, world, PROFILE);
         xpReward = 0;
-        if (getNavigation() instanceof GroundPathNavigation g) g.setCanPassDoors(true);       // the town's doorways are open
+        if (getNavigation() instanceof GroundPathNavigation g) {                           // through doorways and doors (it opens them)
+            g.setCanPassDoors(true);
+            g.setCanOpenDoors(true);
+        }
     }
 
     @Override
@@ -88,6 +91,7 @@ public class Resident extends KiFighter implements SkinVariant {
             case MASTER -> "townsfolk_master";
             case GUARD -> "townsfolk_guard";
             case TRAVELER -> "townsfolk_traveler";
+            case SCIENTIST -> "townsfolk_scientist";
             case CITIZEN -> CITIZEN_SKINS.get(Math.floorMod(c.look, CITIZEN_SKINS.size()));
         };
     }
@@ -124,6 +128,7 @@ public class Resident extends KiFighter implements SkinVariant {
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));
         goalSelector.addGoal(1, new FleeGoal(this));
+        goalSelector.addGoal(1, new DoorGoal(this));                                     // and closes them behind it (not on someone)
         goalSelector.addGoal(2, new CombatAiGoal(this));
         goalSelector.addGoal(3, new LegacyMelee(this, 1.1, false));
         goalSelector.addGoal(4, new TalkGoal(this));

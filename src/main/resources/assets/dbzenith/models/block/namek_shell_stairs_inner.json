@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {"bottom": "dbzenith:block/namek_shell", "top": "dbzenith:block/namek_shell", "side": "dbzenith:block/namek_shell"}
+}

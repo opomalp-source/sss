@@ -195,6 +195,19 @@ All in `com.dbzenith.living` unless named otherwise.
   ("Your companions: Tarrag · Town guard · at home") and in a party ("1 companion", Tarrag defending under Dev).
   Devshot names `party_...` open the Party tab, `partyc_...` create a party first (dev only).
 
+
+## 4d. Towns from world generation; long walks (v0.164.0)
+
+- Settlements can now come from world generation (West City; docs/WORLD_STRUCTURES.md): registered with all their
+  places, a population plan by trade and a look (`Settlement.population`, `style`), peopled at once, bodies appearing
+  as homes load. New trade: the scientist (labs, the `LAB` place kind, a research goal and schedule). The
+  `living.settlementDensity` setting scales generated towns' populations.
+- Long walks (`Routes`): a town may keep a map (waypoints and buildings as rooms entered by their doors, both saved
+  with it); walks longer than 30 blocks, or from one building into another, go door to door along the waypoints, in
+  legs a resident's path search can always finish. Towns without a map walk as before.
+- Doors: residents leave a door open while anyone else is in the doorway (`DoorGoal`); a resident whose destination
+  changes plans its way afresh; a resident giving up on a place logs where it was stuck.
+
 ## 5. Testing
 
 - **GameTests** (`gametest.LivingTests`, 8): the living data and the residents' new fields survive saving; schedules

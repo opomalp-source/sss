@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {"bottom": "dbzenith:block/capsule_dome_yellow", "top": "dbzenith:block/capsule_dome_yellow", "side": "dbzenith:block/capsule_dome_yellow"}
+}

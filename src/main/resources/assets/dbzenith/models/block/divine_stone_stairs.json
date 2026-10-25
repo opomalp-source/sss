@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {"bottom": "dbzenith:block/divine_stone", "top": "dbzenith:block/divine_stone", "side": "dbzenith:block/divine_stone"}
+}

@@ -21,7 +21,9 @@ public enum Occupation {
     STUDENT(true, Poi.Kind.DOJO, List.of(Techniques.KI_BLAST)),
     MASTER(true, Poi.Kind.DOJO, List.of(Techniques.KI_BLAST, Techniques.WAVE_BEAM)),
     GUARD(true, Poi.Kind.PATROL, List.of(Techniques.KI_BLAST)),
-    TRAVELER(true, Poi.Kind.GATE, List.of(Techniques.KI_BLAST));
+    TRAVELER(true, Poi.Kind.GATE, List.of(Techniques.KI_BLAST)),
+    /** A researcher (Capsule Corporation's labs and the like): no fighter. */
+    SCIENTIST(false, Poi.Kind.LAB, List.of());
 
     /** Fights (and defends the town) rather than flees. */
     public final boolean fighter;

@@ -91,7 +91,8 @@ public final class NpcLooks {
             Map.entry("townsfolk_student_b", look(HairCode.Preset.PONYTAIL, 0x141210, RaceTraits.Feature.NONE, false, 0, -1, false)),
             Map.entry("townsfolk_master", look(HairCode.Preset.SAGE, 0xE8E6E0, RaceTraits.Feature.NONE, false, 0, -1, false)),
             Map.entry("townsfolk_guard", look(HairCode.Preset.BUZZ, 0x5A3A20, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.CAP)),
-            Map.entry("townsfolk_traveler", look(HairCode.Preset.WILD, 0x4A2E1A, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.CAPE)));
+            Map.entry("townsfolk_traveler", look(HairCode.Preset.WILD, 0x4A2E1A, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.CAPE)),
+            Map.entry("townsfolk_scientist", look(HairCode.Preset.SWEPT, 0x6A5A8A, RaceTraits.Feature.NONE, false, 0, -1, false)));
 
     private NpcLooks() {}
 

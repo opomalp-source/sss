@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {"bottom": "dbzenith:block/namek_temple", "top": "dbzenith:block/namek_temple", "side": "dbzenith:block/namek_temple"}
+}

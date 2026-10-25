@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "dbzenith:capsule_door",
+    "dbzenith:saiyan_door",
+    "dbzenith:namek_door",
+    "dbzenith:frieza_door"
+  ]
+}

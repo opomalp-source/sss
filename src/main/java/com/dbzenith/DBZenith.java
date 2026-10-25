@@ -34,6 +34,7 @@ public class DBZenith {
         ModEntities.register(modBus);
         ModBlocks.register(modBus);
         com.dbzenith.world.arch.ArchitectureBlocks.register(modBus);              // the landmark block set (CX-33)
+        com.dbzenith.world.arch.CivilizationBlocks.register(modBus);             // the civilizations' building blocks (docs/WORLD_STRUCTURES.md)
         com.dbzenith.registry.ModRecipes.register(modBus);
         ModBlockEntities.register(modBus);
         com.dbzenith.registry.ModEffects.register(modBus);

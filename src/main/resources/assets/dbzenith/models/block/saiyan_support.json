@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {"end": "dbzenith:block/saiyan_support_top", "side": "dbzenith:block/saiyan_support"}
+}

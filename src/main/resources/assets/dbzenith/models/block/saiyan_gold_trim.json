@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {"top": "dbzenith:block/saiyan_gold_trim_top", "bottom": "dbzenith:block/saiyan_gold_trim_top", "side": "dbzenith:block/saiyan_gold_trim"}
+}

@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "type=bottom": {"model": "dbzenith:block/frieza_hangar_slab"},
+    "type=top": {"model": "dbzenith:block/frieza_hangar_slab_top"},
+    "type=double": {"model": "dbzenith:block/frieza_hangar"}
+  }
+}

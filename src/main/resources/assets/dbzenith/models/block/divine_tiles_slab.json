@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {"bottom": "dbzenith:block/divine_tiles", "top": "dbzenith:block/divine_tiles", "side": "dbzenith:block/divine_tiles"}
+}

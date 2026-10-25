@@ -24,7 +24,9 @@ public record Poi(Kind kind, BlockPos pos, String label) {
         /** A point on the guards' round. */
         PATROL,
         /** Where roads leave town (travelers come and go here). */
-        GATE;
+        GATE,
+        /** A laboratory bench (scientists). */
+        LAB;
 
         public String id() {
             return name().toLowerCase(Locale.ROOT);

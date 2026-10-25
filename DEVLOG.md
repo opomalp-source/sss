@@ -4684,3 +4684,29 @@ The user asked whether companions are in your party. They weren't: the party was
   shows your own.
 - Test `companionsCountYourPartyAsFriends`; 355 GameTests pass, twice in a row. Dev client: the Party tab alone and in
   a party with a defending companion.
+
+## 2026-10-25 — World structures, milestone 1: civilizations' blocks and West City (v0.164.0)
+The user's world generation and structures request (block families, canon locations with interiors and residents,
+Namek, Planet Vegeta, Sadala, Frieza Force, divine places, Babidi's Spaceship...), with references looked up first.
+Planned in seven milestones in `docs/WORLD_STRUCTURES.md` (audit, references, design, plan); this is the first.
+- **Blocks:** five civilization families (63 blocks plus stairs, slabs, walls), rounded corners, sliding doors, their
+  own creative tab; all generated with textures, models, loot and tags by `tools/BlockFamilyGen.java`.
+- **Settlements from world generation** that register with the living world when a player first comes near, with
+  places, a population by trade, a look; the scientist trade.
+- **Existing worlds protected:** new landmark kinds never build in regions that existed before them
+  (`LandmarkGuard`); unique landmarks are sited once and the cell kept with the world.
+- **West City** with Capsule Corporation (dome, mark, lobby, atrium, lab, Capsule Room, family rooms, basement with
+  the time machine's pod, lab wing, West Tower, Gravity Room) and a city round it: capsule houses, apartment blocks,
+  park, market with shop and restaurant, the Sangokuichi Dojo, labs, police post; 20 residents.
+- **Long walks:** in a city, residents heading straight for far places got shut in (fences, a one-door dome, upper
+  floors and basement out of reach of their path search, a wedge between two domes). Settlements now keep a map of
+  waypoints and rooms; long walks go door to door in legs. Also: no fence, the lab wing got its own door, a solid neck
+  between the domes, double doors on public buildings, sliding doors without a leaf when open, a door left open while
+  someone is in the doorway, homes filled across the city before the flats.
+- **Tools:** `/dbz structures list|info|places|register|refresh|resettle|path|rebuild`.
+- **Performance:** the unique site search took 9.8 s of world generation (3,300 terrain samples): now a site's own
+  ground is tested before its neighbours' plans (700 samples, 3.4 s), once per world, the cell saved.
+- **Tests:** 9 in `StructureTests`; 366 GameTests pass, twice in a row (an unrelated, already listed AI test failed
+  once in between).
+- **Dev client:** West City generated next to explored regions without touching them; all 125 places reachable by
+  `places`; a resettled city through a morning and an evening with nobody giving up on a place.

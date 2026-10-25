@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "type=bottom": {"model": "dbzenith:block/saiyan_training_slab"},
+    "type=top": {"model": "dbzenith:block/saiyan_training_slab_top"},
+    "type=double": {"model": "dbzenith:block/saiyan_training"}
+  }
+}

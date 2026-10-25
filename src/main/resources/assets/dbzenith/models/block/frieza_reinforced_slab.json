@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {"bottom": "dbzenith:block/frieza_reinforced", "top": "dbzenith:block/frieza_reinforced", "side": "dbzenith:block/frieza_reinforced"}
+}
