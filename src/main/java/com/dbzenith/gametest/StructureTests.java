@@ -204,19 +204,73 @@ public final class StructureTests {
         h.succeed();
     }
 
+    /** Every unique landmark (West City, Kame House, Muscle Tower): one cell, the same every time, nothing round it. */
     @GameTest(template = EMPTY, timeoutTicks = 400)
-    public static void westCityIsUniqueAndStable(GameTestHelper h) {
+    public static void uniqueLandmarksAreUniqueAndStable(GameTestHelper h) {
         var level = h.getLevel().getServer().overworld();
         LandmarkSites.Terrain t = LandmarkSites.Terrain.of(level);
-        long[] cell = LandmarkSites.uniqueCell(Landmark.WEST_CITY, level.getSeed(), t);
-        if (cell != null) {
+        for (Landmark type : Landmark.ALL) {
+            if (!type.unique) continue;
+            long[] cell = LandmarkSites.uniqueCell(type, level.getSeed(), t);
+            if (cell == null) continue;
             int found = 0;
             for (int cx = -2; cx <= 2; cx++)
                 for (int cz = -2; cz <= 2; cz++)
-                    if (LandmarkSites.plan(Landmark.WEST_CITY, level.getSeed(), (int) cell[0] + cx, (int) cell[1] + cz, t) != null) found++;
-            h.assertTrue(found == 1, "one West City round its cell: " + found);
-            h.assertTrue(java.util.Arrays.equals(cell, LandmarkSites.uniqueCell(Landmark.WEST_CITY, level.getSeed(), t)), "the same cell every time");
+                    if (LandmarkSites.plan(type, level.getSeed(), (int) cell[0] + cx, (int) cell[1] + cz, t) != null) found++;
+            h.assertTrue(found == 1, "one " + type.id + " round its cell: " + found);
+            h.assertTrue(java.util.Arrays.equals(cell, LandmarkSites.uniqueCell(type, level.getSeed(), t)), type.id + ": the same cell every time");
         }
+        h.succeed();
+    }
+
+    /** A village: eight plots round the ring, homes for all, every place its people use, farmers where there are fields. */
+    @GameTest(template = EMPTY)
+    public static void villagesHaveAPlaceForEveryone(GameTestHelper h) {
+        for (String style : List.of("earth", "snow", "desert")) {
+            var v = com.dbzenith.world.landmark.Village.at(new LandmarkSites.Site(Landmark.VILLAGE, 0, 0, 40_000, -40_000, 0x7111L + style.length()), 70, style);
+            int[] kinds = new int[Poi.Kind.values().length];
+            for (Poi p : v.places()) {
+                kinds[p.kind().ordinal()]++;
+                h.assertTrue(Math.hypot(p.pos().getX() - v.x, p.pos().getZ() - v.z) <= v.reach(), style + ": " + p.label() + " inside the village");
+            }
+            h.assertTrue(kinds[Poi.Kind.HOME.ordinal()] * 2 >= v.people().size() && v.people().size() >= 8, style + ": homes for all " + v.people().size());
+            for (Poi.Kind k : List.of(Poi.Kind.SHOP, Poi.Kind.MARKET, Poi.Kind.TAVERN, Poi.Kind.PLAZA, Poi.Kind.PATROL, Poi.Kind.GATE))
+                h.assertTrue(kinds[k.ordinal()] > 0, style + ": a " + k.id());
+            boolean farmers = v.people().contains("farmer");
+            h.assertTrue(farmers == !style.equals("snow") && (kinds[Poi.Kind.FIELD.ordinal()] > 0) == farmers, style + ": farmers with fields");
+            h.assertTrue(v.name().endsWith(" Village") && v.style().equals("village_" + style), style + ": named " + v.name());
+            h.assertTrue(v.rooms().size() == 8 && v.ways().size() > 20, style + ": a building room each and a map");
+        }
+        h.succeed();
+    }
+
+    /** The farmer's trade: works the fields, up at dawn. */
+    @GameTest(template = EMPTY)
+    public static void farmersWorkTheFields(GameTestHelper h) {
+        h.assertTrue(com.dbzenith.living.Occupation.FARMER.workplace == Poi.Kind.FIELD && !com.dbzenith.living.Occupation.FARMER.fighter, "fields, no fighting");
+        Settlement s = new Settlement(java.util.UUID.randomUUID());
+        s.name = "Testfield";
+        s.pois.add(new Poi(Poi.Kind.HOME, h.absolutePos(new BlockPos(1, 1, 1)), "house"));
+        NamedFighter c = Residents.create(com.dbzenith.nemesis.Nemesis.data(), s, com.dbzenith.living.Occupation.FARMER, s.pois.get(0).pos(), h.getLevel().getGameTime(), 77);
+        try {
+            h.assertTrue(com.dbzenith.living.Schedules.planned(c, 7) == com.dbzenith.living.Schedules.Activity.WORK, "at work at seven");
+            h.assertTrue(com.dbzenith.living.Schedules.planned(c, 22) == com.dbzenith.living.Schedules.Activity.SLEEP, "asleep at ten");
+            h.assertTrue("townsfolk_farmer".equals(com.dbzenith.living.Resident.skinFor(c)), "dressed for it");
+        } finally {
+            c.status = NamedFighter.Status.DEAD;
+        }
+        h.succeed();
+    }
+
+    /** The Red Ribbon Army: its soldiers are its own (enemies of townsfolk), and its chests are filled from its own loot tables. */
+    @GameTest(template = EMPTY)
+    public static void theRedRibbonArmyIsHostileAndSupplied(GameTestHelper h) {
+        var soldier = h.spawnWithNoFreeWill(com.dbzenith.npc.ModNpcs.RED_RIBBON_SOLDIER.get(), new BlockPos(1, 2, 1));
+        var faction = com.dbzenith.npc.ai.Faction.of(soldier);
+        h.assertTrue(faction == com.dbzenith.npc.ai.Faction.RED_RIBBON && faction.enemyOf(com.dbzenith.npc.ai.Faction.TOWNSFOLK), "a Red Ribbon soldier: " + faction);
+        soldier.discard();
+        for (String table : List.of("dbzenith:chests/red_ribbon_base", "dbzenith:chests/red_ribbon_tower"))
+            h.assertTrue(h.getLevel().getServer().getLootData().getLootTable(new net.minecraft.resources.ResourceLocation(table)) != LootTable.EMPTY, table + " loaded");
         h.succeed();
     }
 

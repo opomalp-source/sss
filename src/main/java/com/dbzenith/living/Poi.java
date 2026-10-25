@@ -26,7 +26,9 @@ public record Poi(Kind kind, BlockPos pos, String label) {
         /** Where roads leave town (travelers come and go here). */
         GATE,
         /** A laboratory bench (scientists). */
-        LAB;
+        LAB,
+        /** A field or garden plot (farmers). */
+        FIELD;
 
         public String id() {
             return name().toLowerCase(Locale.ROOT);

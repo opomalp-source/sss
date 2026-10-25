@@ -44,7 +44,7 @@ public final class NamedFighter {
     /** What it is after, which colours what it does next. */
     public enum Goal { TRAIN, REVENGE, RIVALRY, PROTECT, WANDER, REST,
         // the living world's ambitions (docs/LIVING_WORLD.md)
-        STRONGEST, IMPRESS_MASTER, BUSINESS, EXPLORE, FIND_STUDENT, PROTECT_TOWN, RESEARCH }
+        STRONGEST, IMPRESS_MASTER, BUSINESS, EXPLORE, FIND_STUDENT, PROTECT_TOWN, RESEARCH, HARVEST }
 
     public final UUID id;
     public String name = "", epithet = "";

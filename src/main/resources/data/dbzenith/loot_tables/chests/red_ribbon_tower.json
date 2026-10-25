@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {"rolls": 1, "entries": [{"type": "minecraft:item", "name": "dbzenith:dragon_radar"}]},
+    {"rolls": {"min": 1, "max": 2}, "entries": [{"type": "minecraft:item", "name": "dbzenith:senzu_bean", "functions": [{"function": "minecraft:set_count", "count": {"min": 1, "max": 2}}]}]},
+    {"rolls": {"min": 3, "max": 5}, "entries": [
+      {"type": "minecraft:item", "name": "minecraft:gold_ingot", "weight": 10, "functions": [{"function": "minecraft:set_count", "count": {"min": 2, "max": 6}}]},
+      {"type": "minecraft:item", "name": "minecraft:diamond", "weight": 3, "functions": [{"function": "minecraft:set_count", "count": {"min": 1, "max": 2}}]},
+      {"type": "minecraft:item", "name": "dbzenith:capsule", "weight": 5},
+      {"type": "minecraft:item", "name": "dbzenith:heavy_training_weights", "weight": 3},
+      {"type": "minecraft:item", "name": "minecraft:cooked_beef", "weight": 8, "functions": [{"function": "minecraft:set_count", "count": {"min": 2, "max": 5}}]}
+    ]}
+  ]
+}

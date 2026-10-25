@@ -53,6 +53,24 @@
     "dbzenith:divine_stone_slab",
     "dbzenith:divine_tiles_slab",
     "dbzenith:divine_roof_pink_slab",
-    "dbzenith:divine_gold_slab"
+    "dbzenith:divine_gold_slab",
+    "dbzenith:village_plaster_slab",
+    "dbzenith:village_plaster_white_slab",
+    "dbzenith:village_roof_red_slab",
+    "dbzenith:village_roof_blue_slab",
+    "dbzenith:village_roof_green_slab",
+    "dbzenith:village_roof_orange_slab",
+    "dbzenith:village_thatch_slab",
+    "dbzenith:village_log_slab",
+    "dbzenith:kame_pink_slab",
+    "dbzenith:kame_roof_slab",
+    "dbzenith:kame_trim_slab",
+    "dbzenith:ribbon_steel_slab",
+    "dbzenith:ribbon_steel_dark_slab",
+    "dbzenith:ribbon_olive_slab",
+    "dbzenith:ribbon_concrete_slab",
+    "dbzenith:ribbon_red_band_slab",
+    "dbzenith:ribbon_hazard_slab",
+    "dbzenith:ribbon_grate_slab"
   ]
 }

@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "axis=y": {"model": "dbzenith:block/village_timber"},
+    "axis=z": {"model": "dbzenith:block/village_timber_horizontal", "x": 90},
+    "axis=x": {"model": "dbzenith:block/village_timber_horizontal", "x": 90, "y": 90}
+  }
+}

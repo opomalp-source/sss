@@ -4710,3 +4710,23 @@ Planned in seven milestones in `docs/WORLD_STRUCTURES.md` (audit, references, de
   once in between).
 - **Dev client:** West City generated next to explored regions without touching them; all 125 places reachable by
   `places`; a resettled city through a morning and an evening with nobody giving up on a place.
+
+## 2026-10-25 — World structures, milestone 2: Kame House, villages, the Red Ribbon Army (v0.165.0)
+The second milestone of `docs/WORLD_STRUCTURES.md`, with references looked up for the Red Ribbon additions (Dragon
+Ball Encyclopedia: Muscle Tower, Red Ribbon Army).
+- **Blocks:** 37 more (Earth countryside, Kame House with its five-block "KAME HOUSE" sign, the Red Ribbon Army).
+- **Kame House:** unique, out at sea with no land in sight; the canon house (pink, red roof, the sign, the main room,
+  kitchen, washroom, a bedroom upstairs), Master Roshi on the porch, a sea turtle on the beach.
+- **Traditional villages:** settlements every thousand blocks or so in three looks by biome (round domed huts, snow
+  cabins, desert adobe), a well on the plaza, fields, a shop, an inn, sometimes a dojo, 8 to 12 residents, a map.
+- **The farmer:** a new trade with the fields as its workplace.
+- **The Red Ribbon Army:** field bases (fence, gate, watchtowers, HQ, barracks, hangar, helipad) and Muscle Tower
+  (six floors after the series', the commander's chest with a Dragon Radar at the top), garrisoned by the new Red
+  Ribbon soldiers and android units, with the army's own loot.
+- **Tests:** 4 more in `StructureTests` (one renamed for all unique landmarks); 369 GameTests pass, twice in a row.
+  The long-standing AI flake (`npcsOfEnemySidesFightEachOther`, failing 3 runs in 8) fixed: ki blasts broke its glass
+  pen so a fighter fell out of the arena (now barrier blocks), and the Namekian could lose before landing a blow
+  (now more health: the test is about both sides fighting, not who wins).
+- **Dev client:** each generated beside explored regions; a village's 25 places all reachable and a quiet morning.
+  Fixed from the screenshots: Kame House's underwater slope and land in sight, the snow village's bare edge, soldiers'
+  uniforms painted under the skin layer, repeated village names.

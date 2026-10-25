@@ -103,6 +103,8 @@ public final class ModItems {
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.dbzenith.npc.ModNpcs.TRAINING_DUMMY, 0xC9A66B, 0xC8322A, new Item.Properties()));
     public static final RegistryObject<Item> KI_SOLDIER_EGG = ITEMS.register("ki_soldier_spawn_egg",
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.dbzenith.npc.ModNpcs.KI_SOLDIER, 0xE8E8E8, 0x3A3A4A, new Item.Properties()));
+    public static final RegistryObject<Item> RED_RIBBON_SOLDIER_EGG = ITEMS.register("red_ribbon_soldier_spawn_egg",
+            () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.dbzenith.npc.ModNpcs.RED_RIBBON_SOLDIER, 0x8A7A4E, 0xC42A2A, new Item.Properties()));
     public static final RegistryObject<Item> ANDROID_UNIT_EGG = ITEMS.register("android_unit_spawn_egg",
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.dbzenith.npc.ModNpcs.ANDROID_UNIT, 0x808890, 0xC02020, new Item.Properties()));
     public static final RegistryObject<Item> SAIYAN_WARRIOR_EGG = ITEMS.register("saiyan_warrior_spawn_egg",          // the Nemesis system's rival archetype

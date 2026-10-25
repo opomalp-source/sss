@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {"top": "dbzenith:block/ribbon_crate_top", "bottom": "dbzenith:block/ribbon_crate_top", "side": "dbzenith:block/ribbon_crate"}
+}

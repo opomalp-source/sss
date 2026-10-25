@@ -1,0 +1,4 @@
+{"_doc": "A farmer: up before dawn, in the fields all day with a break at noon, early to bed (docs/LIVING_WORLD.md).", "blocks": [
+  {"from": 21, "to": 5, "do": "sleep"}, {"from": 5, "to": 6, "do": "eat"}, {"from": 6, "to": 12, "do": "work"},
+  {"from": 12, "to": 13, "do": "eat"}, {"from": 13, "to": 18, "do": "work"}, {"from": 18, "to": 20, "do": "social"},
+  {"from": 20, "to": 21, "do": "home"}]}

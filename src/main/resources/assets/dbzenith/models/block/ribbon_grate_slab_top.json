@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {"bottom": "dbzenith:block/ribbon_grate", "top": "dbzenith:block/ribbon_grate", "side": "dbzenith:block/ribbon_grate"}
+}

@@ -525,6 +525,192 @@ public class BlockFamilyGen {
             for (int i = 0; i < 18; i++) t.px(t.rng.nextInt(16), t.rng.nextInt(16), "#B8FFD5", 0.7);
             return one(t);
         });
+
+        // ---- Earth countryside (v0.165.0): cream stucco, tiled and thatched roofs, dark timber, round wooden windows, log cabins
+        String ST = "#EADCBE", STS = "#C9B892", TB = "#5A3E28", TBD = "#3E2A1A";
+        b("village_plaster", "Village Stucco", Shape.CUBE, "stone", "stairs slab wall", "SAND", () -> one(stucco(ST, STS, 100)));
+        b("village_plaster_white", "Village White Stucco", Shape.CUBE, "stone", "stairs slab", "SNOW", () -> one(stucco("#F2EEE4", "#D3CDBF", 101)));
+        b("village_roof_red", "Village Red Roof Tiles", Shape.CUBE, "clay", "stairs slab", "COLOR_RED", () -> one(roofTiles("#B8432F", "#7E2A1E", 102)));
+        b("village_roof_blue", "Village Blue Roof Tiles", Shape.CUBE, "clay", "stairs slab", "COLOR_BLUE", () -> one(roofTiles("#4A6FA8", "#2C4570", 103)));
+        b("village_roof_green", "Village Green Roof Tiles", Shape.CUBE, "clay", "stairs slab", "COLOR_GREEN", () -> one(roofTiles("#5E8F48", "#3B5F2C", 104)));
+        b("village_roof_orange", "Village Orange Roof Tiles", Shape.CUBE, "clay", "stairs slab", "COLOR_ORANGE", () -> one(roofTiles("#D9823A", "#9A5420", 105)));
+        b("village_thatch", "Village Thatch", Shape.CUBE, "cloth", "stairs slab", "COLOR_YELLOW", () -> {
+            T t = new T("#C9A458", 106, 9);
+            for (int i = 0; i < 26; i++) {
+                int x = t.rng.nextInt(16), y = t.rng.nextInt(13);
+                t.rect(x, y, x, y + 3, t.rng.nextBoolean() ? "#E2C27A" : "#9C7A38", 0.55);
+            }
+            t.rect(0, 5, 15, 5, "#8C6A2E", 0.35).rect(0, 11, 15, 11, "#8C6A2E", 0.35);
+            return one(t);
+        });
+        b("village_timber", "Village Timber", Shape.PILLAR, "clay", "", "WOOD", () -> {
+            T side = new T(TB, 107, 6);
+            for (int x = 1; x < 16; x += 4) side.rect(x, 0, x, 15, TBD, 0.5);
+            side.rect(0, 0, 0, 15, "#7A5838", 0.6);
+            T end = new T(TB, 108, 4);
+            end.disc(8, 8, 2, 2.8, TBD, 0.6).disc(8, 8, 5, 5.8, TBD, 0.5).bevel(0, 0, 15, 15);
+            return new T[]{side, end};
+        });
+        b("village_log", "Village Log Wall", Shape.CUBE, "clay", "stairs slab", "PODZOL", () -> {
+            T t = new T("#7A5434", 109, 5);
+            for (int y = 0; y < 16; y += 4) t.bevel(0, y, 15, y + 3, 0.14, 0.22).rect(0, y + 3, 15, y + 3, "#3E2814", 0.7);
+            for (int i = 0; i < 4; i++) t.disc(2 + i * 4 % 12, 1.5 + i * 4, 0.4, 1.1, "#4E3420", 0.5);
+            return one(t);
+        });
+        b("village_window", "Village Round Window", Shape.WINDOW, "stone", "", "SAND", () -> one(porthole(ST, TB, "#3C6E8E", "#D8EEF6", 110, 4.4)));
+        b("village_lantern", "Paper Lantern", Shape.LAMP, "lamp", "", "COLOR_RED", () -> {
+            T t = glow("#C8382C", "#FFE2A0", 111, 7.5);
+            t.rect(0, 0, 15, 1, TBD).rect(0, 14, 15, 15, TBD);
+            for (int y = 4; y < 14; y += 3) t.rect(0, y, 15, y, "#8E2018", 0.35);
+            return one(t);
+        });
+        b("village_corner", "Village Rounded Corner", Shape.CORNER, "stone", "", "SAND", () -> one(stucco(ST, STS, 112)));
+        b("village_door", "Village Wooden Door", Shape.DOOR, "clay", "", "WOOD", () -> {
+            T bottom = new T("#8A5A34", 113, 5);
+            for (int x = 0; x < 16; x += 4) bottom.rect(x, 0, x, 15, "#5A3A20", 0.6);
+            bottom.rect(0, 6, 15, 7, TBD, 0.8).px(12, 2, "#D8B040").px(12, 3, "#D8B040");
+            T top = new T("#8A5A34", 114, 5);
+            for (int x = 0; x < 16; x += 4) top.rect(x, 0, x, 15, "#5A3A20", 0.6);
+            top.disc(8, 7, 0, 3.4, "#3C6E8E", 1).disc(8, 7, 3.4, 4.4, TBD, 1).disc(7, 6, 0, 1.1, "#D8EEF6", 0.7);
+            return new T[]{bottom, top, doorIcon("#8A5A34", "#6A4426", TBD)};
+        });
+
+        // ---- Kame House (canon: pink walls, a red roof, "KAME HOUSE" across the upper storey)
+        String KP = "#F0A6B6", KPS = "#C98494", KR = "#C8322A", KW = "#F6F2EA";
+        b("kame_pink", "Kame House Pink Wall", Shape.CUBE, "stone", "stairs slab wall", "COLOR_PINK", () -> one(stucco(KP, KPS, 120)));
+        b("kame_roof", "Kame House Red Roof", Shape.CUBE, "clay", "stairs slab", "COLOR_RED", () -> one(roofTiles(KR, "#82201A", 121)));
+        b("kame_trim", "Kame House White Trim", Shape.CUBE, "stone", "slab", "SNOW", () -> one(panel(KW, 122, "#D8D2C6", 2)));
+        b("kame_window", "Kame House Window", Shape.WINDOW, "stone", "", "COLOR_PINK", () -> {
+            T t = stucco(KP, KPS, 123);
+            t.rect(2, 2, 13, 13, KW).rect(3, 3, 12, 12, "#4C8CB8").rect(7, 3, 8, 12, KW).rect(3, 7, 12, 8, KW);
+            t.rect(3, 3, 6, 4, "#CFEFFF", 0.7).rect(9, 9, 11, 10, "#CFEFFF", 0.35);
+            return one(t);
+        });
+        b("kame_door", "Kame House Door", Shape.DOOR, "clay", "", "COLOR_RED", () -> {
+            T bottom = new T("#A8462E", 124, 4).bevel(0, 0, 15, 15);
+            bottom.rect(2, 1, 13, 6, "#8A3420").rect(2, 9, 13, 14, "#8A3420").px(12, 2, "#E8C040");
+            T top = new T("#A8462E", 125, 4).bevel(0, 0, 15, 15);
+            top.rect(3, 3, 12, 11, KW).rect(4, 4, 11, 10, "#4C8CB8").rect(4, 4, 7, 5, "#CFEFFF", 0.7);
+            return new T[]{bottom, top, doorIcon("#A8462E", "#8A3420", KW)};
+        });
+        String sign = "KAME HOUSE";                                                   // ten letters, two to a block
+        for (int i = 0; i < 5; i++) {
+            int part = i;
+            b("kame_sign_" + (i + 1), "Kame House Sign (" + (i + 1) + " of 5)", Shape.CUBE, "stone", "", "SNOW", () -> {
+                T t = new T(KW, 126 + part, 2);
+                t.rect(0, 0, 15, 1, KR).rect(0, 14, 15, 15, KR);
+                lettering(t, sign.substring(part * 2, part * 2 + 2), KR);
+                return one(t);
+            });
+        }
+
+        // ---- Red Ribbon Army: grey steel, army olive, bunker concrete, red bands, hazard stripes, the ribbon emblem
+        String RS = "#8C9298", RSD = "#5E636A", OL = "#6B6B3A", OLD = "#4A4A26", RED = "#C42A2A", CC = "#A8A49A";
+        b("ribbon_steel", "Red Ribbon Steel", Shape.CUBE, "hard", "stairs slab wall", "COLOR_GRAY", () -> one(plates(RS, RSD, 130, true)));
+        b("ribbon_steel_dark", "Red Ribbon Dark Steel", Shape.CUBE, "hard", "stairs slab", "COLOR_GRAY", () -> one(plates("#4A4E55", "#2E3136", 131, true)));
+        b("ribbon_olive", "Red Ribbon Army Olive", Shape.CUBE, "hard", "stairs slab wall", "COLOR_GREEN", () -> one(plates(OL, OLD, 132, false)));
+        b("ribbon_concrete", "Red Ribbon Bunker Concrete", Shape.CUBE, "stone", "stairs slab wall", "COLOR_LIGHT_GRAY", () -> {
+            T t = new T(CC, 133, 7);
+            t.rect(0, 7, 15, 7, "#8A867C", 0.6).rect(0, 15, 15, 15, "#8A867C", 0.6);
+            for (int[] p : new int[][]{{3, 3}, {12, 3}, {3, 11}, {12, 11}}) t.disc(p[0] + 0.5, p[1] + 0.5, 0, 0.9, "#6E6A62", 0.7);
+            return one(t);
+        });
+        b("ribbon_red_band", "Red Ribbon Red Band", Shape.CUBE, "hard", "slab", "COLOR_RED", () -> {
+            T t = plates(RS, RSD, 134, false);
+            t.rect(0, 5, 15, 10, RED).rect(0, 5, 15, 5, "#E8584E", 0.6).rect(0, 10, 15, 10, "#7E1616", 0.7);
+            return one(t);
+        });
+        b("ribbon_emblem", "Red Ribbon Emblem", Shape.CUBE, "hard", "", "COLOR_RED", () -> {
+            T t = new T("#ECE8E0", 135, 2).bevel(0, 0, 15, 15, 0.05, 0.08);
+            t.disc(4.6, 6.5, 0, 3.6, RED, 1).disc(11.4, 6.5, 0, 3.6, RED, 1);            // the bow's two loops
+            t.disc(4.6, 6.5, 0, 1.3, "#ECE8E0", 1).disc(11.4, 6.5, 0, 1.3, "#ECE8E0", 1);
+            t.rect(6, 9, 7, 14, RED).rect(9, 9, 10, 14, RED).px(5, 14, RED).px(11, 14, RED); // and its tails
+            t.disc(8, 7, 0, 1.9, "#8E1414", 1);                                            // the knot
+            return one(t);
+        });
+        b("ribbon_window", "Red Ribbon Barred Window", Shape.WINDOW, "hard", "", "COLOR_GRAY", () -> {
+            T t = plates(RS, RSD, 136, false);
+            t.rect(2, 4, 13, 11, "#22303A").rect(2, 4, 13, 5, "#5C7A8A", 0.5);
+            for (int x = 4; x < 13; x += 3) t.rect(x, 4, x, 11, RSD);
+            return one(t);
+        });
+        b("ribbon_light", "Red Ribbon Floodlight", Shape.LAMP, "lamp", "", "COLOR_YELLOW", () -> {
+            T t = new T(RSD, 137, 2).bevel(0, 0, 15, 15);
+            t.disc(8, 8, 0, 6, "#FFF4C8", 1).disc(8, 8, 6, 7.2, RS, 1).disc(6.5, 6.5, 0, 2, "#FFFFFF", 0.8);
+            return one(t);
+        });
+        b("ribbon_hazard", "Hazard Stripes", Shape.CUBE, "hard", "slab", "COLOR_YELLOW", () -> {
+            T t = new T("#E8C230", 138, 3);
+            for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) if (Math.floorMod(x + y, 8) < 4) t.px(x, y, "#1E1E1E", 0.92);
+            return one(t);
+        });
+        b("ribbon_grate", "Red Ribbon Floor Grate", Shape.CUBE, "hard", "slab", "COLOR_GRAY", () -> {
+            T t = new T(RSD, 139, 3).bevel(0, 0, 15, 15);
+            for (int y = 2; y < 15; y += 3) t.rect(1, y, 14, y, "#2A2C30", 0.9);
+            return one(t);
+        });
+        b("ribbon_crate", "Red Ribbon Supply Crate", Shape.CUBE_TB, "clay", "", "COLOR_GREEN", () -> {
+            T side = new T(OL, 140, 5).bevel(0, 0, 15, 15, 0.1, 0.16);
+            side.rect(0, 0, 15, 1, OLD).rect(0, 14, 15, 15, OLD).rect(0, 0, 1, 15, OLD).rect(14, 0, 15, 15, OLD);
+            side.disc(5.5, 8, 0, 2.2, RED, 0.9).disc(10.5, 8, 0, 2.2, RED, 0.9).disc(8, 8, 0, 1, "#8E1414", 1);
+            T top = new T(OL, 141, 5);
+            for (int x = 0; x < 16; x += 5) top.rect(x, 0, x, 15, OLD, 0.7);
+            return new T[]{side, top};
+        });
+        b("ribbon_console", "Red Ribbon Console", Shape.CUBE, "metal", "", "COLOR_GRAY", () -> {
+            T t = new T(RS, 142, 3).bevel(0, 0, 15, 15);
+            t.rect(2, 2, 13, 8, "#14202A").rect(3, 4, 9, 4, "#5CF07A", 0.9).rect(3, 6, 11, 6, "#5CF07A", 0.5);
+            t.px(3, 11, RED).px(6, 11, "#F2C230").px(9, 11, RED).rect(11, 10, 13, 12, RSD);
+            return one(t);
+        });
+        b("ribbon_corner", "Red Ribbon Rounded Corner", Shape.CORNER, "hard", "", "COLOR_GRAY", () -> one(plates(RS, RSD, 143, false)));
+        b("ribbon_door", "Red Ribbon Blast Door", Shape.DOOR, "metal", "", "COLOR_GRAY", () -> {
+            T bottom = plates(RS, RSD, 144, true);
+            bottom.rect(0, 12, 15, 15, "#E8C230");
+            for (int x = 0; x < 16; x++) if (Math.floorMod(x, 4) < 2) bottom.rect(x, 12, x, 15, "#1E1E1E", 0.9);
+            T top = plates(RS, RSD, 145, true);
+            top.rect(4, 3, 11, 7, "#22303A").rect(4, 3, 11, 3, "#5C7A8A", 0.5).rect(0, 0, 15, 1, RED);
+            return new T[]{bottom, top, doorIcon(RS, RSD, RED)};
+        });
+    }
+
+    /** Stucco: a soft mottled render with faint trowel marks. */
+    static T stucco(String base, String dark, long seed) {
+        T t = new T(base, seed, 5);
+        for (int i = 0; i < 7; i++) {
+            int x = t.rng.nextInt(13), y = t.rng.nextInt(15);
+            t.rect(x, y, x + 2 + t.rng.nextInt(3), y, dark, 0.25);
+        }
+        return t.bevel(0, 0, 15, 15, 0.03, 0.05);
+    }
+
+    /** Overlapping rows of curved roof tiles, each row's lower edge in shadow. */
+    static T roofTiles(String base, String dark, long seed) {
+        T t = new T(base, seed, 4);
+        for (int row = 0; row < 4; row++) {
+            int y = row * 4, off = row % 2 == 0 ? 0 : 2;
+            t.rect(0, y + 3, 15, y + 3, dark, 0.7).rect(0, y, 15, y, "#FFFFFF", 0.12);
+            for (int x = off; x < 16; x += 4) t.rect(x, y, x, y + 3, dark, 0.45);
+        }
+        return t;
+    }
+
+    /** Letters 3 by 5, drawn twice the size: the sign's own small font (only the letters it uses). */
+    static final Map<Character, String[]> FONT = Map.of(
+            'K', new String[]{"#.#", "#.#", "##.", "#.#", "#.#"}, 'A', new String[]{".#.", "#.#", "###", "#.#", "#.#"},
+            'M', new String[]{"#.#", "###", "###", "#.#", "#.#"}, 'E', new String[]{"###", "#..", "##.", "#..", "###"},
+            'H', new String[]{"#.#", "#.#", "###", "#.#", "#.#"}, 'O', new String[]{"###", "#.#", "#.#", "#.#", "###"},
+            'U', new String[]{"#.#", "#.#", "#.#", "#.#", "###"}, 'S', new String[]{"###", "#..", "###", "..#", "###"});
+
+    /** Two letters on a 16-pixel face, each 6 by 10 in an 8-pixel cell. */
+    static void lettering(T t, String two, String col) {
+        for (int i = 0; i < two.length(); i++) {
+            String[] g = FONT.get(two.charAt(i));
+            if (g == null) continue;
+            for (int r = 0; r < 5; r++)
+                for (int k = 0; k < 3; k++)
+                    if (g[r].charAt(k) == '#') t.rect(i * 8 + 1 + k * 2, 3 + r * 2, i * 8 + 2 + k * 2, 4 + r * 2, col);
+        }
     }
 
     /** A door's inventory icon: the door's face, narrowed and with a transparent margin. */

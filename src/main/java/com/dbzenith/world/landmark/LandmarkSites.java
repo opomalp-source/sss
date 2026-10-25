@@ -194,6 +194,10 @@ public final class LandmarkSites {
             case CELL_GAMES -> CellGamesArena.plan(site, t);
             case FRYPAN -> FrypanMountains.plan(site, t);
             case WEST_CITY -> WestCity.plan(site, t);
+            case KAME_HOUSE -> KameHouse.plan(site, t);
+            case MUSCLE_TOWER -> MuscleTower.plan(site, t);
+            case RIBBON_BASE -> RibbonBase.plan(site, t);
+            case VILLAGE -> Village.plan(site, t);
         };
     }
 

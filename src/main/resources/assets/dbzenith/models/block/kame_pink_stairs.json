@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {"bottom": "dbzenith:block/kame_pink", "top": "dbzenith:block/kame_pink", "side": "dbzenith:block/kame_pink"}
+}

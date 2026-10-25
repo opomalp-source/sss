@@ -208,6 +208,12 @@ All in `com.dbzenith.living` unless named otherwise.
 - Doors: residents leave a door open while anyone else is in the doorway (`DoorGoal`); a resident whose destination
   changes plans its way afresh; a resident giving up on a place logs where it was stuck.
 
+## 4e. Villages and farmers (v0.165.0)
+
+- Traditional villages (docs/WORLD_STRUCTURES.md) are generated settlements with 8 to 12 residents and a map.
+- New trade, the farmer: works the fields (place kind `FIELD`), up at five and in bed at nine (`schedules/farmer.json`),
+  a good harvest its goal (`HARVEST`), lines of its own, hears the same news as citizens.
+
 ## 5. Testing
 
 - **GameTests** (`gametest.LivingTests`, 8): the living data and the residents' new fields survive saving; schedules

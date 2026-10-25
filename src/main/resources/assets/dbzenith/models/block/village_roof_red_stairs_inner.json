@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {"bottom": "dbzenith:block/village_roof_red", "top": "dbzenith:block/village_roof_red", "side": "dbzenith:block/village_roof_red"}
+}

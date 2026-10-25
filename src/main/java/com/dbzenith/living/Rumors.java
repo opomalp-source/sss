@@ -149,7 +149,7 @@ public final class Rumors {
             case MASTER, STUDENT -> k == Rumor.Kind.NEW_FORM || k == Rumor.Kind.TOURNAMENT_WIN || k == Rumor.Kind.STRONG_FIGHTER
                     || k == Rumor.Kind.TRAINING_HARD || k == Rumor.Kind.DUEL || k == Rumor.Kind.PLAYER_FAMOUS || k == Rumor.Kind.LOST_TO_PLAYER;
             case SCIENTIST -> k == Rumor.Kind.NEW_FORM || k == Rumor.Kind.PLAYER_FAMOUS || k == Rumor.Kind.STRONG_FIGHTER || k == Rumor.Kind.TOWN_ATTACKED;   // curious about power
-            case COOK, CITIZEN -> k == Rumor.Kind.PLAYER_FAMOUS || k == Rumor.Kind.MOURNING || k == Rumor.Kind.NEWCOMER || k == Rumor.Kind.TOWN_ATTACKED;
+            case COOK, CITIZEN, FARMER -> k == Rumor.Kind.PLAYER_FAMOUS || k == Rumor.Kind.MOURNING || k == Rumor.Kind.NEWCOMER || k == Rumor.Kind.TOWN_ATTACKED;
         };
     }
 

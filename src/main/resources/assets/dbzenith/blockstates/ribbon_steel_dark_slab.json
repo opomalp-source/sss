@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "type=bottom": {"model": "dbzenith:block/ribbon_steel_dark_slab"},
+    "type=top": {"model": "dbzenith:block/ribbon_steel_dark_slab_top"},
+    "type=double": {"model": "dbzenith:block/ribbon_steel_dark"}
+  }
+}

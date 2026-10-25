@@ -132,6 +132,7 @@ public final class ClientSetup {
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.RESIDENT.get(), com.dbzenith.client.render.VariantRenderer::new);   // the living world's townsfolk
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.TRAINING_DUMMY.get(), ctx -> new FighterRenderer<>(ctx, "training_dummy", 1f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.ANDROID_UNIT.get(), ctx -> new FighterRenderer<>(ctx, "android_unit", 1f));
+        event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.RED_RIBBON_SOLDIER.get(), ctx -> new FighterRenderer<>(ctx, "red_ribbon_soldier", 1f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.TYRANT_LORD.get(), ctx -> new FighterRenderer<>(ctx, "tyrant_lord", 1.1f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.RAMPAGE_BRUTE.get(), ctx -> new FighterRenderer<>(ctx, "rampage_brute", 1.6f));
         event.registerEntityRenderer(com.dbzenith.npc.ModNpcs.MASTER.get(), ctx -> new FighterRenderer<>(ctx, "martial_arts_master", 0.95f));

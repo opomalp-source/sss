@@ -93,7 +93,8 @@ public final class CivilizationBlocks {
             case GLASS -> new GlassBlock(p.noOcclusion().isViewBlocking((st, l, pos) -> false).isSuffocating((st, l, pos) -> false));
             case LAMP -> new Block(p.lightLevel(st -> 15));
             case CORNER -> new RoundCorner(p.noOcclusion());
-            case DOOR -> new SlidingDoor(p.noOcclusion().pushReaction(net.minecraft.world.level.material.PushReaction.DESTROY), SLIDING);
+            case DOOR -> new SlidingDoor(p.noOcclusion().pushReaction(net.minecraft.world.level.material.PushReaction.DESTROY),
+                    s.material() == CivilizationBlockList.Material.CLAY ? BlockSetType.OAK : SLIDING);             // wooden doors sound like wood
             default -> new Block(p);
         };
     }

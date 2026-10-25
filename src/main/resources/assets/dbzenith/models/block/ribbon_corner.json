@@ -1,0 +1,4 @@
+{
+  "parent": "dbzenith:block/template_round_corner",
+  "textures": {"side": "dbzenith:block/ribbon_corner", "particle": "dbzenith:block/ribbon_corner"}
+}

@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {"bottom": "dbzenith:block/village_log", "top": "dbzenith:block/village_log", "side": "dbzenith:block/village_log"}
+}

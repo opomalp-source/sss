@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {"bottom": "dbzenith:block/kame_trim", "top": "dbzenith:block/kame_trim", "side": "dbzenith:block/kame_trim"}
+}

@@ -28,6 +28,8 @@ public final class ModNpcs {
     public static final KiFighter.Profile SPROUTLING_PROFILE = new KiFighter.Profile("entity.dbzenith.sproutling", 0, List.of(), 0);
     public static final KiFighter.Profile SOLDIER_PROFILE = new KiFighter.Profile("entity.dbzenith.ki_soldier", 25, List.of(Techniques.KI_BLAST), 60);
     public static final KiFighter.Profile ANDROID_PROFILE = new KiFighter.Profile("entity.dbzenith.android_unit", 35, List.of(Techniques.ARM_CANNON), 80);
+    /** A Red Ribbon Army soldier (docs/WORLD_STRUCTURES.md): a trained man with a rifle (quick small shots), garrisoning its bases. */
+    public static final KiFighter.Profile RIBBON_PROFILE = new KiFighter.Profile("entity.dbzenith.red_ribbon_soldier", 15, List.of(Techniques.ARM_CANNON), 50);
     public static final KiFighter.Profile TYRANT_PROFILE = new KiFighter.Profile("entity.dbzenith.tyrant_lord", 90,
             List.of(Techniques.FINGER_BEAM, Techniques.SUPERNOVA_ORB, Techniques.KI_BLAST, Techniques.SEAL_ORB), 50);
     public static final KiFighter.Profile NAMEKIAN_PROFILE = new KiFighter.Profile("entity.dbzenith.namekian_warrior", 30, List.of(Techniques.KI_BLAST), 70);
@@ -46,6 +48,9 @@ public final class ModNpcs {
     public static final RegistryObject<EntityType<KiFighter>> ANDROID_UNIT = TYPES.register("android_unit",
             () -> EntityType.Builder.<KiFighter>of((t, l) -> new KiFighter(t, l, ANDROID_PROFILE), MobCategory.MONSTER)
                     .sized(0.6f, 1.95f).clientTrackingRange(8).build("android_unit"));
+    public static final RegistryObject<EntityType<KiFighter>> RED_RIBBON_SOLDIER = TYPES.register("red_ribbon_soldier",
+            () -> EntityType.Builder.<KiFighter>of((t, l) -> new KiFighter(t, l, RIBBON_PROFILE), MobCategory.MONSTER)
+                    .sized(0.6f, 1.85f).clientTrackingRange(8).build("red_ribbon_soldier"));
     public static final RegistryObject<EntityType<KiFighter>> SAIYAN_WARRIOR = TYPES.register("saiyan_warrior",
             () -> EntityType.Builder.<KiFighter>of((t, l) -> new KiFighter(t, l, SAIYAN_PROFILE), MobCategory.MONSTER)
                     .sized(0.6f, 1.9f).clientTrackingRange(10).build("saiyan_warrior"));
@@ -139,6 +144,7 @@ public final class ModNpcs {
             case "sproutling" -> SPROUTLING_PROFILE;
             case "ki_soldier" -> SOLDIER_PROFILE;
             case "android_unit" -> ANDROID_PROFILE;
+            case "red_ribbon_soldier" -> RIBBON_PROFILE;
             case "saiyan_warrior" -> SAIYAN_PROFILE;
             case "tyrant_lord" -> TYRANT_PROFILE;
             case "rampage_brute" -> BRUTE_PROFILE;
@@ -166,6 +172,7 @@ public final class ModNpcs {
         event.put(SAIYAN_WARRIOR.get(), KiFighter.attributes(45, 5, 0.29).build());
         event.put(TRAINING_DUMMY.get(), TrainingDummy.attributes().build());
         event.put(ANDROID_UNIT.get(), KiFighter.attributes(60, 6, 0.24).add(Attributes.ARMOR, 8).build());
+        event.put(RED_RIBBON_SOLDIER.get(), KiFighter.attributes(26, 4, 0.26).add(Attributes.ARMOR, 3).build());
         event.put(TYRANT_LORD.get(), KiFighter.attributes(400, 6, 0.3).add(Attributes.KNOCKBACK_RESISTANCE, 0.6).build());
         event.put(RAMPAGE_BRUTE.get(), KiFighter.attributes(500, 9, 0.27).add(Attributes.KNOCKBACK_RESISTANCE, 0.9).build());
         event.put(NAMEKIAN_WARRIOR.get(), KiFighter.attributes(50, 5, 0.25).build());

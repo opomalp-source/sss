@@ -89,6 +89,14 @@ public final class Canvas {
         level.setBlock(pos.set(x, y, z), top, 2);
     }
 
+    /** A chest facing {@code facing}, filled from a loot table the first time it is opened. */
+    public void lootChest(int x, int y, int z, Direction facing, String table) {
+        if (!contains(x, z)) return;
+        set(x, y, z, Blocks.CHEST.defaultBlockState().setValue(net.minecraft.world.level.block.ChestBlock.FACING, facing));
+        if (level.getBlockEntity(pos.set(x, y, z)) instanceof net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity chest)
+            chest.setLootTable(new net.minecraft.resources.ResourceLocation(table), hash(31, x, y, z));
+    }
+
     /** Spawns a persistent mob standing at x, y, z (if that spot is in this chunk), facing {@code yaw}. */
     public void spawn(net.minecraft.world.entity.EntityType<? extends net.minecraft.world.entity.Mob> type, double x, double y, double z, float yaw) {
         if (!contains((int) Math.floor(x), (int) Math.floor(z))) return;

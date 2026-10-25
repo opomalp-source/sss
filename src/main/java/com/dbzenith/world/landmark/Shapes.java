@@ -16,8 +16,13 @@ import net.minecraft.world.level.block.state.properties.WallSide;
 public final class Shapes {
     private Shapes() {}
 
+    /** A block by id: the landmark set first, then the civilizations' families. */
     static BlockState b(String id) {
-        return ArchitectureBlocks.get(id);
+        try {
+            return ArchitectureBlocks.get(id);
+        } catch (IllegalArgumentException e) {
+            return com.dbzenith.world.arch.CivilizationBlocks.get(id);
+        }
     }
 
     /**

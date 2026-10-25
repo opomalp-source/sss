@@ -35,7 +35,7 @@ import java.util.Locale;
  *   <li>{@code resettle}: retires its residents and registers it afresh (its plan's people in its homes);</li>
  *   <li>{@code path <from> <to>}: a resident's own path search between two spots, node by node;</li>
  *   <li>{@code rebuild <landmark>}: draws the nearest landmark of a kind again into the loaded chunks it covers (after
- *       a change to its plan; it overwrites what stands there).</li>
+ *       a change to its plan; it overwrites what stands there, and spawns its garrison again).</li>
  * </ul>
  */
 public final class StructuresCommand {

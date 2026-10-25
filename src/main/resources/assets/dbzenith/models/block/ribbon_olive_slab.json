@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {"bottom": "dbzenith:block/ribbon_olive", "top": "dbzenith:block/ribbon_olive", "side": "dbzenith:block/ribbon_olive"}
+}

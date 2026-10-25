@@ -33,6 +33,8 @@ public record AiProfile(Faction faction, List<Personality> personalities, Race r
                 Personality.RECKLESS), Race.SAIYAN, Variant.SAIYAN, true, Tier.NORMAL, true, 0xFFE6A0));
         BY_TYPE.put("android_unit", new AiProfile(Faction.RED_RIBBON, List.of(Personality.TACTICAL, Personality.PATIENT), Race.ANDROID, Variant.ANDROID,
                 true, Tier.NORMAL, false, 0x9AD0FF));
+        BY_TYPE.put("red_ribbon_soldier", new AiProfile(Faction.RED_RIBBON, List.of(Personality.TACTICAL, Personality.AGGRESSIVE, Personality.COWARDLY,
+                Personality.BALANCED), null, null, true, Tier.LIGHT, false, PLAIN_AURA));
         BY_TYPE.put("namekian_warrior", new AiProfile(Faction.NAMEKIANS, List.of(Personality.HONORABLE, Personality.DEFENSIVE, Personality.PATIENT),
                 Race.NAMEKIAN, Variant.WARRIOR_CLAN, true, Tier.NORMAL, false, 0xB8FFB0));
         BY_TYPE.put("ogre_guard", new AiProfile(Faction.OTHERWORLD, List.of(Personality.DEFENSIVE, Personality.HONORABLE), null, null, false,

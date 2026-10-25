@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": {"model": "dbzenith:block/village_corner"},
+    "facing=east": {"model": "dbzenith:block/village_corner", "y": 90},
+    "facing=south": {"model": "dbzenith:block/village_corner", "y": 180},
+    "facing=west": {"model": "dbzenith:block/village_corner", "y": 270}
+  }
+}

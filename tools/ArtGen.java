@@ -21,6 +21,7 @@ public class ArtGen {
             if (args[1].equals("masters")) NpcArt.masters();
             if (args[1].equals("townsfolk")) NpcArt.townsfolk();                  // the living world's people (v0.161.0)
             if (args[1].equals("saiyan_warrior")) NpcArt.saiyanWarrior();          // the Nemesis system's rival (v0.160.0)
+            if (args[1].equals("red_ribbon_soldier")) NpcArt.redRibbonSoldier();      // the Red Ribbon Army's garrisons (v0.165.0)
             if (args[1].equals("gear")) Gear.all();                           // the clothes (the clothing rework)
             System.out.println("ArtGen done: " + args[1]);
             return;
@@ -543,6 +544,7 @@ public class ArtGen {
             patrolOfficer();
             kiSoldier();
             androidUnit();
+            redRibbonSoldier();
             sproutling();
             tyrantLord();
             rampageBrute();
@@ -777,6 +779,41 @@ public class ArtGen {
             new Npc().body("athletic", 0xFFEEC6A0).paint(s).face(3, 0xFF3A2A1A, true, 0, 0xFF3A2414, 0, 0).save("patrol_officer");
         }
 
+        /** A Red Ribbon Army soldier (v0.165.0): a khaki field jacket with chest pockets, a brown belt, the army's red armband
+         *  on the left arm with a white ribbon, khaki trousers in black boots; the cap and short hair are parts (NpcLooks). */
+        static void redRibbonSoldier() throws IOException {
+            int[] khaki = ramp(0xFF9A8A5A, 6), brown = ramp(0xFF5A3E22, 4), black = ramp(0xFF1E1E22, 5), red = ramp(0xFFC42A2A, 4),
+                    white = ramp(0xFFF0EEE8, 3);
+            Hd.HdSkin s = new Hd.HdSkin();
+            s.body = (f, x, y, w, h) -> {
+                double uu = u(x, w), vv = v(y, h);
+                if (f == Face.BOTTOM) return 0;
+                if (vv > 0.76 && vv < 0.86) {                                                                              // the belt
+                    if (f == Face.FRONT && Math.abs(uu - 0.5) < 0.07) return flat(ramp(0xFFC8A040, 3), f, 0);
+                    return row(vv, 0.765, h) || row(vv, 0.855, h) ? ink(brown) : flat(brown, f, 0);
+                }
+                if (f == Face.FRONT) {
+                    if (Math.abs(uu - 0.5) < 0.02) return ink(khaki);                                                    // the button line
+                    for (double px : new double[]{0.28, 0.72})                                                            // chest pockets
+                        if (Math.abs(uu - px) < 0.12 && vv > 0.2 && vv < 0.4) return Math.abs(vv - 0.2) < 0.03 ? ink(khaki) : flat(khaki, f, -0.06);
+                    if (vv < 0.1 && Math.abs(uu - 0.5) < 0.22 - vv) return flat(khaki, f, 0.08);                         // the collar
+                }
+                return cloth(khaki, f, x, y, w, h, 631);
+            };
+            s.arm = (f, x, y, w, h) -> {
+                double vv = v(y, h);
+                if (vv > 0.88) return 0;
+                if (vv > 0.84) return ink(khaki);
+                if (vv > 0.16 && vv < 0.34 && f != Face.TOP && f != Face.BOTTOM) {                                         // the armband
+                    if (f == Face.LEFT && Math.abs(u(x, w) - 0.5) < 0.18 && vv > 0.2 && vv < 0.3) return flat(white, f, 0);
+                    return flat(red, f, 0);
+                }
+                return cloth(khaki, f, x, y, w, h, 632);
+            };
+            s.leg = (f, x, y, w, h) -> v(y, h) > 0.72 || f == Face.BOTTOM ? (row(v(y, h), 0.725, h) ? ink(black) : flat(black, f, 0)) : cloth(khaki, f, x, y, w, h, 633);
+            new Npc().body("athletic", 0xFFEEC6A0).hatless().dress(s).face(3, 0xFF3A2A1A, true, 0, 0xFF2A1E16, 0, 0).scalp(0xFF2A1E16).save("red_ribbon_soldier");
+        }
+
         /** A Saiyan warrior (the Nemesis rival): tanned, in Saiyan battle armour (its shoulder pads are 3D, its wild hair and
          *  tail are parts: NpcLooks), dark eyes, heavy brows. */
         static void saiyanWarrior() throws IOException {
@@ -880,6 +917,8 @@ public class ArtGen {
                 return cloth(slacks, f, x, y, w, h, 906);
             };
             new Npc().body("lean", 0xFFF0CDB0).hatless().dress(coat).face(4, 0xFF3A5A8A, true, 0, 0xFF6A5A8A, 1, 1).scalp(0xFF6A5A8A).save("townsfolk_scientist");
+            new Npc().body("bulky", 0xFFD8A070).hatless().dress(outfit(0xFFB0503A, 0xFF4A6A9A, 0xFF5A3A22, 0, 0xFF4A6A9A, false, false, true, 911))   // a farmer: a striped shirt under denim dungarees
+                    .face(2, 0xFF3A2A1A, true, 1, 0xFF8A6A3A, 1, 1).scalp(0xFF8A6A3A).save("townsfolk_farmer");
         }
 
         /** A soldier of the tyrant's army: a green-skinned alien in white armour with purple pads (3D) and a scouter. */

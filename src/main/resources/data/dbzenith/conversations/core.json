@@ -12,6 +12,7 @@
         {"when": {"first": true, "occupation": "student"}, "text": ["Whoa, are you a fighter too? I'm {npc}! I train at the dojo under {master}!", "Hey! I'm {npc}. I'm going to be the strongest in {town} one day!"]},
         {"when": {"first": true, "occupation": "cook"}, "text": ["Hungry? You look hungry. I'm {npc}, I run the kitchen at the restaurant.", "Welcome! I'm {npc}. Fighters eat a lot, I know. Come by the restaurant."]},
         {"when": {"first": true, "occupation": "scientist"}, "text": ["Oh! A visitor. I'm {npc}. Mind the cables, I'm in the middle of something.", "Hello there. {npc}, research division. Don't touch anything that blinks."]},
+        {"when": {"first": true, "occupation": "farmer"}, "text": ["Mind the rows! Oh, a visitor. I'm {npc}, I grow most of what {town} eats.", "Hello! {npc}. If you're hungry, the radishes are nearly ready."]},
         {"when": {"mood": "happy"}, "text": ["Good to see you, {player}! What a day!", "Ah, {player}! I'm in a fine mood today."]},
         {"when": {"mood": "tired"}, "text": ["*yawn* Oh, it's you, {player}. It's late...", "Mm? Sorry, I'm half asleep."]},
         {"when": {"mood": "annoyed"}, "text": ["What is it?", "Make it quick, {player}."]},
@@ -56,6 +57,7 @@
         {"when": {"occupation": "merchant"}, "text": ["{npc}, purveyor of fine goods. My family has kept shop in {town} for three generations.", "A merchant. Capsules, tools, rice, you name it."]},
         {"when": {"occupation": "cook"}, "text": ["{npc}. I cook. Big portions. Fighters eat like ten people, you know.", "I run the kitchen. Ever tried my fried dumplings? No? We'll fix that."]},
         {"when": {"occupation": "scientist"}, "text": ["{npc}. I'm a scientist. Capsules, engines, a little of everything.", "I do research. Mostly I take things apart to see why they work, then make them smaller."]},
+        {"when": {"occupation": "farmer"}, "text": ["{npc}. I farm. Up before the sun, down after it.", "A farmer. Rice, radishes, cabbages, whatever the season gives."]},
         {"when": {"trait": "curious"}, "text": ["I'm {npc}. And you? Where are you from? What's it like out there?", "{npc}. I've always wanted to see the world beyond {town}."]},
         {"when": {"trait": "shy"}, "text": ["Me? Oh, I'm... nobody really. Just {npc}.", "I-I'm {npc}. I keep to myself, mostly."]}
       ],
@@ -70,6 +72,7 @@
         {"when": {"occupation": "merchant"}, "text": ["I keep the shop, {where:shop} from here. Buy low, sell high, smile a lot.", "Trade! Goods come in from the city, I sell them on. Business has been good lately."]},
         {"when": {"occupation": "cook"}, "text": ["I run the kitchen at the restaurant, {where:tavern} from here. Come at noon or evening.", "Cooking! Breakfast at dawn, lunch at noon, dinner after sunset. The fighters from the dojo eat most of it."]},
         {"when": {"occupation": "scientist"}, "text": ["I work in the lab, {where:lab} from here. Long hours, but the coffee is free.", "Research! We're trying to fit a whole house into a capsule. A bigger house, I mean. We already did the small one."]},
+        {"when": {"occupation": "farmer"}, "text": ["My fields are {where:field} from here. Come and lend a hand at harvest.", "Weeding, watering, chasing off crows. Same as every day, and I wouldn't change it."]},
         {"when": {"occupation": "guard"}, "text": ["I walk the rounds: the roads, the gates, the plaza. Day and night, in shifts.", "Keeping {town} safe. Bandits, wild animals, the odd hothead who thinks he's the strongest in the world."]},
         {"when": {"occupation": "student"}, "text": ["I train at the dojo! Mornings and afternoons. {master} is tough, but fair.", "Training, training, training! I'm going to master the Ki Blast, then something even bigger."]},
         {"when": {"occupation": "master"}, "text": ["I teach the young ones at the dojo. Discipline first, then technique, then power.", "I run the dojo. Strength without control is just noise."]}
@@ -138,6 +141,7 @@
         {"when": {"goal": "find_student"}, "text": ["I am looking for a student worthy of everything I know. They are rare.", "Teaching is easy. Finding someone worth teaching is hard."]},
         {"when": {"goal": "business"}, "text": ["Business, business. A good month means a good year.", "If more travelers came through, I could finally expand."]},
         {"when": {"goal": "research"}, "text": ["There's a problem I can't let go of. The numbers almost work. Almost.", "If I could just get the prototype stable, it would change everything. Well, a few things."]},
+        {"when": {"goal": "harvest"}, "text": ["If the weather holds, this'll be the best harvest in years.", "A good harvest, that's all I want. Fighters can keep their tournaments."]},
         {"when": {"goal": "business", "trait": "greedy"}, "text": ["Money, {player}. Money is on my mind. It always is."]},
         {"when": {"goal": "explore"}, "text": ["I keep thinking about what's past the mountains. One day I'll go and see.", "Have you been far? I'd love to travel someday."]},
         {"when": {"goal": "protect_town"}, "text": ["Keeping these people safe. That's all I think about.", "Something's coming. I can feel it. I want {town} to be ready."]},
@@ -192,6 +196,7 @@
       {"when": {"occupation": "student"}, "text": ["{master} made us do a thousand push-ups today!", "I almost had my ki blast stable this morning!"]},
       {"when": {"occupation": "merchant"}, "text": ["Prices are up again. Don't ask me why.", "Business is slow. Tell your friends about my shop!"]},
       {"when": {"occupation": "scientist"}, "text": ["The prototype exploded again. Small explosion. Mostly.", "Someone keeps borrowing my tools and returning them upside down."]},
+      {"when": {"occupation": "farmer"}, "text": ["Something's been digging up the carrots again.", "Rain's coming. I can feel it in my knees."]},
       {"when": {"mood": "worried"}, "text": ["I don't like how many fighters are around lately.", "I heard there was trouble on the roads."]}
     ]
   }

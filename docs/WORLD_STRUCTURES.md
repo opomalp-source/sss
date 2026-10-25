@@ -52,6 +52,13 @@ Text sources (fan wikis; fandom pages refuse automated reading):
   a Frieza Force base. In Dragon Ball Super: Broly the royal palace stands in a forested valley city.
 - [Dragon Ball Encyclopedia: Namek](https://dragonballencyclopedia.com/wiki/Namek_(planet)): three suns, never night;
   meadows; one Dragon Ball per village, kept by its elder.
+- [Dragon Ball Encyclopedia: Muscle Tower](https://dragonballencyclopedia.com/wiki/Muscle_Tower): a Red Ribbon Army
+  outpost near Jingle Village; six floors and a basement: level 1 snowmobiles and tools, level 2 four soldiers, level 3
+  an android sergeant, level 4 a small garden and a room (a ninja and an android), level 4.5 a maze, level 5 a
+  monster's lair full of his victims' skeletons, level 6 the general's control room.
+- [Dragon Ball Encyclopedia: Red Ribbon Army](https://dragonballencyclopedia.com/wiki/Red_Ribbon_Army): a headquarters,
+  Muscle Tower, field camps (General Blue's, Colonel Silver's); soldiers with cars, tanks, helicopters and planes;
+  the "RR" emblem; their aim, the Dragon Balls (for world rule).
 - [Wikipedia: Master Roshi](https://en.wikipedia.org/wiki/Master_Roshi) and the official site's "World Travelogue"
   series (not readable by the tools).
 
@@ -162,9 +169,52 @@ civilization's look; original places (marked "original" in code and here) are ne
   wing, upper floors and the basement out of the search's reach), and a crowd of residents leaving one block of flats
   stuck at its door. Fixed by the map, double doors, sliding doors without a leaf, and spreading the homes.
 
+### v0.165.0
+
+- **Block families** (37 more, by `tools/BlockFamilyGen.java`): the Earth countryside (stucco, white stucco, red,
+  blue, green and orange roof tiles, thatch, timber, log walls, round wooden windows, paper lanterns, rounded corners,
+  wooden doors), Kame House (pink walls, red roof, white trim, its windows and door, "KAME HOUSE" across five sign
+  blocks in a small pixel font of its own) and the Red Ribbon Army (steel, dark steel, army olive, bunker concrete, a
+  red band, the ribbon emblem (an original bow, not the series' logo), barred windows, floodlights, hazard stripes,
+  floor grates, supply crates, consoles, blast doors). Wooden doors sound like wood. Stairs, slabs and walls as usual.
+- **Kame House** (`KameHouse`; unique, guarded; open ocean, no land within 90 blocks): a sandy island sloping down to
+  the sea floor, three palms, a beach chair under a red-and-white umbrella; the pink two-storey house under a red hip
+  roof with a low red roof round the upper storey and over the porch, "KAME HOUSE" across its front; downstairs the
+  main room (a television, a low table, cushions), the kitchen and a little washroom, a stair up to the bedroom.
+  Master Roshi (the existing style master) on the porch and a sea turtle on the beach.
+- **Traditional villages** (`Village`; a settlement every 1024 blocks or so, guarded): a levelled round site, a plaza
+  with a roofed well and benches, four roads out and a ring road with paper lanterns, eight plots round the ring
+  (houses, a shop with stalls, an inn, one in four with a small dojo), fields of wheat, carrots, potatoes and beetroot
+  with water channels, fenced, trees. Three looks by biome: round stucco huts under tiled domes (temperate), log
+  cabins with tiled roofs in the snow (no fields), flat-roofed adobe with palms in the desert. 8 to 12 residents:
+  a merchant, a cook, a guard, farmers (not in the snow), sometimes a master and two students, citizens; names from
+  original food names (72 in all, by look). Their map: the roads as waypoints, every building a room.
+- **The farmer** (new trade): works the fields (the `FIELD` place kind), up at five, in bed at nine, a striped shirt
+  under denim dungarees, a good harvest the goal, lines of its own.
+- **Red Ribbon field bases** (`RibbonBase`; every 1536 blocks or so, guarded; dry, fairly level land): a fenced yard,
+  the gate between floodlit posts, four watchtowers (ladders, grated platforms, floodlights), the headquarters (the
+  emblem over its blast doors, consoles, a map table, a radio mast), the barracks (bunks, lockers), a round-roofed
+  hangar with crates, a helipad, a flag. Five Red Ribbon soldiers and an android unit; chests with the army's supplies
+  (`chests/red_ribbon_base`: food, iron, gunpowder, bandages, now and then a capsule, training weights or a Senzu).
+- **The Red Ribbon soldier** (new NPC, `red_ribbon_soldier`): the Red Ribbon faction (enemies of townsfolk), quick
+  rifle shots, a khaki field uniform with red armbands, a spawn egg.
+- **Muscle Tower** (`MuscleTower`; unique, guarded; snowy land): a six-storey steel tower with red bands, the
+  emblem over its blast doors, switchback stairs; its floors as in the series: a garage of tools and supplies (two
+  guards), a guard room (four), a machine's floor (an android unit), a little garden and a room (one), a dark lair
+  strewn with bones (two), the commander's control room (two) with his chest (`chests/red_ribbon_tower`: a Dragon
+  Radar, Senzu beans, gold, a capsule...). A radio mast and floodlights on the roof.
+- **Tests:** unique landmarks (all three) one per world and stable; villages of each look with homes, places and
+  farmers; the farmer's day; Red Ribbon soldiers' side and the loot tables. 369 GameTests.
+- **Checked in the dev client:** Kame House, a snow village and a temperate one, a Red Ribbon base and Muscle Tower,
+  each generated beside explored regions; a village's places all reachable (25 of 25) and a morning with nobody
+  giving up; residents (farmers among them) about the plaza. Fixed on the way: Kame House's underwater slope (a
+  sand cylinder), land in sight of it, the snow stopping short of a snow village's edge, soldiers' uniforms painted
+  under their skin, repeated village names.
+
 ## 6. Not done / limits
 
-- Milestones 2 to 7 of the plan above.
+- Milestones 3 to 7 of the plan above. From milestone 2: the Red Ribbon headquarters, Jingle Village by name (a snow
+  village stands in for it), vehicles (the army's cars, tanks and helicopters), named officers.
 - The older landmarks (tournament, Lookout, Cell Games, Frypan) are neither unique nor guarded (as before: one per
   cell, they may generate in unexplored chunks of an old world, as they always did).
 - A settlement is registered when a player first comes near; if its chunks were generated without anyone near (a
@@ -174,3 +224,7 @@ civilization's look; original places (marked "original" in code and here) are ne
 - Residents still give up on a place now and then (logged: "... gave up on place #n ..."); the town retries it the
   next day. A building's stair is 1 wide, and flats fill only after every house.
 - The outer avenues end where the city's circle cuts them (a ragged edge on the map, though walkable).
+- A unique landmark's cell is kept with the world, but its spot in the cell is worked out again from its rules: change a
+  released unique landmark's site rules and it may move within its cell (Kame House did, before release).
+- Vanilla structures (villages, pillager outposts) are not kept away: one may stand next to, or partly under, a landmark.
+- `/dbz structures rebuild` spawns a landmark's garrison again (dev only).

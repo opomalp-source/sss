@@ -42,6 +42,7 @@ public final class NpcLooks {
             Map.entry("ki_soldier", look(null, 0, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.SCOUTER, Extra.FROST_PADS)),
             Map.entry("saiyan_warrior", look(HairCode.Preset.WILD, 0x141418, RaceTraits.Feature.NONE, false, 0, 0x6B3E1E, true, Extra.PADS)),   // the Nemesis rival
             Map.entry("android_unit", look(HairCode.Preset.SLICK, 0x141418, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("red_ribbon_soldier", look(HairCode.Preset.BUZZ, 0x2A1E16, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.CAP)),
             Map.entry("sproutling", look(null, 0, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.DOME)),
             Map.entry("tyrant_lord", look(null, 0, RaceTraits.Feature.NONE, false, 0, 0xF0EEF4, false)),
             Map.entry("rampage_brute", look(null, 0, RaceTraits.Feature.NONE, false, 0, 0x6B3E1E, true, Extra.PADS)),
@@ -92,7 +93,8 @@ public final class NpcLooks {
             Map.entry("townsfolk_master", look(HairCode.Preset.SAGE, 0xE8E6E0, RaceTraits.Feature.NONE, false, 0, -1, false)),
             Map.entry("townsfolk_guard", look(HairCode.Preset.BUZZ, 0x5A3A20, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.CAP)),
             Map.entry("townsfolk_traveler", look(HairCode.Preset.WILD, 0x4A2E1A, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.CAPE)),
-            Map.entry("townsfolk_scientist", look(HairCode.Preset.SWEPT, 0x6A5A8A, RaceTraits.Feature.NONE, false, 0, -1, false)));
+            Map.entry("townsfolk_scientist", look(HairCode.Preset.SWEPT, 0x6A5A8A, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("townsfolk_farmer", look(HairCode.Preset.WILD, 0x8A6A3A, RaceTraits.Feature.NONE, false, 0, -1, false)));
 
     private NpcLooks() {}
 

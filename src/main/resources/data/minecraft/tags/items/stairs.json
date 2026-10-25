@@ -40,6 +40,20 @@
     "dbzenith:frieza_hangar_stairs",
     "dbzenith:divine_stone_stairs",
     "dbzenith:divine_roof_pink_stairs",
-    "dbzenith:divine_gold_stairs"
+    "dbzenith:divine_gold_stairs",
+    "dbzenith:village_plaster_stairs",
+    "dbzenith:village_plaster_white_stairs",
+    "dbzenith:village_roof_red_stairs",
+    "dbzenith:village_roof_blue_stairs",
+    "dbzenith:village_roof_green_stairs",
+    "dbzenith:village_roof_orange_stairs",
+    "dbzenith:village_thatch_stairs",
+    "dbzenith:village_log_stairs",
+    "dbzenith:kame_pink_stairs",
+    "dbzenith:kame_roof_stairs",
+    "dbzenith:ribbon_steel_stairs",
+    "dbzenith:ribbon_steel_dark_stairs",
+    "dbzenith:ribbon_olive_stairs",
+    "dbzenith:ribbon_concrete_stairs"
   ]
 }

@@ -90,6 +90,7 @@ public final class Residents {
             case TRAVELER -> NamedFighter.Goal.EXPLORE;
             case CITIZEN -> c.has(Trait.CURIOUS) ? NamedFighter.Goal.EXPLORE : NamedFighter.Goal.REST;
             case SCIENTIST -> NamedFighter.Goal.RESEARCH;
+            case FARMER -> NamedFighter.Goal.HARVEST;
         };
     }
 

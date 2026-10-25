@@ -23,7 +23,18 @@ public enum Landmark {
             Biomes.SAVANNA, Biomes.SAVANNA_PLATEAU, Biomes.WINDSWEPT_SAVANNA)),
     /** West City with Capsule Corporation (docs/WORLD_STRUCTURES.md): one per world, never on already explored ground. */
     WEST_CITY("west_city", 2048, 132, 0x3e57L, Set.of(Biomes.PLAINS, Biomes.SUNFLOWER_PLAINS, Biomes.MEADOW, Biomes.SAVANNA, Biomes.FOREST,
-            Biomes.BIRCH_FOREST, Biomes.BEACH), true, true);
+            Biomes.BIRCH_FOREST, Biomes.BEACH), true, true),
+    /** Kame House (canon): Master Roshi's house on its little island, out at sea. One per world. */
+    KAME_HOUSE("kame_house", 2048, 44, 0x6a3eL, Set.of(Biomes.OCEAN, Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN, Biomes.DEEP_LUKEWARM_OCEAN), true, true),
+    /** The Red Ribbon Army's Muscle Tower (canon), in the snowy north. One per world. */
+    MUSCLE_TOWER("muscle_tower", 2048, 36, 0x3c1eL, Set.of(Biomes.SNOWY_PLAINS, Biomes.SNOWY_TAIGA, Biomes.ICE_SPIKES, Biomes.GROVE,
+            Biomes.SNOWY_SLOPES), true, true),
+    /** A Red Ribbon Army field base (canon-inspired): a fenced compound with its garrison. */
+    RIBBON_BASE("red_ribbon_base", 1536, 56, 0x8bbaL, Set.of(Biomes.DESERT, Biomes.BADLANDS, Biomes.SAVANNA, Biomes.PLAINS, Biomes.TAIGA,
+            Biomes.SNOWY_PLAINS, Biomes.FOREST), false, true),
+    /** A traditional village (canon-inspired): round houses, a well, fields, its people. */
+    VILLAGE("village", 1024, 60, 0x7111L, Set.of(Biomes.PLAINS, Biomes.SUNFLOWER_PLAINS, Biomes.MEADOW, Biomes.SAVANNA, Biomes.FOREST,
+            Biomes.BIRCH_FOREST, Biomes.TAIGA, Biomes.SNOWY_PLAINS, Biomes.SNOWY_TAIGA, Biomes.DESERT), false, true);
 
     public static final Landmark[] ALL = values();
 

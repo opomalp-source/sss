@@ -253,6 +253,8 @@ public final class AiTests {
         KiFighter namek = fighter(h, ModNpcs.NAMEKIAN_WARRIOR.get(), new BlockPos(1, 1, 1));
         KiFighter soldier = fighter(h, ModNpcs.SPROUTLING.get(), new BlockPos(1, 1, 4));   // a Saibaman: Frieza Force, melee only, no flight
         namek.brain().setPersonality(Personality.HONORABLE);
+        namek.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(400);   // it lasts long enough to answer (not who wins)
+        namek.setHealth(namek.getMaxHealth());
         AABB pair = new AABB(Vec3.atLowerCornerOf(h.absolutePos(new BlockPos(-3, 0, -3))), Vec3.atLowerCornerOf(h.absolutePos(new BlockPos(6, 6, 9))));
         namek.brain().arena = pair;                                                      // each other only, in the pen: other tests run alongside
         soldier.brain().arena = pair;
@@ -273,14 +275,15 @@ public final class AiTests {
         });
     }
 
-    /** A closed glass pen on a stone floor (or, {@code false}, its blocks cleared again: later batches reuse the spot). */
+    /** A closed pen of barrier blocks (blasts don't break it: a broken glass pen let a fighter fall out of the arena),
+     *  or, {@code false}, its blocks cleared again (later batches reuse the spot). */
     private static void pen(GameTestHelper h, boolean build) {
         for (int x = -3; x <= 5; x++)
             for (int z = -3; z <= 8; z++)
                 for (int y = 0; y <= 5; y++) {
                     boolean wall = x == -3 || x == 5 || z == -3 || z == 8 || y == 0 || y == 5;
                     h.setBlock(new BlockPos(x, y, z), !build || !wall ? net.minecraft.world.level.block.Blocks.AIR
-                            : y == 0 ? net.minecraft.world.level.block.Blocks.STONE : net.minecraft.world.level.block.Blocks.GLASS);
+                            : net.minecraft.world.level.block.Blocks.BARRIER);
                 }
     }
 

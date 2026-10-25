@@ -367,13 +367,14 @@ to both mods folders.
 - [ ] Living world feedback from play: schedules, chat frequency, conversation content, fame pacing, errand rewards,
   companion trust thresholds
 - [ ] An errand journal (taken errands are only told in chat and by whoever asked)
-- [ ] `AiTests.npcsOfEnemySidesFightEachOther` still fails now and then (fight outcome varies)
+- [x] `AiTests.npcsOfEnemySidesFightEachOther` failing now and then: ki blasts broke its glass pen (now barrier blocks), and the Namekian could lose before hitting back (more health) (v0.165.0)
 
 ## World structures and civilizations (docs/WORLD_STRUCTURES.md)
 - [x] v0.164.0 Block families (Capsule Corporation, Saiyan, Namekian, Frieza Force, Divine: 63 blocks plus stairs,
   slabs, walls, rounded corners, sliding doors), settlements from world generation that join the living world, the
   existing-world guard, unique landmarks, West City with Capsule Corporation, the scientist trade, `/dbz structures`.
-- [ ] Kame House (unique island), traditional villages, the Red Ribbon Army's facilities
+- [x] v0.165.0 Kame House, traditional villages (three looks, farmers), the Red Ribbon Army's field bases and Muscle Tower
+- [ ] The Red Ribbon headquarters; the army's vehicles; Jingle Village by name
 - [ ] Namek: villages, elders' houses, the Grand Elder's house; Namekian residents
 - [ ] Planet Vegeta (Saiyan city, royal palace, base, training halls) and Sadala
 - [ ] Frieza Force installations and alien trading posts

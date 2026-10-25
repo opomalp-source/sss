@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.164.0, 2026-10-25)
+# Handoff: where Dragon Block Zenith stands (v0.165.0, 2026-10-25)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.164.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.165.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -491,3 +491,8 @@ Companions, masters' lessons, errands and travelers; details in `docs/LIVING_WOR
   and an evening after `/dbz structures resettle`, grepping the server log for "gave up on place".
 - Residents: `living/DoorGoal` (door left open while someone is in the doorway); `CivilizationBlocks.SlidingDoor`
   has no collision when open.
+- v0.165.0: `KameHouse`, `Village` (a `SettlementPlan`; looks by biome; `Village.at` for tests), `RibbonBase`,
+  `MuscleTower` in `world/landmark`; `Canvas.lootChest` (loot tables in `data/dbzenith/loot_tables/chests`);
+  `Shapes.b` finds civilization blocks too (hip roofs in any family's tiles). New NPC `red_ribbon_soldier`
+  (`ModNpcs`, `AiProfile`, skin `ArtGen.NpcArt.redRibbonSoldier`: use `.hatless().dress(...)` for clothes, `paint`
+  leaves the bare anatomy on the outer layer). New trade `FARMER` (place kind `FIELD`, `schedules/farmer.json`).

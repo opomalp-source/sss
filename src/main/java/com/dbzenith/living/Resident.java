@@ -92,6 +92,7 @@ public class Resident extends KiFighter implements SkinVariant {
             case GUARD -> "townsfolk_guard";
             case TRAVELER -> "townsfolk_traveler";
             case SCIENTIST -> "townsfolk_scientist";
+            case FARMER -> "townsfolk_farmer";
             case CITIZEN -> CITIZEN_SKINS.get(Math.floorMod(c.look, CITIZEN_SKINS.size()));
         };
     }
