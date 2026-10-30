@@ -223,6 +223,7 @@ final class RoutineGoal extends Goal {
         return switch (o) {
             case COOK -> "kitchen";
             case MASTER -> "master";
+            case ELDER -> "elder";
             default -> null;
         };
     }

@@ -63,26 +63,28 @@ public final class StructuresCommand {
     }
 
     static int list(CommandSourceStack src) {
-        ServerLevel level = src.getServer().overworld();
-        LandmarkSites.Terrain t = LandmarkSites.Terrain.of(level);
         BlockPos at = BlockPos.containing(src.getPosition());
         for (Landmark type : Landmark.ALL) {
-            LandmarkPlan p = LandmarkSites.nearest(type, level.getSeed(), t, at, type.unique ? LandmarkSites.UNIQUE_RINGS * 2 : 4);
+            ServerLevel level = src.getServer().getLevel(type.dimension);                       // each in its own world (from the same x, z)
+            if (level == null) continue;
+            LandmarkPlan p = LandmarkSites.nearest(type, level.getSeed(), LandmarkSites.Terrain.of(level), at, type.unique ? LandmarkSites.UNIQUE_RINGS * 2 : 4);
             String where = p == null ? "none near" : String.format(Locale.ROOT, "nearest at %d, %d (%d blocks)", p.x, p.z,
                     (int) Math.sqrt(at.distSqr(new BlockPos(p.x, at.getY(), p.z))));
-            say(src, type.id + (type.unique ? " [unique]" : "") + (type.guarded ? " [guarded]" : "") + ": " + where);
+            String world = type.dimension == net.minecraft.world.level.Level.OVERWORLD ? "" : " (" + type.dimension.location().getPath() + ")";
+            say(src, type.id + world + (type.unique ? " [unique]" : "") + (type.guarded ? " [guarded]" : "") + ": " + where);
         }
         return Landmark.ALL.length;
     }
 
     /** The nearest settlement landmark (of any kind) to where the command runs, or null. */
     static SettlementPlan nearestSettlement(CommandSourceStack src) {
-        ServerLevel level = src.getServer().overworld();
+        ServerLevel level = src.getLevel();
         LandmarkSites.Terrain t = LandmarkSites.Terrain.of(level);
         BlockPos at = BlockPos.containing(src.getPosition());
         SettlementPlan best = null;
         double bestD = Double.MAX_VALUE;
         for (Landmark type : Landmark.ALL) {
+            if (type.dimension != level.dimension()) continue;
             LandmarkPlan p = LandmarkSites.nearest(type, level.getSeed(), t, at, type.unique ? LandmarkSites.UNIQUE_RINGS * 2 : 4);
             if (!(p instanceof SettlementPlan sp)) continue;
             double d = at.distSqr(new BlockPos(p.x, at.getY(), p.z));
@@ -120,7 +122,7 @@ public final class StructuresCommand {
     static int places(CommandSourceStack src) {
         SettlementPlan sp = nearestSettlement(src);
         if (sp == null) return 0;
-        ServerLevel level = src.getServer().overworld();
+        ServerLevel level = src.getLevel();
         Resident walker = ModNpcs.RESIDENT.get().create(level);                               // a resident's legs, never added to the world
         if (walker == null) return 0;
         BlockPos from = sp.centre();
@@ -218,7 +220,7 @@ public final class StructuresCommand {
     static int resettle(CommandSourceStack src) {
         SettlementPlan sp = nearestSettlement(src);
         if (sp == null) return 0;
-        ServerLevel level = src.getServer().overworld();
+        ServerLevel level = src.getLevel();
         LivingData ld = LivingData.get(src.getServer());
         Settlement old = ld.settlement(sp.settlementId());
         int gone = 0;
@@ -240,7 +242,7 @@ public final class StructuresCommand {
     static int register(CommandSourceStack src) {
         SettlementPlan sp = nearestSettlement(src);
         if (sp == null) return 0;
-        Settlement s = SettlementSites.register(src.getServer().overworld(), sp);
+        Settlement s = SettlementSites.register(src.getLevel(), sp);
         say(src, s == null ? sp.name() + " was registered already" : sp.name() + " registered: " + s.pois.size() + " places");
         return s == null ? 0 : 1;
     }
@@ -251,7 +253,8 @@ public final class StructuresCommand {
             src.sendFailure(Component.literal("Unknown landmark"));
             return 0;
         }
-        ServerLevel level = src.getServer().overworld();
+        ServerLevel level = src.getServer().getLevel(type.dimension);                         // drawn in its own world
+        if (level == null) return 0;
         BlockPos at = BlockPos.containing(src.getPosition());
         LandmarkPlan p = LandmarkSites.nearest(type, level.getSeed(), LandmarkSites.Terrain.of(level), at, type.unique ? LandmarkSites.UNIQUE_RINGS * 2 : 4);
         if (p == null) {

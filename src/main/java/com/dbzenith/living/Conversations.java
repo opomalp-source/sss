@@ -91,6 +91,7 @@ public final class Conversations {
                 Map<String, Node> n = new LinkedHashMap<>();
                 Map<String, List<Line>> b = new HashMap<>();
                 Map<String, List<Option>> extend = new HashMap<>();
+                Map<String, List<Line>> extendSay = new HashMap<>();                         // more lines for another file's nodes (Namek's, v0.166.0)
                 List<ResourceLocation> keys = new ArrayList<>(files.keySet());
                 keys.sort(java.util.Comparator.comparing(ResourceLocation::toString));
                 for (ResourceLocation key : keys) {
@@ -101,6 +102,8 @@ public final class Conversations {
                         for (var e : GsonHelper.getAsJsonObject(o, "nodes", new JsonObject()).entrySet()) n.put(e.getKey(), node(e.getKey(), e.getValue().getAsJsonObject()));
                         for (var e : GsonHelper.getAsJsonObject(o, "extend", new JsonObject()).entrySet())
                             for (JsonElement x : e.getValue().getAsJsonArray()) extend.computeIfAbsent(e.getKey(), k -> new ArrayList<>()).add(option(x.getAsJsonObject()));
+                        for (var e : GsonHelper.getAsJsonObject(o, "extend_say", new JsonObject()).entrySet())
+                            extendSay.computeIfAbsent(e.getKey(), k -> new ArrayList<>()).addAll(lines(e.getValue()));
                         for (var e : GsonHelper.getAsJsonObject(o, "barks", new JsonObject()).entrySet())
                             b.computeIfAbsent(e.getKey(), k -> new ArrayList<>()).addAll(lines(e.getValue()));
                     } catch (RuntimeException ex) {
@@ -113,6 +116,13 @@ public final class Conversations {
                     List<Option> all = new ArrayList<>(x.options());
                     all.addAll(opts);
                     n.put(id, new Node(id, x.lines(), all));
+                });
+                extendSay.forEach((id, more) -> {
+                    Node x = n.get(id);
+                    if (x == null) return;
+                    List<Line> all = new ArrayList<>(x.lines());
+                    all.addAll(more);
+                    n.put(id, new Node(id, all, x.options()));
                 });
                 nodes = n;
                 barks = b;
@@ -237,6 +247,8 @@ public final class Conversations {
         Bond b = x.bond;
         return switch (key) {
             case "occupation" -> any(v, Occupation.of(c).id());
+            case "race" -> any(v, c.race);                                                      // Namekians speak as Namekians (v0.166.0)
+            case "style" -> x.town != null && any(v, x.town.style);
             case "mood" -> any(v, x.mood.id());
             case "trait" -> {
                 for (Trait t : c.traits) if (any(v, t.id())) yield true;

@@ -28,13 +28,15 @@ public class LandmarkFeature extends Feature<NoneFeatureConfiguration> {
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> ctx) {
         ServerLevel server = ctx.level().getLevel();
-        if (server.dimension() != net.minecraft.world.level.Level.OVERWORLD) return false;
+        boolean here = false;                                                          // only worlds that have landmarks (Earth, Namek)
+        for (Landmark l : Landmark.ALL) here |= l.dimension == server.dimension();
+        if (!here) return false;
         int chunkX = ctx.origin().getX() >> 4, chunkZ = ctx.origin().getZ() >> 4;
         LandmarkSites.Terrain t = new LandmarkSites.Terrain(ctx.chunkGenerator(), server.getChunkSource().randomState(), ctx.level(),
                 ctx.chunkGenerator().getSeaLevel());
         Canvas canvas = new Canvas(ctx.level(), chunkX, chunkZ);
         boolean[] any = {false};
-        LandmarkSites.forChunk(ctx.level().getSeed(), t, chunkX, chunkZ, plan -> {
+        LandmarkSites.forChunk(server.dimension(), ctx.level().getSeed(), t, chunkX, chunkZ, plan -> {
             try {
                 plan.build(canvas);
                 sweep(ctx.level(), plan, chunkX, chunkZ);
@@ -63,7 +65,7 @@ public class LandmarkFeature extends Feature<NoneFeatureConfiguration> {
                 for (int y = floor + 1; y <= top; y++) {
                     BlockState s = level.getBlockState(pos.set(x, y, z));
                     if (s.getBlock() instanceof LeavesBlock && !s.getValue(LeavesBlock.PERSISTENT)
-                            || s.is(Blocks.VINE) || s.is(BlockTags.LOGS) && !s.is(Blocks.JUNGLE_LOG) && !s.is(Blocks.SPRUCE_LOG)
+                            || s.is(Blocks.VINE) || s.is(BlockTags.LOGS) && !s.is(Blocks.JUNGLE_LOG) && !s.is(Blocks.SPRUCE_LOG) && !s.is(com.dbzenith.registry.ModBlocks.NAMEK_LOG.get())
                             || s.is(Blocks.BEE_NEST))
                         level.setBlock(pos, Canvas.AIR, 2);
                 }

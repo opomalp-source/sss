@@ -367,7 +367,7 @@ to both mods folders.
 - [ ] Living world feedback from play: schedules, chat frequency, conversation content, fame pacing, errand rewards,
   companion trust thresholds
 - [ ] An errand journal (taken errands are only told in chat and by whoever asked)
-- [x] `AiTests.npcsOfEnemySidesFightEachOther` failing now and then: ki blasts broke its glass pen (now barrier blocks), and the Namekian could lose before hitting back (more health) (v0.165.0)
+- [x] `AiTests.npcsOfEnemySidesFightEachOther` failing now and then: ki blasts broke its glass pen (now barrier blocks), and either fighter could lose before the other was hit (both get more health) (v0.165.0, v0.166.0)
 
 ## World structures and civilizations (docs/WORLD_STRUCTURES.md)
 - [x] v0.164.0 Block families (Capsule Corporation, Saiyan, Namekian, Frieza Force, Divine: 63 blocks plus stairs,
@@ -375,7 +375,10 @@ to both mods folders.
   existing-world guard, unique landmarks, West City with Capsule Corporation, the scientist trade, `/dbz structures`.
 - [x] v0.165.0 Kame House, traditional villages (three looks, farmers), the Red Ribbon Army's field bases and Muscle Tower
 - [ ] The Red Ribbon headquarters; the army's vehicles; Jingle Village by name
-- [ ] Namek: villages, elders' houses, the Grand Elder's house; Namekian residents
+- [x] v0.166.0 Namek: Namekian villages and their elders, the Grand Elder's house (Guru, Nail, Dende), Namekian residents
+- [ ] Namek's Dragon Balls (kept by the elders) and Porunga
+- [ ] `CraterPipelineTests.realJobsRespectBudgets...` reads the global destruction counters, so another test's ki blasts in
+  the same tick can push it over its bounds (failed once in 6 runs, v0.166.0)
 - [ ] Planet Vegeta (Saiyan city, royal palace, base, training halls) and Sadala
 - [ ] Frieza Force installations and alien trading posts
 - [ ] Divine: the Room of Spirit and Time's building and quarters; Beerus's Planet rework; King Kai's planet

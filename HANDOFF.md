@@ -1,4 +1,4 @@
-# Handoff: where Dragon Block Zenith stands (v0.165.0, 2026-10-25)
+# Handoff: where Dragon Block Zenith stands (v0.166.0, 2026-10-30)
 
 ## The prompt to paste into a new session
 
@@ -13,7 +13,7 @@
 > dev-client screenshots before releasing, because I want it all to look great. Use the official Dragon Ball names in
 > anything players read, keep every asset original, and leave story mode for last.
 >
-> The latest version is v0.165.0. When you've read up, tell me in a few lines what you see as the state of the mod
+> The latest version is v0.166.0. When you've read up, tell me in a few lines what you see as the state of the mod
 > and what you'd do next, then wait for me.
 
 ## Recent work (newest last; details in DEVLOG.md)
@@ -496,3 +496,8 @@ Companions, masters' lessons, errands and travelers; details in `docs/LIVING_WOR
   `Shapes.b` finds civilization blocks too (hip roofs in any family's tiles). New NPC `red_ribbon_soldier`
   (`ModNpcs`, `AiProfile`, skin `ArtGen.NpcArt.redRibbonSoldier`: use `.hatless().dress(...)` for clothes, `paint`
   leaves the bare anatomy on the outer layer). New trade `FARMER` (place kind `FIELD`, `schedules/farmer.json`).
+- v0.166.0: landmarks have a world (`Landmark.dimension`, `Landmark.Keys`) and a `clearance`; add a world's kinds and
+  put `dbzenith:landmarks` in its biome's last feature step. `NamekVillage`, `GrandElderHouse` (both `SettlementPlan`s
+  with `settled` naming their elder / Guru, Nail, Dende). Namek settlements have style "namek": `Residents.create`
+  makes Namekians; `Resident.skinFor` dresses them. Trade `ELDER`. Conversation conditions `race`, `style`; files can
+  `extend_say` other files' nodes.

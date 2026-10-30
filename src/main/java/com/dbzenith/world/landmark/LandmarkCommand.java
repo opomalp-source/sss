@@ -41,7 +41,8 @@ public final class LandmarkCommand {
     private static int survey(CommandContext<CommandSourceStack> ctx) {
         Landmark type = Landmark.byId(StringArgumentType.getString(ctx, "name"));
         if (type == null) return 0;
-        ServerLevel level = ctx.getSource().getServer().overworld();
+        ServerLevel level = ctx.getSource().getServer().getLevel(type.dimension);           // the landmark's own world
+        if (level == null) return 0;
         int[] n = LandmarkSites.survey(type, level.getSeed(), LandmarkSites.Terrain.of(level), BlockPos.containing(ctx.getSource().getPosition()), 3);
         ctx.getSource().sendSuccess(() -> Component.literal(type.id + ": biome " + n[0] + ", crowded " + n[1] + ", ground " + n[2] + ", built " + n[3]), false);
         return 1;
@@ -53,7 +54,8 @@ public final class LandmarkCommand {
             ctx.getSource().sendFailure(Component.literal("Unknown landmark"));
             return 0;
         }
-        ServerLevel level = ctx.getSource().getServer().overworld();
+        ServerLevel level = ctx.getSource().getServer().getLevel(type.dimension);           // the landmark's own world
+        if (level == null) return 0;
         BlockPos from = BlockPos.containing(ctx.getSource().getPosition());
         LandmarkPlan p = LandmarkSites.nearest(type, level.getSeed(), LandmarkSites.Terrain.of(level), from, 12);
         if (p == null) {

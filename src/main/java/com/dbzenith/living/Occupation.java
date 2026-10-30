@@ -25,7 +25,9 @@ public enum Occupation {
     /** A researcher (Capsule Corporation's labs and the like): no fighter. */
     SCIENTIST(false, Poi.Kind.LAB, List.of()),
     /** Works the fields round a village: no fighter. */
-    FARMER(false, Poi.Kind.FIELD, List.of());
+    FARMER(false, Poi.Kind.FIELD, List.of()),
+    /** A village's elder (Namek): keeps the village from the elder's seat, knows all its news; no fighter. */
+    ELDER(false, Poi.Kind.PLAZA, List.of());
 
     /** Fights (and defends the town) rather than flees. */
     public final boolean fighter;

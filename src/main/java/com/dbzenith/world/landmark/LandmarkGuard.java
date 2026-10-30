@@ -51,12 +51,12 @@ public final class LandmarkGuard {
             DBZenith.LOGGER.error("Landmark guard unreadable; new landmarks stay off this world's existing regions", e);
         }
         boolean changed = false;
-        Set<Long> onDisk = null;
+        Map<String, Set<Long>> onDisk = new HashMap<>();                               // by world: each keeps its own region files
         for (Landmark l : Landmark.ALL) {
             if (!l.guarded) continue;
             if (!tag.contains(l.id)) {
-                if (onDisk == null) onDisk = regions(root.resolve("region"));
-                tag.putLongArray(l.id, onDisk.stream().mapToLong(Long::longValue).toArray());
+                Set<Long> regions = onDisk.computeIfAbsent(l.dimension.location().toString(), k -> regions(regionFolder(root, l)));
+                tag.putLongArray(l.id, regions.stream().mapToLong(Long::longValue).toArray());
                 changed = true;
             }
             Set<Long> s = new HashSet<>();
@@ -101,6 +101,13 @@ public final class LandmarkGuard {
         } catch (IOException e) {
             DBZenith.LOGGER.error("Could not save the landmark guard", e);
         }
+    }
+
+    /** Where a landmark's world keeps its region files (Earth's in the world folder, the others under dimensions/). */
+    static Path regionFolder(Path root, Landmark l) {
+        if (l.dimension == net.minecraft.world.level.Level.OVERWORLD) return root.resolve("region");
+        var key = l.dimension.location();
+        return root.resolve("dimensions").resolve(key.getNamespace()).resolve(key.getPath()).resolve("region");
     }
 
     /** The region files in a folder ("r.X.Z.mca"), packed as region coordinates. */

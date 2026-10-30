@@ -1,0 +1,37 @@
+{
+  "_doc": "Namek's people (docs/LIVING_WORLD.md 4f, v0.166.0): lines merged into the core nodes (extend_say). Namekians live on water alone, tend Ajisa trees, keep to their elders and revere the Grand Elder; their villages are small and far apart.",
+  "extend_say": {
+    "root": [
+      {"when": {"race": "namekian"}, "text": ["Greetings, traveler.", "Ah, a visitor. Be welcome.", "The suns are kind today, are they not?"]},
+      {"when": {"race": "namekian", "first": true}, "text": ["You are not of Namek, I think. I am {npc}. Be welcome in our village.", "An outsider! It has been long since one came. I am {npc}."]},
+      {"when": {"race": "namekian", "first": true, "occupation": "elder"}, "text": ["Welcome. I am {npc}, elder of this village. Speak, and I will listen.", "I am {npc}. I have kept this village for many years. What brings you so far?"]},
+      {"when": {"race": "namekian", "first": true, "occupation": "farmer"}, "text": ["Mind the young Ajisa, they are tender. I am {npc}. I tend the groves.", "Hello! {npc}. The trees and I were just talking. Well, I was."]},
+      {"when": {"race": "namekian", "first": true, "occupation": "guard"}, "text": ["Stop there. I am {npc}, and I watch over this village. Your ki is strong. Use it kindly.", "I am {npc} of the warrior clan. Come in peace and you will find peace."]},
+      {"when": {"race": "namekian", "first": true, "occupation": "student"}, "text": ["Are you a fighter? I am {npc}! One day I will be a warrior like the ones in the old stories.", "Hi! I'm {npc}. Do Earthlings really eat food? All of it?"]}
+    ],
+    "about": [
+      {"when": {"race": "namekian"}, "text": ["{npc}. I was born here, as were my elder's children. We live quietly.", "I am {npc} of the dragon clan. I grow things and I keep the water clean."]},
+      {"when": {"race": "namekian", "occupation": "elder"}, "text": ["I am {npc}, the elder. Every village has one. We guide, we remember, and we keep what must be kept.", "An elder listens more than he speaks. I am {npc}; ask, and I will tell you what I know."]},
+      {"when": {"race": "namekian", "occupation": "guard"}, "text": ["{npc}, of the warrior clan. Few of us are left. We guard the villages and the Grand Elder.", "I fight so the others need not. That is the way of my clan."]}
+    ],
+    "work": [
+      {"when": {"race": "namekian", "occupation": "farmer"}, "text": ["The Ajisa groves are {where:field} from here. They give us shade, and the land gives us water.", "I tend the Ajisa. They took the land back after the great storm, and we help them."]},
+      {"when": {"race": "namekian", "occupation": "elder"}, "text": ["My place is in the elder's house, {where:plaza} from here. The villagers come to me with their troubles.", "I keep the village. Its people, its water, its memory."]},
+      {"when": {"race": "namekian", "occupation": "citizen"}, "text": ["Work? I carry water from the spring and keep my house. Namekians need little.", "We have no shops here. We share what we have, and we need only water."]}
+    ],
+    "town": [
+      {"when": {"style": "namek"}, "text": ["{town} is small, as our villages are: a few houses, the elder's house, the spring and the groves.", "There are few of us, and the villages are far apart. The Grand Elder watches over us all."]},
+      {"when": {"style": "namek", "occupation": "guard"}, "text": ["Open land on every side. Nothing comes near without my seeing it."]}
+    ],
+    "mind": [
+      {"when": {"race": "namekian", "goal": "protect_town"}, "text": ["Strangers come to Namek more often now. I want this village to be ready.", "The Grand Elder grows old. I think of what will come after."]},
+      {"when": {"race": "namekian", "goal": "harvest"}, "text": ["If the rains are good, the young Ajisa will take root before the next generation.", "A grove takes a lifetime to grow. It is good work."]},
+      {"when": {"race": "namekian", "goal": "rest"}, "text": ["Water, sunlight, quiet. What more could anyone want?", "The three suns never set here. One learns to rest anyway."]}
+    ]
+  },
+  "barks": {
+    "smalltalk": [
+      {"when": {"race": "namekian"}, "text": ["The spring runs clear today.", "Have you heard? A ship landed beyond the far islands.", "The Ajisa are flowering early this year.", "The Grand Elder's house can be seen from the hills, on a clear day."]}
+    ]
+  }
+}

@@ -38,6 +38,8 @@ public class Resident extends KiFighter implements SkinVariant {
     public static final KiFighter.Profile PROFILE = new KiFighter.Profile("entity.dbzenith.resident", 20, List.of(Techniques.KI_BLAST), 80);
     /** The town's skins (see tools/ArtGen.java townsfolk), by occupation. */
     public static final List<String> CITIZEN_SKINS = List.of("townsfolk_citizen_a", "townsfolk_citizen_b", "townsfolk_citizen_c", "townsfolk_citizen_d");
+    /** Namek's villagers (Dragon Clan, in tunics). */
+    public static final List<String> NAMEK_SKINS = List.of("namek_villager_a", "namek_villager_b", "namek_villager_c");
     private static final EntityDataAccessor<String> SKIN = SynchedEntityData.defineId(Resident.class, EntityDataSerializers.STRING);
 
     // ---- what it is doing (server; the routine and social life set these)
@@ -84,6 +86,11 @@ public class Resident extends KiFighter implements SkinVariant {
 
     /** Which skin a character wears: one of its occupation's (citizens and merchants vary by their look index). */
     public static String skinFor(NamedFighter c) {
+        if ("namekian".equals(c.race)) return switch (Occupation.of(c)) {                   // Namek's villagers (v0.166.0)
+            case ELDER -> "namek_elder";
+            case GUARD, MASTER, STUDENT, TRAVELER -> "namekian_warrior";
+            default -> NAMEK_SKINS.get(Math.floorMod(c.look, NAMEK_SKINS.size()));
+        };
         return switch (Occupation.of(c)) {
             case MERCHANT -> "townsfolk_merchant";
             case COOK -> "townsfolk_cook";
@@ -93,6 +100,7 @@ public class Resident extends KiFighter implements SkinVariant {
             case TRAVELER -> "townsfolk_traveler";
             case SCIENTIST -> "townsfolk_scientist";
             case FARMER -> "townsfolk_farmer";
+            case ELDER -> "townsfolk_master";
             case CITIZEN -> CITIZEN_SKINS.get(Math.floorMod(c.look, CITIZEN_SKINS.size()));
         };
     }

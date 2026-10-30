@@ -143,7 +143,7 @@ public final class Rumors {
     /** Whether a trade brings this kind of news (merchants hear everything; guards of threats; masters of fighters). */
     static boolean hears(Occupation o, Rumor.Kind k) {
         return switch (o) {
-            case MERCHANT, TRAVELER -> true;
+            case MERCHANT, TRAVELER, ELDER -> true;
             case GUARD -> k == Rumor.Kind.BEAT_PLAYER || k == Rumor.Kind.TOWN_ATTACKED || k == Rumor.Kind.DUEL || k == Rumor.Kind.SURVIVED_DEATH
                     || k == Rumor.Kind.FELL;
             case MASTER, STUDENT -> k == Rumor.Kind.NEW_FORM || k == Rumor.Kind.TOURNAMENT_WIN || k == Rumor.Kind.STRONG_FIGHTER

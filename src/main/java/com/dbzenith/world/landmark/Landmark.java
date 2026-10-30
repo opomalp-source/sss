@@ -1,13 +1,16 @@
 package com.dbzenith.world.landmark;
 
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 
 import java.util.Set;
 
 /**
- * The great landmarks of Earth (CX-33) and where they may stand. Each sits at most once in every {@code spacing}
+ * The great landmarks (CX-33; Earth's, and Namek's since v0.166.0) and where they may stand. Each sits at most once in every {@code spacing}
  * square of the world (a random spot in the cell, from the world seed), only where the biome at its centre fits and
  * the ground suits it (each plan decides), and never overlapping an earlier landmark in this list. {@code radius} is
  * how far from its centre it builds (blocks), so the chunk builder knows which chunks it reaches.
@@ -34,7 +37,11 @@ public enum Landmark {
             Biomes.SNOWY_PLAINS, Biomes.FOREST), false, true),
     /** A traditional village (canon-inspired): round houses, a well, fields, its people. */
     VILLAGE("village", 1024, 60, 0x7111L, Set.of(Biomes.PLAINS, Biomes.SUNFLOWER_PLAINS, Biomes.MEADOW, Biomes.SAVANNA, Biomes.FOREST,
-            Biomes.BIRCH_FOREST, Biomes.TAIGA, Biomes.SNOWY_PLAINS, Biomes.SNOWY_TAIGA, Biomes.DESERT), false, true);
+            Biomes.BIRCH_FOREST, Biomes.TAIGA, Biomes.SNOWY_PLAINS, Biomes.SNOWY_TAIGA, Biomes.DESERT), false, true),
+    /** The Grand Elder's house (canon) on Namek: his home on its rock spire, Nail on guard, Dende. One per world. */
+    GRAND_ELDER("grand_elder", 1024, 40, 0x6e1dL, Set.of(Keys.NAMEK_BIOME), true, true, Keys.NAMEK, 400),        // far from the villages
+    /** A Namekian village (canon-inspired) on Namek: white dome houses, the elder's house, a spring, an Ajisa grove. */
+    NAMEK_VILLAGE("namek_village", 768, 56, 0x9a3bL, Set.of(Keys.NAMEK_BIOME), false, true, Keys.NAMEK);
 
     public static final Landmark[] ALL = values();
 
@@ -46,12 +53,35 @@ public enum Landmark {
     public final boolean unique;
     /** Added after worlds already existed: never built in regions that were on disk before it (see {@link LandmarkGuard}). */
     public final boolean guarded;
+    /** The world it stands in (Earth unless said). */
+    public final ResourceKey<Level> dimension;
+    /** How much farther than their reaches later landmarks keep from it (the Grand Elder lives far from the villages). */
+    public final int clearance;
+
+    /** Keys of the mod's own worlds and biomes landmarks stand in. */
+    public static final class Keys {
+        public static final ResourceKey<Level> NAMEK = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("dbzenith", "namek"));
+        public static final ResourceKey<Biome> NAMEK_BIOME = ResourceKey.create(Registries.BIOME, new ResourceLocation("dbzenith", "namek"));
+
+        private Keys() {}
+    }
 
     Landmark(String id, int spacing, int radius, long salt, Set<ResourceKey<Biome>> biomes) {
         this(id, spacing, radius, salt, biomes, false, false);
     }
 
     Landmark(String id, int spacing, int radius, long salt, Set<ResourceKey<Biome>> biomes, boolean unique, boolean guarded) {
+        this(id, spacing, radius, salt, biomes, unique, guarded, Level.OVERWORLD);
+    }
+
+    Landmark(String id, int spacing, int radius, long salt, Set<ResourceKey<Biome>> biomes, boolean unique, boolean guarded, ResourceKey<Level> dimension) {
+        this(id, spacing, radius, salt, biomes, unique, guarded, dimension, 0);
+    }
+
+    Landmark(String id, int spacing, int radius, long salt, Set<ResourceKey<Biome>> biomes, boolean unique, boolean guarded, ResourceKey<Level> dimension,
+             int clearance) {
+        this.dimension = dimension;
+        this.clearance = clearance;
         this.id = id;
         this.spacing = spacing;
         this.radius = radius;

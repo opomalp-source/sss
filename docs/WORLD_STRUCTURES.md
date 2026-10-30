@@ -59,6 +59,10 @@ Text sources (fan wikis; fandom pages refuse automated reading):
 - [Dragon Ball Encyclopedia: Red Ribbon Army](https://dragonballencyclopedia.com/wiki/Red_Ribbon_Army): a headquarters,
   Muscle Tower, field camps (General Blue's, Colonel Silver's); soldiers with cars, tanks, helicopters and planes;
   the "RR" emblem; their aim, the Dragon Balls (for world rule).
+- Namek (searched for v0.166.0; the fan wikis refuse automated reading, other pages say little): villages scattered over
+  Namek's islands, each with an elder (Elder Moori: a red vest, a white collar), each keeping a Dragon Ball; the Grand
+  Elder far from them all, seated, with Nail and Dende. The houses' white domes and the Grand Elder's spire follow the
+  series as widely seen.
 - [Wikipedia: Master Roshi](https://en.wikipedia.org/wiki/Master_Roshi) and the official site's "World Travelogue"
   series (not readable by the tools).
 
@@ -211,9 +215,43 @@ civilization's look; original places (marked "original" in code and here) are ne
   sand cylinder), land in sight of it, the snow stopping short of a snow village's edge, soldiers' uniforms painted
   under their skin, repeated village names.
 
+### v0.166.0
+
+- **Landmarks in other worlds:** a landmark kind now has a world (`Landmark.dimension`; Earth unless said) and an
+  optional clear distance later kinds keep from it (`clearance`). World generation, the existing-world guard (each
+  world's own region folder), the site search, settlement registration (players in every world) and the commands
+  all follow it. Namek's biome runs the landmark feature like Earth's. The sweep leaves Namek's logs alone (the
+  villages' Ajisa trees).
+- **Namekian villages** (`NamekVillage`; Namek, every 768 blocks or so, guarded): five white dome houses round a
+  spring (a blue band at their feet, a ring of round windows, a door toward the spring; beds, water, a chest, a lamp),
+  some with a little dome beside; to the north the elder's house, a great dome between two small ones (the elder's
+  seat, rugs, a bed, water, a chest); trodden paths, lamps on white posts round the spring, an Ajisa grove the
+  farmers tend, one in three with a training ground. No shop and no inn: Namekians live on water. Named for its elder
+  ("Sazae's Village"), whose resident takes the name ("Sazae the Elder"). 11 residents: the elder, a guard, two
+  farmers, sometimes a master and a student, citizens.
+- **The Grand Elder's house** (`GrandElderHouse`; Namek, unique, guarded, villages keep 400 blocks further off): a
+  lone spire of grey rock 42 blocks high flaring into a grassy cap, two Ajisa trees, the great white dome between two
+  small ones, the Grand Elder's wide seat at the back with its carved backrest, Dende's bed, water. A settlement of
+  three: Grand Elder Guru (who stays by his seat), Nail on guard, Dende. Reached by flying.
+- **Namekian residents:** in a Namek settlement (style "namek") residents are Namekians: the Dragon Clan, or the
+  Warrior Clan for fighters; names after snails in Earth's languages, as Dende and Cargo are ("Escar", "Lumaca",
+  "Kagyu"...); villagers in tunics and sashes (three looks), elders in a white robe with a red front (after Elder
+  Moori), fighters in the Namekian warrior's gi. New trade, the elder (`ELDER`: the elder's seat, hears all the
+  news). Their own lines (`conversations/namek.json`: water, the groves, the Grand Elder), by two new conditions
+  (`race`, `style`) and a new way for a file to add lines to shared nodes (`extend_say`).
+- **Safer homes:** a resident's body is never put inside a wall (the nearest spot with room to stand); a plan's
+  `settled` hook names residents once they move in.
+- **Tests:** unique landmarks per world (the Grand Elder's on Namek); Namek villages (elder, seat, grove, no shop or
+  inn); Namekian residents (race, clan, looks, Guru, Nail and Dende); no body inside a wall. 372 GameTests.
+- **Checked in the dev client:** the spire and the Grand Elder (Guru at his seat, Nail, Dende), two villages (places
+  all reachable: 18 of 19 and 22 of 22, the one fixed), villagers' looks and names, a quiet morning. Fixed on the way:
+  an elder's home drawn in a wall (she suffocated; homes are now always clear), a village too near the Grand Elder.
+
 ## 6. Not done / limits
 
-- Milestones 3 to 7 of the plan above. From milestone 2: the Red Ribbon headquarters, Jingle Village by name (a snow
+- Milestones 4 to 7 of the plan above. From milestone 3: Namek's own Dragon Balls (the elders keep none yet) and
+  Porunga; the Namekians' villages hold no ships or Frieza Force raids yet; the old scattered dome houses of Namek
+  (`NamekHouseFeature`) remain, unpeopled. From milestone 2: the Red Ribbon headquarters, Jingle Village by name (a snow
   village stands in for it), vehicles (the army's cars, tanks and helicopters), named officers.
 - The older landmarks (tournament, Lookout, Cell Games, Frypan) are neither unique nor guarded (as before: one per
   cell, they may generate in unexplored chunks of an old world, as they always did).

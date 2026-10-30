@@ -55,6 +55,9 @@ public abstract class SettlementPlan extends LandmarkPlan {
         places.add(new Poi(kind, new BlockPos(px, py, pz), label));
     }
 
+    /** Called once its residents have moved in (a plan can name them: a village's elder, the Grand Elder). */
+    public void settled(com.dbzenith.living.Settlement s, List<com.dbzenith.nemesis.NamedFighter> residents) {}
+
     /** Its waypoints for long walks ({@link com.dbzenith.living.Routes}): street points and the step before each door. */
     public List<BlockPos> ways() {
         return ways;

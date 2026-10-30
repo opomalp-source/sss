@@ -159,7 +159,8 @@ public final class LandmarkSites {
         Landmark type = site.type();
         for (Landmark other : Landmark.ALL) {
             if (other.ordinal() >= type.ordinal()) break;
-            int reach = other.radius + type.radius + 32;
+            if (other.dimension != type.dimension) continue;                              // (another world's landmarks never crowd it)
+            int reach = other.radius + type.radius + 32 + other.clearance;
             int c0x = Math.floorDiv(site.x() - reach, other.spacing), c1x = Math.floorDiv(site.x() + reach, other.spacing);
             int c0z = Math.floorDiv(site.z() - reach, other.spacing), c1z = Math.floorDiv(site.z() + reach, other.spacing);
             for (int cx = c0x; cx <= c1x; cx++)
@@ -195,6 +196,8 @@ public final class LandmarkSites {
             case FRYPAN -> FrypanMountains.plan(site, t);
             case WEST_CITY -> WestCity.plan(site, t);
             case KAME_HOUSE -> KameHouse.plan(site, t);
+            case GRAND_ELDER -> GrandElderHouse.plan(site, t);
+            case NAMEK_VILLAGE -> NamekVillage.plan(site, t);
             case MUSCLE_TOWER -> MuscleTower.plan(site, t);
             case RIBBON_BASE -> RibbonBase.plan(site, t);
             case VILLAGE -> Village.plan(site, t);
@@ -202,9 +205,11 @@ public final class LandmarkSites {
     }
 
     /** Every landmark plan whose reach covers the chunk. */
-    static void forChunk(long worldSeed, Terrain t, int chunkX, int chunkZ, java.util.function.Consumer<LandmarkPlan> out) {
+    static void forChunk(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension, long worldSeed, Terrain t, int chunkX, int chunkZ,
+                         java.util.function.Consumer<LandmarkPlan> out) {
         int bx = (chunkX << 4) + 8, bz = (chunkZ << 4) + 8;
         for (Landmark type : Landmark.ALL) {
+            if (type.dimension != dimension) continue;
             int reach = type.radius + 8;
             int c0x = Math.floorDiv(bx - reach, type.spacing), c1x = Math.floorDiv(bx + reach, type.spacing);
             int c0z = Math.floorDiv(bz - reach, type.spacing), c1z = Math.floorDiv(bz + reach, type.spacing);

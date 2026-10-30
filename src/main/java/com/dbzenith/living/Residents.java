@@ -91,6 +91,7 @@ public final class Residents {
             case CITIZEN -> c.has(Trait.CURIOUS) ? NamedFighter.Goal.EXPLORE : NamedFighter.Goal.REST;
             case SCIENTIST -> NamedFighter.Goal.RESEARCH;
             case FARMER -> NamedFighter.Goal.HARVEST;
+            case ELDER -> NamedFighter.Goal.PROTECT_TOWN;
         };
     }
 
@@ -103,9 +104,10 @@ public final class Residents {
         c.type = "dbzenith:resident";
         List<NamedFighter> living = new ArrayList<>();                                   // the dead give their names back
         for (NamedFighter x : d.all()) if (x.active()) living.add(x);
-        c.name = Names.pick("resident", seed ^ town.getLeastSignificantBits(), living);
-        c.race = "human";
-        c.variant = "human";
+        boolean namek = s != null && s.style.startsWith("namek");                         // Namek's people are Namekians
+        c.name = Names.pick(namek ? "namekian_resident" : "resident", seed ^ town.getLeastSignificantBits(), living);
+        c.race = namek ? "namekian" : "human";
+        c.variant = namek ? (o.fighter ? "warrior_clan" : "dragon_clan") : "human";
         List<Personality> ps = temperaments(o);
         c.personality = ps.get(AiRandom.pick(seed, 6, 21, ps.size()));
         c.traits.addAll(Names.bornTraits(seed ^ 0x51ED, c.personality));
@@ -126,10 +128,25 @@ public final class Residents {
         return c;
     }
 
-    /** Gives a resident a body at {@code at}. */
+    /** {@code at} if someone can stand there, else the nearest spot within three blocks that has room (a home drawn into a wall, rubble). */
+    static BlockPos roomNear(ServerLevel level, BlockPos at) {
+        if (!level.hasChunkAt(at) || Routes.standable(level, at)) return at;
+        for (int r = 1; r <= 3; r++)
+            for (int dy : new int[]{0, 1, -1, 2})
+                for (int dx = -r; dx <= r; dx++)
+                    for (int dz = -r; dz <= r; dz++) {
+                        if (Math.max(Math.abs(dx), Math.abs(dz)) != r) continue;
+                        BlockPos p = at.offset(dx, dy, dz);
+                        if (level.hasChunkAt(p) && Routes.standable(level, p)) return p;
+                    }
+        return at;
+    }
+
+    /** Gives a resident a body at {@code at} (or the nearest spot with room to stand: never inside a wall). */
     public static Resident spawnBody(ServerLevel level, NamedFighter c, BlockPos at) {
         Resident r = com.dbzenith.npc.ModNpcs.RESIDENT.get().create(level);
         if (r == null) return null;
+        at = roomNear(level, at);
         r.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, AiRandom.pick(c.id.getMostSignificantBits(), level.getGameTime(), 22, 360), 0);
         r.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.EVENT, null, null);
         r.setSkin(Resident.skinFor(c));

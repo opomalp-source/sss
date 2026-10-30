@@ -1,5 +1,5 @@
 {
-  "_doc": "Conversations with townsfolk (docs/LIVING_WORLD.md). nodes: {id: {say: [{when, text: [...]}], options: [{id, text, when, do, next}]}}. Conditions: occupation, mood, trait, not_trait, personality, goal, relation, affinity_min/max, first, talks_min, fame_min/max, hour_min/max, alarm, wanted, has_rumor, flag, not_flag, fighter, stronger, fought, activity, has_town. Actions: flag:x, unflag:x, affinity:N, rivalry:N, mood:x, tell_rumor, remember[:detail], spar, close. Placeholders: {player} {npc} {occupation} {town} {mood} {fame} {level} {hour} {master} {rival} {rumor} {where:<place kind>}. No next: the conversation ends.",
+  "_doc": "Conversations with townsfolk (docs/LIVING_WORLD.md). nodes: {id: {say: [{when, text: [...]}], options: [{id, text, when, do, next}]}}. Conditions: occupation, race, style, mood, trait, not_trait, personality, goal, relation, affinity_min/max, first, talks_min, fame_min/max, hour_min/max, alarm, wanted, has_rumor, flag, not_flag, fighter, stronger, fought, activity, has_town. Actions: flag:x, unflag:x, affinity:N, rivalry:N, mood:x, tell_rumor, remember[:detail], spar, close. Placeholders: {player} {npc} {occupation} {town} {mood} {fame} {level} {hour} {master} {rival} {rumor} {where:<place kind>}. No next: the conversation ends.",
   "nodes": {
     "root": {
       "say": [

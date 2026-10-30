@@ -31,8 +31,8 @@ public final class SettlementSites {
     public static void onServerTick(TickEvent.ServerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || event.getServer().getTickCount() % 100 != 60 || !LivingConfig.enabled()) return;
         MinecraftServer server = event.getServer();
-        ServerLevel level = server.overworld();
-        for (ServerPlayer p : level.players()) visit(level, p.blockPosition());
+        for (ServerLevel level : server.getAllLevels())                                    // Earth and Namek (each world its own landmarks)
+            for (ServerPlayer p : level.players()) visit(level, p.blockPosition());
     }
 
     /** Registers any settlement landmark near {@code at} that is due. Returns the last one registered (tests), or null. */
@@ -40,6 +40,7 @@ public final class SettlementSites {
         Settlement made = null;
         LandmarkSites.Terrain t = LandmarkSites.Terrain.of(level);
         for (Landmark type : Landmark.ALL) {
+            if (type.dimension != level.dimension()) continue;
             LandmarkPlan plan = LandmarkSites.nearest(type, level.getSeed(), t, at, 1);
             if (!(plan instanceof SettlementPlan sp)) continue;
             double dx = sp.x - at.getX(), dz = sp.z - at.getZ();
@@ -66,7 +67,9 @@ public final class SettlementSites {
         s.rooms.addAll(sp.rooms());
         s.style = sp.style();
         ld.add(s);
-        int n = Residents.settle(s, level.getGameTime()).size();
+        var residents = Residents.settle(s, level.getGameTime());
+        sp.settled(s, residents);
+        int n = residents.size();
         DBZenith.LOGGER.info("Settlement {} registered at {} with {} places and {} residents", s.name, s.center, s.pois.size(), n);
         return s;
     }

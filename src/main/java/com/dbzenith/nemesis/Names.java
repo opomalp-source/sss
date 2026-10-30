@@ -23,6 +23,10 @@ public final class Names {
                     "Persimo", "Medlar", "Yuzurr", "Sapodil", "Loquat", "Tamaril"),
             "sproutling", List.of("Mungo", "Alfal", "Cressen", "Bean", "Soyaro", "Pea-Shoot", "Radisprout", "Clovern"),
             "namekian_warrior", List.of("Oboen", "Tymp", "Cymba", "Lutar", "Banjol", "Kazu", "Sitarr", "Harpen", "Celest", "Marimba"),
+            // Namek's villagers, after snails in the languages of Earth (as Dende and Cargo are)
+            "namekian_resident", List.of("Escar", "Lumaca", "Caracol", "Schnek", "Slakko", "Helixo", "Babosa", "Limako", "Kagyu", "Maimai", "Tsumuri",
+                    "Kochlea", "Gastro", "Chiocci", "Bourgo", "Achat", "Conchi", "Spirul", "Turbo", "Volut", "Murex", "Nerit", "Trochu", "Cypra",
+                    "Littor", "Mollus", "Pulmon", "Ammon", "Nautil", "Conus", "Limax", "Arion", "Tegula", "Haliot", "Bulim", "Oliva"),
             "android_unit", List.of("Unit R-41", "Unit R-46", "Unit R-52", "Unit R-58", "Unit R-63", "Unit R-67", "Unit R-74", "Unit R-79"),
             "damned_warrior", List.of("Morrow", "Gravell", "Sorrowk", "Vexan", "Dirgeon", "Ashkar", "Wrathe", "Grimald"),
             "ogre_guard", List.of("Akabo", "Aokuro", "Kinjo", "Tetsuo", "Gongo", "Zakuro"),

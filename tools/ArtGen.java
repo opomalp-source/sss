@@ -22,6 +22,7 @@ public class ArtGen {
             if (args[1].equals("townsfolk")) NpcArt.townsfolk();                  // the living world's people (v0.161.0)
             if (args[1].equals("saiyan_warrior")) NpcArt.saiyanWarrior();          // the Nemesis system's rival (v0.160.0)
             if (args[1].equals("red_ribbon_soldier")) NpcArt.redRibbonSoldier();      // the Red Ribbon Army's garrisons (v0.165.0)
+            if (args[1].equals("namek_folk")) NpcArt.namekFolk();                      // Namek's villagers (v0.166.0)
             if (args[1].equals("gear")) Gear.all();                           // the clothes (the clothing rework)
             System.out.println("ArtGen done: " + args[1]);
             return;
@@ -552,6 +553,7 @@ public class ArtGen {
             enma();
             saiyanWarrior();
             townsfolk();
+            namekFolk();
             ogre("ogre_clerk_red", 0xFFD84A3A, false);
             ogre("ogre_clerk_blue", 0xFF4A78D8, false);
             ogre("ogre_guard", 0xFFC8402E, true);
@@ -990,6 +992,19 @@ public class ArtGen {
         static void namekianWarrior() throws IOException {
             new Npc().race("namekian").layer("entity/gear/namekian_top.png").layer("entity/gear/namekian_pants.png")   // the race is bare now (CX-16a): dressed in the gi
                     .layer("entity/gear/namekian_boots.png").face(3, 0xFF201418, true, 5, 0, 0, 0).save("namekian_warrior");
+        }
+
+        /** Namek's villagers (v0.166.0): the Namekian race skin in a long tunic and a sash; an elder in a white robe under a
+         *  red vest (after Elder Moori). Antennae and ears are 3D (NpcLooks). */
+        static void namekFolk() throws IOException {
+            new Npc().race("namekian").dress(outfit(0xFFF2F0EA, 0xFFE8E4DA, 0xFF6A4A2A, 0xFF4AA0D0, 0, false, true, false, 1201))
+                    .face(1, 0xFF201418, true, 1, 0, 0, 0).save("namek_villager_a");
+            new Npc().race("namekian").dress(outfit(0xFFB8A0D8, 0xFFE8E4DA, 0xFF5A3A2A, 0xFF6A3A9A, 0, false, true, false, 1211))
+                    .face(4, 0xFF201418, true, 0, 0, 1, 2).save("namek_villager_b");
+            new Npc().race("namekian").dress(outfit(0xFFE0ECD8, 0xFFD8D4C8, 0xFF6A4A2A, 0xFFE08A3A, 0, false, false, false, 1221))
+                    .face(2, 0xFF201418, true, 1, 0, 0, 1).save("namek_villager_c");
+            new Npc().race("namekian").dress(outfit(0xFFF4F2EC, 0xFFF0EEE8, 0xFF5A3A22, 0, 0xFFB83A2A, false, true, false, 1231))
+                    .face(0, 0xFF201418, true, 1, 0, 0, 0).save("namek_elder");
         }
 
         // ---------------------------------------------------------- the other world

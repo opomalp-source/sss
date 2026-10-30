@@ -214,6 +214,17 @@ All in `com.dbzenith.living` unless named otherwise.
 - New trade, the farmer: works the fields (place kind `FIELD`), up at five and in bed at nine (`schedules/farmer.json`),
   a good harvest its goal (`HARVEST`), lines of its own, hears the same news as citizens.
 
+## 4f. Namekians (v0.166.0)
+
+- Settlements on Namek (style "namek") are peopled by Namekians: Dragon Clan villagers, Warrior Clan fighters, names
+  after snails, their own looks (`namek_villager_a/b/c`, `namek_elder`, `namekian_warrior`).
+- New trade, the elder: the elder's seat (a `PLAZA` labelled "elder") by day, among the villagers at midday and in the
+  evening (`schedules/elder.json`), hears all the news, keeps the village (goal `PROTECT_TOWN`).
+- Namekians need only water: a village has no shop or inn; at meal times they go home.
+- Conversations: conditions `race` and `style`; a file may add lines to another file's nodes with `extend_say`
+  (`conversations/namek.json`).
+- A body is never put inside a wall (`Residents.roomNear`).
+
 ## 5. Testing
 
 - **GameTests** (`gametest.LivingTests`, 8): the living data and the residents' new fields survive saving; schedules

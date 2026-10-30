@@ -4726,7 +4726,25 @@ Ball Encyclopedia: Muscle Tower, Red Ribbon Army).
 - **Tests:** 4 more in `StructureTests` (one renamed for all unique landmarks); 369 GameTests pass, twice in a row.
   The long-standing AI flake (`npcsOfEnemySidesFightEachOther`, failing 3 runs in 8) fixed: ki blasts broke its glass
   pen so a fighter fell out of the arena (now barrier blocks), and the Namekian could lose before landing a blow
-  (now more health: the test is about both sides fighting, not who wins).
+  (now both get more health: the test is about both sides fighting, not who wins; v0.166.0 extended it to the
+  Saibaman after the Namekian won before being hit).
 - **Dev client:** each generated beside explored regions; a village's 25 places all reachable and a quiet morning.
   Fixed from the screenshots: Kame House's underwater slope and land in sight, the snow village's bare edge, soldiers'
   uniforms painted under the skin layer, repeated village names.
+
+## 2026-10-30 — World structures, milestone 3: Namek (v0.166.0)
+The third milestone of `docs/WORLD_STRUCTURES.md`: Namek's villages, the elders' houses and the Grand Elder's house,
+with Namekian residents.
+- **Landmarks in any world:** a kind's world and a clear distance; generation, the guard, siting, settlement
+  registration and the commands follow it; Namek runs the landmark feature.
+- **Namekian villages:** five white dome houses round a spring, the elder's three-domed house with the elder's seat,
+  an Ajisa grove, sometimes a training ground; named for the elder, who takes the name. No shop or inn.
+- **The Grand Elder's house:** a lone rock spire with a grassy cap, the great dome, the Grand Elder's seat; Grand
+  Elder Guru, Nail and Dende live there. Unique; villages keep far off.
+- **Namekian residents:** Dragon and Warrior Clans, snail names, three villager looks and the elder's robe, the new
+  elder trade, Namekian lines (`race`/`style` conditions, `extend_say`).
+- **Safer homes:** no body is put inside a wall (an elder had suffocated in the dev client: her home was drawn into
+  her house's wall); a `settled` hook names residents.
+- **Tests:** 3 more and one widened; 372 GameTests pass, twice in a row.
+- **Dev client:** the spire (Guru at his seat), two villages (every place reachable), villagers' looks, a quiet
+  morning.

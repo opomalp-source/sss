@@ -1,0 +1,3 @@
+{"_doc": "A village elder: at the elder's seat most of the day, among the villagers at midday and in the evening (docs/LIVING_WORLD.md).", "blocks": [
+  {"from": 22, "to": 6, "do": "sleep"}, {"from": 6, "to": 12, "do": "work"}, {"from": 12, "to": 14, "do": "social"},
+  {"from": 14, "to": 19, "do": "work"}, {"from": 19, "to": 22, "do": "social"}]}

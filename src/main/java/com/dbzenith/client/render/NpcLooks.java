@@ -94,7 +94,11 @@ public final class NpcLooks {
             Map.entry("townsfolk_guard", look(HairCode.Preset.BUZZ, 0x5A3A20, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.CAP)),
             Map.entry("townsfolk_traveler", look(HairCode.Preset.WILD, 0x4A2E1A, RaceTraits.Feature.NONE, false, 0, -1, false, Extra.CAPE)),
             Map.entry("townsfolk_scientist", look(HairCode.Preset.SWEPT, 0x6A5A8A, RaceTraits.Feature.NONE, false, 0, -1, false)),
-            Map.entry("townsfolk_farmer", look(HairCode.Preset.WILD, 0x8A6A3A, RaceTraits.Feature.NONE, false, 0, -1, false)));
+            Map.entry("townsfolk_farmer", look(HairCode.Preset.WILD, 0x8A6A3A, RaceTraits.Feature.NONE, false, 0, -1, false)),
+            Map.entry("namek_villager_a", look(null, 0, RaceTraits.Feature.ANTENNAE, true, 0x62B444, -1, false)),
+            Map.entry("namek_villager_b", look(null, 0, RaceTraits.Feature.ANTENNAE, true, 0x62B444, -1, false)),
+            Map.entry("namek_villager_c", look(null, 0, RaceTraits.Feature.ANTENNAE, true, 0x62B444, -1, false)),
+            Map.entry("namek_elder", look(null, 0, RaceTraits.Feature.ANTENNAE, true, 0x58A23E, -1, false)));
 
     private NpcLooks() {}
 

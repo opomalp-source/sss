@@ -204,13 +204,14 @@ public final class StructureTests {
         h.succeed();
     }
 
-    /** Every unique landmark (West City, Kame House, Muscle Tower): one cell, the same every time, nothing round it. */
+    /** Every unique landmark (West City, Kame House, Muscle Tower, the Grand Elder's): one cell, the same every time, nothing round it. */
     @GameTest(template = EMPTY, timeoutTicks = 400)
     public static void uniqueLandmarksAreUniqueAndStable(GameTestHelper h) {
-        var level = h.getLevel().getServer().overworld();
-        LandmarkSites.Terrain t = LandmarkSites.Terrain.of(level);
         for (Landmark type : Landmark.ALL) {
             if (!type.unique) continue;
+            var level = h.getLevel().getServer().getLevel(type.dimension);                     // each in its own world
+            h.assertTrue(level != null, type.id + "'s world exists");
+            LandmarkSites.Terrain t = LandmarkSites.Terrain.of(level);
             long[] cell = LandmarkSites.uniqueCell(type, level.getSeed(), t);
             if (cell == null) continue;
             int found = 0;
@@ -219,6 +220,69 @@ public final class StructureTests {
                     if (LandmarkSites.plan(type, level.getSeed(), (int) cell[0] + cx, (int) cell[1] + cz, t) != null) found++;
             h.assertTrue(found == 1, "one " + type.id + " round its cell: " + found);
             h.assertTrue(java.util.Arrays.equals(cell, LandmarkSites.uniqueCell(type, level.getSeed(), t)), type.id + ": the same cell every time");
+        }
+        h.succeed();
+    }
+
+    /** A Namekian village: on Namek, named for its elder; homes for all, the elder's seat, the grove; no shop or inn (water is enough). */
+    @GameTest(template = EMPTY)
+    public static void namekVillagesKeepTheirElders(GameTestHelper h) {
+        h.assertTrue(Landmark.NAMEK_VILLAGE.dimension == Landmark.Keys.NAMEK && Landmark.GRAND_ELDER.dimension == Landmark.Keys.NAMEK, "on Namek");
+        var v = com.dbzenith.world.landmark.NamekVillage.at(new LandmarkSites.Site(Landmark.NAMEK_VILLAGE, 0, 0, 30_000, 30_000, 0x9a3bL), 90);
+        int[] kinds = new int[Poi.Kind.values().length];
+        for (Poi p : v.places()) kinds[p.kind().ordinal()]++;
+        h.assertTrue(v.name().endsWith("'s Village") && "namek".equals(v.style()), "named for its elder: " + v.name());
+        h.assertTrue(kinds[Poi.Kind.HOME.ordinal()] * 2 >= v.people().size() && "elder".equals(v.people().get(0)), "an elder first, homes for all");
+        h.assertTrue(v.places().stream().anyMatch(p -> p.kind() == Poi.Kind.PLAZA && "elder".equals(p.label())), "the elder's seat");
+        h.assertTrue(kinds[Poi.Kind.FIELD.ordinal()] > 0 && v.people().contains("farmer"), "the grove and its farmers");
+        h.assertTrue(kinds[Poi.Kind.SHOP.ordinal()] == 0 && kinds[Poi.Kind.TAVERN.ordinal()] == 0, "no shop, no inn");
+        h.assertTrue(v.rooms().size() == 6, "five houses and the elder's");
+        h.succeed();
+    }
+
+    /** Namek's people are Namekians, its elders and the Grand Elder's three named. */
+    @GameTest(template = EMPTY)
+    public static void namekiansLiveOnNamek(GameTestHelper h) {
+        Settlement s = new Settlement(java.util.UUID.randomUUID());
+        s.name = "Testnamek";
+        s.style = "namek";
+        s.pois.add(new Poi(Poi.Kind.HOME, h.absolutePos(new BlockPos(1, 1, 1)), "house"));
+        var d = com.dbzenith.nemesis.Nemesis.data();
+        NamedFighter elder = Residents.create(d, s, com.dbzenith.living.Occupation.ELDER, s.pois.get(0).pos(), h.getLevel().getGameTime(), 91);
+        NamedFighter guard = Residents.create(d, s, com.dbzenith.living.Occupation.GUARD, s.pois.get(0).pos(), h.getLevel().getGameTime(), 92);
+        NamedFighter folk = Residents.create(d, s, com.dbzenith.living.Occupation.CITIZEN, s.pois.get(0).pos(), h.getLevel().getGameTime(), 93);
+        try {
+            for (NamedFighter c : List.of(elder, guard, folk)) h.assertTrue("namekian".equals(c.race), c.name + " a Namekian");
+            h.assertTrue("dragon_clan".equals(elder.variant) && "warrior_clan".equals(guard.variant), "the dragon clan, and the warrior clan to fight");
+            h.assertTrue("namek_elder".equals(com.dbzenith.living.Resident.skinFor(elder)) && "namekian_warrior".equals(com.dbzenith.living.Resident.skinFor(guard))
+                    && com.dbzenith.living.Resident.skinFor(folk).startsWith("namek_villager"), "dressed as Namekians");
+            var ge = com.dbzenith.world.landmark.GrandElderHouse.at(new LandmarkSites.Site(Landmark.GRAND_ELDER, 0, 0, 0, 0, 1), 70, 63);
+            h.assertTrue(ge.people().equals(List.of("elder", "guard", "citizen")), "three live there");
+            ge.settled(s, List.of(elder, guard, folk));
+            h.assertTrue("Grand Elder Guru".equals(elder.fullName()) && "Nail".equals(guard.fullName()) && "Dende".equals(folk.fullName()), "Guru, Nail, Dende");
+        } finally {
+            for (NamedFighter c : List.of(elder, guard, folk)) c.status = NamedFighter.Status.DEAD;
+        }
+        h.succeed();
+    }
+
+    /** A body never appears inside a wall: a home drawn into one, and the resident stands beside it. */
+    @GameTest(template = EMPTY)
+    public static void residentsNeverSpawnInWalls(GameTestHelper h) {
+        for (int x = 0; x <= 4; x++) for (int z = 0; z <= 4; z++) h.setBlock(new BlockPos(x, 0, z), net.minecraft.world.level.block.Blocks.STONE);
+        h.setBlock(new BlockPos(2, 1, 2), net.minecraft.world.level.block.Blocks.STONE);
+        h.setBlock(new BlockPos(2, 2, 2), net.minecraft.world.level.block.Blocks.STONE);
+        Settlement s = new Settlement(java.util.UUID.randomUUID());
+        s.name = "Wallville";
+        s.pois.add(new Poi(Poi.Kind.HOME, h.absolutePos(new BlockPos(2, 1, 2)), "house"));
+        NamedFighter c = Residents.create(com.dbzenith.nemesis.Nemesis.data(), s, com.dbzenith.living.Occupation.CITIZEN, s.pois.get(0).pos(), h.getLevel().getGameTime(), 94);
+        var r = Residents.spawnBody(h.getLevel(), c, h.absolutePos(new BlockPos(2, 1, 2)));
+        try {
+            BlockPos at = r.blockPosition();
+            h.assertTrue(h.getLevel().getBlockState(at).isAir() && h.getLevel().getBlockState(at.above()).isAir(), "standing in the open at " + at);
+        } finally {
+            r.discard();
+            c.status = NamedFighter.Status.DEAD;
         }
         h.succeed();
     }

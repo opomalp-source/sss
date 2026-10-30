@@ -253,8 +253,10 @@ public final class AiTests {
         KiFighter namek = fighter(h, ModNpcs.NAMEKIAN_WARRIOR.get(), new BlockPos(1, 1, 1));
         KiFighter soldier = fighter(h, ModNpcs.SPROUTLING.get(), new BlockPos(1, 1, 4));   // a Saibaman: Frieza Force, melee only, no flight
         namek.brain().setPersonality(Personality.HONORABLE);
-        namek.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(400);   // it lasts long enough to answer (not who wins)
-        namek.setHealth(namek.getMaxHealth());
+        for (KiFighter f : new KiFighter[]{namek, soldier}) {                                // both last long enough to land a blow (not who wins)
+            f.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(400);
+            f.setHealth(f.getMaxHealth());
+        }
         AABB pair = new AABB(Vec3.atLowerCornerOf(h.absolutePos(new BlockPos(-3, 0, -3))), Vec3.atLowerCornerOf(h.absolutePos(new BlockPos(6, 6, 9))));
         namek.brain().arena = pair;                                                      // each other only, in the pen: other tests run alongside
         soldier.brain().arena = pair;
