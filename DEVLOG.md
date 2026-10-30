@@ -4748,3 +4748,33 @@ with Namekian residents.
 - **Tests:** 3 more and one widened; 372 GameTests pass, twice in a row.
 - **Dev client:** the spire (Guru at his seat), two villages (every place reachable), villagers' looks, a quiet
   morning.
+
+## 2026-10-30 — Namek's Dragon Balls and Porunga (v0.167.0)
+The gap milestone 3 left (`docs/WORLD_STRUCTURES.md` section 6): in canon each village elder keeps one of Namek's
+Dragon Balls.
+- **The set:** `BallSet.NAMEK`, seven Namekian Dragon Balls (larger than Earth's, amber glass with red stars), tracked
+  like the other sets (each ball also records its keeper), on the radar as 22 to 28 (amber blips in a green rim).
+- **Kept by the elders:** the seven villages nearest Namek's centre, found from the seed off the server thread (about
+  5 s of terrain sampling, once per world and run), each keep one on a white pillar beside the elder's seat. Balls go
+  there when they scatter and when they wake from stone; the keeper's chunk loads (or generates) in the background
+  first. Villages drawn by v0.166.0 get the pillar on their floor; nothing a player put there is ever replaced (the
+  ball then lies elsewhere on Namek, keeper-less).
+- **The elders:** "Tell me about the Dragon Balls." An elder says whether its ball is kept, taken, stone (the Grand
+  Elder: he made them); it hands the ball over, and teaches the Namekian words, to a Namekian, a friend or a famous
+  player. New conditions, actions and a placeholder for conversation files.
+- **Porunga:** answers only the Namekian words ("Takkaraputo, Poporunga, Pupiriyaroro!"), spoken by the summoner
+  (a Namekian, or taught) or by any Namekian resident nearby. Three wishes in turn: bring back one who fell (whoever
+  waited longest), send me to Earth (the last), bring my party here, and Earth's power, restoration, immortality.
+  His own model, reworked after the user's reference pictures: a coiled tail, a hunched body (pale chest and abs,
+  pebbled green hide, shoulder humps with dark spikes, heavy clawed arms), the head low between the shoulders (heavy
+  brow, red eyes, wide fanged mouth, long dark-tipped ears, dark horns).
+- **Also:** dragons say why a wish can't come true (and wait for another); `/dbz namekballs [home]`; config
+  `namekBallsEnabled`; protocol 57.
+- **Tests:** `NamekBallsTests` (4: the words, three wishes and the stone, an elder's pedestal with the radar and the
+  handover, a real return to a keeper on Namek), in their own batches; 376 GameTests pass, twice in a row. Before
+  the batches, `aBlowFromBehindIsCritical` failed twice in a row (it depends on where the framework puts it), and
+  `spacePodLaunchesAndLands` once while seven Namek chunks generated on the server thread (now in the background).
+- **Dev client:** a ball on its pedestal in Uminina's Village, the radar, the seven set out, a Namekian villager
+  speaking the words for Dev, the wish screen (three left), Porunga from the front, the side and the ground, an
+  elder's answer. Fixed from the screenshots: Porunga's face too dark (shades, and less head tilt), elders' lines
+  starting with the ball's name in lower case.

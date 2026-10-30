@@ -286,6 +286,9 @@ public final class Conversations {
             case "lesson_refusal" -> any(v, Lessons.refusal(c, b, x.player, x.town));
             case "errand" -> any(v, errandState(x));
             case "traveler" -> (Occupation.of(c) == Occupation.TRAVELER) == v.getAsBoolean();
+            case "dragon_ball" -> any(v, com.dbzenith.dragonball.NamekBalls.state(x.player.server, x.town));   // Namek's (v0.167.0): kept, taken, stone, none
+            case "knows_words" -> com.dbzenith.dragonball.NamekBalls.knowsWords(x.player) == v.getAsBoolean();
+            case "elder_trusts" -> com.dbzenith.dragonball.NamekBalls.trusts(x.player, b.affinity, x.fame) == v.getAsBoolean();
             default -> false;
         };
     }
@@ -328,6 +331,7 @@ public final class Conversations {
         if (out.contains("{rival}")) out = out.replace("{rival}", rival(c));
         if (out.contains("{rumor}")) out = out.replace("{rumor}", tell(x));
         if (out.contains("{lesson}")) out = out.replace("{lesson}", Lessons.lessonName(c, x.bond, x.player));
+        if (out.contains("{dragon_ball}")) out = out.replace("{dragon_ball}", com.dbzenith.dragonball.NamekBalls.ballName(x.player.server, x.town));
         if (out.contains("{errand}")) out = out.replace("{errand}", errandText(x));
         if (out.contains("{errand_progress}")) out = out.replace("{errand_progress}", errandProgress(x));
         if (out.contains("{reward}")) out = out.replace("{reward}", errandReward(x));
@@ -561,6 +565,10 @@ public final class Conversations {
             case "errand_accept" -> Errands.accept(x.living, c, x.player, x.now);
             case "errand_turn_in" -> Errands.turnIn(x.living, c, x.player, x.now);
             case "errand_abandon" -> Errands.abandon(x.living, c, x.player);
+            case "give_dragon_ball" -> {                                                   // an elder entrusts its ball (v0.167.0)
+                if (com.dbzenith.dragonball.NamekBalls.give(x.player, x.town)) c.remember(new Memory(Memory.Kind.TALKED, x.now, x.player.getUUID(), "gave_dragon_ball"));
+            }
+            case "teach_words" -> com.dbzenith.dragonball.NamekBalls.teachWords(x.player);
             case "close" -> {
                 return true;
             }

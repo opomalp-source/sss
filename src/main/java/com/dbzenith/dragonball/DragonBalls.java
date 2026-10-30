@@ -62,6 +62,7 @@ public final class DragonBalls {
             case EARTH -> ModBlocks.DRAGON_BALLS;
             case BLACK_STAR -> ModBlocks.BLACK_STAR_BALLS;
             case SUPER -> ModBlocks.SUPER_BALLS;
+            case NAMEK -> ModBlocks.NAMEK_BALLS;
         };
     }
 
@@ -85,6 +86,7 @@ public final class DragonBalls {
             case EARTH -> true;
             case BLACK_STAR -> c.blackStarEnabled.get();
             case SUPER -> c.superBallsEnabled.get();
+            case NAMEK -> c.namekBallsEnabled.get();
         };
     }
 
@@ -136,9 +138,11 @@ public final class DragonBalls {
 
     /**
      * Places one ball at a random dry surface spot: around world spawn for Earth's set, much further out for the Super
-     * set, around the middle of a random other planet for the Black Star set.
+     * set, around the middle of a random other planet for the Black Star set. Namek's go back to their elders
+     * ({@link NamekBalls#scatter}).
      */
     public static BlockPos scatter(MinecraftServer server, BallSet set, int star) {
+        if (set == BallSet.NAMEK) return NamekBalls.scatter(server, star);
         RandomSource rnd = server.overworld().random;
         ServerLevel level = server.overworld();
         BlockPos center = level.getSharedSpawnPos();
@@ -156,6 +160,12 @@ public final class DragonBalls {
             }
             radius = DBZConfig.SERVER.blackStarScatterRadius.get();
         }
+        return scatterAround(level, center, radius, set, star);
+    }
+
+    /** One ball at a random dry surface spot within {@code radius} of {@code center}, tracked; null if none was found this time. */
+    static BlockPos scatterAround(ServerLevel level, BlockPos center, int radius, BallSet set, int star) {
+        RandomSource rnd = level.getServer().overworld().random;
         for (int attempt = 0; attempt < 16; attempt++) {
             int x = center.getX() + rnd.nextInt(radius * 2 + 1) - radius;
             int z = center.getZ() + rnd.nextInt(radius * 2 + 1) - radius;
@@ -164,16 +174,33 @@ public final class DragonBalls {
             BlockPos pos = new BlockPos(x, y, z);
             BlockState below = level.getBlockState(pos.below());
             if (!level.getFluidState(pos).isEmpty() || !below.isSolidRender(level, pos.below()) || y <= level.getMinBuildHeight()) continue;
-            moving = true;
-            try {
-                level.setBlockAndUpdate(pos, block(set, star).defaultBlockState());
-            } finally {
-                moving = false;
-            }
-            DragonBallData.get(server, set).set(star, DragonBallData.State.PLACED, level.dimension(), pos);
+            place(level, pos, set, star);
             return pos;
         }
         return null; // try again next maintenance pass
+    }
+
+    /** Puts a ball into the world and records it there (no keeper). */
+    static void place(ServerLevel level, BlockPos pos, BallSet set, int star) {
+        moving = true;
+        try {
+            level.setBlockAndUpdate(pos, block(set, star).defaultBlockState());
+        } finally {
+            moving = false;
+        }
+        DragonBallData data = DragonBallData.get(level.getServer(), set);
+        data.set(star, DragonBallData.State.PLACED, level.dimension(), pos);
+        data.entry(star).keeper = "";
+    }
+
+    /**
+     * Why the seven of a set can't be used at {@code clicked} now (a translation key), or null when they can: all seven
+     * must be gathered there, and Porunga answers only the Namekian words ({@link NamekBalls#speaker}).
+     */
+    public static String summonProblem(ServerLevel level, ServerPlayer player, BlockPos clicked, BallSet set) {
+        for (int star = 1; star <= COUNT; star++) if (findNear(level, clicked, block(set, star)) == null) return "message.dbzenith.need_all_balls";
+        if (set == BallSet.NAMEK && NamekBalls.speaker(level, player, clicked) == null) return "message.dbzenith.namek_words_needed";
+        return null;
     }
 
     // ------------------------------------------------------------------ summoning
@@ -183,8 +210,13 @@ public final class DragonBalls {
         return trySummon(level, player, clicked, BallSet.EARTH);
     }
 
-    /** All seven of a set placed within {@link #GATHER_RADIUS} of {@code clicked}: remove them, raise the dragon, ask for a wish. */
+    /**
+     * All seven of a set placed within {@link #GATHER_RADIUS} of {@code clicked} (and for Namek's, the Namekian words
+     * spoken): remove them, raise the dragon, ask for a wish.
+     */
     public static boolean trySummon(ServerLevel level, ServerPlayer player, BlockPos clicked, BallSet set) {
+        if (summonProblem(level, player, clicked, set) != null) return false;
+        Component speaker = set == BallSet.NAMEK ? NamekBalls.speaker(level, player, clicked) : null;
         List<BlockPos> found = new ArrayList<>();
         for (int star = 1; star <= COUNT; star++) {
             BlockPos at = findNear(level, clicked, block(set, star));
@@ -206,11 +238,14 @@ public final class DragonBalls {
         dragon.setSummoner(player.getUUID());
         dragon.setSet(set);
         dragon.setLiftsCurse(set == BallSet.BLACK_STAR && data.isCursed());
+        dragon.setWishesLeft(set == BallSet.NAMEK ? NamekBalls.WISHES : 1);                     // Porunga grants three
         com.dbzenith.data.ModCapabilities.get(player).ifPresent(d -> d.setFlag("summoned_dragon", true));
         level.addFreshEntity(dragon);
         level.setWeatherParameters(0, 2400, true, true);
-        level.playSound(null, clicked, SoundEvents.ENDER_DRAGON_GROWL, SoundSource.AMBIENT, 4f, set == BallSet.SUPER ? 0.4f : 0.6f);
+        level.playSound(null, clicked, SoundEvents.ENDER_DRAGON_GROWL, SoundSource.AMBIENT, 4f, set == BallSet.SUPER ? 0.4f : set == BallSet.NAMEK ? 0.5f : 0.6f);
         level.sendParticles(ParticleTypes.FLASH, clicked.getX() + 0.5, clicked.getY() + 1, clicked.getZ() + 0.5, 3, 0.5, 0.5, 0.5, 0);
+        if (speaker != null) level.getServer().getPlayerList().broadcastSystemMessage(
+                Component.translatable("message.dbzenith.namek_words", speaker).withStyle(ChatFormatting.GREEN), false);
         level.getServer().getPlayerList().broadcastSystemMessage(
                 Component.translatable("message.dbzenith.dragon_summoned_" + set.id(), player.getDisplayName()), false);
         ModNetwork.sendTo(player, new OpenWishPacket(dragon.getId()));

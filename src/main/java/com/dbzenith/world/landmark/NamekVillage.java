@@ -36,6 +36,8 @@ public final class NamekVillage extends SettlementPlan {
     static final int ELDER_Z = -17;
     /** The warriors' training ground (between two houses, out past them). */
     static final int TX = 14, TZ = 25;
+    /** The pedestal for the village's Dragon Ball, beside the elder's seat (from the elder's house centre; v0.167.0). */
+    static final int BALL_DX = 2, BALL_DZ = -4;
     /** Village elders' names (original: after shellfish, as Namekian names are after snails). */
     static final String[] ELDERS = {"Sazae", "Nagaru", "Kisago", "Tokobushi", "Hinagai", "Ishidatami", "Akagai", "Bai", "Torigai", "Mirugai", "Hotategai",
             "Asari", "Shijimi", "Hamaguri", "Awabi", "Tsubugai", "Kibisago", "Uminina"};
@@ -109,6 +111,21 @@ public final class NamekVillage extends SettlementPlan {
     @Override
     public int ownedAbove(int wx, int wz) {
         return Math.hypot(wx - x, wz - z) <= FLAT + BLEND ? y0 : Integer.MAX_VALUE;
+    }
+
+    /** Where the village's Dragon Ball rests: on the pedestal beside the elder's seat (com.dbzenith.dragonball.NamekBalls puts it there). */
+    public BlockPos ballSpot() {
+        return new BlockPos(x + BALL_DX, y0 + 2, z + ELDER_Z + BALL_DZ);
+    }
+
+    /** The block the ball rests on. */
+    public static BlockState pedestal() {
+        return s("namek_pillar");
+    }
+
+    /** The elder house's floor (a village drawn before the pedestals gets one set on it). */
+    public static BlockState floor() {
+        return s("namek_floor");
     }
 
     /** Its elder takes the village's elder's name (and the elder's house). */
@@ -280,6 +297,7 @@ public final class NamekVillage extends SettlementPlan {
         door(c, ex, ez + 6, Direction.SOUTH);
         for (int dx = -1; dx <= 1; dx++) c.set(ex + dx, y0 + 1, ez - 4, Canvas.stairs(s("namek_temple_stairs"), Direction.NORTH, false));   // the seat
         c.set(ex, y0 + 2, ez - 5, s("namek_pattern"));
+        c.set(ex + BALL_DX, y0 + 1, ez + BALL_DZ, s("namek_pillar"));                       // the Dragon Ball's pedestal (the ball: NamekBalls)
         for (int dx = -2; dx <= 2; dx++)
             for (int dz = -2; dz <= 2; dz++) if (Math.abs(dx) + Math.abs(dz) <= 3) c.set(ex + dx, y0 + 1, ez + dz, Blocks.CYAN_CARPET.defaultBlockState());
         c.set(ex, y0 + 7, ez, s("namek_lamp"));

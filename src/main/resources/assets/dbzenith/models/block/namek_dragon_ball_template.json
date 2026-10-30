@@ -1,0 +1,50 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {"particle": "#ball", "shell": "dbzenith:block/namek_dragon_ball_shell"},
+  "display": {
+    "gui": {"rotation": [25, 45, 0], "translation": [0, 1.5, 0], "scale": [0.95, 0.95, 0.95]},
+    "ground": {"rotation": [0, 0, 0], "translation": [0, 3, 0], "scale": [0.4, 0.4, 0.4]},
+    "fixed": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.8, 0.8, 0.8]},
+    "thirdperson_righthand": {"rotation": [75, 45, 0], "translation": [0, 2.5, 1], "scale": [0.5, 0.5, 0.5]},
+    "firstperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 2, 0], "scale": [0.5, 0.5, 0.5]}
+  },
+  "elements": [
+    {
+      "__comment": "wide in X",
+      "from": [2, 2, 4], "to": [14, 10, 12],
+      "faces": {
+        "north": {"uv": [2, 4, 14, 12], "texture": "#shell"},
+        "south": {"uv": [2, 4, 14, 12], "texture": "#shell"},
+        "east": {"uv": [4, 4, 12, 12], "texture": "#ball"},
+        "west": {"uv": [4, 4, 12, 12], "texture": "#ball"},
+        "up": {"uv": [2, 4, 14, 12], "texture": "#shell"},
+        "down": {"uv": [2, 4, 14, 12], "texture": "#shell"}
+      }
+    },
+    {
+      "__comment": "tall in Y",
+      "from": [4, 0, 4], "to": [12, 12, 12],
+      "faces": {
+        "north": {"uv": [4, 2, 12, 14], "texture": "#shell"},
+        "south": {"uv": [4, 2, 12, 14], "texture": "#shell"},
+        "east": {"uv": [4, 2, 12, 14], "texture": "#shell"},
+        "west": {"uv": [4, 2, 12, 14], "texture": "#shell"},
+        "up": {"uv": [4, 4, 12, 12], "texture": "#shell"},
+        "down": {"uv": [4, 4, 12, 12], "texture": "#shell"}
+      }
+    },
+    {
+      "__comment": "deep in Z",
+      "from": [4, 2, 2], "to": [12, 10, 14],
+      "faces": {
+        "north": {"uv": [4, 4, 12, 12], "texture": "#ball"},
+        "south": {"uv": [4, 4, 12, 12], "texture": "#ball"},
+        "east": {"uv": [2, 4, 14, 12], "texture": "#shell"},
+        "west": {"uv": [2, 4, 14, 12], "texture": "#shell"},
+        "up": {"uv": [4, 2, 12, 14], "texture": "#shell"},
+        "down": {"uv": [4, 2, 12, 14], "texture": "#shell"}
+      }
+    }
+  ]
+}

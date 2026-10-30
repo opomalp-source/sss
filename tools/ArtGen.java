@@ -24,6 +24,10 @@ public class ArtGen {
             if (args[1].equals("red_ribbon_soldier")) NpcArt.redRibbonSoldier();      // the Red Ribbon Army's garrisons (v0.165.0)
             if (args[1].equals("namek_folk")) NpcArt.namekFolk();                      // Namek's villagers (v0.166.0)
             if (args[1].equals("gear")) Gear.all();                           // the clothes (the clothing rework)
+            if (args[1].equals("namek_balls")) {                                   // Namek's Dragon Balls and Porunga (v0.167.0)
+                Blocks.namekBalls();
+                Creatures.porunga();
+            }
             System.out.println("ArtGen done: " + args[1]);
             return;
         }
@@ -4485,6 +4489,7 @@ public class ArtGen {
         static void all() throws IOException {
             for (int star = 1; star <= 7; star++) dragonBall(star);
             otherBalls();
+            namekBalls();
             punchingBag();
             gravityChamber();
             timeChamberDoor();
@@ -4633,6 +4638,35 @@ public class ArtGen {
          * One sheet for the hanging bag: side x0-7 y0-11, top x8-15 y0-7, rope x8-9 y8-9, cap side x8-15 y10,
          * bottom cap side x8-13 y11.
          */
+        /**
+         * Namek's Dragon Balls (v0.167.0): larger than Earth's (12 px), a deeper amber glass, lit from the upper left with a
+         * soft rim; red stars on the 8 px star face (texture 4..11), each with a darker shade beneath.
+         */
+        static void namekBalls() throws IOException {
+            int[] amber = ramp(0xFFF2780E, 7);
+            Canvas shell = new Canvas(16, 16);
+            for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) {
+                double lit = 0.62 - (y - 8) * 0.035 - (x - 8) * 0.012;                  // light from above and the left
+                shell.set(x, y, amber[(int) clamp((float) (lit * 7), 0, 6)]);
+            }
+            shell.set(5, 4, 0xFFFFFFFF).set(6, 4, 0xFFFFF0C8).set(5, 5, 0xFFFFF0C8).set(4, 5, 0xFFFFE0A0);   // gloss
+            shell.save("block/namek_dragon_ball_shell.png");
+            for (int star = 1; star <= 7; star++) {
+                Canvas c = new Canvas(16, 16);
+                for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) c.set(x, y, shell.get(x, y));
+                for (int x = 4; x < 12; x++) {                                                 // a faint rim round the star face
+                    c.set(x, 4, mix(c.get(x, 4), 0xFFFFD890, 0.25));
+                    c.set(x, 11, mix(c.get(x, 11), 0xFF7A2A04, 0.3));
+                }
+                for (int[] s : STARS[star - 1]) {
+                    c.set(5 + s[0], 5 + s[1], 0xFFE0140C);
+                    if (5 + s[1] < 11) c.set(5 + s[0], 6 + s[1], mix(c.get(5 + s[0], 6 + s[1]), 0xFF8A0C06, 0.45));
+                }
+                c.set(5, 5, mix(c.get(5, 5), 0xFFFFFFFF, 0.5));                                // glint
+                c.save("block/namek_dragon_ball_" + star + ".png");
+            }
+        }
+
         static void punchingBag() throws IOException {
             Canvas c = new Canvas(16, 16);
             int[] r = ramp(0xFFB02828, 5), tape = ramp(0xFFE8E0C8, 3), dark = ramp(0xFF3A2A24, 3);
@@ -6055,6 +6089,7 @@ public class ArtGen {
     static final class Creatures {
         static void all() throws IOException {                                              // the Great Ape: tools/GreatApeGen.java
             dragon();
+            porunga();
             formHair();
             spacePod();
         }
@@ -6108,6 +6143,92 @@ public class ArtGen {
         static int grey(double v) {
             int g = (int) Math.round(Math.max(0, Math.min(1, v)) * 255);
             return 0xFF000000 | g << 16 | g << 8 | g;
+        }
+        /**
+         * Porunga (v0.167.0, after the user's reference pictures) for client.render.PorungaModel (128x128): green hide
+         * pebbled with dark spots; a pale tan chest, pectorals and belly muscles; tan under the forearms and palms; dark
+         * horns and spikes; long ears with dark tips; red eyes, a wide mouth with fangs; the tail segment in the Eternal
+         * Dragon's layout.
+         */
+        static void porunga() throws IOException {
+            int[] g = ramp(0xFF3E9C3A, 6), tan = ramp(0xFFE0CC98, 5), dark = ramp(0xFF35363C, 3), belly = ramp(0xFFC9CC7A, 4);
+            int eye = 0xFFFF2416, tooth = 0xFFF8F4E8, mouth = 0xFF5A1018, claw = 0xFFEDE6D2;
+            FaceFn hide = (f, x, y, w, h) -> {                                              // pebbled: dark spots on green, lit from the top
+                int i = switch (f) { case TOP -> 4; case FRONT -> 3; case BOTTOM -> 1; default -> 2; };
+                double n = noise(x, y, 611 + f.ordinal());
+                if (n > 0.84) return g[Math.max(0, i - 2)];                                    // a spot
+                if (n < 0.12) i++;
+                return g[Math.min(5, i)];
+            };
+            FaceFn spike = (f, x, y, w, h) -> y == 0 ? dark[2] : dark[f == Face.FRONT ? 1 : 0];
+            Canvas c = new Canvas(128, 128);
+            box(c, 0, 0, 8, 8, 12, (f, x, y, w, h) -> f == Face.BOTTOM ? belly[(y % 3 == 0) ? 1 : 2] : scales(g, f, x, y));   // tail segment
+            box(c, 40, 0, 2, 4, 2, spike);                                                          // spikes
+            for (int y = 0; y < 3; y++) for (int x = 48; x < 56; x++) c.set(x, y, y == 0 && x % 4 == 1 ? 0xFFFF9050 : eye);   // eyes
+            box(c, 0, 20, 12, 10, 8, (f, x, y, w, h) -> {                                           // belly: the abs
+                if (f == Face.FRONT && x >= 1 && x <= 10) {
+                    if (x == 5 || x == 6 || y % 3 == 2) return tan[1];                                // the grooves between
+                    return tan[x == 1 || x == 10 ? 2 : 3];
+                }
+                return hide.at(f, x, y, w, h);
+            });
+            box(c, 0, 38, 18, 12, 10, (f, x, y, w, h) -> {                                          // chest
+                if (f == Face.FRONT && x >= 1 && x <= 16) {
+                    int under = Math.abs(2 * x - 17) > 11 ? 5 : 6;                                   // the pectorals' lower edge, curving up
+                    if (y == under || y < under && (x == 8 || x == 9)) return tan[1];
+                    if (y < under) return tan[y < 2 ? 4 : 3];
+                    if (y == 9 || x == 8 || x == 9) return tan[1];                                    // upper abs
+                    return tan[2];
+                }
+                if (f == Face.BOTTOM && x >= 3 && x <= 14) return tan[1];
+                return hide.at(f, x, y, w, h);
+            });
+            box(c, 0, 62, 14, 5, 7, hide);                                                          // the hump behind the head
+            box(c, 56, 0, 10, 10, 10, (f, x, y, w, h) -> f == Face.BOTTOM ? g[1] : hide.at(f, x, y, w, h));   // shoulder humps
+            box(c, 96, 0, 7, 12, 7, (f, x, y, w, h) -> {                                            // upper arm, the biceps' swell
+                if (f == Face.FRONT && y >= 2 && y <= 8 && x >= 1 && x <= 5) return tan[y < 4 ? 3 : 2];
+                return hide.at(f, x, y, w, h);
+            });
+            box(c, 96, 20, 6, 11, 6, (f, x, y, w, h) -> f == Face.FRONT || f == Face.BOTTOM ? tan[f == Face.FRONT && x % 3 == 2 ? 1 : 2]
+                    : hide.at(f, x, y, w, h));                                                         // forearm, pale beneath
+            box(c, 96, 38, 6, 4, 6, (f, x, y, w, h) -> {                                            // hand: claws at the fingers' ends
+                if (f == Face.FRONT) return y >= h - 2 && x % 2 == 0 ? claw : g[4];
+                if (f == Face.BOTTOM) return y == 0 && x % 2 == 0 ? claw : tan[3];
+                return hide.at(f, x, y, w, h);
+            });
+            box(c, 0, 76, 12, 8, 10, (f, x, y, w, h) -> {                                           // skull
+                if (f == Face.FRONT) return y < 2 ? g[2] : g[3];
+                return hide.at(f, x, y, w, h);
+            });
+            box(c, 44, 76, 10, 5, 3, (f, x, y, w, h) -> {                                           // muzzle
+                if (f == Face.FRONT) {
+                    if (y == 1 && (x == 3 || x == 6)) return 0xFF1A3A1C;                               // nostrils
+                    if (y == 3) return x == 1 || x == 8 ? tooth : mouth;                               // the mouth, fangs at its corners
+                    if (y == 4) return x % 2 == 0 ? tooth : tan[3];                                     // teeth over the lip
+                    return y == 0 ? g[4] : g[3];
+                }
+                if (f == Face.BOTTOM) return mouth;
+                if ((f == Face.RIGHT || f == Face.LEFT) && y >= 3) return y == 3 ? mouth : tan[2];
+                return hide.at(f, x, y, w, h);
+            });
+            box(c, 44, 86, 12, 2, 2, (f, x, y, w, h) -> f == Face.TOP ? g[4] : f == Face.FRONT ? (y == 0 ? g[3] : g[1]) : g[2]);   // brow
+            box(c, 72, 76, 9, 2, 5, (f, x, y, w, h) -> {                                            // jaw: a pale chin
+                if (f == Face.TOP) return mouth;
+                if (y == 0 && x % 2 == 1 && f != Face.BOTTOM && f != Face.BACK) return tooth;
+                return tan[f == Face.BOTTOM ? 1 : 3];
+            });
+            for (int side = 0; side < 2; side++) {                                                  // ears: dark tips (right one at its -x end)
+                int s = side;
+                box(c, 100, 76 + side * 6, 9, 2, 2, (f, x, y, w, h) -> {
+                    if (f == Face.RIGHT || f == Face.LEFT) return dark[1];
+                    boolean back = f == Face.BACK;
+                    int fromTip = (s == 0) != back ? x : w - 1 - x;
+                    return fromTip < 2 ? dark[fromTip == 0 ? 0 : 1] : f == Face.TOP ? g[4] : g[3];
+                });
+            }
+            box(c, 0, 94, 2, 6, 2, (f, x, y, w, h) -> dark[f == Face.TOP ? 2 : 1]);                  // horns
+            box(c, 8, 94, 2, 5, 2, (f, x, y, w, h) -> dark[y == 0 ? 0 : 1]);                         // horn tips
+            c.save("entity/porunga.png");
         }
 
         /** Scales: staggered arcs, darker at each scale's lower edge. */

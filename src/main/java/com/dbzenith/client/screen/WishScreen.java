@@ -33,6 +33,11 @@ public class WishScreen extends Screen {
                 ? d.set() : com.dbzenith.dragonball.BallSet.EARTH;
     }
 
+    private int wishesLeft() {
+        return minecraft != null && minecraft.level != null && minecraft.level.getEntity(dragonId) instanceof com.dbzenith.dragonball.DragonSpiritEntity d
+                ? d.wishesLeft() : 1;
+    }
+
     @Override
     protected void init() {
         Wish[] wishes = wishes().toArray(new Wish[0]);
@@ -61,7 +66,9 @@ public class WishScreen extends Screen {
         Component heading = Component.translatable("screen.dbzenith.wish_" + set.id());
         DbzTheme.window(g, font, heading, (width - W) / 2 - 12, top, W + 24, rows * 24 + 44);
         int sub = set == com.dbzenith.dragonball.BallSet.BLACK_STAR ? 0xFFFF8A7A : set == com.dbzenith.dragonball.BallSet.SUPER ? 0xFFFFE08A : 0xFFB0FFB0;
-        g.drawCenteredString(font, Component.translatable("screen.dbzenith.wish_sub_" + set.id()), width / 2, top + 18, sub);
+        Component subtitle = set == com.dbzenith.dragonball.BallSet.NAMEK                     // Porunga: how many of the three are left
+                ? Component.translatable("screen.dbzenith.wish_sub_namek", wishesLeft()) : Component.translatable("screen.dbzenith.wish_sub_" + set.id());
+        g.drawCenteredString(font, subtitle, width / 2, top + 18, sub);
         super.render(g, mouseX, mouseY, partialTick);
     }
 

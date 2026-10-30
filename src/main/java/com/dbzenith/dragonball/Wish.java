@@ -19,13 +19,13 @@ import java.util.Locale;
 /**
  * What the dragons can grant. Amounts come from the {@code dragon_balls} config section. Each wish belongs to a set:
  * the Eternal Dragon grants Earth's; the Black Star dragon its own, at the price of the curse; the Super dragon its own
- * and every one of Earth's besides.
+ * and every one of Earth's besides; Porunga (Namek's, v0.167.0) his own and a few of Earth's, three wishes a time.
  */
 public enum Wish {
-    POWER(BallSet.EARTH),
-    RESTORATION(BallSet.EARTH),
+    POWER(BallSet.EARTH, true),
+    RESTORATION(BallSet.EARTH, true),
     SENZU(BallSet.EARTH),
-    IMMORTALITY(BallSet.EARTH),
+    IMMORTALITY(BallSet.EARTH, true),
     HIDDEN_POTENTIAL(BallSet.EARTH),
     GODLY_KI(BallSet.EARTH),
     ETERNAL_YOUTH(BallSet.EARTH),
@@ -50,15 +50,29 @@ public enum Wish {
     DIVINE_AWAKENING(BallSet.SUPER),
     /** Every soul revived and every living fighter restored, everywhere. */
     UNIVERSAL_RESTORATION(BallSet.SUPER),
-    RESTORE_PLANET(BallSet.EARTH);
+    RESTORE_PLANET(BallSet.EARTH),
+
+    /** Porunga's (v0.167.0): one soul back from the other world, whoever has waited longest (one at a time, as in canon). */
+    REVIVE_ONE(BallSet.NAMEK),
+    /** Porunga sends the summoner to Earth. */
+    SEND_TO_EARTH(BallSet.NAMEK),
+    /** Porunga brings the summoner's party to them, wherever they are (as Piccolo was brought to Namek). */
+    GATHER_PARTY(BallSet.NAMEK);
 
     /** Immortality that never runs out. */
     public static final long FOREVER = Long.MAX_VALUE;
 
     private final BallSet set;
+    /** One of Earth's that Porunga grants too. */
+    private final boolean porunga;
 
     Wish(BallSet set) {
+        this(set, false);
+    }
+
+    Wish(BallSet set, boolean porunga) {
         this.set = set;
+        this.porunga = porunga;
     }
 
     public BallSet set() {
@@ -68,6 +82,11 @@ public enum Wish {
     /** The wishes a dragon of this set offers (the curse-lifting wish only comes when it is due). */
     public static List<Wish> of(BallSet set) {
         List<Wish> out = new ArrayList<>();
+        if (set == BallSet.NAMEK) {                                                       // Porunga: his own first
+            for (Wish w : values()) if (w.set == BallSet.NAMEK) out.add(w);
+            for (Wish w : values()) if (w.porunga) out.add(w);
+            return out;
+        }
         for (Wish w : values()) {
             if (w == LIFT_CURSE) continue;
             if (w.set == set || set == BallSet.SUPER && w.set == BallSet.EARTH) out.add(w);
@@ -83,13 +102,57 @@ public enum Wish {
         return "wish.dbzenith." + id();
     }
 
-    public boolean canGrant(ServerPlayer p){return this!=RESTORE_PLANET||com.dbzenith.galaxy.planet.PlanetDestruction.wishTarget(p)!=null;}
+    public boolean canGrant(ServerPlayer p) {
+        return switch (this) {
+            case RESTORE_PLANET -> com.dbzenith.galaxy.planet.PlanetDestruction.wishTarget(p) != null;
+            case REVIVE_ONE -> com.dbzenith.world.Otherworld.anyDead(p.server);              // someone must be waiting
+            case SEND_TO_EARTH -> p.level().dimension() != net.minecraft.world.level.Level.OVERWORLD;
+            case GATHER_PARTY -> !partyAway(p).isEmpty();
+            default -> true;
+        };
+    }
+
+    /** The summoner's party-mates online, alive and not already beside them. */
+    static List<ServerPlayer> partyAway(ServerPlayer p) {
+        List<ServerPlayer> out = new ArrayList<>();
+        var party = com.dbzenith.social.SocialData.get(p.server).membership(p.getUUID(), false);
+        if (party == null) return out;
+        for (java.util.UUID id : party.members.keySet()) {
+            ServerPlayer m = p.server.getPlayerList().getPlayer(id);
+            if (m == null || m == p || m.isSpectator() || ModCapabilities.get(m).map(PlayerData::isDead).orElse(false)) continue;
+            if (m.level() == p.level() && m.distanceToSqr(p) < 16 * 16) continue;
+            out.add(m);
+        }
+        return out;
+    }
+
     public void grant(ServerPlayer player) {
         PlayerData d = ModCapabilities.get(player).orElse(null);
         if (d == null) return;
         DBZConfig.Server c = DBZConfig.SERVER;
         switch (this) {
             case RESTORE_PLANET -> {var ref=com.dbzenith.galaxy.planet.PlanetDestruction.wishTarget(player);if(ref!=null)com.dbzenith.galaxy.planet.PlanetDestruction.restore(player.server,ref);}
+            case REVIVE_ONE -> {
+                ServerPlayer back = com.dbzenith.world.Otherworld.reviveOne(player.server);
+                if (back != null) player.server.getPlayerList().broadcastSystemMessage(
+                        Component.translatable("message.dbzenith.wish_revived_one", back.getDisplayName()), false);
+            }
+            case SEND_TO_EARTH -> {
+                net.minecraft.server.level.ServerLevel earth = player.server.overworld();
+                net.minecraft.core.BlockPos spawn = earth.getSharedSpawnPos();
+                earth.getChunk(spawn.getX() >> 4, spawn.getZ() >> 4);
+                int y = earth.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, spawn.getX(), spawn.getZ());
+                player.teleportTo(earth, spawn.getX() + 0.5, y, spawn.getZ() + 0.5, player.getYRot(), 0f);
+                player.fallDistance = 0;
+            }
+            case GATHER_PARTY -> {
+                for (ServerPlayer m : partyAway(player)) {
+                    m.teleportTo(player.serverLevel(), player.getX() + m.getRandom().nextInt(5) - 2, player.getY(), player.getZ() + m.getRandom().nextInt(5) - 2,
+                            m.getYRot(), 0f);
+                    m.fallDistance = 0;
+                    m.sendSystemMessage(Component.translatable("message.dbzenith.wish_gathered", player.getDisplayName()).withStyle(ChatFormatting.GREEN));
+                }
+            }
             case POWER -> d.addTrainingPoints(c.wishPowerTp.get());
             case RESTORATION -> restore(player, d);
             case SENZU -> give(player, new ItemStack(ModItems.SENZU_BEAN.get(), c.wishSenzuCount.get()));

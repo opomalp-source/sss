@@ -1,5 +1,57 @@
 {
-  "_doc": "Namek's people (docs/LIVING_WORLD.md 4f, v0.166.0): lines merged into the core nodes (extend_say). Namekians live on water alone, tend Ajisa trees, keep to their elders and revere the Grand Elder; their villages are small and far apart.",
+  "_doc": "Namek's people (docs/LIVING_WORLD.md 4f, v0.166.0): lines merged into the core nodes (extend_say). Namekians live on water alone, tend Ajisa trees, keep to their elders and revere the Grand Elder; their villages are small and far apart. Namek's Dragon Balls (v0.167.0): each of seven village elders keeps one; conditions dragon_ball (kept, taken, stone, maker, none), elder_trusts, knows_words; actions give_dragon_ball, teach_words; placeholder {dragon_ball}.",
+  "extend": {
+    "root": [
+      {"id": "namek_ball", "text": "Tell me about the Dragon Balls.", "when": {"style": "namek", "occupation": "elder", "wanted": false}, "next": "namek_ball"}
+    ]
+  },
+  "nodes": {
+    "namek_ball": {
+      "say": [
+        {"when": {"dragon_ball": "kept"}, "text": ["Seven elders keep the seven, and I am one of them: {dragon_ball} rests beside my seat.", "Our village keeps {dragon_ball}. Gathered, the seven call Porunga, the dragon of our people."]},
+        {"when": {"dragon_ball": "taken"}, "text": ["Our ball, {dragon_ball}, is no longer in this village. It was carried away. I hope it is in kind hands.", "Ours is gone from its place beside my seat. Whoever holds {dragon_ball} now, I hope they use it well."]},
+        {"when": {"dragon_ball": "stone"}, "text": ["Porunga was called not long ago. Our ball, {dragon_ball}, sleeps as stone, and will come back to me when its time is done.", "Our ball has turned to stone. In time it will wake and return to its place here."]},
+        {"when": {"dragon_ball": "maker"}, "text": ["I made the Dragon Balls long ago, as the dragon clan has always done. Seven village elders keep them now.", "The seven are kept by the village elders. Ask them, and if your heart is good they will help you."]},
+        {"when": {"dragon_ball": "none"}, "text": ["This village keeps none. Seven elders keep the seven; ours is not among them.", "No, the Dragon Balls are kept in other villages. The Grand Elder made them, and seven elders guard them."]}
+      ],
+      "options": [
+        {"id": "ball_entrust", "text": "Would you entrust it to me?", "when": {"dragon_ball": "kept", "elder_trusts": true}, "do": ["give_dragon_ball", "remember:entrusted_dragon_ball"], "next": "namek_ball_given"},
+        {"id": "ball_entrust", "text": "Would you entrust it to me?", "when": {"dragon_ball": "kept", "elder_trusts": false}, "next": "namek_ball_refused"},
+        {"id": "words", "text": "How is Porunga called?", "when": {"knows_words": false, "elder_trusts": true}, "do": ["teach_words"], "next": "namek_words"},
+        {"id": "words", "text": "How is Porunga called?", "when": {"knows_words": false, "elder_trusts": false}, "next": "namek_words_refused"},
+        {"id": "back", "text": "I had another question.", "next": "root"},
+        {"id": "bye", "text": "Thank you, Elder.", "do": ["affinity:1"]}
+      ]
+    },
+    "namek_ball_given": {
+      "say": ["Your heart is good, I can sense it. Take {dragon_ball}, and gather the others with care.", "Then it is yours to carry. Bring the seven together, and Porunga will hear you. Do not wish for anything cruel."],
+      "options": [
+        {"id": "back", "text": "I had another question.", "next": "root"},
+        {"id": "bye", "text": "I will take good care of it.", "do": ["affinity:2"]}
+      ]
+    },
+    "namek_ball_refused": {
+      "say": ["I do not know your heart yet, stranger. Help this village, and ask me again.", "A Dragon Ball is not given to just anyone. Stay a while. Let us come to know you."],
+      "options": [
+        {"id": "back", "text": "I had another question.", "next": "root"},
+        {"id": "bye", "text": "I understand."}
+      ]
+    },
+    "namek_words": {
+      "say": ["Porunga answers only our language. Say it with me: Takkaraputo, Poporunga, Pupiriyaroro. Remember it well.", "Listen closely, for he hears nothing else: Takkaraputo, Poporunga, Pupiriyaroro. Now you can call him."],
+      "options": [
+        {"id": "back", "text": "I had another question.", "next": "root"},
+        {"id": "bye", "text": "Thank you, Elder.", "do": ["affinity:1"]}
+      ]
+    },
+    "namek_words_refused": {
+      "say": ["The words belong to our people. I will teach them when I know you better.", "Bring a Namekian with you, and they will speak the words for you. Or earn our trust, and I will teach you."],
+      "options": [
+        {"id": "back", "text": "I had another question.", "next": "root"},
+        {"id": "bye", "text": "I understand."}
+      ]
+    }
+  },
   "extend_say": {
     "root": [
       {"when": {"race": "namekian"}, "text": ["Greetings, traveler.", "Ah, a visitor. Be welcome.", "The suns are kind today, are they not?"]},

@@ -1,0 +1,4 @@
+{
+  "parent": "dbzenith:block/namek_dragon_ball_template",
+  "textures": {"ball": "dbzenith:block/namek_dragon_ball_3"}
+}

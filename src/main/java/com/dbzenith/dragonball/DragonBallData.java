@@ -19,6 +19,8 @@ public class DragonBallData extends SavedData {
         public State state = State.UNSET;
         public ResourceKey<Level> dimension = Level.OVERWORLD;
         public BlockPos pos = BlockPos.ZERO;
+        /** Namek's balls: the settlement whose elder keeps it (its id), or "" (v0.167.0). */
+        public String keeper = "";
     }
 
     private final Entry[] balls = new Entry[DragonBalls.COUNT];
@@ -89,6 +91,7 @@ public class DragonBallData extends SavedData {
             t.putString("state", e.state.name());
             t.putString("dim", e.dimension.location().toString());
             t.putLong("pos", e.pos.asLong());
+            if (!e.keeper.isEmpty()) t.putString("keeper", e.keeper);
             list.add(t);
         }
         tag.put("balls", list);
@@ -111,6 +114,7 @@ public class DragonBallData extends SavedData {
             }
             e.dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(t.getString("dim")));
             e.pos = BlockPos.of(t.getLong("pos"));
+            e.keeper = t.getString("keeper");
         }
         d.inertUntil = tag.getLong("inertUntil");
         d.curseUntil = tag.contains("curseUntil") ? tag.getLong("curseUntil") : -1;

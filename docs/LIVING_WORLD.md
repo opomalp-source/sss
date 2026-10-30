@@ -224,6 +224,10 @@ All in `com.dbzenith.living` unless named otherwise.
 - Conversations: conditions `race` and `style`; a file may add lines to another file's nodes with `extend_say`
   (`conversations/namek.json`).
 - A body is never put inside a wall (`Residents.roomNear`).
+- Namek's Dragon Balls (v0.167.0): seven village elders each keep one on a pedestal by their seat; elders speak of it
+  ("Tell me about the Dragon Balls."), and hand it over and teach the Namekian words to those they trust (conditions
+  `dragon_ball`, `elder_trusts`, `knows_words`; actions `give_dragon_ball`, `teach_words`; `{dragon_ball}`). A Namekian
+  resident near the seven speaks the words for the summoner. See docs/WORLD_STRUCTURES.md (v0.167.0).
 
 ## 5. Testing
 

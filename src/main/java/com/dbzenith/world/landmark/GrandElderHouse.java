@@ -51,9 +51,12 @@ public final class GrandElderHouse extends SettlementPlan {
         return new GrandElderHouse(s, h, t.seaLevel());
     }
 
+    /** Its name (also how Namek's Dragon Balls know his house: the Grand Elder made them; v0.167.0). */
+    public static final String NAME = "the Grand Elder's House";
+
     @Override
     public String name() {
-        return "the Grand Elder's House";
+        return NAME;
     }
 
     @Override

@@ -21,6 +21,7 @@ import org.joml.Matrix4f;
 /**
  * The Eternal Dragon: a scaled serpent ({@link DragonModel}) coiling up a helix into the sky, thick at the neck and
  * thin at the tail, dorsal spikes along its back, its head turned towards whoever is looking. It glows faintly.
+ * Porunga ({@link PorungaModel}) stands up from a shorter coil instead.
  */
 public class DragonSpiritRenderer extends EntityRenderer<DragonSpiritEntity> {
     private static final ResourceLocation GLOW = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/ki_glow.png");
@@ -30,11 +31,73 @@ public class DragonSpiritRenderer extends EntityRenderer<DragonSpiritEntity> {
     private static final ResourceLocation BLACK_STAR = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/black_star_dragon.png");
     private static final ResourceLocation SUPER = new ResourceLocation(DBZenith.MOD_ID, "textures/entity/super_dragon.png");
 
+    /** Porunga's body: one model pixel is this many blocks (a torso of about nine blocks over a sixteen-block coil). */
+    private static final float PORUNGA_PX = 0.4f;
+
     private final DragonModel model;
+    private final PorungaModel porunga;
 
     public DragonSpiritRenderer(EntityRendererProvider.Context context) {
         super(context);
         model = new DragonModel(context.bakeLayer(DragonModel.LAYER));
+        porunga = new PorungaModel(context.bakeLayer(PorungaModel.LAYER));
+    }
+
+    /** Porunga's tail (0 = its end on the ground, 1 = his waist): a lower, looser coil that straightens to stand him upright. */
+    private static Vec3 porungaCoil(float f, float t) {
+        float angle = f * 4f * Mth.PI + t;
+        float radius = 6f * (1 - f * 0.6f) * Mth.clamp((1 - f) / 0.18f, 0f, 1f);
+        return new Vec3(radius * Mth.cos(angle), f * 16f, radius * Mth.sin(angle));
+    }
+
+    /**
+     * Porunga (Namek's set, v0.167.0): the coiled tail rises over three seconds, then the body stands from it, turned to
+     * whoever looks at him, hunched, arms hanging forward, breathing slowly; the head tips toward the viewer.
+     */
+    private void renderPorunga(DragonSpiritEntity dragon, float partialTicks, PoseStack pose, MultiBufferSource buffers) {
+        float age = dragon.tickCount + partialTicks;
+        float t = age * 0.012f;
+        float rise = Mth.clamp(age / 60f, 0f, 1f);
+        VertexConsumer body = buffers.getBuffer(RenderType.entityCutoutNoCull(PorungaModel.TEXTURE));
+        int shown = (int) (SEGMENTS * rise);
+        for (int i = 0; i < shown; i++) {
+            float f = i / (float) SEGMENTS;
+            Vec3 p = porungaCoil(f, t), next = porungaCoil((i + 1) / (float) SEGMENTS, t);
+            Vec3 d = next.subtract(p);
+            float thick = 1.2f + f * 2.4f;
+            pose.pushPose();
+            pose.translate(p.x, p.y, p.z);
+            pose.mulPose(Axis.YP.rotation((float) Math.atan2(d.x, d.z) + Mth.PI));
+            pose.mulPose(Axis.XP.rotation((float) Math.atan2(d.y, Math.sqrt(d.x * d.x + d.z * d.z))));
+            pose.scale(thick * 2f, -thick * 2f, (float) (d.length() * 1.45 / 0.75));
+            porunga.segment.render(pose, body, GLOW_LIGHT, OverlayTexture.NO_OVERLAY);
+            if (i % 5 == 0 && f > 0.1f && f < 0.75f) porunga.spike.render(pose, body, GLOW_LIGHT, OverlayTexture.NO_OVERLAY);
+            pose.popPose();
+        }
+        if (rise < 1f) return;
+        Vec3 waist = porungaCoil(1f, t).add(0, 0.6 + 0.12 * Mth.sin(age * 0.06f), 0);
+        Vec3 cam = entityRenderDispatcher.camera.getPosition().subtract(dragon.getPosition(partialTicks)).subtract(waist);
+        float facing = (float) Math.atan2(cam.x, cam.z) + Mth.PI;
+        float s = PORUNGA_PX * 16f;                                                               // model space: 16 units a block
+        pose.pushPose();
+        pose.translate(waist.x, waist.y, waist.z);
+        pose.mulPose(Axis.YP.rotation(facing));
+        pose.pushPose();
+        float breath = 1f + 0.015f * Mth.sin(age * 0.08f);
+        pose.scale(s * breath, -s, s * breath);
+        porunga.torso.render(pose, body, GLOW_LIGHT, OverlayTexture.NO_OVERLAY);
+        pose.popPose();
+        double neckUp = PorungaModel.NECK_UP * PORUNGA_PX;
+        Vec3 toCam = cam.subtract(0, neckUp, 0);
+        float pitch = (float) Math.atan2(toCam.y, Math.sqrt(toCam.x * toCam.x + toCam.z * toCam.z));
+        pose.translate(0, neckUp, -PorungaModel.NECK_FORWARD * PORUNGA_PX);                       // the head low and forward between the shoulders
+        pose.mulPose(Axis.XP.rotation(Mth.clamp(pitch, -0.25f, 0.25f)));                          // (more, and the lit face turns to shadow)
+        pose.scale(s, -s, s);
+        porunga.head.render(pose, body, GLOW_LIGHT, OverlayTexture.NO_OVERLAY);
+        porunga.eyes.render(pose, body, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
+        pose.popPose();
+        float pulse = 0.85f + 0.15f * Mth.sin(age * 0.1f);                                        // faint magic about him
+        ball(pose, buffers.getBuffer(GLOW_TYPE), (float) waist.x, (float) (waist.y + neckUp * 0.6), (float) waist.z, 16f * pulse, 0x70, 0xFF, 0x60, 50);
     }
 
     @Override
@@ -55,6 +118,11 @@ public class DragonSpiritRenderer extends EntityRenderer<DragonSpiritEntity> {
         float t = age * 0.015f;
         float rise = Mth.clamp(age / 60f, 0f, 1f);                                                  // emerges over 3 s
         com.dbzenith.dragonball.BallSet set = dragon.set();
+        if (set == com.dbzenith.dragonball.BallSet.NAMEK) {                                         // Porunga has a body of his own
+            renderPorunga(dragon, partialTicks, pose, buffers);
+            super.render(dragon, yaw, partialTicks, pose, buffers, light);
+            return;
+        }
         pose.pushPose();
         if (set == com.dbzenith.dragonball.BallSet.SUPER) pose.scale(2.4f, 2.4f, 2.4f);              // the Super dragon dwarfs the sky
         VertexConsumer body = buffers.getBuffer(RenderType.entityCutoutNoCull(getTextureLocation(dragon)));
@@ -122,6 +190,7 @@ public class DragonSpiritRenderer extends EntityRenderer<DragonSpiritEntity> {
         return switch (dragon.set()) {
             case BLACK_STAR -> BLACK_STAR;
             case SUPER -> SUPER;
+            case NAMEK -> PorungaModel.TEXTURE;
             default -> DragonModel.TEXTURE;
         };
     }

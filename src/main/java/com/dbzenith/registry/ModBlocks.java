@@ -34,11 +34,13 @@ public final class ModBlocks {
     /** The Black Star Dragon Balls and the Super Dragon Balls (12d). */
     public static final java.util.List<RegistryObject<Block>> BLACK_STAR_BALLS = balls(com.dbzenith.dragonball.BallSet.BLACK_STAR, MapColor.COLOR_RED);
     public static final java.util.List<RegistryObject<Block>> SUPER_BALLS = balls(com.dbzenith.dragonball.BallSet.SUPER, MapColor.GOLD);
+    /** Namek's Dragon Balls (v0.167.0): larger than Earth's, kept by the village elders. */
+    public static final java.util.List<RegistryObject<Block>> NAMEK_BALLS = balls(com.dbzenith.dragonball.BallSet.NAMEK, MapColor.COLOR_ORANGE);
 
     private static java.util.List<RegistryObject<Block>> balls(com.dbzenith.dragonball.BallSet set, MapColor color) {
         return java.util.stream.IntStream.rangeClosed(1, 7)
                 .mapToObj(star -> register(set.prefix() + "_" + star, () -> new DragonBallBlock(set, star, BlockBehaviour.Properties.of()
-                        .mapColor(color).strength(0.5f, 3_600_000f).lightLevel(s -> set == com.dbzenith.dragonball.BallSet.SUPER ? 14 : 10).noOcclusion()
+                        .mapColor(color).strength(0.5f, 3_600_000f).lightLevel(s -> set == com.dbzenith.dragonball.BallSet.SUPER ? 14 : set == com.dbzenith.dragonball.BallSet.NAMEK ? 12 : 10).noOcclusion()
                         .sound(SoundType.GLASS).pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK))))
                 .toList();
     }

@@ -58,11 +58,13 @@ public final class RadarOverlay implements IGuiOverlay {
                 py = cy + (int) ((py - cy) * (R - 3) / off);
             }
             boolean blink = (System.currentTimeMillis() / 400) % 2 == 0;
-            int set = (b.star() - 1) / 7, star = (b.star() - 1) % 7 + 1;                  // Earth, Black Star, Super (12d)
-            int lit = set == 1 ? 0xFFE02818 : set == 2 ? 0xFFFFE860 : 0xFFFFC020, dim = set == 1 ? 0xFF701008 : set == 2 ? 0xFFE0A020 : 0xFFFF8000;
-            int size = set == 2 ? 3 : 2;
+            int set = (b.star() - 1) / 7, star = (b.star() - 1) % 7 + 1;                  // Earth, Black Star, Super (12d), Namek (v0.167.0)
+            int lit = set == 1 ? 0xFFE02818 : set == 2 ? 0xFFFFE860 : set == 3 ? 0xFFFFA838 : 0xFFFFC020;
+            int dim = set == 1 ? 0xFF701008 : set == 2 ? 0xFFE0A020 : set == 3 ? 0xFFB85A10 : 0xFFFF8000;
+            int size = set == 2 || set == 3 ? 3 : 2;
+            if (set == 3) g.fill(px - size - 1, py - size - 1, px + size + 2, py + size + 2, 0xFF60D070);   // Namek's: a green rim
             g.fill(px - size, py - size, px + size + 1, py + size + 1, blink ? lit : dim);
-            g.drawString(font, String.valueOf(star), px + 3, py - 4, set == 1 ? 0xFFFF8070 : 0xFFFFE080, false);
+            g.drawString(font, String.valueOf(star), px + 4, py - 4, set == 1 ? 0xFFFF8070 : set == 3 ? 0xFFB8FFB0 : 0xFFFFE080, false);
         }
         Component label = nearest == Double.MAX_VALUE ? Component.translatable("hud.dbzenith.radar_none")
                 : Component.translatable("hud.dbzenith.radar_nearest", (int) nearest);

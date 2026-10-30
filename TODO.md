@@ -376,7 +376,8 @@ to both mods folders.
 - [x] v0.165.0 Kame House, traditional villages (three looks, farmers), the Red Ribbon Army's field bases and Muscle Tower
 - [ ] The Red Ribbon headquarters; the army's vehicles; Jingle Village by name
 - [x] v0.166.0 Namek: Namekian villages and their elders, the Grand Elder's house (Guru, Nail, Dende), Namekian residents
-- [ ] Namek's Dragon Balls (kept by the elders) and Porunga
+- [x] v0.167.0 Namek's Dragon Balls (kept by the village elders on pedestals, handed to those they trust) and Porunga (the Namekian words, three wishes)
+- [ ] Namek's elders notice their ball being taken without asking; elders' names unique per world (two villages can share one)
 - [ ] `CraterPipelineTests.realJobsRespectBudgets...` reads the global destruction counters, so another test's ki blasts in
   the same tick can push it over its bounds (failed once in 6 runs, v0.166.0)
 - [ ] Planet Vegeta (Saiyan city, royal palace, base, training halls) and Sadala

@@ -142,6 +142,30 @@ public final class Otherworld {
         return true;
     }
 
+    /** Porunga's wish (v0.167.0): one soul comes back, whoever has waited longest in the other world. Returns them, or null. */
+    public static ServerPlayer reviveOne(MinecraftServer server) {
+        ServerPlayer first = null;
+        long when = Long.MAX_VALUE;
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            PlayerData d = ModCapabilities.get(p).orElse(null);
+            if (d != null && d.isDead() && d.getDeathTick() < when) {
+                when = d.getDeathTick();
+                first = p;
+            }
+        }
+        if (first == null) return null;
+        ModCapabilities.get(first).ifPresent(d -> d.setDead(false, 0, false));
+        if (isOtherworld(first.level())) returnToLife(first);
+        com.dbzenith.data.PlayerDataEvents.sync(first);
+        return first;
+    }
+
+    /** Whether anyone online waits in the other world. */
+    public static boolean anyDead(MinecraftServer server) {
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) if (ModCapabilities.get(p).map(PlayerData::isDead).orElse(false)) return true;
+        return false;
+    }
+
     /** The Eternal Dragon's wish: every dead soul comes back at once. Returns how many. */
     public static int reviveAll(MinecraftServer server) {
         int n = 0;

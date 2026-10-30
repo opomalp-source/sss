@@ -80,6 +80,7 @@ public final class ClientSetup {
         event.registerLayerDefinition(com.dbzenith.client.render.CricketRenderer.LAYER, com.dbzenith.client.render.CricketRenderer.Model::createLayer);
         event.registerLayerDefinition(com.dbzenith.client.render.ApeHeadModel.LAYER, com.dbzenith.client.render.ApeHeadModel::createLayer);
         event.registerLayerDefinition(com.dbzenith.client.render.DragonModel.LAYER, com.dbzenith.client.render.DragonModel::createLayer);
+        event.registerLayerDefinition(com.dbzenith.client.render.PorungaModel.LAYER, com.dbzenith.client.render.PorungaModel::createLayer);
         event.registerLayerDefinition(com.dbzenith.client.render.SpacePodRenderer.LAYER, com.dbzenith.client.render.SpacePodRenderer::createLayer);
     }
 

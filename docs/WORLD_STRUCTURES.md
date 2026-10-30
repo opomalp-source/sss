@@ -247,10 +247,40 @@ civilization's look; original places (marked "original" in code and here) are ne
   all reachable: 18 of 19 and 22 of 22, the one fixed), villagers' looks and names, a quiet morning. Fixed on the way:
   an elder's home drawn in a wall (she suffocated; homes are now always clear), a village too near the Grand Elder.
 
+### v0.167.0: Namek's Dragon Balls and Porunga
+
+- **The set** (`dragonball.BallSet.NAMEK`, `NamekBalls`): seven Namekian Dragon Balls, larger than Earth's (amber
+  glass, red stars), tracked like the other sets (`DragonBallData`, saved as `dbzenith_namek_dragon_balls`, each ball
+  with its keeper's settlement id), on the radar as 22 to 28 (amber blips in a green rim).
+- **Kept by the elders:** the seven Namekian villages nearest Namek's centre (worked out from the seed the way world
+  generation sites them, within four rings of village cells, in an order from the seed) each keep one, on a white
+  pillar beside the elder's seat (`NamekVillage.ballSpot`, now drawn with the elder's house). Scattering, and every
+  return from stone, loads (or generates) that one chunk and sets the ball on the pedestal; a village drawn by
+  v0.166.0 gets the pedestal on its floor; anything else standing there is never replaced (the ball then lies
+  somewhere on Namek, keeper-less). Villages register lazily as before: the keeper is the plan's settlement id, the
+  same the living world gives it on the first visit.
+- **The elders:** "Tell me about the Dragon Balls." (elders on Namek): the elder says whether its ball is kept, taken,
+  stone, or kept elsewhere; the Grand Elder says he made them. An elder trusts a Namekian, a friend (bond affinity 10)
+  or a famous player (fame 100): it then hands over its ball and teaches the Namekian words (conditions `dragon_ball`,
+  `elder_trusts`, `knows_words`; actions `give_dragon_ball`, `teach_words`; placeholder `{dragon_ball}`).
+- **Porunga:** only answers the Namekian words: the summoner knows them (a Namekian, or taught by an elder) or a
+  Namekian resident within 16 blocks speaks them. Three wishes, one after another: bring back one who fell (the soul
+  waiting longest), send me to Earth (the last wish), bring my party here, and Earth's power, restoration and
+  immortality. Then the seven turn to stone for the inert time and go home to their elders. A tall coiled tail, a
+  muscled body with folded arms, a horned head (`PorungaModel`; texture `ArtGen only namek_balls`).
+- **Tools:** `/dbz namekballs` (each ball, where, its keeper's pedestal), `/dbz namekballs home` (send every ball not
+  carried back to its keeper now). Config `dragon_balls.namekBallsEnabled`.
+- **Tests:** `NamekBallsTests` (the words, three wishes and the stone, an elder's pedestal with the radar and the
+  handover, a real return to a keeper on Namek). 376 GameTests.
+- **Checked in the dev client:** all seven on their pedestals a minute after the server started (the search took 8 s
+  in the background), one in Uminina's Village beside the seat, the radar, Porunga summoned in the village (a
+  villager spoke the words), the wish screen, the elder's answer.
+
 ## 6. Not done / limits
 
-- Milestones 4 to 7 of the plan above. From milestone 3: Namek's own Dragon Balls (the elders keep none yet) and
-  Porunga; the Namekians' villages hold no ships or Frieza Force raids yet; the old scattered dome houses of Namek
+- Milestones 4 to 7 of the plan above. From milestone 3: the Namekians' villages hold no ships or Frieza Force raids
+  yet; an elder doesn't notice its ball being taken without asking (no theft reaction); two villages may share an
+  elder's name (18 names; the dev world has two "Kisago's Village"); the old scattered dome houses of Namek
   (`NamekHouseFeature`) remain, unpeopled. From milestone 2: the Red Ribbon headquarters, Jingle Village by name (a snow
   village stands in for it), vehicles (the army's cars, tanks and helicopters), named officers.
 - The older landmarks (tournament, Lookout, Cell Games, Frypan) are neither unique nor guarded (as before: one per

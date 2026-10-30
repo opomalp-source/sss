@@ -19,6 +19,8 @@ public class DragonBallBlock extends Block {
     private static final VoxelShape SHAPE = Block.box(4, 0, 4, 12, 8, 12);
     /** A Super Dragon Ball fills its block. */
     private static final VoxelShape BIG = Block.box(0, 0, 0, 16, 16, 16);
+    /** Namek's balls are larger than Earth's (v0.167.0). */
+    private static final VoxelShape LARGE = Block.box(2, 0, 2, 14, 12, 14);
 
     private final BallSet set;
     private final int star;
@@ -39,7 +41,7 @@ public class DragonBallBlock extends Block {
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
-        return set == BallSet.SUPER ? BIG : SHAPE;
+        return set == BallSet.SUPER ? BIG : set == BallSet.NAMEK ? LARGE : SHAPE;
     }
 
     @Override
@@ -57,9 +59,9 @@ public class DragonBallBlock extends Block {
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (level instanceof ServerLevel sl && player instanceof ServerPlayer sp) {
-            if (!DragonBalls.trySummon(sl, sp, pos, set)) {
-                sp.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.dbzenith.need_all_balls"), true);
-            }
+            String problem = DragonBalls.summonProblem(sl, sp, pos, set);           // too few, or (Namek's) no one to speak the words
+            if (problem != null) sp.displayClientMessage(net.minecraft.network.chat.Component.translatable(problem), true);
+            else DragonBalls.trySummon(sl, sp, pos, set);
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
     }

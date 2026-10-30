@@ -222,6 +222,7 @@ public final class DBZConfig {
         public final ForgeConfigSpec.BooleanValue superBallsEnabled;
         public final ForgeConfigSpec.IntValue superScatterRadius;
         public final ForgeConfigSpec.IntValue wishBlackPowerTp;
+        public final ForgeConfigSpec.BooleanValue namekBallsEnabled;
 
         // --- gear ---
         public final ForgeConfigSpec.LongValue scouterLimit;
@@ -626,6 +627,7 @@ public final class DBZConfig {
             superScatterRadius = b.comment("Super Dragon Balls scatter within this many blocks of world spawn")
                     .defineInRange("superScatterRadius", 3000, 16, 30_000);
             wishBlackPowerTp = b.comment("TP granted by the Black Star power wish").defineInRange("wishBlackPowerTp", 15000, 0, Integer.MAX_VALUE);
+            namekBallsEnabled = b.comment("Namek's Dragon Balls: each kept by a village elder on Namek; Porunga grants three wishes").define("namekBallsEnabled", true);
             b.pop();
 
             b.push("gear");

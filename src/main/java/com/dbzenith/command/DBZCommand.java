@@ -367,6 +367,9 @@ public final class DBZCommand {
                                             }
                                             return 0;
                                         }))))
+                .then(Commands.literal("namekballs")                                 // Namek's Dragon Balls and their keepers (v0.167.0)
+                        .executes(ctx -> com.dbzenith.dragonball.NamekBalls.report(ctx.getSource(), false))
+                        .then(Commands.literal("home").executes(ctx -> com.dbzenith.dragonball.NamekBalls.report(ctx.getSource(), true))))
                 .then(Commands.literal("curse")                                      // the Black Star curse (12d)
                         .then(Commands.literal("start").executes(ctx -> {
                             com.dbzenith.dragonball.DragonBalls.curse(ctx.getSource().getServer(), ctx.getSource().getServer().overworld().getGameTime());
