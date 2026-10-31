@@ -16,8 +16,8 @@ $MSG
 ${CO_AUTHOR:-Co-Authored-By: Codex <noreply@openai.com>}
 MSGEOF
 git tag v$V
-if command -v powershell >/dev/null; then                                   # Windows: the user's requested mods folder (".minecraft old": the Forge 1.20.1 setup)
-  powershell -NoProfile -Command "\$mc = Get-CimInstance Win32_Process -Filter \"name like 'java%'\" | Where-Object { \$_.CommandLine -match 'net\.minecraft|--gameDir|bootstraplauncher' }; if (\$mc) { 'MINECRAFT RUNNING: not installed' } else { \$n = 0; foreach (\$d in \"\$env:APPDATA\.minecraft old\mods\") { if (Test-Path \$d) { \$n++; Copy-Item -LiteralPath build\libs\dbzenith-$V.jar -Destination \$d -Force; Get-ChildItem -LiteralPath \$d -File -Filter 'dbzenith-*.jar' | Where-Object { \$_.Name -ne 'dbzenith-$V.jar' } | ForEach-Object { Remove-Item -LiteralPath \$_.FullName -Force } } }; if (\$n) { 'installed $V' } else { 'NOT INSTALLED: no mods folder (' + \$env:APPDATA + '\.minecraft old\mods)' } }"
+if command -v powershell >/dev/null; then                                   # Windows: the user's requested mods folder (".minecraft": the Forge 1.20.1 setup)
+  powershell -NoProfile -Command "\$mc = Get-CimInstance Win32_Process -Filter \"name like 'java%'\" | Where-Object { \$_.CommandLine -match 'net\.minecraft|--gameDir|bootstraplauncher' }; if (\$mc) { 'MINECRAFT RUNNING: not installed' } else { \$n = 0; foreach (\$d in \"\$env:APPDATA\.minecraft\mods\") { if (Test-Path \$d) { \$n++; Copy-Item -LiteralPath build\libs\dbzenith-$V.jar -Destination \$d -Force; Get-ChildItem -LiteralPath \$d -File -Filter 'dbzenith-*.jar' | Where-Object { \$_.Name -ne 'dbzenith-$V.jar' } | ForEach-Object { Remove-Item -LiteralPath \$_.FullName -Force } } }; if (\$n) { 'installed $V' } else { 'NOT INSTALLED: no mods folder (' + \$env:APPDATA + '\.minecraft\mods)' } }"
 fi
 
 git log --oneline -1 | cut -c1-90
